@@ -20,23 +20,18 @@ function handleBattleStart() {
     resetBattleUI();
     showLoadingState();
 
-    // Simulate calculation time
     setTimeout(() => {
         try {
             const battleOutcome = calculateWinProbability(f1Id, f2Id, locId);
+            
+            // **CRITICAL FIX**: This function call now uses the correct parameters
             const story = generateBattleStory(
-                battleOutcome.winnerId,
-                battleOutcome.loserId,
+                f1Id,
+                f2Id,
                 locId,
-                battleOutcome.outcomeReasons,
-                battleOutcome.victoryType,
-                battleOutcome.winProb,
-                battleOutcome.f1FinalScore,
-                battleOutcome.f2FinalScore,
-                battleOutcome.resolutionTone
+                battleOutcome
             );
             
-            // Attach the generated story to the outcome object
             battleOutcome.story = story;
 
             showResultsState(battleOutcome);
@@ -44,7 +39,6 @@ function handleBattleStart() {
         } catch (error) {
             console.error("An error occurred during battle simulation:", error);
             alert("A critical error occurred. Please check the console and refresh.");
-            // Reset UI state on error
             DOM.loadingSpinner.classList.add('hidden');
             DOM.battleBtn.disabled = false;
         }
@@ -52,16 +46,13 @@ function handleBattleStart() {
 }
 
 function init() {
-    // UI Setup
     populateDropdowns();
     updateFighterDisplay('fighter1');
     updateFighterDisplay('fighter2');
 
-    // Event Listeners
     DOM.battleBtn.addEventListener('click', handleBattleStart);
     DOM.fighter1Select.addEventListener('change', () => updateFighterDisplay('fighter1'));
     DOM.fighter2Select.addEventListener('change', () => updateFighterDisplay('fighter2'));
 }
 
-// Start the application once the DOM is fully loaded.
 document.addEventListener('DOMContentLoaded', init);
