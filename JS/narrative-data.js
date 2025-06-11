@@ -7,17 +7,16 @@ export const battleBeats = {
         "Without hesitation, {initiatorName} went on the offensive, {initiator_verb_ing} {initiator_object_phrase}."
     ],
     advantage_attack: [
+        // FIX: Replaced rigid/clashing adverbs with more flexible, descriptive phrasing.
         "Sensing an opportunity, {initiatorName} pressed the advantage, {initiator_verb_ing} {initiator_object_phrase}.",
-        "Dominating the flow, {initiatorName} relentlessly {initiator_verb_past} {initiator_object_phrase}, leaving {responderName} scrambling.",
-        "With momentum on {initiatorPronounP} side, {initiatorName} unleashed another attack, {initiator_verb_ing} {initiator_object_phrase}."
+        "Dominating the flow, {initiatorName} drove {responderName} back with {initiator_object_phrase}, leaving {responderPronounO} scrambling.",
+        "With momentum on {initiatorPronounP} side, {initiatorName} unleashed another powerful attack, {initiator_verb_ing} {initiator_object_phrase}."
     ],
     disadvantage_attack: [
-        // Active counter-attack template
-        "Trying to regain footing, {initiatorName} gambled and {initiator_verb_past} {initiator_object_phrase}, but the attempt was deftly handled by {responderName}.",
-        // Safer, more descriptive template to avoid awkward gerunds
-        "Fighting from a disadvantage, {initiatorName} tried to turn the tide, but {responderName} was ready, shutting the attempt down.",
-        // Another safe variant
-        "An attempt by {initiatorName} to {initiator_verb_base} {initiator_object_phrase} was easily countered by {responderName}."
+        // FIX: Replaced the awkward "gambled and..." template with higher-quality, more active, and grammatically safer variants.
+        "Trying to regain footing, {initiatorName} gambled with a quick {initiator_object_phrase}, but {responderName} deftly countered.",
+        "Fighting from a disadvantage, {initiatorName} attempted to {initiator_verb_base} {initiator_object_phrase}, but the move was easily read and shut down by {responderName}.",
+        "An attempt by {initiatorName} to turn the tide was answered by {responderName}, who nullified the threat."
     ],
     terrain_interaction: [
         "Using the {locationFeature} to {initiatorPronounP} advantage, {initiatorName} {initiator_verb_past} {initiator_object_phrase}, forcing {responderName} onto the treacherous {locationTerrain}.",

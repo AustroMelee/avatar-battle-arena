@@ -6,7 +6,7 @@ import { battleBeats } from './narrative-data.js';
 
 function assembleObjectPhrase(technique) {
     if (!technique || !technique.object) {
-        return '';
+        return ''; 
     }
     if (technique.requiresArticle) {
         const firstLetter = technique.object.charAt(0).toLowerCase();
@@ -43,7 +43,6 @@ function toPastTense(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
 
-    // FIX: Check for irregular verbs FIRST, before applying general rules.
     const irregular = { 
         'hurl': 'hurled', 'run': 'ran', 'swim': 'swam', 'cut': 'cut', 'hit': 'hit', 
         'set': 'set', 'sit': 'sat', 'spin': 'spun', 'throw': 'threw', 'breathe': 'breathed', 
@@ -54,7 +53,6 @@ function toPastTense(verb = '') {
         return irregular[verb];
     }
     
-    // Now apply the general rules for regular verbs.
     if (verb.endsWith('e')) return verb + 'd';
     if (verb.endsWith('y') && verb.length > 2) return verb.slice(0, -1) + 'ied';
 
@@ -88,6 +86,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const initiatorObjectPhrase = assembleObjectPhrase(initiatorTech);
         const responderObjectPhrase = assembleObjectPhrase(responderTech);
 
+        // FIX: Apply .trim() to placeholders to remove any accidental leading/trailing whitespace.
         return template
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)
@@ -97,18 +96,18 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{initiatorPronounSCap}/g, initiatorPronounSCap)
             .replace(/{initiatorPronounO}/g, initiator.pronouns.o)
             .replace(/{initiatorPronounP}/g, initiator.pronouns.p)
-            .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech?.verb || ''))
-            .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech?.verb || ''))
-            .replace(/{initiator_verb_base}/g, (initiatorTech?.verb || '').toLowerCase())
-            .replace(/{initiator_object_phrase}/g, initiatorObjectPhrase)
+            .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech?.verb || '').trim())
+            .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech?.verb || '').trim())
+            .replace(/{initiator_verb_base}/g, (initiatorTech?.verb || '').toLowerCase().trim())
+            .replace(/{initiator_object_phrase}/g, initiatorObjectPhrase.trim())
             .replace(/{responderPronounS}/g, responder.pronouns.s)
             .replace(/{responderPronounSCap}/g, responderPronounSCap)
             .replace(/{responderPronounO}/g, responder.pronouns.o)
             .replace(/{responderPronounP}/g, responder.pronouns.p)
-            .replace(/{responder_verb_ing}/g, toGerund(responderTech?.verb || ''))
-            .replace(/{responder_verb_past}/g, toPastTense(responderTech?.verb || ''))
-            .replace(/{responder_verb_base}/g, (responderTech?.verb || '').toLowerCase())
-            .replace(/{responder_object_phrase}/g, responderObjectPhrase)
+            .replace(/{responder_verb_ing}/g, toGerund(responderTech?.verb || '').trim())
+            .replace(/{responder_verb_past}/g, toPastTense(responderTech?.verb || '').trim())
+            .replace(/{responder_verb_base}/g, (responderTech?.verb || '').toLowerCase().trim())
+            .replace(/{responder_object_phrase}/g, responderObjectPhrase.trim())
             .replace(/{winnerFinisherDescription}/g, finisherDescription);
     };
     
