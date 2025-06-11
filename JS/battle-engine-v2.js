@@ -6,7 +6,7 @@ import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhr
 
 // --- HELPER FUNCTIONS ---
 const getRandomElement = (arr, fallback = null) => (!arr || arr.length === 0) ? fallback : arr[Math.floor(Math.random() * arr.length)];
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+const clamp = (num, min, max) => Math.min(Math.max(num, min, max));
 
 // --- GRAMMAR & NARRATIVE SUB-SYSTEM ---
 function conjugateVerb(verb) {
@@ -69,7 +69,7 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
 // --- BATTLE STATE & SIMULATION ---
 function initializeFighterState(charId) {
     const character = characters[charId];
-    return { id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), hp: 100, energy: 100, momentum: 0, lastMove: null, movesUsed: new Set(), lastPrefix: '' };
+    return { id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), hp: 100, energy: 100, momentum: 0, lastMove: null, movesUsed: new Set(), lastPrefix: '', secondLastPrefix: '' };
 }
 
 export function simulateBattle(f1Id, f2Id, locId) {
@@ -87,8 +87,8 @@ export function simulateBattle(f1Id, f2Id, locId) {
         const initiatorMove = selectMove(initiator);
         const initiatorResult = calculateMove(initiatorMove, initiator, responder, locTags);
         phaseContent += narrateMove(initiator, responder, initiatorMove, initiatorResult, turnLog);
-        responder.hp -= initiatorResult.damage;
-        initiator.energy -= Math.round((initiatorMove.power || 0) * 0.5);
+        responder.hp = clamp(responder.hp - initiatorResult.damage, 0, 100);
+        initiator.energy = clamp(initiator.energy - Math.round((initiatorMove.power || 0) * 0.5), 0, 100);
         initiator.lastMove = initiatorMove;
         initiator.movesUsed.add(initiatorMove.name);
         initiator.momentum = clamp(initiator.momentum + (initiatorResult.damage > 0 ? 1 : -0.5), -3, 3);
@@ -102,8 +102,8 @@ export function simulateBattle(f1Id, f2Id, locId) {
         const responderMove = selectMove(responder);
         const responderResult = calculateMove(responderMove, responder, initiator, locTags);
         phaseContent += narrateMove(responder, initiator, responderMove, responderResult, turnLog);
-        initiator.hp -= responderResult.damage;
-        responder.energy -= Math.round((responderMove.power || 0) * 0.5);
+        initiator.hp = clamp(initiator.hp - responderResult.damage, 0, 100);
+        responder.energy = clamp(responder.energy - Math.round((responderMove.power || 0) * 0.5), 0, 100);
         responder.lastMove = responderMove;
         responder.movesUsed.add(responderMove.name);
         responder.momentum = clamp(responder.momentum + (responderResult.damage > 0 ? 1 : -0.5), -3, 3);
@@ -135,7 +135,7 @@ function selectMove(actor) {
         actor.movesUsed.clear(); // Reset if all moves are used
         suitableMoves = actor.techniques;
     }
-    if (actor.hp > 25 && actor.energy > 40 && suitableMoves.some(m => m.type === 'Finisher')) {
+    if (actor.hp < 25 && actor.energy > 40 && suitableMoves.some(m => m.type === 'Finisher')) {
         return getRandomElement(suitableMoves.filter(m => m.type === 'Finisher'));
     }
     if (actor.hp < 40 && actor.energy > 20 && suitableMoves.some(m => m.type === 'Defense')) {
@@ -154,15 +154,21 @@ function calculateMove(move, attacker, defender, locTags) {
     if (move.type === 'Offense' && defender.lastMove?.type === 'Utility') multiplier += 0.15;
     if (move.type === 'Defense' && defender.lastMove?.type === 'Offense') basePower *= 0.5;
     
-    const powerThreshold = move.power > 80 ? 1.2 : 1.3;
     multiplier += (Math.random() - 0.5) * 0.2;
     const totalEffectiveness = basePower * multiplier;
     
     let level;
-    if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK;
-    else if (totalEffectiveness > basePower * powerThreshold) level = effectivenessLevels.CRITICAL;
-    else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
-    else level = effectivenessLevels.NORMAL;
+    if (move.power > 80) {
+        if (totalEffectiveness < basePower * 0.8) level = effectivenessLevels.WEAK;
+        else if (totalEffectiveness > basePower * 1.2) level = effectivenessLevels.CRITICAL;
+        else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
+        else level = effectivenessLevels.NORMAL;
+    } else {
+        if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK;
+        else if (totalEffectiveness > basePower * 1.3) level = effectivenessLevels.CRITICAL;
+        else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
+        else level = effectivenessLevels.NORMAL;
+    }
     
     const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
     return { effectiveness: level, damage: clamp(damage, 0, 50) };
@@ -188,8 +194,9 @@ function narrateMove(actor, target, move, result, turnLog) {
     
     let statePrefix = '';
     if (statePrefixPool.length > 0) {
-        const availablePrefixes = statePrefixPool.filter(p => p !== actor.lastPrefix);
+        const availablePrefixes = statePrefixPool.filter(p => p !== actor.lastPrefix && p !== actor.secondLastPrefix);
         statePrefix = getRandomElement(availablePrefixes.length > 0 ? availablePrefixes : statePrefixPool);
+        actor.secondLastPrefix = actor.lastPrefix;
         actor.lastPrefix = statePrefix;
     }
     
@@ -202,10 +209,15 @@ function narrateMove(actor, target, move, result, turnLog) {
     let actionSentence = `${conjugatedVerb} ${objectPhrase}`;
     if (!objectPhrase) actionSentence = `executes the ${move.name}`;
 
-    let fullAction = `${statePrefix || intro} ${pronounOrName(statePrefix, actorSpan, actor)} ${actionSentence} ${adverb}.`.trim();
+    const prefixText = statePrefix || intro;
+    let fullAction = `${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${actionSentence} ${adverb}.`.trim();
 
     function pronounOrName(prefix, span, actorData) {
-        return prefix ? span : (Math.random() > 0.5 ? span : (actorData.pronouns.s.charAt(0).toUpperCase() + actorData.pronouns.s.slice(1)));
+        const pronoun = actorData.pronouns.s;
+        if (prefix) {
+            return Math.random() > 0.5 ? span : pronoun;
+        }
+        return Math.random() > 0.5 ? span : (pronoun.charAt(0).toUpperCase() + pronoun.slice(1));
     }
 
     const moveElement = move.special || move.element || 'DEFAULT';
@@ -215,7 +227,7 @@ function narrateMove(actor, target, move, result, turnLog) {
     let impactSentence = getRandomElement(impactTemplates, "The move connects.").replace(/{targetName}/g, targetSpan);
 
     if (result.effectiveness.label === 'WEAK') {
-        impactSentence += getRandomElement([', leaving an opening.', ', giving {targetName} a chance to recover.']).replace(/{targetName}/g, targetSpan);
+        impactSentence += getRandomElement([', leaving an opening.', ', giving {targetName} a chance to recover.', ', creating a chance for {targetName} to counter.']).replace(/{targetName}/g, targetSpan);
     }
     
     const description = `${fullAction} ${impactSentence}`.replace(/\s\./g, '.').replace(/\s+/g, ' ').trim();

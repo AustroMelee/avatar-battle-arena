@@ -58,6 +58,8 @@ export function populateDropdowns() {
 function displayFinalAnalysis(finalState, winnerId) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
+    const winner = winnerId === fighter1.id ? fighter1 : fighter2;
+    const loser = winnerId === fighter1.id ? fighter2 : fighter1;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
@@ -72,13 +74,13 @@ function displayFinalAnalysis(finalState, winnerId) {
         DOM.analysisList.appendChild(li);
     };
 
-    createListItem(`<b>${fighter1.name}'s Final Status</b>`, winnerId === fighter1.id ? 'VICTORIOUS' : 'DEFEATED', winnerId === fighter1.id ? 'modifier-plus' : 'modifier-minus');
-    createListItem(`  • Final Health`, `${Math.round(fighter1.hp)} / 100 HP`);
-    createListItem(`  • Final Energy`, `${Math.round(fighter1.energy)} / 100`);
+    createListItem(`<b>${winner.name}'s Status</b>`, 'VICTORIOUS', 'modifier-plus');
+    createListItem(`  • Health`, `${Math.round(winner.hp)} / 100 HP`);
+    createListItem(`  • Energy`, `${Math.round(winner.energy)} / 100`);
 
-    createListItem(`<b>${fighter2.name}'s Final Status</b>`, winnerId === fighter2.id ? 'VICTORIOUS' : 'DEFEATED', winnerId === fighter2.id ? 'modifier-plus' : 'modifier-minus');
-    createListItem(`  • Final Health`, `${Math.round(fighter2.hp)} / 100 HP`);
-    createListItem(`  • Final Energy`, `${Math.round(fighter2.energy)} / 100`);
+    createListItem(`<b>${loser.name}'s Status</b>`, 'DEFEATED', 'modifier-minus');
+    createListItem(`  • Health`, `${Math.round(loser.hp)} / 100 HP`);
+    createListItem(`  • Energy`, `${Math.round(loser.energy)} / 100`);
 }
 
 

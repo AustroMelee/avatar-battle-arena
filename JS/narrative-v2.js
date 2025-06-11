@@ -48,7 +48,7 @@ export const introductoryPhrases = {
 };
 
 export const adverbPool = {
-    offensive: ['with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 'with ferocious intensity', 'in a calculated strike', 'with overwhelming power'],
+    offensive: ['with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus'],
     defensive: ['with calculated timing', 'in a deft maneuver', 'with steady resolve'],
 };
 
@@ -56,8 +56,8 @@ export const verbSynonyms = { 'launch': ['hurl', 'send', 'unleash', 'fire', 'pro
 
 export const impactPhrases = {
     DEFAULT: {
-        WEAK: ["but the attack glances off harmlessly, leaving an opening.", "but {targetName} easily dodges it, creating a chance to counter.", "but the technique lacks the power to connect meaningfully.", "but the strike is too slow to find its mark, giving {targetName} a chance to recover."],
-        NORMAL: ["The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", "The attack connects, interrupting {targetName}'s rhythm."],
+        WEAK: ["but the attack glances off harmlessly.", "but {targetName} easily dodges it.", "but the technique lacks the power to connect meaningfully.", "but the strike is too slow to find its mark."],
+        NORMAL: ["The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", "The attack connects, interrupting {targetName}'s rhythm.", "{targetName} reels from the precise strike.", "The move lands firmly, catching {targetName} off-guard."],
         STRONG: ["A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", "The impact is significant, leaving {targetName} momentarily stunned."],
         CRITICAL: ["A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground."]
     },
