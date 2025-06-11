@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATLA Battle Arena</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<header class="header">
+<h1 class="title">ATLA BATTLE ARENA</h1>
+<p class="subtitle">Choose your fighters and witness legendary battles from the world of Avatar</p>
+</header>
+<main>
+        <section class="battle-setup">
+            <div class="fighter-section" id="fighter1-section">
+                <h2 class="fighter-title" id="fighter1-name-display">Fighter 1</h2>
+                <div class="select-group">
+                    <label class="select-label" id="fighter1-label" for="fighter1">Select Character</label>
+                    <div class="select-wrapper">
+                        <select id="fighter1">
+                            <option value="">Choose a fighter...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vs-divider" id="vsDivider">VS</div>
+
+            <div class="fighter-section" id="fighter2-section">
+                <h2 class="fighter-title" id="fighter2-name-display">Fighter 2</h2>
+                <div class="select-group">
+                    <label class="select-label" id="fighter2-label" for="fighter2">Select Character</label>
+                    <div class="select-wrapper">
+                        <select id="fighter2">
+                            <option value="">Choose a fighter...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="location-section">
+            <h2 class="location-title">Battle Location</h2>
+            <div class="select-group">
+                <div class="select-wrapper">
+                    <select id="location">
+                        <option value="">Choose a battlefield...</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
+
+        <section class="results-section" id="results">
+            <div class="loading hidden" id="loading">
+                <div class="spinner"></div>
+                <p>The elements clash... calculating outcome...</p>
+            </div>
+            <div id="battle-results" class="hidden">
+                <div class="winner-announcement">
+                    <div class="winner-name" id="winner-name"></div>
+                    <div class="win-probability" id="win-probability"></div>
+                </div>
+                <article class="battle-story" id="battle-story"></article>
+                <div class="outcome-analysis" id="outcome-analysis">
+                    <h3 class="analysis-title">Outcome Analysis</h3>
+                    <ul class="analysis-list" id="analysis-list">
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="js/main.js" type="module" defer></script>
+Use code with caution.
+</body>
+</html>
