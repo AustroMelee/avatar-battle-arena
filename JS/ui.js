@@ -20,7 +20,7 @@ export const DOM = {
     vsDivider: document.getElementById('vsDivider'),
     winnerName: document.getElementById('winner-name'),
     winProbability: document.getElementById('win-probability'),
-    battleStory: document.getElementById('battle-story'), // This will now hold the battle log
+    battleStory: document.getElementById('battle-story'),
     analysisList: document.getElementById('analysis-list'),
 };
 
@@ -39,7 +39,6 @@ export function updateFighterDisplay(fighterKey) {
 }
 
 export function populateDropdowns() {
-    // Filter out characters without techniques (like Ty Lee who was omitted)
     const availableCharacters = Object.keys(characters).filter(id => characters[id].techniques && characters[id].techniques.length > 0);
     const sortedCharacterKeys = availableCharacters.sort((a, b) => characters[a].name.localeCompare(characters[b].name));
     
@@ -78,7 +77,7 @@ function displayFinalAnalysis(finalState, winnerId) {
         if (!text) return;
         const li = document.createElement('li');
         li.className = 'analysis-summary';
-        li.innerHTML = text;
+        li.innerHTML = `<em>${text}</em>`;
         DOM.analysisList.appendChild(li);
     }
 
@@ -99,7 +98,6 @@ function displayFinalAnalysis(finalState, winnerId) {
     createListItem(`  • Momentum:`, `${Math.round(loser.momentum)}`);
 }
 
-
 export function showLoadingState() {
     DOM.resultsSection.classList.remove('show');
     DOM.resultsSection.style.display = 'block';
@@ -118,11 +116,11 @@ export function showResultsState(battleResult) {
     DOM.vsDivider.classList.remove('clash');
     
     DOM.winnerName.textContent = `${characters[battleResult.winnerId].name} Wins!`;
-    DOM.winProbability.textContent = `A decisive victory after a fierce battle.`; // Simplified text
+    DOM.winProbability.textContent = `A decisive victory after a fierce battle.`;
     const winnerSection = battleResult.winnerId === DOM.fighter1Select.value ? DOM.fighter1Section : DOM.fighter2Section;
     winnerSection.classList.add('winner-highlight');
 
-    DOM.battleStory.innerHTML = battleResult.log; // Display the battle log
+    DOM.battleStory.innerHTML = battleResult.log;
     displayFinalAnalysis(battleResult.finalState, battleResult.winnerId);
 
     DOM.loadingSpinner.classList.add('hidden');

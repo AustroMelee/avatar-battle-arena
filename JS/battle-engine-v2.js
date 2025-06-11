@@ -89,7 +89,7 @@ function initializeFighterState(charId) {
         energy: 100, 
         momentum: 0, 
         lastMove: null, 
-        movesUsed: [], // Changed to array to track recency
+        movesUsed: [],
         lastPrefixes: [],
         moveHistory: [] 
     };
@@ -106,53 +106,40 @@ export function simulateBattle(f1Id, f2Id, locId) {
     let battleOver = false;
 
     for (let turn = 0; turn < maxTurns && !battleOver; turn++) {
-        let phaseContent = phaseTemplates.header.replace('{phaseName}', battlePhases[turn].name).replace('{phaseEmoji}', battlePhases[turn].emoji);
+        let phaseName = (turn === maxTurns - 1 && (fighter1.hp > 0 && fighter2.hp > 0)) ? "Finishing Move" : battlePhases[turn].name;
+        let phaseEmoji = (turn === maxTurns - 1 && (fighter1.hp > 0 && fighter2.hp > 0)) ? "🏁" : battlePhases[turn].emoji;
+        let phaseContent = phaseTemplates.header.replace('{phaseName}', phaseName).replace('{phaseEmoji}', phaseEmoji);
         
-        // --- Initiator's Turn ---
-        const initiatorMove = selectMove(initiator, turn, maxTurns);
-        const initiatorResult = calculateMove(initiatorMove, initiator, responder, locTags);
-        phaseContent += narrateMove(initiator, responder, initiatorMove, initiatorResult, turnLog);
-        responder.hp = clamp(responder.hp - initiatorResult.damage, 0, 100);
-        initiator.energy = clamp(initiator.energy - Math.round((initiatorMove.power || 0) * 0.5), 0, 100);
-        initiator.lastMove = initiatorMove;
-        initiator.movesUsed.push(initiatorMove.name);
-        initiator.moveHistory.push(initiatorMove);
-        initiator.momentum = clamp(initiator.momentum + (initiatorResult.damage > 0 ? 1 : -0.5), -3, 3);
+        const processTurn = (attacker, defender) => {
+            if (battleOver) return;
+            const move = selectMove(attacker, turn, maxTurns);
+            const result = calculateMove(move, attacker, defender, locTags);
+            
+            attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness);
+            if (result.damage > 0) defender.momentum = 0;
+            
+            phaseContent += narrateMove(attacker, defender, move, result, turnLog);
+            defender.hp = clamp(defender.hp - result.damage, 0, 100);
+            attacker.energy = clamp(attacker.energy - Math.round((move.power || 0) * 0.5), 0, 100);
+            attacker.lastMove = move;
+            attacker.movesUsed.push(move.name);
+            attacker.moveHistory.push(move);
+            if (defender.hp <= 0) battleOver = true;
+        };
         
-        if (responder.hp <= 0) {
-            turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', battlePhases[turn].name).replace('{phaseContent}', phaseContent));
-            battleOver = true;
-            continue;
-        }
+        processTurn(initiator, responder);
+        if (!battleOver) processTurn(responder, initiator);
 
-        // --- Responder's Turn ---
-        const responderMove = selectMove(responder, turn, maxTurns);
-        const responderResult = calculateMove(responderMove, responder, initiator, locTags);
-        phaseContent += narrateMove(responder, initiator, responderMove, responderResult, turnLog);
-        initiator.hp = clamp(initiator.hp - responderResult.damage, 0, 100);
-        responder.energy = clamp(responder.energy - Math.round((responderMove.power || 0) * 0.5), 0, 100);
-        responder.lastMove = responderMove;
-        responder.movesUsed.push(responderMove.name);
-        responder.moveHistory.push(responderMove);
-        responder.momentum = clamp(responder.momentum + (responderResult.damage > 0 ? 1 : -0.5), -3, 3);
-
-        if (initiator.hp <= 0) {
-            turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', battlePhases[turn].name).replace('{phaseContent}', phaseContent));
-            battleOver = true;
-            continue;
-        }
-
-        turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', battlePhases[turn].name).replace('{phaseContent}', phaseContent));
+        turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', phaseName).replace('{phaseContent}', phaseContent));
         [initiator, responder] = [responder, initiator];
     }
 
     const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
     
-    // Final Strike Mechanic: Ensure the finishing blow is narratively sound.
-    if (loser.hp > 0) { // Time-out victory
+    if (loser.hp > 0) {
         turnLog.push(phaseTemplates.timeOutVictory.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
-    } else { // KO victory
+    } else {
         turnLog.push(phaseTemplates.finalBlow.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
     }
 
@@ -160,62 +147,57 @@ export function simulateBattle(f1Id, f2Id, locId) {
     const finalEnding = getToneAlignedVictoryEnding(winner.id, loser.id, battleContext);
     turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', finalEnding));
     
-    // --- Outcome Analysis ---
     const moveTypes = winner.moveHistory.map(m => m.type);
     const mostUsedType = ['Finisher', 'Offense', 'Defense', 'Utility']
         .map(type => ({ type, count: moveTypes.filter(t => t === type).length }))
         .sort((a, b) => b.count - a.count)[0]?.type || 'versatile';
     
     const summaryMap = {
-        'Finisher': `decisive finishing moves`,
-        'Offense': `relentless offense`,
-        'Defense': `impenetrable defense`,
-        'Utility': `clever tactical maneuvers`,
-        'versatile': `sheer versatility`
+        'Finisher': `decisive finishing moves`, 'Offense': `relentless offense`,
+        'Defense': `impenetrable defense`, 'Utility': `clever tactical maneuvers`, 'versatile': `sheer versatility`
     };
-    fighter1.summary = ``;
-    fighter2.summary = ``;
     winner.summary = `${winner.name}'s victory was sealed by ${winner.pronouns.p} ${summaryMap[mostUsedType]}.`;
+    if (winner.momentum > 3) {
+        winner.summary += ` ${winner.pronouns.s.charAt(0).toUpperCase() + winner.pronouns.s.slice(1)}'s commanding momentum overwhelmed ${loser.name}.`;
+    }
 
     return { log: turnLog.join(''), winnerId: winner.id, loserId: loser.id, finalState: { fighter1, fighter2 } };
 }
 
 // --- MOVE AI & CALCULATION ---
+function updateMomentum(currentMomentum, effectiveness) {
+    let change = 0;
+    if (effectiveness.label === 'Strong' || effectiveness.label === 'Critical') change = 2;
+    else if (effectiveness.label === 'Normal') change = 1;
+    else if (effectiveness.label === 'Weak') change = -1;
+    return clamp(currentMomentum + change, -5, 5);
+}
+
 function selectMove(actor, turn, maxTurns) {
     let suitableMoves = actor.techniques;
-    if (actor.movesUsed.length >= actor.techniques.length -1) {
-        actor.movesUsed = []; // Reset if we've used almost everything
-    } else {
-        suitableMoves = actor.techniques.filter(m => !actor.movesUsed.slice(-3).includes(m.name));
+    if (actor.movesUsed.length >= actor.techniques.length - 1) {
+        actor.movesUsed = [];
     }
     
     const recentMoves = actor.movesUsed.slice(-3);
     let weightedMoves = suitableMoves.map(m => ({
         move: m,
-        weight: recentMoves.includes(m.name) ? 0.2 : 1 // 80% penalty for recent moves
+        weight: recentMoves.includes(m.name) ? 0.2 : 1
     }));
 
     const finishers = weightedMoves.filter(m => m.move.type === 'Finisher');
-    if (turn === maxTurns - 1 && finishers.length > 0 && actor.energy > 10) {
-        return getWeightedRandom(finishers);
-    }
-    if (actor.hp < 50 && actor.energy > 10 && finishers.length > 0) {
-        return getWeightedRandom(finishers);
-    }
-    if (actor.hp < 20 && actor.energy > 0) { // Desperation Rule
+    if (turn === maxTurns - 1 && finishers.length > 0 && actor.energy > 10) return getWeightedRandom(finishers);
+    if (actor.hp < 50 && actor.energy > 10 && finishers.length > 0) return getWeightedRandom(finishers);
+    if (actor.hp < 20 && actor.energy > 0) {
         const desperateOffense = weightedMoves.filter(m => m.move.type === 'Offense' || m.move.type === 'Finisher');
         if (desperateOffense.length > 0) return getWeightedRandom(desperateOffense);
     }
     
     const defenses = weightedMoves.filter(m => m.move.type === 'Defense');
-    if (actor.hp < 40 && actor.energy > 20 && defenses.length > 0) {
-        return getWeightedRandom(defenses);
-    }
+    if (actor.hp < 40 && actor.energy > 20 && defenses.length > 0) return getWeightedRandom(defenses);
     
     const offenses = weightedMoves.filter(m => m.move.type === 'Offense' && m.move.type !== 'Finisher');
-    if (offenses.length > 0) {
-        return getWeightedRandom(offenses);
-    }
+    if (offenses.length > 0) return getWeightedRandom(offenses);
 
     return getWeightedRandom(weightedMoves.filter(m => m.move.type !== 'Finisher')) || getWeightedRandom(weightedMoves);
 }
@@ -229,7 +211,7 @@ function calculateMove(move, attacker, defender, locTags) {
     if (move.type === 'Offense' && defender.lastMove?.type === 'Utility') multiplier += 0.15;
     if (move.type === 'Defense' && defender.lastMove?.type === 'Offense') basePower *= 0.5;
     
-    multiplier += (Math.random() - 0.5) * 0.1; // Reduced randomness
+    multiplier += (Math.random() - 0.5) * 0.1;
     const totalEffectiveness = basePower * multiplier;
     
     let level;
@@ -257,15 +239,14 @@ function narrateMove(actor, target, move, result, turnLog) {
     if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = target.lastMove?.type === 'Offense';
         const impactTemplates = isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
-        
         const prefixPool = isReactive 
             ? ["Reacting quickly,", "Seizing the moment,", "With swift reflexes,", "Countering instantly,", "Parrying with finesse,"] 
             : ["Preparing carefully,", "Taking a moment to strategize,", "Steadying {possessive} stance,", "In a daring gambit,"];
         
         let prefix = getRandomElement(prefixPool.filter(p => !actor.lastPrefixes.includes(p))) || getRandomElement(prefixPool);
+        prefix = prefix.replace(/{possessive}/g, actor.pronouns.p);
         actor.lastPrefixes.push(prefix);
         if (actor.lastPrefixes.length > 5) actor.lastPrefixes.shift();
-        prefix = prefix.replace(/{possessive}/g, actor.pronouns.p);
         
         const description = `${prefix} ${actorSpan} uses the ${move.name}. ` + getRandomElement(impactTemplates).replace(/{actorName}/g, actorSpan);
         const label = isReactive ? "Counter" : "Set-up";
@@ -274,8 +255,8 @@ function narrateMove(actor, target, move, result, turnLog) {
     
     let statePrefixPool = [];
     if (actor.energy < 30) statePrefixPool.push(...narrativeStatePhrases.energy_depletion);
-    if (actor.momentum >= 2) statePrefixPool.push(...narrativeStatePhrases.momentum_gain);
-    if (actor.momentum <= -2) statePrefixPool.push(...narrativeStatePhrases.momentum_loss);
+    if (actor.momentum >= 3) statePrefixPool.push(...narrativeStatePhrases.momentum_gain);
+    if (actor.momentum <= -3) statePrefixPool.push(...narrativeStatePhrases.momentum_loss);
     
     let statePrefix = '';
     if (statePrefixPool.length > 0) {
@@ -291,28 +272,22 @@ function narrateMove(actor, target, move, result, turnLog) {
     const objectPhrase = assembleObjectPhrase(move);
     const adverb = move.type === 'Offense' ? getRandomElement(adverbPool.offensive) : '';
 
-    let actionSentence = `${conjugatedVerb} ${objectPhrase}`;
-    if (!objectPhrase) actionSentence = `executes the ${move.name}`;
-
     function pronounOrName(prefix, span, actorData) {
         const pronoun = actorData.pronouns.s;
-        if (!prefix) {
-            return Math.random() > 0.5 ? span : (pronoun.charAt(0).toUpperCase() + pronoun.slice(1));
-        }
+        if (!prefix) return Math.random() > 0.5 ? span : (pronoun.charAt(0).toUpperCase() + pronoun.slice(1));
         return Math.random() > 0.5 ? span : pronoun;
     }
     
     let prefixText = (statePrefix || intro).replace(/{possessive}/g, actor.pronouns.p);
-    let fullAction = `${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${actionSentence} ${adverb}.`.trim();
+    let fullAction = `${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${conjugatedVerb} ${objectPhrase} ${adverb}.`.trim();
 
-    const moveElement = move.special || move.element || 'DEFAULT';
-    const impactPool = impactPhrases[moveElement] || impactPhrases.DEFAULT;
-    const effectivenessKey = result.effectiveness.label.toUpperCase();
-    const impactTemplates = impactPool[effectivenessKey] || impactPhrases.DEFAULT[effectivenessKey];
-    let impactSentence = getRandomElement(impactTemplates, "The move connects.").replace(/{targetName}/g, targetSpan);
+    let impactSentence = getRandomElement(impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()], "The move connects.").replace(/{targetName}/g, targetSpan);
 
     if (result.effectiveness.label === 'WEAK') {
-        impactSentence += ' ' + getRandomElement(weakMoveTransitions).replace(/{targetName}/g, targetSpan);
+        impactSentence += ' ' + getRandomElement(weakMoveTransitions)
+            .replace(/{targetName}/g, targetSpan)
+            .replace(/{actorName}/g, actorSpan)
+            .replace(/{possessive}/g, actor.pronouns.p);
     }
     
     const description = `${fullAction} ${impactSentence}`.replace(/\s\./g, '.').replace(/\s+/g, ' ').trim();
