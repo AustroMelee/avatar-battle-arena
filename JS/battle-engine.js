@@ -1,16 +1,12 @@
 'use strict';
 
 import { generatePlayByPlay } from './narrative-engine.js'; 
-// DIRECT IMPORTS - This is the critical change.
 import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
 import { victoryTypes, postBattleVictoryPhrases } from './narrative.js';
 import { adjectiveToNounMap } from './mechanics.js';
-import { battleBeats } from './narrative-data.js';
 
 let usedReasonIds = new Set();
-
-// --- UTILITY & HELPER FUNCTIONS ---
 
 function getRandomElement(array, fallbackValue = "skill") {
     if (!array || array.length === 0) return fallbackValue;
@@ -22,8 +18,6 @@ function normalizeTraitToNoun(traitString) {
     const normalized = traitString.toLowerCase().replace(/ /g, '_');
     return adjectiveToNounMap[normalized] || traitString.replace(/_/g, ' ');
 }
-
-// --- NARRATIVE HELPER FUNCTIONS ---
 
 function getVictoryQuote(character, victoryData) {
     if (!character || !character.quotes) return "Victory is mine.";
@@ -96,8 +90,6 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, re
     return populateTemplate(template, templateData);
 }
 
-// --- CORE BATTLE LOGIC ---
-
 function determineVictoryType(winnerId, loserId, winProb) {
     const winnerChar = characters[winnerId];
     const loserChar = characters[loserId];
@@ -118,8 +110,6 @@ function determineResolutionTone(fightContext) {
     if (victoryType === "outsmart") return { type: "clever_victory" };
     return { type: "technical_win" };
 }
-
-// --- MAIN EXPORTED FUNCTIONS ---
 
 export function calculateWinProbability(f1Id, f2Id, locId) {
     usedReasonIds.clear();

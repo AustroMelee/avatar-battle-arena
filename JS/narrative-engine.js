@@ -1,11 +1,8 @@
 'use strict';
 
-// DIRECT IMPORTS - This is the critical change.
 import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
 import { battleBeats } from './narrative-data.js';
-
-// --- GRAMMAR HELPERS ---
 
 function toGerund(verb = '') {
     if (!verb) return "";
@@ -33,8 +30,6 @@ function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-// --- MAIN NARRATIVE GENERATOR ---
-
 export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     const { winnerId, loserId } = battleOutcome;
     const f1 = characters[f1Id], f2 = characters[f2Id], loc = locations[locId];
@@ -46,7 +41,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const { winner, loser, loc, winnerTech, loserTech } = context;
         const initiatorTech = (initiator.id === winner.id) ? winnerTech : loserTech;
         const responderTech = (responder.id === winner.id) ? winnerTech : loserTech;
-
         const finisherTech = getRandomElement(winner.techniques.filter(t => t.finisher)) || getRandomElement(winner.techniques) || { verb: 'strike', object: 'out', method: ''};
 
         return template
