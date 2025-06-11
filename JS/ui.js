@@ -75,15 +75,14 @@ function displayFinalAnalysis(finalState, winnerId) {
     };
 
     const createSummaryItem = (text) => {
+        if (!text) return;
         const li = document.createElement('li');
         li.className = 'analysis-summary';
         li.innerHTML = text;
         DOM.analysisList.appendChild(li);
     }
 
-    if (winner.summary) {
-        createSummaryItem(winner.summary);
-    }
+    createSummaryItem(winner.summary || loser.summary);
 
     createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
     createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
@@ -92,7 +91,6 @@ function displayFinalAnalysis(finalState, winnerId) {
 
     const spacer = document.createElement('li');
     spacer.className = 'analysis-item-spacer';
-    spacer.innerHTML = ' ';
     DOM.analysisList.appendChild(spacer);
 
     createListItem(`<b>${loser.name}'s Final Status:</b>`, 'DEFEATED', 'modifier-minus');
