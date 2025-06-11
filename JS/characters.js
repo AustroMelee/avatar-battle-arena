@@ -15,7 +15,6 @@ export const characters = {
         strengths: ["Master Strategist", "Innovative Tactician", "Resourceful", "Adaptable", "open", "cover_rich", "urban", "dense"], 
         weaknesses: ["Vulnerable to Direct Bending Attacks", "Reliance on Equipment", "Physically Average", "exposed", "slippery", "hot", "cold"], 
         quotes: {
-            // FIX: Ensure all quote properties are arrays.
             preBattle: ["Alright, let's see what kind of mess we can get into!"],
             postWin: ["Boomerang! You *do* always come back!"],
             postWin_dominant: ["See? Brains over brawn... and a little bit of improvisation!", "Sokka chirped, retrieving his boomerang."],
@@ -163,11 +162,13 @@ export const characters = {
         id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "overwhelming firebending", role: "dominant_offense", tone: "arrogant_supreme", victoryStyle: "Supreme", powerTier: 9,
         techniques: [
+            // FIX: Purified the data to have clear verb/object pairs.
             {verb: "generate", object: "massive bolt of lightning", requiresArticle: true}, 
             {verb: "unleash", object: "continuous, powerful stream of fire", requiresArticle: true}, 
-            {verb: "propel", object: "himself with fire jets", requiresArticle: false}, 
-            {verb: "incinerate", object: "anything in his path", requiresArticle: false},
-            {verb: "overwhelm", object: "his opponent with a devastating inferno", finisher: true, requiresArticle: false, finalFlavor: ["Ozai unleashed a massive, unstoppable bolt of lightning, ending the fight with absolute power.", "Ozai simply walked forward, a wall of all-consuming fire radiating from him, incinerating his opponent's defenses and forcing a swift, terrified surrender."]}
+            {verb: "propel", object: "himself forward with fire jets", requiresArticle: false}, 
+            {verb: "hurl", object: "searing flames", requiresArticle: true},
+            {verb: "launch", object: "a devastating inferno", requiresArticle: false},
+            {verb: "overwhelm", object: "his opponent's defenses", finisher: true, requiresArticle: false, finalFlavor: ["With a surge of brutal power, Ozai unleashed a massive bolt of lightning, ending the battle with absolute finality.", "Ozai simply walked forward, a wall of all-consuming fire radiating from him, incinerating his opponent's defenses and forcing a swift, terrified surrender."]}
         ], 
         strengths: ["Exceptional Firebending Prowess", "Indomitable Will", "Raw Power", "Fear-Inducing Presence", "hot", "open", "exposed"], 
         weaknesses: ["Over-reliance on Offensive Power", "Extreme Arrogance", "Underestimates Opponents", "Poor Defensive Strategy", "water_rich", "ice_rich", "slippery", "cold", "cramped", "dense"], 
