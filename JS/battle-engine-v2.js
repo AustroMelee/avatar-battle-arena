@@ -15,8 +15,7 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 function conjugateVerb(verb) {
     if (!verb) return '';
     const verbParts = verb.split(' ');
-    const mainVerb = verbParts.shift(); // Isolate the first word, which is always the verb
-    const remainder = verbParts.join(' '); // The rest of the phrase (e.g., "with")
+    const mainVerb = verbParts.pop(); // Isolate the verb to conjugate
 
     let conjugated;
 
@@ -28,13 +27,17 @@ function conjugateVerb(verb) {
     else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
         conjugated = mainVerb + 'es';
     } 
+    // Handle verbs that already end in 'e' (but are not sibilant)
+    else if (mainVerb.endsWith('e')) {
+        conjugated = mainVerb + 's';
+    }
     // Default case for all other verbs
     else {
         conjugated = mainVerb + 's';
     }
     
-    // Reassemble the full phrase
-    return remainder ? `${conjugated} ${remainder}` : conjugated;
+    verbParts.push(conjugated);
+    return verbParts.join(' ');
 }
 
 
