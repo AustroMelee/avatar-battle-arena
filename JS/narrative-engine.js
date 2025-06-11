@@ -1,7 +1,7 @@
 'use strict';
 
-import { characters, locations } from './data/index.js';
-import { battleBeats } from './data/narrative-data.js';
+// ** THIS IS THE CORRECTED IMPORT STATEMENT **
+import { characters, locations, terrainTags, battleBeats } from './data/index.js';
 
 // Helper to get a random element from an array
 function getRandomElement(array) {
@@ -25,7 +25,7 @@ function getActionPhrase(character) {
  * @returns {string} - The HTML string for the story.
  */
 export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
-    const { winnerId, loserId, winProb } = battleOutcome;
+    const { winnerId, loserId } = battleOutcome;
     const f1 = characters[f1Id];
     const f2 = characters[f2Id];
     const loc = locations[locId];
@@ -36,7 +36,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     let initiator, responder;
 
     // --- BEAT 1: The Opening ---
-    // The fighter with the higher Power Tier or a random fighter starts.
     initiator = (f1.powerTier >= f2.powerTier) ? f1 : f2;
     responder = (initiator.id === f1.id) ? f2 : f1;
 
@@ -62,8 +61,10 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     // --- BEAT 3: Mid-game - Loser's Counter-Attempt ---
     initiator = loser;
     responder = winner;
-    // Add a terrain interaction if the winner has a clear terrain advantage
-    const winnerTerrainScore = (winner.strengths.filter(s => loc.has.includes(s)).length - winner.weaknesses.filter(s => loc.has.includes(s)).length);
+    
+    // This logic now works because terrainTags is imported
+    const locTags = terrainTags[locId] || [];
+    const winnerTerrainScore = (winner.strengths.filter(s => locTags.includes(s)).length - winner.weaknesses.filter(s => locTags.includes(s)).length);
     let midGameTemplate;
     if (winnerTerrainScore > 0 && Math.random() > 0.5) {
         midGameTemplate = getRandomElement(battleBeats.terrain_interaction);
@@ -81,13 +82,17 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     story.push(midGameStory);
 
     // --- BEAT 4: The Finishing Move ---
+    const finishingTechnique = winner.techniques.find(t => t.finisher);
+    const finishingMovePhrase = finishingTechnique 
+        ? `${finishingTechnique.verb} ${finishingTechnique.object} ${finishingTechnique.method}`
+        : getActionPhrase(winner);
+
     let finishingTemplate = getRandomElement(battleBeats.finishing_move);
     let finishingStory = finishingTemplate
         .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
         .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
-        .replace(/{actionPhrase}/g, getActionPhrase(winner));
+        .replace(/{actionPhrase}/g, finishingMovePhrase);
     story.push(finishingStory);
 
-    // Join all the story beats together, wrapped in <p> tags for nice formatting.
     return story.map(beat => `<p>${beat}</p>`).join('');
 }
