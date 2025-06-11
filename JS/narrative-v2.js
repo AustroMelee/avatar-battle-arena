@@ -21,7 +21,7 @@ export const phaseTemplates = {
     move: `
         <div class="move-line">
             <div class="move-actor">
-                <span class="char-{actorId}">{actorName}</span> used <span class="move-name">{moveName}</span> ({moveEmoji})
+                <span class="char-{actorId}">{actorName}</span> used <span class="move-name">{moveName}</span> ({moveEmoji}) [-{energyCost}⚡]
             </div>
             <div class="move-effectiveness {effectivenessLabel}">
                 {effectivenessLabel} ({effectivenessEmoji})
@@ -33,41 +33,100 @@ export const phaseTemplates = {
     conclusion: `<p class="conclusion">{endingNarration}</p>`
 };
 
+// --- NEW NARRATIVE DATA STRUCTURES ---
 
-// --- Data moved from obsolete narrative.js ---
+export const introductoryPhrases = [
+    "Without hesitation,",
+    "Taking the offensive,",
+    "With a quick movement,",
+    "Seizing the opportunity,",
+    "In a sudden burst of speed,",
+    "Responding in kind,",
+    "Looking for an opening,"
+];
 
-export const victoryTypes = {
-    'overwhelm': {
-        narrativeEndings: {}
-    },
-    'disabling_strike': { 
-        narrativeEndings: {
-            "ty-lee": "With a final, graceful flip, <span class='char-ty-lee'>Ty Lee</span> landed a precise jab, leaving <span class='char-{LoserID}'>{LoserName}</span> completely unable to bend. \"{WinnerQuote}\"",
-        }
-    },
-    'outsmart': { 
-        narrativeEndings: {
-            "sokka": "<span class='char-sokka'>Sokka</span> wiped his brow, a triumphant grin spreading across his face as his trap sprung perfectly. 'See? Brains beat brawn... eventually!' he declared, retrieving his boomerang. \"{WinnerQuote}\"",
-        }
-    },
-    'terrain_kill': { 
-        narrativeEndings: {
-            "toph-beifong": "<span class='char-toph-beifong'>Toph</span> scoffed, stomping a foot. The earth itself cemented her victory, leaving <span class='char-{LoserID}'>{LoserName}</span> immobilized. 'That's what you get for not paying attention to the ground, Twinkletoes,' she muttered. \"{WinnerQuote}\"",
-        }
-    },
-    'morale_break': { 
-        narrativeEndings: {
-            "iroh": "<span class='char-iroh'>Iroh</span> approached his defeated foe, offering a comforting hand. 'There is always hope for redirection,' he said kindly, as <span class='char-{LoserID}'>{LoserName}</span>, outmatched in spirit, yielded. \"{WinnerQuote}\"",
-            "jeong-jeong": [
-                { 
-                    action: "<span class='char-jeong-jeong'>Jeong Jeong</span> simply extinguished his last flame, his shoulders slumping.",
-                    dialogue: "'The path of fire is destruction,' he sighed, turning away. 'I will fight no more.'"
-                }
-            ]
-        }
-    }
+export const verbSynonyms = {
+    'launch': ['hurls', 'sends', 'unleashes', 'projects'],
+    'strike': ['slams', 'hits', 'attacks with', 'lands'],
+    'lash': ['whips', 'snaps', 'flicks'],
+    'create': ['forms', 'generates', 'summons', 'materializes'],
+    'throw': ['flings', 'hurls', 'sends'],
+    'unleash': ['releases', 'discharges', 'emits'],
+    'generate': ['creates', 'produces', 'summons'],
+    'ride': ['mounts', 'glides on'],
+    'form': ['constructs', 'shapes', 'creates'],
+    'sweep': ['knocks', 'sweeps'],
+    'push': ['shoves', 'blasts', 'forces'],
+    'erupt': ['erupts with', 'explodes with'],
+    'propel': ['launches', 'boosts'],
+    'release': ['emits', 'discharges'],
+    'trigger': ['unleashes', 'activates', 'triggers'],
+    'don': ['equips', 'wears', 'dons'],
+    'scan': ['scans', 'senses', 'reads'],
+    'hurl': ['throws', 'launches', 'flings'],
+    'trap': ['ensnares', 'traps', 'catches'],
+    'reshape': ['alters', 'reshapes', 'changes'],
+    'breathe': ['exhales', 'breathes'],
+    'redirect': ['deflects', 'redirects', 'guides'],
+    'perform': ['executes', 'performs'],
+    'offer': ['offers', 'presents'],
+    'raise': ['erects', 'raises', 'constructs'],
+    'conjure': ['summons', 'conjures'],
+    'inflict': ['inflicts', 'delivers'],
+    'disperse': ['scatters', 'dissipates', 'disperses'],
+    'end': ['concludes', 'ends'],
+    'ignite': ['sets ablaze', 'ignites', 'envelops'],
+    'assume': ['takes on', 'assumes'],
+    'encase': ['envelops', 'encases', 'imprisons'],
+    'freeze': ['freezes', 'chills'],
+    'execute': ['performs', 'executes'],
+    'dodge': ['evades', 'dodges'],
+    'pin': ['pins', 'fastens'],
+    'block': ['blocks', 'parries', 'deflects'],
+    'devise': ['constructs', 'devises'],
+    'spring': ['springs', 'activates'],
+    'send': ['sends', 'dispatches'],
+    'bend': ['bends', 'manipulates'],
+    'tunnel': ['tunnels', 'burrows'],
+    'turn': ['turns', 'transforms'],
+    'entomb': ['entombs', 'encases'],
+    'deliver': ['delivers', 'unleashes'],
 };
 
+export const impactPhrases = {
+    WEAK: [
+        "The attack glances off harmlessly.",
+        "It's easily dodged by {targetName}.",
+        "{targetName} shrugs off the blow.",
+        "The technique lacks the power to connect meaningfully."
+    ],
+    NORMAL: [
+        "The blow strikes {targetName} squarely.",
+        "It forces {targetName} to brace for impact.",
+        "{targetName} is pushed back by the force of the attack.",
+        "A solid hit lands on {targetName}."
+    ],
+    STRONG: [
+        "A powerful blow sends {targetName} reeling!",
+        "The attack smashes through {targetName}'s guard.",
+        "{targetName} staggers back, caught off-guard by the intensity.",
+        "The impact is significant, leaving {targetName} momentarily stunned."
+    ],
+    CRITICAL: [
+        "A devastating hit! {targetName} is overwhelmed completely.",
+        "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.",
+        "It's a massive blow that leaves {targetName} on the verge of collapse.",
+        "The sheer force of the attack breaks {targetName}'s defense entirely."
+    ],
+    DEFENSE: [
+        "The defensive maneuver perfectly counters the incoming assault.",
+        "The attack is negated completely.",
+        "With a well-timed move, the blow is parried effortlessly.",
+        "The defensive stance holds strong, absorbing the impact."
+    ]
+};
+
+// --- VICTORY NARRATION DATA ---
 export const postBattleVictoryPhrases = {
     "Pacifist": ["Aang quietly offered a helping hand, {WinnerPronounP} victory a testament to peace.","The Avatar sighed in relief, the fight ending without true harm.",],
     "Madcap": ["{WinnerName} retrieved {WinnerPronounP} boomerang with a flourish, {WinnerPronounP} victory a mix of genius and goofiness.","{WinnerName} let out a hearty laugh, already planning {WinnerPronounP} next eccentric stunt.",],

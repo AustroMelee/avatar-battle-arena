@@ -2,8 +2,7 @@
 
 import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
-import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases } from './narrative-v2.js';
-import { adjectiveToNounMap } from './mechanics.js';
+import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, verbSynonyms, impactPhrases } from './narrative-v2.js';
 
 // --- Helper Functions ---
 const getRandomElement = (arr, fallback = null) => {
@@ -15,25 +14,21 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 // --- GRAMMAR SUBSYSTEM ---
 function conjugateVerb(verb) {
     if (!verb) return '';
-    verb = verb.toLowerCase();
-    // Handles special cases like 'gracefully dodge'
     const verbParts = verb.split(' ');
-    const mainVerb = verbParts[verbParts.length - 1];
+    const mainVerb = verbParts.pop(); // Get the last word to conjugate
 
     let conjugated;
 
     if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
-        conjugated = mainVerb.slice(0, -1) + 'ies'; // e.g., apply -> applies
+        conjugated = mainVerb.slice(0, -1) + 'ies';
     } else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
-        conjugated = mainVerb + 'es'; // e.g., lash -> lashes, go -> goes
+        conjugated = mainVerb + 'es';
     } else {
-        conjugated = mainVerb + 's'; // e.g., strike -> strikes
+        conjugated = mainVerb + 's';
     }
-
-    if (verbParts.length > 1) {
-        return verbParts.slice(0, -1).join(' ') + ' ' + conjugated;
-    }
-    return conjugated;
+    
+    verbParts.push(conjugated);
+    return verbParts.join(' ');
 }
 
 function assembleObjectPhrase(move) {
@@ -249,36 +244,46 @@ function calculateMove(move, attacker, defender, locTags) {
 
 // --- Narrative Generation (UPGRADED) ---
 function narrateMove(actor, target, move, result) {
-    const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
-    const phrase = assembleObjectPhrase(move);
-    const conjugatedVerb = conjugateVerb(move.verb);
+    // 1. Select a verb
+    const synonymList = verbSynonyms[move.verb] || [move.verb];
+    const selectedVerb = getRandomElement(synonymList);
+    const conjugatedVerb = conjugateVerb(selectedVerb);
 
-    let templates = [];
-    if (phrase) {
-        templates.push(`${pronounCap} ${conjugatedVerb} ${phrase}.`);
-        templates.push(`With a surge of energy, ${actor.pronouns.s} ${conjugatedVerb} ${phrase}.`);
-        if (target) {
-            templates.push(`Focusing on ${target.name}, ${actor.pronouns.s} ${conjugatedVerb} ${phrase}.`);
-        }
+    // 2. Build the action phrase
+    const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
+    const objectPhrase = assembleObjectPhrase(move);
+    let actionSentence;
+    if (objectPhrase) {
+        actionSentence = `${pronounCap} ${conjugatedVerb} ${objectPhrase}.`;
     } else {
-        templates.push(`${pronounCap} performs the ${move.name}.`);
+        actionSentence = `${pronounCap} ${conjugatedVerb}.`; // For moves like 'dodges'
     }
-    
-    const description = getRandomElement(templates);
+
+    // 3. Add an introductory flourish
+    const intro = getRandomElement(introductoryPhrases);
+    let fullAction = `${intro} ${actionSentence.charAt(0).toLowerCase() + actionSentence.slice(1)}`;
+
+    // 4. Build the impact phrase
+    let impactSentence = "";
+    const impactTemplates = (move.type === 'Defense' || move.type === 'Utility') 
+        ? impactPhrases.DEFENSE 
+        : impactPhrases[result.effectiveness.label];
+        
+    if (impactTemplates) {
+        impactSentence = getRandomElement(impactTemplates).replace(/{targetName}/g, `<span class="char-${target.id}">${target.name}</span>`);
+    }
+
+    // 5. Combine and return the full narrative
+    const description = `${fullAction} ${impactSentence}`;
     const energyCost = Math.round((move.power || 0) * 0.5);
 
-    // Manually construct the HTML to inject the energy cost without modifying the template file.
-    let moveHtml = `
-        <div class="move-line">
-            <div class="move-actor">
-                <span class="char-${actor.id}">${actor.name}</span> used <span class="move-name">${move.name}</span> (${move.emoji || '✨'}) [-${energyCost}⚡]
-            </div>
-            <div class="move-effectiveness ${result.effectiveness.label}">
-                ${result.effectiveness.label} (${result.effectiveness.emoji})
-            </div>
-        </div>
-        <p class="move-description">${description}</p>
-    `;
-
-    return moveHtml;
+    return phaseTemplates.move
+        .replace(/{actorId}/g, actor.id)
+        .replace(/{actorName}/g, actor.name)
+        .replace(/{moveName}/g, move.name)
+        .replace(/{moveEmoji}/g, move.emoji || '✨')
+        .replace(/{energyCost}/g, energyCost)
+        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
+        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
+        .replace(/{moveDescription}/g, description);
 }
