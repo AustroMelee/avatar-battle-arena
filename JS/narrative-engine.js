@@ -6,7 +6,7 @@ import { battleBeats } from './narrative-data.js';
 
 function assembleObjectPhrase(technique) {
     if (!technique || !technique.object) {
-        return ''; 
+        return '';
     }
     if (technique.requiresArticle) {
         const firstLetter = technique.object.charAt(0).toLowerCase();
@@ -43,11 +43,12 @@ function toPastTense(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
 
+    // FIX: Added 'sweep' to the irregular verb list.
     const irregular = { 
         'hurl': 'hurled', 'run': 'ran', 'swim': 'swam', 'cut': 'cut', 'hit': 'hit', 
         'set': 'set', 'sit': 'sat', 'spin': 'spun', 'throw': 'threw', 'breathe': 'breathed', 
         'lead': 'led', 'find': 'found', 'ride': 'rode', 'weave': 'wove', 'freeze': 'froze', 
-        'bend': 'bent', 'strike': 'struck' 
+        'bend': 'bent', 'strike': 'struck', 'sweep': 'swept'
     };
     if (irregular[verb]) {
         return irregular[verb];
@@ -63,6 +64,8 @@ function toPastTense(verb = '') {
 
 function getRandomElement(array) {
     if (!array || array.length === 0) return '';
+    // Guard against being passed a string instead of an array
+    if (typeof array === 'string') return array; 
     return array[Math.floor(Math.random() * array.length)];
 }
 
@@ -86,7 +89,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const initiatorObjectPhrase = assembleObjectPhrase(initiatorTech);
         const responderObjectPhrase = assembleObjectPhrase(responderTech);
 
-        // FIX: Apply .trim() to placeholders to remove any accidental leading/trailing whitespace.
         return template
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)

@@ -10,6 +10,7 @@ let usedReasonIds = new Set();
 
 function getRandomElement(array, fallbackValue = "skill") {
     if (!array || array.length === 0) return fallbackValue;
+    if (typeof array === 'string') return array; // Safety for accidental string pass
     return array[Math.floor(Math.random() * array.length)];
 }
 
@@ -19,30 +20,29 @@ function normalizeTraitToNoun(traitString) {
     return adjectiveToNounMap[normalized] || traitString.replace(/_/g, ' ');
 }
 
-// --- CONSOLIDATED LOGIC ---
 function getVictoryQuote(character, victoryData) {
     if (!character || !character.quotes) return "Victory is mine.";
     const { type, opponentId, resolutionTone } = victoryData;
     const quotes = character.quotes;
 
-    // This complex selection ensures the most specific and context-aware quote is chosen.
+    let selectedQuote = "";
+
     if (opponentId && quotes.postWin_specific && quotes.postWin_specific[opponentId]) {
-        return getRandomElement(quotes.postWin_specific[opponentId]);
+        selectedQuote = getRandomElement(quotes.postWin_specific[opponentId]);
+    } else if (resolutionTone?.type === "overwhelming_power" && quotes.postWin_overwhelming) {
+        selectedQuote = getRandomElement(quotes.postWin_overwhelming);
+    } else if (resolutionTone?.type === "clever_victory" && quotes.postWin_clever) {
+        selectedQuote = getRandomElement(quotes.postWin_clever);
+    } else if (resolutionTone?.type === "emotional_yield" && quotes.postWin_reflective) {
+        selectedQuote = getRandomElement(quotes.postWin_reflective);
+    } else if (quotes[`postWin_${type}`]) {
+        selectedQuote = getRandomElement(quotes[`postWin_${type}`]);
+    } else if (quotes.postWin) {
+        selectedQuote = getRandomElement(quotes.postWin);
     }
-    if (resolutionTone?.type === "overwhelming_power" && quotes.postWin_overwhelming) {
-        return getRandomElement(quotes.postWin_overwhelming);
-    }
-    if (resolutionTone?.type === "clever_victory" && quotes.postWin_clever) {
-        return getRandomElement(quotes.postWin_clever);
-    }
-    if (resolutionTone?.type === "emotional_yield" && quotes.postWin_reflective) {
-        return getRandomElement(quotes.postWin_reflective);
-    }
-    // Fallback to more general types
-    if (quotes[`postWin_${type}`]) {
-        return getRandomElement(quotes[`postWin_${type}`]);
-    }
-    return getRandomElement(quotes.postWin, "I am victorious.");
+    
+    // Final, hardcoded fallback to prevent empty/single-letter output
+    return selectedQuote || "The battle is won.";
 }
 
 function populateTemplate(template, data) {
@@ -80,13 +80,15 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, re
         resolutionTone 
     };
     const finalQuote = getVictoryQuote(winnerChar, quoteData);
-    // FIX: Cleaner quote integration. No more double quotes.
     templateData.WinnerQuote = finalQuote;
     
     let template;
     const specificEnding = victoryTypes[victoryType]?.narrativeEndings?.[winnerId];
-    if (specificEnding) {
+    // Specific endings can be arrays now
+    if (specificEnding && Array.isArray(specificEnding)) {
         template = getRandomElement(specificEnding);
+    } else if (specificEnding) {
+        template = specificEnding;
     } else {
         const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
         template = getRandomElement(archetypePhrases);
@@ -94,7 +96,6 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, re
 
     let populatedEnding = populateTemplate(template, templateData);
     
-    // Append the quote as dialogue if the template doesn't already include it.
     if (!populatedEnding.includes(finalQuote)) {
         populatedEnding += ` "${finalQuote}"`;
     }
