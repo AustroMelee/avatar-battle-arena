@@ -263,9 +263,9 @@ export const characters = {
             { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, emoji: '🎯', requiresArticle: true, element: 'physical' },
             { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, emoji: '🧱', requiresArticle: true, element: 'physical' },
             { name: "Acrobatic Dodge", verb: 'dodge', object: 'with an acrobatic flip', type: 'Defense', power: 30, emoji: '🤸‍♀️', requiresArticle: false, element: 'utility' },
-            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, emoji: '📌', requiresArticle: false, element: 'physical' },
+            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, emoji: '📌', requiresArticle: false, element: 'physical', special: 'PIN' },
             { name: "Ricochet Shot", verb: 'launch', object: 'ricochet shot', type: 'Offense', power: 55, emoji: '🔄', requiresArticle: true, element: 'physical' },
-            { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, emoji: '📍', requiresArticle: false, element: 'physical' }
+            { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, emoji: '📍', requiresArticle: false, element: 'physical', special: 'PIN' }
         ],
         strengths: ["Deadly Accuracy", "Highly Precise", "Unflappable Demeanor", "Ranged Dominance", "open", "cover_rich", "vertical"],
         weaknesses: ["Limited to Ranged Attacks", "Vulnerable in Close Proximity", "Lack of Close Combat Skills", "cramped", "dense", "low_visibility", "slippery"],

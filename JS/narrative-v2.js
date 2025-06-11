@@ -20,7 +20,7 @@ export const phaseTemplates = {
     phaseWrapper: `<div class="battle-phase" data-phase="{phaseName}">{phaseContent}</div>`,
     header: `<h4 class="phase-header">{phaseName} {phaseEmoji}</h4>`,
     move: `
-        <div class="move-line" data-energy-cost="{energyCost}">
+        <div class="move-line">
             <div class="move-actor">
                 <span class="char-{actorId}">{actorName}</span> used <span class="move-name">{moveName}</span> ({moveEmoji})
             </div>
@@ -35,7 +35,7 @@ export const phaseTemplates = {
 };
 
 export const narrativeStatePhrases = {
-    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning their last reserves,"],
+    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning their last reserves,", "Struggling to stand,"],
     momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With their opponent on the back foot,"],
     momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,"]
 };
@@ -47,31 +47,23 @@ export const introductoryPhrases = {
     NEUTRAL: ["Without hesitation,", "With a quick movement,", "Looking for an opening,", "Switching tactics,", "Testing the opponent's defenses,"]
 };
 
-export const microToneModifiers = {
-    intensity: ["with explosive force", "with precise control", "with reckless abandon", "with focused intensity", "with blinding speed", "with brutal efficiency"],
-    tempo: ["in rapid succession", "with fluid grace", "before the opening vanishes", "in a single, swift motion", "without a moment's delay", "in the blink of an eye"]
+export const adverbPool = {
+    offensive: ['with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy'],
+    defensive: ['with calculated timing', 'in a deft maneuver', 'with steady resolve'],
 };
 
 export const verbSynonyms = { 'launch': ['hurl', 'send', 'unleash', 'fire', 'project', 'let loose', 'send hurtling', 'propel'], 'strike': ['slam', 'hit', 'connect with', 'land a blow with', 'drive', 'hammer', 'blast', 'shatter'], 'lash': ['whip', 'snap', 'flick', 'lacerate with'], 'create': ['form', 'generate', 'summon', 'materialize', 'conjure', 'manifest'], 'throw': ['fling', 'hurl', 'send', 'toss', 'catapult'], 'unleash': ['release', 'discharge', 'emit', 'let loose', 'unleash'], 'generate': ['create', 'produce', 'summon'], 'ride': ['mount', 'glide on', 'ride'], 'form': ['construct', 'shape', 'create', 'assemble'], 'sweep': ['knock down', 'sweep', 'topple'], 'push': ['shove', 'blast', 'force back', 'repel'], 'erupt with': ['erupt with', 'explode with'], 'propel': ['launch', 'boost', 'propel'], 'release': ['emit', 'discharge', 'release'], 'trigger': ['activate', 'trigger', 'initiate'], 'don': ['equip', 'wear', 'don', 'sheathe themself in'], 'scan': ['scan', 'sense', 'read'], 'hurl': ['throw', 'launch', 'fling'], 'trap': ['ensnare', 'trap', 'catch', 'immobilize'], 'reshape': ['alter', 'reshape', 'change the terrain with'], 'breathe': ['exhale', 'breathe', 'spew'], 'redirect': ['deflect', 'redirect', 'guide'], 'perform': ['execute', 'perform'], 'offer': ['offer', 'present'], 'raise': ['erect', 'raise', 'construct'], 'conjure': ['summon', 'conjure'], 'inflict': ['inflict', 'deliver'], 'disperse': ['scatter', 'dissipate', 'disperse'], 'end': ['conclude', 'end'], 'ignite': ['set ablaze', 'ignite', 'envelop'], 'assume': ['take on', 'assume'], 'encase': ['envelop', 'encase', 'imprison'], 'freeze': ['freeze', 'chill', 'flash-freeze'], 'execute': ['perform', 'execute'], 'dodge': ['evade', 'dodge', 'sidestep'], 'pin': ['pin', 'fasten', 'affix'], 'block': ['block', 'parry', 'deflect'], 'devise': ['construct', 'devise', 'rig'], 'spring': ['spring', 'activate'], 'send': ['send', 'dispatch'], 'bend': ['bend', 'manipulate'], 'tunnel': ['tunnel', 'burrow'], 'turn': ['turn', 'transform'], 'entomb': ['entomb', 'encase'], 'deliver': ['deliver', 'unleash'], 'dive': ['dive', 'lunge'], 'attempt': ['attempt', 'try'] };
 
 export const impactPhrases = {
     DEFAULT: {
-        WEAK: ["but the attack glances off harmlessly.", "but {targetName} easily dodges it.", "but the technique lacks the power to connect meaningfully."],
-        NORMAL: ["The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles."],
-        STRONG: ["A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity."],
+        WEAK: ["but the attack glances off harmlessly, leaving an opening.", "but {targetName} easily dodges it, creating a chance to counter.", "but the technique lacks the power to connect meaningfully.", "but the strike is too slow to find its mark, giving {targetName} a chance to recover."],
+        NORMAL: ["The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", "The attack connects, interrupting {targetName}'s rhythm."],
+        STRONG: ["A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", "The impact is significant, leaving {targetName} momentarily stunned."],
         CRITICAL: ["A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground."]
     },
-    fire: {
-        NORMAL: ["The flames force {targetName} to retreat.", "Searing heat washes over {targetName}."],
-        STRONG: ["The blaze engulfs {targetName}, who cries out in pain!", "The intense fire melts through {targetName}'s defense."]
-    },
-    ice: {
-        NORMAL: ["A layer of frost covers {targetName}, slowing them down.", "Shards of ice shatter against {targetName}'s defense."],
-        STRONG: ["The bitter cold seeps into {targetName}'s bones.", "The ice encases {targetName}'s limbs, restricting movement."]
-    },
-    physical: {
-        NORMAL: ["The physical blow connects with a dull thud.", "{targetName} grunts from the solid impact."],
-        STRONG: ["The raw force of the blow sends {targetName} flying!", "A bone-jarring impact leaves {targetName} disoriented."]
+    PIN: {
+        NORMAL: ["The onslaught pins {targetName} against a crumbling wall.", "The strike traps {targetName}, limiting their movement."],
+        WEAK: ["The attempt to pin {targetName} falters, missing its mark.", "The weak volley fails to trap {targetName}."]
     },
     DEFENSE: {
         REACTIVE: ["The defensive maneuver perfectly counters the incoming assault.", "The attack is negated completely by the well-timed defense.", "With a skillful move, the blow is parried effortlessly."],
@@ -99,5 +91,13 @@ export const postBattleVictoryPhrases = {
     Cocky: {
         dominant: "{WinnerName} brushed dirt from {WinnerPronounP} clothes with a smirk, {WinnerPronounP} victory over {LoserName} a foregone conclusion.",
         narrow: "'That was almost a challenge,' {WinnerName} quipped, despite the close call against {LoserName}."
+    },
+    Deadpan: {
+        dominant: "{WinnerName} merely blinked, {WinnerPronounP} victory as precise and unemotional as {WinnerPronounP} throws against {LoserName}.",
+        narrow: "With an unflappable expression, {WinnerName} confirms the end of the duel with {LoserName}."
+    },
+    Madcap: {
+        dominant: "{WinnerName} retrieved {WinnerPronounP} boomerang with a flourish, {WinnerPronounP} victory over {LoserName} a mix of genius and goofiness.",
+        narrow: "Against all odds, {WinnerName}'s unconventional tactics secured a narrow victory over {LoserName}."
     }
 };
