@@ -8,3 +8,4 @@ export * from './characters.js';
 export * from './locations.js';
 export * from './narrative.js';
 export * from './mechanics.js';
+export * from './narrative-data.js'; // <-- ADD THIS LINE

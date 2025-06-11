@@ -1,20 +1,19 @@
 'use strict';
 
+// Import our new narrative engine
+import { generatePlayByPlay } from './narrative-engine.js'; 
 import { 
     characters, 
     locations, 
     terrainTags, 
     victoryTypes, 
     postBattleVictoryPhrases, 
-    storyTemplates, 
-    combatStyleAdvantages, 
     adjectiveToNounMap 
 } from './data/index.js';
 
-let usedTechniqueSentences = new Set();
 let usedReasonIds = new Set();
 
-// --- UTILITY & HELPER FUNCTIONS ---
+// --- UTILITY & HELPER FUNCTIONS (Unchanged) ---
 
 function getTraitDisplay(character, traitKey) {
     if (!character) return "unspecified tactic";
@@ -30,15 +29,6 @@ function getTraitDisplay(character, traitKey) {
         lastDitchDefense: "a desperate last-ditch defense"
     };
     return character[traitKey] || fallbackMap[traitKey] || "standard maneuver";
-}
-
-function shuffle(array) {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray;
 }
 
 function getRandomElement(array, fallbackValue = "skill") {
@@ -59,7 +49,7 @@ function normalizeTraitToNoun(traitString) {
     return adjectiveToNounMap[normalized] || traitString.replace(/_/g, ' ');
 }
 
-// --- NARRATIVE & STORY GENERATION ---
+// --- NARRATIVE HELPER FUNCTIONS (To support the final victory announcement) ---
 
 function getCharacterSpecificQuote(charObj, type, opponentId) {
     if (!charObj || !charObj.quotes) return '';
@@ -97,39 +87,20 @@ function getVictoryQuote(character, victoryData) {
 
 function populateTemplate(template, data) {
     const map = {
-        Fighter1Name: `<span class="char-${data.f1Id}">${characters[data.f1Id]?.name || 'Fighter 1'}</span>`,
-        Fighter2Name: `<span class="char-${data.f2Id}">${characters[data.f2Id]?.name || 'Fighter 2'}</span>`,
         WinnerName: `<span class="char-${data.winnerId}">${characters[data.winnerId]?.name || 'Winner'}</span>`,
         LoserName: `<span class="char-${data.loserId}">${characters[data.loserId]?.name || 'Loser'}</span>`,
-        Fighter1ID: data.f1Id, WinnerID: data.winnerId, LoserID: data.loserId,
-        WinnerPronounP: characters[data.winnerId]?.pronouns.p || 'their',
         LoserPronounS: characters[data.loserId]?.pronouns.s || 'they',
         WinnerPronounS: characters[data.winnerId]?.pronouns.s || 'they',
+        WinnerPronounP: characters[data.winnerId]?.pronouns.p || 'their',
         WinnerStrength: normalizeTraitToNoun(getRandomElement(characters[data.winnerId]?.strengths, "skill")),
-        Fighter1Desc: getFormattedStyle(characters[data.f1Id]),
-        Fighter2Desc: getFormattedStyle(characters[data.f2Id]),
         WinnerStyle: getTraitDisplay(characters[data.winnerId], 'style'),
-        LocationName: locations[data.locId]?.name || 'the arena',
-        LocationTerrain: locations[data.locId]?.terrain || 'the battlefield',
-        LocationFeature: sanitizePhrase(locations[data.locId]?.feature) || 'the surroundings',
-        LocationFeatureA: locations[data.locId]?.featureA || 'the dynamic surroundings',
-        LocationFeatureB: locations[data.locId]?.featureB || 'the terrain',
-        LocationFeatureC: locations[data.locId]?.featureC || 'a loose element',
-        Fighter1IntroQuote: getCharacterSpecificQuote(characters[data.f1Id], 'preBattle', data.f2Id),
-        Fighter2IntroQuote: getCharacterSpecificQuote(characters[data.f2Id], 'preBattle', data.f1Id),
-        WinnerQuote: (data.victoryType === 'draw' || data.victoryType === 'tiebreak_win') ? '' : getVictoryQuote(characters[data.winnerId], {
+        WinnerQuote: getVictoryQuote(characters[data.winnerId], {
             type: data.winProb >= 90 ? 'stomp' : (data.winProb >= 75 ? 'dominant' : 'narrow'),
             opponentId: data.loserId,
             resolutionTone: data.resolutionTone
         }),
     };
     return template.replace(/{(\w+)}/g, (match, key) => map[key] || match);
-}
-
-function getFormattedStyle(charObj) {
-    if (!charObj) return 'an unknown fighter';
-    const style = getTraitDisplay(charObj, 'style');
-    return `a ${style.replace(/_/g, ' ')}`;
 }
 
 function getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData) {
@@ -141,33 +112,8 @@ function getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData) {
     return populateTemplate(getRandomElement(archetypePhrases), baseStoryData);
 }
 
-// FINAL, ROBUST, AND GRAMMATICALLY CORRECT VERSION
-function generateCombatSequence(f1, f2, loc) {
-    const f1_opening = getTraitDisplay(f1, "openingMove");
-    const f2_counter = getTraitDisplay(f2, "counterMove");
-    const f1_mid_game = getTraitDisplay(f1, "midGameTactic");
-    const f2_adaptation = getTraitDisplay(f2, "terrainAdaptation");
-    const f1_finishing = getTraitDisplay(f1, "finishingMove");
-    const f2_last_ditch = getTraitDisplay(f2, "lastDitchDefense");
 
-    return [
-        `<span class='char-${f1.id}'>${f1.name}</span> initiated the clash with ${f1_opening}, directly confronting <span class='char-${f2.id}'>${f2.name}</span>. The very ${loc.featureA} seemed to amplify the impact.`,
-        `<span class='char-${f2.id}'>${f2.name}</span> responded with ${f2_counter}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted to ${f1_mid_game}, seeking to control the flow.`,
-        `As the battle intensified, a final exchange saw <span class='char-${f1.id}'>${f1.name}</span> attempt ${f1_finishing}. This was met by ${f2_last_ditch} from <span class='char-${f2.id}'>${f2.name}</span> as the environment itself reacted, with ${loc.featureC} shifting beneath their feet.`
-    ];
-}
-
-function getMicroTurningPoint(f1, f2, loc) {
-    const moments = [
-      `<span class='char-${f1.id}'>${f1.name}</span> tripped on ${loc.featureC}, costing critical seconds and revealing an opening.`,
-      `<span class='char-${f2.id}'>${f2.name}'s</span> overconfidence led to a fatal misread, leaving an attack open.`,
-      `A sudden environmental shift involving ${loc.featureA} changed everything, catching one off guard.`,
-      `A crucial misstep by <span class='char-${f1.id}'>${f1.name}</span> left ${f1.pronouns.o} vulnerable.`,
-    ];
-    return getRandomElement(moments);
-}
-
-// --- CORE BATTLE LOGIC ---
+// --- CORE BATTLE LOGIC (Unchanged) ---
 
 function determineVictoryType(winnerId, loserId, winProb) {
     const winnerChar = characters[winnerId];
@@ -206,14 +152,13 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     };
     
-    // FINAL FIX for Power Tier Label
     const tierGap = f1.powerTier - f2.powerTier;
     if (tierGap !== 0) {
         const tierModifier = Math.sign(tierGap) * (Math.abs(tierGap) * 5 + Math.pow(Math.abs(tierGap), 2));
-        if (tierModifier > 0) { // f1 has the advantage
+        if (tierModifier > 0) {
             addReason(f1, 'Power Tier Advantage', tierModifier);
             addReason(f2, 'Power Tier Disadvantage', -tierModifier);
-        } else { // f2 has the advantage
+        } else {
             addReason(f1, 'Power Tier Disadvantage', tierModifier);
             addReason(f2, 'Power Tier Advantage', -tierModifier);
         }
@@ -221,11 +166,10 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         f2NetModifier -= tierModifier;
     }
 
-    // Relationship & Psychological Modifiers
     [
-        { fighter: f1, opponent: f2, opponentId: f2Id },
-        { fighter: f2, opponent: f1, opponentId: f1Id }
-    ].forEach(({ fighter, opponent, opponentId }) => {
+        { fighter: f1, opponentId: f2Id },
+        { fighter: f2, opponentId: f1Id }
+    ].forEach(({ fighter, opponentId }) => {
         const relationship = fighter.relationships?.[opponentId];
         if (relationship) {
             let relModifier = 0;
@@ -238,18 +182,16 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
                 relModifier = 5; reason = 'Motivated by philosophical opposition';
             }
             if (relModifier !== 0) {
-                if (fighter.id === f1.id) {
-                    f1NetModifier += relModifier; addReason(f1, reason, relModifier);
-                    f2NetModifier -= relModifier; addReason(f2, `Faced opponent's ${reason.toLowerCase()}`, -relModifier);
-                } else {
-                    f2NetModifier += relModifier; addReason(f2, reason, relModifier);
-                    f1NetModifier -= relModifier; addReason(f1, `Faced opponent's ${reason.toLowerCase()}`, -relModifier);
-                }
+                const modifierTarget = (fighter.id === f1.id) ? 1 : -1;
+                f1NetModifier += relModifier * modifierTarget;
+                f2NetModifier -= relModifier * modifierTarget;
+                addReason(fighter, reason, relModifier);
+                const opponent = (fighter.id === f1.id) ? f2 : f1;
+                addReason(opponent, `Faced opponent's ${reason.toLowerCase()}`, -relModifier);
             }
         }
     });
 
-    // Corrected Terrain interactions Logic
     const locTags = terrainTags[locId] || [];
     [f1, f2].forEach(fighter => {
         let fighterModifier = 0;
@@ -272,7 +214,6 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     });
 
-    // Final calculations
     f1NetModifier += Math.random() * 10 - 5;
     f2NetModifier += Math.random() * 10 - 5;
     const f1FinalScore = Math.max(1, f1NetModifier);
@@ -290,21 +231,92 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
     return { f1: f1Prob, f2: 100 - f1Prob, winnerId, loserId, winProb, outcomeReasons, victoryType, f1FinalScore, f2FinalScore, resolutionTone };
 }
 
-export function generateBattleStory(winnerId, loserId, locId, outcomeReasons, victoryType, winProb, f1FinalScore, f2FinalScore, resolutionTone) {
-    usedTechniqueSentences.clear();
-    const f1Id = document.getElementById('fighter1').value;
-    const f2Id = document.getElementById('fighter2').value;
+// ** NEW, REFACTORED STORY GENERATION FUNCTION **
+export function generateBattleStory(f1Id, f2Id, locId, battleOutcome) {
+    const { winnerId, loserId, victoryType, resolutionTone, winProb } = battleOutcome;
     
-    const data = { f1Id, f2Id, winnerId, loserId, locId, winProb, victoryType, resolutionTone };
-    const f1 = characters[f1Id], f2 = characters[f2Id], loc = locations[locId];
+    // 1. Generate the detailed play-by-play from the new engine.
+    const playByPlay = generatePlayByPlay(f1Id, f2Id, locId, battleOutcome);
 
-    const actionBeats = generateCombatSequence(f1, f2, loc);
-    let narrative_core = actionBeats.join(" ");
+    // 2. Get the winner's final victory announcement.
+    const baseStoryData = {
+        winnerId,
+        loserId,
+        winProb,
+        victoryType,
+        resolutionTone,
+    };
+    const finalEnding = getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData);
 
-    if (Math.abs(f1FinalScore - f2FinalScore) <= 10) {
-        narrative_core += ` ${getMicroTurningPoint(f1, f2, loc)}`;
-    }
-    
-    const finalEnding = getToneAlignedVictoryEnding(winnerId, victoryType, data);
-    return `<p>${narrative_core}</p><br><p>${finalEnding}</p>`;
+    // 3. Combine them into the final story.
+    return `${playByPlay}<br><p>${finalEnding}</p>`;
 }
+
+File 2: main.js (Crucial Update)
+
+You also need to update main.js to call generateBattleStory with the correct arguments. This is a small but critical change.
+
+js/main.js
+
+'use strict';
+
+import { calculateWinProbability, generateBattleStory } from './battle-engine.js';
+import { DOM, populateDropdowns, updateFighterDisplay, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
+
+function handleBattleStart() {
+    const f1Id = DOM.fighter1Select.value;
+    const f2Id = DOM.fighter2Select.value;
+    const locId = DOM.locationSelect.value;
+
+    if (!f1Id || !f2Id || !locId) {
+        alert("Please select both fighters and a location.");
+        return;
+    }
+    if (f1Id === f2Id) {
+        alert('Please select two different fighters!');
+        return;
+    }
+
+    resetBattleUI();
+    showLoadingState();
+
+    // Simulate calculation time
+    setTimeout(() => {
+        try {
+            const battleOutcome = calculateWinProbability(f1Id, f2Id, locId);
+            
+            // *** THIS IS THE UPDATED FUNCTION CALL ***
+            const story = generateBattleStory(
+                f1Id,
+                f2Id,
+                locId,
+                battleOutcome
+            );
+            
+            // Attach the generated story to the outcome object
+            battleOutcome.story = story;
+
+            showResultsState(battleOutcome);
+
+        } catch (error) {
+            console.error("An error occurred during battle simulation:", error);
+            alert("A critical error occurred. Please check the console and refresh.");
+            // Reset UI state on error
+            DOM.loadingSpinner.classList.add('hidden');
+            DOM.battleBtn.disabled = false;
+        }
+    }, 1500);
+}
+
+function init() {
+    // UI Setup
+    populateDropdowns();
+    updateFighterDisplay('fighter1');
+    updateFighterDisplay('fighter2');
+
+    // Event Listeners
+    DOM.battleBtn.addEventListener('click', handleBattleStart);
+    DOM.fighter1Select.addEventListener('change', () => updateFighterDisplay('fighter1'));
+    DOM.fighter2Select.addEventListener('change', () => updateFighterDisplay('fighter2'));
+}
+
