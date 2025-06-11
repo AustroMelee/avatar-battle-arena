@@ -21,8 +21,9 @@ function getUniqueTechnique(character, usedTechniques) {
 function toGerund(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
-    if (verb.endsWith('e') && !['be', 'see', 'use', 'dodge'].includes(verb)) return verb.slice(0, -1) + 'ing';
-    const double = ['run', 'swim', 'cut', 'hit', 'pin', 'set', 'sit', 'propel', 'spin', 'turn', 'engulf', 'heat', 'jab', 'slip'];
+    if (verb.endsWith('e') && !['be', 'see', 'use', 'dodge', 'freeze'].includes(verb)) return verb.slice(0, -1) + 'ing';
+    // FIX: Expanded the list to include 'control' and other verbs.
+    const double = ['run', 'swim', 'cut', 'hit', 'pin', 'set', 'sit', 'propel', 'spin', 'turn', 'engulf', 'heat', 'jab', 'slip', 'control', 'wield'];
     if (double.includes(verb)) return verb + verb.slice(-1) + 'ing';
     return verb + 'ing';
 }
@@ -32,7 +33,6 @@ function toPastTense(verb = '') {
     verb = verb.toLowerCase();
     if (verb.endsWith('e')) return verb + 'd';
     if (verb.endsWith('y') && verb.length > 2) return verb.slice(0, -1) + 'ied';
-    // FIX: Expanded list of irregular verbs based on character techniques.
     const irregular = { 
         'hurl': 'hurled', 'run': 'ran', 'swim': 'swam', 'cut': 'cut', 'hit': 'hit', 
         'set': 'set', 'sit': 'sat', 'spin': 'spun', 'throw': 'threw', 'breathe': 'breathed', 
@@ -61,7 +61,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     const populateBeat = (template, initiator, responder, context) => {
         const { winner, loc, initiatorTech, responderTech } = context;
         
-        // --- FIX: Correctly selects ONE random finisher description string ---
         const finisherTechnique = getRandomElement(winner.techniques.filter(t => t.finisher));
         const finisherDescription = getRandomElement(finisherTechnique?.finalFlavor) || `${winner.name} delivered a final, decisive blow.`;
 
@@ -92,6 +91,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{winnerFinisherDescription}/g, finisherDescription);
     };
     
+    // --- OPENING BEAT ---
     const openingInitiator = (f1.powerTier >= f2.powerTier) ? f1 : f2;
     const openingResponder = (openingInitiator.id === f1.id) ? f2 : f1;
     const openingContext = {
@@ -101,6 +101,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     };
     story.push(populateBeat(getRandomElement(battleBeats.opening), openingInitiator, openingResponder, openingContext));
 
+    // --- ADVANTAGE BEAT ---
     const advantageContext = {
         winner, loser, loc,
         initiatorTech: getUniqueTechnique(winner, usedTechniques),
@@ -108,20 +109,30 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     };
     story.push(populateBeat(getRandomElement(battleBeats.advantage_attack), winner, loser, advantageContext));
     
+    // --- FIX: REFACTORED MID-BEAT LOGIC ---
     const locTags = terrainTags[locId] || [];
     const winnerTerrainAdvantage = winner.strengths.some(s => locTags.includes(s));
-    const midInitiator = winnerTerrainAdvantage ? winner : loser;
-    const midResponder = winnerTerrainAdvantage ? loser : winner;
-    const midBeatContext = {
-        winner, loser, loc,
-        initiatorTech: getUniqueTechnique(midInitiator, usedTechniques),
-        responderTech: getUniqueTechnique(midResponder, usedTechniques)
-    };
-    const midBeatTemplate = winnerTerrainAdvantage && Math.random() > 0.5 
-        ? getRandomElement(battleBeats.terrain_interaction) 
-        : getRandomElement(battleBeats.disadvantage_attack);
-    story.push(populateBeat(midBeatTemplate, midInitiator, midResponder, midBeatContext));
+    
+    // Decide which type of mid-beat to use
+    if (winnerTerrainAdvantage && Math.random() > 0.5) {
+        // Terrain Interaction Beat: Winner is the initiator
+        const context = {
+            winner, loser, loc,
+            initiatorTech: getUniqueTechnique(winner, usedTechniques),
+            responderTech: getUniqueTechnique(loser, usedTechniques)
+        };
+        story.push(populateBeat(getRandomElement(battleBeats.terrain_interaction), winner, loser, context));
+    } else {
+        // Disadvantage Attack Beat: Loser is the initiator
+        const context = {
+            winner, loser, loc,
+            initiatorTech: getUniqueTechnique(loser, usedTechniques),
+            responderTech: getUniqueTechnique(winner, usedTechniques)
+        };
+        story.push(populateBeat(getRandomElement(battleBeats.disadvantage_attack), loser, winner, context));
+    }
 
+    // --- FINISHING BEAT ---
     const defaultTech = { verb: '', object: '' };
     const finishingContext = { winner, loser, loc, initiatorTech: defaultTech, responderTech: defaultTech };
     story.push(populateBeat(getRandomElement(battleBeats.finishing_move), winner, loser, finishingContext));
