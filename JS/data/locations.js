@@ -32,7 +32,7 @@ export const locations = {
         has: ['water', 'ice'], 
         interactiveElements: ['ice_bridge', 'frozen_wall', 'water_canal', 'slippery_terrain', 'ice_shards'],
         terrainType: "aquatic-icy",
-        featureA: "the swirling water of the canals",
+        featureA: "swirling water of the canals",
         featureB: "slippery ice bridges",
         featureC: "a precarious ice formation"
     },
@@ -43,8 +43,8 @@ export const locations = {
         has: ['earth', 'urban', 'buildings', 'water'], 
         interactiveElements: ['alleyways', 'stone_walls', 'building_rooftops'],
         terrainType: "urban-dense",
-        featureA: "the towering stone walls",
-        featureB: "the labyrinthine city streets",
+        featureA: "towering stone walls",
+        featureB: "labyrinthine city streets",
         featureC: "a crowded market stall"
     },
     'si-wong-desert': { 
@@ -54,7 +54,7 @@ export const locations = {
         has: ['sand', 'heat', 'wind'], 
         interactiveElements: ['shifting_sand', 'sand_dunes', 'sandstone_outcrops', 'heat_haze'],
         terrainType: "sandy-open",
-        featureA: "the scorching desert heat",
+        featureA: "scorching desert heat",
         featureB: "disorienting shimmering heat haze",
         featureC: "a crumbling sandstone outcrop"
     },
@@ -65,8 +65,8 @@ export const locations = {
         has: ['water', 'earth', 'plants', 'fog'], 
         interactiveElements: ['dense_vines', 'murky_water', 'hidden_roots', 'thick_fog'],
         terrainType: "swamp-dense",
-        featureA: "the thick, disorienting fog",
-        featureB: "the gnarled, twisting vines",
+        featureA: "thick, disorienting fog",
+        featureB: "gnarled, twisting vines",
         featureC: "a treacherous patch of murky water"
     },
     'boiling-rock': { 
@@ -77,7 +77,7 @@ export const locations = {
         interactiveElements: ['metal_walkways', 'boiling_lake', 'steam_vents', 'precarious_footing'],
         terrainType: "industrial-enclosed",
         featureA: "scalding steam vents",
-        featureB: "the precarious metal walkways",
+        featureB: "precarious metal walkways",
         featureC: "a sudden geyser from the boiling lake"
     },
     'fire-nation-capital': { 
@@ -87,8 +87,8 @@ export const locations = {
         has: ['earth', 'heat', 'urban', 'fire'], 
         interactiveElements: ['black_rock_structures', 'industrial_steam', 'narrow_alleys', 'defensive_walls'],
         terrainType: "urban-dense",
-        featureA: "the oppressive industrial heat",
-        featureB: "the narrow, dark alleyways",
+        featureA: "oppressive industrial heat",
+        featureB: "narrow, dark alleyways",
         featureC: "a crumbling black rock structure"
     },
     'omashu': { 
@@ -98,8 +98,8 @@ export const locations = {
         has: ['earth', 'urban', 'buildings'], 
         interactiveElements: ['delivery_chutes', 'stone_buildings', 'tiered_levels', 'high_ground', 'narrow_passages'],
         terrainType: "urban-dense",
-        featureA: "the towering stone buildings",
-        featureB: "the winding tiered pathways",
+        featureA: "towering stone buildings",
+        featureB: "winding tiered pathways",
         featureC: "a discarded cabbage cart"
     },
     'great-divide': { 
@@ -109,8 +109,8 @@ export const locations = {
         has: ['earth', 'high_altitude'], 
         interactiveElements: ['rocky_cliffs', 'narrow_ledges', 'chasms', 'loose_scree', 'rockslides'],
         terrainType: "open-plain",
-        featureA: "the echoing chasms",
-        featureB: "the sheer rocky cliffs",
+        featureA: "echoing chasms",
+        featureB: "sheer rocky cliffs",
         featureC: "a pile of loose scree"
     },
     'kyoshi-island': { 
@@ -120,8 +120,8 @@ export const locations = {
         has: ['earth', 'water', 'urban'], 
         interactiveElements: ['coastal_waters', 'village_houses', 'sandy_beaches', 'sea_cliffs'],
         terrainType: "coastal-open",
-        featureA: "the crashing ocean waves",
-        featureB: "the quaint village houses",
+        featureA: "crashing ocean waves",
+        featureB: "quaint village houses",
         featureC: "a slippery patch of seaweed"
     },
 };

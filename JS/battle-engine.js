@@ -143,7 +143,6 @@ function getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData) {
 
 // FINAL, ROBUST, AND GRAMMATICALLY CORRECT VERSION
 function generateCombatSequence(f1, f2, loc) {
-    // Get the move descriptions directly from the data.
     const f1_opening = getTraitDisplay(f1, "openingMove");
     const f2_counter = getTraitDisplay(f2, "counterMove");
     const f1_mid_game = getTraitDisplay(f1, "midGameTactic");
@@ -151,7 +150,6 @@ function generateCombatSequence(f1, f2, loc) {
     const f1_finishing = getTraitDisplay(f1, "finishingMove");
     const f2_last_ditch = getTraitDisplay(f2, "lastDitchDefense");
 
-    // Use simple, varied, but grammatically-safe sentence structures.
     return [
         `<span class='char-${f1.id}'>${f1.name}</span> initiated the clash with ${f1_opening}, directly confronting <span class='char-${f2.id}'>${f2.name}</span>. The very ${loc.featureA} seemed to amplify the impact.`,
         `<span class='char-${f2.id}'>${f2.name}</span> responded with ${f2_counter}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted to ${f1_mid_game}, seeking to control the flow.`,
@@ -169,7 +167,7 @@ function getMicroTurningPoint(f1, f2, loc) {
     return getRandomElement(moments);
 }
 
-// --- CORE BATTLE LOGIC (UNCHANGED, AS IT'S WORKING PERFECTLY) ---
+// --- CORE BATTLE LOGIC ---
 
 function determineVictoryType(winnerId, loserId, winProb) {
     const winnerChar = characters[winnerId];
@@ -192,7 +190,7 @@ function determineResolutionTone(fightContext) {
     return { type: "technical_win" };
 }
 
-// --- MAIN EXPORTED FUNCTIONS (UNCHANGED, AS IT'S WORKING PERFECTLY) ---
+// --- MAIN EXPORTED FUNCTIONS ---
 
 export function calculateWinProbability(f1Id, f2Id, locId) {
     usedReasonIds.clear();
@@ -208,13 +206,22 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     };
     
+    // FINAL FIX for Power Tier Label
     const tierGap = f1.powerTier - f2.powerTier;
-    const tierModifier = Math.sign(tierGap) * (Math.abs(tierGap) * 5 + Math.pow(Math.abs(tierGap), 2));
-    if (tierModifier !== 0) {
-        f1NetModifier += tierModifier; addReason(f1, 'Power Tier Advantage', tierModifier);
-        f2NetModifier -= tierModifier; addReason(f2, 'Power Tier Disadvantage', -tierModifier);
+    if (tierGap !== 0) {
+        const tierModifier = Math.sign(tierGap) * (Math.abs(tierGap) * 5 + Math.pow(Math.abs(tierGap), 2));
+        if (tierModifier > 0) { // f1 has the advantage
+            addReason(f1, 'Power Tier Advantage', tierModifier);
+            addReason(f2, 'Power Tier Disadvantage', -tierModifier);
+        } else { // f2 has the advantage
+            addReason(f1, 'Power Tier Disadvantage', tierModifier);
+            addReason(f2, 'Power Tier Advantage', -tierModifier);
+        }
+        f1NetModifier += tierModifier;
+        f2NetModifier -= tierModifier;
     }
 
+    // Relationship & Psychological Modifiers
     [
         { fighter: f1, opponent: f2, opponentId: f2Id },
         { fighter: f2, opponent: f1, opponentId: f1Id }
@@ -242,6 +249,7 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     });
 
+    // Corrected Terrain interactions Logic
     const locTags = terrainTags[locId] || [];
     [f1, f2].forEach(fighter => {
         let fighterModifier = 0;
@@ -264,6 +272,7 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     });
 
+    // Final calculations
     f1NetModifier += Math.random() * 10 - 5;
     f2NetModifier += Math.random() * 10 - 5;
     const f1FinalScore = Math.max(1, f1NetModifier);
