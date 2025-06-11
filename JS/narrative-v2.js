@@ -35,8 +35,8 @@ export const phaseTemplates = {
 };
 
 export const narrativeStatePhrases = {
-    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning their last reserves,", "Struggling to stand,"],
-    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With their opponent on the back foot,"],
+    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {pronoun} last reserves,", "Struggling to stand,"],
+    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {pronoun} opponent on the back foot,"],
     momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,"]
 };
 
@@ -48,7 +48,7 @@ export const introductoryPhrases = {
 };
 
 export const adverbPool = {
-    offensive: ['with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus'],
+    offensive: ['with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus', 'with devastating speed', 'in a relentless assault'],
     defensive: ['with calculated timing', 'in a deft maneuver', 'with steady resolve'],
 };
 
@@ -56,9 +56,21 @@ export const verbSynonyms = { 'launch': ['hurl', 'send', 'unleash', 'fire', 'pro
 
 export const impactPhrases = {
     DEFAULT: {
-        WEAK: ["but the attack glances off harmlessly.", "but {targetName} easily dodges it.", "but the technique lacks the power to connect meaningfully.", "but the strike is too slow to find its mark."],
+        WEAK: [
+            "but the attack glances off harmlessly.",
+            "but {targetName} easily dodges it.",
+            "but the technique lacks the power to connect meaningfully.",
+            "but the strike is too slow to find its mark."
+        ],
         NORMAL: ["The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", "The attack connects, interrupting {targetName}'s rhythm.", "{targetName} reels from the precise strike.", "The move lands firmly, catching {targetName} off-guard."],
-        STRONG: ["A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", "The impact is significant, leaving {targetName} momentarily stunned."],
+        STRONG: [
+            "A powerful blow sends {targetName} reeling!", 
+            "The attack smashes through {targetName}'s guard with ease.", 
+            "{targetName} staggers back, caught off-guard by the intensity.", 
+            "The impact is significant, leaving {targetName} momentarily stunned.",
+            "{targetName} is rocked by the forceful strike.",
+            "The blow overwhelms {targetName}'s defenses."
+        ],
         CRITICAL: ["A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground."]
     },
     PIN: {

@@ -6,7 +6,7 @@ import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhr
 
 // --- HELPER FUNCTIONS ---
 const getRandomElement = (arr, fallback = null) => (!arr || arr.length === 0) ? fallback : arr[Math.floor(Math.random() * arr.length)];
-const clamp = (num, min, max) => Math.min(Math.max(num, min, max));
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 // --- GRAMMAR & NARRATIVE SUB-SYSTEM ---
 function conjugateVerb(verb) {
@@ -69,7 +69,7 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
 // --- BATTLE STATE & SIMULATION ---
 function initializeFighterState(charId) {
     const character = characters[charId];
-    return { id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), hp: 100, energy: 100, momentum: 0, lastMove: null, movesUsed: new Set(), lastPrefix: '', secondLastPrefix: '' };
+    return { id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), hp: 100, energy: 100, momentum: 0, lastMove: null, movesUsed: new Set(), lastPrefixes: [] };
 }
 
 export function simulateBattle(f1Id, f2Id, locId) {
@@ -135,15 +135,21 @@ function selectMove(actor) {
         actor.movesUsed.clear(); // Reset if all moves are used
         suitableMoves = actor.techniques;
     }
-    if (actor.hp < 25 && actor.energy > 40 && suitableMoves.some(m => m.type === 'Finisher')) {
-        return getRandomElement(suitableMoves.filter(m => m.type === 'Finisher'));
+
+    if (actor.hp < 25 && actor.energy > 40) {
+        const finishers = suitableMoves.filter(m => m.type === 'Finisher');
+        if (finishers.length > 0) return getRandomElement(finishers);
     }
-    if (actor.hp < 40 && actor.energy > 20 && suitableMoves.some(m => m.type === 'Defense')) {
-        return getRandomElement(suitableMoves.filter(m => m.type === 'Defense'));
+    
+    if (actor.hp < 40 && actor.energy > 20) {
+        const defenses = suitableMoves.filter(m => m.type === 'Defense');
+        if (defenses.length > 0) return getRandomElement(defenses);
     }
-    const offenses = suitableMoves.filter(m => m.type === 'Offense');
+    
+    const offenses = suitableMoves.filter(m => m.type === 'Offense' && m.type !== 'Finisher');
     if (offenses.length > 0) return getRandomElement(offenses);
-    return getRandomElement(actor.techniques);
+
+    return getRandomElement(actor.techniques.filter(m => m.type !== 'Finisher'));
 }
 
 function calculateMove(move, attacker, defender, locTags) {
@@ -154,7 +160,7 @@ function calculateMove(move, attacker, defender, locTags) {
     if (move.type === 'Offense' && defender.lastMove?.type === 'Utility') multiplier += 0.15;
     if (move.type === 'Defense' && defender.lastMove?.type === 'Offense') basePower *= 0.5;
     
-    multiplier += (Math.random() - 0.5) * 0.2;
+    multiplier += (Math.random() - 0.5) * 0.1; // Reduced randomness
     const totalEffectiveness = basePower * multiplier;
     
     let level;
@@ -194,10 +200,10 @@ function narrateMove(actor, target, move, result, turnLog) {
     
     let statePrefix = '';
     if (statePrefixPool.length > 0) {
-        const availablePrefixes = statePrefixPool.filter(p => p !== actor.lastPrefix && p !== actor.secondLastPrefix);
+        const availablePrefixes = statePrefixPool.filter(p => !actor.lastPrefixes.includes(p));
         statePrefix = getRandomElement(availablePrefixes.length > 0 ? availablePrefixes : statePrefixPool);
-        actor.secondLastPrefix = actor.lastPrefix;
-        actor.lastPrefix = statePrefix;
+        actor.lastPrefixes.push(statePrefix);
+        if (actor.lastPrefixes.length > 3) actor.lastPrefixes.shift();
     }
     
     const intro = statePrefix ? '' : getRandomElement(introductoryPhrases.NEUTRAL);
@@ -209,16 +215,17 @@ function narrateMove(actor, target, move, result, turnLog) {
     let actionSentence = `${conjugatedVerb} ${objectPhrase}`;
     if (!objectPhrase) actionSentence = `executes the ${move.name}`;
 
-    const prefixText = statePrefix || intro;
-    let fullAction = `${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${actionSentence} ${adverb}.`.trim();
-
     function pronounOrName(prefix, span, actorData) {
         const pronoun = actorData.pronouns.s;
-        if (prefix) {
-            return Math.random() > 0.5 ? span : pronoun;
+        if (!prefix) { // If there's no prefix, start of sentence.
+            return Math.random() > 0.5 ? span : (pronoun.charAt(0).toUpperCase() + pronoun.slice(1));
         }
-        return Math.random() > 0.5 ? span : (pronoun.charAt(0).toUpperCase() + pronoun.slice(1));
+        // If there is a prefix, it's mid-sentence.
+        return Math.random() > 0.5 ? span : pronoun;
     }
+    
+    let prefixText = (statePrefix || intro).replace(/{pronoun}/g, actor.pronouns.p);
+    let fullAction = `${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${actionSentence} ${adverb}.`.trim();
 
     const moveElement = move.special || move.element || 'DEFAULT';
     const impactPool = impactPhrases[moveElement] || impactPhrases.DEFAULT;
@@ -227,7 +234,11 @@ function narrateMove(actor, target, move, result, turnLog) {
     let impactSentence = getRandomElement(impactTemplates, "The move connects.").replace(/{targetName}/g, targetSpan);
 
     if (result.effectiveness.label === 'WEAK') {
-        impactSentence += getRandomElement([', leaving an opening.', ', giving {targetName} a chance to recover.', ', creating a chance for {targetName} to counter.']).replace(/{targetName}/g, targetSpan);
+        impactSentence += ' ' + getRandomElement([
+             'leaving an opening.', 
+             'giving {targetName} a chance to recover.', 
+             'creating a chance for {targetName} to counter.'
+        ]).replace(/{targetName}/g, targetSpan);
     }
     
     const description = `${fullAction} ${impactSentence}`.replace(/\s\./g, '.').replace(/\s+/g, ' ').trim();
