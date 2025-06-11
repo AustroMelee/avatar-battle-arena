@@ -52,12 +52,21 @@ function getVictoryQuote(character, battleContext) {
 function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
     const winnerChar = characters[winnerId];
     const loserChar = characters[loserId];
-    const archetype = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
-    const endingTemplate = battleContext.isCloseCall ? (archetype.narrow || archetype.dominant) : archetype.dominant;
+    let customEnding;
+
+    if (battleContext.isCloseCall) {
+        customEnding = `After a grueling, hard-fought duel, <span class="char-${winnerId}">${winnerChar.name}</span> barely emerges victorious over <span class="char-${loserId}">${loserChar.name}</span>.`;
+    } else if (battleContext.isDominant) {
+        customEnding = `<span class="char-${winnerId}">${winnerChar.name}</span> achieves a decisive stomp, utterly overwhelming <span class="char-${loserId}">${loserChar.name}</span>.`;
+    }
     
-    const finalQuote = getVictoryQuote(winnerChar, { ...battleContext, type: battleContext.isCloseCall ? 'narrow' : 'dominant' });
+    const quoteData = { type: battleContext.isCloseCall ? 'narrow' : 'dominant', opponentId: loserId };
+    const finalQuote = getVictoryQuote(winnerChar, quoteData);
     
-    let populatedEnding = endingTemplate
+    const archetypePool = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
+    const endingTemplate = battleContext.isCloseCall ? (archetypePool.narrow || archetypePool.dominant) : archetypePool.dominant;
+    
+    let populatedEnding = customEnding || endingTemplate
         .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
         .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`)
         .replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
@@ -122,7 +131,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
 
     const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
-    const battleContext = { isCloseCall: winner.hp < 25, isDominant: loser.hp <= 0 && winner.hp > 75, fightLength: turn, opponentId: loser.id };
+    const battleContext = { isCloseCall: winner.hp < 35, isDominant: loser.hp <= 0 && winner.hp > 75, fightLength: turn, opponentId: loser.id };
     const finalEnding = getToneAlignedVictoryEnding(winner.id, loser.id, battleContext);
     
     battleLog.push(phaseTemplates.finalBlow.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
@@ -171,15 +180,16 @@ function calculateMove(move, attacker, defender, locTags) {
 function narrateMove(actor, target, move, result) {
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
     const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
-    
+    const energyCost = Math.round((move.power || 0) * 0.5);
+
     if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = target.lastMove?.type === 'Offense';
         const impactTemplates = isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
         const description = (isReactive
             ? `Reacting quickly, ${actorSpan} uses the ${move.name} to intercept ${targetSpan}'s assault. `
             : `${actorSpan} takes a moment to prepare. `) + getRandomElement(impactTemplates).replace(/{actorName}/g, actorSpan);
-        const energyCost = Math.round((move.power || 0) * 0.5);
-        return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{energyCost}/g, energyCost).replace(/{effectivenessLabel}/g, isReactive ? "Counter" : "Set-up").replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
+        const label = isReactive ? "Counter" : "Set-up";
+        return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{energyCost}/g, energyCost).replace(/{effectivenessLabel}/g, label).replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
     }
     
     let statePrefix = '';
@@ -187,30 +197,33 @@ function narrateMove(actor, target, move, result) {
     else if (actor.momentum > 1) statePrefix = getRandomElement(narrativeStatePhrases.momentum_gain) + ' ';
     else if (actor.momentum < -1) statePrefix = getRandomElement(narrativeStatePhrases.momentum_loss) + ' ';
 
-    const introContext = actor.hp > 80 ? 'CONFIDENT' : (target.lastMove ? 'REACTIVE' : 'NEUTRAL');
+    let introContext;
+    if (statePrefix) introContext = 'NEUTRAL'; // State prefix overrides general intro
+    else if (actor.hp > 80 && actor.hp > target.hp) introContext = 'CONFIDENT';
+    else if (target.lastMove) introContext = 'REACTIVE';
+    else introContext = 'AGGRESSIVE';
     const intro = getRandomElement(introductoryPhrases[introContext]);
+    
     const verb = getRandomElement(verbSynonyms[move.verb] || [move.verb]);
     const conjugatedVerb = conjugateVerb(verb);
     const objectPhrase = assembleObjectPhrase(move);
     const intensity = Math.random() > 0.5 ? getRandomElement(microToneModifiers.intensity) : '';
 
-    let actionSentence = `${pronounOrName()} ${conjugatedVerb} ${objectPhrase} ${intensity}.`;
-    function pronounOrName() {
-        return Math.random() > 0.5 ? actorSpan : (actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1));
-    }
+    let actionSentence = `${conjugatedVerb} ${objectPhrase}`;
+    if (!objectPhrase) actionSentence = `executes the ${move.name}`;
     
-    let fullAction = toLowerCaseFirst(actionSentence);
-    if(statePrefix) {
-        fullAction = `${statePrefix}${fullAction}`;
-    } else {
-        fullAction = `${intro} ${fullAction}`;
+    let fullAction = `${statePrefix || intro} ${pronounOrName(statePrefix, actorSpan, actor)} ${actionSentence} ${intensity}.`.trim();
+
+    function pronounOrName(prefix, span, actorData) {
+        return prefix ? '' : (Math.random() > 0.5 ? span : (actorData.pronouns.s.charAt(0).toUpperCase() + actorData.pronouns.s.slice(1)));
     }
 
     const impactPool = impactPhrases[move.element] || impactPhrases.DEFAULT;
-    const impactSentence = getRandomElement(impactPool[result.effectiveness.label] || impactPhrases.DEFAULT[result.effectiveness.label]).replace(/{targetName}/g, targetSpan);
+    const effectivenessKey = result.effectiveness.label.toUpperCase();
+    const impactTemplates = impactPool[effectivenessKey] || impactPhrases.DEFAULT[effectivenessKey];
+    const impactSentence = getRandomElement(impactTemplates, "The move connects.").replace(/{targetName}/g, targetSpan);
     
     const description = `${fullAction} ${impactSentence}`.replace(/\s+/g, ' ').trim();
-    const energyCost = Math.round((move.power || 0) * 0.5);
 
     return phaseTemplates.move
         .replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨')
