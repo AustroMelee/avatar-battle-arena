@@ -24,13 +24,8 @@ function handleBattleStart() {
         try {
             const battleOutcome = calculateWinProbability(f1Id, f2Id, locId);
             
-            // **CRITICAL FIX**: This function call now uses the correct parameters
-            const story = generateBattleStory(
-                f1Id,
-                f2Id,
-                locId,
-                battleOutcome
-            );
+            // This function call now matches the new, correct definition
+            const story = generateBattleStory(f1Id, f2Id, locId, battleOutcome);
             
             battleOutcome.story = story;
 
