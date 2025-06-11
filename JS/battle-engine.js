@@ -19,11 +19,13 @@ function normalizeTraitToNoun(traitString) {
     return adjectiveToNounMap[normalized] || traitString.replace(/_/g, ' ');
 }
 
+// --- CONSOLIDATED LOGIC ---
 function getVictoryQuote(character, victoryData) {
     if (!character || !character.quotes) return "Victory is mine.";
     const { type, opponentId, resolutionTone } = victoryData;
     const quotes = character.quotes;
 
+    // This complex selection ensures the most specific and context-aware quote is chosen.
     if (opponentId && quotes.postWin_specific && quotes.postWin_specific[opponentId]) {
         return getRandomElement(quotes.postWin_specific[opponentId]);
     }
@@ -36,6 +38,7 @@ function getVictoryQuote(character, victoryData) {
     if (resolutionTone?.type === "emotional_yield" && quotes.postWin_reflective) {
         return getRandomElement(quotes.postWin_reflective);
     }
+    // Fallback to more general types
     if (quotes[`postWin_${type}`]) {
         return getRandomElement(quotes[`postWin_${type}`]);
     }
@@ -76,19 +79,29 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, re
         opponentId: loserId, 
         resolutionTone 
     };
-    templateData.WinnerQuote = getVictoryQuote(winnerChar, quoteData);
+    const finalQuote = getVictoryQuote(winnerChar, quoteData);
+    // FIX: Cleaner quote integration. No more double quotes.
+    templateData.WinnerQuote = finalQuote;
     
     let template;
     const specificEnding = victoryTypes[victoryType]?.narrativeEndings?.[winnerId];
     if (specificEnding) {
-        template = specificEnding;
+        template = getRandomElement(specificEnding);
     } else {
         const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
         template = getRandomElement(archetypePhrases);
     }
 
-    return populateTemplate(template, templateData);
+    let populatedEnding = populateTemplate(template, templateData);
+    
+    // Append the quote as dialogue if the template doesn't already include it.
+    if (!populatedEnding.includes(finalQuote)) {
+        populatedEnding += ` "${finalQuote}"`;
+    }
+
+    return populatedEnding;
 }
+
 
 function determineVictoryType(winnerId, loserId, winProb) {
     const winnerChar = characters[winnerId];

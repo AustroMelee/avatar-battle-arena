@@ -23,9 +23,9 @@ export const battleBeats = {
         "The {locationTerrain} became a weapon for {initiatorName}. {initiatorPronounSCap} {initiator_verb_past} {initiator_object}, and {responderName} had to adapt quickly or be overwhelmed."
     ],
     finishing_move: [
-        // FIX: The {winnerName} placeholder is removed to prevent duplication, as the name is now part of the description itself.
-        "The decisive moment arrived. Seizing an opening, {winnerFinisherDescription}",
-        "It all came down to one final exchange. Seeing the opportunity, {winnerFinisherDescription}",
-        "The battle reached its climax. With a final, powerful move, {winnerFinisherDescription}"
+        // FIX: The templates are now just the placeholder. The finalFlavor provides the full sentence.
+        "{winnerFinisherDescription}",
+        "{winnerFinisherDescription}",
+        "{winnerFinisherDescription}"
     ]
 };
