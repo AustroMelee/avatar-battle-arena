@@ -12,10 +12,20 @@ import {
 
 let usedReasonIds = new Set();
 
+// --- UTILITY & HELPER FUNCTIONS ---
+
 function getRandomElement(array, fallbackValue = "skill") {
     if (!array || array.length === 0) return fallbackValue;
     return array[Math.floor(Math.random() * array.length)];
 }
+
+function normalizeTraitToNoun(traitString) {
+    if (!traitString) return 'skill';
+    const normalized = traitString.toLowerCase().replace(/ /g, '_');
+    return adjectiveToNounMap[normalized] || traitString.replace(/_/g, ' ');
+}
+
+// --- NARRATIVE HELPER FUNCTIONS ---
 
 function getVictoryQuote(character, victoryData) {
     if (!character || !character.quotes) return "Victory is mine.";
@@ -42,21 +52,25 @@ function getVictoryQuote(character, victoryData) {
     return finalQuote || "I am victorious.";
 }
 
+// ** UPDATED to remove extra quotes **
 function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, resolutionTone) {
     const winnerChar = characters[winnerId];
-    const baseStoryData = { WinnerName: `<span class="char-${winnerId}">${winnerChar.name}</span>`, LoserName: `<span class="char-${loserId}">${characters[loserId].name}</span>` };
-    
+    const loserChar = characters[loserId];
+
     const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
     let template = getRandomElement(archetypePhrases);
     
     const quoteData = { type: winProb >= 90 ? 'stomp' : (winProb >= 75 ? 'dominant' : 'narrow'), opponentId: loserId, resolutionTone };
     const quote = getVictoryQuote(winnerChar, quoteData);
 
+    // The template in narrative.js already has quotes, so we just insert the text.
     return template
-        .replace(/{WinnerQuote}/g, `"${quote}"`)
-        .replace(/{WinnerName}/g, baseStoryData.WinnerName)
-        .replace(/{LoserName}/g, baseStoryData.LoserName);
+        .replace(/{WinnerQuote}/g, quote)
+        .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
+        .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`);
 }
+
+// --- CORE BATTLE LOGIC ---
 
 function determineVictoryType(winnerId, loserId, winProb) {
     const winnerChar = characters[winnerId];
@@ -76,6 +90,8 @@ function determineResolutionTone(fightContext) {
     if (winBy === "outsmart" || winBy === "tiebreak_win") return { type: "clever_victory" };
     return { type: "technical_win" };
 }
+
+// --- MAIN EXPORTED FUNCTIONS ---
 
 export function calculateWinProbability(f1Id, f2Id, locId) {
     usedReasonIds.clear();
@@ -111,13 +127,13 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         fighter.strengths?.forEach(strength => {
             if (locTags.includes(strength)) {
                 fighterModifier += 10;
-                addReason(fighter, `Leveraged ${adjectiveToNounMap[strength] || strength}`, 10);
+                addReason(fighter, `Leveraged ${normalizeTraitToNoun(strength)}`, 10);
             }
         });
         fighter.weaknesses?.forEach(weakness => {
             if (locTags.includes(weakness)) {
                 fighterModifier -= 10;
-                addReason(fighter, `Hindered by ${adjectiveToNounMap[weakness] || weakness}`, -10);
+                addReason(fighter, `Hindered by ${normalizeTraitToNoun(weakness)}`, -10);
             }
         });
         if (fighter.id === f1.id) {
