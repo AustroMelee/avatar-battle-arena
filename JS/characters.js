@@ -154,7 +154,7 @@ export const characters = {
             { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, emoji: '🔪', requiresArticle: false, element: 'fire' },
             { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, emoji: '🔥', requiresArticle: false, element: 'fire' },
             { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', type: 'Finisher', power: 100, emoji: '⚡', requiresArticle: true, element: 'lightning' },
-            { name: "Flame Burst", verb: 'erupt with', object: 'a burst of blue flame', type: 'Defense', power: 50, emoji: '💥', requiresArticle: true, element: 'fire' },
+            { name: "Flame Burst", verb: 'erupt with', object: 'burst of blue flame', type: 'Defense', power: 50, emoji: '💥', requiresArticle: true, element: 'fire' },
             { name: "Fire Jets", verb: 'propel', object: 'herself with jets of fire', type: 'Utility', power: 30, emoji: '🚀', requiresArticle: false, element: 'fire' },
             { name: "Precision Strike", verb: 'strike', object: 'with a focused fire blast', type: 'Offense', power: 70, emoji: '🎯', requiresArticle: false, element: 'fire' },
             { name: "Heat Wave", verb: 'release', object: 'debilitating heat wave', type: 'Utility', power: 35, emoji: '☀️', requiresArticle: true, element: 'fire' },
@@ -210,7 +210,7 @@ export const characters = {
             { name: "Earth Armor", verb: 'don', object: 'suit of earth armor', type: 'Defense', power: 70, emoji: '🗿', requiresArticle: true, element: 'earth' },
             { name: "Seismic Scan", verb: 'scan', object: 'the battlefield with seismic sense', type: 'Utility', power: 15, emoji: '📡', requiresArticle: false, element: 'utility' },
             { name: "Boulder Throw", verb: 'hurl', object: 'giant boulder', type: 'Offense', power: 60, emoji: '🪨', requiresArticle: true, element: 'earth' },
-            { name: "Ground Spike", verb: 'erupt with', object: 'a spike of rock from the ground', type: 'Offense', power: 45, emoji: '⛰️', requiresArticle: true, element: 'earth' },
+            { name: "Ground Spike", verb: 'erupt with', object: 'spike of rock from the ground', type: 'Offense', power: 45, emoji: '⛰️', requiresArticle: true, element: 'earth' },
             { name: "Earthen Prison", verb: 'trap', object: 'his foe in an earthen prison', type: 'Utility', power: 50, emoji: '🧱', requiresArticle: false, element: 'earth' },
             { name: "Terrain Reshape", verb: 'reshape', object: 'the battlefield', type: 'Utility', power: 40, emoji: '🌍', requiresArticle: false, element: 'earth' }
         ],
@@ -235,7 +235,7 @@ export const characters = {
         maxHealth: 100, maxEnergy: 100,
         techniques: [
             { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, emoji: '🤸‍♀️', requiresArticle: true, element: 'utility' },
-            { name: "Pressure Point Strike", verb: 'strike', object: 'a vital pressure point', type: 'Offense', power: 60, emoji: '🎯', requiresArticle: true, element: 'physical' },
+            { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, emoji: '🎯', requiresArticle: true, element: 'physical' },
             { name: "Graceful Dodge", verb: 'dodge', object: 'an incoming attack', type: 'Defense', power: 40, emoji: '🍃', requiresArticle: true, element: 'utility' },
             { name: "Blur of Motion", verb: 'move', object: 'like a blur', type: 'Utility', power: 20, emoji: '💨', requiresArticle: false, element: 'utility' },
             { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'flurry of chi-blocking strikes', type: 'Finisher', power: 85, emoji: '🛑', requiresArticle: true, element: 'special' }
@@ -316,7 +316,7 @@ export const characters = {
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, emoji: '🧊', requiresArticle: true, element: 'ice' },
             { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, emoji: '🛡️', requiresArticle: true, element: 'water' },
             { name: "Frozen Ground", verb: 'freeze', object: 'the ground', type: 'Utility', power: 35, emoji: '❄️', requiresArticle: false, element: 'ice' },
-            { name: "Ice Prison", verb: 'encase', object: 'his foe in an ice prison', type: 'Utility', power: 65, emoji: '🧊', requiresArticle: false, element: 'ice' },
+            { name: "Ice Prison", verb: 'encase', object: 'his foe in an earthen prison', type: 'Utility', power: 65, emoji: '🧊', requiresArticle: false, element: 'ice' },
             { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, emoji: '🌊', requiresArticle: true, element: 'water' },
             { name: "Ice Armor", verb: 'form', object: 'suit of ice armor', type: 'Defense', power: 70, emoji: '🗿', requiresArticle: true, element: 'ice' },
             { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, emoji: '🐙', requiresArticle: false, element: 'water' }

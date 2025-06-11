@@ -30,13 +30,13 @@ export const phaseTemplates = {
         </div>
         <p class="move-description">{moveDescription}</p>
     `,
-    finalBlow: `<p class="final-blow">{winnerName} lands a finishing blow, defeating {loserName}!</p>`,
+    finalBlow: `<p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     conclusion: `<p class="conclusion">{endingNarration}</p>`
 };
 
 export const narrativeStatePhrases = {
     energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning their last reserves,"],
-    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Smelling blood in the water,", "With their opponent on the back foot,"],
+    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With their opponent on the back foot,"],
     momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,"]
 };
 
@@ -91,5 +91,13 @@ export const postBattleVictoryPhrases = {
     Supreme: {
         dominant: "{WinnerName} stood radiating immense power, {WinnerPronounP} victory a declaration of {WinnerPronounP} absolute dominion over {LoserName}.",
         narrow: "Though the battle was intense, {WinnerName}'s superior power ultimately crushed {LoserName}'s hopes."
+    },
+    Fierce: {
+        dominant: "{WinnerName} radiated quiet power, {WinnerPronounP} fierce determination evident in {WinnerPronounP} victory over {LoserName}.",
+        narrow: "Pushed to the brink, {WinnerName}'s fierce determination proved to be the key in overcoming {LoserName}."
+    },
+    Cocky: {
+        dominant: "{WinnerName} brushed dirt from {WinnerPronounP} clothes with a smirk, {WinnerPronounP} victory over {LoserName} a foregone conclusion.",
+        narrow: "'That was almost a challenge,' {WinnerName} quipped, despite the close call against {LoserName}."
     }
 };
