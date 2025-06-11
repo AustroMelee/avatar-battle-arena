@@ -52,7 +52,6 @@ function getVictoryQuote(character, victoryData) {
     return finalQuote || "I am victorious.";
 }
 
-// ** UPDATED to remove extra quotes **
 function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, resolutionTone) {
     const winnerChar = characters[winnerId];
     const loserChar = characters[loserId];
@@ -63,7 +62,6 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, re
     const quoteData = { type: winProb >= 90 ? 'stomp' : (winProb >= 75 ? 'dominant' : 'narrow'), opponentId: loserId, resolutionTone };
     const quote = getVictoryQuote(winnerChar, quoteData);
 
-    // The template in narrative.js already has quotes, so we just insert the text.
     return template
         .replace(/{WinnerQuote}/g, quote)
         .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)

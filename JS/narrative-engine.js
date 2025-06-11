@@ -1,11 +1,24 @@
 'use strict';
 
-// This file has been corrected to import ALL necessary data.
 import { characters, locations, terrainTags, battleBeats } from './data/index.js';
+
+// --- HELPER FUNCTIONS ---
 
 function getRandomElement(array) {
     if (!array || array.length === 0) return '';
     return array[Math.floor(Math.random() * array.length)];
+}
+
+function toGerund(verb) {
+    if (!verb) return "";
+    if (verb.endsWith('e') && !['be', 'see', 'use'].includes(verb)) {
+        return verb.slice(0, -1) + 'ing';
+    }
+    const doubleConsonants = ['run', 'swim', 'cut', 'hit', 'pin', 'set', 'sit', 'propel', 'spin', 'turn', 'engulf', 'heat'];
+    if (doubleConsonants.includes(verb)) {
+        return verb + verb.slice(-1) + 'ing';
+    }
+    return verb + 'ing';
 }
 
 function getActionPhrase(character, isFinisher = false) {
@@ -13,14 +26,15 @@ function getActionPhrase(character, isFinisher = false) {
     if (isFinisher) {
         technique = character.techniques.find(t => t.finisher);
     }
-    // If no finisher is requested or found, get a random one.
     if (!technique) {
         technique = getRandomElement(character.techniques);
     }
     
-    if (!technique) return "made a standard move";
-    return `${technique.verb} ${technique.object} ${technique.method}`;
+    if (!technique) return "making a standard move";
+    return `${toGerund(technique.verb)} ${technique.object} ${technique.method}`;
 }
+
+// --- MAIN NARRATIVE GENERATOR ---
 
 export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     const { winnerId, loserId } = battleOutcome;
@@ -78,7 +92,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     story.push(finishingTemplate
         .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
         .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
-        .replace(/{actionPhrase}/g, getActionPhrase(winner, true)) // Request a finisher
+        .replace(/{actionPhrase}/g, getActionPhrase(winner, true))
     );
 
     return story.map(beat => `<p>${beat}</p>`).join('');
