@@ -1,6 +1,7 @@
 'use strict';
 
-import { characters, locations } from './data/index.js';
+import { characters } from './characters.js';
+import { locations } from './locations.js';
 
 export const DOM = {
     fighter1Select: document.getElementById('fighter1'),
@@ -57,12 +58,11 @@ export function displayOutcomeAnalysis(outcomeReasons, winnerId, loserId, f1Fina
     const f1Id = DOM.fighter1Select.value;
     const f2Id = DOM.fighter2Select.value;
     
-    const createListItem = (reasonText, modifier, fighterId = null) => {
+    const createListItem = (reasonText, modifier) => {
         const li = document.createElement('li');
         li.className = 'analysis-item';
         
         const spanReason = document.createElement('span');
-        // The reason text now correctly includes character-specific spans for color styling
         spanReason.innerHTML = reasonText; 
         
         const spanModifier = document.createElement('span');
@@ -81,21 +81,18 @@ export function displayOutcomeAnalysis(outcomeReasons, winnerId, loserId, f1Fina
         DOM.analysisList.appendChild(li);
     };
 
-    // Fighter 1 Breakdown - Using backticks for multi-line clarity
-    createListItem(`<b>${characters[f1Id]?.name || 'Fighter 1'}'s Score Breakdown</b>`, '', f1Id);
+    createListItem(`<b>${characters[f1Id]?.name || 'Fighter 1'}'s Score Breakdown</b>`, '');
     outcomeReasons.filter(r => r.fighterId === f1Id).forEach(reason => {
         createListItem(`  • ${reason.reason}`, reason.modifier);
     });
-    createListItem(`  • <b>Total Score</b>`, Math.round(f1FinalScore), f1Id);
+    createListItem(`  • <b>Total Score</b>`, Math.round(f1FinalScore));
 
-    // Fighter 2 Breakdown
-    createListItem(`<b>${characters[f2Id]?.name || 'Fighter 2'}'s Score Breakdown</b>`, '', f2Id);
+    createListItem(`<b>${characters[f2Id]?.name || 'Fighter 2'}'s Score Breakdown</b>`, '');
     outcomeReasons.filter(r => r.fighterId === f2Id).forEach(reason => {
         createListItem(`  • ${reason.reason}`, reason.modifier);
     });
-    createListItem(`  • <b>Total Score</b>`, Math.round(f2FinalScore), f2Id);
+    createListItem(`  • <b>Total Score</b>`, Math.round(f2FinalScore));
 
-    // Summary
     if (winnerId && loserId) {
         const winnerName = `<span class="char-${winnerId}">${characters[winnerId].name}</span>`;
         const loserName = `<span class="char-${loserId}">${characters[loserId].name}</span>`;
@@ -108,14 +105,13 @@ export function displayOutcomeAnalysis(outcomeReasons, winnerId, loserId, f1Fina
 
 
 export function showLoadingState() {
-    DOM.resultsSection.classList.remove('show'); // Hide results before showing loading
-    DOM.resultsSection.style.display = 'block'; // Ensure the container is visible
+    DOM.resultsSection.classList.remove('show');
+    DOM.resultsSection.style.display = 'block'; 
     DOM.loadingSpinner.classList.remove('hidden');
     DOM.battleResultsContainer.classList.add('hidden');
     DOM.battleBtn.disabled = true;
     DOM.vsDivider.classList.add('clash');
     
-    // Use a timeout to allow the initial state to render before scrolling and fading in
     setTimeout(() => {
         DOM.resultsSection.classList.add('show');
         DOM.resultsSection.scrollIntoView({ behavior: 'smooth' });
@@ -152,7 +148,6 @@ export function resetBattleUI() {
     DOM.fighter1Section.classList.remove('winner-highlight');
     DOM.fighter2Section.classList.remove('winner-highlight');
     DOM.resultsSection.classList.remove('show');
-    // Add a delay to allow the fade-out animation to complete before hiding it
     setTimeout(() => {
         if (!DOM.resultsSection.classList.contains('show')) {
             DOM.resultsSection.style.display = 'none';
