@@ -1,35 +1,30 @@
 'use strict';
 
 // This file contains the templates for building the play-by-play narrative.
+// The templates now explicitly request the verb form needed for grammatical accuracy.
 
 export const battleBeats = {
-    // The very first exchange of the fight
     opening: [
-        "{initiatorName} opened the fight, {actionPhrase}, forcing {responderName} to immediately {responsePhrase}.",
-        "The battle began as {initiatorName} {actionPhrase}, putting {responderName} on the defensive, who could only {responsePhrase}.",
-        "Without hesitation, {initiatorName} went on the offensive with {actionPhrase}. {responderName} quickly {responsePhrase} to counter."
+        "{initiatorName} opened the fight by {initiator_verb_ing} {initiator_object}, forcing {responderName} to immediately {responder_verb_base} {responder_object}.",
+        "The battle began as {initiatorName} {initiator_verb_past} {initiator_object}, putting {responderName} on the defensive, who could only {responder_verb_base} {responder_object}.",
+        "Without hesitation, {initiatorName} went on the offensive, {initiator_verb_ing} {initiator_object}. {responderName} quickly countered by {responder_verb_ing} {responder_object}."
     ],
-    // When the character with the advantage presses their attack
     advantage_attack: [
-        "Sensing an opportunity, {initiatorName} pressed the advantage, {actionPhrase}, leaving {responderName} scrambling to {responsePhrase}.",
-        "Dominating the flow of the battle, {initiatorName} relentlessly {actionPhrase}. {responderName} was forced to {responsePhrase}.",
-        "With momentum on their side, {initiatorName} {actionPhrase}. A desperate {responderName} could only {responsePhrase} in return."
+        "Sensing an opportunity, {initiatorName} pressed the advantage, {initiator_verb_ing} {initiator_object} and leaving {responderName} scrambling to {responder_verb_base} {responder_object}.",
+        "Dominating the flow, {initiatorName} relentlessly {initiator_verb_past} {initiator_object}. {responderName} was forced to {responder_verb_base} {responder_object}.",
+        "With momentum on their side, {initiatorName} {initiator_verb_past} {initiator_object}. A desperate {responderName} could only respond by {responder_verb_ing} {responder_object}."
     ],
-    // When the character with the disadvantage tries to fight back
     disadvantage_attack: [
-        "Fighting from behind, {initiatorName} looked for an opening and {actionPhrase}, but {responderName} easily {responsePhrase}.",
-        "Trying to turn the tide, {initiatorName} gambled with {actionPhrase}. The attempt was deftly handled as {responderName} {responsePhrase}.",
-        "Despite being on the back foot, {initiatorName} {actionPhrase}. {responderName}, unfazed, simply {responsePhrase}."
+        "Fighting from a disadvantage, {initiatorName} tried to {initiator_verb_base} {initiator_object}, but {responderName} easily countered with a display of {responder_verb_ing} {responder_object}.",
+        "Trying to turn the tide, {initiatorName} gambled and {initiator_verb_past} {initiator_object}. The attempt was deftly handled as {responderName} {responder_verb_past} {responder_object} in response."
     ],
-    // A moment where the environment is used
     terrain_interaction: [
-        "Using the {locationFeature} to their advantage, {initiatorName} {actionPhrase}, forcing {responderName} to use the {locationTerrain} to {responsePhrase}.",
-        "The {locationTerrain} became a weapon for {initiatorName}, who {actionPhrase}. {responderName} had to adapt quickly and {responsePhrase}."
+        "Using the {locationFeature} to their advantage, {initiatorName} {initiator_verb_past} {initiator_object}, forcing {responderName} to use the {locationTerrain} to {responder_verb_base} {responder_object}.",
+        "The {locationTerrain} became a weapon for {initiatorName}, who {initiator_verb_past} {initiator_object}. {responderName} had to adapt quickly by {responder_verb_ing} {responder_object}."
     ],
-    // The final move of the battle
     finishing_move: [
-        "Seeing the end in sight, {winnerName} prepared the final blow. They {actionPhrase}, and {loserName} could not recover.",
-        "It all came down to one final moment. {winnerName} {actionPhrase}, sealing the victory against {loserName}.",
-        "The decisive moment arrived. With a final, powerful move, {winnerName} {actionPhrase}, ending the battle and leaving {loserName} defeated."
+        "Seeing the end in sight, {winnerName} prepared the final blow. They {winner_verb_past} {winner_object}, and {loserName} could not recover.",
+        "It all came down to one final moment. {winnerName} {winner_verb_past} {winner_object}, sealing the victory against {loserName}.",
+        "The decisive moment arrived. With a final, powerful move, {winnerName} {winner_verb_past} {winner_object}, ending the battle and leaving {loserName} defeated."
     ]
 };
