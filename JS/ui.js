@@ -75,16 +75,17 @@ function displayFinalAnalysis(finalState, winnerId) {
     };
 
     createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
-    createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
-    createListItem(`  • Energy:`, `${Math.round(winner.energy)} / 100`);
+    createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
+    createListItem(`  • Energy:`, `${Math.round(winner.energy)} / 100`);
 
     const spacer = document.createElement('li');
     spacer.className = 'analysis-item-spacer';
+    spacer.innerHTML = ' ';
     DOM.analysisList.appendChild(spacer);
 
     createListItem(`<b>${loser.name}'s Final Status:</b>`, 'DEFEATED', 'modifier-minus');
-    createListItem(`  • Health:`, `${Math.round(loser.hp)} / 100 HP`);
-    createListItem(`  • Energy:`, `${Math.round(loser.energy)} / 100`);
+    createListItem(`  • Health:`, `${Math.round(loser.hp)} / 100 HP`);
+    createListItem(`  • Energy:`, `${Math.round(loser.energy)} / 100`);
 }
 
 

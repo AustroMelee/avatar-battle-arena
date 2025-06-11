@@ -8,6 +8,18 @@ import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhr
 const getRandomElement = (arr, fallback = null) => (!arr || arr.length === 0) ? fallback : arr[Math.floor(Math.random() * arr.length)];
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
+// Weighted random selection helper
+function getWeightedRandom(items) {
+    if (!items || items.length === 0) return null;
+    const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+    let random = Math.random() * totalWeight;
+    for (const item of items) {
+        random -= item.weight;
+        if (random <= 0) return item.move;
+    }
+    return items[items.length - 1].move;
+}
+
 // --- GRAMMAR & NARRATIVE SUB-SYSTEM ---
 function conjugateVerb(verb) {
     if (!verb) return '';
@@ -79,12 +91,13 @@ export function simulateBattle(f1Id, f2Id, locId) {
     let turnLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
+    const maxTurns = 6;
 
-    for (let turn = 0; turn < 6; turn++) {
+    for (let turn = 0; turn < maxTurns; turn++) {
         let phaseContent = phaseTemplates.header.replace('{phaseName}', battlePhases[turn].name).replace('{phaseEmoji}', battlePhases[turn].emoji);
         
         // --- Initiator's Turn ---
-        const initiatorMove = selectMove(initiator);
+        const initiatorMove = selectMove(initiator, turn, maxTurns);
         const initiatorResult = calculateMove(initiatorMove, initiator, responder, locTags);
         phaseContent += narrateMove(initiator, responder, initiatorMove, initiatorResult, turnLog);
         responder.hp = clamp(responder.hp - initiatorResult.damage, 0, 100);
@@ -99,7 +112,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
         }
 
         // --- Responder's Turn ---
-        const responderMove = selectMove(responder);
+        const responderMove = selectMove(responder, turn, maxTurns);
         const responderResult = calculateMove(responderMove, responder, initiator, locTags);
         phaseContent += narrateMove(responder, initiator, responderMove, responderResult, turnLog);
         initiator.hp = clamp(initiator.hp - responderResult.damage, 0, 100);
@@ -129,28 +142,40 @@ export function simulateBattle(f1Id, f2Id, locId) {
 }
 
 // --- MOVE AI & CALCULATION ---
-function selectMove(actor) {
+function selectMove(actor, turn, maxTurns) {
     let suitableMoves = actor.techniques.filter(m => !actor.movesUsed.has(m.name) || actor.movesUsed.size > actor.techniques.length - 2);
     if (suitableMoves.length === 0) {
-        actor.movesUsed.clear(); // Reset if all moves are used
+        actor.movesUsed.clear(); 
         suitableMoves = actor.techniques;
     }
 
-    if (actor.hp < 25 && actor.energy > 40) {
-        const finishers = suitableMoves.filter(m => m.type === 'Finisher');
-        if (finishers.length > 0) return getRandomElement(finishers);
-    }
-    
-    if (actor.hp < 40 && actor.energy > 20) {
-        const defenses = suitableMoves.filter(m => m.type === 'Defense');
-        if (defenses.length > 0) return getRandomElement(defenses);
-    }
-    
-    const offenses = suitableMoves.filter(m => m.type === 'Offense' && m.type !== 'Finisher');
-    if (offenses.length > 0) return getRandomElement(offenses);
+    const recentMoves = Array.from(actor.movesUsed).slice(-2);
+    let weightedMoves = suitableMoves.map(m => ({
+        move: m,
+        weight: recentMoves.includes(m.name) ? 0.5 : 1
+    }));
 
-    return getRandomElement(actor.techniques.filter(m => m.type !== 'Finisher'));
+    const finishers = weightedMoves.filter(m => m.move.type === 'Finisher');
+    if (turn === maxTurns - 1 && finishers.length > 0 && actor.energy > 20) {
+        return getRandomElement(finishers).move;
+    }
+    if (actor.hp < 25 && actor.energy > 40 && finishers.length > 0) {
+        return getRandomElement(finishers).move;
+    }
+    
+    const defenses = weightedMoves.filter(m => m.move.type === 'Defense');
+    if (actor.hp < 40 && actor.energy > 20 && defenses.length > 0) {
+        return getWeightedRandom(defenses);
+    }
+    
+    const offenses = weightedMoves.filter(m => m.move.type === 'Offense' && m.move.type !== 'Finisher');
+    if (offenses.length > 0) {
+        return getWeightedRandom(offenses);
+    }
+
+    return getWeightedRandom(weightedMoves.filter(m => m.move.type !== 'Finisher')) || getWeightedRandom(weightedMoves);
 }
+
 
 function calculateMove(move, attacker, defender, locTags) {
     let basePower = move.power || 30;
@@ -188,7 +213,15 @@ function narrateMove(actor, target, move, result, turnLog) {
     if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = target.lastMove?.type === 'Offense';
         const impactTemplates = isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
-        const description = (isReactive ? `Reacting quickly, ${actorSpan} uses the ${move.name} to intercept ${targetSpan}'s assault. ` : `${actorSpan} takes a moment to prepare. `) + getRandomElement(impactTemplates).replace(/{actorName}/g, actorSpan);
+        
+        const prefixPool = isReactive 
+            ? ["Reacting quickly,", "Seizing the moment,", "With swift reflexes,", "Countering instantly,"] 
+            : ["Preparing carefully,", "Taking a moment to strategize,", "Steadying their stance,"];
+        const prefix = getRandomElement(prefixPool.filter(p => !actor.lastPrefixes.includes(p))) || getRandomElement(prefixPool);
+        actor.lastPrefixes.push(prefix);
+        if (actor.lastPrefixes.length > 3) actor.lastPrefixes.shift();
+        
+        const description = `${prefix} ${actorSpan} uses the ${move.name}. ` + getRandomElement(impactTemplates).replace(/{actorName}/g, actorSpan);
         const label = isReactive ? "Counter" : "Set-up";
         return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{effectivenessLabel}/g, label).replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
     }
@@ -217,10 +250,9 @@ function narrateMove(actor, target, move, result, turnLog) {
 
     function pronounOrName(prefix, span, actorData) {
         const pronoun = actorData.pronouns.s;
-        if (!prefix) { // If there's no prefix, start of sentence.
+        if (!prefix) {
             return Math.random() > 0.5 ? span : (pronoun.charAt(0).toUpperCase() + pronoun.slice(1));
         }
-        // If there is a prefix, it's mid-sentence.
         return Math.random() > 0.5 ? span : pronoun;
     }
     
