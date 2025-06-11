@@ -20,15 +20,19 @@ function handleBattleStart() {
     resetBattleUI();
     showLoadingState();
 
+    // Simulate network delay and calculation time
     setTimeout(() => {
         try {
+            // This object contains all calculated outcomes, including probabilities, winner/loser, and reasons.
             const battleOutcome = calculateWinProbability(f1Id, f2Id, locId);
             
-            // This function call now matches the new, correct definition
+            // The story is generated using the context from the battle outcome.
             const story = generateBattleStory(f1Id, f2Id, locId, battleOutcome);
             
+            // Attach the generated story to the outcome object to pass to the UI.
             battleOutcome.story = story;
 
+            // Display the final results.
             showResultsState(battleOutcome);
 
         } catch (error) {

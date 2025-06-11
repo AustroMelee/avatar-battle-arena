@@ -17,7 +17,7 @@
             <div class="fighter-section" id="fighter1-section">
                 <h2 class="fighter-title" id="fighter1-name-display">Fighter 1</h2>
                 <div class="select-group">
-                    <label class="select-label" id="fighter1-label" for="fighter1">Select Character</label>
+                    <label class="select-label hidden" id="fighter1-label" for="fighter1">Select Character</label>
                     <div class="select-wrapper">
                         <select id="fighter1">
                             <option value="">Choose a fighter...</option>
@@ -31,7 +31,7 @@
             <div class="fighter-section" id="fighter2-section">
                 <h2 class="fighter-title" id="fighter2-name-display">Fighter 2</h2>
                 <div class="select-group">
-                    <label class="select-label" id="fighter2-label" for="fighter2">Select Character</label>
+                    <label class="select-label hidden" id="fighter2-label" for="fighter2">Select Character</label>
                     <div class="select-wrapper">
                         <select id="fighter2">
                             <option value="">Choose a fighter...</option>
@@ -54,7 +54,7 @@
 
         <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
 
-        <section class="results-section" id="results">
+        <section class="results-section" id="results" style="display: none;">
             <div class="loading hidden" id="loading">
                 <div class="spinner"></div>
                 <p>The elements clash... calculating outcome...</p>

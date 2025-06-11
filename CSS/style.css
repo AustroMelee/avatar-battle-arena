@@ -28,6 +28,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
@@ -37,7 +41,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 2rem;
 }
@@ -46,20 +50,21 @@ body {
 .header {
     text-align: center;
     margin-bottom: 3rem;
-    padding: 2rem 0;
-    border-bottom: 2px solid #2d3748;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--surface-border);
 }
 
 .title {
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 800;
     background: linear-gradient(45deg, var(--accent-1), var(--accent-2), var(--accent-3));
     background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-fill-color: transparent;
     animation: gradientShift 3s ease-in-out infinite;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 @keyframes gradientShift {
@@ -68,7 +73,7 @@ body {
 }
 
 .subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--text-secondary);
     font-weight: 300;
 }
@@ -77,17 +82,17 @@ body {
 .battle-setup {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
-    gap: 3rem;
+    gap: 2rem;
     align-items: start;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 .fighter-section {
     background: var(--surface-bg);
     backdrop-filter: blur(10px);
     border: 1px solid var(--surface-border);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 12px;
+    padding: 1.5rem;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -96,7 +101,7 @@ body {
 
 .fighter-section:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px var(--surface-shadow);
+    box-shadow: 0 15px 30px var(--surface-shadow);
 }
 
 .fighter-title {
@@ -104,13 +109,14 @@ body {
     font-weight: 600;
     margin-bottom: 1.5rem;
     text-align: center;
-    color: var(--accent-1);
+    color: var(--text-primary);
     min-height: 1.5em;
+    transition: color 0.3s ease;
 }
 
-.fighter-section:last-child .fighter-title {
-    color: var(--accent-2);
-}
+#fighter1-section .fighter-title { color: var(--accent-1); }
+#fighter2-section .fighter-title { color: var(--accent-2); }
+
 
 /* VS Divider */
 .vs-divider {
@@ -118,17 +124,18 @@ body {
     align-items: center;
     justify-content: center;
     padding-top: 4rem;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 900;
     color: var(--accent-gold);
-    text-shadow: 0 0 20px rgba(255, 217, 61, 0.5);
+    text-shadow: 0 0 15px rgba(255, 217, 61, 0.5);
+    transition: all 0.3s ease-out;
     animation: pulse 2s ease-in-out infinite;
 }
 
 .vs-divider.clash {
     animation: clashPulse 0.5s ease-out;
     color: var(--accent-red);
-    text-shadow: 0 0 30px rgba(255, 61, 61, 0.8);
+    text-shadow: 0 0 25px rgba(255, 61, 61, 0.8);
 }
 
 @keyframes pulse {
@@ -138,21 +145,28 @@ body {
 
 @keyframes clashPulse {
     0% { transform: scale(1); color: var(--accent-gold); }
-    50% { transform: scale(1.2); color: var(--accent-red); }
+    50% { transform: scale(1.3); color: var(--accent-red); }
     100% { transform: scale(1); color: var(--accent-gold); }
 }
 
 /* Select Dropdowns */
 .select-group {
-    margin-bottom: 2rem;
+    position: relative;
     width: 100%;
 }
 
 .select-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--text-tertiary);
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.select-label.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
 .select-wrapper {
@@ -164,14 +178,14 @@ select {
     width: 100%;
     padding: 1rem;
     background: var(--input-bg);
-    border: 2px solid var(--surface-border);
-    border-radius: 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
     color: var(--text-primary);
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
 }
 
 select:focus {
@@ -199,53 +213,55 @@ select:hover {
     background: var(--surface-bg);
     backdrop-filter: blur(10px);
     border: 1px solid var(--surface-border);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 3rem;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
     text-align: center;
 }
 
 .location-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     color: var(--accent-gold);
 }
 
 /* Battle Button */
 .battle-button {
     display: block;
-    width: 300px;
-    margin: 3rem auto;
-    padding: 1.5rem 3rem;
+    width: 100%;
+    max-width: 300px;
+    margin: 2rem auto;
+    padding: 1.2rem 2.5rem;
     background: linear-gradient(45deg, var(--accent-1), var(--accent-2));
     background-size: 200% 200%;
     border: none;
     border-radius: 50px;
     color: white;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 10px 30px var(--surface-shadow);
+    box-shadow: 0 8px 25px var(--surface-shadow);
     animation: gradientShift 3s ease-in-out infinite;
 }
 
-.battle-button:hover {
+.battle-button:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 20px 40px var(--surface-shadow-hover);
+    box-shadow: 0 15px 30px var(--surface-shadow-hover);
 }
 
-.battle-button:active {
+.battle-button:active:not(:disabled) {
     transform: translateY(-1px);
 }
 
 .battle-button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    background: var(--text-secondary);
+    animation: none;
 }
 
 /* Results Section */
@@ -253,24 +269,24 @@ select:hover {
     background: var(--surface-bg);
     backdrop-filter: blur(10px);
     border: 1px solid var(--surface-border);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 12px;
+    padding: 2.5rem;
     margin-top: 3rem;
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.5s ease;
-    display: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .results-section.show {
     opacity: 1;
     transform: translateY(0);
-    display: block;
 }
 
 .winner-announcement {
     text-align: center;
     margin-bottom: 2rem;
+    border-bottom: 1px solid var(--surface-border);
+    padding-bottom: 2rem;
 }
 
 .winner-name {
@@ -280,53 +296,62 @@ select:hover {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-fill-color: transparent;
     margin-bottom: 0.5rem;
 }
 
 .win-probability {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--text-secondary);
-    margin-bottom: 2rem;
 }
 
 .battle-story {
-    line-height: 1.8;
+    line-height: 1.7;
     font-size: 1.1rem;
     color: var(--text-tertiary);
     text-align: left;
-    max-width: 800px;
-    margin: 0 auto 2rem;
+    max-width: 80ch;
+    margin: 2rem auto;
+}
+
+.battle-story p {
+    margin-bottom: 1rem;
 }
 
 /* Outcome Analysis */
 .outcome-analysis {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     padding: 1.5rem;
-    margin-top: 2rem;
+    margin-top: 2.5rem;
 }
 
 .analysis-title {
     font-size: 1.4rem;
     font-weight: 600;
     color: var(--accent-2);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     text-align: center;
+    border-bottom: 1px solid var(--surface-border);
+    padding-bottom: 1rem;
 }
 
 .analysis-list {
     list-style: none;
-    padding: 0;
-    margin: 0;
 }
 
 .analysis-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-size: 1rem;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease;
+}
+.analysis-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 .analysis-item:last-child {
@@ -335,72 +360,81 @@ select:hover {
 
 .analysis-item span:first-child {
     color: var(--text-tertiary);
+    flex-grow: 1;
+    padding-right: 1rem;
 }
+.analysis-item span:first-child b {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 
 .analysis-item span:last-child {
-    font-weight: bold;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 50px;
+    text-align: right;
 }
 
-.analysis-item .modifier-plus {
-    color: var(--modifier-plus);
-}
-
-.analysis-item .modifier-minus {
-    color: var(--modifier-minus);
-}
-
-.analysis-item .modifier-neutral {
-    color: var(--modifier-neutral);
-}
+.analysis-item .modifier-plus { color: var(--modifier-plus); }
+.analysis-item .modifier-minus { color: var(--modifier-minus); }
+.analysis-item .modifier-neutral { color: var(--modifier-neutral); }
 
 /* Loading state */
 .loading {
     text-align: center;
-    padding: 2rem;
+    padding: 4rem 2rem;
 }
 
 .spinner {
     width: 50px;
     height: 50px;
     border: 4px solid var(--surface-border);
-    border-left: 4px solid var(--accent-3);
+    border-left-color: var(--accent-3);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
+    margin: 0 auto 1.5rem;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
 }
 
 /* Winner Highlight */
 .fighter-section.winner-highlight {
     border-color: var(--accent-gold);
-    box-shadow: 0 0 30px rgba(255, 217, 61, 0.6), 0 0 15px rgba(255, 217, 61, 0.4);
+    box-shadow: 0 0 25px rgba(255, 217, 61, 0.3), 0 0 10px rgba(255, 217, 61, 0.2);
     animation: winnerGlow 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes winnerGlow {
-    0% { box-shadow: 0 0 15px rgba(255, 217, 61, 0.4); }
-    100% { box-shadow: 0 0 30px rgba(255, 217, 61, 0.6), 0 0 15px rgba(255, 217, 61, 0.4); }
+    from { box-shadow: 0 0 10px rgba(255, 217, 61, 0.2); }
+    to { box-shadow: 0 0 25px rgba(255, 217, 61, 0.4), 0 0 10px rgba(255, 217, 61, 0.2); }
 }
 
 /* Utility classes */
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
     .battle-setup {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .vs-divider {
         transform: rotate(90deg);
-        font-size: 2rem;
+        font-size: 1.8rem;
         padding-top: 0;
         margin: -1rem 0;
     }
@@ -408,24 +442,23 @@ select:hover {
     .title {
         font-size: 2.5rem;
     }
-
-    .battle-button {
-        width: 100%;
-        max-width: 300px;
+    
+    .results-section {
+        padding: 1.5rem;
     }
 }
 
 /* Character-specific colors for text in breakdowns */
-.char-sokka { color: #a4d2f7; }
-.char-aang-airbending-only { color: #8aff8a; }
-.char-katara { color: #87ceeb; }
-.char-toph-beifong { color: #b7a476; }
-.char-zuko { color: #ff9966; }
-.char-azula { color: #9933ff; }
-.char-ozai-not-comet-enhanced { color: #ff0000; }
-.char-bumi { color: #ffd700; }
-.char-ty-lee { color: #ffccff; }
-.char-mai { color: #cccccc; }
-.char-iroh { color: #66cc66; }
-.char-pakku { color: #add8e6; }
-.char-jeong-jeong { color: #cc6666; }
+.char-sokka { color: #a4d2f7; font-weight: bold; }
+.char-aang-airbending-only { color: #8aff8a; font-weight: bold; }
+.char-katara { color: #87ceeb; font-weight: bold; }
+.char-toph-beifong { color: #b7a476; font-weight: bold; }
+.char-zuko { color: #ff9966; font-weight: bold; }
+.char-azula { color: #9933ff; font-weight: bold; }
+.char-ozai-not-comet-enhanced { color: #ff4d4d; font-weight: bold; }
+.char-bumi { color: #ffd700; font-weight: bold; }
+.char-ty-lee { color: #ffccff; font-weight: bold; }
+.char-mai { color: #cccccc; font-weight: bold; }
+.char-iroh { color: #66cc66; font-weight: bold; }
+.char-pakku { color: #add8e6; font-weight: bold; }
+.char-jeong-jeong { color: #cc6666; font-weight: bold; }
