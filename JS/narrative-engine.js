@@ -1,10 +1,13 @@
 'use strict';
 
-import { characters, locations, terrainTags, battleBeats } from './data/index.js';
+// DIRECT IMPORTS - This is the critical change.
+import { characters } from './characters.js';
+import { locations, terrainTags } from './locations.js';
+import { battleBeats } from './narrative-data.js';
 
 // --- GRAMMAR HELPERS ---
 
-function toGerund(verb = '') { // -ing form
+function toGerund(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
     if (verb.endsWith('e') && !['be', 'see', 'use', 'dodge'].includes(verb)) return verb.slice(0, -1) + 'ing';
@@ -13,7 +16,7 @@ function toGerund(verb = '') { // -ing form
     return verb + 'ing';
 }
 
-function toPastTense(verb = '') { // -ed form (simplified for this project)
+function toPastTense(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
     if (verb.endsWith('e')) return verb + 'd';
@@ -33,7 +36,7 @@ function getRandomElement(array) {
 // --- MAIN NARRATIVE GENERATOR ---
 
 export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
-    const { winnerId, loserId, victoryType } = battleOutcome;
+    const { winnerId, loserId } = battleOutcome;
     const f1 = characters[f1Id], f2 = characters[f2Id], loc = locations[locId];
     const winner = characters[winnerId], loser = characters[loserId];
 
@@ -44,19 +47,15 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const initiatorTech = (initiator.id === winner.id) ? winnerTech : loserTech;
         const responderTech = (responder.id === winner.id) ? winnerTech : loserTech;
 
-        // Find a specific finishing move from the winner's techniques
         const finisherTech = getRandomElement(winner.techniques.filter(t => t.finisher)) || getRandomElement(winner.techniques) || { verb: 'strike', object: 'out', method: ''};
 
-        // This function now populates all pronouns and grammatical variations.
         return template
-            // Names & Locations
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)
             .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
             .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
             .replace(/{locationFeature}/g, loc.featureA)
             .replace(/{locationTerrain}/g, loc.terrain)
-            // Initiator Pronouns & Verbs
             .replace(/{initiatorPronounS}/g, initiator.pronouns.s)
             .replace(/{initiatorPronounO}/g, initiator.pronouns.o)
             .replace(/{initiatorPronounP}/g, initiator.pronouns.p)
@@ -64,7 +63,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech.verb))
             .replace(/{initiator_verb_base}/g, initiatorTech.verb.toLowerCase())
             .replace(/{initiator_object}/g, initiatorTech.object || '')
-            // Responder Pronouns & Verbs
             .replace(/{responderPronounS}/g, responder.pronouns.s)
             .replace(/{responderPronounO}/g, responder.pronouns.o)
             .replace(/{responderPronounP}/g, responder.pronouns.p)
@@ -72,7 +70,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{responder_verb_past}/g, toPastTense(responderTech.verb))
             .replace(/{responder_verb_base}/g, responderTech.verb.toLowerCase())
             .replace(/{responder_object}/g, responderTech.object || '')
-            // Finisher - Use the pre-written, vivid description
             .replace(/{winnerFinisherDescription}/g, getRandomElement(finisherTech.finalFlavor) || `delivered a final, decisive blow.`);
     };
     
@@ -84,30 +81,23 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         loserTech: getRandomElement(loser.techniques) || { verb: 'defend', object: 'desperately' }
     };
 
-    // BEAT 1: Opening
     const openingInitiator = (f1.powerTier >= f2.powerTier) ? f1 : f2;
     const openingResponder = (openingInitiator.id === f1.id) ? f2 : f1;
     story.push(populateBeat(getRandomElement(battleBeats.opening), openingInitiator, openingResponder, context));
 
-    // BEAT 2: Winner's Advantage
     story.push(populateBeat(getRandomElement(battleBeats.advantage_attack), winner, loser, context));
     
-    // BEAT 3: Loser's Counter-Attempt
     const locTags = terrainTags[locId] || [];
     const winnerTerrainAdvantage = winner.strengths.some(s => locTags.includes(s));
     let midBeatTemplate;
     if (winnerTerrainAdvantage && Math.random() > 0.5) {
         midBeatTemplate = getRandomElement(battleBeats.terrain_interaction);
-        // Ensure winner is the initiator for terrain advantage beat
         story.push(populateBeat(midBeatTemplate, winner, loser, context));
     } else {
         midBeatTemplate = getRandomElement(battleBeats.disadvantage_attack);
-        // Loser initiates a counter-attack
         story.push(populateBeat(midBeatTemplate, loser, winner, context));
     }
 
-    // BEAT 4: Finishing Move (OVERHAULED)
-    // This beat now uses a special placeholder that gets filled with a character-specific, high-impact description.
     story.push(populateBeat(getRandomElement(battleBeats.finishing_move), winner, loser, context));
 
     return story.map(beat => `<p>${beat}</p>`).join('');

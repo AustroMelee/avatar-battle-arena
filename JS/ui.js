@@ -1,5 +1,6 @@
 'use strict';
 
+// DIRECT IMPORTS - This is correct.
 import { characters } from './characters.js';
 import { locations } from './locations.js';
 
