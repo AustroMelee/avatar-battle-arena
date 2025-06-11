@@ -4,6 +4,22 @@ import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
 import { battleBeats } from './narrative-data.js';
 
+// --- THE LINGUISTIC INJECTION CONTROLLER ---
+function assembleObjectPhrase(technique) {
+    if (!technique || !technique.object) {
+        return ''; // Handles null objects gracefully
+    }
+
+    if (technique.requiresArticle) {
+        const firstLetter = technique.object.charAt(0).toLowerCase();
+        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
+        return `${article} ${technique.object}`;
+    }
+
+    // If no article is required, return the object as is.
+    return technique.object;
+}
+
 function getUniqueTechnique(character, usedTechniques) {
     const availableTechniques = character.techniques.filter(t => !usedTechniques.has(t.verb));
     if (availableTechniques.length > 0) {
@@ -22,7 +38,6 @@ function toGerund(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
     if (verb.endsWith('e') && !['be', 'see', 'use', 'dodge', 'freeze'].includes(verb)) return verb.slice(0, -1) + 'ing';
-    // FIX: Expanded the list to include 'control' and other verbs.
     const double = ['run', 'swim', 'cut', 'hit', 'pin', 'set', 'sit', 'propel', 'spin', 'turn', 'engulf', 'heat', 'jab', 'slip', 'control', 'wield'];
     if (double.includes(verb)) return verb + verb.slice(-1) + 'ing';
     return verb + 'ing';
@@ -67,6 +82,10 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const initiatorPronounSCap = initiator.pronouns.s.charAt(0).toUpperCase() + initiator.pronouns.s.slice(1);
         const responderPronounSCap = responder.pronouns.s.charAt(0).toUpperCase() + responder.pronouns.s.slice(1);
 
+        // Use the controller to build the phrases
+        const initiatorObjectPhrase = assembleObjectPhrase(initiatorTech);
+        const responderObjectPhrase = assembleObjectPhrase(responderTech);
+
         return template
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)
@@ -79,7 +98,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech?.verb || ''))
             .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech?.verb || ''))
             .replace(/{initiator_verb_base}/g, (initiatorTech?.verb || '').toLowerCase())
-            .replace(/{initiator_object}/g, initiatorTech?.object || '')
+            .replace(/{initiator_object_phrase}/g, initiatorObjectPhrase) // Use the controlled phrase
             .replace(/{responderPronounS}/g, responder.pronouns.s)
             .replace(/{responderPronounSCap}/g, responderPronounSCap)
             .replace(/{responderPronounO}/g, responder.pronouns.o)
@@ -87,11 +106,10 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{responder_verb_ing}/g, toGerund(responderTech?.verb || ''))
             .replace(/{responder_verb_past}/g, toPastTense(responderTech?.verb || ''))
             .replace(/{responder_verb_base}/g, (responderTech?.verb || '').toLowerCase())
-            .replace(/{responder_object}/g, responderTech?.object || '')
+            .replace(/{responder_object_phrase}/g, responderObjectPhrase) // Use the controlled phrase
             .replace(/{winnerFinisherDescription}/g, finisherDescription);
     };
     
-    // --- OPENING BEAT ---
     const openingInitiator = (f1.powerTier >= f2.powerTier) ? f1 : f2;
     const openingResponder = (openingInitiator.id === f1.id) ? f2 : f1;
     const openingContext = {
@@ -101,7 +119,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     };
     story.push(populateBeat(getRandomElement(battleBeats.opening), openingInitiator, openingResponder, openingContext));
 
-    // --- ADVANTAGE BEAT ---
     const advantageContext = {
         winner, loser, loc,
         initiatorTech: getUniqueTechnique(winner, usedTechniques),
@@ -109,13 +126,10 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     };
     story.push(populateBeat(getRandomElement(battleBeats.advantage_attack), winner, loser, advantageContext));
     
-    // --- FIX: REFACTORED MID-BEAT LOGIC ---
     const locTags = terrainTags[locId] || [];
     const winnerTerrainAdvantage = winner.strengths.some(s => locTags.includes(s));
     
-    // Decide which type of mid-beat to use
     if (winnerTerrainAdvantage && Math.random() > 0.5) {
-        // Terrain Interaction Beat: Winner is the initiator
         const context = {
             winner, loser, loc,
             initiatorTech: getUniqueTechnique(winner, usedTechniques),
@@ -123,7 +137,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         };
         story.push(populateBeat(getRandomElement(battleBeats.terrain_interaction), winner, loser, context));
     } else {
-        // Disadvantage Attack Beat: Loser is the initiator
         const context = {
             winner, loser, loc,
             initiatorTech: getUniqueTechnique(loser, usedTechniques),
@@ -132,8 +145,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         story.push(populateBeat(getRandomElement(battleBeats.disadvantage_attack), loser, winner, context));
     }
 
-    // --- FINISHING BEAT ---
-    const defaultTech = { verb: '', object: '' };
+    const defaultTech = { verb: '', object: '', requiresArticle: false };
     const finishingContext = { winner, loser, loc, initiatorTech: defaultTech, responderTech: defaultTech };
     story.push(populateBeat(getRandomElement(battleBeats.finishing_move), winner, loser, finishingContext));
 

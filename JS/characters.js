@@ -5,13 +5,12 @@ export const characters = {
         id: 'sokka', name: "Sokka", type: "Nonbender", bendingTypes: ["Non-Bending"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "strategic non-bending", role: "tactician", tone: "improvisational_ironic", victoryStyle: "Madcap", powerTier: 3,
         techniques: [
-            // FIX: Removed leading 'a'
-            {verb: "hurl", object: "smoke pellet"},
-            {verb: "launch", object: "his trusty boomerang"},
-            {verb: "devise", object: "clever trap"},
-            {verb: "lunge", object: "forward with his meteorite sword"},
-            {verb: "attempt", object: "tactical feint"},
-            {verb: "set", object: "complex tripwire trap", finisher: true, finalFlavor: ["With a triumphant yelp, Sokka pulled a rope, and his opponent was suddenly hoisted into the air, caught in a masterfully constructed snare.", "Sokka's planning paid off as his foe stumbled into a cleverly disguised pitfall trap, ending the confrontation with a thud and a groan."]},
+            {verb: "hurl", object: "smoke pellet", requiresArticle: true},
+            {verb: "launch", object: "his trusty boomerang", requiresArticle: false},
+            {verb: "devise", object: "clever trap", requiresArticle: true},
+            {verb: "lunge", object: "forward with his meteorite sword", requiresArticle: false},
+            {verb: "attempt", object: "tactical feint", requiresArticle: true},
+            {verb: "set", object: "complex tripwire trap", finisher: true, requiresArticle: true, finalFlavor: ["With a triumphant yelp, Sokka pulled a rope, and his opponent was suddenly hoisted into the air, caught in a masterfully constructed snare.", "Sokka's planning paid off as his foe stumbled into a cleverly disguised pitfall trap, ending the confrontation with a thud and a groan."]},
         ], 
         strengths: ["Master Strategist", "Innovative Tactician", "Resourceful", "Adaptable", "open", "cover_rich", "urban", "dense"], 
         weaknesses: ["Vulnerable to Direct Bending Attacks", "Reliance on Equipment", "Physically Average", "exposed", "slippery", "hot", "cold"], 
@@ -35,12 +34,12 @@ export const characters = {
         id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", bendingTypes: ["Air"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "evasive airbending", role: "evader", tone: "pacifistic_agile", victoryStyle: "Pacifist", powerTier: 9,
         techniques: [
-            {verb: "create", object: "powerful air scooter"}, 
-            {verb: "form", object: "massive tornado"}, 
-            {verb: "unleash", object: "focused blast of air"}, 
-            {verb: "ride", object: "the winds"}, 
-            {verb: "weave", object: "through the air"},
-            {verb: "launch", object: "his opponent", finisher: true, finalFlavor: ["With a focused gust of wind, Aang swept his foe off their feet, depositing them safely but firmly outside the ring.", "Aang created a swirling vortex of air, lifting his opponent and gently setting them down, disarmed and defeated."]}
+            {verb: "create", object: "powerful air scooter", requiresArticle: true}, 
+            {verb: "form", object: "massive tornado", requiresArticle: true}, 
+            {verb: "unleash", object: "focused blast of air", requiresArticle: true}, 
+            {verb: "ride", object: "the winds", requiresArticle: false}, 
+            {verb: "weave", object: "through the air", requiresArticle: false},
+            {verb: "launch", object: "his opponent", finisher: true, requiresArticle: false, finalFlavor: ["With a focused gust of wind, Aang swept his foe off their feet, depositing them safely but firmly outside the ring.", "Aang created a swirling vortex of air, lifting his opponent and gently setting them down, disarmed and defeated."]}
         ], 
         strengths: ["Unrivaled Evasiveness", "Exceptional Mobility", "Pacifistic", "open", "vertical", "air_rich", "high_altitude"], 
         weaknesses: ["Aversion to Lethal Force", "Direct Confrontation", "Vulnerable to Ground Traps", "cramped", "dense", "sandy", "low_visibility"], 
@@ -61,12 +60,12 @@ export const characters = {
         id: 'katara', name: "Katara", type: "Bender", bendingTypes: ["Water", "Healing"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
         style: "masterful waterbending", role: "versatile_control", tone: "fierce_compassionate", victoryStyle: "Fierce", powerTier: 7,
         techniques: [
-            {verb: "launch", object: "barrage of ice daggers"}, 
-            {verb: "create", object: "massive wave"}, 
-            {verb: "envelop", object: "her foe in a watery sphere"}, 
-            {verb: "manipulate", object: "nearby vines with plantbending"}, 
-            {verb: "pull", object: "moisture from the air"},
-            {verb: "freeze", object: "her opponent's limbs", finisher: true, finalFlavor: ["Katara sent a powerful wave crashing down, and as the water receded, her opponent was left encased in a prison of solid, unyielding ice.", "With a sharp, determined gesture, Katara froze the ground around her opponent's feet, then sent tendrils of ice snaking up their body, immobilizing them completely."]}
+            {verb: "launch", object: "barrage of ice daggers", requiresArticle: true}, 
+            {verb: "create", object: "massive wave", requiresArticle: true}, 
+            {verb: "envelop", object: "her foe in a watery sphere", requiresArticle: false}, 
+            {verb: "manipulate", object: "nearby vines with plantbending", requiresArticle: false}, 
+            {verb: "pull", object: "moisture from the air", requiresArticle: false},
+            {verb: "freeze", object: "her opponent's limbs", finisher: true, requiresArticle: false, finalFlavor: ["Katara sent a powerful wave crashing down, and as the water receded, her opponent was left encased in a prison of solid, unyielding ice.", "With a sharp, determined gesture, Katara froze the ground around her opponent's feet, then sent tendrils of ice snaking up their body, immobilizing them completely."]}
         ], 
         strengths: ["Prodigious Bending Talent", "Exceptional Healing", "Fierce Determination", "water_rich", "ice_rich", "plants_rich", "cover_rich", "slippery"], 
         weaknesses: ["Emotional Volatility", "Limited Hand-to-Hand Combat", "Reliance on Water Source", "hot", "exposed", "sandy", "dry"], 
@@ -86,12 +85,12 @@ export const characters = {
         id: 'toph-beifong', name: "Toph", type: "Bender", bendingTypes: ["Earth", "Metal", "Sand"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
         style: "unrelenting earthbending", role: "tank_disabler", tone: "cocky_theatrical", victoryStyle: "Cocky", powerTier: 7,
         techniques: [ 
-            {verb: "launch", object: "pillar of rock"}, 
-            {verb: "encase", object: "her opponent's feet in stone"}, 
-            {verb: "bend", object: "suit of metal armor around herself"}, 
-            {verb: "create", object: "powerful sand spout"}, 
-            {verb: "sense", object: "attack through the earth"},
-            {verb: "entomb", object: "her foe in a cocoon of solid rock", finisher: true, finalFlavor: ["With a mighty stomp, Toph sent a wave of earth surging upwards, completely encasing her foe in a tight-fitting prison of solid rock. 'Sounds like you're stuck between a rock and a hard place!' she yelled.", "Toph slammed her fists together, and the ground beneath her opponent turned to quicksand, dragging them down until only their bewildered head remained above the surface."]}
+            {verb: "launch", object: "pillar of rock", requiresArticle: true}, 
+            {verb: "encase", object: "her opponent's feet in stone", requiresArticle: false}, 
+            {verb: "bend", object: "suit of metal armor around herself", requiresArticle: true}, 
+            {verb: "create", object: "powerful sand spout", requiresArticle: true}, 
+            {verb: "sense", object: "an attack through the earth", requiresArticle: true},
+            {verb: "entomb", object: "her foe in a cocoon of solid rock", finisher: true, requiresArticle: false, finalFlavor: ["With a mighty stomp, Toph sent a wave of earth surging upwards, completely encasing her foe in a tight-fitting prison of solid rock. 'Sounds like you're stuck between a rock and a hard place!' she yelled.", "Toph slammed her fists together, and the ground beneath her opponent turned to quicksand, dragging them down until only their bewildered head remained above the surface."]}
         ], 
         strengths: ["Unconventional Fighting Style", "Seismic Perception", "Immovable", "Terrain Control", "earth_rich", "metal_rich", "dense", "cover_rich", "sandy", "rocky"], 
         weaknesses: ["Vulnerable to Airborne Opponents", "Reliance on Bare Feet", "air_rich", "water_rich", "slippery", "vertical", "exposed"], 
@@ -111,11 +110,12 @@ export const characters = {
         id: 'zuko', name: "Zuko", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "adaptive firebending", role: "brawler_redemption", tone: "determined_brooding", victoryStyle: "Determined", powerTier: 6,
         techniques: [
-            {verb: "unleash", object: "flurry of fire-enhanced kicks"}, 
-            {verb: "create", object: "explosive fireball"}, 
-            {verb: "wield", object: "his dual dao swords"}, 
-            {verb: "propel", object: "himself forward"}, 
-            {verb: "overwhelm", object: "his opponent with a stream of fire", finisher: true, finalFlavor: ["Zuko drove his opponent back with a relentless, two-handed stream of furious fire, giving them no room to breathe and forcing their surrender.", "In a final, desperate lunge, Zuko broke through his foe's defense, delivering a precise, non-lethal strike with the hilt of his sword."]}
+            {verb: "unleash", object: "flurry of fire-enhanced kicks", requiresArticle: true}, 
+            {verb: "create", object: "explosive fireball", requiresArticle: true}, 
+            {verb: "wield", object: "his dual dao swords", requiresArticle: false}, 
+            {verb: "propel", object: "himself forward", requiresArticle: false}, 
+            {verb: "overwhelm", object: "his opponent with a stream of fire", requiresArticle: false},
+            {verb: "break", object: "his foe's defense", finisher: true, requiresArticle: false, finalFlavor: ["Zuko drove his opponent back with a relentless, two-handed stream of furious fire, giving them no room to breathe and forcing their surrender.", "In a final, desperate lunge, Zuko broke through his foe's defense, delivering a precise, non-lethal strike with the hilt of his sword."]}
         ], 
         strengths: ["Unwavering Determination", "Exceptional Swordsman", "Resilient", "hot", "metal_rich", "cramped", "dense"], 
         weaknesses: ["Emotional Instability", "Impulsiveness", "Vulnerable to Water", "water_rich", "ice_rich", "slippery", "open", "exposed", "precarious", "cold"], 
@@ -138,11 +138,11 @@ export const characters = {
         id: 'azula', name: "Azula", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
         style: "lethal firebending", role: "dominant_offense", tone: "calculated_ruthless", victoryStyle: "Ruthless", powerTier: 8,
         techniques: [
-            {verb: "generate", object: "precise bolt of lightning"}, 
-            {verb: "propel", object: "herself with jets of blue fire"}, 
-            {verb: "launch", object: "razor-sharp fire daggers"}, 
-            {verb: "unleash", object: "rapid-fire blue flames"},
-            {verb: "incinerate", object: "her opponent", finisher: true, finalFlavor: ["Azula calmly raised two fingers, an arc of lightning crackling between them before lancing out to strike her foe down in a single, perfect motion. The fight was over before the thunderclap.", "With chilling precision, Azula unleashed a concentrated, piercing torrent of blue flame, overwhelming her opponent's defenses and leaving them defeated in a cloud of steam."]}
+            {verb: "generate", object: "precise bolt of lightning", requiresArticle: true}, 
+            {verb: "propel", object: "herself with jets of blue fire", requiresArticle: false}, 
+            {verb: "launch", object: "razor-sharp fire daggers", requiresArticle: true}, 
+            {verb: "unleash", object: "rapid-fire blue flames", requiresArticle: true},
+            {verb: "incinerate", object: "her opponent", finisher: true, requiresArticle: false, finalFlavor: ["Azula calmly raised two fingers, an arc of lightning crackling between them before lancing out to strike her foe down in a single, perfect motion. The fight was over before the thunderclap.", "With chilling precision, Azula unleashed a concentrated, piercing torrent of blue flame, overwhelming her opponent's defenses and leaving them defeated in a cloud of steam."]}
         ], 
         strengths: ["Firebending Prodigy", "Master Tactician", "Ruthless", "Agile", "Intimidating", "hot", "open", "exposed"], 
         weaknesses: ["Deep-seated Mental Instability", "Arrogant", "Overconfident", "water_rich", "ice_rich", "slippery", "cold", "cramped", "low_visibility"], 
@@ -162,11 +162,11 @@ export const characters = {
         id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "overwhelming firebending", role: "dominant_offense", tone: "arrogant_supreme", victoryStyle: "Supreme", powerTier: 9,
         techniques: [
-            {verb: "generate", object: "massive bolt of lightning"}, 
-            {verb: "unleash", object: "continuous, powerful stream of fire"}, 
-            {verb: "propel", object: "himself with fire jets"}, 
-            {verb: "incinerate", object: "anything in his path"},
-            {verb: "overwhelm", object: "his opponent with a devastating inferno", finisher: true, finalFlavor: ["Ozai unleashed a massive, unstoppable bolt of lightning, ending the fight with absolute power.", "Ozai simply walked forward, a wall of all-consuming fire radiating from him, incinerating his opponent's defenses and forcing a swift, terrified surrender."]}
+            {verb: "generate", object: "massive bolt of lightning", requiresArticle: true}, 
+            {verb: "unleash", object: "continuous, powerful stream of fire", requiresArticle: true}, 
+            {verb: "propel", object: "himself with fire jets", requiresArticle: false}, 
+            {verb: "incinerate", object: "anything in his path", requiresArticle: false},
+            {verb: "overwhelm", object: "his opponent with a devastating inferno", finisher: true, requiresArticle: false, finalFlavor: ["Ozai unleashed a massive, unstoppable bolt of lightning, ending the fight with absolute power.", "Ozai simply walked forward, a wall of all-consuming fire radiating from him, incinerating his opponent's defenses and forcing a swift, terrified surrender."]}
         ], 
         strengths: ["Exceptional Firebending Prowess", "Indomitable Will", "Raw Power", "Fear-Inducing Presence", "hot", "open", "exposed"], 
         weaknesses: ["Over-reliance on Offensive Power", "Extreme Arrogance", "Underestimates Opponents", "Poor Defensive Strategy", "water_rich", "ice_rich", "slippery", "cold", "cramped", "dense"], 
@@ -185,12 +185,12 @@ export const characters = {
         id: 'bumi', name: "Bumi", type: "Bender", bendingTypes: ["Earth"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "unpredictable earthbending", role: "mad_genius", tone: "eccentric_powerful", victoryStyle: "Madcap", powerTier: 8,
         techniques: [
-            {verb: "launch", object: "massive stone platform"}, 
-            {verb: "turn", object: "the ground to quicksand"}, 
-            {verb: "tunnel", object: "rapidly underground"}, 
-            {verb: "collapse", object: "nearby structure"}, 
-            {verb: "hurl", object: "barrage of earth disks"},
-            {verb: "engulf", object: "his opponent in a vortex of rubble", finisher: true, finalFlavor: ["With a wild cackle, Bumi stomped his foot, and the very ground beneath his opponent erupted, launching them harmlessly out of the arena in a giant pillar of rock.", "Bumi waved his hands with theatrical flair, turning the battlefield into a churning, unpredictable mess of earth and stone that completely swallowed his foe's attack and left them trapped."]}
+            {verb: "launch", object: "massive stone platform", requiresArticle: true}, 
+            {verb: "turn", object: "the ground to quicksand", requiresArticle: false}, 
+            {verb: "tunnel", object: "rapidly underground", requiresArticle: false}, 
+            {verb: "collapse", object: "nearby structure", requiresArticle: true}, 
+            {verb: "hurl", object: "barrage of earth disks", requiresArticle: true},
+            {verb: "engulf", object: "his opponent in a vortex of rubble", finisher: true, requiresArticle: false, finalFlavor: ["With a wild cackle, Bumi stomped his foot, and the very ground beneath his opponent erupted, launching them harmlessly out of the arena in a giant pillar of rock.", "Bumi waved his hands with theatrical flair, turning the battlefield into a churning, unpredictable mess of earth and stone that completely swallowed his foe's attack and left them trapped."]}
         ], 
         strengths: ["Mad Genius Tactics", "Brilliant Strategist", "Unpredictable", "Immense Power", "Terrain Control", "earth_rich", "urban", "dense", "vertical", "rocky"], 
         weaknesses: ["Underestimated", "Vulnerable when not on Earth", "Can be Distracted", "open", "exposed", "sandy", "water_rich", "slippery", "air_rich"], 
@@ -211,11 +211,11 @@ export const characters = {
         id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", bendingTypes: ["Chi-Blocking"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
         style: "agile chi-blocking", role: "disabler", tone: "playful_acrobatic", victoryStyle: "Playful", powerTier: 4,
         techniques: [
-            {verb: "execute", object: "series of acrobatic flips"}, 
-            {verb: "strike", object: "vital pressure point"}, 
-            {verb: "gracefully dodge", object: "attack"}, 
-            {verb: "use", object: "her agility to move like a blur"},
-            {verb: "deliver", object: "flurry of chi-blocking strikes", finisher: true, finalFlavor: ["In a flash of pink, Ty Lee cartwheeled past her opponent's defenses, landing a series of quick, precise jabs to their pressure points. Their bending sputtered and died, leaving them helpless.", "Ty Lee landed gracefully behind her foe, a single, silent finger-strike to the base of the neck ending the fight instantly. 'Your aura is... all blocked up!' she chirped."]}
+            {verb: "execute", object: "series of acrobatic flips", requiresArticle: true}, 
+            {verb: "strike", object: "vital pressure point", requiresArticle: true}, 
+            {verb: "gracefully dodge", object: "an attack", requiresArticle: true}, 
+            {verb: "use", object: "her agility to move like a blur", requiresArticle: false},
+            {verb: "deliver", object: "flurry of chi-blocking strikes", finisher: true, requiresArticle: true, finalFlavor: ["In a flash of pink, Ty Lee cartwheeled past her opponent's defenses, landing a series of quick, precise jabs to their pressure points. Their bending sputtered and died, leaving them helpless.", "Ty Lee landed gracefully behind her foe, a single, silent finger-strike to the base of the neck ending the fight instantly. 'Your aura is... all blocked up!' she chirped."]}
         ], 
         strengths: ["Exceptional Agility", "Disables Benders", "Precise Strikes", "Unpredictable Movements", "cramped", "dense", "vertical", "precarious", "cover_rich", "plants_rich"], 
         weaknesses: ["Vulnerable if Immobilized", "Limited Offensive Power", "Fragile", "exposed", "slippery", "hot", "cold", "open"], 
@@ -235,11 +235,11 @@ export const characters = {
         id: 'mai', name: "Mai", type: "Nonbender", bendingTypes: ["Non-Bending"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
         style: "precise marksmanship", role: "sniper_zoner", tone: "unflappable_deadpan", victoryStyle: "Deadpan", powerTier: 4,
         techniques: [
-            {verb: "unleash", object: "volley of stilettos"}, 
-            {verb: "pin", object: "her opponent's clothing to a wall"}, 
-            {verb: "throw", object: "shuriken to disarm her foe"}, 
-            {verb: "launch", object: "silent, razor-sharp blades"},
-            {verb: "strike", object: "vital pressure point with a knife throw", finisher: true, finalFlavor: ["With an almost bored flick of her wrist, Mai sent a single, perfectly aimed stiletto that pinned her opponent's sleeve to a wall, ending the fight without a scratch.", "A flurry of knives erupted from Mai's sleeves, not to harm, but to herd her opponent into a corner, completely trapped and unable to continue."]}
+            {verb: "unleash", object: "volley of stilettos", requiresArticle: true}, 
+            {verb: "pin", object: "her opponent's clothing to a wall", requiresArticle: false}, 
+            {verb: "throw", object: "shuriken to disarm her foe", requiresArticle: true}, 
+            {verb: "launch", object: "silent, razor-sharp blades", requiresArticle: true},
+            {verb: "strike", object: "a vital pressure point with a knife throw", finisher: true, requiresArticle: true, finalFlavor: ["With an almost bored flick of her wrist, Mai sent a single, perfectly aimed stiletto that pinned her opponent's sleeve to a wall, ending the fight without a scratch.", "A flurry of knives erupted from Mai's sleeves, not to harm, but to herd her opponent into a corner, completely trapped and unable to continue."]}
         ], 
         strengths: ["Deadly Accuracy", "Highly Precise", "Unflappable Demeanor", "Ranged Dominance", "open", "cover_rich", "vertical"], 
         weaknesses: ["Limited to Ranged Attacks", "Vulnerable in Close Proximity", "Lack of Close Combat Skills", "cramped", "dense", "low_visibility", "slippery"], 
@@ -258,12 +258,12 @@ export const characters = {
         id: 'iroh', name: "Iroh", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "wise firebending", role: "mentor_strategist", tone: "wise_calm", victoryStyle: "Wise", powerTier: 8,
         techniques: [
-            {verb: "breathe", object: "plume of controlled fire"}, 
-            {verb: "heat", object: "the ground to limit movement"}, 
-            {verb: "calmly redirect", object: "lightning bolt"}, 
-            {verb: "execute", object: "subtle, evasive maneuver"}, 
-            {verb: "launch", object: "powerful, yet controlled, fire blast"},
-            {verb: "envelop", object: "his opponent in a ring of flames", finisher: true, finalFlavor: ["Iroh sighed softly, then enveloped his opponent in a gentle, yet inescapable ring of flames, not to burn, but to show the fight was over. 'Would you care for some tea?' he offered.", "Sensing his opponent's energy, Iroh calmly guided their attack, redirecting it harmlessly into the sky. The sheer mastery of the move left his foe stunned into submission."]}
+            {verb: "breathe", object: "plume of controlled fire", requiresArticle: true}, 
+            {verb: "heat", object: "the ground to limit movement", requiresArticle: false}, 
+            {verb: "calmly redirect", object: "a lightning bolt", requiresArticle: true}, 
+            {verb: "execute", object: "subtle, evasive maneuver", requiresArticle: true}, 
+            {verb: "launch", object: "powerful, yet controlled, fire blast", requiresArticle: true},
+            {verb: "envelop", object: "his opponent in a ring of flames", finisher: true, requiresArticle: false, finalFlavor: ["Iroh sighed softly, then enveloped his opponent in a gentle, yet inescapable ring of flames, not to burn, but to show the fight was over. 'Would you care for some tea?' he offered.", "Sensing his opponent's energy, Iroh calmly guided their attack, redirecting it harmlessly into the sky. The sheer mastery of the move left his foe stunned into submission."]}
         ], 
         strengths: ["Masterful Strategist", "Profound Wisdom", "Lightning Redirection", "Hidden Power", "hot", "cover_rich", "cramped", "dense"], 
         weaknesses: ["Reluctance to Engage in Direct Combat", "Prefers Philosophy to Fighting", "water_rich", "ice_rich", "slippery", "cold", "open", "exposed"], 
@@ -283,12 +283,12 @@ export const characters = {
         id: 'pakku', name: "Pakku", type: "Bender", bendingTypes: ["Water"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "disciplined waterbending", role: "master_disciplinarian", tone: "stern_commanding", victoryStyle: "Disciplined", powerTier: 7,
         techniques: [
-            {verb: "create", object: "vortex of razor-sharp ice shards"}, 
-            {verb: "launch", object: "powerful water whips"}, 
-            {verb: "ride", object: "massive water spout"}, 
-            {verb: "assume", object: "defensive stance"}, 
-            {verb: "shape", object: "solid ice barrier"},
-            {verb: "freeze", object: "the ground, trapping his opponent", finisher: true, finalFlavor: ["With a series of fluid, precise movements, Pakku encased his opponent in an unyielding prison of flawlessly clear ice, ending the duel with indisputable mastery.", "Pakku used his mastery over water to create a massive octopus form, its tentacles overwhelming his foe's defenses and proving his superior technique."]}
+            {verb: "create", object: "vortex of razor-sharp ice shards", requiresArticle: true}, 
+            {verb: "launch", object: "powerful water whips", requiresArticle: true}, 
+            {verb: "ride", object: "massive water spout", requiresArticle: true}, 
+            {verb: "assume", object: "defensive stance", requiresArticle: true}, 
+            {verb: "shape", object: "solid ice barrier", requiresArticle: true},
+            {verb: "freeze", object: "the ground, trapping his opponent", finisher: true, requiresArticle: false, finalFlavor: ["With a series of fluid, precise movements, Pakku encased his opponent in an unyielding prison of flawlessly clear ice, ending the duel with indisputable mastery.", "Pakku used his mastery over water to create a massive octopus form, its tentacles overwhelming his foe's defenses and proving his superior technique."]}
         ], 
         strengths: ["Exceptional Waterbending Prowess", "Disciplined Combatant", "Master Tactician", "water_rich", "ice_rich", "slippery", "cold", "open"], 
         weaknesses: ["Rigid Adherence to Tradition", "Can Underestimate Opponents", "Initial Arrogance", "Limited Adaptability", "hot", "sandy", "exposed", "cramped"], 
@@ -307,12 +307,12 @@ export const characters = {
         id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "controlled firebending", role: "defensive_zoner", tone: "wise_reluctant", victoryStyle: "Wise_Reluctant", powerTier: 6,
         techniques: [
-            {verb: "create", object: "massive, impenetrable wall of fire"}, 
-            {verb: "launch", object: "small, precise fire blasts"}, 
-            {verb: "raise", object: "pillars of flame from the ground"}, 
-            {verb: "evade", object: "with a burst of fire jets"}, 
-            {verb: "control", object: "ring of fire to maintain distance"},
-            {verb: "dissipate", object: "his flames into smoke", finisher: true, finalFlavor: ["Jeong Jeong calmly raised an impenetrable wall of flame, not to attack, but to show the utter futility of continuing the fight. His opponent, facing the impassable barrier, conceded.", "With a heavy sigh, Jeong Jeong extinguished his opponent's will to fight by demonstrating overwhelming control, extinguishing their attacks without ever launching his own."]}
+            {verb: "create", object: "massive, impenetrable wall of fire", requiresArticle: true}, 
+            {verb: "launch", object: "small, precise fire blasts", requiresArticle: true}, 
+            {verb: "raise", object: "pillars of flame from the ground", requiresArticle: false}, 
+            {verb: "evade", object: "", requiresArticle: false}, 
+            {verb: "control", object: "ring of fire to maintain distance", requiresArticle: true},
+            {verb: "dissipate", object: "his flames into smoke", finisher: true, requiresArticle: false, finalFlavor: ["Jeong Jeong calmly raised an impenetrable wall of flame, not to attack, but to show the utter futility of continuing the fight. His opponent, facing the impassable barrier, conceded.", "With a heavy sigh, Jeong Jeong extinguished his opponent's will to fight by demonstrating overwhelming control, extinguishing their attacks without ever launching his own."]}
         ], 
         strengths: ["Exceptional Self-Control", "Wise Strategist", "Defensive Master", "hot", "cover_rich", "cramped", "dense"], 
         weaknesses: ["Reluctance to Fight", "Pessimistic Outlook", "Less Offensive Power", "water_rich", "ice_rich", "slippery", "cold", "open", "exposed", "low_visibility"], 
