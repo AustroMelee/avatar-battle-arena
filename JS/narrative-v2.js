@@ -1,4 +1,4 @@
-// FILE: narrative-v2.js
+// FILE: js/narrative-v2.js
 'use strict';
 
 export const battlePhases = [
@@ -139,7 +139,7 @@ export const postBattleVictoryPhrases = {
         narrow: "With an unflappable expression, {WinnerName} confirms the end of the duel with {LoserName}."
     },
     Madcap: {
-        dominant: "{WinnerName} retrieved {WinnerPronounP} boomerang with a flourish, {WinnerPronounP} victory over {LoserName} a mix of genius and goofiness.",
+        dominant: "{WinnerName} celebrated with a flourish, {WinnerPronounP} victory over {LoserName} a mix of genius and goofiness.",
         narrow: "Against all odds, {WinnerName}'s unconventional tactics secured a narrow victory over {LoserName}."
     }
 };

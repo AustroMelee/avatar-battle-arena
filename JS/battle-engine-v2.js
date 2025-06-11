@@ -1,8 +1,9 @@
-// FILE: battle-engine-v2.js
+// FILE: js/battle-engine-v2.js
 'use strict';
 
 import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
+import { getContextualMoveset } from './context-engine.js';
 import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, impactPhrases, adverbPool, narrativeStatePhrases, weakMoveTransitions, finishingBlowPhrases } from './narrative-v2.js';
 
 // --- HELPER FUNCTIONS ---
@@ -32,7 +33,7 @@ function conjugateVerb(verb) {
     if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
         conjugated = mainVerb.slice(0, -1) + 'ies';
     } else if (/(s|sh|ch|x|z|o)$/.test(mainVerb)) {
-        conjugated = mainVerb + 'es';
+        conjugated = mainVerb + 's';
     } else {
         conjugated = mainVerb + 's';
     }
@@ -80,18 +81,20 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
 }
 
 // --- BATTLE STATE & SIMULATION ---
-function initializeFighterState(charId) {
+function initializeFighterState(charId, locId) {
     const character = characters[charId];
+    const contextualMoveset = getContextualMoveset(charId, locId);
     return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, 
-        movesUsed: [], phraseHistory: [], lastPrefixes: [], moveHistory: []
+        movesUsed: [], phraseHistory: [], lastPrefixes: [], moveHistory: [],
+        techniques: contextualMoveset // Override with contextual moves
     };
 }
 
 export function simulateBattle(f1Id, f2Id, locId) {
-    let fighter1 = initializeFighterState(f1Id);
-    let fighter2 = initializeFighterState(f2Id);
+    let fighter1 = initializeFighterState(f1Id, locId);
+    let fighter2 = initializeFighterState(f2Id, locId);
     const locTags = terrainTags[locId] || [];
     let turnLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
@@ -195,13 +198,19 @@ function calculateMove(move, attacker, locTags) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
     
-    // Terrain advantage/disadvantage logic
-    const moveElement = move.element.split('_')[0]; // 'water', 'fire', 'earth', 'air', 'physical'
-    if (moveElement === 'water' && (locTags.includes('sandy') || locTags.includes('hot'))) multiplier *= 0.25; // 75% debuff
-    if (moveElement === 'water' && (locTags.includes('water_rich') || locTags.includes('ice_rich'))) multiplier *= 1.3; // 30% buff
-    if (moveElement === 'earth' && locTags.includes('earth_rich')) multiplier *= 1.3;
-    if (moveElement === 'fire' && locTags.includes('hot')) multiplier *= 1.25;
-    if (moveElement === 'fire' && (locTags.includes('water_rich') || locTags.includes('cold'))) multiplier *= 0.5; // 50% debuff
+    const moveElement = move.element;
+    if (moveElement === 'water' || moveElement === 'ice' || moveElement === 'healing') {
+        if ((locTags.includes('sandy') || locTags.includes('hot')) && !locTags.includes('water_rich')) multiplier *= 0.25; // 75% debuff
+        if (locTags.includes('water_rich') || locTags.includes('ice_rich')) multiplier *= 1.3;
+    }
+    if (moveElement === 'earth' || moveElement === 'sand' || moveElement === 'metal') {
+        if (locTags.includes('earth_rich') || locTags.includes('metal_rich')) multiplier *= 1.3;
+        if (locTags.includes('water_rich') && !locTags.includes('earth_rich')) multiplier *= 0.7; // Earthbenders are weaker on water
+    }
+    if (moveElement === 'fire') {
+        if (locTags.includes('hot')) multiplier *= 1.25;
+        if (locTags.includes('water_rich') || locTags.includes('cold')) multiplier *= 0.5;
+    }
     if (moveElement === 'air' && locTags.includes('air_rich')) multiplier *= 1.25;
     
     multiplier += (Math.random() - 0.5) * 0.1;
