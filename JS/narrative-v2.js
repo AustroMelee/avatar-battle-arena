@@ -31,54 +31,64 @@ export const phaseTemplates = {
         <p class="move-description">{moveDescription}</p>
     `,
     finalBlow: `<p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
+    timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
     conclusion: `<p class="conclusion">{endingNarration}</p>`
 };
 
 export const narrativeStatePhrases = {
-    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {pronoun} last reserves,", "Struggling to stand,"],
-    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {pronoun} opponent on the back foot,"],
-    momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,"]
+    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {possessive} last reserves,", "Struggling to stand,"],
+    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {possessive} opponent on the back foot,", "Channeling their focus,"],
+    momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,", "In a daring gambit,"]
 };
 
-export const introductoryPhrases = {
-    CONFIDENT: ["With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,", "With an air of supreme confidence,"],
-    AGGRESSIVE: ["Taking the offensive,", "With a ferocious cry,", "Deciding to end this quickly,", "Lunging forward,"],
-    REACTIVE: ["Responding in kind,", "Seizing the opportunity,", "Countering the last move,", "Not missing a beat,", "Pivoting smoothly,"],
-    NEUTRAL: ["Without hesitation,", "With a quick movement,", "Looking for an opening,", "Switching tactics,", "Testing the opponent's defenses,"]
-};
+export const introductoryPhrases = [
+    "With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,", 
+    "With an air of supreme confidence,", "Taking the offensive,", "With a ferocious cry,", "Deciding to end this quickly,",
+    "Lunging forward,", "Responding in kind,", "Seizing the opportunity,", "Countering the last move,", "Not missing a beat,",
+    "Pivoting smoothly,", "Without hesitation,", "With a quick movement,", "Looking for an opening,", "Switching tactics,",
+    "Testing the opponent's defenses,", "With calculated poise,"
+];
 
 export const adverbPool = {
-    offensive: ['with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus', 'with devastating speed', 'in a relentless assault', 'with pinpoint accuracy', 'in a fierce onslaught'],
+    offensive: [
+        'with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 
+        'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus', 
+        'with devastating speed', 'in a relentless assault', 'with pinpoint accuracy', 'in a fierce onslaught',
+        'with blazing speed', 'in a masterful flourish', 'with unshakable resolve'
+    ],
     defensive: ['with calculated timing', 'in a deft maneuver', 'with steady resolve'],
 };
 
-export const verbSynonyms = { 'launch': ['hurl', 'send', 'unleash', 'fire', 'project', 'let loose', 'send hurtling', 'propel'], 'strike': ['slam', 'hit', 'connect with', 'land a blow with', 'drive', 'hammer', 'blast', 'shatter'], 'lash': ['whip', 'snap', 'flick', 'lacerate with'], 'create': ['form', 'generate', 'summon', 'materialize', 'conjure', 'manifest'], 'throw': ['fling', 'hurl', 'send', 'toss', 'catapult'], 'unleash': ['release', 'discharge', 'emit', 'let loose', 'unleash'], 'generate': ['create', 'produce', 'summon'], 'ride': ['mount', 'glide on', 'ride'], 'form': ['construct', 'shape', 'create', 'assemble'], 'sweep': ['knock down', 'sweep', 'topple'], 'push': ['shove', 'blast', 'force back', 'repel'], 'erupt with': ['erupt with', 'explode with'], 'propel': ['launch', 'boost', 'propel'], 'release': ['emit', 'discharge', 'release'], 'trigger': ['activate', 'trigger', 'initiate'], 'don': ['equip', 'wear', 'don', 'sheathe themself in'], 'scan': ['scan', 'sense', 'read'], 'hurl': ['throw', 'launch', 'fling'], 'trap': ['ensnare', 'trap', 'catch', 'immobilize'], 'reshape': ['alter', 'reshape', 'change the terrain with'], 'breathe': ['exhale', 'breathe', 'spew'], 'redirect': ['deflect', 'redirect', 'guide'], 'perform': ['execute', 'perform'], 'offer': ['offer', 'present'], 'raise': ['erect', 'raise', 'construct'], 'conjure': ['summon', 'conjure'], 'inflict': ['inflict', 'deliver'], 'disperse': ['scatter', 'dissipate', 'disperse'], 'end': ['conclude', 'end'], 'ignite': ['set ablaze', 'ignite', 'envelop'], 'assume': ['take on', 'assume'], 'encase': ['envelop', 'encase', 'imprison'], 'freeze': ['freeze', 'chill', 'flash-freeze'], 'execute': ['perform', 'execute'], 'dodge': ['evade', 'dodge', 'sidestep'], 'pin': ['pin', 'fasten', 'affix'], 'block': ['block', 'parry', 'deflect'], 'devise': ['construct', 'devise', 'rig'], 'spring': ['spring', 'activate'], 'send': ['send', 'dispatch'], 'bend': ['bend', 'manipulate'], 'tunnel': ['tunnel', 'burrow'], 'turn': ['turn', 'transform'], 'entomb': ['entomb', 'encase'], 'deliver': ['deliver', 'unleash'], 'dive': ['dive', 'lunge'], 'attempt': ['attempt', 'try'], 'control': ['control', 'manipulate', 'dominate'] };
+export const weakMoveTransitions = [
+    "leaving an opening.",
+    "giving {targetName} a chance to recover.",
+    "creating a chance for {targetName} to counter.",
+    "but it barely makes an impact.",
+    "exposing a critical flaw in the approach.",
+    "allowing {targetName} to seize the initiative.",
+    "leaving {targetName} completely unfazed.",
+    "but the execution is clumsy.",
+    "but it lacks the force to be effective.",
+    "and the opportunity is wasted."
+];
 
 export const impactPhrases = {
     DEFAULT: {
         WEAK: [
-            "but the attack glances off harmlessly.",
-            "but {targetName} easily dodges it.",
-            "but the technique lacks the power to connect meaningfully.",
-            "but the strike is too slow to find its mark."
+            "but the attack glances off harmlessly", "but {targetName} easily dodges it",
+            "but the technique lacks the power to connect meaningfully", "but the strike is too slow to find its mark"
         ],
         NORMAL: [
-            "The blow strikes {targetName} squarely.", 
-            "It forces {targetName} to brace for impact.", 
-            "A solid hit lands, and {targetName} stumbles.", 
-            "The attack connects, interrupting {targetName}'s rhythm.", 
-            "{targetName} reels from the precise strike.", 
-            "The move lands firmly, catching {targetName} off-guard.",
-            "{targetName} struggles to recover from the hit.",
-            "The strike catches {targetName} by surprise."
+            "The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", 
+            "The attack connects, interrupting {targetName}'s rhythm.", "{targetName} reels from the precise strike.", "The move lands firmly, catching {targetName} off-guard.",
+            "{targetName} struggles to recover from the hit.", "The strike catches {targetName} by surprise.", "A clean hit, forcing {targetName} back.",
+            "{targetName} absorbs the blow, but it clearly hurts."
         ],
         STRONG: [
-            "A powerful blow sends {targetName} reeling!", 
-            "The attack smashes through {targetName}'s guard with ease.", 
-            "{targetName} staggers back, caught off-guard by the intensity.", 
-            "The impact is significant, leaving {targetName} momentarily stunned.",
-            "{targetName} is rocked by the forceful strike.",
-            "The blow overwhelms {targetName}'s defenses."
+            "A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", 
+            "The impact is significant, leaving {targetName} momentarily stunned.", "{targetName} is rocked by the forceful strike.", "The blow overwhelms {targetName}'s defenses.",
+            "A crushing impact! {targetName} struggles to stay standing.", "The fierce assault leaves {targetName} battered.", "{targetName} is thrown off balance by the powerful strike.",
+            "The force of the attack is staggering."
         ],
         CRITICAL: ["A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground."]
     },
@@ -87,8 +97,14 @@ export const impactPhrases = {
         WEAK: ["The attempt to pin {targetName} falters, missing its mark.", "The weak volley fails to trap {targetName}."]
     },
     DEFENSE: {
-        REACTIVE: ["The defensive maneuver perfectly counters the incoming assault.", "The attack is negated completely by the well-timed defense.", "With a skillful move, the blow is parried effortlessly."],
-        PROACTIVE: ["The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares their defense, anticipating the next move."]
+        REACTIVE: [
+            "The defensive maneuver perfectly counters the incoming assault.", "The attack is negated completely by the well-timed defense.", "With a skillful move, the blow is parried effortlessly.",
+            "{actorName} deftly neutralizes the attack.", "The assault is stopped dead in its tracks.", "The incoming blow is masterfully redirected."
+        ],
+        PROACTIVE: [
+            "The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares {possessive} defense, anticipating the next move.",
+            "A solid defense is established, challenging any approach.", "The strategic position makes {actorName} a difficult target.", "The field is reshaped to {actorName}'s advantage."
+        ]
     }
 };
 
