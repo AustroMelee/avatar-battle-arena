@@ -19,6 +19,11 @@
     --modifier-plus: #8bc34a;
     --modifier-minus: #ef5350;
     --modifier-neutral: #64b5f6;
+    /* New v2 styles */
+    --effectiveness-weak: #9ca3af;
+    --effectiveness-normal: #e0e6ed;
+    --effectiveness-strong: #ffb74d;
+    --effectiveness-critical: #ff6b6b;
 }
 
 /* General styles */
@@ -305,6 +310,7 @@ select:hover {
     color: var(--text-secondary);
 }
 
+/* Battle Story / Log - V2 Styles */
 .battle-story {
     line-height: 1.7;
     font-size: 1.1rem;
@@ -314,8 +320,66 @@ select:hover {
     margin: 2rem auto;
 }
 
-.battle-story p {
+.phase-header {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-3);
+    margin-top: 2rem;
     margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    text-align: center;
+}
+
+.move-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+.move-actor .move-name {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.move-effectiveness {
+    font-weight: bold;
+}
+
+.move-effectiveness.Weak { color: var(--effectiveness-weak); }
+.move-effectiveness.Normal { color: var(--effectiveness-normal); }
+.move-effectiveness.Strong { color: var(--effectiveness-strong); }
+.move-effectiveness.Critical { color: var(--effectiveness-critical); }
+
+.move-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    padding: 0.25rem 1rem 1rem;
+    border-bottom: 1px dashed var(--surface-border);
+    margin-bottom: 1rem;
+}
+
+.final-blow, .conclusion {
+    font-style: italic;
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    color: var(--accent-gold);
+}
+
+.conclusion {
+    font-style: normal;
+    font-weight: normal;
+    color: var(--text-primary);
+    background: rgba(0,0,0,0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-gold);
 }
 
 /* Outcome Analysis */

@@ -1,19 +1,21 @@
 'use strict';
 
 export const characters = {
-    'sokka': { 
-        id: 'sokka', name: "Sokka", type: "Nonbender", bendingTypes: ["Non-Bending"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'sokka': {
+        id: 'sokka', name: "Sokka", type: "Nonbender", bendingTypes: ["Non-Bending"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "strategic non-bending", role: "tactician", tone: "improvisational_ironic", victoryStyle: "Madcap", powerTier: 3,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "hurl", object: "smoke pellet", requiresArticle: true},
-            {verb: "launch", object: "his trusty boomerang", requiresArticle: false},
-            {verb: "devise", object: "clever trap", requiresArticle: true},
-            {verb: "lunge", object: "forward with his meteorite sword", requiresArticle: false},
-            {verb: "attempt", object: "tactical feint", requiresArticle: true},
-            {verb: "set", object: "complex tripwire trap", finisher: true, requiresArticle: true, finalFlavor: ["With a triumphant yelp, Sokka pulled a rope, and his opponent was suddenly hoisted into the air, caught in a masterfully constructed snare.", "Sokka's planning paid off as his foe stumbled into a cleverly disguised pitfall trap, ending the confrontation with a thud and a groan."]},
-        ], 
-        strengths: ["Master Strategist", "Innovative Tactician", "Resourceful", "Adaptable", "open", "cover_rich", "urban", "dense"], 
-        weaknesses: ["Vulnerable to Direct Bending Attacks", "Reliance on Equipment", "Physically Average", "exposed", "slippery", "hot", "cold"], 
+            { name: "Sword Strike", verb: 'strike', object: 'with his meteorite sword', type: 'Offense', power: 40, emoji: '⚔️', requiresArticle: false },
+            { name: "Boomerang Throw", verb: 'throw', object: 'his trusty boomerang', type: 'Offense', power: 35, emoji: '🪃', requiresArticle: false },
+            { name: "Shield Block", verb: 'block', object: 'with his shield', type: 'Defense', power: 30, emoji: '🛡️', requiresArticle: false },
+            { name: "Tactical Positioning", verb: 'reposition', object: 'for a tactical advantage', type: 'Utility', power: 20, emoji: '🗺️', requiresArticle: false },
+            { name: "Improvised Trap", verb: 'devise', object: 'a clever trap', type: 'Utility', power: 50, emoji: '🪤', requiresArticle: true },
+            { name: "Sokka Style", verb: 'attempt', object: 'a tactical feint', type: 'Offense', power: 25, emoji: '🧠', requiresArticle: true },
+            { name: "The Sokka Special", verb: 'spring', object: 'a masterfully constructed snare trap', type: 'Finisher', power: 75, emoji: '🏆', requiresArticle: true }
+        ],
+        strengths: ["Master Strategist", "Innovative Tactician", "Resourceful", "Adaptable", "open", "cover_rich", "urban", "dense"],
+        weaknesses: ["Vulnerable to Direct Bending Attacks", "Reliance on Equipment", "Physically Average", "exposed", "slippery", "hot", "cold"],
         quotes: {
             preBattle: ["Alright, let's see what kind of mess we can get into!"],
             postWin: ["Boomerang! You *do* always come back!"],
@@ -30,19 +32,21 @@ export const characters = {
             'pakku': {type: "opposed_philosophy", dynamic: "philosophical_clash"}
         }
     },
-    'aang-airbending-only': { 
-        id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", bendingTypes: ["Air"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'aang-airbending-only': {
+        id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", bendingTypes: ["Air"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "evasive airbending", role: "evader", tone: "pacifistic_agile", victoryStyle: "Pacifist", powerTier: 9,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "ride", object: "his air scooter to outmaneuver his opponent", requiresArticle: false}, 
-            {verb: "form", object: "a massive tornado to control the battlefield", requiresArticle: false}, 
-            {verb: "unleash", object: "a focused blast of air to push his opponent off balance", requiresArticle: false}, 
-            {verb: "ride", object: "the winds to gain a better position", requiresArticle: false}, 
-            {verb: "weave", object: "through a flurry of attacks, untouchable", requiresArticle: false},
-            {verb: "sweep", object: "his foe off their feet with a focused gust", finisher: true, requiresArticle: false, finalFlavor: ["With a focused gust of wind, Aang swept his foe off their feet, depositing them safely but firmly outside the ring.", "Aang created a swirling vortex of air, lifting his opponent and gently setting them down, disarmed and defeated."]}
-        ], 
-        strengths: ["Unrivaled Evasiveness", "Exceptional Mobility", "Pacifistic", "open", "vertical", "air_rich", "high_altitude"], 
-        weaknesses: ["Aversion to Lethal Force", "Direct Confrontation", "Vulnerable to Ground Traps", "cramped", "dense", "sandy", "low_visibility"], 
+            { name: "Air Scooter", verb: 'ride', object: 'his air scooter', type: 'Utility', power: 20, emoji: '🛴', requiresArticle: false },
+            { name: "Air Blast", verb: 'unleash', object: 'a focused blast of air', type: 'Offense', power: 40, emoji: '💨', requiresArticle: false },
+            { name: "Wind Shield", verb: 'form', object: 'a swirling shield of wind', type: 'Defense', power: 50, emoji: '🛡️', requiresArticle: false },
+            { name: "Tornado Whirl", verb: 'create', object: 'a disorienting tornado', type: 'Offense', power: 65, emoji: '🌪️', requiresArticle: true },
+            { name: "Air Cushion", verb: 'create', object: 'a cushion of air', type: 'Utility', power: 25, emoji: '☁️', requiresArticle: true },
+            { name: "Gust Push", verb: 'push', object: 'with a sudden gust of wind', type: 'Offense', power: 30, emoji: '🌬️', requiresArticle: false },
+            { name: "Sweeping Gust", verb: 'sweep', object: 'his foe off their feet', type: 'Finisher', power: 80, emoji: '🧹', requiresArticle: false }
+        ],
+        strengths: ["Unrivaled Evasiveness", "Exceptional Mobility", "Pacifistic", "open", "vertical", "air_rich", "high_altitude"],
+        weaknesses: ["Aversion to Lethal Force", "Direct Confrontation", "Vulnerable to Ground Traps", "cramped", "dense", "sandy", "low_visibility"],
         quotes: {
             preBattle: ["Let's keep this light, okay?"],
             postWin: ["Phew! Nobody got hurt, right? Mostly."],
@@ -56,19 +60,21 @@ export const characters = {
             'bumi': {type: "mentor_student", dynamic: "friendly_rivalry"}
         }
     },
-    'katara': { 
-        id: 'katara', name: "Katara", type: "Bender", bendingTypes: ["Water", "Healing"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
+    'katara': {
+        id: 'katara', name: "Katara", type: "Bender", bendingTypes: ["Water", "Healing"], pronouns: { s: 'she', p: 'her', o: 'her' },
         style: "masterful waterbending", role: "versatile_control", tone: "fierce_compassionate", victoryStyle: "Fierce", powerTier: 7,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "launch", object: "barrage of ice daggers", requiresArticle: true}, 
-            {verb: "create", object: "massive wave", requiresArticle: true}, 
-            {verb: "envelop", object: "her foe in a watery sphere", requiresArticle: false}, 
-            {verb: "manipulate", object: "nearby vines with plantbending", requiresArticle: false}, 
-            {verb: "pull", object: "moisture from the air", requiresArticle: false},
-            {verb: "freeze", object: "her opponent's limbs", finisher: true, requiresArticle: false, finalFlavor: ["Katara sent a powerful wave crashing down, and as the water receded, her opponent was left encased in a prison of solid, unyielding ice.", "With a sharp, determined gesture, Katara froze the ground around her opponent's feet, then sent tendrils of ice snaking up their body, immobilizing them completely."]}
-        ], 
-        strengths: ["Prodigious Bending Talent", "Exceptional Healing", "Fierce Determination", "water_rich", "ice_rich", "plants_rich", "cover_rich", "slippery"], 
-        weaknesses: ["Emotional Volatility", "Limited Hand-to-Hand Combat", "Reliance on Water Source", "hot", "exposed", "sandy", "dry"], 
+            { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, emoji: '💧', requiresArticle: false },
+            { name: "Ice Spears", verb: 'launch', object: 'a volley of ice spears', type: 'Offense', power: 55, emoji: '🧊', requiresArticle: true },
+            { name: "Water Shield", verb: 'raise', object: 'a shield of water', type: 'Defense', power: 50, emoji: '🛡️', requiresArticle: true },
+            { name: "Healing Waters", verb: 'use', object: 'healing waters', type: 'Utility', power: 30, emoji: '🩹', requiresArticle: false },
+            { name: "Ice Prison", verb: 'create', object: 'an ice prison', type: 'Utility', power: 60, emoji: '🧊', requiresArticle: true },
+            { name: "Tidal Wave", verb: 'summon', object: 'a massive tidal wave', type: 'Finisher', power: 90, emoji: '🌊', requiresArticle: true },
+            { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, emoji: '🩸', requiresArticle: false }
+        ],
+        strengths: ["Prodigious Bending Talent", "Exceptional Healing", "Fierce Determination", "water_rich", "ice_rich", "plants_rich", "cover_rich", "slippery"],
+        weaknesses: ["Emotional Volatility", "Limited Hand-to-Hand Combat", "Reliance on Water Source", "hot", "exposed", "sandy", "dry"],
         quotes: {
             preBattle: ["I won't hold back. Not if you won't."],
             postWin: ["That's how you do it, for my family, for my tribe!"],
@@ -81,19 +87,22 @@ export const characters = {
             'sokka': {type: "sibling", bond: "strong_familial", dynamic: "friendly_rivalry"}
         }
     },
-    'toph-beifong': { 
-        id: 'toph-beifong', name: "Toph", type: "Bender", bendingTypes: ["Earth", "Metal", "Sand"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
+    'toph-beifong': {
+        id: 'toph-beifong', name: "Toph", type: "Bender", bendingTypes: ["Earth", "Metal", "Sand"], pronouns: { s: 'she', p: 'her', o: 'her' },
         style: "unrelenting earthbending", role: "tank_disabler", tone: "cocky_theatrical", victoryStyle: "Cocky", powerTier: 7,
-        techniques: [ 
-            {verb: "launch", object: "pillar of rock", requiresArticle: true}, 
-            {verb: "encase", object: "her opponent's feet in stone", requiresArticle: false}, 
-            {verb: "bend", object: "suit of metal armor around herself", requiresArticle: true}, 
-            {verb: "create", object: "powerful sand spout", requiresArticle: true}, 
-            {verb: "sense", object: "an attack through the earth", requiresArticle: true},
-            {verb: "entomb", object: "her foe in a cocoon of solid rock", finisher: true, requiresArticle: false, finalFlavor: ["With a mighty stomp, Toph sent a wave of earth surging upwards, completely encasing her foe in a tight-fitting prison of solid rock. 'Sounds like you're stuck between a rock and a hard place!' she yelled.", "Toph slammed her fists together, and the ground beneath her opponent turned to quicksand, dragging them down until only their bewildered head remained above the surface."]}
-        ], 
-        strengths: ["Unconventional Fighting Style", "Seismic Perception", "Immovable", "Terrain Control", "earth_rich", "metal_rich", "dense", "cover_rich", "sandy", "rocky"], 
-        weaknesses: ["Vulnerable to Airborne Opponents", "Reliance on Bare Feet", "air_rich", "water_rich", "slippery", "vertical", "exposed"], 
+        maxHealth: 100, maxEnergy: 100,
+        techniques: [
+            { name: "Earth Wave", verb: 'send', object: 'a powerful wave of earth', type: 'Offense', power: 60, emoji: '🌊', requiresArticle: true },
+            { name: "Rock Armor", verb: 'don', object: 'a suit of rock armor', type: 'Defense', power: 75, emoji: '🗿', requiresArticle: true },
+            { name: "Seismic Slam", verb: 'slam', object: 'her fists to the ground', type: 'Offense', power: 70, emoji: '💥', requiresArticle: false },
+            { name: "Metal Bending", verb: 'bend', object: 'the metal in the environment', type: 'Offense', power: 80, emoji: '🔩', requiresArticle: false },
+            { name: "Earth Tunnel", verb: 'tunnel', object: 'underground to reposition', type: 'Utility', power: 30, emoji: '🚇', requiresArticle: false },
+            { name: "Boulder Throw", verb: 'launch', object: 'a volley of rock projectiles', type: 'Offense', power: 65, emoji: '🪨', requiresArticle: false },
+            { name: "Quicksand Trap", verb: 'turn', object: 'the ground to quicksand', type: 'Utility', power: 55, emoji: '⏳', requiresArticle: false },
+            { name: "Rock Coffin", verb: 'entomb', object: 'her foe in a prison of rock', type: 'Finisher', power: 95, emoji: '⚰️', requiresArticle: false }
+        ],
+        strengths: ["Unconventional Fighting Style", "Seismic Perception", "Immovable", "Terrain Control", "earth_rich", "metal_rich", "dense", "cover_rich", "sandy", "rocky"],
+        weaknesses: ["Vulnerable to Airborne Opponents", "Reliance on Bare Feet", "air_rich", "water_rich", "slippery", "vertical", "exposed"],
         quotes: {
             preBattle: ["Let's see what you're made of, twinkletoes."],
             postWin: ["Told you I was the best. The greatest earthbender in the world!"],
@@ -106,19 +115,22 @@ export const characters = {
             'bumi': {type: "peer", dynamic: "friendly_rivalry"}
         }
     },
-    'zuko': { 
-        id: 'zuko', name: "Zuko", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'zuko': {
+        id: 'zuko', name: "Zuko", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "adaptive firebending", role: "brawler_redemption", tone: "determined_brooding", victoryStyle: "Determined", powerTier: 6,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "unleash", object: "flurry of fire-enhanced kicks", requiresArticle: true}, 
-            {verb: "create", object: "explosive fireball", requiresArticle: true}, 
-            {verb: "wield", object: "his dual dao swords", requiresArticle: false}, 
-            {verb: "propel", object: "himself forward", requiresArticle: false}, 
-            {verb: "overwhelm", object: "his opponent with a stream of fire", requiresArticle: false},
-            {verb: "break", object: "his foe's defense", finisher: true, requiresArticle: false, finalFlavor: ["Zuko drove his opponent back with a relentless, two-handed stream of furious fire, giving them no room to breathe and forcing their surrender.", "In a final, desperate lunge, Zuko broke through his foe's defense, delivering a precise, non-lethal strike with the hilt of his sword."]}
-        ], 
-        strengths: ["Unwavering Determination", "Exceptional Swordsman", "Resilient", "hot", "metal_rich", "cramped", "dense"], 
-        weaknesses: ["Emotional Instability", "Impulsiveness", "Vulnerable to Water", "water_rich", "ice_rich", "slippery", "open", "exposed", "precarious", "cold"], 
+            { name: "Fire Daggers", verb: 'throw', object: 'a volley of fire daggers', type: 'Offense', power: 45, emoji: '🔪', requiresArticle: true },
+            { name: "Flame Sword", verb: 'ignite', object: 'his dual dao swords', type: 'Offense', power: 55, emoji: '⚔️', requiresArticle: false },
+            { name: "Fire Shield", verb: 'create', object: 'a swirling fire shield', type: 'Defense', power: 50, emoji: '🛡️', requiresArticle: true },
+            { name: "Dragon's Breath", verb: 'unleash', object: 'a sustained stream of fire', type: 'Offense', power: 70, emoji: '🐉', requiresArticle: false },
+            { name: "Agni Kai Stance", verb: 'assume', object: 'the Agni Kai stance', type: 'Utility', power: 30, emoji: '🤺', requiresArticle: false },
+            { name: "Fire Whip", verb: 'lash', object: 'out with a whip of fire', type: 'Offense', power: 60, emoji: '🔥', requiresArticle: false },
+            { name: "Blazing Charge", verb: 'charge', object: 'forward, propelled by fire', type: 'Offense', power: 65, emoji: '🚀', requiresArticle: false },
+            { name: "Redemption's Fury", verb: 'overwhelm', object: 'his opponent with a flurry of attacks', type: 'Finisher', power: 85, emoji: '🔥', requiresArticle: false }
+        ],
+        strengths: ["Unwavering Determination", "Exceptional Swordsman", "Resilient", "hot", "metal_rich", "cramped", "dense"],
+        weaknesses: ["Emotional Instability", "Impulsiveness", "Vulnerable to Water", "water_rich", "ice_rich", "slippery", "open", "exposed", "precarious", "cold"],
         quotes: {
             preBattle: ["I've struggled for my honor. I'm not losing this."],
             postWin: ["I fought for my own path. And I won."],
@@ -134,18 +146,22 @@ export const characters = {
             'azula': { type: "sibling_rivalry", bond: "power_struggle", dynamic: "long_standing_conflict" }
         }
     },
-    'azula': { 
-        id: 'azula', name: "Azula", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
+    'azula': {
+        id: 'azula', name: "Azula", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'she', p: 'her', o: 'her' },
         style: "lethal firebending", role: "dominant_offense", tone: "calculated_ruthless", victoryStyle: "Ruthless", powerTier: 8,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "generate", object: "precise bolt of lightning", requiresArticle: true}, 
-            {verb: "propel", object: "herself with jets of blue fire", requiresArticle: false}, 
-            {verb: "launch", object: "razor-sharp fire daggers", requiresArticle: true}, 
-            {verb: "unleash", object: "rapid-fire blue flames", requiresArticle: true},
-            {verb: "incinerate", object: "her opponent", finisher: true, requiresArticle: false, finalFlavor: ["Azula calmly raised two fingers, an arc of lightning crackling between them before lancing out to strike her foe down in a single, perfect motion. The fight was over before the thunderclap.", "With chilling precision, Azula unleashed a concentrated, piercing torrent of blue flame, overwhelming her opponent's defenses and leaving them defeated in a cloud of steam."]}
-        ], 
-        strengths: ["Firebending Prodigy", "Master Tactician", "Ruthless", "Agile", "Intimidating", "hot", "open", "exposed"], 
-        weaknesses: ["Deep-seated Mental Instability", "Arrogant", "Overconfident", "water_rich", "ice_rich", "slippery", "cold", "cramped", "low_visibility"], 
+            { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, emoji: '🔪', requiresArticle: false },
+            { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, emoji: '🔥', requiresArticle: false },
+            { name: "Lightning Generation", verb: 'generate', object: 'a precise bolt of lightning', type: 'Finisher', power: 100, emoji: '⚡', requiresArticle: true },
+            { name: "Flame Burst", verb: 'erupt', object: 'with a burst of blue flame', type: 'Defense', power: 50, emoji: '💥', requiresArticle: false },
+            { name: "Fire Jets", verb: 'propel', object: 'herself with jets of fire', type: 'Utility', power: 30, emoji: '🚀', requiresArticle: false },
+            { name: "Precision Strike", verb: 'strike', object: 'with a focused fire blast', type: 'Offense', power: 70, emoji: '🎯', requiresArticle: false },
+            { name: "Heat Wave", verb: 'release', object: 'a debilitating heat wave', type: 'Utility', power: 35, emoji: '☀️', requiresArticle: true },
+            { name: "Fire Shield", verb: 'create', object: 'a shield of rotating fire', type: 'Defense', power: 60, emoji: '🛡️', requiresArticle: true }
+        ],
+        strengths: ["Firebending Prodigy", "Master Tactician", "Ruthless", "Agile", "Intimidating", "hot", "open", "exposed"],
+        weaknesses: ["Deep-seated Mental Instability", "Arrogant", "Overconfident", "water_rich", "ice_rich", "slippery", "cold", "cramped", "low_visibility"],
         quotes: {
             preBattle: ["Don't bother. You're outmatched."],
             postWin: ["Flawless. As expected."],
@@ -158,20 +174,22 @@ export const characters = {
             'zuko': { type: "sibling_rivalry", bond: "power_struggle" }
         }
     },
-    'ozai-not-comet-enhanced': { 
-        id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'ozai-not-comet-enhanced': {
+        id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", bendingTypes: ["Fire", "Lightning"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "overwhelming firebending", role: "dominant_offense", tone: "arrogant_supreme", victoryStyle: "Supreme", powerTier: 9,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            // FIX: Purified the data to have clear verb/object pairs.
-            {verb: "generate", object: "massive bolt of lightning", requiresArticle: true}, 
-            {verb: "unleash", object: "continuous, powerful stream of fire", requiresArticle: true}, 
-            {verb: "propel", object: "himself forward with fire jets", requiresArticle: false}, 
-            {verb: "hurl", object: "searing flames", requiresArticle: true},
-            {verb: "launch", object: "a devastating inferno", requiresArticle: false},
-            {verb: "overwhelm", object: "his opponent's defenses", finisher: true, requiresArticle: false, finalFlavor: ["With a surge of brutal power, Ozai unleashed a massive bolt of lightning, ending the battle with absolute finality.", "Ozai simply walked forward, a wall of all-consuming fire radiating from him, incinerating his opponent's defenses and forcing a swift, terrified surrender."]}
-        ], 
-        strengths: ["Exceptional Firebending Prowess", "Indomitable Will", "Raw Power", "Fear-Inducing Presence", "hot", "open", "exposed"], 
-        weaknesses: ["Over-reliance on Offensive Power", "Extreme Arrogance", "Underestimates Opponents", "Poor Defensive Strategy", "water_rich", "ice_rich", "slippery", "cold", "cramped", "dense"], 
+            { name: "Fire Comet", verb: 'launch', object: 'a massive fire comet', type: 'Offense', power: 80, emoji: '☄️', requiresArticle: true },
+            { name: "Flame Tornado", verb: 'create', object: 'a searing flame tornado', type: 'Offense', power: 75, emoji: '🌪️', requiresArticle: true },
+            { name: "Royal Fire", verb: 'unleash', object: 'a blast of royal fire', type: 'Offense', power: 65, emoji: '👑', requiresArticle: true },
+            { name: "Fire Armor", verb: 'ignite', object: 'a suit of fire armor', type: 'Defense', power: 60, emoji: '🛡️', requiresArticle: true },
+            { name: "Dragon's Roar", verb: 'breathe', object: 'a devastating cone of fire', type: 'Offense', power: 85, emoji: '🐉', requiresArticle: true },
+            { name: "Phoenix Strike", verb: 'dive', object: 'with a phoenix strike', type: 'Offense', power: 70, emoji: '🐦', requiresArticle: false },
+            { name: "Inferno Field", verb: 'set', object: 'the battlefield ablaze', type: 'Utility', power: 50, emoji: '🌍', requiresArticle: false },
+            { name: "Emperor's Wrath", verb: 'unleash', object: "the Emperor's Wrath", type: 'Finisher', power: 100, emoji: '😠', requiresArticle: false }
+        ],
+        strengths: ["Exceptional Firebending Prowess", "Indomitable Will", "Raw Power", "Fear-Inducing Presence", "hot", "open", "exposed"],
+        weaknesses: ["Over-reliance on Offensive Power", "Extreme Arrogance", "Underestimates Opponents", "Poor Defensive Strategy", "water_rich", "ice_rich", "slippery", "cold", "cramped", "dense"],
         quotes: {
             preBattle: ["I am the Phoenix King! You are nothing!"],
             postWin: ["The Fire Nation is supreme! My power is absolute!"],
@@ -183,19 +201,21 @@ export const characters = {
             'zuko': { type: "father_son", bond: "emotional_conflict", history: "neglect_and_disappointment" }
         }
     },
-    'bumi': { 
-        id: 'bumi', name: "Bumi", type: "Bender", bendingTypes: ["Earth"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'bumi': {
+        id: 'bumi', name: "Bumi", type: "Bender", bendingTypes: ["Earth"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "unpredictable earthbending", role: "mad_genius", tone: "eccentric_powerful", victoryStyle: "Madcap", powerTier: 8,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "launch", object: "massive stone platform", requiresArticle: true}, 
-            {verb: "turn", object: "the ground to quicksand", requiresArticle: false}, 
-            {verb: "tunnel", object: "rapidly underground", requiresArticle: false}, 
-            {verb: "collapse", object: "nearby structure", requiresArticle: true}, 
-            {verb: "hurl", object: "barrage of earth disks", requiresArticle: true},
-            {verb: "engulf", object: "his opponent in a vortex of rubble", finisher: true, requiresArticle: false, finalFlavor: ["With a wild cackle, Bumi stomped his foot, and the very ground beneath his opponent erupted, launching them harmlessly out of the arena in a giant pillar of rock.", "Bumi waved his hands with theatrical flair, turning the battlefield into a churning, unpredictable mess of earth and stone that completely swallowed his foe's attack and left them trapped."]}
-        ], 
-        strengths: ["Mad Genius Tactics", "Brilliant Strategist", "Unpredictable", "Immense Power", "Terrain Control", "earth_rich", "urban", "dense", "vertical", "rocky"], 
-        weaknesses: ["Underestimated", "Vulnerable when not on Earth", "Can be Distracted", "open", "exposed", "sandy", "water_rich", "slippery", "air_rich"], 
+            { name: "Rock Avalanche", verb: 'trigger', object: 'a massive rock avalanche', type: 'Finisher', power: 95, emoji: '🌋', requiresArticle: true },
+            { name: "Earth Armor", verb: 'don', object: 'a suit of earth armor', type: 'Defense', power: 70, emoji: '🗿', requiresArticle: true },
+            { name: "Seismic Scan", verb: 'scan', object: 'the battlefield with seismic sense', type: 'Utility', power: 15, emoji: '📡', requiresArticle: false },
+            { name: "Boulder Throw", verb: 'hurl', object: 'a giant boulder', type: 'Offense', power: 60, emoji: '🪨', requiresArticle: true },
+            { name: "Ground Spike", verb: 'erupt', object: 'a spike of rock from the ground', type: 'Offense', power: 45, emoji: '⛰️', requiresArticle: true },
+            { name: "Earthen Prison", verb: 'trap', object: 'his foe in an earthen prison', type: 'Utility', power: 50, emoji: '🧱', requiresArticle: false },
+            { name: "Terrain Reshape", verb: 'reshape', object: 'the battlefield', type: 'Utility', power: 40, emoji: '🌍', requiresArticle: false }
+        ],
+        strengths: ["Mad Genius Tactics", "Brilliant Strategist", "Unpredictable", "Immense Power", "Terrain Control", "earth_rich", "urban", "dense", "vertical", "rocky"],
+        weaknesses: ["Underestimated", "Vulnerable when not on Earth", "Can be Distracted", "open", "exposed", "sandy", "water_rich", "slippery", "air_rich"],
         quotes: {
             preBattle: ["Let's play!"],
             postWin: ["Time for a nap! Or maybe some cabbage!"],
@@ -209,18 +229,19 @@ export const characters = {
             'azula': { type: "clash_of_styles", dynamic: "precision_vs_chaos" }
         }
     },
-    'ty-lee': { 
-        id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", bendingTypes: ["Chi-Blocking"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
+    'ty-lee': {
+        id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", bendingTypes: ["Chi-Blocking"], pronouns: { s: 'she', p: 'her', o: 'her' },
         style: "agile chi-blocking", role: "disabler", tone: "playful_acrobatic", victoryStyle: "Playful", powerTier: 4,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "execute", object: "series of acrobatic flips", requiresArticle: true}, 
-            {verb: "strike", object: "vital pressure point", requiresArticle: true}, 
-            {verb: "gracefully dodge", object: "an attack", requiresArticle: true}, 
-            {verb: "use", object: "her agility to move like a blur", requiresArticle: false},
-            {verb: "deliver", object: "flurry of chi-blocking strikes", finisher: true, requiresArticle: true, finalFlavor: ["In a flash of pink, Ty Lee cartwheeled past her opponent's defenses, landing a series of quick, precise jabs to their pressure points. Their bending sputtered and died, leaving them helpless.", "Ty Lee landed gracefully behind her foe, a single, silent finger-strike to the base of the neck ending the fight instantly. 'Your aura is... all blocked up!' she chirped."]}
-        ], 
-        strengths: ["Exceptional Agility", "Disables Benders", "Precise Strikes", "Unpredictable Movements", "cramped", "dense", "vertical", "precarious", "cover_rich", "plants_rich"], 
-        weaknesses: ["Vulnerable if Immobilized", "Limited Offensive Power", "Fragile", "exposed", "slippery", "hot", "cold", "open"], 
+            { name: "Acrobatic Flips", verb: 'execute', object: 'a series of acrobatic flips', type: 'Utility', power: 25, emoji: '🤸‍♀️', requiresArticle: true },
+            { name: "Pressure Point Strike", verb: 'strike', object: 'a vital pressure point', type: 'Offense', power: 60, emoji: '🎯', requiresArticle: true },
+            { name: "Graceful Dodge", verb: 'gracefully dodge', object: 'an incoming attack', type: 'Defense', power: 40, emoji: '🍃', requiresArticle: true },
+            { name: "Blur of Motion", verb: 'move', object: 'like a blur', type: 'Utility', power: 20, emoji: '💨', requiresArticle: false },
+            { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'a flurry of chi-blocking strikes', type: 'Finisher', power: 85, emoji: '🛑', requiresArticle: true }
+        ],
+        strengths: ["Exceptional Agility", "Disables Benders", "Precise Strikes", "Unpredictable Movements", "cramped", "dense", "vertical", "precarious", "cover_rich", "plants_rich"],
+        weaknesses: ["Vulnerable if Immobilized", "Limited Offensive Power", "Fragile", "exposed", "slippery", "hot", "cold", "open"],
         quotes: {
             preBattle: ["Ooh! This is going to be fun!"],
             postWin: ["Looks like your chi's... on vacation!"],
@@ -233,18 +254,21 @@ export const characters = {
             'zuko': {type: "ally", dynamic: "former_teammate"}
         }
     },
-    'mai': { 
-        id: 'mai', name: "Mai", type: "Nonbender", bendingTypes: ["Non-Bending"], pronouns: { s: 'she', p: 'her', o: 'her' }, 
+    'mai': {
+        id: 'mai', name: "Mai", type: "Nonbender", bendingTypes: ["Non-Bending"], pronouns: { s: 'she', p: 'her', o: 'her' },
         style: "precise marksmanship", role: "sniper_zoner", tone: "unflappable_deadpan", victoryStyle: "Deadpan", powerTier: 4,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "unleash", object: "volley of stilettos", requiresArticle: true}, 
-            {verb: "pin", object: "her opponent's clothing to a wall", requiresArticle: false}, 
-            {verb: "throw", object: "shuriken to disarm her foe", requiresArticle: true}, 
-            {verb: "launch", object: "silent, razor-sharp blades", requiresArticle: true},
-            {verb: "strike", object: "a vital pressure point with a knife throw", finisher: true, requiresArticle: true, finalFlavor: ["With an almost bored flick of her wrist, Mai sent a single, perfectly aimed stiletto that pinned her opponent's sleeve to a wall, ending the fight without a scratch.", "A flurry of knives erupted from Mai's sleeves, not to harm, but to herd her opponent into a corner, completely trapped and unable to continue."]}
-        ], 
-        strengths: ["Deadly Accuracy", "Highly Precise", "Unflappable Demeanor", "Ranged Dominance", "open", "cover_rich", "vertical"], 
-        weaknesses: ["Limited to Ranged Attacks", "Vulnerable in Close Proximity", "Lack of Close Combat Skills", "cramped", "dense", "low_visibility", "slippery"], 
+            { name: "Knife Barrage", verb: 'unleash', object: 'a barrage of knives', type: 'Offense', power: 50, emoji: '🔪', requiresArticle: true },
+            { name: "Precision Strike", verb: 'throw', object: 'a single, perfectly aimed knife', type: 'Offense', power: 65, emoji: '🎯', requiresArticle: true },
+            { name: "Knife Wall", verb: 'create', object: 'a defensive wall of knives', type: 'Defense', power: 45, emoji: '🧱', requiresArticle: true },
+            { name: "Acrobatic Dodge", verb: 'dodge', object: 'with an acrobatic flip', type: 'Defense', power: 30, emoji: '🤸‍♀️', requiresArticle: false },
+            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, emoji: '📌', requiresArticle: false },
+            { name: "Ricochet Shot", verb: 'launch', object: 'a ricochet shot', type: 'Offense', power: 55, emoji: '🔄', requiresArticle: true },
+            { name: "Final Pin", verb: 'unleash', object: 'a final volley to trap her opponent', type: 'Finisher', power: 80, emoji: '📍', requiresArticle: false }
+        ],
+        strengths: ["Deadly Accuracy", "Highly Precise", "Unflappable Demeanor", "Ranged Dominance", "open", "cover_rich", "vertical"],
+        weaknesses: ["Limited to Ranged Attacks", "Vulnerable in Close Proximity", "Lack of Close Combat Skills", "cramped", "dense", "low_visibility", "slippery"],
         quotes: {
             preBattle: ["Don't waste my time."],
             postWin: ["That's it. Are we done now?"],
@@ -256,19 +280,22 @@ export const characters = {
             'sokka': {type: "rivalry", dynamic: "clash_of_wits"}
         }
     },
-    'iroh': { 
-        id: 'iroh', name: "Iroh", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'iroh': {
+        id: 'iroh', name: "Iroh", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "wise firebending", role: "mentor_strategist", tone: "wise_calm", victoryStyle: "Wise", powerTier: 8,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "breathe", object: "plume of controlled fire", requiresArticle: true}, 
-            {verb: "heat", object: "the ground to limit movement", requiresArticle: false}, 
-            {verb: "calmly redirect", object: "a lightning bolt", requiresArticle: true}, 
-            {verb: "execute", object: "subtle, evasive maneuver", requiresArticle: true}, 
-            {verb: "launch", object: "powerful, yet controlled, fire blast", requiresArticle: true},
-            {verb: "envelop", object: "his opponent in a ring of flames", finisher: true, requiresArticle: false, finalFlavor: ["Iroh sighed softly, then enveloped his opponent in a gentle, yet inescapable ring of flames, not to burn, but to show the fight was over. 'Would you care for some tea?' he offered.", "Sensing his opponent's energy, Iroh calmly guided their attack, redirecting it harmlessly into the sky. The sheer mastery of the move left his foe stunned into submission."]}
-        ], 
-        strengths: ["Masterful Strategist", "Profound Wisdom", "Lightning Redirection", "Hidden Power", "hot", "cover_rich", "cramped", "dense"], 
-        weaknesses: ["Reluctance to Engage in Direct Combat", "Prefers Philosophy to Fighting", "water_rich", "ice_rich", "slippery", "cold", "open", "exposed"], 
+            { name: "Fire Breath", verb: 'breathe', object: 'a plume of controlled fire', type: 'Offense', power: 60, emoji: '🐉', requiresArticle: true },
+            { name: "Lightning Generation", verb: 'generate', object: 'a powerful bolt of lightning', type: 'Finisher', power: 95, emoji: '⚡', requiresArticle: true },
+            { name: "Lightning Redirection", verb: 'redirect', object: 'an incoming lightning attack', type: 'Defense', power: 80, emoji: '🔄', requiresArticle: true },
+            { name: "Flame Barrier", verb: 'create', object: 'a wall of fire', type: 'Defense', power: 65, emoji: '🧱', requiresArticle: true },
+            { name: "Dragon Dance", verb: 'perform', object: 'the Dragon Dance', type: 'Utility', power: 25, emoji: '💃', requiresArticle: false },
+            { name: "Spiritual Fire", verb: 'unleash', object: 'spiritual fire', type: 'Offense', power: 70, emoji: '🧘', requiresArticle: false },
+            { name: "Warming Embrace", verb: 'offer', object: 'a warming embrace', type: 'Utility', power: 20, emoji: '☕', requiresArticle: true },
+            { name: "Wise Strike", verb: 'strike', object: 'with a precise blast of fire', type: 'Offense', power: 50, emoji: '🍵', requiresArticle: false }
+        ],
+        strengths: ["Masterful Strategist", "Profound Wisdom", "Lightning Redirection", "Hidden Power", "hot", "cover_rich", "cramped", "dense"],
+        weaknesses: ["Reluctance to Engage in Direct Combat", "Prefers Philosophy to Fighting", "water_rich", "ice_rich", "slippery", "cold", "open", "exposed"],
         quotes: {
             preBattle: ["Perhaps a cup of jasmine tea first?"],
             postWin: ["There is always hope for redirection, even in battle."],
@@ -281,19 +308,21 @@ export const characters = {
             'jeong-jeong': { type: "philosophical_peer", bond: "friendly", history: "shared_burden_of_firebending" }
         }
     },
-    'pakku': { 
-        id: 'pakku', name: "Pakku", type: "Bender", bendingTypes: ["Water"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'pakku': {
+        id: 'pakku', name: "Pakku", type: "Bender", bendingTypes: ["Water"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "disciplined waterbending", role: "master_disciplinarian", tone: "stern_commanding", victoryStyle: "Disciplined", powerTier: 7,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "create", object: "vortex of razor-sharp ice shards", requiresArticle: true}, 
-            {verb: "launch", object: "powerful water whips", requiresArticle: true}, 
-            {verb: "ride", object: "massive water spout", requiresArticle: true}, 
-            {verb: "assume", object: "defensive stance", requiresArticle: true}, 
-            {verb: "shape", object: "solid ice barrier", requiresArticle: true},
-            {verb: "freeze", object: "the ground, trapping his opponent", finisher: true, requiresArticle: false, finalFlavor: ["With a series of fluid, precise movements, Pakku encased his opponent in an unyielding prison of flawlessly clear ice, ending the duel with indisputable mastery.", "Pakku used his mastery over water to create a massive octopus form, its tentacles overwhelming his foe's defenses and proving his superior technique."]}
-        ], 
-        strengths: ["Exceptional Waterbending Prowess", "Disciplined Combatant", "Master Tactician", "water_rich", "ice_rich", "slippery", "cold", "open"], 
-        weaknesses: ["Rigid Adherence to Tradition", "Can Underestimate Opponents", "Initial Arrogance", "Limited Adaptability", "hot", "sandy", "exposed", "cramped"], 
+            { name: "Ice Spikes", verb: 'launch', object: 'a volley of ice spikes', type: 'Offense', power: 50, emoji: '🧊', requiresArticle: true },
+            { name: "Water Barrier", verb: 'erect', object: 'a solid water barrier', type: 'Defense', power: 60, emoji: '🛡️', requiresArticle: true },
+            { name: "Frozen Ground", verb: 'freeze', object: 'the ground', type: 'Utility', power: 35, emoji: '❄️', requiresArticle: false },
+            { name: "Ice Prison", verb: 'encase', object: 'his foe in an ice prison', type: 'Utility', power: 65, emoji: '🧊', requiresArticle: false },
+            { name: "Tidal Surge", verb: 'summon', object: 'a powerful tidal surge', type: 'Offense', power: 75, emoji: '🌊', requiresArticle: true },
+            { name: "Ice Armor", verb: 'form', object: 'a suit of ice armor', type: 'Defense', power: 70, emoji: '🗿', requiresArticle: true },
+            { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, emoji: '🐙', requiresArticle: false }
+        ],
+        strengths: ["Exceptional Waterbending Prowess", "Disciplined Combatant", "Master Tactician", "water_rich", "ice_rich", "slippery", "cold", "open"],
+        weaknesses: ["Rigid Adherence to Tradition", "Can Underestimate Opponents", "Initial Arrogance", "Limited Adaptability", "hot", "sandy", "exposed", "cramped"],
         quotes: {
             preBattle: ["Let's see if you're worthy of my time."],
             postWin: ["Discipline prevails."],
@@ -305,19 +334,21 @@ export const characters = {
             'sokka': { type: "opposed_philosophy", dynamic: "philosophical_clash" }
         }
     },
-    'jeong-jeong': { 
-        id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
+    'jeong-jeong': {
+        id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", bendingTypes: ["Fire"], pronouns: { s: 'he', p: 'his', o: 'him' },
         style: "controlled firebending", role: "defensive_zoner", tone: "wise_reluctant", victoryStyle: "Wise_Reluctant", powerTier: 6,
+        maxHealth: 100, maxEnergy: 100,
         techniques: [
-            {verb: "create", object: "massive, impenetrable wall of fire", requiresArticle: true}, 
-            {verb: "launch", object: "small, precise fire blasts", requiresArticle: true}, 
-            {verb: "raise", object: "pillars of flame from the ground", requiresArticle: false}, 
-            {verb: "evade", object: "", requiresArticle: false}, 
-            {verb: "control", object: "ring of fire to maintain distance", requiresArticle: true},
-            {verb: "dissipate", object: "his flames into smoke", finisher: true, requiresArticle: false, finalFlavor: ["Jeong Jeong calmly raised an impenetrable wall of flame, not to attack, but to show the utter futility of continuing the fight. His opponent, facing the impassable barrier, conceded.", "With a heavy sigh, Jeong Jeong extinguished his opponent's will to fight by demonstrating overwhelming control, extinguishing their attacks without ever launching his own."]}
-        ], 
-        strengths: ["Exceptional Self-Control", "Wise Strategist", "Defensive Master", "hot", "cover_rich", "cramped", "dense"], 
-        weaknesses: ["Reluctance to Fight", "Pessimistic Outlook", "Less Offensive Power", "water_rich", "ice_rich", "slippery", "cold", "open", "exposed", "low_visibility"], 
+            { name: "Controlled Inferno", verb: 'create', object: 'a controlled inferno', type: 'Offense', power: 80, emoji: '🔥', requiresArticle: true },
+            { name: "Fire Wall", verb: 'raise', object: 'an impenetrable wall of fire', type: 'Defense', power: 85, emoji: '🧱', requiresArticle: true },
+            { name: "Flame Whips", verb: 'conjure', object: 'precise flame whips', type: 'Offense', power: 55, emoji: '🐍', requiresArticle: false },
+            { name: "Fire Cloak", verb: 'don', object: 'a cloak of defensive fire', type: 'Defense', power: 50, emoji: '🧥', requiresArticle: true },
+            { name: "Precision Burn", verb: 'inflict', object: 'a surgical burn', type: 'Offense', power: 45, emoji: '🎯', requiresArticle: true },
+            { name: "Flame Dispersion", verb: 'disperse', object: 'an incoming fire attack', type: 'Defense', power: 60, emoji: '💨', requiresArticle: true },
+            { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, emoji: '🛑', requiresArticle: false }
+        ],
+        strengths: ["Exceptional Self-Control", "Wise Strategist", "Defensive Master", "hot", "cover_rich", "cramped", "dense"],
+        weaknesses: ["Reluctance to Fight", "Pessimistic Outlook", "Less Offensive Power", "water_rich", "ice_rich", "slippery", "cold", "open", "exposed", "low_visibility"],
         quotes: {
             preBattle: ["I seek not to fight, but to teach. If you insist."],
             postWin: ["The destructive path of fire has been averted, for now."],

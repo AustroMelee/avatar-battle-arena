@@ -1,6 +1,6 @@
 'use strict';
 
-import { calculateWinProbability, generateBattleStory } from './battle-engine.js';
+import { simulateBattle } from './battle-engine-v2.js'; // <-- NEW ENGINE
 import { DOM, populateDropdowns, updateFighterDisplay, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
 
 function handleBattleStart() {
@@ -22,10 +22,9 @@ function handleBattleStart() {
 
     setTimeout(() => {
         try {
-            const battleOutcome = calculateWinProbability(f1Id, f2Id, locId);
-            const story = generateBattleStory(f1Id, f2Id, locId, battleOutcome);
-            battleOutcome.story = story;
-            showResultsState(battleOutcome);
+            // New battle simulation call
+            const battleResult = simulateBattle(f1Id, f2Id, locId);
+            showResultsState(battleResult);
 
         } catch (error) {
             console.error("An error occurred during battle simulation:", error);

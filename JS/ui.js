@@ -20,7 +20,7 @@ export const DOM = {
     vsDivider: document.getElementById('vsDivider'),
     winnerName: document.getElementById('winner-name'),
     winProbability: document.getElementById('win-probability'),
-    battleStory: document.getElementById('battle-story'),
+    battleStory: document.getElementById('battle-story'), // This will now hold the battle log
     analysisList: document.getElementById('analysis-list'),
 };
 
@@ -39,13 +39,15 @@ export function updateFighterDisplay(fighterKey) {
 }
 
 export function populateDropdowns() {
-    const sortedCharacterKeys = Object.keys(characters).sort((a, b) => characters[a].name.localeCompare(characters[b].name));
+    // Filter out characters without techniques (like Ty Lee who was omitted)
+    const availableCharacters = Object.keys(characters).filter(id => characters[id].techniques && characters[id].techniques.length > 0);
+    const sortedCharacterKeys = availableCharacters.sort((a, b) => characters[a].name.localeCompare(characters[b].name));
+    
     sortedCharacterKeys.forEach(id => {
-        if (characters.hasOwnProperty(id)) {
-            DOM.fighter1Select.add(new Option(characters[id].name, id));
-            DOM.fighter2Select.add(new Option(characters[id].name, id));
-        }
+        DOM.fighter1Select.add(new Option(characters[id].name, id));
+        DOM.fighter2Select.add(new Option(characters[id].name, id));
     });
+
     for (const id in locations) {
         if (locations.hasOwnProperty(id)) {
             DOM.locationSelect.add(new Option(locations[id].name, id));
@@ -53,90 +55,57 @@ export function populateDropdowns() {
     }
 }
 
-export function displayOutcomeAnalysis(outcomeReasons, winnerId, loserId, f1FinalScore, f2FinalScore) {
+function displayFinalAnalysis(finalState, winnerId) {
     DOM.analysisList.innerHTML = '';
-    const f1Id = DOM.fighter1Select.value;
-    const f2Id = DOM.fighter2Select.value;
-    
-    const createListItem = (reasonText, modifier) => {
+    const { fighter1, fighter2 } = finalState;
+
+    const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
         li.className = 'analysis-item';
-        
         const spanReason = document.createElement('span');
-        spanReason.innerHTML = reasonText; 
-        
-        const spanModifier = document.createElement('span');
-        if (typeof modifier === 'number') {
-            spanModifier.textContent = (modifier > 0 ? '+' : '') + Math.round(modifier);
-            if (modifier > 0) spanModifier.className = 'modifier-plus';
-            else if (modifier < 0) spanModifier.className = 'modifier-minus';
-            else spanModifier.className = 'modifier-neutral';
-        } else {
-            spanModifier.textContent = modifier;
-            spanModifier.className = 'modifier-neutral';
-        }
-        
+        spanReason.innerHTML = text;
+        const spanValue = document.createElement('span');
+        spanValue.textContent = value;
+        spanValue.className = valueClass;
         li.appendChild(spanReason);
-        li.appendChild(spanModifier);
+        li.appendChild(spanValue);
         DOM.analysisList.appendChild(li);
     };
 
-    createListItem(`<b>${characters[f1Id]?.name || 'Fighter 1'}'s Score Breakdown</b>`, '');
-    outcomeReasons.filter(r => r.fighterId === f1Id).forEach(reason => {
-        createListItem(`  • ${reason.reason}`, reason.modifier);
-    });
-    createListItem(`  • <b>Total Score</b>`, Math.round(f1FinalScore));
+    createListItem(`<b>${fighter1.name}'s Final Status</b>`, winnerId === fighter1.id ? 'VICTORIOUS' : 'DEFEATED', winnerId === fighter1.id ? 'modifier-plus' : 'modifier-minus');
+    createListItem(`  • Final Health`, `${Math.round(fighter1.hp)} / 100 HP`);
+    createListItem(`  • Final Energy`, `${Math.round(fighter1.energy)} / 100`);
 
-    createListItem(`<b>${characters[f2Id]?.name || 'Fighter 2'}'s Score Breakdown</b>`, '');
-    outcomeReasons.filter(r => r.fighterId === f2Id).forEach(reason => {
-        createListItem(`  • ${reason.reason}`, reason.modifier);
-    });
-    createListItem(`  • <b>Total Score</b>`, Math.round(f2FinalScore));
-
-    if (winnerId && loserId) {
-        const winnerName = `<span class="char-${winnerId}">${characters[winnerId].name}</span>`;
-        const loserName = `<span class="char-${loserId}">${characters[loserId].name}</span>`;
-        createListItem(`<b>${winnerName} vs. ${loserName} Summary</b>`, '');
-        createListItem(`  • ${winnerName}'s Overall Advantage`, 'WIN');
-    } else {
-        createListItem('<b>The Battle Concluded in a Draw</b>', '');
-    }
+    createListItem(`<b>${fighter2.name}'s Final Status</b>`, winnerId === fighter2.id ? 'VICTORIOUS' : 'DEFEATED', winnerId === fighter2.id ? 'modifier-plus' : 'modifier-minus');
+    createListItem(`  • Final Health`, `${Math.round(fighter2.hp)} / 100 HP`);
+    createListItem(`  • Final Energy`, `${Math.round(fighter2.energy)} / 100`);
 }
+
 
 export function showLoadingState() {
     DOM.resultsSection.classList.remove('show');
-    DOM.resultsSection.style.display = 'block'; 
+    DOM.resultsSection.style.display = 'block';
     DOM.loadingSpinner.classList.remove('hidden');
     DOM.battleResultsContainer.classList.add('hidden');
     DOM.battleBtn.disabled = true;
     DOM.vsDivider.classList.add('clash');
-    
+
     setTimeout(() => {
         DOM.resultsSection.classList.add('show');
         DOM.resultsSection.scrollIntoView({ behavior: 'smooth' });
     }, 10);
 }
 
-export function showResultsState(battleOutcome) {
+export function showResultsState(battleResult) {
     DOM.vsDivider.classList.remove('clash');
-    if (battleOutcome.victoryType === 'draw') {
-        DOM.winnerName.textContent = `It's a Draw!`;
-        DOM.winProbability.textContent = `Both fighters proved equally formidable.`;
-    } else {
-        DOM.winnerName.textContent = `${characters[battleOutcome.winnerId].name} Wins!`;
-        DOM.winProbability.textContent = `Calculated Victory Probability: ${battleOutcome.winProb}%`;
-        const winnerSection = battleOutcome.winnerId === DOM.fighter1Select.value ? DOM.fighter1Section : DOM.fighter2Section;
-        winnerSection.classList.add('winner-highlight');
-    }
+    
+    DOM.winnerName.textContent = `${characters[battleResult.winnerId].name} Wins!`;
+    DOM.winProbability.textContent = `A decisive victory after a fierce battle.`; // Simplified text
+    const winnerSection = battleResult.winnerId === DOM.fighter1Select.value ? DOM.fighter1Section : DOM.fighter2Section;
+    winnerSection.classList.add('winner-highlight');
 
-    DOM.battleStory.innerHTML = battleOutcome.story;
-    displayOutcomeAnalysis(
-        battleOutcome.outcomeReasons,
-        battleOutcome.winnerId,
-        battleOutcome.loserId,
-        battleOutcome.f1FinalScore,
-        battleOutcome.f2FinalScore
-    );
+    DOM.battleStory.innerHTML = battleResult.log; // Display the battle log
+    displayFinalAnalysis(battleResult.finalState, battleResult.winnerId);
 
     DOM.loadingSpinner.classList.add('hidden');
     DOM.battleResultsContainer.classList.remove('hidden');
