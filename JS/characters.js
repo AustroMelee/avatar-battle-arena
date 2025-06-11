@@ -17,12 +17,13 @@ export const characters = {
         quotes: {
             preBattle: "Alright, let's see what kind of mess we can get into!",
             postWin: "Boomerang! You *do* always come back!",
-            postWin_dominant: ["'See? Brains over brawn... and a little bit of improvisation!', Sokka chirped, retrieving his boomerang."],
-            postWin_stomp: ["'BOOMERANG! And that's all she wrote, folks! You totally didn't see that coming, did you?!'"],
-            postWin_specific: { 'pakku': ["'See, Pakku? Brains over brawn... and a little bit of improvisation!'"], 'katara': ["'Who's the master strategist now, Katara? Boomerang one, bending zero!'"] },
-            postWin_clever: ["'My genius is sometimes... it's almost frightening!'", "'Plan G was a success! Now, who's hungry?'"],
-            postWin_reflective: ["'Whew. Okay. That was a little too close. But a win's a win!'"],
-            postWin_overwhelming: ["'Nailed it! I am the greatest warrior-inventor of our time!'"],
+            // FIX: The second element is now a valid string.
+            postWin_dominant: ["See? Brains over brawn... and a little bit of improvisation!", "Sokka chirped, retrieving his boomerang."],
+            postWin_stomp: ["BOOMERANG! And that's all she wrote, folks! You totally didn't see that coming, did you?!"],
+            postWin_specific: { 'pakku': ["See, Pakku? Brains over brawn... and a little bit of improvisation!"], 'katara': ["Who's the master strategist now, Katara? Boomerang one, bending zero!"] },
+            postWin_clever: ["My genius is sometimes... it's almost frightening!", "Plan G was a success! Now, who's hungry?"],
+            postWin_reflective: ["Whew. Okay. That was a little too close. But a win's a win!"],
+            postWin_overwhelming: ["Nailed it! I am the greatest warrior-inventor of our time!"],
             postLose: "Well, that's just unfair. Who designed this arena?",
         },
         relationships: {
@@ -46,9 +47,9 @@ export const characters = {
         quotes: {
             preBattle: "Let's keep this light, okay?",
             postWin: "Phew! Nobody got hurt, right? Mostly.",
-            postWin_clever: ["'Sometimes the best way to win is to just not get hit!'"],
-            postWin_reflective: ["'That was intense, but I'm glad it's over peacefully.'"],
-            postWin_overwhelming: ["'Whoa, that was a lot of air! Are you okay?'"],
+            postWin_clever: ["Sometimes the best way to win is to just not get hit!"],
+            postWin_reflective: ["That was intense, but I'm glad it's over peacefully."],
+            postWin_overwhelming: ["Whoa, that was a lot of air! Are you okay?"],
             postLose: "Guess I need a bit more practice at... not getting defeated.",
         },
         relationships: {
@@ -72,8 +73,8 @@ export const characters = {
         quotes: {
             preBattle: "I won't hold back. Not if you won't.",
             postWin: "That's how you do it, for my family, for my tribe!",
-            postWin_reflective: ["'Winning is sometimes hard, but I'll always fight for what's right.'"],
-            postWin_overwhelming: ["'That's what happens when you underestimate a waterbender!'"],
+            postWin_reflective: ["Winning is sometimes hard, but I'll always fight for what's right."],
+            postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"],
             postLose: "I won't let this happen again!",
         },
         relationships: {
@@ -97,8 +98,8 @@ export const characters = {
         quotes: {
             preBattle: "Let's see what you're made of, twinkletoes.",
             postWin: "Told you I was the best. The greatest earthbender in the world!",
-            postWin_clever: ["'Who needs eyes when you can see with your feet?'", "'Ground game strong, always.'"],
-            postWin_overwhelming: ["'HA! That's what happens when you fight the greatest earthbender in the world!'"],
+            postWin_clever: ["Who needs eyes when you can see with your feet?", "Ground game strong, always."],
+            postWin_overwhelming: ["HA! That's what happens when you fight the greatest earthbender in the world!"],
             postLose: "Whatever. That doesn’t count. You cheated!",
         },
         relationships: {
@@ -121,11 +122,11 @@ export const characters = {
         quotes: {
             preBattle: "I've struggled for my honor. I'm not losing this.",
             postWin: "I fought for my own path. And I won.",
-            postWin_dominant: ["'My honor is my own. And I will not be defeated.'", "'That was a mistake. Challenging me.'"],
-            postWin_stomp: ["'Pathetic. That was hardly a challenge.'"],
-            postWin_specific: { 'azula': ["'No lightning today, Azula? I've changed. I'm stronger.'"] },
-            postWin_reflective: ["'I'm... stronger now. This proves it.'", "(Zuko says nothing, only breathing heavily, the internal battle more difficult than the external one.)"],
-            postWin_overwhelming: ["'My fire burns hotter because I fight for something real!'"],
+            postWin_dominant: ["My honor is my own. And I will not be defeated.", "That was a mistake. Challenging me."],
+            postWin_stomp: ["Pathetic. That was hardly a challenge."],
+            postWin_specific: { 'azula': ["No lightning today, Azula? I've changed. I'm stronger."] },
+            postWin_reflective: ["I'm... stronger now. This proves it.", "(Zuko says nothing, only breathing heavily, the internal battle more difficult than the external one.)"],
+            postWin_overwhelming: ["My fire burns hotter because I fight for something real!"],
             postLose: "Agh! Why can't I ever win?!",
         },
         relationships: {
@@ -148,8 +149,8 @@ export const characters = {
         quotes: {
             preBattle: "Don't bother. You're outmatched.",
             postWin: "Flawless. As expected.",
-            postWin_clever: ["'Did you truly think you could outwit me?'"],
-            postWin_overwhelming: ["'My power is absolute. You are beneath me.'"],
+            postWin_clever: ["Did you truly think you could outwit me?"],
+            postWin_overwhelming: ["My power is absolute. You are beneath me."],
             postLose: "Impossible! This is insubordination!",
         },
         relationships: {
@@ -172,7 +173,7 @@ export const characters = {
         quotes: {
             preBattle: "I am the Phoenix King! You are nothing!",
             postWin: "The Fire Nation is supreme! My power is absolute!",
-            postWin_overwhelming: ["'I am the Phoenix King! There is no equal!'"],
+            postWin_overwhelming: ["I am the Phoenix King! There is no equal!"],
             postLose: "This cannot be! I am the Fire Lord!",
         },
         relationships: {
@@ -196,8 +197,8 @@ export const characters = {
         quotes: {
             preBattle: "Let's play!",
             postWin: "Time for a nap! Or maybe some cabbage!",
-            postWin_clever: ["'You thought you knew my next move, didn't you?! Haha!'"],
-            postWin_overwhelming: ["'The earth moves for me! No one can stop the Mad King!'"],
+            postWin_clever: ["You thought you knew my next move, didn't you?! Haha!"],
+            postWin_overwhelming: ["The earth moves for me! No one can stop the Mad King!"],
             postLose: "Haha! You almost had me, you crazy kid!",
         },
         relationships: {
@@ -221,8 +222,8 @@ export const characters = {
         quotes: {
             preBattle: "Ooh! This is going to be fun!",
             postWin: "Looks like your chi's... on vacation!",
-            postWin_clever: ["'Boing! You can't catch me!'", "'Looks like someone's aura is all murky now!'"],
-            postWin_overwhelming: ["'Ta-da! That's how it's done!'"],
+            postWin_clever: ["Boing! You can't catch me!", "Looks like someone's aura is all murky now!"],
+            postWin_overwhelming: ["Ta-da! That's how it's done!"],
             postLose: "Aw, man! And I didn't even get to do my special handstand!",
         },
         relationships: {
@@ -245,7 +246,7 @@ export const characters = {
         quotes: {
             preBattle: "Don't waste my time.",
             postWin: "That's it. Are we done now?",
-            postWin_overwhelming: ["'You were never a threat. Just... annoying.'"],
+            postWin_overwhelming: ["You were never a threat. Just... annoying."],
             postLose: "Hmph. Pathetic.",
         },
         relationships: {
@@ -269,8 +270,8 @@ export const characters = {
         quotes: {
             preBattle: "Perhaps a cup of jasmine tea first?",
             postWin: "There is always hope for redirection, even in battle.",
-            postWin_reflective: ["'Even in conflict, there is peace to be found.'"],
-            postWin_clever: ["'The greatest victories are often won with the mind, not just the fist.'"],
+            postWin_reflective: ["Even in conflict, there is peace to be found."],
+            postWin_clever: ["The greatest victories are often won with the mind, not just the fist."],
             postLose: "A momentary lapse. It happens to the best of us.",
         },
         relationships: {
@@ -294,7 +295,7 @@ export const characters = {
         quotes: {
             preBattle: "Let's see if you're worthy of my time.",
             postWin: "Discipline prevails.",
-            postWin_overwhelming: ["'My mastery is absolute. There is no question of the outcome.'"],
+            postWin_overwhelming: ["My mastery is absolute. There is no question of the outcome."],
             postLose: "This is... unacceptable.",
         },
         relationships: {
@@ -318,7 +319,7 @@ export const characters = {
         quotes: {
             preBattle: "I seek not to fight, but to teach. If you insist.",
             postWin: "The destructive path of fire has been averted, for now.",
-            postWin_reflective: ["'The true victory lies in avoiding destruction, not causing it.'"],
+            postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."],
             postLose: "Such is the way of things. All flames eventually fade.",
         },
         relationships: {

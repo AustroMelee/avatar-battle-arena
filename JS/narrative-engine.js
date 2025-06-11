@@ -4,6 +4,30 @@ import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
 import { battleBeats } from './narrative-data.js';
 
+// --- NEW HELPER FUNCTION: The heart of our repetition fix ---
+// This ensures we don't use the same move over and over.
+function getUniqueTechnique(character, usedTechniques) {
+    // Filter out techniques that have already been used in this fight.
+    const availableTechniques = character.techniques.filter(t => !usedTechniques.has(t.verb));
+
+    // If we still have unique techniques left, pick one.
+    if (availableTechniques.length > 0) {
+        const technique = getRandomElement(availableTechniques);
+        usedTechniques.add(technique.verb); // Mark this verb as used
+        return technique;
+    }
+
+    // If we've used all unique techniques, we'll allow a repeat but prioritize non-finishers.
+    const nonFinishers = character.techniques.filter(t => !t.finisher);
+    if (nonFinishers.length > 0) {
+        return getRandomElement(nonFinishers);
+    }
+    
+    // Fallback to any technique if only finishers are left
+    return getRandomElement(character.techniques);
+}
+
+
 function toGerund(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
@@ -36,21 +60,26 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     const winner = characters[winnerId], loser = characters[loserId];
 
     let story = [];
+    const usedTechniques = new Set(); // The context controller for verb usage
 
     const populateBeat = (template, initiator, responder, context) => {
-        const { winner, loser, loc, winnerTech, loserTech } = context;
-        const initiatorTech = (initiator.id === winner.id) ? winnerTech : loserTech;
-        const responderTech = (responder.id === winner.id) ? winnerTech : loserTech;
-        const finisherTech = getRandomElement(winner.techniques.filter(t => t.finisher)) || getRandomElement(winner.techniques) || { verb: 'strike', object: 'out', method: ''};
+        const { winner, loser, loc, initiatorTech, responderTech } = context;
+        // The finisher description is now self-contained and doesn't need a verb/object.
+        const finisherDescription = getRandomElement(winner.techniques.filter(t => t.finisher))?.finalFlavor || `delivered a final, decisive blow.`;
+
+        // --- GRAMMAR FIX: Capitalize pronouns for start-of-sentence usage ---
+        const initiatorPronounSCap = initiator.pronouns.s.charAt(0).toUpperCase() + initiator.pronouns.s.slice(1);
+        const responderPronounSCap = responder.pronouns.s.charAt(0).toUpperCase() + responder.pronouns.s.slice(1);
 
         return template
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)
             .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
             .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
-            .replace(/{locationFeature}/g, loc.featureA)
-            .replace(/{locationTerrain}/g, loc.terrain)
+            .replace(/{locationFeature}/g, `<b>${loc.featureA}</b>`)
+            .replace(/{locationTerrain}/g, `<b>${loc.terrain}</b>`)
             .replace(/{initiatorPronounS}/g, initiator.pronouns.s)
+            .replace(/{initiatorPronounSCap}/g, initiatorPronounSCap)
             .replace(/{initiatorPronounO}/g, initiator.pronouns.o)
             .replace(/{initiatorPronounP}/g, initiator.pronouns.p)
             .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech.verb))
@@ -58,41 +87,55 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{initiator_verb_base}/g, initiatorTech.verb.toLowerCase())
             .replace(/{initiator_object}/g, initiatorTech.object || '')
             .replace(/{responderPronounS}/g, responder.pronouns.s)
+            .replace(/{responderPronounSCap}/g, responderPronounSCap)
             .replace(/{responderPronounO}/g, responder.pronouns.o)
             .replace(/{responderPronounP}/g, responder.pronouns.p)
             .replace(/{responder_verb_ing}/g, toGerund(responderTech.verb))
             .replace(/{responder_verb_past}/g, toPastTense(responderTech.verb))
             .replace(/{responder_verb_base}/g, responderTech.verb.toLowerCase())
             .replace(/{responder_object}/g, responderTech.object || '')
-            .replace(/{winnerFinisherDescription}/g, getRandomElement(finisherTech.finalFlavor) || `delivered a final, decisive blow.`);
+            .replace(/{winnerFinisherDescription}/g, finisherDescription);
     };
     
-    const context = {
-        winner,
-        loser,
-        loc,
-        winnerTech: getRandomElement(winner.techniques) || { verb: 'attack', object: 'fiercely' },
-        loserTech: getRandomElement(loser.techniques) || { verb: 'defend', object: 'desperately' }
+    // --- OPENING BEAT ---
+    const openingContext = {
+        winner, loser, loc,
+        initiatorTech: getUniqueTechnique((f1.powerTier >= f2.powerTier) ? f1 : f2, usedTechniques),
+        responderTech: getUniqueTechnique((f1.powerTier < f2.powerTier) ? f1 : f2, usedTechniques)
     };
-
     const openingInitiator = (f1.powerTier >= f2.powerTier) ? f1 : f2;
     const openingResponder = (openingInitiator.id === f1.id) ? f2 : f1;
-    story.push(populateBeat(getRandomElement(battleBeats.opening), openingInitiator, openingResponder, context));
+    story.push(populateBeat(getRandomElement(battleBeats.opening), openingInitiator, openingResponder, openingContext));
 
-    story.push(populateBeat(getRandomElement(battleBeats.advantage_attack), winner, loser, context));
+    // --- ADVANTAGE BEAT (Winner's attack) ---
+    const advantageContext = {
+        winner, loser, loc,
+        initiatorTech: getUniqueTechnique(winner, usedTechniques),
+        responderTech: getUniqueTechnique(loser, usedTechniques)
+    };
+    story.push(populateBeat(getRandomElement(battleBeats.advantage_attack), winner, loser, advantageContext));
     
+    // --- MID BEAT (Interaction or Loser's counter-attack) ---
     const locTags = terrainTags[locId] || [];
     const winnerTerrainAdvantage = winner.strengths.some(s => locTags.includes(s));
     let midBeatTemplate;
+    const midBeatContext = {
+        winner, loser, loc,
+        initiatorTech: getUniqueTechnique(winnerTerrainAdvantage ? winner : loser, usedTechniques),
+        responderTech: getUniqueTechnique(winnerTerrainAdvantage ? loser : winner, usedTechniques)
+    };
+
     if (winnerTerrainAdvantage && Math.random() > 0.5) {
         midBeatTemplate = getRandomElement(battleBeats.terrain_interaction);
-        story.push(populateBeat(midBeatTemplate, winner, loser, context));
+        story.push(populateBeat(midBeatTemplate, winner, loser, midBeatContext));
     } else {
         midBeatTemplate = getRandomElement(battleBeats.disadvantage_attack);
-        story.push(populateBeat(midBeatTemplate, loser, winner, context));
+        story.push(populateBeat(midBeatTemplate, loser, winner, midBeatContext));
     }
 
-    story.push(populateBeat(getRandomElement(battleBeats.finishing_move), winner, loser, context));
+    // --- FINISHING MOVE ---
+    const finishingContext = { winner, loser, loc, initiatorTech: {}, responderTech: {} }; // No specific techniques needed here
+    story.push(populateBeat(getRandomElement(battleBeats.finishing_move), winner, loser, finishingContext));
 
     return story.map(beat => `<p>${beat}</p>`).join('');
 }
