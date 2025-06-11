@@ -22,7 +22,7 @@ function getTraitDisplay(character, traitKey) {
         style: "unique approach",
         combatStrength: "superior technique",
         combatWeakness: "unexpected flaw",
-        openingMove: "signature maneuver",
+        openingMove: "a signature maneuver",
         counterMove: "a strong counter-move",
         midGameTactic: "a clever mid-battle tactic",
         terrainAdaptation: "a swift terrain adaptation",
@@ -46,47 +46,25 @@ function getRandomElement(array, fallbackValue = "skill") {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-function toGerund(verb) {
-    if (!verb) return "";
-    if (verb.endsWith('e') && verb.length > 1 && !['be', 'see', 'use'].includes(verb)) {
-        return verb.slice(0, -1) + 'ing';
-    }
-    const doubleConsonant = ['run', 'swim', 'cut', 'hit', 'spin', 'set', 'sit', 'propel', 'pin', 'turn', 'engulf', 'heat'];
-    if (doubleConsonant.includes(verb)) {
-        return verb + verb.slice(-1) + 'ing';
-    }
-    return verb + 'ing';
-}
-
-function sanitizePhrase(phrase) {
-    if (phrase && phrase.startsWith('the ')) {
-        return phrase.substring(4);
-    }
-    return phrase;
-}
-
+// FINAL, SIMPLIFIED VERSION of getStyledAction
 function getStyledAction(fighter, baseAction) {
     const style = getRandomElement(fighter.combatStyleTags, 'default');
     
-    // This map now produces just a descriptive prefix.
+    // This map now produces a simple, reliable adverb or short phrase.
     const flavorMap = {
-        aggressive: "aggressively", precise: "methodically",
-        calculated: "deliberately", improvisational: "cleverly",
-        evasive: "swiftly", fierce: "fiercely",
-        unrelenting: "relentlessly", determined: "with fierce determination",
-        ruthless: "ruthlessly", overwhelming: "with overwhelming force",
-        eccentric: "unpredictably", acrobatic: "acrobatically",
-        silent: "silently", wise: "with calm wisdom",
-        disciplined: "with disciplined precision", controlled: "with precise control",
-        default: ""
+        aggressive: "aggressively unleashed", precise: "methodically executed",
+        calculated: "deliberately unleashed", improvisational: "cleverly attempted",
+        evasive: "swiftly dodged with", fierce: "fiercely launched",
+        unrelenting: "relentlessly unleashed", determined: "with fierce determination, attempted",
+        ruthless: "ruthlessly executed", overwhelming: "with overwhelming force, launched",
+        eccentric: "unpredictably tried", acrobatic: "acrobatically performed",
+        silent: "silently prepared", wise: "with calm wisdom, initiated",
+        disciplined: "with disciplined precision, executed", controlled: "with precise control, unleashed",
+        default: "unleashed"
     };
 
-    const prefix = flavorMap[style] || "";
-    // We combine them carefully to avoid grammar issues.
-    if (prefix.startsWith('with')) {
-        return `${prefix}, ${toGerund(baseAction.split(' ')[0])} ${baseAction.split(' ').slice(1).join(' ')}`;
-    }
-    return `${prefix} ${baseAction.replace('a ', '').replace('an ', '')}`;
+    const verbPhrase = flavorMap[style] || flavorMap.default;
+    return `${verbPhrase} ${baseAction}`;
 }
 
 
@@ -178,7 +156,6 @@ function getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData) {
     return populateTemplate(getRandomElement(archetypePhrases), baseStoryData);
 }
 
-// FIXED: This function is now grammatically sound with getStyledAction
 function generateCombatSequence(f1, f2, loc) {
     const f1_opening_action = getStyledAction(f1, getTraitDisplay(f1, "openingMove"));
     const f2_counter_action = getStyledAction(f2, getTraitDisplay(f2, "counterMove"));
@@ -189,8 +166,8 @@ function generateCombatSequence(f1, f2, loc) {
 
     return [
         `<span class='char-${f1.id}'>${f1.name}</span> initiated the clash, ${f1_opening_action}, directly confronting <span class='char-${f2.id}'>${f2.name}</span>. The very ${loc.featureA} seemed to amplify the impact.`,
-        `<span class='char-${f2.id}'>${f2.name}</span> responded with ${f2_counter_action}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted to ${f1_mid_game_action}, seeking to control the flow.`,
-        `As the battle intensified, <span class='char-${f1.id}'>${f1.name}'s</span> ${f1_finishing_action} met <span class='char-${f2.id}'>${f2.name}'s</span> ${f2_last_ditch_action}. The environment itself seemed to react, with ${loc.featureC} shifting beneath their feet.`
+        `<span class='char-${f2.id}'>${f2.name}</span> responded with ${f2_counter_action}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted and ${f1_mid_game_action}, seeking to control the flow.`,
+        `As the battle intensified, ${f1_finishing_action} from <span class='char-${f1.id}'>${f1.name}</span> met ${f2_last_ditch_action} from <span class='char-${f2.id}'>${f2.name}</span>. The environment itself seemed to react, with ${loc.featureC} shifting beneath their feet.`
     ];
 }
 
@@ -279,7 +256,7 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     });
 
-    // FIXED: Corrected Terrain interactions Logic
+    // Corrected Terrain interactions Logic
     const locTags = terrainTags[locId] || [];
     [f1, f2].forEach(fighter => {
         let fighterModifier = 0;
