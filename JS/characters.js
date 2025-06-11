@@ -34,12 +34,12 @@ export const characters = {
         id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", bendingTypes: ["Air"], pronouns: { s: 'he', p: 'his', o: 'him' }, 
         style: "evasive airbending", role: "evader", tone: "pacifistic_agile", victoryStyle: "Pacifist", powerTier: 9,
         techniques: [
-            {verb: "create", object: "powerful air scooter", requiresArticle: true}, 
-            {verb: "form", object: "massive tornado", requiresArticle: true}, 
-            {verb: "unleash", object: "focused blast of air", requiresArticle: true}, 
-            {verb: "ride", object: "the winds", requiresArticle: false}, 
-            {verb: "weave", object: "through the air", requiresArticle: false},
-            {verb: "launch", object: "his opponent", finisher: true, requiresArticle: false, finalFlavor: ["With a focused gust of wind, Aang swept his foe off their feet, depositing them safely but firmly outside the ring.", "Aang created a swirling vortex of air, lifting his opponent and gently setting them down, disarmed and defeated."]}
+            {verb: "ride", object: "his air scooter to outmaneuver his opponent", requiresArticle: false}, 
+            {verb: "form", object: "a massive tornado to control the battlefield", requiresArticle: false}, 
+            {verb: "unleash", object: "a focused blast of air to push his opponent off balance", requiresArticle: false}, 
+            {verb: "ride", object: "the winds to gain a better position", requiresArticle: false}, 
+            {verb: "weave", object: "through a flurry of attacks, untouchable", requiresArticle: false},
+            {verb: "sweep", object: "his foe off their feet with a focused gust", finisher: true, requiresArticle: false, finalFlavor: ["With a focused gust of wind, Aang swept his foe off their feet, depositing them safely but firmly outside the ring.", "Aang created a swirling vortex of air, lifting his opponent and gently setting them down, disarmed and defeated."]}
         ], 
         strengths: ["Unrivaled Evasiveness", "Exceptional Mobility", "Pacifistic", "open", "vertical", "air_rich", "high_altitude"], 
         weaknesses: ["Aversion to Lethal Force", "Direct Confrontation", "Vulnerable to Ground Traps", "cramped", "dense", "sandy", "low_visibility"], 

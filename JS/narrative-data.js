@@ -7,15 +7,14 @@ export const battleBeats = {
         "Without hesitation, {initiatorName} went on the offensive, {initiator_verb_ing} {initiator_object_phrase}."
     ],
     advantage_attack: [
-        // FIX: Replaced rigid/clashing adverbs with more flexible, descriptive phrasing.
         "Sensing an opportunity, {initiatorName} pressed the advantage, {initiator_verb_ing} {initiator_object_phrase}.",
-        "Dominating the flow, {initiatorName} drove {responderName} back with {initiator_object_phrase}, leaving {responderPronounO} scrambling.",
+        "Dominating the flow, {initiatorName} drove {responderName} back, using {initiatorPronounP} momentum to {initiator_verb_base} {initiator_object_phrase}.",
         "With momentum on {initiatorPronounP} side, {initiatorName} unleashed another powerful attack, {initiator_verb_ing} {initiator_object_phrase}."
     ],
     disadvantage_attack: [
-        // FIX: Replaced the awkward "gambled and..." template with higher-quality, more active, and grammatically safer variants.
-        "Trying to regain footing, {initiatorName} gambled with a quick {initiator_object_phrase}, but {responderName} deftly countered.",
-        "Fighting from a disadvantage, {initiatorName} attempted to {initiator_verb_base} {initiator_object_phrase}, but the move was easily read and shut down by {responderName}.",
+        // FIX: Replaced stiff templates with the more active, natural-sounding versions.
+        "Trying to regain footing, {initiatorName}'s attempt to {initiator_verb_base} was deftly countered by {responderName}.",
+        "{initiatorName}'s counterattack was swiftly deflected by {responderName}.",
         "An attempt by {initiatorName} to turn the tide was answered by {responderName}, who nullified the threat."
     ],
     terrain_interaction: [
