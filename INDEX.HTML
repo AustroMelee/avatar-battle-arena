@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATLA Battle Arena</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLA Battle Arena</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="container">
-<header class="header">
-<h1 class="title">ATLA BATTLE ARENA</h1>
-<p class="subtitle">Choose your fighters and witness legendary battles from the world of Avatar</p>
-</header>
-<main>
+    <header class="header">
+        <h1 class="title">ATLA BATTLE ARENA</h1>
+        <p class="subtitle">Choose your fighters and witness legendary battles from the world of Avatar</p>
+    </header>
+    <main>
         <section class="battle-setup">
             <div class="fighter-section" id="fighter1-section">
                 <h2 class="fighter-title" id="fighter1-name-display">Fighter 1</h2>
                 <div class="select-group">
-                    <label class="select-label hidden" id="fighter1-label" for="fighter1">Select Character</label>
+                    <label class="select-label" id="fighter1-label" for="fighter1">Select Character</label>
                     <div class="select-wrapper">
                         <select id="fighter1">
                             <option value="">Choose a fighter...</option>
@@ -31,7 +31,7 @@
             <div class="fighter-section" id="fighter2-section">
                 <h2 class="fighter-title" id="fighter2-name-display">Fighter 2</h2>
                 <div class="select-group">
-                    <label class="select-label hidden" id="fighter2-label" for="fighter2">Select Character</label>
+                    <label class="select-label" id="fighter2-label" for="fighter2">Select Character</label>
                     <div class="select-wrapper">
                         <select id="fighter2">
                             <option value="">Choose a fighter...</option>
@@ -74,6 +74,7 @@
         </section>
     </main>
 </div>
+<!-- THIS SCRIPT TAG IS THE MOST IMPORTANT PART. IT MUST HAVE type="module". -->
 <script src="js/main.js" type="module" defer></script>
 </body>
 </html>

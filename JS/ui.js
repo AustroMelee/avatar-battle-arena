@@ -103,7 +103,6 @@ export function displayOutcomeAnalysis(outcomeReasons, winnerId, loserId, f1Fina
     }
 }
 
-
 export function showLoadingState() {
     DOM.resultsSection.classList.remove('show');
     DOM.resultsSection.style.display = 'block'; 
