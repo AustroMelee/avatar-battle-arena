@@ -4,19 +4,15 @@ import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
 import { battleBeats } from './narrative-data.js';
 
-// --- THE LINGUISTIC INJECTION CONTROLLER ---
 function assembleObjectPhrase(technique) {
     if (!technique || !technique.object) {
-        return ''; // Handles null objects gracefully
+        return '';
     }
-
     if (technique.requiresArticle) {
         const firstLetter = technique.object.charAt(0).toLowerCase();
         const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
         return `${article} ${technique.object}`;
     }
-
-    // If no article is required, return the object as is.
     return technique.object;
 }
 
@@ -46,15 +42,22 @@ function toGerund(verb = '') {
 function toPastTense(verb = '') {
     if (!verb) return "";
     verb = verb.toLowerCase();
-    if (verb.endsWith('e')) return verb + 'd';
-    if (verb.endsWith('y') && verb.length > 2) return verb.slice(0, -1) + 'ied';
+
+    // FIX: Check for irregular verbs FIRST, before applying general rules.
     const irregular = { 
         'hurl': 'hurled', 'run': 'ran', 'swim': 'swam', 'cut': 'cut', 'hit': 'hit', 
         'set': 'set', 'sit': 'sat', 'spin': 'spun', 'throw': 'threw', 'breathe': 'breathed', 
         'lead': 'led', 'find': 'found', 'ride': 'rode', 'weave': 'wove', 'freeze': 'froze', 
         'bend': 'bent', 'strike': 'struck' 
     };
-    if (irregular[verb]) return irregular[verb];
+    if (irregular[verb]) {
+        return irregular[verb];
+    }
+    
+    // Now apply the general rules for regular verbs.
+    if (verb.endsWith('e')) return verb + 'd';
+    if (verb.endsWith('y') && verb.length > 2) return verb.slice(0, -1) + 'ied';
+
     const double = ['pin', 'slip', 'jab'];
      if (double.includes(verb)) return verb + verb.slice(-1) + 'ed';
     return verb + 'ed';
@@ -82,7 +85,6 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const initiatorPronounSCap = initiator.pronouns.s.charAt(0).toUpperCase() + initiator.pronouns.s.slice(1);
         const responderPronounSCap = responder.pronouns.s.charAt(0).toUpperCase() + responder.pronouns.s.slice(1);
 
-        // Use the controller to build the phrases
         const initiatorObjectPhrase = assembleObjectPhrase(initiatorTech);
         const responderObjectPhrase = assembleObjectPhrase(responderTech);
 
@@ -98,7 +100,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech?.verb || ''))
             .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech?.verb || ''))
             .replace(/{initiator_verb_base}/g, (initiatorTech?.verb || '').toLowerCase())
-            .replace(/{initiator_object_phrase}/g, initiatorObjectPhrase) // Use the controlled phrase
+            .replace(/{initiator_object_phrase}/g, initiatorObjectPhrase)
             .replace(/{responderPronounS}/g, responder.pronouns.s)
             .replace(/{responderPronounSCap}/g, responderPronounSCap)
             .replace(/{responderPronounO}/g, responder.pronouns.o)
@@ -106,7 +108,7 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{responder_verb_ing}/g, toGerund(responderTech?.verb || ''))
             .replace(/{responder_verb_past}/g, toPastTense(responderTech?.verb || ''))
             .replace(/{responder_verb_base}/g, (responderTech?.verb || '').toLowerCase())
-            .replace(/{responder_object_phrase}/g, responderObjectPhrase) // Use the controlled phrase
+            .replace(/{responder_object_phrase}/g, responderObjectPhrase)
             .replace(/{winnerFinisherDescription}/g, finisherDescription);
     };
     
