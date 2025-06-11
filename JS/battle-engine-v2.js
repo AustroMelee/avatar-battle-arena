@@ -15,21 +15,31 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 function conjugateVerb(verb) {
     if (!verb) return '';
     const verbParts = verb.split(' ');
-    const mainVerb = verbParts.pop(); // Get the last word to conjugate
+    const mainVerb = verbParts.pop(); // Isolate the verb to conjugate
 
     let conjugated;
 
+    // Handle consonant + 'y'
     if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
         conjugated = mainVerb.slice(0, -1) + 'ies';
-    } else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
+    } 
+    // Handle sibilant sounds and 'o'
+    else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
         conjugated = mainVerb + 'es';
-    } else {
+    } 
+    // Handle verbs that already end in 'e' (but are not sibilant)
+    else if (mainVerb.endsWith('e')) {
+        conjugated = mainVerb + 's';
+    }
+    // Default case for all other verbs
+    else {
         conjugated = mainVerb + 's';
     }
     
     verbParts.push(conjugated);
     return verbParts.join(' ');
 }
+
 
 function assembleObjectPhrase(move) {
     if (!move.object) {
@@ -244,26 +254,22 @@ function calculateMove(move, attacker, defender, locTags) {
 
 // --- Narrative Generation (UPGRADED) ---
 function narrateMove(actor, target, move, result) {
-    // 1. Select a verb
     const synonymList = verbSynonyms[move.verb] || [move.verb];
     const selectedVerb = getRandomElement(synonymList);
     const conjugatedVerb = conjugateVerb(selectedVerb);
 
-    // 2. Build the action phrase
     const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
     const objectPhrase = assembleObjectPhrase(move);
     let actionSentence;
     if (objectPhrase) {
         actionSentence = `${pronounCap} ${conjugatedVerb} ${objectPhrase}.`;
     } else {
-        actionSentence = `${pronounCap} ${conjugatedVerb}.`; // For moves like 'dodges'
+        actionSentence = `${pronounCap} performs the ${move.name}.`;
     }
 
-    // 3. Add an introductory flourish
     const intro = getRandomElement(introductoryPhrases);
     let fullAction = `${intro} ${actionSentence.charAt(0).toLowerCase() + actionSentence.slice(1)}`;
 
-    // 4. Build the impact phrase
     let impactSentence = "";
     const impactTemplates = (move.type === 'Defense' || move.type === 'Utility') 
         ? impactPhrases.DEFENSE 
@@ -273,7 +279,6 @@ function narrateMove(actor, target, move, result) {
         impactSentence = getRandomElement(impactTemplates).replace(/{targetName}/g, `<span class="char-${target.id}">${target.name}</span>`);
     }
 
-    // 5. Combine and return the full narrative
     const description = `${fullAction} ${impactSentence}`;
     const energyCost = Math.round((move.power || 0) * 0.5);
 
