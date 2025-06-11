@@ -3,87 +3,83 @@
 export const victoryTypes = {
     'overwhelm': {
         narrativeEndings: {
-            "azula": "<span class='char-azula'>Azula's</span> blue flames danced with triumphant, cold efficiency. She didn't even look back at <span class='char-{LoserID}'>{LoserName}</span>, already forgotten. \"{WinnerQuote}\"",
-            "ozai-not-comet-enhanced": "<span class='char-ozai-not-comet-enhanced'>Ozai</span> stood amidst the devastation, his power radiating, leaving no doubt about the dominion of the Phoenix King. The battle concluded. \"{WinnerQuote}\"",
-            "bumi": "<span class='char-bumi'>Bumi</span> merely chuckled, the ground beneath <span class='char-{LoserID}'>{LoserName}</span> still churning in his wake. 'Another one for the collection!' he declared, quite pleased with his overwhelming display. \"{WinnerQuote}\"",
+            // These can be specific overrides for a victory type
         }
     },
     'disabling_strike': { 
         narrativeEndings: {
-            "ty-lee": "<span class='char-ty-lee'>Ty Lee</span> landed silently, a quick, almost gentle jab ending the fight. 'Looks like your chi's... on vacation!' she quipped, a playful grin her only victory declaration.",
-            "mai": "A single blade pinned <span class='char-{LoserID}'>{LoserName}'s</span> shadow to the ground, a silent, stark declaration. <span class='char-mai'>Mai</span> didn't miss. She merely turned and walked away, the fight concluded.",
+            "ty-lee": "With a final, graceful flip, <span class='char-ty-lee'>Ty Lee</span> landed a precise jab, leaving <span class='char-{LoserID}'>{LoserName}</span> completely unable to bend. \"{WinnerQuote}\"",
         }
     },
     'outsmart': { 
         narrativeEndings: {
-            "sokka": "<span class='char-sokka'>Sokka</span> wiped his brow, a triumphant grin spreading across his face. 'See? Brains beat brawn... eventually!' he declared, retrieving his boomerang.",
-            "azula": "<span class='char-azula'>Azula's</span> victory was cold and absolute, a testament to her calculated cruelty. <span class='char-{LoserID}'>{LoserName}</span> hadn't been defeated; they had been outplayed.",
-            "iroh": "<span class='char-iroh'>Iroh</span> offered a gentle smile. 'Sometimes, a direct path is not the wisest, eh?' he mused, as <span class='char-{LoserID}'>{LoserName}</span> conceded defeat, outmaneuvered by the Dragon of the West.",
+            "sokka": "<span class='char-sokka'>Sokka</span> wiped his brow, a triumphant grin spreading across his face as his trap sprung perfectly. 'See? Brains beat brawn... eventually!' he declared, retrieving his boomerang. \"{WinnerQuote}\"",
         }
     },
     'terrain_kill': { 
         narrativeEndings: {
-            "toph-beifong": "<span class='char-toph-beifong'>Toph</span> scoffed, stomping a foot. The earth itself cemented her victory, leaving <span class='char-{LoserID}'>{LoserName}</span> immobilized. 'That's what you get for not paying attention to the ground, Twinkletoes,' she muttered, walking away.",
-            "bumi": "<span class='char-bumi'>Bumi</span> merely chuckled, the ground beneath <span class='char-{LoserID}'>{LoserName}</span> still churning in his wake. 'Another one for the collection!' he declared, quite pleased with his overwhelming display.",
-            "pakku": "<span class='char-pakku'>Pakku</span> surveyed the scene, <span class='char-{LoserID}'>{LoserName}</span> incapacitated by the elements. 'Order is maintained,' he stated, a chilling calm in his voice.",
+            "toph-beifong": "<span class='char-toph-beifong'>Toph</span> scoffed, stomping a foot. The earth itself cemented her victory, leaving <span class='char-{LoserID}'>{LoserName}</span> immobilized. 'That's what you get for not paying attention to the ground, Twinkletoes,' she muttered. \"{WinnerQuote}\"",
         }
     },
     'morale_break': { 
         narrativeEndings: {
-            "jeong-jeong": "<span class='char-jeong-jeong'>Jeong Jeong</span> simply extinguished his last flame, his shoulders slumping. 'The path of fire is destruction,' he sighed, turning away. 'I will fight no more.'", 
-            "iroh": "<span class='char-iroh'>Iroh</span> approached his defeated foe, offering a comforting hand. 'There is always hope for redirection,' he said kindly, as <span class='char-{LoserID}'>{LoserName}</span>, outmatched in spirit, yielded. The battle ended not with a blow, but a surrender.",
+            "iroh": "<span class='char-iroh'>Iroh</span> approached his defeated foe, offering a comforting hand. 'There is always hope for redirection,' he said kindly, as <span class='char-{LoserID}'>{LoserName}</span>, outmatched in spirit, yielded. \"{WinnerQuote}\"",
+            // FIX: Restructured for better control in the engine.
+            "jeong-jeong": [
+                { 
+                    action: "<span class='char-jeong-jeong'>Jeong Jeong</span> simply extinguished his last flame, his shoulders slumping.",
+                    dialogue: "'The path of fire is destruction,' he sighed, turning away. 'I will fight no more.'"
+                }
+            ]
         }
     }
 };
 
+// Generic endings based on the winner's "Victory Style" defined in characters.js
 export const postBattleVictoryPhrases = {
     "Pacifist": [
-        "Aang quietly offered a helping hand, his victory a testament to peace. \"{WinnerQuote}\"",
-        "The Avatar sighed in relief, the fight ending without true harm. \"{WinnerQuote}\"",
-        "Aang stood triumphant, having neutralized the threat without needing to hurt his opponent. \"{WinnerQuote}\""
+        "Aang quietly offered a helping hand, {WinnerPronounP} victory a testament to peace.",
+        "The Avatar sighed in relief, the fight ending without true harm.",
     ],
     "Madcap": [
-        "Sokka retrieved his boomerang with a flourish, his victory a mix of genius and goofiness. \"{WinnerQuote}\"",
-        "Bumi let out a hearty laugh, already planning his next eccentric stunt. \"{WinnerQuote}\"",
-        "Ty Lee giggled, skipping away from her bewildered opponent. \"{WinnerQuote}\""
+        "{WinnerName} retrieved {WinnerPronounP} boomerang with a flourish, {WinnerPronounP} victory a mix of genius and goofiness.",
+        "{WinnerName} let out a hearty laugh, already planning {WinnerPronounP} next eccentric stunt.",
+    ],
+    "Playful": [
+        "{WinnerName} giggled, skipping away from {WinnerPronounP} bewildered opponent.",
+        "With a cheerful 'Ta-da!', {WinnerName} celebrated a victory that felt more like a game."
     ],
     "Disciplined": [
-        "Pakku nodded stiffly, his victory a clear affirmation of tradition and mastery. \"{WinnerQuote}\"",
-        "Katara stood firm, her waterbending prowess undeniable. \"{WinnerQuote}\""
+        "{WinnerName} nodded stiffly, {WinnerPronounP} victory a clear affirmation of tradition and mastery.",
     ],
     "Fierce": [
-        "Katara stood firm, her waterbending prowess undeniable. \"{WinnerQuote}\"",
-        "Katara radiated quiet power, her fierce determination evident in her victory. \"{WinnerQuote}\""
+        "{WinnerName} stood firm, {WinnerPronounP} bending prowess undeniable.",
+        "{WinnerName} radiated quiet power, {WinnerPronounP} fierce determination evident in {WinnerPronounP} victory."
     ],
     "Cocky": [
-        "Toph brushed dirt from her clothes with a smirk, her victory a foregone conclusion. \"{WinnerQuote}\"",
-        "Toph crossed her arms, declaring herself the greatest once more. \"{WinnerQuote}\""
+        "{WinnerName} brushed dirt from {WinnerPronounP} clothes with a smirk, {WinnerPronounP} victory a foregone conclusion.",
     ],
     "Determined": [
-        "Zuko stood breathing heavily, his victory a testament to his hard-won resolve. \"{WinnerQuote}\"",
-        "Zuko clenched his fist, the battle an affirmation of his chosen path. \"{WinnerQuote}\""
+        "{WinnerName} stood breathing heavily, {WinnerPronounP} victory a testament to {WinnerPronounP} hard-won resolve.",
+        "{WinnerName} clenched {WinnerPronounP} fist, the battle an affirmation of {WinnerPronounP} chosen path."
     ],
     "Ruthless": [
-        "Azula's blue flames flickered, leaving no doubt about her cold, efficient triumph. \"{WinnerQuote}\"",
-        "Azula surveyed the scene with a chillingly detached expression, her victory absolute. \"{WinnerQuote}\""
+        "{WinnerName}'s blue flames flickered, leaving no doubt about {WinnerPronounP} cold, efficient triumph over {LoserName}.",
     ],
     "Supreme": [
-        "Ozai stood radiating immense power, his victory a declaration of his absolute dominion. \"{WinnerQuote}\"",
-        "Ozai's presence filled the arena, his win a terrifying display of unchallengeable might. \"{WinnerQuote}\""
+        "{WinnerName} stood radiating immense power, {WinnerPronounP} victory a declaration of {WinnerPronounP} absolute dominion.",
     ],
     "Wise": [
-        "Iroh offered a gentle smile, his victory a quiet lesson in subtlety and wisdom. \"{WinnerQuote}\"",
-        "Iroh exhaled slowly, content in a battle won through understanding rather than force. \"{WinnerQuote}\""
+        "{WinnerName} offered a gentle smile, {WinnerPronounP} victory a quiet lesson in subtlety and wisdom.",
     ],
     "Wise_Reluctant": [
-        "Jeong Jeong sighed, his victory a somber affirmation of control over destruction. \"{WinnerQuote}\"",
-        "Jeong Jeong extinguished his last flame, having achieved a necessary, if reluctant, win. \"{WinnerQuote}\""
+        // This is a generic fallback, the specific one for Jeong Jeong is now in victoryTypes.
+        "{WinnerName} sighed, {WinnerPronounP} victory a somber affirmation of control over destruction. \"{WinnerQuote}\"",
     ],
     "Deadpan": [
-        "Mai merely blinked, her victory as precise and unemotional as her throws. \"{WinnerQuote}\"",
-        "Mai collected her blades, the fight concluded with minimal fuss. \"{WinnerQuote}\""
+        "{WinnerName} merely blinked, {WinnerPronounP} victory as precise and unemotional as {WinnerPronounP} throws.",
     ],
     "default": [
-        "<span class='char-{WinnerID}'>{WinnerName}</span> stood victorious, the battle concluded. \"{WinnerQuote}\""
+        "{WinnerName} stood victorious over {LoserName}, the battle concluded. \"{WinnerQuote}\""
     ]
 };

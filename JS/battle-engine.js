@@ -10,7 +10,7 @@ let usedReasonIds = new Set();
 
 function getRandomElement(array, fallbackValue = "skill") {
     if (!array || array.length === 0) return fallbackValue;
-    if (typeof array === 'string') return array; // Safety for accidental string pass
+    if (typeof array === 'string') return array;
     return array[Math.floor(Math.random() * array.length)];
 }
 
@@ -41,7 +41,6 @@ function getVictoryQuote(character, victoryData) {
         selectedQuote = getRandomElement(quotes.postWin);
     }
     
-    // Final, hardcoded fallback to prevent empty/single-letter output
     return selectedQuote || "The battle is won.";
 }
 
@@ -82,19 +81,24 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, re
     const finalQuote = getVictoryQuote(winnerChar, quoteData);
     templateData.WinnerQuote = finalQuote;
     
-    let template;
-    const specificEnding = victoryTypes[victoryType]?.narrativeEndings?.[winnerId];
-    // Specific endings can be arrays now
-    if (specificEnding && Array.isArray(specificEnding)) {
-        template = getRandomElement(specificEnding);
-    } else if (specificEnding) {
-        template = specificEnding;
-    } else {
-        const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
-        template = getRandomElement(archetypePhrases);
+    const specificEndingData = victoryTypes[victoryType]?.narrativeEndings?.[winnerId];
+    
+    // FIX: Handle both simple string templates and complex object templates.
+    if (specificEndingData) {
+        const ending = getRandomElement(specificEndingData);
+        if (typeof ending === 'object' && ending.action && ending.dialogue) {
+            // It's a structured ending like Jeong Jeong's.
+            const epilogue = `The destructive path of fire had been averted — for now.`;
+            return `${ending.action}<br><i>"${ending.dialogue}"</i><br>${epilogue}`;
+        } else if (typeof ending === 'string') {
+            // It's a simple string template.
+            return populateTemplate(ending, templateData);
+        }
     }
-
-    let populatedEnding = populateTemplate(template, templateData);
+    
+    // Fallback to the generic victory style phrases.
+    const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
+    let populatedEnding = populateTemplate(getRandomElement(archetypePhrases), templateData);
     
     if (!populatedEnding.includes(finalQuote)) {
         populatedEnding += ` "${finalQuote}"`;

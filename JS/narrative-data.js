@@ -2,23 +2,22 @@
 
 export const battleBeats = {
     opening: [
-        "{initiatorName} opened the fight, {initiator_verb_ing} {initiator_object_phrase} and forcing {responderName} onto the defensive.",
+        "{initiatorName} opened aggressively, {initiator_verb_ing} {initiator_object_phrase}.",
         "The battle began as {initiatorName} {initiator_verb_past} {initiator_object_phrase}, forcing {responderName} to react immediately.",
-        "Without hesitation, {initiatorName} went on the offensive, {initiator_verb_ing} {initiator_object_phrase}."
+        "Without hesitation, {initiatorName} went on the offensive with {initiator_object_phrase}."
     ],
     advantage_attack: [
-        "Sensing an opportunity, {initiatorName} pressed the advantage, {initiator_verb_ing} {initiator_object_phrase}.",
-        "Dominating the flow, {initiatorName} drove {responderName} back, using {initiatorPronounP} momentum to {initiator_verb_base} {initiator_object_phrase}.",
-        "With momentum on {initiatorPronounP} side, {initiatorName} unleashed another powerful attack, {initiator_verb_ing} {initiator_object_phrase}."
+        "Sensing a momentum shift, {initiatorName} pressed the advantage, unleashing {initiator_object_phrase}.",
+        "Dominating the flow, {initiatorName} calmly countered, using {initiator_object_phrase} to deny {responderName}'s approach.",
+        "With momentum on {initiatorPronounP} side, {initiatorName} drove {responderName} back with another powerful attack."
     ],
     disadvantage_attack: [
-        // FIX: Replaced stiff templates with the more active, natural-sounding versions.
-        "Trying to regain footing, {initiatorName}'s attempt to {initiator_verb_base} was deftly countered by {responderName}.",
+        "{responderName} responded with a disciplined {responder_object_phrase}, but {initiatorName} rode the sudden updraft, evading cleanly.",
         "{initiatorName}'s counterattack was swiftly deflected by {responderName}.",
-        "An attempt by {initiatorName} to turn the tide was answered by {responderName}, who nullified the threat."
+        "An attempt by {initiatorName} to turn the tide was answered by {responderName}, who neutralized the threat with a well-timed {responder_object_phrase}."
     ],
     terrain_interaction: [
-        "Using the {locationFeature} to {initiatorPronounP} advantage, {initiatorName} {initiator_verb_past} {initiator_object_phrase}, forcing {responderName} onto the treacherous {locationTerrain}.",
+        "Using the {locationFeature} to {initiatorPronounP} advantage, {initiatorName} unleashed {initiator_object_phrase}, driving {responderName} toward the treacherous {locationTerrain}.",
         "The {locationTerrain} became a weapon for {initiatorName}. {initiatorPronounSCap} {initiator_verb_past} {initiator_object_phrase}, and {responderName} had to adapt quickly or be overwhelmed."
     ],
     finishing_move: [
