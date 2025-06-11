@@ -68,30 +68,27 @@ function sanitizePhrase(phrase) {
 function getStyledAction(fighter, baseAction) {
     const style = getRandomElement(fighter.combatStyleTags, 'default');
     
-    // NEW: Updated flavorMap for better grammatical flow
+    // This map now produces just a descriptive prefix.
     const flavorMap = {
-        aggressive: `with an aggressive flurry, unleashing`,
-        precise: `with methodical precision, executing`,
-        calculated: `with deliberate intent, unleashing`,
-        improvisational: `with clever improvisation, attempting`,
-        evasive: `with a swift, evasive maneuver to set up`,
-        fierce: `with fierce power, launching`,
-        unrelenting: `relentlessly, unleashing`,
-        determined: `with fierce determination, attempting`,
-        ruthless: `ruthlessly executing`,
-        overwhelming: `with overwhelming force, launching`,
-        eccentric: `with unpredictable flair, trying`,
-        acrobatic: `acrobatically, launching into`,
-        silent: `silently preparing`,
-        wise: `with calm wisdom, initiating`,
-        disciplined: `with disciplined form, executing`,
-        controlled: `with precise control, unleashing`,
-        default: `unleashing`
+        aggressive: "aggressively", precise: "methodically",
+        calculated: "deliberately", improvisational: "cleverly",
+        evasive: "swiftly", fierce: "fiercely",
+        unrelenting: "relentlessly", determined: "with fierce determination",
+        ruthless: "ruthlessly", overwhelming: "with overwhelming force",
+        eccentric: "unpredictably", acrobatic: "acrobatically",
+        silent: "silently", wise: "with calm wisdom",
+        disciplined: "with disciplined precision", controlled: "with precise control",
+        default: ""
     };
 
-    const actionPrefix = flavorMap[style] || flavorMap.default;
-    return `${actionPrefix} ${baseAction}`;
+    const prefix = flavorMap[style] || "";
+    // We combine them carefully to avoid grammar issues.
+    if (prefix.startsWith('with')) {
+        return `${prefix}, ${toGerund(baseAction.split(' ')[0])} ${baseAction.split(' ').slice(1).join(' ')}`;
+    }
+    return `${prefix} ${baseAction.replace('a ', '').replace('an ', '')}`;
 }
+
 
 function normalizeTraitToNoun(traitString) {
     if (!traitString) return 'skill';
@@ -181,6 +178,7 @@ function getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData) {
     return populateTemplate(getRandomElement(archetypePhrases), baseStoryData);
 }
 
+// FIXED: This function is now grammatically sound with getStyledAction
 function generateCombatSequence(f1, f2, loc) {
     const f1_opening_action = getStyledAction(f1, getTraitDisplay(f1, "openingMove"));
     const f2_counter_action = getStyledAction(f2, getTraitDisplay(f2, "counterMove"));
@@ -191,8 +189,8 @@ function generateCombatSequence(f1, f2, loc) {
 
     return [
         `<span class='char-${f1.id}'>${f1.name}</span> initiated the clash, ${f1_opening_action}, directly confronting <span class='char-${f2.id}'>${f2.name}</span>. The very ${loc.featureA} seemed to amplify the impact.`,
-        `<span class='char-${f2.id}'>${f2.name}</span> responded, ${f2_counter_action}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted, ${f1_mid_game_action}, seeking to control the flow.`,
-        `As the battle intensified, <span class='char-${f1.id}'>${f1.name}'s</span> attempt at ${f1_finishing_action} met <span class='char-${f2.id}'>${f2.name}'s</span> ${f2_last_ditch_action}. The environment itself seemed to react, with ${loc.featureC} shifting beneath their feet.`
+        `<span class='char-${f2.id}'>${f2.name}</span> responded with ${f2_counter_action}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted to ${f1_mid_game_action}, seeking to control the flow.`,
+        `As the battle intensified, <span class='char-${f1.id}'>${f1.name}'s</span> ${f1_finishing_action} met <span class='char-${f2.id}'>${f2.name}'s</span> ${f2_last_ditch_action}. The environment itself seemed to react, with ${loc.featureC} shifting beneath their feet.`
     ];
 }
 
@@ -245,17 +243,19 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     };
     
-    // NEW: More impactful Tier difference
+    // More impactful Tier difference
     const tierGap = f1.powerTier - f2.powerTier;
     const tierModifier = Math.sign(tierGap) * (Math.abs(tierGap) * 5 + Math.pow(Math.abs(tierGap), 2));
-    f1NetModifier += tierModifier; addReason(f1, 'Power Tier Advantage', tierModifier);
-    f2NetModifier -= tierModifier; addReason(f2, 'Power Tier Disadvantage', -tierModifier);
+    if (tierModifier !== 0) {
+        f1NetModifier += tierModifier; addReason(f1, 'Power Tier Advantage', tierModifier);
+        f2NetModifier -= tierModifier; addReason(f2, 'Power Tier Disadvantage', -tierModifier);
+    }
 
-    // NEW: Relationship & Psychological Modifiers
+    // Relationship & Psychological Modifiers
     [
-        { fighter: f1, opponentId: f2Id, modifier: 1 },
-        { fighter: f2, opponentId: f1Id, modifier: -1 }
-    ].forEach(({ fighter, opponentId, modifier }) => {
+        { fighter: f1, opponent: f2, opponentId: f2Id },
+        { fighter: f2, opponent: f1, opponentId: f1Id }
+    ].forEach(({ fighter, opponent, opponentId }) => {
         const relationship = fighter.relationships?.[opponentId];
         if (relationship) {
             let relModifier = 0;
@@ -279,30 +279,26 @@ export function calculateWinProbability(f1Id, f2Id, locId) {
         }
     });
 
-    // NEW: Corrected Terrain interactions Logic
+    // FIXED: Corrected Terrain interactions Logic
     const locTags = terrainTags[locId] || [];
-    
-    // Process Fighter 1's terrain interaction
-    f1.strengths?.forEach(strength => {
-        if (locTags.includes(strength)) {
-            f1NetModifier += 10; addReason(f1, `Leveraged ${normalizeTraitToNoun(strength)}`, 10);
-        }
-    });
-    f1.weaknesses?.forEach(weakness => {
-        if (locTags.includes(weakness)) {
-            f1NetModifier -= 10; addReason(f1, `Hindered by ${normalizeTraitToNoun(weakness)}`, -10);
-        }
-    });
-
-    // Process Fighter 2's terrain interaction
-    f2.strengths?.forEach(strength => {
-        if (locTags.includes(strength)) {
-            f2NetModifier += 10; addReason(f2, `Leveraged ${normalizeTraitToNoun(strength)}`, 10);
-        }
-    });
-    f2.weaknesses?.forEach(weakness => {
-        if (locTags.includes(weakness)) {
-            f2NetModifier -= 10; addReason(f2, `Hindered by ${normalizeTraitToNoun(weakness)}`, -10);
+    [f1, f2].forEach(fighter => {
+        let fighterModifier = 0;
+        fighter.strengths?.forEach(strength => {
+            if (locTags.includes(strength)) {
+                fighterModifier += 10;
+                addReason(fighter, `Leveraged ${normalizeTraitToNoun(strength)}`, 10);
+            }
+        });
+        fighter.weaknesses?.forEach(weakness => {
+            if (locTags.includes(weakness)) {
+                fighterModifier -= 10;
+                addReason(fighter, `Hindered by ${normalizeTraitToNoun(weakness)}`, -10);
+            }
+        });
+        if (fighter.id === f1.id) {
+            f1NetModifier += fighterModifier;
+        } else {
+            f2NetModifier += fighterModifier;
         }
     });
 
@@ -342,5 +338,3 @@ export function generateBattleStory(winnerId, loserId, locId, outcomeReasons, vi
     const finalEnding = getToneAlignedVictoryEnding(winnerId, victoryType, data);
     return `<p>${narrative_core}</p><br><p>${finalEnding}</p>`;
 }
-
-
