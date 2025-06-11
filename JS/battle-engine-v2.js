@@ -2,7 +2,7 @@
 
 import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
-import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, verbSynonyms, impactPhrases } from './narrative-v2.js';
+import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, verbSynonyms, impactPhrases, intensityPhrases, tempoPhrases } from './narrative-v2.js';
 
 // --- Helper Functions ---
 const getRandomElement = (arr, fallback = null) => {
@@ -10,41 +10,32 @@ const getRandomElement = (arr, fallback = null) => {
     return arr[Math.floor(Math.random() * arr.length)];
 };
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+const toLowerCaseFirst = (s) => {
+    if (typeof s !== 'string' || s.length === 0) return '';
+    return s.charAt(0).toLowerCase() + s.slice(1);
+}
 
 // --- GRAMMAR SUBSYSTEM ---
 function conjugateVerb(verb) {
     if (!verb) return '';
     const verbParts = verb.split(' ');
-    const mainVerb = verbParts.pop(); // Isolate the verb to conjugate
+    const mainVerb = verbParts.shift();
+    const remainder = verbParts.join(' ');
 
     let conjugated;
-
-    // Handle consonant + 'y'
     if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
         conjugated = mainVerb.slice(0, -1) + 'ies';
-    } 
-    // Handle sibilant sounds and 'o'
-    else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
+    } else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
         conjugated = mainVerb + 'es';
-    } 
-    // Handle verbs that already end in 'e' (but are not sibilant)
-    else if (mainVerb.endsWith('e')) {
-        conjugated = mainVerb + 's';
-    }
-    // Default case for all other verbs
-    else {
+    } else {
         conjugated = mainVerb + 's';
     }
     
-    verbParts.push(conjugated);
-    return verbParts.join(' ');
+    return remainder ? `${conjugated} ${remainder}` : conjugated;
 }
 
-
 function assembleObjectPhrase(move) {
-    if (!move.object) {
-        return '';
-    }
+    if (!move.object) return '';
     if (move.requiresArticle) {
         const firstLetter = move.object.charAt(0).toLowerCase();
         const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
@@ -252,33 +243,64 @@ function calculateMove(move, attacker, defender, locTags) {
     };
 }
 
-// --- Narrative Generation (UPGRADED) ---
+// --- Narrative Generation (FINAL) ---
 function narrateMove(actor, target, move, result) {
+    const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
+    const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
+
+    // 1. Handle special case for proactive defensive moves
+    if ((move.type === 'Defense' || move.type === 'Utility') && (!target.lastMove || target.lastMove.type !== 'Offense')) {
+        const description = getRandomElement(impactPhrases.PROACTIVE_DEFENSE).replace(/{actorName}/g, actorSpan);
+        const energyCost = Math.round((move.power || 0) * 0.5);
+        return phaseTemplates.move.replace('{actorId}', actor.id).replace('{actorName}', actor.name).replace('{moveName}', move.name).replace('{moveEmoji}', move.emoji || '✨').replace('{energyCost}', energyCost).replace('{effectivenessLabel}', "Set-up").replace('{effectivenessEmoji}', '🛡️').replace('{moveDescription}', description);
+    }
+     // Handle special case for reactive defensive moves
+    if ((move.type === 'Defense' || move.type === 'Utility') && (target.lastMove && target.lastMove.type === 'Offense')) {
+        const description = `Reacting quickly, ${actorSpan} uses the ${move.name} to intercept ${targetSpan}'s assault. ${getRandomElement(impactPhrases.REACTIVE_DEFENSE)}`;
+        const energyCost = Math.round((move.power || 0) * 0.5);
+        return phaseTemplates.move.replace('{actorId}', actor.id).replace('{actorName}', actor.name).replace('{moveName}', move.name).replace('{moveEmoji}', move.emoji || '✨').replace('{energyCost}', energyCost).replace('{effectivenessLabel}', "Counter").replace('{effectivenessEmoji}', '🛡️').replace('{moveDescription}', description);
+    }
+
+    // 2. Select verb and conjugate it for offensive moves
     const synonymList = verbSynonyms[move.verb] || [move.verb];
     const selectedVerb = getRandomElement(synonymList);
     const conjugatedVerb = conjugateVerb(selectedVerb);
-
-    const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
     const objectPhrase = assembleObjectPhrase(move);
-    let actionSentence;
-    if (objectPhrase) {
-        actionSentence = `${pronounCap} ${conjugatedVerb} ${objectPhrase}.`;
+    
+    // 3. Select a contextual intro phrase
+    let introContext;
+    if (actor.hp < 35 && actor.energy < 40) introContext = 'DESPERATE';
+    else if (actor.hp > 80 && actor.hp > target.hp) introContext = 'CONFIDENT';
+    else if (target.lastMove) introContext = 'REACTIVE';
+    else introContext = 'AGGRESSIVE';
+    
+    const introPool = introductoryPhrases[introContext];
+    const introType = Math.random() > 0.4 ? 'leading' : 'standalone';
+    let intro = getRandomElement(introPool[introType]);
+
+    // 4. Build the main action sentence
+    let fullAction;
+    const intensity = getRandomElement(intensityPhrases);
+    let verbPhrase = `${conjugatedVerb} ${objectPhrase}`;
+    if (!objectPhrase) verbPhrase = `executes the ${move.name}`;
+
+    if (introType === 'leading') {
+        let actionSegment = `${verbPhrase} ${intensity}.`;
+        fullAction = `${intro.replace('{actorName}', actorSpan)} ${actionSegment}`;
     } else {
-        actionSentence = `${pronounCap} performs the ${move.name}.`;
+        const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
+        let actionSentence = `${pronounCap} ${verbPhrase}.`;
+        fullAction = `${intro} ${toLowerCaseFirst(actionSentence)}`;
     }
-
-    const intro = getRandomElement(introductoryPhrases);
-    let fullAction = `${intro} ${actionSentence.charAt(0).toLowerCase() + actionSentence.slice(1)}`;
-
+    
+    // 5. Build the impact phrase
     let impactSentence = "";
-    const impactTemplates = (move.type === 'Defense' || move.type === 'Utility') 
-        ? impactPhrases.DEFENSE 
-        : impactPhrases[result.effectiveness.label];
-        
+    const impactTemplates = impactPhrases[result.effectiveness.label];
     if (impactTemplates) {
-        impactSentence = getRandomElement(impactTemplates).replace(/{targetName}/g, `<span class="char-${target.id}">${target.name}</span>`);
+        impactSentence = getRandomElement(impactTemplates).replace(/{targetName}/g, targetSpan);
     }
-
+    
+    // 6. Combine and return the full narrative
     const description = `${fullAction} ${impactSentence}`;
     const energyCost = Math.round((move.power || 0) * 0.5);
 

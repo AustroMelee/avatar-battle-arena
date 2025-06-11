@@ -1,312 +1,89 @@
 'use strict';
 
-import { characters } from './characters.js';
-import { locations, terrainTags } from './locations.js';
-import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, verbSynonyms, impactPhrases, intensityPhrases, tempoPhrases } from './narrative-v2.js';
+export const battlePhases = [
+    { name: "Opening Clash", emoji: "⚔️" },
+    { name: "Momentum Shift", emoji: "🔄" },
+    { name: "Counterplay", emoji: "🔃" },
+    { name: "Terrain Interaction", emoji: "🌍" },
+    { name: "Climactic Exchange", emoji: "💥" },
+    { name: "Finishing Move", emoji: "🏁" }
+];
 
-// --- Helper Functions ---
-const getRandomElement = (arr, fallback = null) => {
-    if (!arr || arr.length === 0) return fallback;
-    return arr[Math.floor(Math.random() * arr.length)];
+export const effectivenessLevels = {
+    WEAK: { label: "Weak", emoji: "💤" },
+    NORMAL: { label: "Normal", emoji: "⚔️" },
+    STRONG: { label: "Strong", emoji: "🔥" },
+    CRITICAL: { label: "Critical", emoji: "💥" }
 };
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-const toLowerCaseFirst = (s) => {
-    if (typeof s !== 'string' || s.length === 0) return '';
-    return s.charAt(0).toLowerCase() + s.slice(1);
-}
 
-// --- GRAMMAR SUBSYSTEM ---
-function conjugateVerb(verb) {
-    if (!verb) return '';
-    const verbParts = verb.split(' ');
-    const mainVerb = verbParts.shift();
-    const remainder = verbParts.join(' ');
+export const phaseTemplates = {
+    header: `<h4 class="phase-header">{phaseName} {phaseEmoji}</h4>`,
+    move: `
+        <div class="move-line">
+            <div class="move-actor">
+                <span class="char-{actorId}">{actorName}</span> used <span class="move-name">{moveName}</span> ({moveEmoji}) [-{energyCost}⚡]
+            </div>
+            <div class="move-effectiveness {effectivenessLabel}">
+                {effectivenessLabel} ({effectivenessEmoji})
+            </div>
+        </div>
+        <p class="move-description">{moveDescription}</p>
+    `,
+    finalBlow: `<p class="final-blow">{winnerName} lands a finishing blow, defeating {loserName}!</p>`,
+    conclusion: `<p class="conclusion">{endingNarration}</p>`
+};
 
-    let conjugated;
-    if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
-        conjugated = mainVerb.slice(0, -1) + 'ies';
-    } else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
-        conjugated = mainVerb + 'es';
-    } else {
-        conjugated = mainVerb + 's';
+export const introductoryPhrases = {
+    CONFIDENT: {
+        standalone: ["With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,"],
+        leading: ["Radiating confidence, {actorName}", "Showing superior technique, {actorName}", "With an air of supreme confidence, {actorName}"]
+    },
+    AGGRESSIVE: {
+        standalone: ["Taking the offensive,", "Pressing the advantage,", "With a ferocious cry,", "Deciding to end this quickly,"],
+        leading: ["In a sudden, aggressive push, {actorName}", "Wanting to overwhelm the opponent, {actorName}", "{actorName} lunges forward and"]
+    },
+    REACTIVE: {
+        standalone: ["Responding in kind,", "Seizing the opportunity,", "Countering the last move,", "Not missing a beat,"],
+        leading: ["Quickly retaliating, {actorName}", "Finding an opening in the opponent's attack, {actorName}", "Pivoting smoothly, {actorName}"]
+    },
+    DESPERATE: {
+        standalone: ["In a desperate gamble,", "With their remaining energy,", "Fighting to stay in the battle,", "Mustering their last reserves,"],
+        leading: ["In a last-ditch effort, {actorName}", "Refusing to give up, {actorName}", "Pushing past the pain, {actorName}"]
+    },
+    NEUTRAL: {
+        standalone: ["Without hesitation,", "With a quick movement,", "Looking for an opening,", "Switching tactics,"],
+        leading: ["Testing the opponent's defenses, {actorName}", "Maintaining a steady guard, {actorName}", "{actorName} makes a move and"]
     }
-    
-    return remainder ? `${conjugated} ${remainder}` : conjugated;
-}
+};
 
-function assembleObjectPhrase(move) {
-    if (!move.object) return '';
-    if (move.requiresArticle) {
-        const firstLetter = move.object.charAt(0).toLowerCase();
-        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
-        return `${article} ${move.object}`;
-    }
-    return move.object;
-}
+export const intensityPhrases = ["with explosive force", "with precise control", "with reckless abandon", "with focused intensity", "with blinding speed"];
+export const tempoPhrases = ["in rapid succession", "with fluid grace", "before the opening vanishes", "in a single, swift motion", "without a moment's delay"];
 
+export const verbSynonyms = {
+    'launch': ['hurl', 'send', 'unleash', 'fire', 'project', 'let loose'], 'strike': ['slam', 'hit', 'connect with', 'land a blow with'], 'lash': ['whip', 'snap', 'flick'], 'create': ['form', 'generate', 'summon', 'materialize'], 'throw': ['fling', 'hurl', 'send', 'toss'], 'unleash': ['release', 'discharge', 'emit', 'let loose'], 'generate': ['create', 'produce', 'summon'], 'ride': ['mount', 'glide on'], 'form': ['construct', 'shape', 'create'], 'sweep': ['knock down', 'sweep'], 'push': ['shove', 'blast', 'force back'], 'erupt with': ['erupt with', 'explode with'], 'propel': ['launch', 'boost'], 'release': ['emit', 'discharge'], 'trigger': ['unleash', 'activate', 'trigger'], 'don': ['equip', 'wear', 'don'], 'scan': ['scan', 'sense', 'read'], 'hurl': ['throw', 'launch', 'fling'], 'trap': ['ensnare', 'trap', 'catch'], 'reshape': ['alter', 'reshape', 'change'], 'breathe': ['exhale', 'breathe'], 'redirect': ['deflect', 'redirect', 'guide'], 'perform': ['execute', 'perform'], 'offer': ['offer', 'present'], 'raise': ['erect', 'raise', 'construct'], 'conjure': ['summon', 'conjure'], 'inflict': ['inflict', 'deliver'], 'disperse': ['scatter', 'dissipate', 'disperse'], 'end': ['conclude', 'end'], 'ignite': ['set ablaze', 'ignite', 'envelop'], 'assume': ['take on', 'assume'], 'encase': ['envelop', 'encase', 'imprison'], 'freeze': ['freeze', 'chill'], 'execute': ['perform', 'execute'], 'dodge': ['evade', 'dodge'], 'pin': ['pin', 'fasten'], 'block': ['block', 'parry', 'deflect'], 'devise': ['construct', 'devise'], 'spring': ['spring', 'activate'], 'send': ['send', 'dispatch'], 'bend': ['bend', 'manipulate'], 'tunnel': ['tunnel', 'burrow'], 'turn': ['turn', 'transform'], 'entomb': ['entomb', 'encase'], 'deliver': ['deliver', 'unleash'], 'dive': ['dive', 'lunge'], 'attempt': ['attempt', 'try']
+};
 
-// --- Victory Narration Logic ---
-function getVictoryQuote(character, victoryData) {
-    if (!character || !character.quotes) return "Victory is mine.";
-    const { type, opponentId } = victoryData;
-    const quotes = character.quotes;
+export const impactPhrases = {
+    WEAK: [
+        "but the attack glances off harmlessly.", "but {targetName} easily dodges it.", "but {targetName} shrugs off the blow.", "but the technique lacks the power to connect meaningfully.", "but the strike is too slow to find its mark."
+    ],
+    NORMAL: [
+        "The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "{targetName} is pushed back by the force of the attack.", "A solid hit lands on {targetName}, who stumbles.", "The attack connects, interrupting {targetName}'s rhythm."
+    ],
+    STRONG: [
+        "A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", "The impact is significant, leaving {targetName} momentarily stunned.", "It's a direct hit, and {targetName} clearly feels the force of it."
+    ],
+    CRITICAL: [
+        "A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "It's a massive blow that leaves {targetName} on the verge of collapse.", "The sheer force of the attack breaks {targetName}'s defense entirely.", "An incredible strike! {targetName} is knocked to the ground."
+    ],
+    REACTIVE_DEFENSE: [
+        "The defensive maneuver perfectly counters the incoming assault.", "The attack is negated completely by the well-timed defense.", "With a skillful move, the blow is parried effortlessly.", "The defensive stance holds strong, absorbing the full impact."
+    ],
+    PROACTIVE_DEFENSE: [
+        "The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares their defense, anticipating the next move.", "The defensive form is established, holding strong against any potential attack."
+    ]
+};
 
-    const quotePool = [];
-    if (opponentId && quotes.postWin_specific && quotes.postWin_specific[opponentId]) {
-        quotePool.push(quotes.postWin_specific[opponentId]);
-    }
-    if (quotes[`postWin_${type}`]) {
-        quotePool.push(quotes[`postWin_${type}`]);
-    } else if (quotes.postWin) {
-        quotePool.push(quotes.postWin);
-    }
-    
-    if (quotes.postWin_overwhelming) quotePool.push(quotes.postWin_overwhelming);
-    if (quotes.postWin_clever) quotePool.push(quotes.postWin_clever);
-    if (quotes.postWin_reflective) quotePool.push(quotes.postWin_reflective);
-
-    let selectedQuote = getRandomElement(quotePool.flat());
-    return selectedQuote || "The battle is won.";
-}
-
-function getToneAlignedVictoryEnding(winnerId, loserId, winProb) {
-    const winnerChar = characters[winnerId];
-    const loserChar = characters[loserId];
-
-    const templateData = {
-        WinnerName: `<span class="char-${winnerId}">${winnerChar.name}</span>`,
-        LoserName: `<span class="char-${loserId}">${loserChar.name}</span>`,
-        WinnerPronounS: winnerChar.pronouns.s,
-        WinnerPronounO: winnerChar.pronouns.o,
-        WinnerPronounP: winnerChar.pronouns.p,
-        LoserPronounS: loserChar.pronouns.s,
-        LoserPronounO: loserChar.pronouns.o,
-        LoserPronounP: loserChar.pronouns.p,
-    };
-    
-    const quoteData = { 
-        type: winProb >= 90 ? 'stomp' : (winProb >= 75 ? 'dominant' : 'narrow'), 
-        opponentId: loserId,
-    };
-    const finalQuote = getVictoryQuote(winnerChar, quoteData);
-    templateData.WinnerQuote = finalQuote;
-    
-    const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
-    let populatedEnding = archetypePhrases[Math.floor(Math.random() * archetypePhrases.length)]
-        .replace(/{(\w+)}/g, (match, key) => templateData[key] || match);
-    
-    if (!populatedEnding.includes(finalQuote)) {
-        populatedEnding += ` "${finalQuote}"`;
-    }
-
-    return populatedEnding;
-}
-
-
-// --- Battle State Initialization ---
-function initializeFighterState(charId) {
-    const character = characters[charId];
-    return {
-        id: charId,
-        name: character.name,
-        ...JSON.parse(JSON.stringify(character)),
-        hp: 100,
-        energy: 100,
-        status: [],
-        lastMove: null,
-    };
-}
-
-// --- Core Simulation Logic ---
-export function simulateBattle(f1Id, f2Id, locId) {
-    let fighter1 = initializeFighterState(f1Id);
-    let fighter2 = initializeFighterState(f2Id);
-    const locTags = terrainTags[locId] || [];
-
-    let battleLog = [];
-    let turn = 0;
-    const maxTurns = 6;
-
-    let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
-    let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
-
-    while (fighter1.hp > 0 && fighter2.hp > 0 && turn < maxTurns) {
-        const phase = battlePhases[turn];
-        
-        battleLog.push(phaseTemplates.header.replace('{phaseName}', phase.name).replace('{phaseEmoji}', phase.emoji));
-
-        if (phase.name === "Finishing Move") {
-            battleLog.push(`<p class="move-description">The battle reaches its peak! Both fighters gather their remaining strength for a final, decisive exchange.</p>`);
-        }
-
-        const initiatorMove = selectMove(initiator, phase.name, responder);
-        const responderMove = selectMove(responder, phase.name, initiator);
-
-        const initiatorResult = calculateMove(initiatorMove, initiator, responder, locTags);
-        const responderResult = calculateMove(responderMove, responder, initiator, locTags);
-        
-        responder.hp -= initiatorResult.damage;
-        initiator.energy -= Math.round((initiatorMove.power || 0) * 0.5);
-        initiator.lastMove = initiatorMove;
-
-        if (responder.hp > 0) {
-            initiator.hp -= responderResult.damage;
-            responder.energy -= Math.round((responderMove.power || 0) * 0.5);
-            responder.lastMove = responderMove;
-        }
-
-        fighter1.hp = clamp(fighter1.hp, 0, 100);
-        fighter2.hp = clamp(fighter2.hp, 0, 100);
-        fighter1.energy = clamp(fighter1.energy, 0, 100);
-        fighter2.energy = clamp(fighter2.energy, 0, 100);
-
-        battleLog.push(narrateMove(initiator, responder, initiatorMove, initiatorResult));
-        if (responder.hp > 0) {
-             battleLog.push(narrateMove(responder, initiator, responderMove, responderResult));
-        }
-
-        [initiator, responder] = [responder, initiator];
-        turn++;
-    }
-
-    const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
-    const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
-    
-    battleLog.push(phaseTemplates.finalBlow
-        .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
-        .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
-    );
-    
-    const winProb = (winner.hp / (winner.hp + loser.hp + 0.01)) * 100;
-    const finalEnding = getToneAlignedVictoryEnding(winner.id, loser.id, winProb);
-    battleLog.push(phaseTemplates.conclusion.replace('{endingNarration}', finalEnding));
-
-    return {
-        log: battleLog.join(''),
-        winnerId: winner.id,
-        loserId: loser.id,
-        finalState: { fighter1, fighter2 }
-    };
-}
-
-
-// --- Move AI & Calculation ---
-function selectMove(actor, phaseName, target) {
-    let suitableMoves = actor.techniques;
-    if (!suitableMoves || suitableMoves.length === 0) {
-        return { name: "Struggle", verb: 'struggle', object: 'to act', type: 'Utility', power: 10, emoji: '❓', requiresArticle: false };
-    }
-
-    if (phaseName === "Finishing Move" && actor.hp > target.hp && actor.energy > 40) {
-        const finishers = suitableMoves.filter(m => m.type === 'Finisher');
-        if (finishers.length > 0) return getRandomElement(finishers);
-    }
-    if (actor.hp < 40 && actor.energy > 20) {
-        const defenses = suitableMoves.filter(m => m.type === 'Defense' || m.type === 'Utility');
-        if (defenses.length > 0) return getRandomElement(defenses);
-    }
-    const offenses = suitableMoves.filter(m => m.type === 'Offense');
-    if (offenses.length > 0) return getRandomElement(offenses);
-
-    return getRandomElement(suitableMoves);
-}
-
-function calculateMove(move, attacker, defender, locTags) {
-    let basePower = move.power || 30;
-    let multiplier = 1.0;
-
-    if (attacker.strengths?.some(s => locTags.includes(s))) multiplier += 0.25;
-    if (attacker.weaknesses?.some(w => locTags.includes(w))) multiplier -= 0.25;
-
-    const defenderMoveType = defender.lastMove?.type;
-    if (move.type === 'Offense' && defenderMoveType === 'Utility') multiplier += 0.15;
-    if (move.type === 'Utility' && defenderMoveType === 'Defense') multiplier += 0.15;
-    if (move.type === 'Defense' && defenderMoveType === 'Offense') {
-        basePower *= 0.5;
-    }
-    
-    multiplier += (Math.random() - 0.5) * 0.2;
-
-    const totalEffectiveness = basePower * multiplier;
-    
-    let level;
-    if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK;
-    else if (totalEffectiveness > basePower * 1.3) level = effectivenessLevels.CRITICAL;
-    else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
-    else level = effectivenessLevels.NORMAL;
-
-    const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
-
-    return {
-        effectiveness: level,
-        damage: clamp(damage, 0, 50)
-    };
-}
-
-// --- Narrative Generation (FINAL) ---
-function narrateMove(actor, target, move, result) {
-    const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
-    const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
-
-    // 1. Handle special case for defensive moves first
-    if (move.type === 'Defense' || move.type === 'Utility') {
-        const isReactive = target.lastMove && target.lastMove.type === 'Offense';
-        if (isReactive) {
-            const description = `Reacting quickly, ${actorSpan} intercepts ${targetSpan}'s assault with the ${move.name}. ${getRandomElement(impactPhrases.REACTIVE_DEFENSE)}`;
-            const energyCost = Math.round((move.power || 0) * 0.5);
-            return phaseTemplates.move.replace('{actorId}', actor.id).replace('{actorName}', actor.name).replace('{moveName}', move.name).replace('{moveEmoji}', move.emoji || '✨').replace('{energyCost}', energyCost).replace('{effectivenessLabel}', "Defensive").replace('{effectivenessEmoji}', '🛡️').replace('{moveDescription}', description);
-        }
-    }
-
-    // 2. Select verb and conjugate it
-    const synonymList = verbSynonyms[move.verb] || [move.verb];
-    const selectedVerb = getRandomElement(synonymList);
-    const conjugatedVerb = conjugateVerb(selectedVerb);
-    const objectPhrase = assembleObjectPhrase(move);
-    
-    // 3. Select a contextual intro phrase
-    let introContext;
-    if (actor.hp < 35 && actor.energy < 40) introContext = 'DESPERATE';
-    else if (actor.hp > 80 && actor.hp > target.hp) introContext = 'CONFIDENT';
-    else if (target.lastMove) introContext = 'REACTIVE';
-    else introContext = 'AGGRESSIVE';
-    const introPool = introductoryPhrases[introContext];
-    const introType = Math.random() > 0.4 ? 'leading' : 'standalone';
-    let intro = getRandomElement(introPool[introType]);
-
-    // 4. Build the main action sentence
-    let fullAction;
-    const intensity = getRandomElement(intensityPhrases);
-    const tempo = getRandomElement(tempoPhrases);
-    let verbPhrase = `${conjugatedVerb} ${objectPhrase}`;
-    if (!objectPhrase) verbPhrase = `executes the ${move.name}`;
-
-    if (introType === 'leading') {
-        fullAction = `${intro.replace('{actorName}', actorSpan)} ${verbPhrase} ${intensity}.`;
-    } else {
-        const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
-        let actionSentence = `${pronounCap} ${verbPhrase}.`;
-        fullAction = `${intro} ${toLowerCaseFirst(actionSentence)}`;
-    }
-    
-    // 5. Build the impact phrase
-    let impactSentence = "";
-    const impactTemplates = impactPhrases[result.effectiveness.label];
-    if (impactTemplates) {
-        impactSentence = getRandomElement(impactTemplates).replace(/{targetName}/g, targetSpan);
-    }
-    
-    // 6. Combine and return the full narrative
-    const description = `${fullAction} ${impactSentence}`;
-    const energyCost = Math.round((move.power || 0) * 0.5);
-
-    return phaseTemplates.move
-        .replace(/{actorId}/g, actor.id)
-        .replace(/{actorName}/g, actor.name)
-        .replace(/{moveName}/g, move.name)
-        .replace(/{moveEmoji}/g, move.emoji || '✨')
-        .replace(/{energyCost}/g, energyCost)
-        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
-        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-        .replace(/{moveDescription}/g, description);
-}
+export const postBattleVictoryPhrases = {
+    "Pacifist": ["Aang quietly offered a helping hand, {WinnerPronounP} victory a testament to peace.","The Avatar sighed in relief, the fight ending without true harm.",], "Madcap": ["{WinnerName} retrieved {WinnerPronounP} boomerang with a flourish, {WinnerPronounP} victory a mix of genius and goofiness.","{WinnerName} let out a hearty laugh, already planning {WinnerPronounP} next eccentric stunt.",], "Playful": ["{WinnerName} giggled, skipping away from {WinnerPronounP} bewildered opponent.","With a cheerful 'Ta-da!', {WinnerName} celebrated a victory that felt more like a game."], "Disciplined": ["{WinnerName} nodded stiffly, {WinnerPronounP} victory a clear affirmation of tradition and mastery.",], "Fierce": ["{WinnerName} stood firm, {WinnerPronounP} bending prowess undeniable.","{WinnerName} radiated quiet power, {WinnerPronounP} fierce determination evident in {WinnerPronounP} victory."], "Cocky": ["{WinnerName} brushed dirt from {WinnerPronounP} clothes with a smirk, {WinnerPronounP} victory a foregone conclusion.",], "Determined": ["{WinnerName} stood breathing heavily, {WinnerPronounP} victory a testament to {WinnerPronounP} hard-won resolve.","{WinnerName} clenched {WinnerPronounP} fist, the battle an affirmation of {WinnerPronounP} chosen path."], "Ruthless": ["{WinnerName}'s blue flames flickered, leaving no doubt about {WinnerPronounP} cold, efficient triumph over {LoserName}."], "Supreme": ["{WinnerName} stood radiating immense power, {WinnerPronounP} victory a declaration of {WinnerPronounP} absolute dominion.",], "Wise": ["{WinnerName} offered a gentle smile, {WinnerPronounP} victory a quiet lesson in subtlety and wisdom.",], "Wise_Reluctant": ["{WinnerName} sighed, {WinnerPronounP} victory a somber affirmation of control over destruction. \"{WinnerQuote}\"",], "Deadpan": ["{WinnerName} merely blinked, {WinnerPronounP} victory as precise and unemotional as {WinnerPronounP} throws.",], "default": ["{WinnerName} stood victorious over {LoserName}, the battle concluded. \"{WinnerQuote}\""]
+};
