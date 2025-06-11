@@ -67,10 +67,10 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         // The finisher description is now self-contained and doesn't need a verb/object.
         const finisherDescription = getRandomElement(winner.techniques.filter(t => t.finisher))?.finalFlavor || `delivered a final, decisive blow.`;
 
-        // --- GRAMMAR FIX: Capitalize pronouns for start-of-sentence usage ---
         const initiatorPronounSCap = initiator.pronouns.s.charAt(0).toUpperCase() + initiator.pronouns.s.slice(1);
         const responderPronounSCap = responder.pronouns.s.charAt(0).toUpperCase() + responder.pronouns.s.slice(1);
 
+        // --- FIX: Add defensive guards (e.g., || '') to prevent crashes if a verb is missing ---
         return template
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)
@@ -82,18 +82,18 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
             .replace(/{initiatorPronounSCap}/g, initiatorPronounSCap)
             .replace(/{initiatorPronounO}/g, initiator.pronouns.o)
             .replace(/{initiatorPronounP}/g, initiator.pronouns.p)
-            .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech.verb))
-            .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech.verb))
-            .replace(/{initiator_verb_base}/g, initiatorTech.verb.toLowerCase())
-            .replace(/{initiator_object}/g, initiatorTech.object || '')
+            .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech?.verb || ''))
+            .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech?.verb || ''))
+            .replace(/{initiator_verb_base}/g, (initiatorTech?.verb || '').toLowerCase())
+            .replace(/{initiator_object}/g, initiatorTech?.object || '')
             .replace(/{responderPronounS}/g, responder.pronouns.s)
             .replace(/{responderPronounSCap}/g, responderPronounSCap)
             .replace(/{responderPronounO}/g, responder.pronouns.o)
             .replace(/{responderPronounP}/g, responder.pronouns.p)
-            .replace(/{responder_verb_ing}/g, toGerund(responderTech.verb))
-            .replace(/{responder_verb_past}/g, toPastTense(responderTech.verb))
-            .replace(/{responder_verb_base}/g, responderTech.verb.toLowerCase())
-            .replace(/{responder_object}/g, responderTech.object || '')
+            .replace(/{responder_verb_ing}/g, toGerund(responderTech?.verb || ''))
+            .replace(/{responder_verb_past}/g, toPastTense(responderTech?.verb || ''))
+            .replace(/{responder_verb_base}/g, (responderTech?.verb || '').toLowerCase())
+            .replace(/{responder_object}/g, responderTech?.object || '')
             .replace(/{winnerFinisherDescription}/g, finisherDescription);
     };
     
@@ -134,7 +134,9 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
     }
 
     // --- FINISHING MOVE ---
-    const finishingContext = { winner, loser, loc, initiatorTech: {}, responderTech: {} }; // No specific techniques needed here
+    // FIX: Provide a default, safe technique object instead of an empty one.
+    const defaultTech = { verb: '', object: '' };
+    const finishingContext = { winner, loser, loc, initiatorTech: defaultTech, responderTech: defaultTech };
     story.push(populateBeat(getRandomElement(battleBeats.finishing_move), winner, loser, finishingContext));
 
     return story.map(beat => `<p>${beat}</p>`).join('');
