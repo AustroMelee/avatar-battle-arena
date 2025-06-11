@@ -14,14 +14,26 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 // --- GRAMMAR SUBSYSTEM ---
 function conjugateVerb(verb) {
-    // Simple 3rd person singular present tense conjugation
-    if (verb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(verb.slice(-2, -1))) {
-        return verb.slice(0, -1) + 'ies'; // e.g., fly -> flies
+    if (!verb) return '';
+    verb = verb.toLowerCase();
+    // Handles special cases like 'gracefully dodge'
+    const verbParts = verb.split(' ');
+    const mainVerb = verbParts[verbParts.length - 1];
+
+    let conjugated;
+
+    if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
+        conjugated = mainVerb.slice(0, -1) + 'ies'; // e.g., apply -> applies
+    } else if (mainVerb.endsWith('s') || mainVerb.endsWith('sh') || mainVerb.endsWith('ch') || mainVerb.endsWith('x') || mainVerb.endsWith('z') || mainVerb.endsWith('o')) {
+        conjugated = mainVerb + 'es'; // e.g., lash -> lashes, go -> goes
+    } else {
+        conjugated = mainVerb + 's'; // e.g., strike -> strikes
     }
-    if (verb.endsWith('s') || verb.endsWith('sh') || verb.endsWith('ch') || verb.endsWith('x') || verb.endsWith('z')) {
-        return verb + 'es'; // e.g., unleash -> unleashes
+
+    if (verbParts.length > 1) {
+        return verbParts.slice(0, -1).join(' ') + ' ' + conjugated;
     }
-    return verb + 's'; // e.g., strike -> strikes
+    return conjugated;
 }
 
 function assembleObjectPhrase(move) {
@@ -101,7 +113,7 @@ function initializeFighterState(charId) {
     return {
         id: charId,
         name: character.name,
-        ...JSON.parse(JSON.stringify(character)), // Deep copy to avoid mutation
+        ...JSON.parse(JSON.stringify(character)),
         hp: 100,
         energy: 100,
         status: [],
@@ -127,6 +139,10 @@ export function simulateBattle(f1Id, f2Id, locId) {
         
         battleLog.push(phaseTemplates.header.replace('{phaseName}', phase.name).replace('{phaseEmoji}', phase.emoji));
 
+        if (phase.name === "Finishing Move") {
+            battleLog.push(`<p class="move-description">The battle reaches its peak! Both fighters gather their remaining strength for a final, decisive exchange.</p>`);
+        }
+
         const initiatorMove = selectMove(initiator, phase.name, responder);
         const responderMove = selectMove(responder, phase.name, initiator);
 
@@ -134,12 +150,12 @@ export function simulateBattle(f1Id, f2Id, locId) {
         const responderResult = calculateMove(responderMove, responder, initiator, locTags);
         
         responder.hp -= initiatorResult.damage;
-        initiator.energy -= (initiatorMove.power || 0) * 0.5;
+        initiator.energy -= Math.round((initiatorMove.power || 0) * 0.5);
         initiator.lastMove = initiatorMove;
 
         if (responder.hp > 0) {
             initiator.hp -= responderResult.damage;
-            responder.energy -= (responderMove.power || 0) * 0.5;
+            responder.energy -= Math.round((responderMove.power || 0) * 0.5);
             responder.lastMove = responderMove;
         }
 
@@ -148,9 +164,9 @@ export function simulateBattle(f1Id, f2Id, locId) {
         fighter1.energy = clamp(fighter1.energy, 0, 100);
         fighter2.energy = clamp(fighter2.energy, 0, 100);
 
-        battleLog.push(narrateMove(initiator, initiatorMove, initiatorResult));
+        battleLog.push(narrateMove(initiator, responder, initiatorMove, initiatorResult));
         if (responder.hp > 0) {
-             battleLog.push(narrateMove(responder, responderMove, responderResult));
+             battleLog.push(narrateMove(responder, initiator, responderMove, responderResult));
         }
 
         [initiator, responder] = [responder, initiator];
@@ -185,11 +201,11 @@ function selectMove(actor, phaseName, target) {
         return { name: "Struggle", verb: 'struggle', object: 'to act', type: 'Utility', power: 10, emoji: '❓', requiresArticle: false };
     }
 
-    if (phaseName === "Finishing Move" && actor.hp > target.hp) {
+    if (phaseName === "Finishing Move" && actor.hp > target.hp && actor.energy > 40) {
         const finishers = suitableMoves.filter(m => m.type === 'Finisher');
         if (finishers.length > 0) return getRandomElement(finishers);
     }
-    if (actor.hp < 40) {
+    if (actor.hp < 40 && actor.energy > 20) {
         const defenses = suitableMoves.filter(m => m.type === 'Defense' || m.type === 'Utility');
         if (defenses.length > 0) return getRandomElement(defenses);
     }
@@ -223,7 +239,7 @@ function calculateMove(move, attacker, defender, locTags) {
     else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
     else level = effectivenessLevels.NORMAL;
 
-    const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 4) : 0;
+    const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
 
     return {
         effectiveness: level,
@@ -232,24 +248,37 @@ function calculateMove(move, attacker, defender, locTags) {
 }
 
 // --- Narrative Generation (UPGRADED) ---
-function narrateMove(actor, move, result) {
+function narrateMove(actor, target, move, result) {
     const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
-    const conjugatedVerb = conjugateVerb(move.verb);
     const phrase = assembleObjectPhrase(move);
+    const conjugatedVerb = conjugateVerb(move.verb);
 
-    let description;
+    let templates = [];
     if (phrase) {
-        description = `${pronounCap} ${conjugatedVerb} ${phrase}.`;
+        templates.push(`${pronounCap} ${conjugatedVerb} ${phrase}.`);
+        templates.push(`With a surge of energy, ${actor.pronouns.s} ${conjugatedVerb} ${phrase}.`);
+        if (target) {
+            templates.push(`Focusing on ${target.name}, ${actor.pronouns.s} ${conjugatedVerb} ${phrase}.`);
+        }
     } else {
-        description = `${pronounCap} performs the ${move.name}.`;
+        templates.push(`${pronounCap} performs the ${move.name}.`);
     }
+    
+    const description = getRandomElement(templates);
+    const energyCost = Math.round((move.power || 0) * 0.5);
 
-    return phaseTemplates.move
-        .replace(/{actorId}/g, actor.id)
-        .replace(/{actorName}/g, actor.name)
-        .replace(/{moveName}/g, move.name)
-        .replace(/{moveEmoji}/g, move.emoji || '✨')
-        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
-        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-        .replace(/{moveDescription}/g, description);
+    // Manually construct the HTML to inject the energy cost without modifying the template file.
+    let moveHtml = `
+        <div class="move-line">
+            <div class="move-actor">
+                <span class="char-${actor.id}">${actor.name}</span> used <span class="move-name">${move.name}</span> (${move.emoji || '✨'}) [-${energyCost}⚡]
+            </div>
+            <div class="move-effectiveness ${result.effectiveness.label}">
+                ${result.effectiveness.label} (${result.effectiveness.emoji})
+            </div>
+        </div>
+        <p class="move-description">${description}</p>
+    `;
+
+    return moveHtml;
 }
