@@ -2,7 +2,7 @@
 
 import { characters } from './characters.js';
 import { locations, terrainTags } from './locations.js';
-import { battlePhases, effectivenessLevels, phaseTemplates, victoryTypes, postBattleVictoryPhrases } from './narrative-v2.js';
+import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases } from './narrative-v2.js';
 import { adjectiveToNounMap } from './mechanics.js';
 
 // --- Helper Functions ---
@@ -12,55 +12,53 @@ const getRandomElement = (arr, fallback = null) => {
 };
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-// --- Victory Narration Logic (Moved from obsolete battle-engine.js) ---
-
-function normalizeTraitToNoun(traitString) {
-    if (!traitString) return 'skill';
-    const normalized = traitString.toLowerCase().replace(/ /g, '_');
-    return adjectiveToNounMap[normalized] || traitString.replace(/_/g, ' ');
+// --- GRAMMAR SUBSYSTEM ---
+function conjugateVerb(verb) {
+    // Simple 3rd person singular present tense conjugation
+    if (verb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(verb.slice(-2, -1))) {
+        return verb.slice(0, -1) + 'ies'; // e.g., fly -> flies
+    }
+    if (verb.endsWith('s') || verb.endsWith('sh') || verb.endsWith('ch') || verb.endsWith('x') || verb.endsWith('z')) {
+        return verb + 'es'; // e.g., unleash -> unleashes
+    }
+    return verb + 's'; // e.g., strike -> strikes
 }
 
+function assembleObjectPhrase(move) {
+    if (!move.object) {
+        return '';
+    }
+    if (move.requiresArticle) {
+        const firstLetter = move.object.charAt(0).toLowerCase();
+        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
+        return `${article} ${move.object}`;
+    }
+    return move.object;
+}
+
+
+// --- Victory Narration Logic ---
 function getVictoryQuote(character, victoryData) {
     if (!character || !character.quotes) return "Victory is mine.";
-    const { type, opponentId, resolutionTone } = victoryData;
+    const { type, opponentId } = victoryData;
     const quotes = character.quotes;
 
-    let selectedQuote = "";
     const quotePool = [];
-
     if (opponentId && quotes.postWin_specific && quotes.postWin_specific[opponentId]) {
         quotePool.push(quotes.postWin_specific[opponentId]);
     }
-    if (resolutionTone?.type === "overwhelming_power" && quotes.postWin_overwhelming) {
-        quotePool.push(quotes.postWin_overwhelming);
-    }
-    if (resolutionTone?.type === "clever_victory" && quotes.postWin_clever) {
-        quotePool.push(quotes.postWin_clever);
-    }
-    if (resolutionTone?.type === "emotional_yield" && quotes.postWin_reflective) {
-        quotePool.push(quotes.postWin_reflective);
-    }
     if (quotes[`postWin_${type}`]) {
         quotePool.push(quotes[`postWin_${type}`]);
-    }
-    if (quotes.postWin) {
+    } else if (quotes.postWin) {
         quotePool.push(quotes.postWin);
     }
     
-    selectedQuote = getRandomElement(quotePool.flat());
-    return selectedQuote || "The battle is won.";
-}
+    if (quotes.postWin_overwhelming) quotePool.push(quotes.postWin_overwhelming);
+    if (quotes.postWin_clever) quotePool.push(quotes.postWin_clever);
+    if (quotes.postWin_reflective) quotePool.push(quotes.postWin_reflective);
 
-function populateTemplate(template, data) {
-    return template.replace(/{(\w+)}/g, (match, key) => {
-        const lowerKey = key.toLowerCase();
-        for (const dataKey in data) {
-            if (dataKey.toLowerCase() === lowerKey) {
-                return data[dataKey];
-            }
-        }
-        return match;
-    });
+    let selectedQuote = getRandomElement(quotePool.flat());
+    return selectedQuote || "The battle is won.";
 }
 
 function getToneAlignedVictoryEnding(winnerId, loserId, winProb) {
@@ -76,20 +74,18 @@ function getToneAlignedVictoryEnding(winnerId, loserId, winProb) {
         LoserPronounS: loserChar.pronouns.s,
         LoserPronounO: loserChar.pronouns.o,
         LoserPronounP: loserChar.pronouns.p,
-        WinnerStrength: normalizeTraitToNoun(getRandomElement(winnerChar?.strengths, "skill")),
-        LoserID: loserId, 
     };
     
     const quoteData = { 
         type: winProb >= 90 ? 'stomp' : (winProb >= 75 ? 'dominant' : 'narrow'), 
-        opponentId: loserId, 
-        resolutionTone: { type: 'technical_win' } // Simplified for now
+        opponentId: loserId,
     };
     const finalQuote = getVictoryQuote(winnerChar, quoteData);
     templateData.WinnerQuote = finalQuote;
     
     const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
-    let populatedEnding = populateTemplate(getRandomElement(archetypePhrases), templateData);
+    let populatedEnding = archetypePhrases[Math.floor(Math.random() * archetypePhrases.length)]
+        .replace(/{(\w+)}/g, (match, key) => templateData[key] || match);
     
     if (!populatedEnding.includes(finalQuote)) {
         populatedEnding += ` "${finalQuote}"`;
@@ -141,7 +137,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
         initiator.energy -= (initiatorMove.power || 0) * 0.5;
         initiator.lastMove = initiatorMove;
 
-        if (fighter1.hp > 0 && fighter2.hp > 0) {
+        if (responder.hp > 0) {
             initiator.hp -= responderResult.damage;
             responder.energy -= (responderMove.power || 0) * 0.5;
             responder.lastMove = responderMove;
@@ -153,7 +149,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
         fighter2.energy = clamp(fighter2.energy, 0, 100);
 
         battleLog.push(narrateMove(initiator, initiatorMove, initiatorResult));
-        if (fighter2.hp > 0) {
+        if (responder.hp > 0) {
              battleLog.push(narrateMove(responder, responderMove, responderResult));
         }
 
@@ -169,7 +165,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
         .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
     );
     
-    const winProb = (winner.hp / (winner.hp + loser.hp)) * 100;
+    const winProb = (winner.hp / (winner.hp + loser.hp + 0.01)) * 100;
     const finalEnding = getToneAlignedVictoryEnding(winner.id, loser.id, winProb);
     battleLog.push(phaseTemplates.conclusion.replace('{endingNarration}', finalEnding));
 
@@ -186,7 +182,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
 function selectMove(actor, phaseName, target) {
     let suitableMoves = actor.techniques;
     if (!suitableMoves || suitableMoves.length === 0) {
-        return { name: "Struggle", verb: 'struggles', object: 'to act', type: 'Utility', power: 10, emoji: '❓', requiresArticle: false };
+        return { name: "Struggle", verb: 'struggle', object: 'to act', type: 'Utility', power: 10, emoji: '❓', requiresArticle: false };
     }
 
     if (phaseName === "Finishing Move" && actor.hp > target.hp) {
@@ -200,7 +196,7 @@ function selectMove(actor, phaseName, target) {
     const offenses = suitableMoves.filter(m => m.type === 'Offense');
     if (offenses.length > 0) return getRandomElement(offenses);
 
-    return getRandomElement(suitableMoves); // Fallback
+    return getRandomElement(suitableMoves);
 }
 
 function calculateMove(move, attacker, defender, locTags) {
@@ -235,16 +231,17 @@ function calculateMove(move, attacker, defender, locTags) {
     };
 }
 
-// --- Narrative Generation ---
+// --- Narrative Generation (UPGRADED) ---
 function narrateMove(actor, move, result) {
-    const requiresArticle = move.requiresArticle;
-    const firstLetter = move.object?.charAt(0).toLowerCase();
-    const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
-    const objectPhrase = move.object ? (requiresArticle ? `${article} ${move.object}` : move.object) : '';
+    const pronounCap = actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1);
+    const conjugatedVerb = conjugateVerb(move.verb);
+    const phrase = assembleObjectPhrase(move);
 
-    let description = `${actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1)} ${move.verb} ${objectPhrase}.`;
-    if (!move.object) {
-        description = `${actor.pronouns.s.charAt(0).toUpperCase() + actor.pronouns.s.slice(1)} performed the ${move.name}.`;
+    let description;
+    if (phrase) {
+        description = `${pronounCap} ${conjugatedVerb} ${phrase}.`;
+    } else {
+        description = `${pronounCap} performs the ${move.name}.`;
     }
 
     return phaseTemplates.move
