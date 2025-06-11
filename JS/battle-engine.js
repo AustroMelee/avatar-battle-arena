@@ -52,20 +52,46 @@ function getVictoryQuote(character, victoryData) {
     return finalQuote || "I am victorious.";
 }
 
+// This function now uses a more powerful template filler
+function populateTemplate(template, data) {
+    // This regex finds all placeholders like {key}
+    return template.replace(/{(\w+)}/g, (match, key) => {
+        // Return the value from the data map, or the original placeholder if not found
+        return data[key] || match;
+    });
+}
+
 function getToneAlignedVictoryEnding(winnerId, loserId, winProb, victoryType, resolutionTone) {
     const winnerChar = characters[winnerId];
     const loserChar = characters[loserId];
 
-    const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
-    let template = getRandomElement(archetypePhrases);
-    
-    const quoteData = { type: winProb >= 90 ? 'stomp' : (winProb >= 75 ? 'dominant' : 'narrow'), opponentId: loserId, resolutionTone };
-    const quote = getVictoryQuote(winnerChar, quoteData);
+    // The data map for populating the template
+    const templateData = {
+        WinnerName: `<span class="char-${winnerId}">${winnerChar.name}</span>`,
+        LoserName: `<span class="char-${loserId}">${loserChar.name}</span>`,
+        WinnerPronounS: winnerChar.pronouns.s,
+        WinnerPronounO: winnerChar.pronouns.o,
+        WinnerPronounP: winnerChar.pronouns.p,
+        LoserPronounS: loserChar.pronouns.s,
+        LoserPronounO: loserChar.pronouns.o,
+        LoserPronounP: loserChar.pronouns.p,
+        WinnerStrength: normalizeTraitToNoun(getRandomElement(winnerChar?.strengths, "skill")),
+    };
 
-    return template
-        .replace(/{WinnerQuote}/g, quote)
-        .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
-        .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`);
+    const quoteData = { type: winProb >= 90 ? 'stomp' : (winProb >= 75 ? 'dominant' : 'narrow'), opponentId: loserId, resolutionTone };
+    templateData.WinnerQuote = getVictoryQuote(winnerChar, quoteData);
+    
+    // Choose the correct template from narrative.js
+    let template;
+    const specificEnding = victoryTypes[victoryType]?.narrativeEndings?.[winnerId];
+    if (specificEnding) {
+        template = specificEnding;
+    } else {
+        const archetypePhrases = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
+        template = getRandomElement(archetypePhrases);
+    }
+
+    return populateTemplate(template, templateData);
 }
 
 // --- CORE BATTLE LOGIC ---

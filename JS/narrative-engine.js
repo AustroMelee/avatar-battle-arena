@@ -40,22 +40,32 @@ export function generatePlayByPlay(f1Id, f2Id, locId, battleOutcome) {
         const responderTech = getRandomElement(responder.techniques) || { verb: 'defend', object: 'themself', method: ''};
         const winnerTech = getRandomElement(winner.techniques.filter(t => t.finisher)) || getRandomElement(winner.techniques) || { verb: 'strike', object: 'out', method: ''};
 
+        // This function now populates all pronouns and grammatical variations.
         return template
+            // Names & Locations
             .replace(/{initiatorName}/g, `<span class="char-${initiator.id}">${initiator.name}</span>`)
             .replace(/{responderName}/g, `<span class="char-${responder.id}">${responder.name}</span>`)
             .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
             .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
             .replace(/{locationFeature}/g, loc.featureA)
             .replace(/{locationTerrain}/g, loc.terrain)
-            // Initiator Verbs
+            // Initiator Pronouns & Verbs
+            .replace(/{initiatorPronounS}/g, initiator.pronouns.s)
+            .replace(/{initiatorPronounO}/g, initiator.pronouns.o)
+            .replace(/{initiatorPronounP}/g, initiator.pronouns.p)
             .replace(/{initiator_verb_ing}/g, toGerund(initiatorTech.verb))
             .replace(/{initiator_verb_past}/g, toPastTense(initiatorTech.verb))
             .replace(/{initiator_verb_base}/g, initiatorTech.verb)
-            // Responder Verbs
+            // Responder Pronouns & Verbs
+            .replace(/{responderPronounS}/g, responder.pronouns.s)
+            .replace(/{responderPronounO}/g, responder.pronouns.o)
+            .replace(/{responderPronounP}/g, responder.pronouns.p)
             .replace(/{responder_verb_ing}/g, toGerund(responderTech.verb))
             .replace(/{responder_verb_past}/g, toPastTense(responderTech.verb))
             .replace(/{responder_verb_base}/g, responderTech.verb)
-            // Winner Verbs (for finisher)
+            // Winner Pronouns & Verbs (for finisher)
+            .replace(/{winnerPronounS}/g, winner.pronouns.s)
+            .replace(/{winnerPronounP}/g, winner.pronouns.p)
             .replace(/{winner_verb_past}/g, toPastTense(winnerTech.verb))
             // Objects
             .replace(/{initiator_object}/g, initiatorTech.object || '')
