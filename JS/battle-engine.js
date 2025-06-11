@@ -46,27 +46,12 @@ function getRandomElement(array, fallbackValue = "skill") {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-// FINAL, SIMPLIFIED VERSION of getStyledAction
-function getStyledAction(fighter, baseAction) {
-    const style = getRandomElement(fighter.combatStyleTags, 'default');
-    
-    // This map now produces a simple, reliable adverb or short phrase.
-    const flavorMap = {
-        aggressive: "aggressively unleashed", precise: "methodically executed",
-        calculated: "deliberately unleashed", improvisational: "cleverly attempted",
-        evasive: "swiftly dodged with", fierce: "fiercely launched",
-        unrelenting: "relentlessly unleashed", determined: "with fierce determination, attempted",
-        ruthless: "ruthlessly executed", overwhelming: "with overwhelming force, launched",
-        eccentric: "unpredictably tried", acrobatic: "acrobatically performed",
-        silent: "silently prepared", wise: "with calm wisdom, initiated",
-        disciplined: "with disciplined precision, executed", controlled: "with precise control, unleashed",
-        default: "unleashed"
-    };
-
-    const verbPhrase = flavorMap[style] || flavorMap.default;
-    return `${verbPhrase} ${baseAction}`;
+function sanitizePhrase(phrase) {
+    if (phrase && phrase.startsWith('the ')) {
+        return phrase.substring(4);
+    }
+    return phrase;
 }
-
 
 function normalizeTraitToNoun(traitString) {
     if (!traitString) return 'skill';
@@ -156,18 +141,35 @@ function getToneAlignedVictoryEnding(winnerId, victoryType, baseStoryData) {
     return populateTemplate(getRandomElement(archetypePhrases), baseStoryData);
 }
 
+// FINAL, CORRECTED VERSION of generateCombatSequence
 function generateCombatSequence(f1, f2, loc) {
-    const f1_opening_action = getStyledAction(f1, getTraitDisplay(f1, "openingMove"));
-    const f2_counter_action = getStyledAction(f2, getTraitDisplay(f2, "counterMove"));
-    const f1_mid_game_action = getStyledAction(f1, getTraitDisplay(f1, "midGameTactic"));
-    const f2_terrain_adapt_action = getStyledAction(f2, getTraitDisplay(f2, "terrainAdaptation"));
-    const f1_finishing_action = getStyledAction(f1, getTraitDisplay(f1, "finishingMove"));
-    const f2_last_ditch_action = getStyledAction(f2, getTraitDisplay(f2, "lastDitchDefense"));
+    const getStyleAdverb = (fighter) => {
+        const style = getRandomElement(fighter.combatStyleTags, 'default');
+        const flavorMap = {
+            aggressive: "aggressively", precise: "methodically",
+            calculated: "deliberately", improvisational: "cleverly",
+            evasive: "swiftly", fierce: "fiercely",
+            unrelenting: "relentlessly", determined: "determinedly",
+            ruthless: "ruthlessly", overwhelming: "overwhelmingly",
+            eccentric: "unpredictably", acrobatic: "acrobatically",
+            silent: "silently", wise: "wisely",
+            disciplined: "with disciplined precision", controlled: "with precise control",
+            default: ""
+        };
+        return flavorMap[style] || '';
+    };
+
+    const action1 = `${getStyleAdverb(f1)} unleashing ${getTraitDisplay(f1, "openingMove")}`;
+    const action2 = `${getStyleAdverb(f2)} countering with ${getTraitDisplay(f2, "counterMove")}`;
+    const action3 = `${getStyleAdverb(f1)} using ${getTraitDisplay(f1, "midGameTactic")}`;
+    const action4 = `${getStyleAdverb(f2)} adapting with ${getTraitDisplay(f2, "terrainAdaptation")}`;
+    const action5 = `${getStyleAdverb(f1)} attempting ${getTraitDisplay(f1, "finishingMove")}`;
+    const action6 = `${getStyleAdverb(f2)} making ${getTraitDisplay(f2, "lastDitchDefense")}`;
 
     return [
-        `<span class='char-${f1.id}'>${f1.name}</span> initiated the clash, ${f1_opening_action}, directly confronting <span class='char-${f2.id}'>${f2.name}</span>. The very ${loc.featureA} seemed to amplify the impact.`,
-        `<span class='char-${f2.id}'>${f2.name}</span> responded with ${f2_counter_action}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted and ${f1_mid_game_action}, seeking to control the flow.`,
-        `As the battle intensified, ${f1_finishing_action} from <span class='char-${f1.id}'>${f1.name}</span> met ${f2_last_ditch_action} from <span class='char-${f2.id}'>${f2.name}</span>. The environment itself seemed to react, with ${loc.featureC} shifting beneath their feet.`
+        `<span class='char-${f1.id}'>${f1.name}</span> initiated the clash, ${action1}, directly confronting <span class='char-${f2.id}'>${f2.name}</span>. The very ${loc.featureA} seemed to amplify the impact.`,
+        `<span class='char-${f2.id}'>${f2.name}</span> responded, ${action2}, deftly leveraging ${loc.featureB}. Meanwhile, <span class='char-${f1.id}'>${f1.name}</span> pivoted, ${action3} to control the flow.`,
+        `As the battle intensified, the ${action5} from <span class='char-${f1.id}'>${f1.name}</span> was met by ${action6} from <span class='char-${f2.id}'>${f2.name}</span>. The environment itself seemed to react, with ${loc.featureC} shifting beneath their feet.`
     ];
 }
 
