@@ -1,3 +1,4 @@
+// FILE: narrative-v2.js
 'use strict';
 
 export const battlePhases = [
@@ -30,7 +31,7 @@ export const phaseTemplates = {
         </div>
         <p class="move-description">{moveDescription}</p>
     `,
-    finalBlow: `<p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
+    finalBlow: `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
     conclusion: `<p class="conclusion">{endingNarration}</p>`
 };
@@ -46,7 +47,7 @@ export const introductoryPhrases = [
     "With an air of supreme confidence,", "Taking the offensive,", "With a ferocious cry,", "Deciding to end this quickly,",
     "Lunging forward,", "Responding in kind,", "Seizing the opportunity,", "Countering the last move,", "Not missing a beat,",
     "Pivoting smoothly,", "Without hesitation,", "With a quick movement,", "Looking for an opening,", "Switching tactics,",
-    "Testing the opponent's defenses,", "With calculated poise,", "Channeling inner strength,"
+    "Testing the opponent's defenses,", "With calculated poise,", "Channeling inner strength,", "With steely determination,"
 ];
 
 export const adverbPool = {
@@ -68,6 +69,11 @@ export const weakMoveTransitions = [
     "granting {targetName} the upper hand.", "leaving {actorName} open to retaliation."
 ];
 
+export const finishingBlowPhrases = [
+    "{targetName} crumbles under the decisive strike.", "{targetName} falls to the devastating blow.", "The final attack leaves {targetName} unable to continue.",
+    "A perfect finishing move ends the battle decisively.", "The final, crushing blow lands, ending the fight."
+];
+
 export const impactPhrases = {
     DEFAULT: {
         WEAK: [
@@ -79,14 +85,17 @@ export const impactPhrases = {
             "The attack connects, interrupting {targetName}'s rhythm.", "{targetName} reels from the precise strike.", "The move lands firmly, catching {targetName} off-guard.",
             "{targetName} struggles to recover from the hit.", "The strike catches {targetName} by surprise.", "A clean hit, forcing {targetName} back.",
             "{targetName} absorbs the blow, but it clearly hurts.", "{targetName} falters under the attack.", "The hit lands true.", "{targetName} grunts from the impact.",
-            "A well-aimed strike finds its mark."
+            "A well-aimed strike finds its mark.", "The impact forces a gasp from {targetName}.", "It's a direct, solid connection.", "{targetName} is momentarily shaken.",
+            "The blow disrupts {targetName}'s stance.", "A textbook hit.", "The attack lands as intended."
         ],
         STRONG: [
             "A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", 
             "The impact is significant, leaving {targetName} momentarily stunned.", "{targetName} is rocked by the forceful strike.", "The blow overwhelms {targetName}'s defenses.",
             "A crushing impact! {targetName} struggles to stay standing.", "The fierce assault leaves {targetName} battered.", "{targetName} is thrown off balance by the powerful strike.",
             "The force of the attack is staggering.", "{targetName} buckles from the fierce blow.", "{targetName} is overwhelmed by the fierce assault.",
-            "A devastating strike lands, cracking {targetName}'s defense."
+            "A devastating strike lands, cracking {targetName}'s defense.", "The sheer power of the move is breathtaking.", "{targetName}'s defense shatters under the force.",
+            "The assault is brutal and effective.", "A heavy blow lands, leaving {targetName} dazed.", "The strike resonates with raw power.", "{targetName} cries out in pain from the forceful hit.",
+            "The attack leaves a visible mark."
         ],
         CRITICAL: ["A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground.", "The decisive strike connects, leaving no room for recovery."]
     },
@@ -94,12 +103,12 @@ export const impactPhrases = {
         REACTIVE: [
             "The defensive maneuver perfectly counters the incoming assault.", "The attack is negated completely by the well-timed defense.", "With a skillful move, the blow is parried effortlessly.",
             "{actorName} deftly neutralizes the attack.", "The assault is stopped dead in its tracks.", "The incoming blow is masterfully redirected.",
-            "The attack is brushed aside with ease.", "The attempt is expertly intercepted."
+            "The attack is brushed aside with ease.", "The attempt is expertly intercepted.", "A flawless block negates all damage.", "{actorName} stands firm against the attack."
         ],
         PROACTIVE: [
             "The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares {possessive} defense, anticipating the next move.",
             "A solid defense is established, challenging any approach.", "The strategic position makes {actorName} a difficult target.", "The field is reshaped to {actorName}'s advantage.",
-            "{actorName} creates an obstacle, controlling the battlefield.", "The defensive posture is flawless."
+            "{actorName} creates an obstacle, controlling the battlefield.", "The defensive posture is flawless.", "The battlefield shifts to favor {actorName}.", "{actorName} takes a commanding defensive position."
         ]
     }
 };

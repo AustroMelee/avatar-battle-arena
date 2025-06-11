@@ -1,3 +1,4 @@
+// FILE: ui.js
 'use strict';
 
 import { characters } from './characters.js';
