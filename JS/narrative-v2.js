@@ -77,8 +77,8 @@ export const finishingBlowPhrases = [
 export const impactPhrases = {
     DEFAULT: {
         WEAK: [
-            "but the attack glances off harmlessly", "but {targetName} easily dodges it",
-            "but the technique lacks the power to connect meaningfully", "but the strike is too slow to find its mark"
+            "but the attack glances off harmlessly.", "but {targetName} easily dodges it.",
+            "but the technique lacks the power to connect meaningfully.", "but the strike is too slow to find its mark."
         ],
         NORMAL: [
             "The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", 
