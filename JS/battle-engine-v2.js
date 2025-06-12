@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v6.3-Defensive-Hardening-Final';
+const systemVersion = 'v6.4-Hardened-Crash-Fix';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -70,8 +70,7 @@ function initializeFighterState(charId, locId) {
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         isStunned: false, hasSetup: false, loggedEnvEffects: new Set(),
-        movesUsed: [], phraseHistory: {}, // History per phrase type
-        techniques: contextualMoveset
+        movesUsed: [], phraseHistory: {}, moveHistory: [],
     };
 }
 
@@ -149,14 +148,18 @@ export function simulateBattle(f1Id, f2Id, locId) {
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.lastMove = move;
 
-            // **DEFINITIVE BUG FIX (LAYER 2): Defensive Guard Clause**
-            // This prevents a crash even if the root cause is elsewhere.
-            if (!attacker.movesUsed) {
-                console.error(`CRITICAL RECOVERY: attacker.movesUsed was undefined for ${attacker.name}. Re-initializing.`);
+            // **DEFINITIVE BUG FIX (LAYER 2 - EXPANDED): Defensive Guard Clauses**
+            if (!Array.isArray(attacker.movesUsed)) {
+                console.error(`CRITICAL RECOVERY: attacker.movesUsed was not an array for ${attacker.name}. Re-initializing.`);
                 attacker.movesUsed = [];
+            }
+            if (!Array.isArray(attacker.moveHistory)) {
+                console.error(`CRITICAL RECOVERY: attacker.moveHistory was not an array for ${attacker.name}. Re-initializing.`);
+                attacker.moveHistory = [];
             }
             attacker.movesUsed.push(move.name);
             attacker.moveHistory.push(move);
+
             if (defender.hp <= 0) battleOver = true;
         };
         
@@ -173,7 +176,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
     if (interactionLog.length === 0) {
         interactionLog.push('No significant environmental or move-interaction modifiers were in play.');
     }
-    winner.interactionLog = [...new Set(interactionLog)]; // Ensure log has unique entries
+    winner.interactionLog = [...new Set(interactionLog)];
     const summary = generateOutcomeSummary(winner, loser);
     winner.summary = summary;
     
@@ -225,7 +228,6 @@ function selectMove(actor, defender) {
     const chosenMove = getWeightedRandom(weightedMoves);
 
     // **DEFINITIVE BUG FIX (LAYER 1): Foolproof Fallback**
-    // This explicit check makes it impossible for this function to return a nullish value.
     if (chosenMove) {
         return chosenMove;
     } else {
@@ -238,7 +240,6 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let multiplier = 1.0;
     let effectReasons = [];
     
-    // 1. PUNISHABLE MOVE CHECK
     if (!legacyMode && move.moveTags.includes('requires_opening')) {
         const punishmentRule = punishableMoves[move.name];
         if (punishmentRule) {
@@ -255,7 +256,6 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         }
     }
     
-    // 2. Environmental Modifiers
     const envEffects = [];
     if (move.element === 'water' || move.element === 'ice') {
         if (conditions.isSandy || conditions.isHot) { multiplier *= 0.25; envEffects.push("was weakened by the arid terrain"); }
@@ -271,7 +271,6 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         }
     });
     
-    // 3. Move Interaction Matrix
     if (!legacyMode && defender.lastMove) {
         const attackerMoveName = move.name;
         const defenderMoveName = defender.lastMove.name;
@@ -311,7 +310,6 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
 
 const isReactive = (defender) => defender.lastMove?.type === 'Offense';
 
-// --- NARRATIVE & OUTCOME ---
 function getSmartRandomPhrase(actor, poolKey, pool) {
     if (!actor.phraseHistory[poolKey]) {
         actor.phraseHistory[poolKey] = [];
