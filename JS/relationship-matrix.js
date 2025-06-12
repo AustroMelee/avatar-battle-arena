@@ -154,5 +154,35 @@ export const relationshipMatrix = {
                 mercyTrigger: true,
             }
         }
+    },
+    
+    // --- OZAI ---
+    'ozai-not-comet-enhanced': {
+        'azula': {
+            relationshipType: "demanding_patriarch",
+            stressModifier: 1.3, // Her defiance/failure stresses him, making him less calculated.
+            resilienceModifier: 1.1, // He's still very resilient, but not unbreakable.
+            emotionalModifiers: {
+                aggressionBoost: 0.25, // He becomes even more aggressive.
+                patienceReduction: 0.4, // He has no time for her games.
+                riskToleranceBoost: 0.2, // He will take risks to prove his dominance.
+            }
+        },
+        'zuko': {
+            relationshipType: "contemptuous_disdain",
+            stressModifier: 0.6, // Zuko's actions don't stress him, they just anger him.
+            resilienceModifier: 1.5,
+            emotionalModifiers: {
+                aggressionBoost: 0.3,
+            }
+        },
+        'iroh': {
+            relationshipType: "sibling_contempt",
+            stressModifier: 1.0,
+            resilienceModifier: 1.2,
+            emotionalModifiers: {
+                aggressionBoost: 0.1,
+            }
+        }
     }
 };

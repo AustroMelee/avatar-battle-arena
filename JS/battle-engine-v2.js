@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v16.0-TSS-Complete';
+const systemVersion = 'v16.1-BalancePass-A';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -177,7 +177,7 @@ function selectMove(actor, defender, conditions) {
 
     let weightedMoves = availableMoves.map(move => {
         let weight = 1.0;
-        const energyCost = Math.round((move.power || 0) * 0.35) + 5;
+        const energyCost = Math.round((move.power || 0) * 0.30) + 5;
         if (actor.energy < energyCost) return { move, weight: 0 };
         
         switch (move.type) {
@@ -205,8 +205,6 @@ function selectMove(actor, defender, conditions) {
         if (move.moveTags?.includes('requires_opening')) {
             const openingExists = (defender.isStunned || defender.tacticalState);
             if(openingExists) {
-                // Massive incentive to use payoff moves on a vulnerable target.
-                // The bonus is scaled by the intensity of the opening.
                 const intensity = defender.tacticalState?.intensity || 1.2;
                 weight *= (25.0 * intensity);
             } else {
@@ -215,7 +213,16 @@ function selectMove(actor, defender, conditions) {
         }
         
         if (actor.mentalState.level === 'broken') {
-            if (move.type === 'Finisher' || move.type === 'Utility') weight *= 0.1;
+            if (move.setup) {
+                // A desperate, broken fighter might still try to create an opening as a gambit.
+                weight *= 0.5; 
+            } else if (move.type === 'Utility' || move.type === 'Defense') {
+                // But other non-offensive moves are neglected.
+                weight *= 0.1;
+            } else if (move.type === 'Finisher') {
+                // Finishers are also less likely as they require focus.
+                weight *= 0.2;
+            }
         }
 
         return { move, weight };
@@ -314,7 +321,7 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     else level = effectivenessLevels.NORMAL;
     
     const damage = (move.type.includes('Offense') || move.type.includes('Finisher')) ? Math.round(totalEffectiveness / 3) : 0;
-    const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.35) + 5;
+    const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.30) + 5;
     
     return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished, payoff, consumedStateName };
 }

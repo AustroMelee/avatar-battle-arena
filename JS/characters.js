@@ -148,14 +148,17 @@ export const characters = {
         personalityProfile: { aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0 },
         environmentalAffinity: { isHot: 1.2, isCold: 0.8, isIndustrial: 1.1, isUrban: 1.2 },
         techniques: [
-            { name: "Fire Comet", verb: 'launch', object: 'massive fire comet', type: 'Offense', power: 80, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_large'],
-              usageRequirements: {}, environmentBonuses: { isHot: 1.4, isIndustrial: 1.2 }, environmentPenalties: { isCold: 0.6 } },
-            { name: "Flame Tornado", verb: 'create', object: 'searing flame tornado', type: 'Offense', power: 75, requiresArticle: true, element: 'fire', moveTags: ['area_of_effect_large', 'channeled', 'environmental_manipulation'],
-              usageRequirements: {}, environmentBonuses: { isHot: 1.4 }, environmentPenalties: { isCold: 0.6, isCramped: 0.8 } },
+            { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'],
+                setup: { name: 'Pressured', duration: 1, intensity: 1.2 },
+                usageRequirements: {}, environmentBonuses: { isExposed: 1.2 }, environmentPenalties: { isCramped: 0.7 } },
+            { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 70, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'],
+                usageRequirements: {}, environmentBonuses: { isHot: 1.3, isIndustrial: 1.1 }, environmentPenalties: { isCold: 0.7 } },
+            { name: "Flame Wall", verb: 'erect', object: 'towering wall of flame', type: 'Defense', power: 65, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'area_of_effect_large'],
+                usageRequirements: {}, environmentBonuses: { isHot: 1.3, isCramped: 1.2 }, environmentPenalties: { isCold: 0.7, waterRich: 0.8 } },
             { name: "Dragon's Roar", verb: 'breathe', object: 'devastating cone of fire', type: 'Offense', power: 85, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect', 'channeled'],
-              usageRequirements: {}, environmentBonuses: { isHot: 1.5 }, environmentPenalties: { isCold: 0.5 } },
+                usageRequirements: {}, environmentBonuses: { isHot: 1.5 }, environmentPenalties: { isCold: 0.5 } },
             { name: "Emperor's Wrath", verb: 'unleash', object: "the Emperor's Wrath", type: 'Finisher', power: 100, element: 'fire', moveTags: ['area_of_effect_large', 'versatile', 'unblockable_standard', 'requires_opening'],
-              usageRequirements: {}, environmentBonuses: { isHot: 1.5 }, environmentPenalties: { isCold: 0.5 } }
+                usageRequirements: {}, environmentBonuses: { isHot: 1.5 }, environmentPenalties: { isCold: 0.5 } }
         ],
         quotes: { postWin: ["The Fire Nation is supreme! My power is absolute!"], postWin_overwhelming: ["I am the Phoenix King! There is no equal!"], postWin_specific: { 'aang-airbending-only': "You thought you could stop me, child? You are nothing." } }
     },
@@ -187,7 +190,7 @@ export const characters = {
         techniques: [
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'],
               usageRequirements: {}, environmentBonuses: { waterRich: 1.1, iceRich: 1.4, isCold: 1.3 }, environmentPenalties: { isHot: 0.4, isSandy: 0.5 } },
-            { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation'],
+            { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'],
               usageRequirements: {}, environmentBonuses: { waterRich: 1.4 }, environmentPenalties: { isHot: 0.5, isSandy: 0.4 } },
             { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'],
               usageRequirements: { waterRich: true }, environmentBonuses: { isCoastal: 1.4 }, environmentPenalties: {} },
