@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v4-Punishable-Logic-Final';
+const systemVersion = 'v5-AI-Logic-Final';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -126,10 +126,9 @@ export function simulateBattle(f1Id, f2Id, locId) {
         const processTurn = (attacker, defender) => {
             if (battleOver) return;
             
-            // Reset stun status at the start of a turn
             attacker.isStunned = false; 
 
-            const move = selectMove(attacker, defender, turn, maxTurns);
+            const move = selectMove(attacker, defender);
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
@@ -157,7 +156,6 @@ export function simulateBattle(f1Id, f2Id, locId) {
     const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
     
-    // Outcome Analysis
     if (interactionLog.length === 0) {
         interactionLog.push('No significant environmental or move-interaction modifiers were in play.');
     }
@@ -165,7 +163,6 @@ export function simulateBattle(f1Id, f2Id, locId) {
     const summary = generateOutcomeSummary(winner, loser);
     winner.summary = summary;
     
-    // Final Narration
     if (loser.hp > 0) {
         turnLog.push(phaseTemplates.timeOutVictory.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
     } else {
@@ -179,33 +176,67 @@ export function simulateBattle(f1Id, f2Id, locId) {
 }
 
 // --- MOVE AI & CALCULATION ---
-function selectMove(actor, defender, turn, maxTurns) {
-    let suitableMoves = actor.techniques;
-    if (suitableMoves.length === 0) return { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags:[] };
-    
-    if (actor.movesUsed.length >= suitableMoves.length - 1) actor.movesUsed = [];
-    
+function selectMove(actor, defender) {
+    const suitableMoves = actor.techniques;
+    if (suitableMoves.length === 0) return { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
+
     const recentMoves = actor.movesUsed.slice(-3);
-    let weightedMoves = suitableMoves.map(m => ({ move: m, weight: recentMoves.includes(m.name) ? 0.2 : 1 }));
-    
-    // Prioritize Punishable moves if an opening exists
     const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
-    if (openingExists) {
-        const punishable = weightedMoves.filter(m => m.move.moveTags.includes('requires_opening'));
-        if (punishable.length > 0) return getWeightedRandom(punishable);
+
+    const weightedMoves = suitableMoves.map(move => {
+        let weight = 1.0;
+
+        // 1. Repetition Penalty
+        if (recentMoves.includes(move.name)) {
+            weight *= 0.2;
+        }
+
+        // 2. Punishable Move Logic (The Core AI Fix)
+        if (move.moveTags.includes('requires_opening')) {
+            if (openingExists) {
+                // MASSIVE bonus for using the right move at the right time
+                weight *= 20.0; 
+            } else {
+                // MASSIVE penalty for using a punishable move without an opening.
+                // High risk-tolerance allows for a tiny chance of an "arrogant" mistake.
+                weight *= 0.01 * (actor.personalityProfile.riskTolerance || 0.1);
+            }
+        }
+        
+        // 3. Personality & Move Type Weighting
+        switch (move.type) {
+            case 'Finisher':
+                weight *= 1.5 * actor.personalityProfile.riskTolerance;
+                break;
+            case 'Offense':
+                weight *= 1.2 * actor.personalityProfile.aggression;
+                break;
+            case 'Defense':
+                weight *= 1.2 * (1 - actor.personalityProfile.aggression);
+                break;
+
+            case 'Utility':
+                weight *= 1.1 * (actor.personalityProfile.patience || 0.5);
+                break;
+        }
+
+        // 4. Energy Check
+        const energyCost = (move.power || 0) * 0.5;
+        if (actor.energy < energyCost) {
+            weight = 0; // Cannot use moves they don't have energy for
+        }
+
+        return { move, weight };
+    });
+
+    const selectedMove = getWeightedRandom(weightedMoves);
+
+    // Fallback if all moves have zero weight (e.g., no energy for any move)
+    if (!selectedMove) {
+        return { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
     }
-    
-    const finishers = weightedMoves.filter(m => m.move.type === 'Finisher');
-    if (actor.personalityProfile.riskTolerance > 0.7 && actor.energy > 40) {
-        if (finishers.length > 0) return getWeightedRandom(finishers);
-    }
-    
-    const offenses = weightedMoves.filter(m => m.move.type === 'Offense');
-    if (Math.random() < actor.personalityProfile.aggression && offenses.length > 0) {
-        return getWeightedRandom(offenses);
-    }
-    
-    return getWeightedRandom(weightedMoves);
+
+    return selectedMove;
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
