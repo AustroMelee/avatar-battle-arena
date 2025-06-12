@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v9.0-A+-Overkill-Pass';
+const systemVersion = 'v9.1-B+-Personality-Overkill-Pass';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -71,6 +71,8 @@ function initializeFighterState(charId) {
         isStunned: false, hasSetup: false, loggedEnvEffects: new Set(),
         movesUsed: [], phraseHistory: {}, moveHistory: [],
         moveFailureHistory: [], // A+ Feature: AI Memory
+        consecutiveDefensiveTurns: 0, // Stall detection
+        aiLog: [], // For logging AI decisions
     };
 }
 
@@ -126,17 +128,27 @@ export function simulateBattle(f1Id, f2Id, locId) {
             
             attacker.isStunned = false; 
 
-            const move = selectMove(attacker, defender, conditions);
+            const { move, aiLogEntry } = selectMove(attacker, defender, conditions);
+            attacker.aiLog.push(`[T${turn+1}] ${aiLogEntry}`);
+
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
             attacker.lastMoveEffectiveness = result.effectiveness.label;
-            if (move.type === 'Utility' || (move.type === 'Defense' && !isReactive(defender))) attacker.hasSetup = true; else attacker.hasSetup = false;
+            
+            const isDefensiveMove = move.type === 'Utility' || (move.type === 'Defense');
+            if (isDefensiveMove) {
+                attacker.consecutiveDefensiveTurns++;
+                if(!isReactive(defender)) attacker.hasSetup = true;
+            } else {
+                attacker.consecutiveDefensiveTurns = 0;
+                attacker.hasSetup = false;
+            }
             
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
-            if (result.wasPunished) { // A+ Feature: AI Memory
+            if (result.wasPunished) { 
                 attacker.moveFailureHistory.push(move.name);
-                if (attacker.moveFailureHistory.length > 2) attacker.moveFailureHistory.shift(); // Cap history size
+                if (attacker.moveFailureHistory.length > 2) attacker.moveFailureHistory.shift(); 
             }
             
             phaseContent += narrateMove(attacker, defender, move, result);
@@ -201,90 +213,83 @@ function getAvailableMoves(actor, conditions) {
 
 
 function selectMove(actor, defender, conditions) {
-    const suitableMoves = getAvailableMoves(actor, conditions);
-    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {}, environmentBonuses: {}, environmentPenalties: {} };
-    if (!suitableMoves || suitableMoves.length === 0) return struggleMove;
+    const availableMoves = getAvailableMoves(actor, conditions);
+    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
+    if (!availableMoves || availableMoves.length === 0) return { move: struggleMove, aiLogEntry: "No moves available, selected Struggle." };
 
     const recentMoves = actor.movesUsed.slice(-3);
-    const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
+    const { aggression, patience, riskTolerance, opportunism } = actor.personalityProfile;
 
-    const weightedMoves = suitableMoves.map(move => {
+    // --- DYNAMIC AI MODIFIERS ---
+    const isDesperate = actor.hp < 30 || actor.momentum <= -3;
+    const hasMomentum = actor.momentum >= 3;
+    const isStalling = actor.consecutiveDefensiveTurns >= 2;
+    const dynamicRisk = isDesperate ? clamp(riskTolerance * 1.5, 0, 1.0) : riskTolerance;
+    const dynamicAggression = hasMomentum ? clamp(aggression * 1.2, 0, 1.0) : aggression;
+
+    // --- TIERED OPPORTUNISM ---
+    let opportunismBonus = 1.0;
+    let openingReason = 'None';
+    if (defender.isStunned) {
+        opportunismBonus += opportunism * 1.0;
+        openingReason = 'Stun';
+    } else if (defender.momentum <= -3) {
+        opportunismBonus += opportunism * 0.7;
+        openingReason = 'Momentum';
+    } else if (defender.lastMoveEffectiveness === 'Weak') {
+        opportunismBonus += opportunism * 0.4;
+        openingReason = 'Weakness';
+    }
+
+    const weightedMoves = availableMoves.map(move => {
         let weight = 1.0;
-        if (recentMoves.includes(move.name)) weight *= 0.2;
-        
-        // A+ Feature: AI Memory
-        if (actor.moveFailureHistory && actor.moveFailureHistory.includes(move.name)) {
-            weight *= 0.1; // Drastically reduce weight of recently failed punishable moves
-        }
+        let reasons = [];
 
-        if (move.moveTags.includes('requires_opening')) {
-            if (openingExists) { weight *= 20.0; } 
-            else { weight *= 0.01 * (actor.personalityProfile.riskTolerance || 0.1); }
-        }
-        
+        // Base Personality Weighting
         switch (move.type) {
-            case 'Finisher': weight *= 1.5 * actor.personalityProfile.riskTolerance; break;
-            case 'Offense': weight *= 1.2 * actor.personalityProfile.aggression; break;
-            case 'Defense': weight *= 1.2 * (1 - actor.personalityProfile.aggression); break;
-            case 'Utility': weight *= 1.1 * (actor.personalityProfile.patience || 0.5); break;
+            case 'Offense': weight *= (1.0 + (dynamicAggression * 0.5)) * opportunismBonus; reasons.push('A'); break;
+            case 'Defense': weight *= 1.0 + ((1 - dynamicAggression) * 0.5); reasons.push('d'); break;
+            case 'Utility': weight *= 1.0 + (patience * 0.3); reasons.push('p'); break;
+            case 'Finisher': weight *= (1.0 + (dynamicRisk * 0.5)) * opportunismBonus; reasons.push('R'); break;
+        }
+
+        // Penalty for recently used moves
+        if (recentMoves.includes(move.name)) weight *= 0.2;
+        // Penalty for recently failed punishable moves
+        if (actor.moveFailureHistory && actor.moveFailureHistory.includes(move.name)) weight *= 0.1;
+
+        // Stall Prevention
+        if (isStalling && (move.type === 'Defense' || move.type === 'Utility')) {
+            weight *= 0.5;
+            reasons.push('StallPrev');
         }
         
-        const energyCost = (move.power || 0) * 0.5;
-        if (actor.energy < energyCost) weight = 0;
+        // Punishable Move Logic
+        if (move.moveTags.includes('requires_opening')) {
+            const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak' || actor.hasSetup);
+            if (openingExists) {
+                weight *= 20.0; // Huge bonus if opening is present
+                reasons.push('Open+');
+            } else {
+                weight *= (dynamicRisk * 0.1); // Risky characters might still try
+                reasons.push('Risk-');
+            }
+        }
+        
+        // Energy Check
+        if (actor.energy < (move.power || 0) * 0.5) weight = 0;
 
-        return { move, weight };
+        return { move, weight, reasons };
     });
 
-    const chosenMove = getWeightedRandom(weightedMoves);
-    return chosenMove || struggleMove;
-}
+    const chosenMoveInfo = weightedMoves.sort((a,b) => b.weight - a.weight)[0];
+    const chosenMove = chosenMoveInfo.move;
 
-function applyEnvironmentalModifiers(move, attacker, conditions) {
-    let multiplier = 1.0;
-    let logReasons = { affinity: new Set(), move: new Set() };
-    let primaryFactor = { type: null, strength: 0 };
-
-    // 1. Character-level environmental affinity
-    if (attacker.environmentalAffinity) {
-        for (const [key, affinityModifier] of Object.entries(attacker.environmentalAffinity)) {
-            if (conditions[key]) {
-                multiplier *= affinityModifier;
-                const reason = affinityModifier > 1 ? `empowered by the ${key} terrain` : `weakened by the ${key} terrain`;
-                logReasons.affinity.add(reason);
-                if (Math.abs(1 - affinityModifier) > primaryFactor.strength) {
-                    primaryFactor = { type: reason, strength: Math.abs(1 - affinityModifier) };
-                }
-            }
-        }
-    }
-
-    // 2. Move-specific environmental bonuses/penalties
-    for (const [key, bonus] of Object.entries(move.environmentBonuses || {})) {
-        if (conditions[key]) {
-            multiplier *= bonus;
-            const reason = `empowered by the ${key} environment`;
-            logReasons.move.add(reason);
-            if (Math.abs(1 - bonus) > primaryFactor.strength) {
-                primaryFactor = { type: reason, strength: Math.abs(1 - bonus) };
-            }
-        }
-    }
-    for (const [key, penalty] of Object.entries(move.environmentPenalties || {})) {
-        if (conditions[key]) {
-            multiplier *= penalty;
-            const reason = `weakened by the ${key} environment`;
-            logReasons.move.add(reason);
-            if (Math.abs(1 - penalty) > primaryFactor.strength) {
-                primaryFactor = { type: reason, strength: Math.abs(1 - penalty) };
-            }
-        }
-    }
-
-    const finalLogReasons = [];
-    logReasons.affinity.forEach(r => finalLogReasons.push(`${r} (Affinity)`));
-    logReasons.move.forEach(r => finalLogReasons.push(`${r} (Move)`));
-
-    return { multiplier, logReasons: finalLogReasons, primaryFactor: primaryFactor.type };
+    let aiLogEntry = `Selected '${chosenMove.name}' (W: ${chosenMoveInfo.weight.toFixed(2)}). Factors: [${chosenMoveInfo.reasons.join(', ')}]`;
+    if (opportunismBonus > 1.0) aiLogEntry += ` | Opp: ${openingReason}`;
+    if (isDesperate) aiLogEntry += ` | Desperate!`;
+    
+    return { move: chosenMove, aiLogEntry };
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
@@ -346,10 +351,58 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     else if (totalEffectiveness > basePower * 1.1) { level = effectivenessLevels.STRONG; energyMultiplier = 0.95; } 
     else { level = effectivenessLevels.NORMAL; }
     
-    const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
+    const damage = move.type.includes('Offense') || move.type.includes('Finisher') ? Math.round(totalEffectiveness / 3) : 0;
     const energyCost = Math.round(((move.power || 0) * 0.5) * energyMultiplier);
 
     return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished, primaryEnvFactor: primaryFactor };
+}
+
+function applyEnvironmentalModifiers(move, attacker, conditions) {
+    let multiplier = 1.0;
+    let logReasons = { affinity: new Set(), move: new Set() };
+    let primaryFactor = { type: null, strength: 0 };
+
+    // 1. Character-level environmental affinity
+    if (attacker.environmentalAffinity) {
+        for (const [key, affinityModifier] of Object.entries(attacker.environmentalAffinity)) {
+            if (conditions[key]) {
+                multiplier *= affinityModifier;
+                const reason = affinityModifier > 1 ? `empowered by the ${key} terrain` : `weakened by the ${key} terrain`;
+                logReasons.affinity.add(reason);
+                if (Math.abs(1 - affinityModifier) > primaryFactor.strength) {
+                    primaryFactor = { type: reason, strength: Math.abs(1 - affinityModifier) };
+                }
+            }
+        }
+    }
+
+    // 2. Move-specific environmental bonuses/penalties
+    for (const [key, bonus] of Object.entries(move.environmentBonuses || {})) {
+        if (conditions[key]) {
+            multiplier *= bonus;
+            const reason = `empowered by the ${key} environment`;
+            logReasons.move.add(reason);
+            if (Math.abs(1 - bonus) > primaryFactor.strength) {
+                primaryFactor = { type: reason, strength: Math.abs(1 - bonus) };
+            }
+        }
+    }
+    for (const [key, penalty] of Object.entries(move.environmentPenalties || {})) {
+        if (conditions[key]) {
+            multiplier *= penalty;
+            const reason = `weakened by the ${key} environment`;
+            logReasons.move.add(reason);
+            if (Math.abs(1 - penalty) > primaryFactor.strength) {
+                primaryFactor = { type: reason, strength: Math.abs(1 - penalty) };
+            }
+        }
+    }
+
+    const finalLogReasons = [];
+    logReasons.affinity.forEach(r => finalLogReasons.push(`${r} (Affinity)`));
+    logReasons.move.forEach(r => finalLogReasons.push(`${r} (Move)`));
+
+    return { multiplier, logReasons: finalLogReasons, primaryFactor: primaryFactor.type };
 }
 
 const isReactive = (defender) => defender.lastMove?.type === 'Offense';
