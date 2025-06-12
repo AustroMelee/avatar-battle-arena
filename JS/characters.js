@@ -61,7 +61,7 @@ export const characters = {
             { name: "Tidal Wave", verb: 'summon', object: 'massive tidal wave', type: 'Finisher', power: 90, requiresArticle: true, element: 'water', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'channeled', 'requires_opening'],
               usageRequirements: { waterRich: true }, environmentBonuses: { isCoastal: 1.5 }, environmentPenalties: {} },
             { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening'],
-              usageRequirements: {}, environmentBonuses: {}, environmentPenalties: {} }
+              usageRequirements: { isNight: true }, environmentBonuses: {}, environmentPenalties: {} }
         ],
         quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"], postWin_specific: { 'azula': "You're beaten. It's over." } }
     },

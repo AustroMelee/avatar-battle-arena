@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v9.1-B+-Personality-Overkill-Pass';
+const systemVersion = 'v9.2-C+-DayNight-Overkill-Pass';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -106,10 +106,20 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
     return populatedEnding;
 }
 
-export function simulateBattle(f1Id, f2Id, locId) {
+export function simulateBattle(f1Id, f2Id, locId, timeOfDay) {
     let fighter1 = initializeFighterState(f1Id);
     let fighter2 = initializeFighterState(f2Id);
-    const conditions = locationConditions[locId];
+    
+    // Create combined battle conditions
+    const conditions = { ...locationConditions[locId] };
+    if (timeOfDay) {
+        conditions.isDay = (timeOfDay === 'day');
+        conditions.isNight = (timeOfDay === 'night');
+    } else { // Backward compatibility default
+        conditions.isDay = true;
+        conditions.isNight = false;
+    }
+
     let turnLog = [];
     let interactionLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
@@ -375,8 +385,20 @@ function applyEnvironmentalModifiers(move, attacker, conditions) {
             }
         }
     }
+    
+    // 2. Time of Day Affinity
+    const isFirebender = attacker.techniques.some(t => t.element === 'fire' || t.element === 'lightning');
+    const isWaterbender = attacker.techniques.some(t => t.element === 'water' || t.element === 'ice');
+    if (conditions.isDay) {
+        if (isFirebender) { multiplier *= 1.1; logReasons.affinity.add(`empowered by daylight (Affinity)`); }
+        if (isWaterbender) { multiplier *= 0.9; logReasons.affinity.add(`weakened by daylight (Affinity)`); }
+    } else if (conditions.isNight) {
+        if (isFirebender) { multiplier *= 0.9; logReasons.affinity.add(`weakened by nighttime (Affinity)`); }
+        if (isWaterbender) { multiplier *= 1.1; logReasons.affinity.add(`empowered by nighttime (Affinity)`); }
+    }
 
-    // 2. Move-specific environmental bonuses/penalties
+
+    // 3. Move-specific environmental bonuses/penalties
     for (const [key, bonus] of Object.entries(move.environmentBonuses || {})) {
         if (conditions[key]) {
             multiplier *= bonus;
@@ -399,8 +421,8 @@ function applyEnvironmentalModifiers(move, attacker, conditions) {
     }
 
     const finalLogReasons = [];
-    logReasons.affinity.forEach(r => finalLogReasons.push(`${r} (Affinity)`));
-    logReasons.move.forEach(r => finalLogReasons.push(`${r} (Move)`));
+    logReasons.affinity.forEach(r => finalLogReasons.push(`${r}`));
+    logReasons.move.forEach(r => finalLogReasons.push(`${r}`));
 
     return { multiplier, logReasons: finalLogReasons, primaryFactor: primaryFactor.type };
 }

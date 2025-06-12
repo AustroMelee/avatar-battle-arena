@@ -1,3 +1,4 @@
+// FILE: main.js
 'use strict';
 
 import { simulateBattle } from './battle-engine-v2.js'; // <-- NEW ENGINE
@@ -7,6 +8,7 @@ function handleBattleStart() {
     const f1Id = DOM.fighter1Select.value;
     const f2Id = DOM.fighter2Select.value;
     const locId = DOM.locationSelect.value;
+    const timeOfDay = DOM.timeOfDaySelect.value; // Get time of day
 
     if (!f1Id || !f2Id || !locId) {
         alert("Please select both fighters and a location.");
@@ -22,8 +24,8 @@ function handleBattleStart() {
 
     setTimeout(() => {
         try {
-            // New battle simulation call
-            const battleResult = simulateBattle(f1Id, f2Id, locId);
+            // New battle simulation call with time of day
+            const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay);
             showResultsState(battleResult);
 
         } catch (error) {

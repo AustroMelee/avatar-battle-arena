@@ -1,3 +1,4 @@
+// FILE: ui.js
 // FILE: js/ui.js
 'use strict';
 
@@ -8,6 +9,7 @@ export const DOM = {
     fighter1Select: document.getElementById('fighter1'),
     fighter2Select: document.getElementById('fighter2'),
     locationSelect: document.getElementById('location'),
+    timeOfDaySelect: document.getElementById('time-of-day'), // New element
     fighter1NameDisplay: document.getElementById('fighter1-name-display'),
     fighter2NameDisplay: document.getElementById('fighter2-name-display'),
     fighter1Label: document.getElementById('fighter1-label'),
@@ -53,13 +55,14 @@ export function populateDropdowns() {
             DOM.locationSelect.add(new Option(locations[id].name, id));
         }
     }
+    // No need to populate time of day as it's static in the HTML
 }
 
 function displayFinalAnalysis(finalState, winnerId) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
     const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-    const loser = winnerId === fighter1.id ? fighter2 : fighter1;
+    const loser = winnerId === fighter1.id ? fighter2 : loser;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
