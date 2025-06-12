@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v6.4-Hardened-Crash-Fix';
+const systemVersion = 'v7.0-Data-Driven-Refactor';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -63,23 +63,14 @@ function assembleObjectPhrase(move) {
 }
 
 // --- BATTLE STATE & SIMULATION ---
-function initializeFighterState(charId, locId) {
+function initializeFighterState(charId) {
     const character = characters[charId];
-    const contextualMoveset = getContextualMoveset(character, locId);
     return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         isStunned: false, hasSetup: false, loggedEnvEffects: new Set(),
         movesUsed: [], phraseHistory: {}, moveHistory: [],
     };
-}
-
-function getContextualMoveset(char, locId) {
-    const conditions = locationConditions[locId];
-    if (char.canteenMoves && (conditions.isSandy || conditions.isHot) && !conditions.waterRich) {
-        return char.canteenMoves;
-    }
-    return char.techniques;
 }
 
 function getVictoryQuote(character, battleContext) {
@@ -113,8 +104,8 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
 }
 
 export function simulateBattle(f1Id, f2Id, locId) {
-    let fighter1 = initializeFighterState(f1Id, locId);
-    let fighter2 = initializeFighterState(f2Id, locId);
+    let fighter1 = initializeFighterState(f1Id);
+    let fighter2 = initializeFighterState(f2Id);
     const conditions = locationConditions[locId];
     let turnLog = [];
     let interactionLog = [];
@@ -134,7 +125,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
             
             attacker.isStunned = false; 
 
-            const move = selectMove(attacker, defender);
+            const move = selectMove(attacker, defender, conditions);
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
@@ -148,15 +139,8 @@ export function simulateBattle(f1Id, f2Id, locId) {
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.lastMove = move;
 
-            // **DEFINITIVE BUG FIX (LAYER 2 - EXPANDED): Defensive Guard Clauses**
-            if (!Array.isArray(attacker.movesUsed)) {
-                console.error(`CRITICAL RECOVERY: attacker.movesUsed was not an array for ${attacker.name}. Re-initializing.`);
-                attacker.movesUsed = [];
-            }
-            if (!Array.isArray(attacker.moveHistory)) {
-                console.error(`CRITICAL RECOVERY: attacker.moveHistory was not an array for ${attacker.name}. Re-initializing.`);
-                attacker.moveHistory = [];
-            }
+            if (!Array.isArray(attacker.movesUsed)) attacker.movesUsed = [];
+            if (!Array.isArray(attacker.moveHistory)) attacker.moveHistory = [];
             attacker.movesUsed.push(move.name);
             attacker.moveHistory.push(move);
 
@@ -193,11 +177,29 @@ export function simulateBattle(f1Id, f2Id, locId) {
 }
 
 // --- MOVE AI & CALCULATION ---
-function selectMove(actor, defender) {
-    const suitableMoves = actor.techniques;
-    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
+function getAvailableMoves(actor, conditions) {
+    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {}, environmentBonuses: {}, environmentPenalties: {} };
+    if (!actor.techniques || actor.techniques.length === 0) return [struggleMove];
+
+    const available = actor.techniques.filter(move => {
+        if (!move.usageRequirements) return true;
+        for (const [key, requiredValue] of Object.entries(move.usageRequirements)) {
+            if (conditions[key] !== requiredValue) {
+                return false; // Requirement not met
+            }
+        }
+        return true; // All requirements met
+    });
+    
+    return available.length > 0 ? available : [struggleMove];
+}
+
+
+function selectMove(actor, defender, conditions) {
+    const suitableMoves = getAvailableMoves(actor, conditions);
+    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {}, environmentBonuses: {}, environmentPenalties: {} };
     if (!suitableMoves || suitableMoves.length === 0) {
-        return struggleMove;
+        return struggleMove; // Should be handled by getAvailableMoves, but as a fallback.
     }
 
     const recentMoves = actor.movesUsed.slice(-3);
@@ -226,13 +228,7 @@ function selectMove(actor, defender) {
     });
 
     const chosenMove = getWeightedRandom(weightedMoves);
-
-    // **DEFINITIVE BUG FIX (LAYER 1): Foolproof Fallback**
-    if (chosenMove) {
-        return chosenMove;
-    } else {
-        return struggleMove;
-    }
+    return chosenMove || struggleMove;
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
@@ -240,6 +236,7 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let multiplier = 1.0;
     let effectReasons = [];
     
+    // --- PUNISHMENT MECHANICS ---
     if (!legacyMode && move.moveTags.includes('requires_opening')) {
         const punishmentRule = punishableMoves[move.name];
         if (punishmentRule) {
@@ -256,14 +253,25 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         }
     }
     
+    // --- DATA-DRIVEN ENVIRONMENTAL MODIFIERS ---
     const envEffects = [];
-    if (move.element === 'water' || move.element === 'ice') {
-        if (conditions.isSandy || conditions.isHot) { multiplier *= 0.25; envEffects.push("was weakened by the arid terrain"); }
-        if (conditions.waterRich || conditions.iceRich) { multiplier *= 1.3; envEffects.push("was empowered by the abundant water/ice"); }
+    if (move.environmentBonuses) {
+        for (const [key, bonus] of Object.entries(move.environmentBonuses)) {
+            if (conditions[key]) {
+                multiplier *= bonus;
+                envEffects.push(`was empowered by the ${key} environment`);
+            }
+        }
     }
-    if (move.element === 'earth' && conditions.earthRich) { multiplier *= 1.3; envEffects.push("was empowered by the rich earth"); }
-    if (move.element === 'fire' && conditions.isHot) { multiplier *= 1.25; envEffects.push("was empowered by the intense heat"); }
-    
+    if (move.environmentPenalties) {
+        for (const [key, penalty] of Object.entries(move.environmentPenalties)) {
+            if (conditions[key]) {
+                multiplier *= penalty;
+                envEffects.push(`was weakened by the ${key} environment`);
+            }
+        }
+    }
+
     envEffects.forEach(effect => {
         if (!attacker.loggedEnvEffects.has(effect)) {
             effectReasons.push(effect);
@@ -271,6 +279,7 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         }
     });
     
+    // --- MOVE INTERACTION MATRIX ---
     if (!legacyMode && defender.lastMove) {
         const attackerMoveName = move.name;
         const defenderMoveName = defender.lastMove.name;
