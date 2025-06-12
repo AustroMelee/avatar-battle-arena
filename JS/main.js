@@ -1,14 +1,15 @@
-// FILE: main.js
+// FILE: js/main.js
 'use strict';
 
-import { simulateBattle } from './battle-engine-v2.js'; // <-- NEW ENGINE
+import { simulateBattle } from './battle-engine-v2.js';
 import { DOM, populateDropdowns, updateFighterDisplay, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
 
 function handleBattleStart() {
     const f1Id = DOM.fighter1Select.value;
     const f2Id = DOM.fighter2Select.value;
     const locId = DOM.locationSelect.value;
-    const timeOfDay = DOM.timeOfDaySelect.value; // Get time of day
+    const timeOfDay = DOM.timeOfDaySelect.value;
+    const emotionalMode = DOM.emotionalModeCheckbox.checked; // Get emotional mode state
 
     if (!f1Id || !f2Id || !locId) {
         alert("Please select both fighters and a location.");
@@ -24,8 +25,8 @@ function handleBattleStart() {
 
     setTimeout(() => {
         try {
-            // New battle simulation call with time of day
-            const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay);
+            // New battle simulation call with all parameters
+            const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
             showResultsState(battleResult);
 
         } catch (error) {

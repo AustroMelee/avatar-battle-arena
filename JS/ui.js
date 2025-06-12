@@ -1,4 +1,4 @@
-// FILE: ui.js
+// FILE: js/ui.js
 'use strict';
 
 import { characters } from './characters.js';
@@ -8,7 +8,8 @@ export const DOM = {
     fighter1Select: document.getElementById('fighter1'),
     fighter2Select: document.getElementById('fighter2'),
     locationSelect: document.getElementById('location'),
-    timeOfDaySelect: document.getElementById('time-of-day'), // New element
+    timeOfDaySelect: document.getElementById('time-of-day'),
+    emotionalModeCheckbox: document.getElementById('emotional-mode'), // New element
     fighter1NameDisplay: document.getElementById('fighter1-name-display'),
     fighter2NameDisplay: document.getElementById('fighter2-name-display'),
     fighter1Label: document.getElementById('fighter1-label'),
@@ -54,14 +55,12 @@ export function populateDropdowns() {
             DOM.locationSelect.add(new Option(locations[id].name, id));
         }
     }
-    // No need to populate time of day as it's static in the HTML
 }
 
 function displayFinalAnalysis(finalState, winnerId) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
     const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-    // --- THIS IS THE CORRECTED LINE ---
     const loser = winnerId === fighter1.id ? fighter2 : fighter1;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
@@ -85,18 +84,19 @@ function displayFinalAnalysis(finalState, winnerId) {
         DOM.analysisList.appendChild(li);
     }
     
-    const createInteractionLog = (log) => {
+    const createLog = (log, title, className) => {
         if (!log || log.length === 0) return;
         const li = document.createElement('li');
-        li.className = 'interaction-log';
-        li.innerHTML = '<strong>Interaction Log:</strong> ' + log.join(' ');
+        li.className = className;
+        li.innerHTML = `<strong>${title}:</strong> ` + log.join(' ');
         DOM.analysisList.appendChild(li);
     }
 
     createSummaryItem(winner.summary);
-    if (winner.interactionLog && winner.interactionLog.length > 0) {
-        createInteractionLog(winner.interactionLog);
-    }
+    createLog(winner.interactionLog, 'Interaction Log', 'interaction-log');
+    createLog(winner.aiLog, 'Winner AI Log', 'ai-log');
+    createLog(loser.aiLog, 'Loser AI Log', 'ai-log');
+
 
     createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
     createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);

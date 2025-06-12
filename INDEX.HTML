@@ -1,3 +1,4 @@
+// FILE: index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +44,7 @@
 
         <section class="location-section">
             <h2 class="location-title">Battlefield Conditions</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
                 <div class="select-group">
                     <div class="select-wrapper">
                         <select id="location">
@@ -59,6 +60,10 @@
                         </select>
                     </div>
                 </div>
+            </div>
+             <div style="margin-top: 1rem; text-align: center; display: flex; justify-content: center; align-items: center;">
+                <input type="checkbox" id="emotional-mode" checked>
+                <label for="emotional-mode" style="margin-left: 0.5rem; cursor: pointer;">Enable Emotional Mode</label>
             </div>
         </section>
 
