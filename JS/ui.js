@@ -57,11 +57,9 @@ export function populateDropdowns() {
     }
 }
 
-function displayFinalAnalysis(finalState, winnerId) {
+function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
-    const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-    const loser = winnerId === fighter1.id ? fighter2 : fighter1;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
@@ -91,25 +89,37 @@ function displayFinalAnalysis(finalState, winnerId) {
         li.innerHTML = `<strong>${title}:</strong><br>` + log.join('<br>'); // Use <br> for readability
         DOM.analysisList.appendChild(li);
     }
-
-    createSummaryItem(winner.summary);
-    createLog(winner.interactionLog, 'Interaction Log', 'interaction-log');
+    
+    if (!isDraw) {
+        const winner = winnerId === fighter1.id ? fighter1 : fighter2;
+        const loser = winnerId === fighter1.id ? fighter2 : fighter1;
+        createSummaryItem(winner.summary);
+        createLog(winner.interactionLog, 'Interaction Log', 'interaction-log');
+    } else {
+        createSummaryItem("The fighters were too evenly matched for a decisive outcome.");
+        const combinedLog = [...new Set([...fighter1.interactionLog, ...fighter2.interactionLog])];
+        createLog(combinedLog, 'Interaction Log', 'interaction-log');
+    }
     
     const spacer = document.createElement('li');
     spacer.className = 'analysis-item-spacer';
     DOM.analysisList.appendChild(spacer);
+    
+    const f1_status = isDraw ? 'DRAW' : (fighter1.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
+    const f1_class = isDraw ? 'modifier-neutral' : (fighter1.id === winnerId ? 'modifier-plus' : 'modifier-minus');
+    createListItem(`<b>${fighter1.name}'s Final Status:</b>`, f1_status, f1_class);
+    createListItem(`  • Health:`, `${Math.round(fighter1.hp)} / 100 HP`);
+    createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
 
-    createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
-    createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
-    createListItem(`  • Mental State:`, winner.mentalState.level.toUpperCase());
-
-    createListItem(`<b>${loser.name}'s Final Status:</b>`, 'DEFEATED', 'modifier-minus');
-    createListItem(`  • Health:`, `${Math.round(loser.hp)} / 100 HP`);
-    createListItem(`  • Mental State:`, loser.mentalState.level.toUpperCase());
+    const f2_status = isDraw ? 'DRAW' : (fighter2.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
+    const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
+    createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
+    createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
+    createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
     
     DOM.analysisList.appendChild(spacer.cloneNode());
-    createLog(winner.aiLog, 'Winner AI Log', 'ai-log');
-    createLog(loser.aiLog, 'Loser AI Log', 'ai-log');
+    createLog(fighter1.aiLog, `${fighter1.name}'s AI Log`, 'ai-log');
+    createLog(fighter2.aiLog, `${fighter2.name}'s AI Log`, 'ai-log');
 }
 
 export function showLoadingState() {
@@ -129,13 +139,18 @@ export function showLoadingState() {
 export function showResultsState(battleResult) {
     DOM.vsDivider.classList.remove('clash');
     
-    DOM.winnerName.textContent = `${characters[battleResult.winnerId].name} Wins!`;
-    DOM.winProbability.textContent = `A decisive victory after a fierce battle.`;
-    const winnerSection = battleResult.winnerId === DOM.fighter1Select.value ? DOM.fighter1Section : DOM.fighter2Section;
-    winnerSection.classList.add('winner-highlight');
+    if (battleResult.isDraw) {
+        DOM.winnerName.textContent = `A Stalemate!`;
+        DOM.winProbability.textContent = `The battle ends in a draw, with neither fighter able to gain the upper hand.`;
+    } else {
+        DOM.winnerName.textContent = `${characters[battleResult.winnerId].name} Wins!`;
+        DOM.winProbability.textContent = `A decisive victory after a fierce battle.`;
+        const winnerSection = battleResult.winnerId === DOM.fighter1Select.value ? DOM.fighter1Section : DOM.fighter2Section;
+        winnerSection.classList.add('winner-highlight');
+    }
 
     DOM.battleStory.innerHTML = battleResult.log;
-    displayFinalAnalysis(battleResult.finalState, battleResult.winnerId);
+    displayFinalAnalysis(battleResult.finalState, battleResult.winnerId, battleResult.isDraw);
 
     DOM.loadingSpinner.classList.add('hidden');
     DOM.battleResultsContainer.classList.remove('hidden');

@@ -1,12 +1,10 @@
-// FILE: narrative-v2.js
+// FILE: js/narrative-v2.js
 'use strict';
 
 // ====================================================================================
-//  Narrative Engine Library (v3 - Brute Force Expansion)
+//  Narrative Engine Library (v3.1 - Draw Condition)
 // ====================================================================================
-//  This library provides all text-based content for battle narration.
-//  All pools have been significantly expanded to maximize narrative variety and
-//  prevent repetition, even in prolonged or repeated battles.
+//  - Added template for Draw/Stalemate outcomes.
 // ====================================================================================
 
 export const battlePhases = [
@@ -41,6 +39,7 @@ export const phaseTemplates = {
     `,
     finalBlow: `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
+    drawResult: `<p class="final-blow">The battle timer expires! Both fighters are equally matched, their strength and will pushed to the absolute limit. The result is a DRAW!</p>`,
     conclusion: `<p class="conclusion">{endingNarration}</p>`
 };
 

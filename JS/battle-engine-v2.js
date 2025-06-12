@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v16.2-AI-AntiLoop';
+const systemVersion = 'v16.3-StalemateBreaker';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -22,7 +22,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
     return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
-        isStunned: false, tacticalState: null, // Replaces hasSetup
+        isStunned: false, tacticalState: null,
         movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         relationalState: (emotionalMode && relationshipMatrix[charId]?.[opponentId]) || null,
@@ -43,7 +43,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
         [fighter1, fighter2].forEach(f => {
             f.mentalStateChangedThisTurn = false;
-            // Tactical State duration countdown
             if (f.tacticalState) {
                 f.tacticalState.duration--;
                 if (f.tacticalState.duration <= 0) {
@@ -75,11 +74,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const isDefensiveMove = move.type === 'Utility' || move.type === 'Defense';
             attacker.consecutiveDefensiveTurns = isDefensiveMove ? attacker.consecutiveDefensiveTurns + 1 : 0;
             
-            // Apply new tactical state if the move has one
             if (move.setup && result.effectiveness.label !== 'Weak') {
                 defender.tacticalState = { ...move.setup };
             }
-            // Consume tactical state on payoff
             if (move.moveTags?.includes('requires_opening') && result.payoff) {
                 defender.tacticalState = null;
             }
@@ -104,6 +101,14 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
         turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', phaseName).replace('{phaseContent}', phaseContent));
         [initiator, responder] = [responder, initiator];
+    }
+    
+    // --- FINAL OUTCOME DETERMINATION ---
+    // DRAW Condition: If HPs are equal at timeout.
+    if (fighter1.hp > 0 && fighter1.hp === fighter2.hp) {
+         turnLog.push(phaseTemplates.drawResult);
+         turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', "Both warriors fought to their absolute limit, but neither could secure the final blow. They stand exhausted, a testament to each other's strength."));
+         return { log: turnLog.join(''), isDraw: true, finalState: { fighter1, fighter2 } };
     }
 
     const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
@@ -130,7 +135,7 @@ function updateMentalState(actor, opponent, moveResult) {
         stressThisTurn += moveResult.damage / 2;
     }
     if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
-    if (actor.tacticalState) stressThisTurn += 15; // Being in a vulnerable state is stressful
+    if (actor.tacticalState) stressThisTurn += 15;
     stressThisTurn *= (actor.relationalState.stressModifier || 1.0);
     actor.mentalState.stress += stressThisTurn;
     const resilience = actor.relationalState.resilienceModifier || 1.0;
@@ -177,7 +182,7 @@ function selectMove(actor, defender, conditions) {
 
     let weightedMoves = availableMoves.map(move => {
         let weight = 1.0;
-        const energyCost = Math.round((move.power || 0) * 0.30) + 5;
+        const energyCost = Math.round((move.power || 0) * 0.22) + 4;
         if (actor.energy < energyCost) return { move, weight: 0 };
         
         switch (move.type) {
@@ -187,13 +192,9 @@ function selectMove(actor, defender, conditions) {
             case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
         }
 
-        // --- ANTI-LOOP & TACTICAL AI ---
-        // If the defender is ALREADY vulnerable, massively de-prioritize creating another opening.
         if (defender.tacticalState && move.setup) {
-            weight *= 0.05; // Attack, don't just set up again!
-        }
-        // If the defender is not vulnerable, STRONGLY prefer setup moves.
-        else if (!defender.tacticalState && !defender.isStunned && move.setup) {
+            weight *= 0.05;
+        } else if (!defender.tacticalState && !defender.isStunned && move.setup) {
             weight *= (15.0 * move.setup.intensity);
         }
 
@@ -214,11 +215,9 @@ function selectMove(actor, defender, conditions) {
             }
         }
         
-        if (actor.mentalState.level === 'broken') {
-            // A broken fighter lashes out. Heavily penalize anything that isn't raw offense.
-            if (move.type === 'Utility' || move.type === 'Defense' || move.type === 'Finisher') {
-                weight *= 0.01;
-            }
+        // FINAL OVERRIDE: Broken state logic
+        if (actor.mentalState.level === 'broken' && move.type !== 'Offense') {
+            weight = 0.01;
         }
 
         return { move, weight };
@@ -273,13 +272,13 @@ function narrateMove(actor, target, move, result) {
     return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '⚔️').replace(/{effectivenessLabel}/g, result.effectiveness.label).replace(/{effectivenessEmoji}/g, result.effectiveness.emoji).replace(/{moveDescription}/g, fullDesc.replace(/\s+/g, ' ').trim());
 }
 
-
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
     let wasPunished = false;
     let payoff = false;
     let consumedStateName = null;
+    let damage = 0;
 
     if (move.moveTags?.includes('requires_opening')) {
         const openingExists = defender.isStunned || defender.tacticalState;
@@ -289,10 +288,12 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
                 consumedStateName = defender.tacticalState.name;
                 interactionLog.push(`${attacker.name}'s ${move.name} was amplified by ${defender.name} being ${defender.tacticalState.name}.`);
                 payoff = true;
+                damage += 5; // Flat damage bonus for consuming a tactical state.
             } else if (defender.isStunned) {
                 multiplier *= 1.3;
                 interactionLog.push(`${attacker.name}'s ${move.name} capitalized on ${defender.name} being stunned.`);
                 payoff = true;
+                damage += 3; // Smaller bonus for a generic stun.
             }
         } else if (punishableMoves[move.name]) {
             multiplier *= punishableMoves[move.name].penalty;
@@ -311,12 +312,13 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
     else level = effectivenessLevels.NORMAL;
     
-    const damage = (move.type.includes('Offense') || move.type.includes('Finisher')) ? Math.round(totalEffectiveness / 3) : 0;
-    const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.30) + 5;
+    if (move.type.includes('Offense') || move.type.includes('Finisher')) {
+        damage += Math.round(totalEffectiveness / 3);
+    }
+    const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.22) + 4;
     
-    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished, payoff, consumedStateName };
+    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 4, 100), wasPunished, payoff, consumedStateName };
 }
-
 
 function getAvailableMoves(actor, conditions) {
     if (!actor.techniques) return [];
