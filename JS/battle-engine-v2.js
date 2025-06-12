@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v16.4-FinalBalance';
+const systemVersion = 'v16.5-FinalBalance';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -104,7 +104,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     }
     
     // --- FINAL OUTCOME DETERMINATION ---
-    if (fighter1.hp > 0 && fighter1.hp === fighter2.hp) {
+    if (fighter1.hp > 0 && Math.abs(fighter1.hp - fighter2.hp) < 5) {
          turnLog.push(phaseTemplates.drawResult);
          turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', "Both warriors fought to their absolute limit, but neither could secure the final blow. They stand exhausted, a testament to each other's strength."));
          return { log: turnLog.join(''), isDraw: true, finalState: { fighter1, fighter2 } };
@@ -214,8 +214,12 @@ function selectMove(actor, defender, conditions) {
             }
         }
         
-        if (actor.personalityProfile.aggression > 0.9 && actor.momentum >= 3) {
-            if (move.type === 'Offense') weight *= 3.0; // Blood in the water bonus
+        // --- CHARACTER-SPECIFIC & STATE-BASED AI OVERRIDES ---
+        if (actor.personalityProfile.aggression > 0.9 && (actor.momentum >= 3 || defender.hp < 40)) {
+            if (move.type === 'Offense') weight *= 3.0; // Blood in the water bonus for aggressive characters
+        }
+        if (actor.id === 'azula' && defender.id === 'ozai-not-comet-enhanced' && defender.mentalState.level !== 'stable' && move.name === 'Lightning Generation') {
+            weight *= 5.0; // Royal Contempt bonus for Azula
         }
         
         if (actor.mentalState.level === 'broken' && move.type !== 'Offense') {

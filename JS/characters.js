@@ -150,7 +150,7 @@ export const characters = {
         techniques: [
             { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'],
                 usageRequirements: {}, environmentBonuses: { isExposed: 1.2 }, environmentPenalties: { isCramped: 0.7 } },
-            { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 70, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'],
+            { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 65, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'],
                 usageRequirements: {}, environmentBonuses: { isHot: 1.3, isIndustrial: 1.1 }, environmentPenalties: { isCold: 0.7 } },
             { name: "Flame Wall", verb: 'erect', object: 'towering wall of flame', type: 'Defense', power: 65, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'area_of_effect_large'],
                 usageRequirements: {}, environmentBonuses: { isHot: 1.3, isCramped: 1.2 }, environmentPenalties: { isCold: 0.7, waterRich: 0.8 } },

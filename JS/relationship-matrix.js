@@ -2,9 +2,9 @@
 'use strict';
 
 // ====================================================================================
-//  Relational Modifier Layer (RML) v1.5 - Final Balance
+//  Relational Modifier Layer (RML) v1.6 - Precision Tuning
 // ====================================================================================
-//  - Tuned Ozai's resilience vs. Azula to be higher, making him harder to break.
+//  - Increased Azula's resilience vs. Ozai to give her a better fighting chance.
 // ====================================================================================
 
 export const relationshipMatrix = {
@@ -23,7 +23,7 @@ export const relationshipMatrix = {
         'ozai-not-comet-enhanced': {
             relationshipType: "parental_fear",
             stressModifier: 2.5,
-            resilienceModifier: 0.5,
+            resilienceModifier: 0.7, // Increased from 0.5. Still low, but not cripplingly so.
             emotionalModifiers: {
                 riskToleranceBoost: 0.3, 
                 aggressionReduction: 0.1,
@@ -161,7 +161,7 @@ export const relationshipMatrix = {
         'azula': {
             relationshipType: "demanding_patriarch",
             stressModifier: 1.1,
-            resilienceModifier: 1.25, // Increased from 1.1 to make him more durable against her psychological attacks.
+            resilienceModifier: 1.25,
             emotionalModifiers: {
                 aggressionBoost: 0.25,
                 patienceReduction: 0.4,
