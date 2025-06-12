@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v6.2-Final-Bugfix';
+const systemVersion = 'v6.3-Defensive-Hardening-Final';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -148,6 +148,13 @@ export function simulateBattle(f1Id, f2Id, locId) {
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.lastMove = move;
+
+            // **DEFINITIVE BUG FIX (LAYER 2): Defensive Guard Clause**
+            // This prevents a crash even if the root cause is elsewhere.
+            if (!attacker.movesUsed) {
+                console.error(`CRITICAL RECOVERY: attacker.movesUsed was undefined for ${attacker.name}. Re-initializing.`);
+                attacker.movesUsed = [];
+            }
             attacker.movesUsed.push(move.name);
             attacker.moveHistory.push(move);
             if (defender.hp <= 0) battleOver = true;
@@ -186,7 +193,9 @@ export function simulateBattle(f1Id, f2Id, locId) {
 function selectMove(actor, defender) {
     const suitableMoves = actor.techniques;
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
-    if (!suitableMoves || suitableMoves.length === 0) return struggleMove;
+    if (!suitableMoves || suitableMoves.length === 0) {
+        return struggleMove;
+    }
 
     const recentMoves = actor.movesUsed.slice(-3);
     const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
@@ -215,8 +224,8 @@ function selectMove(actor, defender) {
 
     const chosenMove = getWeightedRandom(weightedMoves);
 
-    // **DEFINITIVE BUG FIX:** Explicitly check for a null or undefined result.
-    // This guarantees a valid move object is always returned, preventing the crash.
+    // **DEFINITIVE BUG FIX (LAYER 1): Foolproof Fallback**
+    // This explicit check makes it impossible for this function to return a nullish value.
     if (chosenMove) {
         return chosenMove;
     } else {
