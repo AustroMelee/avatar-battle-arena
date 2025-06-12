@@ -1,7 +1,10 @@
 // FILE: js/ui.js
 'use strict';
 
-import { characters } from './characters.js';
+// This module manages all direct DOM manipulations.
+// MODIFIED: The import for 'characters' now points to the new data directory.
+
+import { characters } from '../data/characters.js';
 import { locations } from './locations.js';
 
 export const DOM = {
@@ -92,7 +95,6 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
     
     if (!isDraw) {
         const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-        const loser = winnerId === fighter1.id ? fighter2 : fighter1;
         createSummaryItem(winner.summary);
         createLog(winner.interactionLog, 'Interaction Log', 'interaction-log');
     } else {
@@ -143,7 +145,8 @@ export function showResultsState(battleResult) {
         DOM.winnerName.textContent = `A Stalemate!`;
         DOM.winProbability.textContent = `The battle ends in a draw, with neither fighter able to gain the upper hand.`;
     } else {
-        DOM.winnerName.textContent = `${characters[battleResult.winnerId].name} Wins!`;
+        const winner = characters[battleResult.winnerId];
+        DOM.winnerName.textContent = `${winner.name} Wins!`;
         DOM.winProbability.textContent = `A decisive victory after a fierce battle.`;
         const winnerSection = battleResult.winnerId === DOM.fighter1Select.value ? DOM.fighter1Section : DOM.fighter2Section;
         winnerSection.classList.add('winner-highlight');

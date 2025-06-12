@@ -1,7 +1,11 @@
 // FILE: js/main.js
 'use strict';
 
-import { simulateBattle } from './battle-engine-v2.js';
+// This is the main entry point for the application.
+// It handles user interactions and initiates the battle simulation.
+// MODIFIED: The import for simulateBattle now points to the new engine core.
+
+import { simulateBattle } from './engine/battle-engine-core.js';
 import { DOM, populateDropdowns, updateFighterDisplay, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
 
 function handleBattleStart() {
@@ -9,7 +13,7 @@ function handleBattleStart() {
     const f2Id = DOM.fighter2Select.value;
     const locId = DOM.locationSelect.value;
     const timeOfDay = DOM.timeOfDaySelect.value;
-    const emotionalMode = DOM.emotionalModeCheckbox.checked; // Get emotional mode state
+    const emotionalMode = DOM.emotionalModeCheckbox.checked;
 
     if (!f1Id || !f2Id || !locId) {
         alert("Please select both fighters and a location.");
@@ -25,7 +29,6 @@ function handleBattleStart() {
 
     setTimeout(() => {
         try {
-            // New battle simulation call with all parameters
             const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
             showResultsState(battleResult);
 
