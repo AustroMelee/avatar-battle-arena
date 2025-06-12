@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v10.1-S++-RML-Bugfix-Pass';
+const systemVersion = 'v11.1-S++-Resilience-Pass';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -11,94 +11,47 @@ import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhr
 import { relationshipMatrix } from './relationship-matrix.js';
 import { emotionalFlavor } from './narrative-flavor.js';
 
-// --- HELPER FUNCTIONS (MOVED TO TOP-LEVEL SCOPE) ---
-const getRandomElement = (arr, fallback = null) => {
-    if (!arr || arr.length === 0) return fallback;
-    return arr[Math.floor(Math.random() * arr.length)];
-};
+// --- HELPER FUNCTIONS ---
+const getRandomElement = (arr, fallback = null) => arr?.[Math.floor(Math.random() * arr.length)] || fallback;
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-function conjugateVerb(verb) {
-    if (!verb) return '';
-    const verbParts = verb.split(' ');
-    const mainVerb = verbParts.shift();
-    const remainder = verbParts.join(' ');
-    let conjugated;
-    if (mainVerb === 'launch') return 'launches';
-    if (mainVerb === 'lash') return 'lashes';
-    if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
-        conjugated = mainVerb.slice(0, -1) + 'ies';
-    } else if (/(s|sh|ch|x|z|o)$/.test(mainVerb)) {
-        conjugated = mainVerb + 'es';
-    } else {
-        conjugated = mainVerb + 's';
-    }
-    return remainder ? `${conjugated} ${remainder}` : conjugated;
-}
-
-function assembleObjectPhrase(move) {
-    if (!move.object) return '';
-    if (move.requiresArticle) {
-        const firstLetter = move.object.charAt(0).toLowerCase();
-        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
-        return `${article} ${move.object}`;
-    }
-    return move.object;
-}
-
+const isReactive = (defender) => defender.lastMove?.type === 'Offense';
 
 // --- BATTLE STATE & SIMULATION ---
 function initializeFighterState(charId, opponentId, emotionalMode) {
     const character = characters[charId];
-    let state = { 
+    return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         isStunned: false, hasSetup: false,
         movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
-        // RML Properties
-        relationalState: null,
-        emotionalState: 'normal', // normal, desperate, breakdown, merciful
-        emotionalStateChangedThisTurn: false,
+        relationalState: (emotionalMode && relationshipMatrix[charId]?.[opponentId]) || null,
+        mentalState: { level: 'stable', stress: 0 }, // stable, stressed, shaken, broken
+        mentalStateChangedThisTurn: false,
     };
-
-    if (emotionalMode && relationshipMatrix[charId] && relationshipMatrix[charId][opponentId]) {
-        state.relationalState = relationshipMatrix[charId][opponentId];
-    }
-    
-    return state;
 }
 
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
     let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
     
-    const conditions = { ...locationConditions[locId] };
-    conditions.isDay = (timeOfDay === 'day');
-    conditions.isNight = (timeOfDay === 'night');
-
+    const conditions = { ...locationConditions[locId], isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
     let turnLog = [], interactionLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
-    const maxTurns = 6;
-    let battleOver = false;
 
-    for (let turn = 0; turn < maxTurns && !battleOver; turn++) {
-        fighter1.emotionalStateChangedThisTurn = false;
-        fighter2.emotionalStateChangedThisTurn = false;
+    for (let turn = 0; turn < 6 && !battleOver; turn++) {
+        [fighter1, fighter2].forEach(f => f.mentalStateChangedThisTurn = false);
 
         const phaseName = battlePhases[turn]?.name || "Final Exchange";
-        const phaseEmoji = battlePhases[turn]?.emoji || "💥";
-        let phaseContent = phaseTemplates.header.replace('{phaseName}', phaseName).replace('{phaseEmoji}', phaseEmoji);
+        let phaseContent = phaseTemplates.header.replace('{phaseName}', phaseName).replace('{phaseEmoji}', '⚔️');
+        var battleOver = false;
         
         const processTurn = (attacker, defender) => {
             if (battleOver) return;
-            
             attacker.isStunned = false; 
-
-            // --- RML: Emotional State Check ---
-            checkEmotionalState(attacker, defender);
-
+            
+            updateMentalState(attacker, defender);
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions);
             attacker.aiLog.push(`[T${turn+1}] ${aiLogEntry}`);
 
@@ -107,22 +60,24 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
             attacker.lastMoveEffectiveness = result.effectiveness.label;
             
-            const isDefensiveMove = move.type === 'Utility' || (move.type === 'Defense');
+            const isDefensiveMove = move.type === 'Utility' || move.type === 'Defense';
             attacker.consecutiveDefensiveTurns = isDefensiveMove ? attacker.consecutiveDefensiveTurns + 1 : 0;
             attacker.hasSetup = (isDefensiveMove && !isReactive(defender));
             
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
-            if (result.wasPunished) { 
+            if (result.wasPunished) {
                 attacker.moveFailureHistory.push(move.name);
-                if (attacker.moveFailureHistory.length > 3) attacker.moveFailureHistory.shift(); 
+                attacker.mentalState.stress += 15; // Punished moves are stressful
             }
             
             phaseContent += narrateMove(attacker, defender, move, result);
-            defender.hp = clamp(defender.hp - result.damage, 0, 100);
+            let damageTaken = defender.hp - clamp(defender.hp - result.damage, 0, 100);
+            defender.hp -= damageTaken;
+            defender.mentalState.stress += damageTaken / 4; // Damage taken is stressful
+
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.lastMove = move;
             attacker.moveHistory.push(move);
-            attacker.movesUsed.push(move.name);
 
             if (defender.hp <= 0) battleOver = true;
         };
@@ -136,87 +91,83 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
     const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
-    
     winner.interactionLog = [...new Set(interactionLog)];
     winner.summary = generateOutcomeSummary(winner, loser);
     
-    if (loser.hp > 0) {
-        turnLog.push(phaseTemplates.timeOutVictory.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
-    } else {
-        turnLog.push(phaseTemplates.finalBlow.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
-    }
-    const finalEnding = getToneAlignedVictoryEnding(winner.id, loser.id, { isCloseCall: winner.hp < 35, isDominant: loser.hp <= 0 && winner.hp > 75, opponentId: loser.id });
+    if (loser.hp > 0) turnLog.push(phaseTemplates.timeOutVictory.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
+    else turnLog.push(phaseTemplates.finalBlow.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
+    
+    const finalEnding = getToneAlignedVictoryEnding(winner.id, loser.id, { isCloseCall: winner.hp < 35, opponentId: loser.id });
     turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', finalEnding));
 
     return { log: turnLog.join(''), winnerId: winner.id, loserId: loser.id, finalState: { fighter1, fighter2 } };
 }
 
-// --- RML & AI SYSTEMS ---
-function checkEmotionalState(actor, defender) {
-    if (actor.emotionalState !== 'normal') return; // State is locked once changed
+// --- MENTAL STATE & AI SYSTEMS ---
+function updateMentalState(actor) {
+    if (actor.mentalState.level === 'broken' || !actor.relationalState) return;
 
-    let triggerReason = null;
-    if (actor.relationalState?.emotionalModifiers?.breakdownTrigger && actor.hp < 40 && actor.momentum <= -2) {
-        actor.emotionalState = 'breakdown';
-        triggerReason = "Relational Breakdown";
-    } else if (actor.hp < 25 && actor.momentum <= -3) {
-        actor.emotionalState = 'desperate';
-        triggerReason = "Low HP/Momentum";
-    } else if (actor.relationalState?.emotionalModifiers?.mercyTrigger && defender.hp < 20) {
-        actor.emotionalState = 'merciful';
-        triggerReason = "Opponent HP Low";
-    }
+    let stressThisTurn = 0;
+    if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum);
+    
+    stressThisTurn *= (actor.relationalState.stressModifier || 1.0);
+    actor.mentalState.stress += stressThisTurn;
 
-    if (triggerReason) {
-        actor.aiLog.push(`[Emotional Shift]: ${actor.name} enters ${actor.emotionalState.toUpperCase()} state due to ${triggerReason}.`);
-        actor.emotionalStateChangedThisTurn = true;
+    const resilience = actor.relationalState.resilienceModifier || 1.0;
+    const thresholds = {
+        stressed: 30 * resilience,
+        shaken: 65 * resilience,
+        broken: 100 * resilience,
+    };
+
+    const oldLevel = actor.mentalState.level;
+    if (actor.mentalState.stress > thresholds.broken) actor.mentalState.level = 'broken';
+    else if (actor.mentalState.stress > thresholds.shaken) actor.mentalState.level = 'shaken';
+    else if (actor.mentalState.stress > thresholds.stressed) actor.mentalState.level = 'stressed';
+
+    if (oldLevel !== actor.mentalState.level) {
+        actor.aiLog.push(`[Mental State Change]: ${actor.name} is now ${actor.mentalState.level.toUpperCase()}. (Stress: ${actor.mentalState.stress.toFixed(0)})`);
+        actor.mentalStateChangedThisTurn = true;
     }
 }
 
 function getDynamicPersonality(actor) {
     let profile = { ...actor.personalityProfile };
-    const modifiers = actor.relationalState?.emotionalModifiers || {};
-
-    // Apply relational modifiers
-    profile.aggression = clamp(profile.aggression + (modifiers.aggressionBoost || 0) - (modifiers.aggressionReduction || 0), 0, 1);
-    profile.patience = clamp(profile.patience + (modifiers.patienceBoost || 0) - (modifiers.patienceReduction || 0), 0, 1);
-    profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1);
-    profile.opportunism = clamp(profile.opportunism + (modifiers.opportunismBoost || 0) - (modifiers.opportunismReduction || 0), 0, 1);
-    
-    // Apply emotional state overrides
-    switch (actor.emotionalState) {
-        case 'breakdown':
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.2);
-            profile.patience *= 0.2;
-            profile.aggression = clamp(profile.aggression + 0.3, 0, 1.2);
-            break;
-        case 'desperate':
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.4, 0, 1.1);
-            profile.patience *= 0.5;
-            break;
-        case 'merciful':
-            profile.aggression *= 0.3;
-            profile.riskTolerance *= 0.5;
-            break;
+    if (actor.relationalState) {
+        const modifiers = actor.relationalState.emotionalModifiers || {};
+        profile.aggression = clamp(profile.aggression + (modifiers.aggressionBoost || 0) - (modifiers.aggressionReduction || 0), 0, 1);
+        profile.patience = clamp(profile.patience + (modifiers.patienceBoost || 0) - (modifiers.patienceReduction || 0), 0, 1);
+        profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1);
     }
     
+    switch (actor.mentalState.level) {
+        case 'stressed':
+            profile.patience *= 0.8;
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.1, 0, 1);
+            break;
+        case 'shaken':
+            profile.patience *= 0.5;
+            profile.opportunism *= 0.7;
+            profile.aggression = clamp(profile.aggression + 0.15, 0, 1.1);
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.2, 0, 1.1);
+            break;
+        case 'broken':
+            profile.patience = 0.1;
+            profile.opportunism = 0.2;
+            profile.aggression = clamp(profile.aggression + 0.3, 0, 1.2);
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.4, 0, 1.2);
+            break;
+    }
     return profile;
 }
 
 function selectMove(actor, defender, conditions) {
     const availableMoves = getAvailableMoves(actor, conditions);
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
-    if (!availableMoves || availableMoves.length === 0) return { move: struggleMove, aiLogEntry: "No moves available, selected Struggle." };
-    
+    if (!availableMoves.length) return { move: struggleMove, aiLogEntry: "No moves available, selected Struggle." };
+
     const profile = getDynamicPersonality(actor);
     
-    const isDesperate = actor.hp < 30 || actor.momentum <= -3;
-    const hasMomentum = actor.momentum >= 3;
-    const isStalling = actor.consecutiveDefensiveTurns >= 2;
-    
-    profile.riskTolerance = isDesperate ? clamp(profile.riskTolerance + 0.2, 0, 1.1) : profile.riskTolerance;
-    profile.aggression = hasMomentum ? clamp(profile.aggression + 0.1, 0, 1.1) : profile.aggression;
-
     let opportunismBonus = 1.0, openingReason = 'None';
     if (defender.isStunned) { opportunismBonus += profile.opportunism * 1.0; openingReason = 'Stun'; }
     else if (defender.momentum <= -3) { opportunismBonus += profile.opportunism * 0.7; openingReason = 'Momentum'; }
@@ -224,159 +175,98 @@ function selectMove(actor, defender, conditions) {
 
     const weightedMoves = availableMoves.map(move => {
         let weight = 1.0;
-        let reasons = [];
-
+        
         switch (move.type) {
-            case 'Offense': weight *= (1.0 + (profile.aggression * 0.5)) * opportunismBonus; reasons.push('A'); break;
-            case 'Defense': weight *= (1.0 + ((1 - profile.aggression) * 0.5)); reasons.push('d'); break;
-            case 'Utility': weight *= (1.0 + (profile.patience * 0.3)); reasons.push('p'); break;
-            case 'Finisher': weight *= (1.0 + (profile.riskTolerance * 0.5)) * opportunismBonus; reasons.push('R'); break;
+            case 'Offense': weight *= (1 + profile.aggression * 0.5) * opportunismBonus; break;
+            case 'Defense': weight *= 1 + (1 - profile.aggression) * 0.5; break;
+            case 'Utility': weight *= 1 + profile.patience * 0.3; break;
+            case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
         }
 
-        if (actor.movesUsed.slice(-2).includes(move.name)) weight *= 0.2;
+        if (actor.moveHistory.slice(-2).some(m => m.name === move.name)) weight *= 0.25;
         if (actor.moveFailureHistory.includes(move.name)) weight *= 0.1;
-
-        if (isStalling && (move.type === 'Defense' || move.type === 'Utility')) {
-            weight *= 0.5;
-            reasons.push('StallPrev');
-        }
+        if (actor.consecutiveDefensiveTurns >= 2 && (move.type === 'Defense' || move.type === 'Utility')) weight *= 0.5;
         
         if (move.moveTags.includes('requires_opening')) {
             const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak' || actor.hasSetup);
-            if (openingExists) { weight *= 20.0; reasons.push('Open+'); }
-            else { weight *= (profile.riskTolerance * 0.1); reasons.push('Risk-'); }
+            weight *= openingExists ? 20.0 : (profile.riskTolerance * 0.1);
         }
         
-        if (actor.energy < (move.power || 0) * 0.5) weight = 0;
+        if (actor.mentalState.level === 'broken') {
+            if (move.type === 'Finisher') weight *= 0.1;
+            if (move.type === 'Utility') weight *= 0.3;
+        }
 
-        return { move, weight, reasons };
+        if (actor.energy < (move.power || 0) * 0.5) weight = 0;
+        return { move, weight };
     });
 
     const sortedMoves = weightedMoves.filter(m => m.weight > 0).sort((a,b) => b.weight - a.weight);
-    const chosenMoveInfo = sortedMoves.length > 0 ? sortedMoves[0] : null;
+    const chosenMoveInfo = sortedMoves[0];
     const chosenMove = chosenMoveInfo ? chosenMoveInfo.move : struggleMove;
-
-    let aiLogEntry = `Selected '${chosenMove.name}'`
-    if(chosenMoveInfo) {
-        aiLogEntry += ` (W: ${chosenMoveInfo.weight.toFixed(2)}). Factors: [${chosenMoveInfo.reasons.join(',')}]`;
-    }
-    if (opportunismBonus > 1.0) aiLogEntry += `|Opp:${openingReason}`;
-    if (actor.emotionalState !== 'normal') aiLogEntry += `|State:${actor.emotionalState.toUpperCase()}`;
+    
+    let aiLogEntry = `Selected '${chosenMove.name}'`;
+    if (chosenMoveInfo) aiLogEntry += ` (W: ${chosenMoveInfo.weight.toFixed(2)})`;
+    if (openingReason !== 'None') aiLogEntry += `|Opp:${openingReason}`;
+    aiLogEntry += `|State:${actor.mentalState.level}`;
     
     return { move: chosenMove, aiLogEntry };
 }
 
-
 // --- NARRATIVE & COMBAT CALCULATION ---
-
 function narrateMove(actor, target, move, result) {
+    let emotionalPrefix = '';
+    if (actor.mentalStateChangedThisTurn) {
+        const pool = emotionalFlavor[actor.id]?.[actor.mentalState.level] || emotionalFlavor.generic?.[actor.mentalState.level];
+        if (pool) emotionalPrefix = getRandomElement(pool).replace(/{actorName}/g, actor.name).replace(/{possessive}/g, actor.pronouns.p) + ' ';
+    }
+
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
     const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
     
-    // --- RML: Inject Emotional Flavor Text ---
-    let emotionalPrefix = '';
-    if (actor.emotionalStateChangedThisTurn) {
-        const flavorPool = emotionalFlavor[actor.id]?.[actor.emotionalState] || emotionalFlavor.generic[actor.emotionalState];
-        if (flavorPool) {
-            emotionalPrefix = getRandomElement(flavorPool)
-                .replace(/{actorName}/g, actorSpan)
-                .replace(/{targetName}/g, targetSpan)
-                .replace(/{possessive}/g, actor.pronouns.p) + ' ';
-        }
-    } else if (actor.relationalState && Math.random() < 0.2) { // Chance for a random taunt if relationship exists
-        const tauntPool = emotionalFlavor[actor.id]?.taunt;
-        const taunt = tauntPool ? tauntPool[target.id] || tauntPool.generic : null;
-        if (taunt) {
-            emotionalPrefix = `${actorSpan} taunts, "<em>${taunt}</em>" `;
-        }
-    }
-
     if (move.type === 'Defense' || move.type === 'Utility') {
         const reactive = isReactive(target);
-        const impactTemplates = reactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
-        let prefix = reactive ? "Reacting quickly," : "Preparing carefully,";
-        let impactSentence = getRandomElement(impactTemplates).replace(/{actorName}/g, actorSpan).replace(/{possessive}/g, actor.pronouns.p);
-        const description = `${emotionalPrefix}${prefix} ${actorSpan} uses the ${move.name}. ${impactSentence}`;
-        const label = reactive ? "Counter" : "Set-up";
-        return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{effectivenessLabel}/g, label).replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
+        let impactSentence = getRandomElement(reactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE).replace(/{actorName}/g, actorSpan);
+        const desc = `${emotionalPrefix}${actorSpan} uses the ${move.name}. ${impactSentence}`;
+        return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '🛡️').replace(/{effectivenessLabel}/g, reactive ? "Counter" : "Set-up").replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, desc);
     }
     
-    let statePrefix = '';
-    if (actor.momentum >= 3) statePrefix = getRandomElement(narrativeStatePhrases.momentum_gain);
-    else if (actor.momentum <= -3) statePrefix = getRandomElement(narrativeStatePhrases.momentum_loss);
-    
-    const intro = statePrefix ? '' : getRandomElement(introductoryPhrases);
-    const verb = conjugateVerb(move.verb || 'executes');
-    const objectPhrase = assembleObjectPhrase(move);
-    const adverb = getRandomElement(adverbPool.offensive);
-    
-    let fullAction = `${emotionalPrefix}${(statePrefix || intro).replace(/{possessive}/g, actor.pronouns.p)} ${actorSpan} ${verb} ${objectPhrase} ${adverb}.`;
-
-    let impactSentence;
-    if (target.hp - result.damage <= 0 && result.damage > 0) {
-        impactSentence = getRandomElement(finishingBlowPhrases).replace(/{targetName}/g, targetSpan);
-    } else {
-        const impactPool = impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()];
-        impactSentence = getRandomElement(impactPool).replace(/{targetName}/g, targetSpan);
-    }
-    
-    const description = `${fullAction} ${impactSentence}`.replace(/\s\./g, '.').replace(/\s+/g, ' ').trim();
+    const impactSentence = getRandomElement(impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()]).replace(/{targetName}/g, targetSpan);
+    const fullDesc = `${emotionalPrefix}${actorSpan} ${conjugateVerb(move.verb || 'executes')} ${assembleObjectPhrase(move)}. ${impactSentence}`;
 
     return phaseTemplates.move
-        .replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨')
+        .replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '⚔️')
         .replace(/{effectivenessLabel}/g, result.effectiveness.label).replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-        .replace(/{moveDescription}/g, description);
+        .replace(/{moveDescription}/g, fullDesc.replace(/\s+/g, ' ').trim());
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
-    let effectReasons = [];
     let wasPunished = false;
     
     if (move.moveTags.includes('requires_opening')) {
-        const punishmentRule = punishableMoves[move.name];
-        if (punishmentRule) {
-            let openingFound = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak' || attacker.hasSetup);
-            if (!openingFound) {
-                multiplier *= punishmentRule.penalty;
-                effectReasons.push("punished due to a lack of opening");
-                wasPunished = true;
-            }
+        const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak' || attacker.hasSetup);
+        if (!openingExists && punishableMoves[move.name]) {
+            multiplier *= punishableMoves[move.name].penalty;
+            wasPunished = true;
         }
     }
     
     const { multiplier: envMultiplier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
     multiplier *= envMultiplier;
-    effectReasons.push(...envReasons);
-
-    if (defender.lastMove) {
-        const attackerInteractions = moveInteractionMatrix[move.name];
-        if (attackerInteractions?.counters?.[defender.lastMove.name]) {
-            multiplier *= attackerInteractions.counters[defender.lastMove.name];
-            effectReasons.push(`countered ${defender.name}'s ${defender.lastMove.name}`);
-        }
-        const defenderInteractions = moveInteractionMatrix[defender.lastMove.name];
-        if (defenderInteractions?.counters?.[move.name]) {
-            multiplier /= defenderInteractions.counters[move.name];
-            effectReasons.push(`countered by ${defender.name}'s ${defender.lastMove.name}`);
-        }
-    }
-    
-    if (effectReasons.length > 0) {
-        interactionLog.push(`${attacker.name}'s ${move.name} was ${effectReasons.join(', ')}.`);
-    }
+    if (envReasons.length > 0) interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${envReasons.join(', ')}.`);
 
     const totalEffectiveness = basePower * multiplier;
     
-    let level, energyMultiplier = 1.0;
-    if (totalEffectiveness < basePower * 0.7) { level = effectivenessLevels.WEAK; energyMultiplier = 1.2; } 
-    else if (totalEffectiveness > basePower * 1.5) { level = effectivenessLevels.CRITICAL; energyMultiplier = 0.8; } 
-    else if (totalEffectiveness > basePower * 1.1) { level = effectivenessLevels.STRONG; energyMultiplier = 0.95; } 
-    else { level = effectivenessLevels.NORMAL; }
+    let level;
+    if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK; 
+    else if (totalEffectiveness > basePower * 1.5) level = effectivenessLevels.CRITICAL;
+    else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
+    else level = effectivenessLevels.NORMAL;
     
     const damage = (move.type.includes('Offense') || move.type.includes('Finisher')) ? Math.round(totalEffectiveness / 3) : 0;
-    const energyCost = Math.round(((move.power || 0) * 0.5) * energyMultiplier);
+    const energyCost = Math.round((move.power || 0) * 0.5);
 
     return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished };
 }
@@ -384,49 +274,47 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
 function getAvailableMoves(actor, conditions) {
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {} };
     if (!actor.techniques) return [struggleMove];
-    
-    const available = actor.techniques.filter(move => {
-        if (!move.usageRequirements) return true;
-        return Object.entries(move.usageRequirements).every(([key, val]) => conditions[key] === val);
-    });
-
+    const available = actor.techniques.filter(move => Object.entries(move.usageRequirements || {}).every(([key, val]) => conditions[key] === val));
     return available.length > 0 ? available : [struggleMove];
 }
 
 function applyEnvironmentalModifiers(move, attacker, conditions) {
     let multiplier = 1.0;
-    let logReasons = new Set();
+    let logReasons = [];
     
-    if (attacker.environmentalAffinity) {
-        Object.entries(attacker.environmentalAffinity).forEach(([key, mod]) => {
-            if (conditions[key]) {
-                multiplier *= mod;
-                logReasons.add(mod > 1 ? `empowered by ${key} terrain` : `weakened by ${key} terrain`);
-            }
-        });
-    }
-
     const isFirebender = attacker.techniques.some(t => t.element === 'fire' || t.element === 'lightning');
     const isWaterbender = attacker.techniques.some(t => t.element === 'water' || t.element === 'ice');
     if (conditions.isDay) {
-        if (isFirebender) { multiplier *= 1.1; logReasons.add(`empowered by daylight`); }
-        if (isWaterbender) { multiplier *= 0.9; logReasons.add(`weakened by daylight`); }
+        if (isFirebender) { multiplier *= 1.1; logReasons.push(`daylight`); }
+        if (isWaterbender) { multiplier *= 0.9; }
     } else if (conditions.isNight) {
-        if (isFirebender) { multiplier *= 0.9; logReasons.add(`weakened by nighttime`); }
-        if (isWaterbender) { multiplier *= 1.1; logReasons.add(`empowered by nighttime`); }
+        if (isFirebender) { multiplier *= 0.9; }
+        if (isWaterbender) { multiplier *= 1.1; logReasons.push(`nighttime`); }
     }
-
-    Object.entries(move.environmentBonuses || {}).forEach(([key, mod]) => {
-        if(conditions[key]) { multiplier *= mod; logReasons.add(`move empowered by ${key}`); }
-    });
-    Object.entries(move.environmentPenalties || {}).forEach(([key, mod]) => {
-        if(conditions[key]) { multiplier *= (1/mod); logReasons.add(`move weakened by ${key}`); }
-    });
-
-    return { multiplier, logReasons: Array.from(logReasons) };
+    
+    return { multiplier, logReasons };
 }
 
-const isReactive = (defender) => defender.lastMove?.type === 'Offense';
+function conjugateVerb(verb) {
+    if (!verb) return '';
+    const verbParts = verb.split(' ');
+    const mainVerb = verbParts.shift();
+    const remainder = verbParts.join(' ');
+    if (mainVerb.endsWith('s')) return verb;
+    if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) return mainVerb.slice(0, -1) + 'ies' + (remainder ? ' ' + remainder : '');
+    if (/(s|sh|ch|x|z|o)$/.test(mainVerb)) return verb + 'es';
+    return verb + 's';
+}
+
+function assembleObjectPhrase(move) {
+    if (!move.object) return move.name;
+    if (move.requiresArticle) {
+        const firstLetter = move.object.charAt(0).toLowerCase();
+        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
+        return `${article} ${move.object}`;
+    }
+    return move.object;
+}
 
 function updateMomentum(current, label) {
     const changes = { 'Critical': 3, 'Strong': 2, 'Normal': 1, 'Weak': -2, 'Counter': 2 };
@@ -439,42 +327,26 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
     const archetypePool = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
     const endingTemplate = battleContext.isCloseCall ? (archetypePool.narrow || archetypePool.dominant) : archetypePool.dominant;
     
-    let populatedEnding = endingTemplate
-        .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
-        .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`)
-        .replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
+    let populatedEnding = endingTemplate.replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`).replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`).replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
 
     const finalQuote = getVictoryQuote(winnerChar, battleContext);
-    if (finalQuote && !populatedEnding.includes(finalQuote)) {
-        populatedEnding += ` "${finalQuote}"`;
-    }
+    if (finalQuote) populatedEnding += ` "${finalQuote}"`;
     return populatedEnding;
 }
 
 function getVictoryQuote(character, battleContext) {
-    if (!character || !character.quotes) return "Victory is mine.";
-    const { opponentId } = battleContext;
     const quotes = character.quotes;
-    const quotePool = [];
-    if (opponentId && quotes.postWin_specific?.[opponentId]) quotePool.push(...[].concat(quotes.postWin_specific[opponentId]));
-    if (battleContext.isDominant && quotes.postWin_overwhelming) quotePool.push(...[].concat(quotes.postWin_overwhelming));
-    if (battleContext.isCloseCall && quotes.postWin_reflective) quotePool.push(...[].concat(quotes.postWin_reflective));
-    if (quotes.postWin) quotePool.push(...[].concat(quotes.postWin));
-    return getRandomElement(quotePool) || "The battle is won.";
+    if (!quotes) return null;
+    const { opponentId, isDominant, isCloseCall } = battleContext;
+    if (opponentId && quotes.postWin_specific?.[opponentId]) return getRandomElement([].concat(quotes.postWin_specific[opponentId]));
+    if (isDominant && quotes.postWin_overwhelming) return getRandomElement([].concat(quotes.postWin_overwhelming));
+    if (isCloseCall && quotes.postWin_reflective) return getRandomElement([].concat(quotes.postWin_reflective));
+    return getRandomElement([].concat(quotes.postWin));
 }
 
 function generateOutcomeSummary(winner, loser) {
     const moveTypes = winner.moveHistory.map(m => m.type);
-    const mostUsedType = ['Finisher', 'Offense', 'Defense', 'Utility'].map(type => ({ type, count: moveTypes.filter(t => t === type).length })).sort((a, b) => b.count - a.count)[0]?.type || 'versatile';
-    
-    const summaryMap = {
-        'Finisher': `decisive finishing moves`, 'Offense': `relentless offense`,
-        'Defense': `impenetrable defense`, 'Utility': `clever tactical maneuvers`, 'versatile': `sheer versatility`
-    };
-    
-    let summary = `${winner.name}'s victory was sealed by ${winner.pronouns.p} ${summaryMap[mostUsedType]}.`;
-    if (winner.momentum - loser.momentum >= 5) {
-        summary += ` ${winner.pronouns.p.charAt(0).toUpperCase() + winner.pronouns.p.slice(1)} commanding momentum overwhelmed ${loser.name}.`;
-    }
-    return summary;
+    const mostUsedType = ['Finisher', 'Offense', 'Defense', 'Utility'].map(type => ({ type, count: moveTypes.filter(t => t === type).length })).sort((a,b) => b.count - a.count)[0]?.type || 'versatile';
+    const summaryMap = { 'Finisher': 'decisive finishing moves', 'Offense': 'relentless offense', 'Defense': 'impenetrable defense', 'Utility': 'clever tactical maneuvers', 'versatile': 'sheer versatility' };
+    return `${winner.name}'s victory was sealed by ${winner.pronouns.p} ${summaryMap[mostUsedType]}.`;
 }

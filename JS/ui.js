@@ -9,7 +9,7 @@ export const DOM = {
     fighter2Select: document.getElementById('fighter2'),
     locationSelect: document.getElementById('location'),
     timeOfDaySelect: document.getElementById('time-of-day'),
-    emotionalModeCheckbox: document.getElementById('emotional-mode'), // New element
+    emotionalModeCheckbox: document.getElementById('emotional-mode'), 
     fighter1NameDisplay: document.getElementById('fighter1-name-display'),
     fighter2NameDisplay: document.getElementById('fighter2-name-display'),
     fighter1Label: document.getElementById('fighter1-label'),
@@ -88,29 +88,28 @@ function displayFinalAnalysis(finalState, winnerId) {
         if (!log || log.length === 0) return;
         const li = document.createElement('li');
         li.className = className;
-        li.innerHTML = `<strong>${title}:</strong> ` + log.join(' ');
+        li.innerHTML = `<strong>${title}:</strong><br>` + log.join('<br>'); // Use <br> for readability
         DOM.analysisList.appendChild(li);
     }
 
     createSummaryItem(winner.summary);
     createLog(winner.interactionLog, 'Interaction Log', 'interaction-log');
-    createLog(winner.aiLog, 'Winner AI Log', 'ai-log');
-    createLog(loser.aiLog, 'Loser AI Log', 'ai-log');
-
-
-    createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
-    createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
-    createListItem(`  • Energy:`, `${Math.round(winner.energy)} / 100`);
-    createListItem(`  • Momentum:`, `${Math.round(winner.momentum)}`);
-
+    
     const spacer = document.createElement('li');
     spacer.className = 'analysis-item-spacer';
     DOM.analysisList.appendChild(spacer);
 
+    createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
+    createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
+    createListItem(`  • Mental State:`, winner.mentalState.level.toUpperCase());
+
     createListItem(`<b>${loser.name}'s Final Status:</b>`, 'DEFEATED', 'modifier-minus');
     createListItem(`  • Health:`, `${Math.round(loser.hp)} / 100 HP`);
-    createListItem(`  • Energy:`, `${Math.round(loser.energy)} / 100`);
-    createListItem(`  • Momentum:`, `${Math.round(loser.momentum)}`);
+    createListItem(`  • Mental State:`, loser.mentalState.level.toUpperCase());
+    
+    DOM.analysisList.appendChild(spacer.cloneNode());
+    createLog(winner.aiLog, 'Winner AI Log', 'ai-log');
+    createLog(loser.aiLog, 'Loser AI Log', 'ai-log');
 }
 
 export function showLoadingState() {

@@ -2,35 +2,47 @@
 'use strict';
 
 // ====================================================================================
-//  Narrative Flavor Library (RML v1.0)
+//  Narrative Flavor Library (RML v1.1 - Multi-State)
 // ====================================================================================
-//  Provides dynamic, emotional flavor text injected into the battle narration
-//  based on a character's emotional state and relationship to their opponent.
+//  Provides flavor text for the Multi-Stage Emotional Breakdown Framework.
 // ====================================================================================
 
 export const emotionalFlavor = {
-    // Generic state changes for any character
+    // --- GENERIC STATES FOR ANY CHARACTER ---
     generic: {
-        breakdown: [
-            "A flicker of panic flashes in {actorName}'s eyes.",
-            "{actorName}'s confident stance begins to crumble.",
-            "The pressure seems to be getting to {actorName}, whose movements become erratic.",
-            "Frustration boils over, and {actorName}'s technique becomes sloppy and desperate."
+        stressed: [
+            "{actorName}'s brow furrows with concentration.",
+            "A hint of strain appears in {actorName}'s movements.",
+            "{actorName} takes a sharp breath, refocusing under the pressure."
         ],
-        desperation: [
-            "With nothing left to lose, {actorName} prepares for a reckless gamble.",
-            "Cornered and battered, {actorName} summons {possessive} last reserves for a desperate push.",
-            "There's no more room for strategy; only a desperate, all-out attack will do."
+        shaken: [
+            "A flicker of panic flashes in {actorName}'s eyes.",
+            "{actorName}'s confident stance begins to waver.",
+            "The pressure seems to be getting to {actorName}, whose movements become slightly erratic."
+        ],
+        broken: [
+            "Frustration boils over, and {actorName}'s technique becomes sloppy and desperate.",
+            "A desperate cry escapes {actorName} as {possessive} guard breaks completely.",
+            "All strategy is gone, replaced by raw, unfocused rage."
         ]
     },
 
-    // Character-specific flavor text
+    // --- CHARACTER-SPECIFIC STATES ---
     'azula': {
-        breakdown: [
+        stressed: [
+            "Azula's smile tightens, a hint of strain at the edges.",
+            "Her precise movements become a fraction too sharp, betraying a hidden tension.",
+            "'You're starting to annoy me,' {actorName} says, her voice dangerously calm."
+        ],
+        shaken: [
             "A single hair falls out of place, and Azula's perfect composure cracks, replaced by a snarl.",
-            "'{targetName}, you've always been a disappointment!' she shrieks, her attack laced with fury rather than precision.",
             "A memory of her mother's words seems to haunt her, and her blue flames flicker with instability.",
-            "'I... I must be perfect!' {actorName} mutters, her movements becoming dangerously unpredictable."
+            "'I am perfect...' {actorName} mutters, as if trying to convince herself."
+        ],
+        broken: [
+            "'Everyone thinks I'm a monster!' she shrieks, her attack laced with furious despair rather than precision.",
+            "Her attacks become wild, powerful, but without their usual terrifying focus.",
+            "Tears stream down her face, sizzling into steam as they touch her superheated armor."
         ],
         taunt: {
             'zuko': "You've always been weak, Zuzu. Pathetic.",
@@ -40,45 +52,46 @@ export const emotionalFlavor = {
         }
     },
     'zuko': {
-        breakdown: [
-            "His father's mocking laughter echoes in his mind, and {actorName} lashes out with uncontrolled rage.",
-            "'I have to restore my honor!' he yells, his attacks becoming wild and predictable.",
-            "The scar on his face seems to burn as he falters, torn between two paths."
+        stressed: [
+            "The scar on his face seems to tighten as he focuses, his breath coming in short bursts.",
+            "{actorName} grits his teeth, pushing back against the memory of his father's scorn.",
+            "'I won't lose my way,' he whispers, his fists clenched."
         ],
-        desperation: [
-            "He thinks of his uncle's teachings, steadying himself for one last, focused effort.",
-            "'This is for my nation! For myself!' {actorName} roars, channeling all his pain into the attack."
+        shaken: [
+            "His father's mocking laughter echoes in his mind, and {actorName} lashes out with uncontrolled anger.",
+            "He falters for a moment, torn between his past and present, leaving an opening.",
+            "'I have to restore my honor!' he yells, but his voice cracks with uncertainty."
+        ],
+        broken: [
+            "He clutches his head, overwhelmed by conflicting emotions. 'I'm so confused...'",
+            "His firebending becomes a storm of raw emotion, dangerous to everyone, including himself.",
+            "'Which path is mine?!' he shouts at the sky, his defense faltering completely."
         ]
     },
     'aang-airbending-only': {
-        reluctance: [
-            "Aang hesitates, his face etched with worry. 'I don't want to hurt you, {targetName}!'",
-            "He pulls back at the last second, turning a powerful strike into a defensive maneuver.",
-            "'There has to be another way!' he pleads, using his airbending to create distance, not to harm."
+        stressed: [
+            "Aang's playful demeanor fades, replaced by the heavy burden of his duty.",
+            "'This is getting too serious,' he thinks, his evasive maneuvers becoming more urgent.",
+        ],
+        shaken: [
+            "He looks at {targetName} with worried eyes. 'Please, we don't have to do this!'",
+            "A memory of the Hundred Year War flashes in his mind, and he pulls back from a powerful attack."
+        ],
+        broken: [
+            // Aang doesn't 'break' in the same way; he enters the Avatar State. This is beyond current scope.
+            // So his 'broken' state is a form of desperate, powerful defense.
+            "His eyes and tattoos begin to glow faintly. 'I have to protect everyone!'",
+            "A powerful sphere of wind begins to form around him, a desperate defensive measure."
         ]
     },
     'iroh': {
+        stressed: [ // It's hard to stress Iroh, this is more 'disappointed'
+            "Iroh sighs, a look of profound sadness on his face. 'It is time to stop this foolishness.'",
+            "He shakes his head slowly. 'You have lost your way.'",
+        ],
         mercy: [
-            "Iroh sighs, a look of profound sadness on his face. 'It is time to stop this foolishness, child.'",
             "He sees the pain in {targetName}'s eyes and holds back, turning his attack into a gentle push.",
             "He sips from an imaginary teacup. 'Have you considered that this conflict is... ill-advised?' he asks, deflecting the blow."
-        ],
-        taunt: {
-            'azula': "My dear niece, you have so much to learn about true power.",
-            'ozai-not-comet-enhanced': "You have forgotten the most important lesson, brother. Power is not the only path."
-        }
-    },
-    'katara': {
-        desperation: [
-            "Her mother's necklace glows softly as {actorName} thinks of her lost family, her waterbending becoming sharp and cold as ice.",
-            "'I won't let you win! For the Southern Water Tribe!' she cries, her control over water becoming immense and terrifying."
         ]
-    },
-    'toph-beifong': {
-        taunt: {
-            'aang-airbending-only': "Come on, Twinkle-toes! Are you gonna dance around all day or actually fight?",
-            'katara': "Try getting your feet wet now, Sugar Queen!",
-            'azula': "All that hot air and you still can't touch me."
-        }
     }
 };
