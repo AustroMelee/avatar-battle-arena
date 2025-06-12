@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v3B-Overhaul-Patch-1';
+const systemVersion = 'v3C-Overhaul-Patch-2';
 const legacyMode = false; // Set to true to disable the move matrix for debugging
 
 import { characters } from './characters.js';
@@ -200,37 +200,45 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     
     // Environmental Modifiers
     if (move.element === 'water' || move.element === 'ice') {
-        if (conditions.isSandy || conditions.isHot) {
-            multiplier *= 0.25; // Massive debuff
-            logReasons.push("was weakened by the arid terrain");
-        }
-        if (conditions.waterRich || conditions.iceRich) {
-            multiplier *= 1.3;
-            logReasons.push("was empowered by the abundant water/ice");
-        }
+        if (conditions.isSandy || conditions.isHot) { multiplier *= 0.25; logReasons.push("was weakened by the arid terrain"); }
+        if (conditions.waterRich || conditions.iceRich) { multiplier *= 1.3; logReasons.push("was empowered by the abundant water/ice"); }
     }
-    if (move.element === 'earth' && conditions.earthRich) {
-        multiplier *= 1.3;
-        logReasons.push("was empowered by the rich earth");
-    }
-    if (move.element === 'fire' && conditions.isHot) {
-        multiplier *= 1.25;
-        logReasons.push("was empowered by the intense heat");
-    }
+    if (move.element === 'earth' && conditions.earthRich) { multiplier *= 1.3; logReasons.push("was empowered by the rich earth"); }
+    if (move.element === 'fire' && conditions.isHot) { multiplier *= 1.25; logReasons.push("was empowered by the intense heat"); }
     
-    // Move Interaction Matrix
-    if (!legacyMode && moveInteractionMatrix[move.name]) {
-        const moveInteractions = moveInteractionMatrix[move.name];
-        if (defender.lastMove && moveInteractions.counters?.[defender.lastMove.name]) {
-            const counterBonus = moveInteractions.counters[defender.lastMove.name];
-            multiplier *= counterBonus;
-            logReasons.push(`countered ${defender.name}'s ${defender.lastMove.name}`);
+    // Move Interaction Matrix (Bi-directional check)
+    if (!legacyMode && defender.lastMove) {
+        const attackerMoveName = move.name;
+        const defenderMoveName = defender.lastMove.name;
+        
+        // 1. Check if attacker's move COUNTERS defender's last move
+        const attackerInteractions = moveInteractionMatrix[attackerMoveName];
+        if (attackerInteractions && attackerInteractions.counters?.[defenderMoveName]) {
+            const bonus = attackerInteractions.counters[defenderMoveName];
+            multiplier *= bonus;
+            logReasons.push(`countered ${defender.name}'s ${defenderMoveName}`);
+        }
+
+        // 2. Check if attacker's move is COUNTERED BY defender's last move
+        const defenderInteractions = moveInteractionMatrix[defenderMoveName];
+        if (defenderInteractions && defenderInteractions.counters?.[attackerMoveName]) {
+            const penalty = 1 / defenderInteractions.counters[attackerMoveName]; // Invert the bonus to get a penalty
+            multiplier *= penalty;
+            logReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
+        }
+        // LEGACY `counteredBy` check for backward compatibility (can be phased out)
+        if (attackerInteractions && attackerInteractions.counteredBy?.[defenderMoveName]) {
+            const penalty = 1 / attackerInteractions.counteredBy[defenderMoveName];
+            multiplier *= penalty;
+             logReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
         }
     }
     
     // Add to main log if any reasons were found
     if (logReasons.length > 0) {
-        interactionLog.push(`${attacker.name}'s ${move.name} ${logReasons.join(' and ')}.`);
+        // Use a Set to remove duplicate reasons before joining
+        const uniqueReasons = [...new Set(logReasons)];
+        interactionLog.push(`${attacker.name}'s ${move.name} ${uniqueReasons.join(' and ')}.`);
     }
 
     const totalEffectiveness = basePower * multiplier;
