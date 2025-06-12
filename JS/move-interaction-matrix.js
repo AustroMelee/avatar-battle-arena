@@ -2,29 +2,70 @@
 'use strict';
 
 // ====================================================================================
-//  Move Interaction Matrix (v3.1 - Corrected Brute-Force Edition)
+//  Move Interaction Matrix (v4 - Punishable Moves & Exhaustive Brute-Force Edition)
 // ====================================================================================
-//  This matrix defines weighted interactions between specific moves.
-//  The system is bi-directional. The 'counters' property is the source of truth.
-//  The goal of this version is to exhaustively define all logical interactions for
-//  the current character roster to eliminate the need for future incremental updates.
-//
-//  HOW IT WORKS:
-//  - If Move A has `counters: { 'Move B': 1.3 }`, then Move A gets a 1.3x bonus
-//    when used immediately after an opponent uses Move B.
-//  - The engine AUTOMATICALLY calculates the inverse. When Move B is used against
-//    Move A, it will receive a penalty (1 / 1.3x ≈ 0.77x).
-//  - This file is organized by CHARACTER for maximum clarity and exhaustive listing.
+//  This file defines all strategic interactions. It includes two major components:
+//  1. The `punishableMoves` object: Defines high-risk, high-reward moves that are
+//     heavily penalized if used without a proper opening.
+//  2. The `moveInteractionMatrix` object: Defines standard move-vs-move counters.
 // ====================================================================================
-
 
 // Define shared counter objects first to avoid self-reference errors during object creation.
 const pressurePointCounters = {
-    'Rock Armor': 1.7,
-    'Fire Shield': 1.5,
-    'Water Shield': 1.5,
-    'Octopus Form': 1.4,
-    'Defensive Stance': 2.0, // A simple block is useless
+    'Rock Armor': 1.7, 'Fire Shield': 1.5, 'Water Shield': 1.5,
+    'Octopus Form': 1.4, 'Defensive Stance': 2.0, // A simple block is useless
+};
+
+// ============================================================
+//  PUNISHABLE MOVES
+// ============================================================
+// Defines moves that require an "opening." If used without one, they receive a massive penalty.
+export const punishableMoves = {
+    'Lightning Generation': {
+        penalty: 0.2, // Move operates at 20% effectiveness if punished
+        openingConditions: ['defender_is_stunned', 'defender_momentum_negative', 'defender_last_move_weak'],
+        narration: "{attacker}'s Lightning Generation was punished as {defender} presented no clear opening."
+    },
+    'Emperor\'s Wrath': { // Ozai's finisher has a similar but less severe requirement
+        penalty: 0.3,
+        openingConditions: ['defender_is_stunned', 'defender_momentum_negative', 'defender_last_move_weak'],
+        narration: "{attacker}'s Emperor's Wrath was predictable, allowing {defender} to mitigate the attack."
+    },
+    'Bloodbending': {
+        penalty: 0.1, // Almost useless without the right timing
+        openingConditions: ['defender_is_stunned', 'defender_last_move_weak', 'defender_is_channeled'],
+        narration: "{defender}'s focused will allowed them to resist {attacker}'s Bloodbending attempt."
+    },
+    'Tidal Wave': {
+        penalty: 0.25,
+        openingConditions: ['defender_is_stunned', 'defender_momentum_negative', 'attacker_has_setup'],
+        narration: "{attacker} was interrupted while trying to summon a Tidal Wave."
+    },
+    'Rock Avalanche': {
+        penalty: 0.3,
+        openingConditions: ['defender_is_stunned', 'defender_momentum_negative', 'attacker_has_setup'],
+        narration: "{attacker} couldn't gather enough earth for a full Rock Avalanche, resulting in a minor tremor."
+    },
+    'Rock Coffin': {
+        penalty: 0.4,
+        openingConditions: ['defender_is_stunned', 'defender_last_move_weak', 'attacker_has_setup'],
+        narration: "{defender}'s mobility prevented {attacker} from fully executing the Rock Coffin."
+    },
+    'Octopus Form': {
+        penalty: 0.5,
+        openingConditions: ['defender_is_stunned', 'attacker_has_setup'],
+        narration: "{attacker} failed to establish the Octopus Form before {defender}'s next move."
+    },
+    'Rock Armor': {
+        penalty: 0.6, // Less of a penalty as it's purely defensive
+        openingConditions: ['defender_last_move_weak', 'attacker_has_setup'],
+        narration: "{attacker}'s Rock Armor formed incompletely due to the lack of a proper opening."
+    },
+    'Reluctant Finale': {
+        penalty: 0.4,
+        openingConditions: ['defender_is_stunned', 'defender_momentum_negative', 'defender_last_move_weak'],
+        narration: "{attacker}'s reluctance and lack of focus weakened the final attack."
+    },
 };
 
 
@@ -97,16 +138,8 @@ export const moveInteractionMatrix = {
             'Sword Strike': 1.5, 'Flame Sword': 1.4,
         },
     },
-    'Tidal Wave': {
-        counters: {
-            'Flame Tornado': 1.6, 'Controlled Inferno': 1.5, 'Dragon\'s Roar': 1.4, 'Fire Wall': 1.5, // Overwhelming dousing power
-            'Rock Avalanche': 1.3, 'Terrain Reshape': 1.3, // Washes away the debris field
-            'Knife Wall': 1.8, 'Improvised Trap': 1.8, // Destroys ground-based constructs/traps
-        },
-    },
-    'Bloodbending': {
-        counters: { /* See characters.js for tag-based logic; defined here for clarity. Counters almost every physical move. */ },
-    },
+    'Tidal Wave': { /* Punishable Move */ },
+    'Bloodbending': { /* Punishable Move */ },
 
     // ============================================================
     //  ZUKO
@@ -134,13 +167,7 @@ export const moveInteractionMatrix = {
     //  TOPH
     // ============================================================
     'Earth Wave': { counters: { 'Fire Whip': 1.2, 'Gust Push': 1.3, 'Water Stream': 1.4 } }, // Grounds fire, too heavy for wind, absorbs weak water
-    'Rock Armor': {
-        counters: {
-            'Sword Strike': 1.6, 'Boomerang Throw': 1.6, 'Knife Barrage': 1.6, // Impervious to simple physical attacks
-            'Fire Whip': 1.3, 'Water Whip': 1.2, // Physical armor is resistant to elemental whips
-            'Air Blast': 1.4, 'Gust Push': 1.5, // Too heavy to be pushed
-        },
-    },
+    'Rock Armor': { /* Punishable Move */ },
     'Seismic Slam': {
         counters: {
             'Air Scooter': 1.4, 'Acrobatic Flips': 1.4, // Knocks mobile opponents off their feet
@@ -158,7 +185,7 @@ export const moveInteractionMatrix = {
         },
     },
     'Boulder Throw': { counters: { 'Ice Spears': 1.3, 'Wind Shield': 1.4, 'Fire Shield': 1.3, 'Air Blast': 1.2 } },
-    'Rock Coffin': { counters: { 'Ground Spike': 1.3, 'Pressure Point Strike': 1.5, 'Flame Sword': 1.4 } },
+    'Rock Coffin': { /* Punishable Move */ },
 
     // ============================================================
     //  AZULA
@@ -170,15 +197,7 @@ export const moveInteractionMatrix = {
             'Gust Push': 1.3, 'Tornado Whirl': 1.2, // Pierces air currents
         },
     },
-    'Lightning Generation': {
-        counters: {
-            'Water Whip': 1.6, 'Tidal Wave': 1.4, 'Water Shield': 1.5, // Electrifies water
-            'Air Scooter': 1.6, 'Gust Push': 1.5, 'Wind Shield': 1.4, // Instantaneous, bypasses air defenses
-            'Metal Bending': 1.5, // Metal conducts electricity, harming the user
-            'Rock Armor': 1.3, 'Rock Coffin': 1.3, // Can shatter rock constructs
-            'Octopus Form': 1.5, // Zaps the entire water defense
-        },
-    },
+    'Lightning Generation': { /* Punishable Move */ },
     'Flame Burst': { // Reactive defense
         counters: {
             'Sword Strike': 1.5, 'Pressure Point Strike': 1.5, 'Chi-Blocking Flurry': 1.4, // Repels close-range attackers
@@ -217,14 +236,7 @@ export const moveInteractionMatrix = {
     // ============================================================
     //  CROSS-CHARACTER FINISHERS
     // ============================================================
-    'Emperor\'s Wrath': { // Ozai
-        counters: {
-            'Tidal Wave': 1.2, // Can evaporate a significant portion of the wave
-            'Rock Avalanche': 1.3, // Can shatter the incoming rocks with sheer force
-            'Octopus Form': 1.5, // Overwhelms the water defense completely
-            'Reluctant Finale': 1.2, // A greater fire move beats a lesser one
-        },
-    },
+    'Emperor\'s Wrath': { /* Punishable Move */ },
     'Redemption\'s Fury': { // Zuko
         counters: { 'Precision Strike': 1.2 }, // Flurry overwhelms a single focused blast
     },

@@ -1,12 +1,12 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v3C-Overhaul-Patch-2';
-const legacyMode = false; // Set to true to disable the move matrix for debugging
+const systemVersion = 'v4-Punishable-Logic-Final';
+const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
 import { locationConditions } from './location-battle-conditions.js';
-import { moveInteractionMatrix } from './move-interaction-matrix.js';
+import { moveInteractionMatrix, punishableMoves } from './move-interaction-matrix.js';
 import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, impactPhrases, adverbPool, narrativeStatePhrases, weakMoveTransitions, finishingBlowPhrases } from './narrative-v2.js';
 
 // --- HELPER FUNCTIONS ---
@@ -69,7 +69,8 @@ function initializeFighterState(charId, locId) {
     const contextualMoveset = getContextualMoveset(character, locId);
     return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
-        hp: 100, energy: 100, momentum: 0, lastMove: null, 
+        hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
+        isStunned: false, hasSetup: false,
         movesUsed: [], phraseHistory: [], lastPrefixes: [], moveHistory: [],
         techniques: contextualMoveset
     };
@@ -124,11 +125,18 @@ export function simulateBattle(f1Id, f2Id, locId) {
         
         const processTurn = (attacker, defender) => {
             if (battleOver) return;
-            const move = selectMove(attacker, turn, maxTurns);
+            
+            // Reset stun status at the start of a turn
+            attacker.isStunned = false; 
+
+            const move = selectMove(attacker, defender, turn, maxTurns);
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
-            if (result.damage > 10) defender.momentum = 0;
+            attacker.lastMoveEffectiveness = result.effectiveness.label;
+            if(move.type === 'Utility' || (move.type === 'Defense' && !isReactive(defender))) attacker.hasSetup = true; else attacker.hasSetup = false;
+            
+            if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             
             phaseContent += narrateMove(attacker, defender, move, result);
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
@@ -171,7 +179,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
 }
 
 // --- MOVE AI & CALCULATION ---
-function selectMove(actor, turn, maxTurns) {
+function selectMove(actor, defender, turn, maxTurns) {
     let suitableMoves = actor.techniques;
     if (suitableMoves.length === 0) return { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags:[] };
     
@@ -179,6 +187,13 @@ function selectMove(actor, turn, maxTurns) {
     
     const recentMoves = actor.movesUsed.slice(-3);
     let weightedMoves = suitableMoves.map(m => ({ move: m, weight: recentMoves.includes(m.name) ? 0.2 : 1 }));
+    
+    // Prioritize Punishable moves if an opening exists
+    const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
+    if (openingExists) {
+        const punishable = weightedMoves.filter(m => m.move.moveTags.includes('requires_opening'));
+        if (punishable.length > 0) return getWeightedRandom(punishable);
+    }
     
     const finishers = weightedMoves.filter(m => m.move.type === 'Finisher');
     if (actor.personalityProfile.riskTolerance > 0.7 && actor.energy > 40) {
@@ -198,7 +213,27 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let multiplier = 1.0;
     let logReasons = [];
     
-    // Environmental Modifiers
+    // 1. PUNISHABLE MOVE CHECK
+    if (!legacyMode && move.moveTags.includes('requires_opening')) {
+        const punishmentRule = punishableMoves[move.name];
+        if (punishmentRule) {
+            let openingFound = false;
+            if (punishmentRule.openingConditions.includes('defender_is_stunned') && defender.isStunned) openingFound = true;
+            if (punishmentRule.openingConditions.includes('defender_momentum_negative') && defender.momentum <= -3) openingFound = true;
+            if (punishmentRule.openingConditions.includes('defender_last_move_weak') && defender.lastMoveEffectiveness === 'Weak') openingFound = true;
+            if (punishmentRule.openingConditions.includes('attacker_has_setup') && attacker.hasSetup) openingFound = true;
+
+            if (!openingFound) {
+                multiplier *= punishmentRule.penalty;
+                const narration = punishmentRule.narration
+                    .replace('{attacker}', attacker.name)
+                    .replace('{defender}', defender.name);
+                interactionLog.push(narration);
+            }
+        }
+    }
+    
+    // 2. Environmental Modifiers
     if (move.element === 'water' || move.element === 'ice') {
         if (conditions.isSandy || conditions.isHot) { multiplier *= 0.25; logReasons.push("was weakened by the arid terrain"); }
         if (conditions.waterRich || conditions.iceRich) { multiplier *= 1.3; logReasons.push("was empowered by the abundant water/ice"); }
@@ -206,37 +241,27 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     if (move.element === 'earth' && conditions.earthRich) { multiplier *= 1.3; logReasons.push("was empowered by the rich earth"); }
     if (move.element === 'fire' && conditions.isHot) { multiplier *= 1.25; logReasons.push("was empowered by the intense heat"); }
     
-    // Move Interaction Matrix (Bi-directional check)
+    // 3. Move Interaction Matrix (Bi-directional check)
     if (!legacyMode && defender.lastMove) {
         const attackerMoveName = move.name;
         const defenderMoveName = defender.lastMove.name;
         
-        // 1. Check if attacker's move COUNTERS defender's last move
         const attackerInteractions = moveInteractionMatrix[attackerMoveName];
         if (attackerInteractions && attackerInteractions.counters?.[defenderMoveName]) {
-            const bonus = attackerInteractions.counters[defenderMoveName];
-            multiplier *= bonus;
+            multiplier *= attackerInteractions.counters[defenderMoveName];
             logReasons.push(`countered ${defender.name}'s ${defenderMoveName}`);
         }
 
-        // 2. Check if attacker's move is COUNTERED BY defender's last move
         const defenderInteractions = moveInteractionMatrix[defenderMoveName];
         if (defenderInteractions && defenderInteractions.counters?.[attackerMoveName]) {
-            const penalty = 1 / defenderInteractions.counters[attackerMoveName]; // Invert the bonus to get a penalty
+            const penalty = 1 / defenderInteractions.counters[attackerMoveName];
             multiplier *= penalty;
             logReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
-        }
-        // LEGACY `counteredBy` check for backward compatibility (can be phased out)
-        if (attackerInteractions && attackerInteractions.counteredBy?.[defenderMoveName]) {
-            const penalty = 1 / attackerInteractions.counteredBy[defenderMoveName];
-            multiplier *= penalty;
-             logReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
         }
     }
     
     // Add to main log if any reasons were found
     if (logReasons.length > 0) {
-        // Use a Set to remove duplicate reasons before joining
         const uniqueReasons = [...new Set(logReasons)];
         interactionLog.push(`${attacker.name}'s ${move.name} ${uniqueReasons.join(' and ')}.`);
     }
@@ -247,10 +272,10 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let energyMultiplier = 1.0;
     if (totalEffectiveness < basePower * 0.7) {
         level = effectivenessLevels.WEAK;
-        energyMultiplier = 1.2; // Wasted effort costs more energy
-    } else if (totalEffectiveness > basePower * 1.3) {
+        energyMultiplier = 1.2;
+    } else if (totalEffectiveness > basePower * 1.5) {
         level = effectivenessLevels.CRITICAL;
-        energyMultiplier = 0.9; // Efficient strike costs less
+        energyMultiplier = 0.8;
     } else if (totalEffectiveness > basePower * 1.1) {
         level = effectivenessLevels.STRONG;
         energyMultiplier = 0.95;
@@ -267,13 +292,15 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         energyCost: clamp(energyCost, 5, 100)
     };
 }
+const isReactive = (defender) => defender.lastMove?.type === 'Offense';
 
 // --- NARRATIVE & OUTCOME ---
 function updateMomentum(currentMomentum, effectivenessLabel) {
     let change = 0;
-    if (effectivenessLabel === 'Strong' || effectivenessLabel === 'Critical') change = 2;
+    if (effectivenessLabel === 'Critical') change = 3;
+    else if (effectivenessLabel === 'Strong') change = 2;
     else if (effectivenessLabel === 'Normal') change = 1;
-    else if (effectivenessLabel === 'Weak') change = -1;
+    else if (effectivenessLabel === 'Weak') change = -2;
     else if (effectivenessLabel === 'Counter') change = 1;
     return clamp(currentMomentum + change, -5, 5);
 }
@@ -283,9 +310,9 @@ function narrateMove(actor, target, move, result) {
     const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
     
     if (move.type === 'Defense' || move.type === 'Utility') {
-        const isReactive = target.lastMove?.type === 'Offense';
-        const impactTemplates = isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
-        const prefixPool = isReactive 
+        const reactive = isReactive(target);
+        const impactTemplates = reactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
+        const prefixPool = reactive 
             ? ["Reacting quickly,", "Seizing the moment,", "With swift reflexes,", "Countering instantly,", "Parrying with finesse,"] 
             : ["Preparing carefully,", "Taking a moment to strategize,", "Steadying {possessive} stance,", "In a daring gambit,"];
         
@@ -299,7 +326,7 @@ function narrateMove(actor, target, move, result) {
             .replace(/{possessive}/g, actor.pronouns.p);
         const description = `${prefix} ${actorSpan} uses the ${move.name}. ${impactSentence}`;
 
-        const label = isReactive ? "Counter" : "Set-up";
+        const label = reactive ? "Counter" : "Set-up";
         return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{effectivenessLabel}/g, label).replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
     }
     
