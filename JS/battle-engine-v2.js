@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v13.0-S++-Pacing-Pass';
+const systemVersion = 'v14.0-S++-ProactivePacing-Pass';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -166,8 +166,8 @@ function selectMove(actor, defender, conditions) {
     
     const energyPercent = (actor.energy / 100);
     let staminaState = 'fresh';
-    if (energyPercent < 0.7) staminaState = 'winded';
-    if (energyPercent < 0.3) staminaState = 'exhausted';
+    if (energyPercent < 0.65) staminaState = 'winded';
+    if (energyPercent < 0.30) staminaState = 'exhausted';
 
     let opportunismBonus = 1.0, openingReason = 'None';
     if (defender.isStunned) { opportunismBonus += profile.opportunism * 1.0; openingReason = 'Stun'; }
@@ -187,11 +187,19 @@ function selectMove(actor, defender, conditions) {
             case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
         }
 
-        // --- PACING & STAMINA LOGIC ---
-        if (pacingProfile === 'tactical' || (pacingProfile === 'opportunist' && openingReason === 'None')) {
-            if (staminaState === 'winded' && energyCost > 30) weight *= 0.7;
-            if (staminaState === 'exhausted' && energyCost > 20) weight *= 0.4;
+        // --- PROACTIVE PACING & STAMINA LOGIC ---
+        if (pacingProfile === 'tactical') {
+            // Penalize expensive moves when winded/exhausted
+            if (staminaState === 'winded' && energyCost > 30) weight *= 0.6;
+            if (staminaState === 'exhausted' && energyCost > 20) weight *= 0.3;
+            // Reward cheap, efficient moves when stamina is not full
+            if (staminaState !== 'fresh' && energyCost < 22) weight *= 1.3;
+        } else if (pacingProfile === 'opportunist' && openingReason === 'None') {
+            // Opportunists conserve energy until an opening appears
+            if (staminaState !== 'fresh' && energyCost > 25) weight *= 0.5;
+            if (staminaState !== 'fresh' && energyCost < 20) weight *= 1.2;
         }
+        // Berserkers (like Ozai) have no pacing logic and will always go for broke.
 
         if (actor.moveHistory.slice(-2).some(m => m.name === move.name)) weight *= 0.25;
         if (actor.moveFailureHistory.includes(move.name)) weight *= 0.1;
@@ -226,8 +234,6 @@ function selectMove(actor, defender, conditions) {
 }
 
 // --- NARRATIVE & COMBAT CALCULATION ---
-// (No changes below this line, functions are copied for completeness)
-
 function narrateMove(actor, target, move, result) {
     let emotionalPrefix = '';
     if (actor.mentalStateChangedThisTurn) {
