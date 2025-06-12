@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v11.5-S++-Volatility-Pass';
+const systemVersion = 'v12.0-S++-EnergyMgmt-Pass';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -26,7 +26,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         relationalState: (emotionalMode && relationshipMatrix[charId]?.[opponentId]) || null,
-        mentalState: { level: 'stable', stress: 0 }, // stable, stressed, shaken, broken
+        mentalState: { level: 'stable', stress: 0 },
         mentalStateChangedThisTurn: false,
     };
 }
@@ -51,13 +51,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (battleOver) return;
             attacker.isStunned = false; 
             
-            updateMentalState(attacker, defender, null); // Pre-move state update
+            updateMentalState(attacker, defender, null);
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions);
             attacker.aiLog.push(`[T${turn+1}] ${aiLogEntry}`);
 
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
-            // Post-move state update for the defender based on hit
             updateMentalState(defender, attacker, result);
 
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
@@ -70,7 +69,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             if (result.wasPunished) {
                 attacker.moveFailureHistory.push(move.name);
-                attacker.mentalState.stress += 25; // Increased stress for punished moves
+                attacker.mentalState.stress += 25;
             }
             
             phaseContent += narrateMove(attacker, defender, move, result);
@@ -108,13 +107,11 @@ function updateMentalState(actor, opponent, moveResult) {
     if (actor.mentalState.level === 'broken' || !actor.relationalState) return;
 
     let stressThisTurn = 0;
-    // Stress from being hit
     if (moveResult) {
         if (moveResult.effectiveness.label === 'Critical') stressThisTurn += 30;
         if (moveResult.effectiveness.label === 'Strong') stressThisTurn += 20;
         stressThisTurn += moveResult.damage / 2;
     }
-    // Ambient stress from situation
     if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
     
     stressThisTurn *= (actor.relationalState.stressModifier || 1.0);
@@ -147,33 +144,28 @@ function getDynamicPersonality(actor) {
         profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1.2);
     }
     
-    // Amplify penalties for mental state
     switch (actor.mentalState.level) {
-        case 'stressed':
-            profile.patience *= 0.7; // was 0.8
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.15, 0, 1.1); // was 0.1
-            break;
+        case 'stressed': profile.patience *= 0.7; profile.riskTolerance = clamp(profile.riskTolerance + 0.15, 0, 1.1); break;
         case 'shaken':
-            profile.patience *= 0.4; // was 0.5
-            profile.opportunism *= 0.6; // was 0.7
-            profile.aggression = clamp(profile.aggression + 0.2, 0, 1.2); // was 0.15
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.3, 0, 1.2); // was 0.2
+            profile.patience *= 0.4;
+            profile.opportunism *= 0.6;
+            profile.aggression = clamp(profile.aggression + 0.2, 0, 1.2);
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.3, 0, 1.2);
             break;
         case 'broken':
-            profile.patience = 0.05; // was 0.1
-            profile.opportunism = 0.1; // was 0.2
-            profile.aggression = clamp(profile.aggression + 0.4, 0, 1.3); // was 0.3
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.5); // was 0.4
+            profile.patience = 0.05;
+            profile.opportunism = 0.1;
+            profile.aggression = clamp(profile.aggression + 0.4, 0, 1.3);
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.5);
             break;
     }
     return profile;
 }
 
 function selectMove(actor, defender, conditions) {
-    const availableMoves = getAvailableMoves(actor, conditions);
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
-    if (!availableMoves.length) return { move: struggleMove, aiLogEntry: "No moves available, selected Struggle." };
-
+    const availableMoves = getAvailableMoves(actor, conditions);
+    
     const profile = getDynamicPersonality(actor);
     
     let opportunismBonus = 1.0, openingReason = 'None';
@@ -181,14 +173,23 @@ function selectMove(actor, defender, conditions) {
     else if (defender.momentum <= -3) { opportunismBonus += profile.opportunism * 0.7; openingReason = 'Momentum'; }
     else if (defender.lastMoveEffectiveness === 'Weak') { opportunismBonus += profile.opportunism * 0.4; openingReason = 'Weakness'; }
 
-    const weightedMoves = availableMoves.map(move => {
+    let weightedMoves = availableMoves.map(move => {
         let weight = 1.0;
+        const energyCost = Math.round((move.power || 0) * 0.35) + 5;
+
+        // NEW: Check for affordability first
+        if (actor.energy < energyCost) return { move, weight: 0 };
         
         switch (move.type) {
             case 'Offense': weight *= (1 + profile.aggression * 0.5) * opportunismBonus; break;
             case 'Defense': weight *= 1 + (1 - profile.aggression) * 0.5; break;
             case 'Utility': weight *= 1 + profile.patience * 0.3; break;
             case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
+        }
+
+        // NEW: Energy Conservation Logic
+        if (actor.energy - energyCost < 20 && actor.mentalState.level === 'stable') {
+            weight *= 0.6; // Less likely to use a move that leaves them drained unless stressed/broken
         }
 
         if (actor.moveHistory.slice(-2).some(m => m.name === move.name)) weight *= 0.25;
@@ -201,25 +202,27 @@ function selectMove(actor, defender, conditions) {
         }
         
         if (actor.mentalState.level === 'broken') {
-            if (move.type === 'Finisher') weight *= 0.2; // Still a chance for a desperate finisher
-            if (move.type === 'Utility') weight *= 0.1; // Very unlikely to use utility
-            if (move.type === 'Defense') weight *= 0.2; 
-        } else if (actor.mentalState.level === 'shaken') {
-            if (move.type === 'Utility') weight *= 0.5;
+            if (move.type === 'Finisher') weight *= 0.2;
+            if (move.type === 'Utility') weight *= 0.1;
         }
 
-        if (actor.energy < (move.power || 0) * 0.5) weight = 0;
         return { move, weight };
     });
 
-    const sortedMoves = weightedMoves.filter(m => m.weight > 0).sort((a,b) => b.weight - a.weight);
+    // Add struggle as a low-weight option
+    weightedMoves.push({move: struggleMove, weight: 0.1});
+    
+    const validMoves = weightedMoves.filter(m => m.weight > 0);
+    if (!validMoves.length) return { move: struggleMove, aiLogEntry: "No valid moves, defaulting to Struggle." };
+
+    const sortedMoves = validMoves.sort((a,b) => b.weight - a.weight);
     const chosenMoveInfo = sortedMoves[0];
-    const chosenMove = chosenMoveInfo ? chosenMoveInfo.move : struggleMove;
+    const chosenMove = chosenMoveInfo.move;
     
     let aiLogEntry = `Selected '${chosenMove.name}'`;
     if (chosenMoveInfo) aiLogEntry += ` (W: ${chosenMoveInfo.weight.toFixed(2)})`;
     if (openingReason !== 'None') aiLogEntry += `|Opp:${openingReason}`;
-    aiLogEntry += `|State:${actor.mentalState.level}`;
+    aiLogEntry += `|State:${actor.mentalState.level}|E:${actor.energy}`;
     
     return { move: chosenMove, aiLogEntry };
 }
@@ -277,16 +280,15 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     else level = effectivenessLevels.NORMAL;
     
     const damage = (move.type.includes('Offense') || move.type.includes('Finisher')) ? Math.round(totalEffectiveness / 3) : 0;
-    const energyCost = Math.round((move.power || 0) * 0.5);
+    // NEW Energy Cost Formula
+    const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.35) + 5;
 
     return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished };
 }
 
 function getAvailableMoves(actor, conditions) {
-    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {} };
-    if (!actor.techniques) return [struggleMove];
-    const available = actor.techniques.filter(move => Object.entries(move.usageRequirements || {}).every(([key, val]) => conditions[key] === val));
-    return available.length > 0 ? available : [struggleMove];
+    if (!actor.techniques) return [];
+    return actor.techniques.filter(move => Object.entries(move.usageRequirements || {}).every(([key, val]) => conditions[key] === val));
 }
 
 function applyEnvironmentalModifiers(move, attacker, conditions) {
@@ -350,7 +352,7 @@ function getVictoryQuote(character, battleContext) {
     if (!quotes) return null;
     const { opponentId, isDominant, isCloseCall } = battleContext;
     if (opponentId && quotes.postWin_specific?.[opponentId]) return getRandomElement([].concat(quotes.postWin_specific[opponentId]));
-    if (isDominant && quotes.postWin_overwhelming) return getRandomElement([].concat(posts.postWin_overwhelming));
+    if (isDominant && quotes.postWin_overwhelming) return getRandomElement([].concat(quotes.postWin_overwhelming));
     if (isCloseCall && quotes.postWin_reflective) return getRandomElement([].concat(quotes.postWin_reflective));
     return getRandomElement([].concat(quotes.postWin));
 }
