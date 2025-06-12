@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v7.0-Data-Driven-Refactor';
+const systemVersion = 'v8.0-Affinity-Refactor';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -199,7 +199,7 @@ function selectMove(actor, defender, conditions) {
     const suitableMoves = getAvailableMoves(actor, conditions);
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {}, environmentBonuses: {}, environmentPenalties: {} };
     if (!suitableMoves || suitableMoves.length === 0) {
-        return struggleMove; // Should be handled by getAvailableMoves, but as a fallback.
+        return struggleMove;
     }
 
     const recentMoves = actor.movesUsed.slice(-3);
@@ -231,6 +231,44 @@ function selectMove(actor, defender, conditions) {
     return chosenMove || struggleMove;
 }
 
+function applyEnvironmentalModifiers(move, attacker, conditions) {
+    let multiplier = 1.0;
+    let logReasons = [];
+
+    // 1. Character-level environmental affinity
+    if (attacker.environmentalAffinity) {
+        for (const [conditionKey, affinityModifier] of Object.entries(attacker.environmentalAffinity)) {
+            if (conditions[conditionKey]) {
+                multiplier *= affinityModifier;
+                const reason = affinityModifier > 1 ? `empowered by the ${conditionKey} terrain (Affinity)` : `weakened by the ${conditionKey} terrain (Affinity)`;
+                logReasons.push(reason);
+            }
+        }
+    }
+
+    // 2. Move-specific environmental bonuses
+    if (move.environmentBonuses) {
+        for (const [conditionKey, bonus] of Object.entries(move.environmentBonuses)) {
+            if (conditions[conditionKey]) {
+                multiplier *= bonus;
+                logReasons.push(`empowered by the ${conditionKey} environment (Move)`);
+            }
+        }
+    }
+
+    // 3. Move-specific environmental penalties
+    if (move.environmentPenalties) {
+        for (const [conditionKey, penalty] of Object.entries(move.environmentPenalties)) {
+            if (conditions[conditionKey]) {
+                multiplier *= penalty;
+                logReasons.push(`weakened by the ${conditionKey} environment (Move)`);
+            }
+        }
+    }
+
+    return { multiplier, logReasons };
+}
+
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
@@ -253,32 +291,18 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         }
     }
     
-    // --- DATA-DRIVEN ENVIRONMENTAL MODIFIERS ---
-    const envEffects = [];
-    if (move.environmentBonuses) {
-        for (const [key, bonus] of Object.entries(move.environmentBonuses)) {
-            if (conditions[key]) {
-                multiplier *= bonus;
-                envEffects.push(`was empowered by the ${key} environment`);
-            }
-        }
-    }
-    if (move.environmentPenalties) {
-        for (const [key, penalty] of Object.entries(move.environmentPenalties)) {
-            if (conditions[key]) {
-                multiplier *= penalty;
-                envEffects.push(`was weakened by the ${key} environment`);
-            }
-        }
-    }
-
-    envEffects.forEach(effect => {
-        if (!attacker.loggedEnvEffects.has(effect)) {
-            effectReasons.push(effect);
-            attacker.loggedEnvEffects.add(effect);
+    // --- REFACTORED: DATA-DRIVEN ENVIRONMENTAL MODIFIERS ---
+    const { multiplier: envMultiplier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
+    multiplier *= envMultiplier;
+    
+    envReasons.forEach(reason => {
+        const fullLog = `${attacker.name}'s ${move.name} ${reason}`;
+        if (!attacker.loggedEnvEffects.has(fullLog)) {
+            effectReasons.push(reason);
+            attacker.loggedEnvEffects.add(fullLog);
         }
     });
-    
+
     // --- MOVE INTERACTION MATRIX ---
     if (!legacyMode && defender.lastMove) {
         const attackerMoveName = move.name;
