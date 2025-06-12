@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v16.5-FinalBalance';
+const systemVersion = 'v17.0-FinalBalance';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -103,7 +103,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
     
-    // --- FINAL OUTCOME DETERMINATION ---
     if (fighter1.hp > 0 && Math.abs(fighter1.hp - fighter2.hp) < 5) {
          turnLog.push(phaseTemplates.drawResult);
          turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', "Both warriors fought to their absolute limit, but neither could secure the final blow. They stand exhausted, a testament to each other's strength."));
@@ -126,23 +125,33 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
 // --- MENTAL STATE & AI SYSTEMS ---
 function updateMentalState(actor, opponent, moveResult) {
-    if (actor.mentalState.level === 'broken' || !actor.relationalState) return;
+    if (actor.mentalState.level === 'broken') return;
     let stressThisTurn = 0;
+    
     if (moveResult) {
-        if (moveResult.effectiveness.label === 'Critical') stressThisTurn += 30;
-        if (moveResult.effectiveness.label === 'Strong') stressThisTurn += 20;
+        // --- Psychological Warfare Mechanic ---
+        // Successful hits inflict stress based on effectiveness, amplified by relational dynamics
+        const stressMultiplier = opponent.relationalState?.stressModifier || 1.0;
+        if (moveResult.effectiveness.label === 'Critical') stressThisTurn += (20 * stressMultiplier);
+        if (moveResult.effectiveness.label === 'Strong') stressThisTurn += (15 * stressMultiplier);
+        
+        // Standard stress from taking damage
         stressThisTurn += moveResult.damage / 2;
     }
+    
+    // Ambient stress from being at a disadvantage
     if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
     if (actor.tacticalState) stressThisTurn += 15;
-    stressThisTurn *= (actor.relationalState.stressModifier || 1.0);
+    
     actor.mentalState.stress += stressThisTurn;
-    const resilience = actor.relationalState.resilienceModifier || 1.0;
+    const resilience = actor.relationalState?.resilienceModifier || 1.0;
     const thresholds = { stressed: 25 * resilience, shaken: 60 * resilience, broken: 90 * resilience };
     const oldLevel = actor.mentalState.level;
+
     if (actor.mentalState.stress > thresholds.broken) actor.mentalState.level = 'broken';
     else if (actor.mentalState.stress > thresholds.shaken) actor.mentalState.level = 'shaken';
     else if (actor.mentalState.stress > thresholds.stressed) actor.mentalState.level = 'stressed';
+    
     if (oldLevel !== actor.mentalState.level) {
         actor.aiLog.push(`[Mental State Change]: ${actor.name} is now ${actor.mentalState.level.toUpperCase()}. (Stress: ${actor.mentalState.stress.toFixed(0)})`);
         actor.mentalStateChangedThisTurn = true;
@@ -214,16 +223,18 @@ function selectMove(actor, defender, conditions) {
             }
         }
         
-        // --- CHARACTER-SPECIFIC & STATE-BASED AI OVERRIDES ---
         if (actor.personalityProfile.aggression > 0.9 && (actor.momentum >= 3 || defender.hp < 40)) {
-            if (move.type === 'Offense') weight *= 3.0; // Blood in the water bonus for aggressive characters
+            if (move.type === 'Offense') weight *= 3.0;
         }
-        if (actor.id === 'azula' && defender.id === 'ozai-not-comet-enhanced' && defender.mentalState.level !== 'stable' && move.name === 'Lightning Generation') {
-            weight *= 5.0; // Royal Contempt bonus for Azula
+        if (actor.id === 'azula' && defender.id === 'ozai-not-comet-enhanced' && defender.mentalState.level !== 'stable') {
+             if (move.type === 'Finisher' || (move.type === 'Offense' && move.power > 65)) {
+                weight *= 5.0; // Royal Contempt bonus
+             }
         }
         
-        if (actor.mentalState.level === 'broken' && move.type !== 'Offense') {
-            weight = 0.01;
+        if (actor.mentalState.level === 'broken') {
+             if (move.type === 'Utility' || move.type === 'Defense') weight *= 0.05;
+             if (move.type === 'Finisher') weight *= 0.2; // A desperate, last-ditch effort is possible
         }
 
         return { move, weight };
