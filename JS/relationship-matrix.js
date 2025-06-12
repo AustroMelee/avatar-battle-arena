@@ -2,10 +2,9 @@
 'use strict';
 
 // ====================================================================================
-//  Relational Modifier Layer (RML) v1.2 Data File
+//  Relational Modifier Layer (RML) v1.3 - Volatility Pass
 // ====================================================================================
-//  - stressModifier: Multiplier for how quickly stress accumulates. (Higher = more stressful)
-//  - resilienceModifier: Multiplier for the stress thresholds. (Higher = more resilient)
+//  - stressModifier: Increased values for high-trauma matchups to accelerate stress.
 // ====================================================================================
 
 export const relationshipMatrix = {
@@ -13,8 +12,8 @@ export const relationshipMatrix = {
     'azula': {
         'zuko': {
             relationshipType: "sibling_rivalry_dominant",
-            stressModifier: 1.2,
-            resilienceModifier: 0.9, // She's confident against him, but his defiance can get to her.
+            stressModifier: 1.5, // Increased from 1.2
+            resilienceModifier: 0.9,
             emotionalModifiers: {
                 aggressionBoost: 0.2,
                 opportunismBoost: 0.3,
@@ -23,8 +22,8 @@ export const relationshipMatrix = {
         },
         'ozai-not-comet-enhanced': {
             relationshipType: "parental_fear",
-            stressModifier: 2.0,
-            resilienceModifier: 0.5, // The ultimate source of her trauma; she breaks easily.
+            stressModifier: 2.5, // Significantly increased from 2.0
+            resilienceModifier: 0.5,
             emotionalModifiers: {
                 riskToleranceBoost: 0.3, 
                 aggressionReduction: 0.1,
@@ -33,7 +32,7 @@ export const relationshipMatrix = {
         'iroh': {
             relationshipType: "contemptuous_underestimation",
             stressModifier: 0.8,
-            resilienceModifier: 1.1, // His calm demeanor doesn't phase her.
+            resilienceModifier: 1.1,
             emotionalModifiers: {
                 aggressionBoost: 0.1,
                 riskToleranceBoost: 0.2, 
@@ -45,8 +44,8 @@ export const relationshipMatrix = {
     'zuko': {
         'azula': {
             relationshipType: "sibling_rivalry_inferior",
-            stressModifier: 1.8,
-            resilienceModifier: 0.8, // Azula knows how to break him down.
+            stressModifier: 2.0, // Increased from 1.8
+            resilienceModifier: 0.8,
             emotionalModifiers: {
                 aggressionBoost: 0.2,
                 riskToleranceBoost: 0.3,
@@ -55,8 +54,8 @@ export const relationshipMatrix = {
         },
         'ozai-not-comet-enhanced': {
             relationshipType: "parental_defiance",
-            stressModifier: 1.5,
-            resilienceModifier: 1.2, // He's learned to stand up to him, making him more resilient.
+            stressModifier: 1.8, // Increased from 1.5
+            resilienceModifier: 1.2,
             emotionalModifiers: {
                 aggressionBoost: 0.3,
                 riskToleranceReduction: 0.1,
@@ -66,7 +65,7 @@ export const relationshipMatrix = {
         'iroh': {
             relationshipType: "mentor_respect",
             stressModifier: 0.5,
-            resilienceModifier: 1.5, // Iroh's presence is calming and fortifying.
+            resilienceModifier: 1.5,
             emotionalModifiers: {
                 aggressionReduction: 0.2,
                 patienceBoost: 0.4,
@@ -79,8 +78,8 @@ export const relationshipMatrix = {
     'aang-airbending-only': {
         'ozai-not-comet-enhanced': {
             relationshipType: "fated_adversary",
-            stressModifier: 1.3,
-            resilienceModifier: 1.3, // The weight is heavy, but his spirit is strong.
+            stressModifier: 1.4, // Increased from 1.3
+            resilienceModifier: 1.3,
             emotionalModifiers: {
                 aggressionBoost: 0.2,
                 riskToleranceReduction: 0.3,
@@ -89,8 +88,8 @@ export const relationshipMatrix = {
         },
         'azula': {
             relationshipType: "nonlethal_pacifism",
-            stressModifier: 1.1,
-            resilienceModifier: 1.2, // Her lethality is stressful, but he remains centered.
+            stressModifier: 1.2, // Increased from 1.1
+            resilienceModifier: 1.2,
             emotionalModifiers: {
                 aggressionReduction: 0.4,
                 riskToleranceReduction: 0.5,
@@ -105,7 +104,7 @@ export const relationshipMatrix = {
         'zuko': {
             relationshipType: "tense_alliance",
             stressModifier: 1.0,
-            resilienceModifier: 1.1, // She is emotionally resilient.
+            resilienceModifier: 1.1,
             emotionalModifiers: {
                 opportunismBoost: 0.2,
                 patienceBoost: 0.1,
@@ -113,8 +112,8 @@ export const relationshipMatrix = {
         },
         'azula': {
             relationshipType: "bitter_rivalry",
-            stressModifier: 1.4,
-            resilienceModifier: 1.0, // Her hatred is a powerful, but stable, motivator.
+            stressModifier: 1.5, // Increased from 1.4
+            resilienceModifier: 1.0,
             emotionalModifiers: {
                 aggressionBoost: 0.3,
                 riskToleranceBoost: 0.2,
@@ -128,7 +127,7 @@ export const relationshipMatrix = {
         'katara': {
             relationshipType: 'sibling_support',
             stressModifier: 0.9,
-            resilienceModifier: 1.2 // They support each other.
+            resilienceModifier: 1.2
         }
     },
 
@@ -137,7 +136,7 @@ export const relationshipMatrix = {
         'zuko': {
             relationshipType: "mentor_guidance",
             stressModifier: 0.7,
-            resilienceModifier: 2.0, // Almost unshakable when guiding his nephew.
+            resilienceModifier: 2.0,
             emotionalModifiers: {
                 aggressionReduction: 0.5,
                 patienceBoost: 0.5,
@@ -148,7 +147,7 @@ export const relationshipMatrix = {
         'azula': {
             relationshipType: "pitying_disappointment",
             stressModifier: 1.1,
-            resilienceModifier: 1.8, // He is sad for her, but not personally broken by her.
+            resilienceModifier: 1.8,
             emotionalModifiers: {
                 aggressionReduction: 0.4,
                 patienceBoost: 0.3,

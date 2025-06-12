@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v11.1-S++-Resilience-Pass';
+const systemVersion = 'v11.5-S++-Volatility-Pass';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -51,12 +51,15 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (battleOver) return;
             attacker.isStunned = false; 
             
-            updateMentalState(attacker, defender);
+            updateMentalState(attacker, defender, null); // Pre-move state update
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions);
             attacker.aiLog.push(`[T${turn+1}] ${aiLogEntry}`);
 
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
+            // Post-move state update for the defender based on hit
+            updateMentalState(defender, attacker, result);
+
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
             attacker.lastMoveEffectiveness = result.effectiveness.label;
             
@@ -67,14 +70,11 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             if (result.wasPunished) {
                 attacker.moveFailureHistory.push(move.name);
-                attacker.mentalState.stress += 15; // Punished moves are stressful
+                attacker.mentalState.stress += 25; // Increased stress for punished moves
             }
             
             phaseContent += narrateMove(attacker, defender, move, result);
-            let damageTaken = defender.hp - clamp(defender.hp - result.damage, 0, 100);
-            defender.hp -= damageTaken;
-            defender.mentalState.stress += damageTaken / 4; // Damage taken is stressful
-
+            defender.hp = clamp(defender.hp - result.damage, 0, 100);
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.lastMove = move;
             attacker.moveHistory.push(move);
@@ -104,20 +104,27 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 }
 
 // --- MENTAL STATE & AI SYSTEMS ---
-function updateMentalState(actor) {
+function updateMentalState(actor, opponent, moveResult) {
     if (actor.mentalState.level === 'broken' || !actor.relationalState) return;
 
     let stressThisTurn = 0;
-    if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum);
+    // Stress from being hit
+    if (moveResult) {
+        if (moveResult.effectiveness.label === 'Critical') stressThisTurn += 30;
+        if (moveResult.effectiveness.label === 'Strong') stressThisTurn += 20;
+        stressThisTurn += moveResult.damage / 2;
+    }
+    // Ambient stress from situation
+    if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
     
     stressThisTurn *= (actor.relationalState.stressModifier || 1.0);
     actor.mentalState.stress += stressThisTurn;
 
     const resilience = actor.relationalState.resilienceModifier || 1.0;
     const thresholds = {
-        stressed: 30 * resilience,
-        shaken: 65 * resilience,
-        broken: 100 * resilience,
+        stressed: 25 * resilience,
+        shaken: 60 * resilience,
+        broken: 90 * resilience,
     };
 
     const oldLevel = actor.mentalState.level;
@@ -135,27 +142,28 @@ function getDynamicPersonality(actor) {
     let profile = { ...actor.personalityProfile };
     if (actor.relationalState) {
         const modifiers = actor.relationalState.emotionalModifiers || {};
-        profile.aggression = clamp(profile.aggression + (modifiers.aggressionBoost || 0) - (modifiers.aggressionReduction || 0), 0, 1);
-        profile.patience = clamp(profile.patience + (modifiers.patienceBoost || 0) - (modifiers.patienceReduction || 0), 0, 1);
-        profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1);
+        profile.aggression = clamp(profile.aggression + (modifiers.aggressionBoost || 0) - (modifiers.aggressionReduction || 0), 0, 1.2);
+        profile.patience = clamp(profile.patience + (modifiers.patienceBoost || 0) - (modifiers.patienceReduction || 0), 0, 1.2);
+        profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1.2);
     }
     
+    // Amplify penalties for mental state
     switch (actor.mentalState.level) {
         case 'stressed':
-            profile.patience *= 0.8;
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.1, 0, 1);
+            profile.patience *= 0.7; // was 0.8
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.15, 0, 1.1); // was 0.1
             break;
         case 'shaken':
-            profile.patience *= 0.5;
-            profile.opportunism *= 0.7;
-            profile.aggression = clamp(profile.aggression + 0.15, 0, 1.1);
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.2, 0, 1.1);
+            profile.patience *= 0.4; // was 0.5
+            profile.opportunism *= 0.6; // was 0.7
+            profile.aggression = clamp(profile.aggression + 0.2, 0, 1.2); // was 0.15
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.3, 0, 1.2); // was 0.2
             break;
         case 'broken':
-            profile.patience = 0.1;
-            profile.opportunism = 0.2;
-            profile.aggression = clamp(profile.aggression + 0.3, 0, 1.2);
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.4, 0, 1.2);
+            profile.patience = 0.05; // was 0.1
+            profile.opportunism = 0.1; // was 0.2
+            profile.aggression = clamp(profile.aggression + 0.4, 0, 1.3); // was 0.3
+            profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.5); // was 0.4
             break;
     }
     return profile;
@@ -193,8 +201,11 @@ function selectMove(actor, defender, conditions) {
         }
         
         if (actor.mentalState.level === 'broken') {
-            if (move.type === 'Finisher') weight *= 0.1;
-            if (move.type === 'Utility') weight *= 0.3;
+            if (move.type === 'Finisher') weight *= 0.2; // Still a chance for a desperate finisher
+            if (move.type === 'Utility') weight *= 0.1; // Very unlikely to use utility
+            if (move.type === 'Defense') weight *= 0.2; 
+        } else if (actor.mentalState.level === 'shaken') {
+            if (move.type === 'Utility') weight *= 0.5;
         }
 
         if (actor.energy < (move.power || 0) * 0.5) weight = 0;
@@ -339,7 +350,7 @@ function getVictoryQuote(character, battleContext) {
     if (!quotes) return null;
     const { opponentId, isDominant, isCloseCall } = battleContext;
     if (opponentId && quotes.postWin_specific?.[opponentId]) return getRandomElement([].concat(quotes.postWin_specific[opponentId]));
-    if (isDominant && quotes.postWin_overwhelming) return getRandomElement([].concat(quotes.postWin_overwhelming));
+    if (isDominant && quotes.postWin_overwhelming) return getRandomElement([].concat(posts.postWin_overwhelming));
     if (isCloseCall && quotes.postWin_reflective) return getRandomElement([].concat(quotes.postWin_reflective));
     return getRandomElement([].concat(quotes.postWin));
 }
