@@ -95,3 +95,56 @@ export const emotionalFlavor = {
         ]
     }
 };
+
+// ====================================================================================
+//  Tactical Flavor Library (v1.0)
+// ====================================================================================
+//  Provides narrative text for the Tactical State system.
+// ====================================================================================
+export const tacticalFlavor = {
+    // --- APPLYING A STATE ---
+    apply: {
+        generic: "The move creates a clear opening!",
+        Exposed: "The brilliant feint leaves {targetName} completely exposed!",
+        'Off-Balance': "{targetName} stumbles, knocked completely off-balance by the swift maneuver.",
+        Disoriented: "The whirling attack leaves {targetName} disoriented and unable to focus.",
+        Trapped: "{actorName}'s clever trap springs shut, leaving {targetName} with nowhere to run!",
+        Immobilized: "A prison of {element} envelops {targetName}, holding them fast!",
+        Staggered: "The earth-shattering impact leaves {targetName} staggered and struggling to recover their footing.",
+        Pinned: "A perfectly aimed shot pins {targetName}'s clothing, severely restricting their movement!",
+        Distracted: "{targetName} is distracted by the flashy acrobatics, dropping their guard for a crucial moment.",
+        Cornered: "The wall of {element} cuts off all escape routes, leaving {targetName} cornered.",
+        Unstable: "The ground shifts beneath {targetName}'s feet, making their stance precarious and unstable.",
+    },
+
+    // --- CONSUMING A STATE (Payoff) ---
+    consume: {
+        generic: "Exploiting the opening,",
+        Exposed: "Capitalizing on {targetName}'s exposed defense,",
+        'Off-Balance': "Seeing {targetName} off-balance,",
+        Disoriented: "While {targetName} is still disoriented,",
+        Trapped: "With {targetName} trapped,",
+        Immobilized: "With {targetName} unable to move,",
+        Staggered: "While {targetName} is still reeling,",
+        Pinned: "With {targetName} pinned in place,",
+        Distracted: "Taking advantage of the distraction,",
+        Cornered: "With nowhere left to run,",
+        Unstable: "As {targetName} struggles for footing,"
+    },
+
+    // --- NARRATING AN ACTION WHILE A STATE IS ACTIVE ---
+    // (Used as a prefix for the actor's move narration)
+    has_state: {
+        generic: "Sensing an opportunity,",
+        Exposed: "Pressing the attack while {targetName} is exposed,",
+        'Off-Balance': "Moving to capitalize on {targetName}'s poor footing,",
+        Disoriented: "While {targetName} struggles to regain their senses,",
+        Trapped: "With {targetName} caught in the trap,",
+        Immobilized: "With {targetName} held fast,",
+        Staggered: "Before {targetName} can recover,",
+        Pinned: "While {targetName} is restricted,",
+        Distracted: "Before {targetName} can refocus,",
+        Cornered: "Closing in on the cornered foe,",
+        Unstable: "As the ground continues to shift,"
+    }
+};

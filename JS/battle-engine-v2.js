@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v14.0-S++-ProactivePacing-Pass';
+const systemVersion = 'v16.0-TSS-Complete';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -9,7 +9,7 @@ import { locationConditions } from './location-battle-conditions.js';
 import { moveInteractionMatrix, punishableMoves } from './move-interaction-matrix.js';
 import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, impactPhrases, adverbPool, narrativeStatePhrases, weakMoveTransitions, finishingBlowPhrases } from './narrative-v2.js';
 import { relationshipMatrix } from './relationship-matrix.js';
-import { emotionalFlavor } from './narrative-flavor.js';
+import { emotionalFlavor, tacticalFlavor } from './narrative-flavor.js';
 
 // --- HELPER FUNCTIONS ---
 const getRandomElement = (arr, fallback = null) => arr?.[Math.floor(Math.random() * arr.length)] || fallback;
@@ -22,7 +22,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
     return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
-        isStunned: false, hasSetup: false,
+        isStunned: false, tacticalState: null, // Replaces hasSetup
         movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         relationalState: (emotionalMode && relationshipMatrix[charId]?.[opponentId]) || null,
@@ -41,8 +41,18 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
 
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
-        [fighter1, fighter2].forEach(f => f.mentalStateChangedThisTurn = false);
-
+        [fighter1, fighter2].forEach(f => {
+            f.mentalStateChangedThisTurn = false;
+            // Tactical State duration countdown
+            if (f.tacticalState) {
+                f.tacticalState.duration--;
+                if (f.tacticalState.duration <= 0) {
+                    f.tacticalState = null;
+                    interactionLog.push(`${f.name} recovered from their vulnerable state.`);
+                }
+            }
+        });
+        
         const phaseName = battlePhases[turn]?.name || "Final Exchange";
         let phaseContent = phaseTemplates.header.replace('{phaseName}', phaseName).replace('{phaseEmoji}', '⚔️');
         var battleOver = false;
@@ -64,6 +74,15 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             
             const isDefensiveMove = move.type === 'Utility' || move.type === 'Defense';
             attacker.consecutiveDefensiveTurns = isDefensiveMove ? attacker.consecutiveDefensiveTurns + 1 : 0;
+            
+            // Apply new tactical state if the move has one
+            if (move.setup && result.effectiveness.label !== 'Weak') {
+                defender.tacticalState = { ...move.setup };
+            }
+            // Consume tactical state on payoff
+            if (move.moveTags?.includes('requires_opening') && result.payoff) {
+                defender.tacticalState = null;
+            }
             
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             if (result.wasPunished) {
@@ -104,7 +123,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 // --- MENTAL STATE & AI SYSTEMS ---
 function updateMentalState(actor, opponent, moveResult) {
     if (actor.mentalState.level === 'broken' || !actor.relationalState) return;
-
     let stressThisTurn = 0;
     if (moveResult) {
         if (moveResult.effectiveness.label === 'Critical') stressThisTurn += 30;
@@ -112,18 +130,15 @@ function updateMentalState(actor, opponent, moveResult) {
         stressThisTurn += moveResult.damage / 2;
     }
     if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
-    
+    if (actor.tacticalState) stressThisTurn += 15; // Being in a vulnerable state is stressful
     stressThisTurn *= (actor.relationalState.stressModifier || 1.0);
     actor.mentalState.stress += stressThisTurn;
-
     const resilience = actor.relationalState.resilienceModifier || 1.0;
     const thresholds = { stressed: 25 * resilience, shaken: 60 * resilience, broken: 90 * resilience };
-
     const oldLevel = actor.mentalState.level;
     if (actor.mentalState.stress > thresholds.broken) actor.mentalState.level = 'broken';
     else if (actor.mentalState.stress > thresholds.shaken) actor.mentalState.level = 'shaken';
     else if (actor.mentalState.stress > thresholds.stressed) actor.mentalState.level = 'stressed';
-
     if (oldLevel !== actor.mentalState.level) {
         actor.aiLog.push(`[Mental State Change]: ${actor.name} is now ${actor.mentalState.level.toUpperCase()}. (Stress: ${actor.mentalState.stress.toFixed(0)})`);
         actor.mentalStateChangedThisTurn = true;
@@ -138,21 +153,10 @@ function getDynamicPersonality(actor) {
         profile.patience = clamp(profile.patience + (modifiers.patienceBoost || 0) - (modifiers.patienceReduction || 0), 0, 1.2);
         profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1.2);
     }
-    
     switch (actor.mentalState.level) {
         case 'stressed': profile.patience *= 0.7; profile.riskTolerance = clamp(profile.riskTolerance + 0.15, 0, 1.1); break;
-        case 'shaken':
-            profile.patience *= 0.4;
-            profile.opportunism *= 0.6;
-            profile.aggression = clamp(profile.aggression + 0.2, 0, 1.2);
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.3, 0, 1.2);
-            break;
-        case 'broken':
-            profile.patience = 0.05;
-            profile.opportunism = 0.1;
-            profile.aggression = clamp(profile.aggression + 0.4, 0, 1.3);
-            profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.5);
-            break;
+        case 'shaken': profile.patience *= 0.4; profile.opportunism *= 0.6; profile.aggression = clamp(profile.aggression + 0.2, 0, 1.2); profile.riskTolerance = clamp(profile.riskTolerance + 0.3, 0, 1.2); break;
+        case 'broken': profile.patience = 0.05; profile.opportunism = 0.1; profile.aggression = clamp(profile.aggression + 0.4, 0, 1.3); profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.5); break;
     }
     return profile;
 }
@@ -162,22 +166,18 @@ function selectMove(actor, defender, conditions) {
     const availableMoves = getAvailableMoves(actor, conditions);
     
     const profile = getDynamicPersonality(actor);
-    const pacingProfile = actor.pacingProfile || 'tactical';
-    
     const energyPercent = (actor.energy / 100);
-    let staminaState = 'fresh';
-    if (energyPercent < 0.65) staminaState = 'winded';
-    if (energyPercent < 0.30) staminaState = 'exhausted';
+    let staminaState = energyPercent > 0.65 ? 'fresh' : (energyPercent > 0.3 ? 'winded' : 'exhausted');
 
-    let opportunismBonus = 1.0, openingReason = 'None';
-    if (defender.isStunned) { opportunismBonus += profile.opportunism * 1.0; openingReason = 'Stun'; }
-    else if (defender.momentum <= -3) { opportunismBonus += profile.opportunism * 0.7; openingReason = 'Momentum'; }
-    else if (defender.lastMoveEffectiveness === 'Weak') { opportunismBonus += profile.opportunism * 0.4; openingReason = 'Weakness'; }
+    let opportunismBonus = 1.0;
+    if (defender.isStunned) opportunismBonus += profile.opportunism * 1.0;
+    else if (defender.momentum <= -3) opportunismBonus += profile.opportunism * 0.7;
+    else if (defender.lastMoveEffectiveness === 'Weak') opportunismBonus += profile.opportunism * 0.4;
+    else if (defender.tacticalState) opportunismBonus += profile.opportunism * 0.8 * defender.tacticalState.intensity;
 
     let weightedMoves = availableMoves.map(move => {
         let weight = 1.0;
         const energyCost = Math.round((move.power || 0) * 0.35) + 5;
-
         if (actor.energy < energyCost) return { move, weight: 0 };
         
         switch (move.type) {
@@ -187,87 +187,116 @@ function selectMove(actor, defender, conditions) {
             case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
         }
 
-        // --- PROACTIVE PACING & STAMINA LOGIC ---
-        if (pacingProfile === 'tactical') {
-            // Penalize expensive moves when winded/exhausted
-            if (staminaState === 'winded' && energyCost > 30) weight *= 0.6;
-            if (staminaState === 'exhausted' && energyCost > 20) weight *= 0.3;
-            // Reward cheap, efficient moves when stamina is not full
-            if (staminaState !== 'fresh' && energyCost < 22) weight *= 1.3;
-        } else if (pacingProfile === 'opportunist' && openingReason === 'None') {
-            // Opportunists conserve energy until an opening appears
-            if (staminaState !== 'fresh' && energyCost > 25) weight *= 0.5;
-            if (staminaState !== 'fresh' && energyCost < 20) weight *= 1.2;
+        // --- TACTICAL STATE AI ---
+        // If the defender is not vulnerable, STRONGLY prefer setup moves.
+        if (!defender.tacticalState && !defender.isStunned) {
+            if (move.setup) {
+                weight *= (15.0 * move.setup.intensity); // More intense setups are more desirable.
+            }
         }
-        // Berserkers (like Ozai) have no pacing logic and will always go for broke.
+
+        if (staminaState === 'winded' && energyCost > 30) weight *= 0.6;
+        if (staminaState === 'exhausted' && energyCost > 20) weight *= 0.3;
+        if (staminaState !== 'fresh' && energyCost < 22) weight *= 1.3;
 
         if (actor.moveHistory.slice(-2).some(m => m.name === move.name)) weight *= 0.25;
         if (actor.moveFailureHistory.includes(move.name)) weight *= 0.1;
         
-        if (move.moveTags.includes('requires_opening')) {
-            const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
-            weight *= openingExists ? 20.0 : (profile.riskTolerance * 0.1);
+        if (move.moveTags?.includes('requires_opening')) {
+            const openingExists = (defender.isStunned || defender.tacticalState);
+            if(openingExists) {
+                // Massive incentive to use payoff moves on a vulnerable target.
+                // The bonus is scaled by the intensity of the opening.
+                const intensity = defender.tacticalState?.intensity || 1.2;
+                weight *= (25.0 * intensity);
+            } else {
+                 weight *= (profile.riskTolerance * 0.05); // Low base risk
+            }
         }
         
         if (actor.mentalState.level === 'broken') {
-            if (move.type === 'Finisher') weight *= 0.2;
-            if (move.type === 'Utility') weight *= 0.1;
+            if (move.type === 'Finisher' || move.type === 'Utility') weight *= 0.1;
         }
 
         return { move, weight };
     });
 
     weightedMoves.push({move: struggleMove, weight: 0.1});
-    
     const validMoves = weightedMoves.filter(m => m.weight > 0);
-    if (!validMoves.length) return { move: struggleMove, aiLogEntry: "No valid moves, defaulting to Struggle." };
-
     const sortedMoves = validMoves.sort((a,b) => b.weight - a.weight);
-    const chosenMoveInfo = sortedMoves[0];
+    const chosenMoveInfo = sortedMoves[0] || { move: struggleMove, weight: 0.1 };
     const chosenMove = chosenMoveInfo.move;
     
-    let aiLogEntry = `Selected '${chosenMove.name}'`;
-    if (chosenMoveInfo) aiLogEntry += ` (W: ${chosenMoveInfo.weight.toFixed(2)})`;
-    aiLogEntry += `|State:${actor.mentalState.level}|Stamina:${staminaState}`;
+    let aiLogEntry = `Selected '${chosenMove.name}' (W: ${chosenMoveInfo.weight.toFixed(2)})|State:${actor.mentalState.level}|Stamina:${staminaState}`;
+    if(defender.tacticalState) aiLogEntry += `|DEFENDER_STATE:${defender.tacticalState.name}`;
     
     return { move: chosenMove, aiLogEntry };
 }
 
 // --- NARRATIVE & COMBAT CALCULATION ---
 function narrateMove(actor, target, move, result) {
+    const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
+    const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
+    let tacticalPrefix = '';
+    let tacticalSuffix = '';
+
+    // If this move is a payoff that consumes a state
+    if(result.payoff && result.consumedStateName) {
+        const flavorPool = tacticalFlavor.consume[result.consumedStateName] || tacticalFlavor.consume.generic;
+        tacticalPrefix = getRandomElement([].concat(flavorPool)).replace(/{targetName}/g, targetSpan) + ' ';
+    } 
+    // If this move applies a state
+    else if (move.setup && result.effectiveness.label !== 'Weak') {
+        const flavorPool = tacticalFlavor.apply[move.setup.name] || tacticalFlavor.apply.generic;
+        tacticalSuffix = ' ' + getRandomElement([].concat(flavorPool)).replace(/{actorName}/g, actorSpan).replace(/{targetName}/g, targetSpan).replace(/{element}/g, move.element);
+    } 
+    // If the attacker is just acting while the target is vulnerable
+    else if (target.tacticalState) {
+        const flavorPool = tacticalFlavor.has_state[target.tacticalState.name] || tacticalFlavor.has_state.generic;
+        tacticalPrefix = getRandomElement([].concat(flavorPool)).replace(/{targetName}/g, targetSpan) + ' ';
+    }
+    
     let emotionalPrefix = '';
     if (actor.mentalStateChangedThisTurn) {
         const pool = emotionalFlavor[actor.id]?.[actor.mentalState.level] || emotionalFlavor.generic?.[actor.mentalState.level];
         if (pool) emotionalPrefix = getRandomElement(pool).replace(/{actorName}/g, actor.name).replace(/{possessive}/g, actor.pronouns.p) + ' ';
     }
-
-    const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
-    const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
     
     if (move.type === 'Defense' || move.type === 'Utility') {
         const reactive = isReactive(target);
-        let impactSentence = getRandomElement(reactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE).replace(/{actorName}/g, actorSpan);
-        const desc = `${emotionalPrefix}${actorSpan} uses the ${move.name}. ${impactSentence}`;
-        return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '🛡️').replace(/{effectivenessLabel}/g, reactive ? "Counter" : "Set-up").replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, desc);
+        let impactSentence = getRandomElement(reactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE).replace(/{actorName}/g, actorSpan).replace(/{possessive}/g, actor.pronouns.p);
+        const desc = `${emotionalPrefix}${tacticalPrefix}${actorSpan} uses the ${move.name}. ${impactSentence}${tacticalSuffix}`;
+        return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '🛡️').replace(/{effectivenessLabel}/g, reactive ? "Counter" : "Set-up").replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, desc.replace(/\s+/g, ' ').trim());
     }
-    
     const impactSentence = getRandomElement(impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()]).replace(/{targetName}/g, targetSpan);
-    const fullDesc = `${emotionalPrefix}${actorSpan} ${conjugateVerb(move.verb || 'executes')} ${assembleObjectPhrase(move)}. ${impactSentence}`;
-
-    return phaseTemplates.move
-        .replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '⚔️')
-        .replace(/{effectivenessLabel}/g, result.effectiveness.label).replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-        .replace(/{moveDescription}/g, fullDesc.replace(/\s+/g, ' ').trim());
+    const fullDesc = `${emotionalPrefix}${tacticalPrefix}${actorSpan} ${conjugateVerb(move.verb || 'executes')} ${assembleObjectPhrase(move)}. ${impactSentence}${tacticalSuffix}`;
+    return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, '⚔️').replace(/{effectivenessLabel}/g, result.effectiveness.label).replace(/{effectivenessEmoji}/g, result.effectiveness.emoji).replace(/{moveDescription}/g, fullDesc.replace(/\s+/g, ' ').trim());
 }
+
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
     let wasPunished = false;
-    
-    if (move.moveTags.includes('requires_opening')) {
-        const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak' || attacker.hasSetup);
-        if (!openingExists && punishableMoves[move.name]) {
+    let payoff = false;
+    let consumedStateName = null;
+
+    if (move.moveTags?.includes('requires_opening')) {
+        const openingExists = defender.isStunned || defender.tacticalState;
+        if (openingExists) {
+            // Apply bonus from tactical state
+            if(defender.tacticalState) {
+                multiplier *= defender.tacticalState.intensity;
+                consumedStateName = defender.tacticalState.name;
+                interactionLog.push(`${attacker.name}'s ${move.name} was amplified by ${defender.name} being ${defender.tacticalState.name}.`);
+                payoff = true;
+            } else if (defender.isStunned) {
+                multiplier *= 1.3; // Standard stun bonus
+                interactionLog.push(`${attacker.name}'s ${move.name} capitalized on ${defender.name} being stunned.`);
+                payoff = true;
+            }
+        } else if (punishableMoves[move.name]) {
+            // Punish if no opening exists
             multiplier *= punishableMoves[move.name].penalty;
             wasPunished = true;
         }
@@ -276,9 +305,8 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     const { multiplier: envMultiplier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
     multiplier *= envMultiplier;
     if (envReasons.length > 0) interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${envReasons.join(', ')}.`);
-
-    const totalEffectiveness = basePower * multiplier;
     
+    const totalEffectiveness = basePower * multiplier;
     let level;
     if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK; 
     else if (totalEffectiveness > basePower * 1.5) level = effectivenessLevels.CRITICAL;
@@ -287,9 +315,10 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     
     const damage = (move.type.includes('Offense') || move.type.includes('Finisher')) ? Math.round(totalEffectiveness / 3) : 0;
     const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.35) + 5;
-
-    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished };
+    
+    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished, payoff, consumedStateName };
 }
+
 
 function getAvailableMoves(actor, conditions) {
     if (!actor.techniques) return [];
@@ -299,17 +328,10 @@ function getAvailableMoves(actor, conditions) {
 function applyEnvironmentalModifiers(move, attacker, conditions) {
     let multiplier = 1.0;
     let logReasons = [];
-    
     const isFirebender = attacker.techniques.some(t => t.element === 'fire' || t.element === 'lightning');
     const isWaterbender = attacker.techniques.some(t => t.element === 'water' || t.element === 'ice');
-    if (conditions.isDay) {
-        if (isFirebender) { multiplier *= 1.1; logReasons.push(`daylight`); }
-        if (isWaterbender) { multiplier *= 0.9; }
-    } else if (conditions.isNight) {
-        if (isFirebender) { multiplier *= 0.9; }
-        if (isWaterbender) { multiplier *= 1.1; logReasons.push(`nighttime`); }
-    }
-    
+    if (conditions.isDay) { if (isFirebender) { multiplier *= 1.1; logReasons.push(`daylight`); } if (isWaterbender) { multiplier *= 0.9; }
+    } else if (conditions.isNight) { if (isFirebender) { multiplier *= 0.9; } if (isWaterbender) { multiplier *= 1.1; logReasons.push(`nighttime`); } }
     return { multiplier, logReasons };
 }
 
@@ -344,9 +366,7 @@ function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
     const loserChar = characters[loserId];
     const archetypePool = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
     const endingTemplate = battleContext.isCloseCall ? (archetypePool.narrow || archetypePool.dominant) : archetypePool.dominant;
-    
     let populatedEnding = endingTemplate.replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`).replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`).replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
-
     const finalQuote = getVictoryQuote(winnerChar, battleContext);
     if (finalQuote) populatedEnding += ` "${finalQuote}"`;
     return populatedEnding;
