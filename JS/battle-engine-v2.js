@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v12.0-S++-EnergyMgmt-Pass';
+const systemVersion = 'v13.0-S++-Pacing-Pass';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -64,7 +64,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             
             const isDefensiveMove = move.type === 'Utility' || move.type === 'Defense';
             attacker.consecutiveDefensiveTurns = isDefensiveMove ? attacker.consecutiveDefensiveTurns + 1 : 0;
-            attacker.hasSetup = (isDefensiveMove && !isReactive(defender));
             
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             if (result.wasPunished) {
@@ -118,11 +117,7 @@ function updateMentalState(actor, opponent, moveResult) {
     actor.mentalState.stress += stressThisTurn;
 
     const resilience = actor.relationalState.resilienceModifier || 1.0;
-    const thresholds = {
-        stressed: 25 * resilience,
-        shaken: 60 * resilience,
-        broken: 90 * resilience,
-    };
+    const thresholds = { stressed: 25 * resilience, shaken: 60 * resilience, broken: 90 * resilience };
 
     const oldLevel = actor.mentalState.level;
     if (actor.mentalState.stress > thresholds.broken) actor.mentalState.level = 'broken';
@@ -167,7 +162,13 @@ function selectMove(actor, defender, conditions) {
     const availableMoves = getAvailableMoves(actor, conditions);
     
     const profile = getDynamicPersonality(actor);
+    const pacingProfile = actor.pacingProfile || 'tactical';
     
+    const energyPercent = (actor.energy / 100);
+    let staminaState = 'fresh';
+    if (energyPercent < 0.7) staminaState = 'winded';
+    if (energyPercent < 0.3) staminaState = 'exhausted';
+
     let opportunismBonus = 1.0, openingReason = 'None';
     if (defender.isStunned) { opportunismBonus += profile.opportunism * 1.0; openingReason = 'Stun'; }
     else if (defender.momentum <= -3) { opportunismBonus += profile.opportunism * 0.7; openingReason = 'Momentum'; }
@@ -177,7 +178,6 @@ function selectMove(actor, defender, conditions) {
         let weight = 1.0;
         const energyCost = Math.round((move.power || 0) * 0.35) + 5;
 
-        // NEW: Check for affordability first
         if (actor.energy < energyCost) return { move, weight: 0 };
         
         switch (move.type) {
@@ -187,17 +187,17 @@ function selectMove(actor, defender, conditions) {
             case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
         }
 
-        // NEW: Energy Conservation Logic
-        if (actor.energy - energyCost < 20 && actor.mentalState.level === 'stable') {
-            weight *= 0.6; // Less likely to use a move that leaves them drained unless stressed/broken
+        // --- PACING & STAMINA LOGIC ---
+        if (pacingProfile === 'tactical' || (pacingProfile === 'opportunist' && openingReason === 'None')) {
+            if (staminaState === 'winded' && energyCost > 30) weight *= 0.7;
+            if (staminaState === 'exhausted' && energyCost > 20) weight *= 0.4;
         }
 
         if (actor.moveHistory.slice(-2).some(m => m.name === move.name)) weight *= 0.25;
         if (actor.moveFailureHistory.includes(move.name)) weight *= 0.1;
-        if (actor.consecutiveDefensiveTurns >= 2 && (move.type === 'Defense' || move.type === 'Utility')) weight *= 0.5;
         
         if (move.moveTags.includes('requires_opening')) {
-            const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak' || actor.hasSetup);
+            const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
             weight *= openingExists ? 20.0 : (profile.riskTolerance * 0.1);
         }
         
@@ -209,7 +209,6 @@ function selectMove(actor, defender, conditions) {
         return { move, weight };
     });
 
-    // Add struggle as a low-weight option
     weightedMoves.push({move: struggleMove, weight: 0.1});
     
     const validMoves = weightedMoves.filter(m => m.weight > 0);
@@ -221,13 +220,14 @@ function selectMove(actor, defender, conditions) {
     
     let aiLogEntry = `Selected '${chosenMove.name}'`;
     if (chosenMoveInfo) aiLogEntry += ` (W: ${chosenMoveInfo.weight.toFixed(2)})`;
-    if (openingReason !== 'None') aiLogEntry += `|Opp:${openingReason}`;
-    aiLogEntry += `|State:${actor.mentalState.level}|E:${actor.energy}`;
+    aiLogEntry += `|State:${actor.mentalState.level}|Stamina:${staminaState}`;
     
     return { move: chosenMove, aiLogEntry };
 }
 
 // --- NARRATIVE & COMBAT CALCULATION ---
+// (No changes below this line, functions are copied for completeness)
+
 function narrateMove(actor, target, move, result) {
     let emotionalPrefix = '';
     if (actor.mentalStateChangedThisTurn) {
@@ -280,7 +280,6 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     else level = effectivenessLevels.NORMAL;
     
     const damage = (move.type.includes('Offense') || move.type.includes('Finisher')) ? Math.round(totalEffectiveness / 3) : 0;
-    // NEW Energy Cost Formula
     const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.35) + 5;
 
     return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished };

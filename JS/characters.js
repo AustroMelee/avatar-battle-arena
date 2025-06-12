@@ -1,10 +1,11 @@
-// FILE: characters.js
+// FILE: js/characters.js
 'use strict';
 
 export const characters = {
     'sokka': {
         id: 'sokka', name: "Sokka", type: "Nonbender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Madcap", powerTier: 3,
+        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7 },
         environmentalAffinity: { hasCover: 1.1, isUrban: 1.05, isExposed: 0.95, plantsRich: 1.05 },
         techniques: [
@@ -26,8 +27,9 @@ export const characters = {
     'aang-airbending-only': {
         id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Pacifist", powerTier: 9,
+        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.5, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7 },
-        environmentalAffinity: { airRich: 1.1, isExposed: 1.05, isUrban: 0.9, isIndustrial: 0.9 }, // Restrained in cities
+        environmentalAffinity: { airRich: 1.1, isExposed: 1.05, isUrban: 0.9, isIndustrial: 0.9 },
         techniques: [
             { name: "Air Scooter", verb: 'ride', object: 'his air scooter', type: 'Utility', power: 20, element: 'air', moveTags: ['utility_reposition', 'evasive', 'channeled'],
               usageRequirements: {}, environmentBonuses: { airRich: 1.3, isVertical: 1.2 }, environmentPenalties: { isCramped: 0.8 } },
@@ -47,8 +49,9 @@ export const characters = {
     'katara': {
         id: 'katara', name: "Katara", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Fierce", powerTier: 7,
+        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8 },
-        environmentalAffinity: { waterRich: 1.1, isCold: 1.05, isUrban: 0.9, isHot: 0.9 }, // Restrained in cities, weakened by heat
+        environmentalAffinity: { waterRich: 1.1, isCold: 1.05, isUrban: 0.9, isHot: 0.9 },
         techniques: [
             { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'],
               usageRequirements: {}, environmentBonuses: { waterRich: 1.3, isCoastal: 1.2 }, environmentPenalties: { isHot: 0.5, isSandy: 0.4 } },
@@ -68,6 +71,7 @@ export const characters = {
     'toph-beifong': {
         id: 'toph-beifong', name: "Toph", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Cocky", powerTier: 7,
+        pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9 },
         environmentalAffinity: { earthRich: 1.2, isRocky: 1.1, metalRich: 1.1, isPrecarious: 0.8, isSlippery: 0.9, hasShiftingGround: 1.1 },
         techniques: [
@@ -89,8 +93,9 @@ export const characters = {
     'zuko': {
         id: 'zuko', name: "Zuko", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Determined", powerTier: 6,
+        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8 },
-        environmentalAffinity: { isHot: 1.05, isCold: 0.95, isUrban: 1.0 }, // Torn and thus neutral about cities
+        environmentalAffinity: { isHot: 1.05, isCold: 0.95, isUrban: 1.0 },
         techniques: [
             { name: "Fire Daggers", verb: 'throw', object: 'volley of fire daggers', type: 'Offense', power: 45, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'],
               usageRequirements: {}, environmentBonuses: { isHot: 1.2 }, environmentPenalties: { isCold: 0.8, waterRich: 0.9 } },
@@ -110,8 +115,9 @@ export const characters = {
     'azula': {
         id: 'azula', name: "Azula", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Ruthless", powerTier: 8,
+        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0 },
-        environmentalAffinity: { isHot: 1.1, isCold: 0.9, isUrban: 1.1, isIndustrial: 1.05 }, // Thrives on collateral damage
+        environmentalAffinity: { isHot: 1.1, isCold: 0.9, isUrban: 1.1, isIndustrial: 1.05 },
         techniques: [
             { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'],
               usageRequirements: {}, environmentBonuses: { isHot: 1.25 }, environmentPenalties: { isCold: 0.75 } },
@@ -129,8 +135,9 @@ export const characters = {
     'ozai-not-comet-enhanced': {
         id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Supreme", powerTier: 9,
+        pacingProfile: 'berserker',
         personalityProfile: { aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0 },
-        environmentalAffinity: { isHot: 1.2, isCold: 0.8, isIndustrial: 1.1, isUrban: 1.2 }, // Cares nothing for collateral damage
+        environmentalAffinity: { isHot: 1.2, isCold: 0.8, isIndustrial: 1.1, isUrban: 1.2 },
         techniques: [
             { name: "Fire Comet", verb: 'launch', object: 'massive fire comet', type: 'Offense', power: 80, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_large'],
               usageRequirements: {}, environmentBonuses: { isHot: 1.4, isIndustrial: 1.2 }, environmentPenalties: { isCold: 0.6 } },
@@ -146,8 +153,9 @@ export const characters = {
     'bumi': {
         id: 'bumi', name: "Bumi", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Madcap", powerTier: 8,
-        personalityProfile: { aggression: 0.8, patience: 0.4, riskTolerance: 0.7, opportunism: 0.9 },
-        environmentalAffinity: { earthRich: 1.2, isRocky: 1.1, isUrban: 1.1 }, // Knows his cities
+        pacingProfile: 'opportunist',
+        personalityProfile: { aggression: 0.8, riskTolerance: 0.9, opportunism: 0.7, patience: 0.5 },
+        environmentalAffinity: { earthRich: 1.2, isRocky: 1.1, isUrban: 1.1 },
         techniques: [
             { name: "Rock Avalanche", verb: 'trigger', object: 'massive rock avalanche', type: 'Finisher', power: 95, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'requires_opening'],
               usageRequirements: { earthRich: true }, environmentBonuses: { isVertical: 1.4, isRocky: 1.3 }, environmentPenalties: {} },
@@ -163,7 +171,8 @@ export const characters = {
     'pakku': {
         id: 'pakku', name: "Pakku", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Disciplined", powerTier: 7,
-        personalityProfile: { aggression: 0.6, patience: 0.9, riskTolerance: 0.4, opportunism: 0.8 },
+        pacingProfile: 'tactical',
+        personalityProfile: { aggression: 0.6, riskTolerance: 0.4, opportunism: 0.8, patience: 0.8 },
         environmentalAffinity: { waterRich: 1.1, iceRich: 1.1, isCold: 1.1, isHot: 0.9, isUrban: 1.0 },
         techniques: [
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'],
@@ -180,8 +189,9 @@ export const characters = {
     'jeong-jeong': {
         id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Wise_Reluctant", powerTier: 6,
-        personalityProfile: { aggression: 0.3, patience: 1.0, riskTolerance: 0.1, opportunism: 0.6 },
-        environmentalAffinity: { isHot: 1.05, isCold: 0.95, isUrban: 0.9, plantsRich: 1.1 }, // Careful in cities, masterful with nature
+        pacingProfile: 'tactical',
+        personalityProfile: { aggression: 0.2, riskTolerance: 0.3, opportunism: 0.5, patience: 0.9 },
+        environmentalAffinity: { isHot: 1.05, isCold: 0.95, isUrban: 0.9, plantsRich: 1.1 },
         techniques: [
             { name: "Controlled Inferno", verb: 'create', object: 'controlled inferno', type: 'Offense', power: 80, emoji: '🔥', requiresArticle: true, element: 'fire', moveTags: ['area_of_effect', 'channeled'],
               usageRequirements: {}, environmentBonuses: { isHot: 1.1, plantsRich: 1.3 }, environmentPenalties: { isCold: 0.8, waterRich: 0.85 } },
@@ -199,7 +209,8 @@ export const characters = {
     'mai': {
         id: 'mai', name: "Mai", type: "Nonbender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Deadpan", powerTier: 4,
-        personalityProfile: { aggression: 0.5, patience: 0.8, riskTolerance: 0.3, opportunism: 0.9 },
+        pacingProfile: 'opportunist',
+        personalityProfile: { aggression: 0.4, riskTolerance: 0.4, opportunism: 0.8, patience: 0.7 },
         environmentalAffinity: { isUrban: 1.1, hasCover: 1.1, isCramped: 1.05, isExposed: 0.9 },
         techniques: [
             { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, emoji: '🔪', requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'],
@@ -220,7 +231,8 @@ export const characters = {
     'ty-lee': {
         id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Playful", powerTier: 4,
-        personalityProfile: { aggression: 0.7, patience: 0.5, riskTolerance: 0.7, opportunism: 0.9 },
+        pacingProfile: 'opportunist',
+        personalityProfile: { aggression: 0.8, riskTolerance: 0.7, opportunism: 0.9, patience: 0.3 },
         environmentalAffinity: { isUrban: 1.1, isDense: 1.05, isExposed: 0.95, isSlippery: 0.9, hasShiftingGround: 0.95 },
         techniques: [
             { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, emoji: '🤸‍♀️', requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'],
