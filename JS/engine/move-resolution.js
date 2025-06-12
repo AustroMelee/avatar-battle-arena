@@ -5,8 +5,13 @@
 // outcome of a move, including damage, effectiveness, energy cost, and the
 // effects of environmental factors and special conditions like punishments.
 
-import { effectivenessLevels } from '../js/narrative-v2.js';
-import { punishableMoves } from '../js/move-interaction-matrix.js';
+// --- IMPORTS (PATHS CORRECTED) ---
+//- OLD PATH: ../js/narrative-v2.js
+//+ NEW PATH: ../narrative-v2.js
+import { effectivenessLevels } from '../narrative-v2.js';
+//- OLD PATH: ../js/move-interaction-matrix.js
+//+ NEW PATH: ../move-interaction-matrix.js
+import { punishableMoves } from '../move-interaction-matrix.js';
 
 // --- HELPER FUNCTIONS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);

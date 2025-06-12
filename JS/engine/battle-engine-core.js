@@ -5,9 +5,14 @@
 // calling upon specialized modules for calculations, AI decisions, and narration.
 // Its primary jobs are state management and turn sequencing.
 
+// --- IMPORTS (PATHS CORRECTED) ---
 import { characters } from '../data/characters.js';
-import { locationConditions } from '../js/location-battle-conditions.js';
-import { battlePhases, phaseTemplates } from '../js/narrative-v2.js';
+//- OLD PATH: ../js/location-battle-conditions.js
+//+ NEW PATH: ../location-battle-conditions.js
+import { locationConditions } from '../location-battle-conditions.js'; 
+//- OLD PATH: ../js/narrative-v2.js
+//+ NEW PATH: ../narrative-v2.js
+import { battlePhases, phaseTemplates } from '../narrative-v2.js';
 import { selectMove } from './ai-decision.js';
 import { calculateMove } from './move-resolution.js';
 import { updateMentalState } from './mental-state.js';

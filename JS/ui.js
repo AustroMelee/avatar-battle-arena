@@ -4,7 +4,10 @@
 // This module manages all direct DOM manipulations.
 // MODIFIED: The import for 'characters' now points to the new data directory.
 
-import { characters } from '../data/characters.js';
+// --- IMPORTS (PATHS CORRECTED) ---
+//- OLD PATH: ../data/characters.js
+//+ NEW PATH: ./data/characters.js
+import { characters } from './data/characters.js';
 import { locations } from './locations.js';
 
 export const DOM = {

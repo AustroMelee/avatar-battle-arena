@@ -5,9 +5,14 @@
 // human-readable text from battle events, including move descriptions,
 // flavor text, victory summaries, and final quotes.
 
+// --- IMPORTS (PATHS CORRECTED) ---
 import { characters } from '../data/characters.js';
-import { phaseTemplates, impactPhrases, postBattleVictoryPhrases } from '../js/narrative-v2.js';
-import { emotionalFlavor, tacticalFlavor } from '../js/narrative-flavor.js';
+//- OLD PATH: ../js/narrative-v2.js
+//+ NEW PATH: ../narrative-v2.js
+import { phaseTemplates, impactPhrases, postBattleVictoryPhrases } from '../narrative-v2.js';
+//- OLD PATH: ../js/narrative-flavor.js
+//+ NEW PATH: ../narrative-flavor.js
+import { emotionalFlavor, tacticalFlavor } from '../narrative-flavor.js';
 
 // --- HELPER FUNCTIONS ---
 const getRandomElement = (arr, fallback = null) => arr?.[Math.floor(Math.random() * arr.length)] || fallback;
