@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v18.0-AI-Variance';
+const systemVersion = 'v18.1-Hotfix';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -103,6 +103,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
     
+    // --- FINAL OUTCOME DETERMINATION ---
+    // BUG FIX: Assign interactionLog to BOTH fighters before determining the outcome.
+    const finalInteractionLog = [...new Set(interactionLog)];
+    fighter1.interactionLog = finalInteractionLog;
+    fighter2.interactionLog = finalInteractionLog;
+
     if (fighter1.hp > 0 && Math.abs(fighter1.hp - fighter2.hp) < 5) {
          turnLog.push(phaseTemplates.drawResult);
          turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', "Both warriors fought to their absolute limit, but neither could secure the final blow. They stand exhausted, a testament to each other's strength."));
@@ -111,7 +117,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
     const winner = (fighter1.hp > fighter2.hp) ? fighter1 : fighter2;
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
-    winner.interactionLog = [...new Set(interactionLog)];
     winner.summary = generateOutcomeSummary(winner, loser);
     
     if (loser.hp > 0) turnLog.push(phaseTemplates.timeOutVictory.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
@@ -245,8 +250,6 @@ function selectMove(actor, defender, conditions) {
     const sortedMoves = validMoves.sort((a,b) => b.weight - a.weight);
     const topMove = sortedMoves[0];
 
-    // --- AI TACTICAL VARIANCE ---
-    // Create a pool of "good enough" moves to introduce unpredictability.
     const candidateThreshold = topMove.weight * 0.75;
     const candidatePool = sortedMoves.filter(m => m.weight >= candidateThreshold);
     
