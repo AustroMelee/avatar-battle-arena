@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v16.1-BalancePass-A';
+const systemVersion = 'v16.2-AI-AntiLoop';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -187,12 +187,14 @@ function selectMove(actor, defender, conditions) {
             case 'Finisher': weight *= (1 + profile.riskTolerance * 0.5) * opportunismBonus; break;
         }
 
-        // --- TACTICAL STATE AI ---
+        // --- ANTI-LOOP & TACTICAL AI ---
+        // If the defender is ALREADY vulnerable, massively de-prioritize creating another opening.
+        if (defender.tacticalState && move.setup) {
+            weight *= 0.05; // Attack, don't just set up again!
+        }
         // If the defender is not vulnerable, STRONGLY prefer setup moves.
-        if (!defender.tacticalState && !defender.isStunned) {
-            if (move.setup) {
-                weight *= (15.0 * move.setup.intensity); // More intense setups are more desirable.
-            }
+        else if (!defender.tacticalState && !defender.isStunned && move.setup) {
+            weight *= (15.0 * move.setup.intensity);
         }
 
         if (staminaState === 'winded' && energyCost > 30) weight *= 0.6;
@@ -208,20 +210,14 @@ function selectMove(actor, defender, conditions) {
                 const intensity = defender.tacticalState?.intensity || 1.2;
                 weight *= (25.0 * intensity);
             } else {
-                 weight *= (profile.riskTolerance * 0.05); // Low base risk
+                 weight *= (profile.riskTolerance * 0.05);
             }
         }
         
         if (actor.mentalState.level === 'broken') {
-            if (move.setup) {
-                // A desperate, broken fighter might still try to create an opening as a gambit.
-                weight *= 0.5; 
-            } else if (move.type === 'Utility' || move.type === 'Defense') {
-                // But other non-offensive moves are neglected.
-                weight *= 0.1;
-            } else if (move.type === 'Finisher') {
-                // Finishers are also less likely as they require focus.
-                weight *= 0.2;
+            // A broken fighter lashes out. Heavily penalize anything that isn't raw offense.
+            if (move.type === 'Utility' || move.type === 'Defense' || move.type === 'Finisher') {
+                weight *= 0.01;
             }
         }
 
@@ -247,17 +243,14 @@ function narrateMove(actor, target, move, result) {
     let tacticalPrefix = '';
     let tacticalSuffix = '';
 
-    // If this move is a payoff that consumes a state
     if(result.payoff && result.consumedStateName) {
         const flavorPool = tacticalFlavor.consume[result.consumedStateName] || tacticalFlavor.consume.generic;
         tacticalPrefix = getRandomElement([].concat(flavorPool)).replace(/{targetName}/g, targetSpan) + ' ';
     } 
-    // If this move applies a state
     else if (move.setup && result.effectiveness.label !== 'Weak') {
         const flavorPool = tacticalFlavor.apply[move.setup.name] || tacticalFlavor.apply.generic;
         tacticalSuffix = ' ' + getRandomElement([].concat(flavorPool)).replace(/{actorName}/g, actorSpan).replace(/{targetName}/g, targetSpan).replace(/{element}/g, move.element);
     } 
-    // If the attacker is just acting while the target is vulnerable
     else if (target.tacticalState) {
         const flavorPool = tacticalFlavor.has_state[target.tacticalState.name] || tacticalFlavor.has_state.generic;
         tacticalPrefix = getRandomElement([].concat(flavorPool)).replace(/{targetName}/g, targetSpan) + ' ';
@@ -291,19 +284,17 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     if (move.moveTags?.includes('requires_opening')) {
         const openingExists = defender.isStunned || defender.tacticalState;
         if (openingExists) {
-            // Apply bonus from tactical state
             if(defender.tacticalState) {
                 multiplier *= defender.tacticalState.intensity;
                 consumedStateName = defender.tacticalState.name;
                 interactionLog.push(`${attacker.name}'s ${move.name} was amplified by ${defender.name} being ${defender.tacticalState.name}.`);
                 payoff = true;
             } else if (defender.isStunned) {
-                multiplier *= 1.3; // Standard stun bonus
+                multiplier *= 1.3;
                 interactionLog.push(`${attacker.name}'s ${move.name} capitalized on ${defender.name} being stunned.`);
                 payoff = true;
             }
         } else if (punishableMoves[move.name]) {
-            // Punish if no opening exists
             multiplier *= punishableMoves[move.name].penalty;
             wasPunished = true;
         }

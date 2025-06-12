@@ -2,9 +2,9 @@
 'use strict';
 
 // ====================================================================================
-//  Relational Modifier Layer (RML) v1.3 - Volatility Pass
+//  Relational Modifier Layer (RML) v1.4 - Balance Pass
 // ====================================================================================
-//  - stressModifier: Increased values for high-trauma matchups to accelerate stress.
+//  - Re-tuned Ozai's stress modifier vs. Azula to prevent immediate breakdown.
 // ====================================================================================
 
 export const relationshipMatrix = {
@@ -12,7 +12,7 @@ export const relationshipMatrix = {
     'azula': {
         'zuko': {
             relationshipType: "sibling_rivalry_dominant",
-            stressModifier: 1.5, // Increased from 1.2
+            stressModifier: 1.5,
             resilienceModifier: 0.9,
             emotionalModifiers: {
                 aggressionBoost: 0.2,
@@ -22,7 +22,7 @@ export const relationshipMatrix = {
         },
         'ozai-not-comet-enhanced': {
             relationshipType: "parental_fear",
-            stressModifier: 2.5, // Significantly increased from 2.0
+            stressModifier: 2.5,
             resilienceModifier: 0.5,
             emotionalModifiers: {
                 riskToleranceBoost: 0.3, 
@@ -44,7 +44,7 @@ export const relationshipMatrix = {
     'zuko': {
         'azula': {
             relationshipType: "sibling_rivalry_inferior",
-            stressModifier: 2.0, // Increased from 1.8
+            stressModifier: 2.0,
             resilienceModifier: 0.8,
             emotionalModifiers: {
                 aggressionBoost: 0.2,
@@ -54,7 +54,7 @@ export const relationshipMatrix = {
         },
         'ozai-not-comet-enhanced': {
             relationshipType: "parental_defiance",
-            stressModifier: 1.8, // Increased from 1.5
+            stressModifier: 1.8,
             resilienceModifier: 1.2,
             emotionalModifiers: {
                 aggressionBoost: 0.3,
@@ -78,7 +78,7 @@ export const relationshipMatrix = {
     'aang-airbending-only': {
         'ozai-not-comet-enhanced': {
             relationshipType: "fated_adversary",
-            stressModifier: 1.4, // Increased from 1.3
+            stressModifier: 1.4,
             resilienceModifier: 1.3,
             emotionalModifiers: {
                 aggressionBoost: 0.2,
@@ -88,7 +88,7 @@ export const relationshipMatrix = {
         },
         'azula': {
             relationshipType: "nonlethal_pacifism",
-            stressModifier: 1.2, // Increased from 1.1
+            stressModifier: 1.2,
             resilienceModifier: 1.2,
             emotionalModifiers: {
                 aggressionReduction: 0.4,
@@ -112,7 +112,7 @@ export const relationshipMatrix = {
         },
         'azula': {
             relationshipType: "bitter_rivalry",
-            stressModifier: 1.5, // Increased from 1.4
+            stressModifier: 1.5,
             resilienceModifier: 1.0,
             emotionalModifiers: {
                 aggressionBoost: 0.3,
@@ -160,17 +160,17 @@ export const relationshipMatrix = {
     'ozai-not-comet-enhanced': {
         'azula': {
             relationshipType: "demanding_patriarch",
-            stressModifier: 1.3, // Her defiance/failure stresses him, making him less calculated.
-            resilienceModifier: 1.1, // He's still very resilient, but not unbreakable.
+            stressModifier: 1.1, // Reduced from 1.3 to prevent instant breakdown. Still significant.
+            resilienceModifier: 1.1,
             emotionalModifiers: {
-                aggressionBoost: 0.25, // He becomes even more aggressive.
-                patienceReduction: 0.4, // He has no time for her games.
-                riskToleranceBoost: 0.2, // He will take risks to prove his dominance.
+                aggressionBoost: 0.25,
+                patienceReduction: 0.4,
+                riskToleranceBoost: 0.2,
             }
         },
         'zuko': {
             relationshipType: "contemptuous_disdain",
-            stressModifier: 0.6, // Zuko's actions don't stress him, they just anger him.
+            stressModifier: 0.6,
             resilienceModifier: 1.5,
             emotionalModifiers: {
                 aggressionBoost: 0.3,

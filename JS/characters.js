@@ -149,7 +149,6 @@ export const characters = {
         environmentalAffinity: { isHot: 1.2, isCold: 0.8, isIndustrial: 1.1, isUrban: 1.2 },
         techniques: [
             { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'],
-                setup: { name: 'Pressured', duration: 1, intensity: 1.2 },
                 usageRequirements: {}, environmentBonuses: { isExposed: 1.2 }, environmentPenalties: { isCramped: 0.7 } },
             { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 70, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'],
                 usageRequirements: {}, environmentBonuses: { isHot: 1.3, isIndustrial: 1.1 }, environmentPenalties: { isCold: 0.7 } },
