@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v6-QA-Polish-Final';
+const systemVersion = 'v6.1-Bugfix-Final';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -22,13 +22,17 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 function getWeightedRandom(items) {
     if (!items || items.length === 0) return null;
     const totalWeight = items.reduce((sum, item) => sum + (item.weight || 1), 0);
-    if (totalWeight <= 0) return getRandomElement(items.map(i => i.move));
+    if (totalWeight <= 0) {
+        // If all weights are zero, can't perform weighted random selection
+        return null;
+    }
 
     let random = Math.random() * totalWeight;
     for (const item of items) {
         random -= (item.weight || 1);
         if (random <= 0) return item.move;
     }
+    // Fallback in case of floating point inaccuracies
     return items[items.length - 1].move;
 }
 
@@ -184,7 +188,8 @@ export function simulateBattle(f1Id, f2Id, locId) {
 // --- MOVE AI & CALCULATION ---
 function selectMove(actor, defender) {
     const suitableMoves = actor.techniques;
-    if (suitableMoves.length === 0) return { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
+    const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
+    if (suitableMoves.length === 0) return struggleMove;
 
     const recentMoves = actor.movesUsed.slice(-3);
     const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
@@ -213,7 +218,10 @@ function selectMove(actor, defender) {
     });
 
     const selectedMove = getWeightedRandom(weightedMoves);
-    return selectedMove || { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
+
+    // **CRITICAL BUG FIX:** If getWeightedRandom returns null (e.g., all weights are 0 due to no energy),
+    // we MUST return a valid move object. "Struggle" is the designated fallback.
+    return selectedMove || struggleMove;
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
