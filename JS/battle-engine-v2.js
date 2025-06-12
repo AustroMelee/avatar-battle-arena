@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v8.0-Affinity-Refactor';
+const systemVersion = 'v9.0-A+-Overkill-Pass';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -70,6 +70,7 @@ function initializeFighterState(charId) {
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         isStunned: false, hasSetup: false, loggedEnvEffects: new Set(),
         movesUsed: [], phraseHistory: {}, moveHistory: [],
+        moveFailureHistory: [], // A+ Feature: AI Memory
     };
 }
 
@@ -130,9 +131,13 @@ export function simulateBattle(f1Id, f2Id, locId) {
             
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
             attacker.lastMoveEffectiveness = result.effectiveness.label;
-            if(move.type === 'Utility' || (move.type === 'Defense' && !isReactive(defender))) attacker.hasSetup = true; else attacker.hasSetup = false;
+            if (move.type === 'Utility' || (move.type === 'Defense' && !isReactive(defender))) attacker.hasSetup = true; else attacker.hasSetup = false;
             
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
+            if (result.wasPunished) { // A+ Feature: AI Memory
+                attacker.moveFailureHistory.push(move.name);
+                if (attacker.moveFailureHistory.length > 2) attacker.moveFailureHistory.shift(); // Cap history size
+            }
             
             phaseContent += narrateMove(attacker, defender, move, result);
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
@@ -183,12 +188,12 @@ function getAvailableMoves(actor, conditions) {
 
     const available = actor.techniques.filter(move => {
         if (!move.usageRequirements) return true;
-        for (const [key, requiredValue] of Object.entries(move.usageRequirements)) {
+        for (const [key, requiredValue] of Object.entries(move.usageRequirements || {})) {
             if (conditions[key] !== requiredValue) {
-                return false; // Requirement not met
+                return false;
             }
         }
-        return true; // All requirements met
+        return true;
     });
     
     return available.length > 0 ? available : [struggleMove];
@@ -198,9 +203,7 @@ function getAvailableMoves(actor, conditions) {
 function selectMove(actor, defender, conditions) {
     const suitableMoves = getAvailableMoves(actor, conditions);
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {}, environmentBonuses: {}, environmentPenalties: {} };
-    if (!suitableMoves || suitableMoves.length === 0) {
-        return struggleMove;
-    }
+    if (!suitableMoves || suitableMoves.length === 0) return struggleMove;
 
     const recentMoves = actor.movesUsed.slice(-3);
     const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
@@ -208,6 +211,11 @@ function selectMove(actor, defender, conditions) {
     const weightedMoves = suitableMoves.map(move => {
         let weight = 1.0;
         if (recentMoves.includes(move.name)) weight *= 0.2;
+        
+        // A+ Feature: AI Memory
+        if (actor.moveFailureHistory && actor.moveFailureHistory.includes(move.name)) {
+            weight *= 0.1; // Drastically reduce weight of recently failed punishable moves
+        }
 
         if (move.moveTags.includes('requires_opening')) {
             if (openingExists) { weight *= 20.0; } 
@@ -233,46 +241,57 @@ function selectMove(actor, defender, conditions) {
 
 function applyEnvironmentalModifiers(move, attacker, conditions) {
     let multiplier = 1.0;
-    let logReasons = [];
+    let logReasons = { affinity: new Set(), move: new Set() };
+    let primaryFactor = { type: null, strength: 0 };
 
     // 1. Character-level environmental affinity
     if (attacker.environmentalAffinity) {
-        for (const [conditionKey, affinityModifier] of Object.entries(attacker.environmentalAffinity)) {
-            if (conditions[conditionKey]) {
+        for (const [key, affinityModifier] of Object.entries(attacker.environmentalAffinity)) {
+            if (conditions[key]) {
                 multiplier *= affinityModifier;
-                const reason = affinityModifier > 1 ? `empowered by the ${conditionKey} terrain (Affinity)` : `weakened by the ${conditionKey} terrain (Affinity)`;
-                logReasons.push(reason);
+                const reason = affinityModifier > 1 ? `empowered by the ${key} terrain` : `weakened by the ${key} terrain`;
+                logReasons.affinity.add(reason);
+                if (Math.abs(1 - affinityModifier) > primaryFactor.strength) {
+                    primaryFactor = { type: reason, strength: Math.abs(1 - affinityModifier) };
+                }
             }
         }
     }
 
-    // 2. Move-specific environmental bonuses
-    if (move.environmentBonuses) {
-        for (const [conditionKey, bonus] of Object.entries(move.environmentBonuses)) {
-            if (conditions[conditionKey]) {
-                multiplier *= bonus;
-                logReasons.push(`empowered by the ${conditionKey} environment (Move)`);
+    // 2. Move-specific environmental bonuses/penalties
+    for (const [key, bonus] of Object.entries(move.environmentBonuses || {})) {
+        if (conditions[key]) {
+            multiplier *= bonus;
+            const reason = `empowered by the ${key} environment`;
+            logReasons.move.add(reason);
+            if (Math.abs(1 - bonus) > primaryFactor.strength) {
+                primaryFactor = { type: reason, strength: Math.abs(1 - bonus) };
+            }
+        }
+    }
+    for (const [key, penalty] of Object.entries(move.environmentPenalties || {})) {
+        if (conditions[key]) {
+            multiplier *= penalty;
+            const reason = `weakened by the ${key} environment`;
+            logReasons.move.add(reason);
+            if (Math.abs(1 - penalty) > primaryFactor.strength) {
+                primaryFactor = { type: reason, strength: Math.abs(1 - penalty) };
             }
         }
     }
 
-    // 3. Move-specific environmental penalties
-    if (move.environmentPenalties) {
-        for (const [conditionKey, penalty] of Object.entries(move.environmentPenalties)) {
-            if (conditions[conditionKey]) {
-                multiplier *= penalty;
-                logReasons.push(`weakened by the ${conditionKey} environment (Move)`);
-            }
-        }
-    }
+    const finalLogReasons = [];
+    logReasons.affinity.forEach(r => finalLogReasons.push(`${r} (Affinity)`));
+    logReasons.move.forEach(r => finalLogReasons.push(`${r} (Move)`));
 
-    return { multiplier, logReasons };
+    return { multiplier, logReasons: finalLogReasons, primaryFactor: primaryFactor.type };
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
     let effectReasons = [];
+    let wasPunished = false;
     
     // --- PUNISHMENT MECHANICS ---
     if (!legacyMode && move.moveTags.includes('requires_opening')) {
@@ -287,21 +306,15 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
             if (!openingFound) {
                 multiplier *= punishmentRule.penalty;
                 effectReasons.push("was punished due to a lack of opening");
+                wasPunished = true;
             }
         }
     }
     
-    // --- REFACTORED: DATA-DRIVEN ENVIRONMENTAL MODIFIERS ---
-    const { multiplier: envMultiplier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
+    // --- DATA-DRIVEN ENVIRONMENTAL MODIFIERS ---
+    const { multiplier: envMultiplier, logReasons: envReasons, primaryFactor } = applyEnvironmentalModifiers(move, attacker, conditions);
     multiplier *= envMultiplier;
-    
-    envReasons.forEach(reason => {
-        const fullLog = `${attacker.name}'s ${move.name} ${reason}`;
-        if (!attacker.loggedEnvEffects.has(fullLog)) {
-            effectReasons.push(reason);
-            attacker.loggedEnvEffects.add(fullLog);
-        }
-    });
+    effectReasons.push(...envReasons);
 
     // --- MOVE INTERACTION MATRIX ---
     if (!legacyMode && defender.lastMove) {
@@ -313,11 +326,9 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
             multiplier *= attackerInteractions.counters[defenderMoveName];
             effectReasons.push(`countered ${defender.name}'s ${defenderMoveName}`);
         }
-
         const defenderInteractions = moveInteractionMatrix[defenderMoveName];
         if (defenderInteractions && defenderInteractions.counters?.[attackerMoveName]) {
-            const penalty = 1 / defenderInteractions.counters[attackerMoveName];
-            multiplier *= penalty;
+            multiplier *= (1 / defenderInteractions.counters[attackerMoveName]);
             effectReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
         }
     }
@@ -338,30 +349,19 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
     const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
     const energyCost = Math.round(((move.power || 0) * 0.5) * energyMultiplier);
 
-    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100) };
+    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100), wasPunished, primaryEnvFactor: primaryFactor };
 }
 
 const isReactive = (defender) => defender.lastMove?.type === 'Offense';
 
 function getSmartRandomPhrase(actor, poolKey, pool) {
-    if (!actor.phraseHistory[poolKey]) {
-        actor.phraseHistory[poolKey] = [];
-    }
+    if (!actor.phraseHistory[poolKey]) actor.phraseHistory[poolKey] = [];
     let history = actor.phraseHistory[poolKey];
     const available = pool.filter(phrase => !history.includes(phrase));
-    
-    let chosenPhrase;
-    if (available.length > 0) {
-        chosenPhrase = available[Math.floor(Math.random() * available.length)];
-    } else {
-        history.length = 0;
-        chosenPhrase = pool[Math.floor(Math.random() * pool.length)];
-    }
-    
+    let chosenPhrase = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : pool[Math.floor(Math.random() * pool.length)];
+    if (available.length === 0) history.length = 0;
     history.push(chosenPhrase);
-    if (history.length > 5) { 
-        history.shift();
-    }
+    if (history.length > 5) history.shift();
     return chosenPhrase;
 }
 
@@ -371,7 +371,7 @@ function updateMomentum(currentMomentum, effectivenessLabel) {
     else if (effectivenessLabel === 'Strong') change = 2;
     else if (effectivenessLabel === 'Normal') change = 1;
     else if (effectivenessLabel === 'Weak') change = -2;
-    else if (effectivenessLabel === 'Counter') change = 1;
+    else if (effectivenessLabel === 'Counter') change = 2; // A+ Feature: Enhanced momentum
     return clamp(currentMomentum + change, -5, 5);
 }
 
@@ -379,20 +379,17 @@ function narrateMove(actor, target, move, result) {
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
     const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
     
+    // Defensive/Utility moves have their own narration path
     if (move.type === 'Defense' || move.type === 'Utility') {
         const reactive = isReactive(target);
         const impactTemplates = reactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE;
         const prefixPool = reactive 
             ? ["Reacting quickly,", "Seizing the moment,", "With swift reflexes,", "Countering instantly,", "Parrying with finesse,"] 
             : ["Preparing carefully,", "Taking a moment to strategize,", "Steadying {possessive} stance,", "In a daring gambit,"];
-        
         let prefix = getSmartRandomPhrase(actor, 'prefix', prefixPool).replace(/{possessive}/g, actor.pronouns.p);
-        
         let impactSentence = getSmartRandomPhrase(actor, 'defenseImpact', impactTemplates)
-            .replace(/{actorName}/g, actorSpan)
-            .replace(/{possessive}/g, actor.pronouns.p);
+            .replace(/{actorName}/g, actorSpan).replace(/{possessive}/g, actor.pronouns.p);
         const description = `${prefix} ${actorSpan} uses the ${move.name}. ${impactSentence}`;
-
         const label = reactive ? "Counter" : "Set-up";
         return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{effectivenessLabel}/g, label).replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
     }
@@ -402,11 +399,17 @@ function narrateMove(actor, target, move, result) {
     if (actor.momentum >= 3) statePrefixPool.push(...narrativeStatePhrases.momentum_gain);
     if (actor.momentum <= -3) statePrefixPool.push(...narrativeStatePhrases.momentum_loss);
     
-    let statePrefix = '';
-    if (statePrefixPool.length > 0 && Math.random() > 0.3) {
-        statePrefix = getSmartRandomPhrase(actor, 'statePrefix', statePrefixPool);
+    // A+ Feature: Narrative Flavor Scaling
+    let envFlavor = '';
+    if (result.primaryEnvFactor && Math.random() > 0.5) {
+        if (result.primaryEnvFactor.includes('empowered')) {
+            envFlavor = `${actorSpan} seems to draw strength from the surroundings. `;
+        } else if (result.primaryEnvFactor.includes('weakened')) {
+            envFlavor = `The environment seems to hinder ${actorSpan}'s movements. `;
+        }
     }
-    
+
+    let statePrefix = statePrefixPool.length > 0 && Math.random() > 0.3 ? getSmartRandomPhrase(actor, 'statePrefix', statePrefixPool) : '';
     const intro = statePrefix ? '' : getSmartRandomPhrase(actor, 'intro', introductoryPhrases);
     const verb = move.verb || 'executes';
     const conjugatedVerb = conjugateVerb(verb);
@@ -420,7 +423,7 @@ function narrateMove(actor, target, move, result) {
     }
     
     let prefixText = (statePrefix || intro).replace(/{possessive}/g, actor.pronouns.p);
-    let fullAction = `${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${conjugatedVerb} ${objectPhrase} ${adverb}.`;
+    let fullAction = `${envFlavor}${prefixText} ${pronounOrName(prefixText, actorSpan, actor)} ${conjugatedVerb} ${objectPhrase} ${adverb}.`;
 
     let impactSentence;
     if (target.hp - result.damage <= 0 && result.damage > 0) {
@@ -453,7 +456,7 @@ function generateOutcomeSummary(winner, loser) {
     };
     
     let summary = `${winner.name}'s victory was sealed by ${winner.pronouns.p} ${summaryMap[mostUsedType]}.`;
-    if (winner.momentum - loser.momentum >= 3) {
+    if (winner.momentum - loser.momentum >= 5) { // Adjusted threshold for stronger momentum feel
         summary += ` ${winner.pronouns.p.charAt(0).toUpperCase() + winner.pronouns.p.slice(1)} commanding momentum overwhelmed ${loser.name}.`;
     }
     return summary;
