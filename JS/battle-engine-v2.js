@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v5-AI-Logic-Final';
+const systemVersion = 'v6-QA-Polish-Final';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -10,7 +10,13 @@ import { moveInteractionMatrix, punishableMoves } from './move-interaction-matri
 import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhrases, introductoryPhrases, impactPhrases, adverbPool, narrativeStatePhrases, weakMoveTransitions, finishingBlowPhrases } from './narrative-v2.js';
 
 // --- HELPER FUNCTIONS ---
-const getRandomElement = (arr, fallback = null) => (!arr || arr.length === 0) ? fallback : arr[Math.floor(Math.random() * arr.length)];
+const getRandomElement = (arr, fallback = null) => {
+    if (!arr || arr.length === 0) return fallback;
+    // This is a simple history-aware random picker to prevent immediate repetition
+    const recentHistory = arr.slice(-3);
+    const available = arr.filter(item => !recentHistory.includes(item));
+    return (available.length > 0) ? available[Math.floor(Math.random() * available.length)] : arr[Math.floor(Math.random() * arr.length)];
+};
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 function getWeightedRandom(items) {
@@ -56,24 +62,24 @@ function assembleObjectPhrase(move) {
 }
 
 // --- BATTLE STATE & SIMULATION ---
-function getContextualMoveset(char, locId) {
-    const conditions = locationConditions[locId];
-    if (char.canteenMoves && (conditions.isSandy || conditions.isHot) && !conditions.waterRich) {
-        return char.canteenMoves;
-    }
-    return char.techniques;
-}
-
 function initializeFighterState(charId, locId) {
     const character = characters[charId];
     const contextualMoveset = getContextualMoveset(character, locId);
     return { 
         id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
-        isStunned: false, hasSetup: false,
-        movesUsed: [], phraseHistory: [], lastPrefixes: [], moveHistory: [],
+        isStunned: false, hasSetup: false, loggedEnvEffects: new Set(),
+        movesUsed: [], phraseHistory: {}, // History per phrase type
         techniques: contextualMoveset
     };
+}
+
+function getContextualMoveset(char, locId) {
+    const conditions = locationConditions[locId];
+    if (char.canteenMoves && (conditions.isSandy || conditions.isHot) && !conditions.waterRich) {
+        return char.canteenMoves;
+    }
+    return char.techniques;
 }
 
 function getVictoryQuote(character, battleContext) {
@@ -159,7 +165,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
     if (interactionLog.length === 0) {
         interactionLog.push('No significant environmental or move-interaction modifiers were in play.');
     }
-    winner.interactionLog = interactionLog;
+    winner.interactionLog = [...new Set(interactionLog)]; // Ensure log has unique entries
     const summary = generateOutcomeSummary(winner, loser);
     winner.summary = summary;
     
@@ -186,63 +192,34 @@ function selectMove(actor, defender) {
     const weightedMoves = suitableMoves.map(move => {
         let weight = 1.0;
 
-        // 1. Repetition Penalty
-        if (recentMoves.includes(move.name)) {
-            weight *= 0.2;
-        }
+        if (recentMoves.includes(move.name)) weight *= 0.2;
 
-        // 2. Punishable Move Logic (The Core AI Fix)
         if (move.moveTags.includes('requires_opening')) {
-            if (openingExists) {
-                // MASSIVE bonus for using the right move at the right time
-                weight *= 20.0; 
-            } else {
-                // MASSIVE penalty for using a punishable move without an opening.
-                // High risk-tolerance allows for a tiny chance of an "arrogant" mistake.
-                weight *= 0.01 * (actor.personalityProfile.riskTolerance || 0.1);
-            }
+            if (openingExists) { weight *= 20.0; } 
+            else { weight *= 0.01 * (actor.personalityProfile.riskTolerance || 0.1); }
         }
         
-        // 3. Personality & Move Type Weighting
         switch (move.type) {
-            case 'Finisher':
-                weight *= 1.5 * actor.personalityProfile.riskTolerance;
-                break;
-            case 'Offense':
-                weight *= 1.2 * actor.personalityProfile.aggression;
-                break;
-            case 'Defense':
-                weight *= 1.2 * (1 - actor.personalityProfile.aggression);
-                break;
-
-            case 'Utility':
-                weight *= 1.1 * (actor.personalityProfile.patience || 0.5);
-                break;
+            case 'Finisher': weight *= 1.5 * actor.personalityProfile.riskTolerance; break;
+            case 'Offense': weight *= 1.2 * actor.personalityProfile.aggression; break;
+            case 'Defense': weight *= 1.2 * (1 - actor.personalityProfile.aggression); break;
+            case 'Utility': weight *= 1.1 * (actor.personalityProfile.patience || 0.5); break;
         }
-
-        // 4. Energy Check
+        
         const energyCost = (move.power || 0) * 0.5;
-        if (actor.energy < energyCost) {
-            weight = 0; // Cannot use moves they don't have energy for
-        }
+        if (actor.energy < energyCost) weight = 0;
 
         return { move, weight };
     });
 
     const selectedMove = getWeightedRandom(weightedMoves);
-
-    // Fallback if all moves have zero weight (e.g., no energy for any move)
-    if (!selectedMove) {
-        return { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
-    }
-
-    return selectedMove;
+    return selectedMove || { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
-    let logReasons = [];
+    let effectReasons = [];
     
     // 1. PUNISHABLE MOVE CHECK
     if (!legacyMode && move.moveTags.includes('requires_opening')) {
@@ -256,23 +233,28 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
 
             if (!openingFound) {
                 multiplier *= punishmentRule.penalty;
-                const narration = punishmentRule.narration
-                    .replace('{attacker}', attacker.name)
-                    .replace('{defender}', defender.name);
-                interactionLog.push(narration);
+                effectReasons.push("was punished due to a lack of opening");
             }
         }
     }
     
     // 2. Environmental Modifiers
+    const envEffects = [];
     if (move.element === 'water' || move.element === 'ice') {
-        if (conditions.isSandy || conditions.isHot) { multiplier *= 0.25; logReasons.push("was weakened by the arid terrain"); }
-        if (conditions.waterRich || conditions.iceRich) { multiplier *= 1.3; logReasons.push("was empowered by the abundant water/ice"); }
+        if (conditions.isSandy || conditions.isHot) { multiplier *= 0.25; envEffects.push("was weakened by the arid terrain"); }
+        if (conditions.waterRich || conditions.iceRich) { multiplier *= 1.3; envEffects.push("was empowered by the abundant water/ice"); }
     }
-    if (move.element === 'earth' && conditions.earthRich) { multiplier *= 1.3; logReasons.push("was empowered by the rich earth"); }
-    if (move.element === 'fire' && conditions.isHot) { multiplier *= 1.25; logReasons.push("was empowered by the intense heat"); }
+    if (move.element === 'earth' && conditions.earthRich) { multiplier *= 1.3; envEffects.push("was empowered by the rich earth"); }
+    if (move.element === 'fire' && conditions.isHot) { multiplier *= 1.25; envEffects.push("was empowered by the intense heat"); }
     
-    // 3. Move Interaction Matrix (Bi-directional check)
+    envEffects.forEach(effect => {
+        if (!attacker.loggedEnvEffects.has(effect)) {
+            effectReasons.push(effect);
+            attacker.loggedEnvEffects.add(effect);
+        }
+    });
+    
+    // 3. Move Interaction Matrix
     if (!legacyMode && defender.lastMove) {
         const attackerMoveName = move.name;
         const defenderMoveName = defender.lastMove.name;
@@ -280,52 +262,62 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
         const attackerInteractions = moveInteractionMatrix[attackerMoveName];
         if (attackerInteractions && attackerInteractions.counters?.[defenderMoveName]) {
             multiplier *= attackerInteractions.counters[defenderMoveName];
-            logReasons.push(`countered ${defender.name}'s ${defenderMoveName}`);
+            effectReasons.push(`countered ${defender.name}'s ${defenderMoveName}`);
         }
 
         const defenderInteractions = moveInteractionMatrix[defenderMoveName];
         if (defenderInteractions && defenderInteractions.counters?.[attackerMoveName]) {
             const penalty = 1 / defenderInteractions.counters[attackerMoveName];
             multiplier *= penalty;
-            logReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
+            effectReasons.push(`was countered by ${defender.name}'s ${defenderMoveName}`);
         }
     }
     
-    // Add to main log if any reasons were found
-    if (logReasons.length > 0) {
-        const uniqueReasons = [...new Set(logReasons)];
-        interactionLog.push(`${attacker.name}'s ${move.name} ${uniqueReasons.join(' and ')}.`);
+    if (effectReasons.length > 0) {
+        interactionLog.push(`${attacker.name}'s ${move.name} ${effectReasons.join(', ')}.`);
     }
 
     const totalEffectiveness = basePower * multiplier;
     
     let level;
     let energyMultiplier = 1.0;
-    if (totalEffectiveness < basePower * 0.7) {
-        level = effectivenessLevels.WEAK;
-        energyMultiplier = 1.2;
-    } else if (totalEffectiveness > basePower * 1.5) {
-        level = effectivenessLevels.CRITICAL;
-        energyMultiplier = 0.8;
-    } else if (totalEffectiveness > basePower * 1.1) {
-        level = effectivenessLevels.STRONG;
-        energyMultiplier = 0.95;
-    } else {
-        level = effectivenessLevels.NORMAL;
-    }
+    if (totalEffectiveness < basePower * 0.7) { level = effectivenessLevels.WEAK; energyMultiplier = 1.2; } 
+    else if (totalEffectiveness > basePower * 1.5) { level = effectivenessLevels.CRITICAL; energyMultiplier = 0.8; } 
+    else if (totalEffectiveness > basePower * 1.1) { level = effectivenessLevels.STRONG; energyMultiplier = 0.95; } 
+    else { level = effectivenessLevels.NORMAL; }
     
     const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
     const energyCost = Math.round(((move.power || 0) * 0.5) * energyMultiplier);
 
-    return { 
-        effectiveness: level, 
-        damage: clamp(damage, 0, 50),
-        energyCost: clamp(energyCost, 5, 100)
-    };
+    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 5, 100) };
 }
+
 const isReactive = (defender) => defender.lastMove?.type === 'Offense';
 
 // --- NARRATIVE & OUTCOME ---
+function getSmartRandomPhrase(actor, poolKey, pool) {
+    if (!actor.phraseHistory[poolKey]) {
+        actor.phraseHistory[poolKey] = [];
+    }
+    let history = actor.phraseHistory[poolKey];
+    const available = pool.filter(phrase => !history.includes(phrase));
+    
+    let chosenPhrase;
+    if (available.length > 0) {
+        chosenPhrase = available[Math.floor(Math.random() * available.length)];
+    } else {
+        // If all phrases have been used, reset history and pick one
+        history.length = 0;
+        chosenPhrase = pool[Math.floor(Math.random() * pool.length)];
+    }
+    
+    history.push(chosenPhrase);
+    if (history.length > 5) { // Keep history to the last 5 used phrases
+        history.shift();
+    }
+    return chosenPhrase;
+}
+
 function updateMomentum(currentMomentum, effectivenessLabel) {
     let change = 0;
     if (effectivenessLabel === 'Critical') change = 3;
@@ -347,12 +339,9 @@ function narrateMove(actor, target, move, result) {
             ? ["Reacting quickly,", "Seizing the moment,", "With swift reflexes,", "Countering instantly,", "Parrying with finesse,"] 
             : ["Preparing carefully,", "Taking a moment to strategize,", "Steadying {possessive} stance,", "In a daring gambit,"];
         
-        let prefix = getRandomElement(prefixPool.filter(p => !actor.lastPrefixes.includes(p))) || getRandomElement(prefixPool);
-        prefix = prefix.replace(/{possessive}/g, actor.pronouns.p);
-        actor.lastPrefixes.push(prefix);
-        if (actor.lastPrefixes.length > 5) actor.lastPrefixes.shift();
+        let prefix = getSmartRandomPhrase(actor, 'prefix', prefixPool).replace(/{possessive}/g, actor.pronouns.p);
         
-        let impactSentence = getRandomElement(impactTemplates)
+        let impactSentence = getSmartRandomPhrase(actor, 'defenseImpact', impactTemplates)
             .replace(/{actorName}/g, actorSpan)
             .replace(/{possessive}/g, actor.pronouns.p);
         const description = `${prefix} ${actorSpan} uses the ${move.name}. ${impactSentence}`;
@@ -367,18 +356,15 @@ function narrateMove(actor, target, move, result) {
     if (actor.momentum <= -3) statePrefixPool.push(...narrativeStatePhrases.momentum_loss);
     
     let statePrefix = '';
-    if (statePrefixPool.length > 0) {
-        const availablePrefixes = statePrefixPool.filter(p => !actor.lastPrefixes.includes(p));
-        statePrefix = getRandomElement(availablePrefixes.length > 0 ? availablePrefixes : statePrefixPool);
-        actor.lastPrefixes.push(statePrefix);
-        if (actor.lastPrefixes.length > 5) actor.lastPrefixes.shift();
+    if (statePrefixPool.length > 0 && Math.random() > 0.3) { // 70% chance to use a state phrase if available
+        statePrefix = getSmartRandomPhrase(actor, 'statePrefix', statePrefixPool);
     }
     
-    const intro = statePrefix ? '' : getRandomElement(introductoryPhrases);
+    const intro = statePrefix ? '' : getSmartRandomPhrase(actor, 'intro', introductoryPhrases);
     const verb = move.verb || 'executes';
     const conjugatedVerb = conjugateVerb(verb);
     const objectPhrase = assembleObjectPhrase(move);
-    const adverb = move.type === 'Offense' ? getRandomElement(adverbPool.offensive) : '';
+    const adverb = getSmartRandomPhrase(actor, 'adverb', adverbPool.offensive);
 
     function pronounOrName(prefix, span, actorData) {
         const pronoun = actorData.pronouns.s;
@@ -394,17 +380,12 @@ function narrateMove(actor, target, move, result) {
         impactSentence = getRandomElement(finishingBlowPhrases).replace(/{targetName}/g, targetSpan);
     } else {
         const impactPool = impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()];
-        const availableImpacts = impactPool.filter(p => !actor.phraseHistory.includes(p));
-        impactSentence = getRandomElement(availableImpacts.length > 5 ? availableImpacts : impactPool, "The move connects.").replace(/{targetName}/g, targetSpan);
-        actor.phraseHistory.push(impactSentence);
-        if (actor.phraseHistory.length > 10) actor.phraseHistory.shift();
+        impactSentence = getSmartRandomPhrase(actor, 'attackImpact', impactPool).replace(/{targetName}/g, targetSpan);
     }
 
     if (result.effectiveness.label === 'WEAK') {
-        impactSentence += ' ' + getRandomElement(weakMoveTransitions)
-            .replace(/{targetName}/g, targetSpan)
-            .replace(/{actorName}/g, actorSpan)
-            .replace(/{possessive}/g, actor.pronouns.p);
+        impactSentence += ' ' + getSmartRandomPhrase(actor, 'weakTransition', weakMoveTransitions)
+            .replace(/{targetName}/g, targetSpan).replace(/{actorName}/g, actorSpan).replace(/{possessive}/g, actor.pronouns.p);
     }
     
     const description = `${fullAction} ${impactSentence}`.replace(/\s\./g, '.').replace(/\s+/g, ' ').trim();
