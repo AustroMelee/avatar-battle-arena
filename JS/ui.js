@@ -1,5 +1,4 @@
 // FILE: ui.js
-// FILE: js/ui.js
 'use strict';
 
 import { characters } from './characters.js';
@@ -62,7 +61,8 @@ function displayFinalAnalysis(finalState, winnerId) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
     const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-    const loser = winnerId === fighter1.id ? fighter2 : loser;
+    // --- THIS IS THE CORRECTED LINE ---
+    const loser = winnerId === fighter1.id ? fighter2 : fighter1;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
