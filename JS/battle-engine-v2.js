@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v10.0-S++-RML-Overkill-Pass';
+const systemVersion = 'v10.1-S++-RML-Bugfix-Pass';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -11,12 +11,41 @@ import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhr
 import { relationshipMatrix } from './relationship-matrix.js';
 import { emotionalFlavor } from './narrative-flavor.js';
 
-// --- HELPER FUNCTIONS ---
+// --- HELPER FUNCTIONS (MOVED TO TOP-LEVEL SCOPE) ---
 const getRandomElement = (arr, fallback = null) => {
     if (!arr || arr.length === 0) return fallback;
     return arr[Math.floor(Math.random() * arr.length)];
 };
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+function conjugateVerb(verb) {
+    if (!verb) return '';
+    const verbParts = verb.split(' ');
+    const mainVerb = verbParts.shift();
+    const remainder = verbParts.join(' ');
+    let conjugated;
+    if (mainVerb === 'launch') return 'launches';
+    if (mainVerb === 'lash') return 'lashes';
+    if (mainVerb.endsWith('y') && !['a', 'e', 'i', 'o', 'u'].includes(mainVerb.slice(-2, -1))) {
+        conjugated = mainVerb.slice(0, -1) + 'ies';
+    } else if (/(s|sh|ch|x|z|o)$/.test(mainVerb)) {
+        conjugated = mainVerb + 'es';
+    } else {
+        conjugated = mainVerb + 's';
+    }
+    return remainder ? `${conjugated} ${remainder}` : conjugated;
+}
+
+function assembleObjectPhrase(move) {
+    if (!move.object) return '';
+    if (move.requiresArticle) {
+        const firstLetter = move.object.charAt(0).toLowerCase();
+        const article = ['a', 'e', 'i', 'o', 'u'].includes(firstLetter) ? 'an' : 'a';
+        return `${article} ${move.object}`;
+    }
+    return move.object;
+}
+
 
 // --- BATTLE STATE & SIMULATION ---
 function initializeFighterState(charId, opponentId, emotionalMode) {
@@ -223,10 +252,14 @@ function selectMove(actor, defender, conditions) {
         return { move, weight, reasons };
     });
 
-    const chosenMoveInfo = weightedMoves.sort((a,b) => b.weight - a.weight)[0];
+    const sortedMoves = weightedMoves.filter(m => m.weight > 0).sort((a,b) => b.weight - a.weight);
+    const chosenMoveInfo = sortedMoves.length > 0 ? sortedMoves[0] : null;
     const chosenMove = chosenMoveInfo ? chosenMoveInfo.move : struggleMove;
 
-    let aiLogEntry = `Selected '${chosenMove.name}' (W: ${chosenMoveInfo.weight.toFixed(2)}). Factors: [${chosenMoveInfo.reasons.join(',')}]`;
+    let aiLogEntry = `Selected '${chosenMove.name}'`
+    if(chosenMoveInfo) {
+        aiLogEntry += ` (W: ${chosenMoveInfo.weight.toFixed(2)}). Factors: [${chosenMoveInfo.reasons.join(',')}]`;
+    }
     if (opportunismBonus > 1.0) aiLogEntry += `|Opp:${openingReason}`;
     if (actor.emotionalState !== 'normal') aiLogEntry += `|State:${actor.emotionalState.toUpperCase()}`;
     
@@ -235,7 +268,6 @@ function selectMove(actor, defender, conditions) {
 
 
 // --- NARRATIVE & COMBAT CALCULATION ---
-// (The functions below are largely the same as before, but with narrative hooks added)
 
 function narrateMove(actor, target, move, result) {
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
@@ -251,7 +283,7 @@ function narrateMove(actor, target, move, result) {
                 .replace(/{targetName}/g, targetSpan)
                 .replace(/{possessive}/g, actor.pronouns.p) + ' ';
         }
-    } else if (Math.random() < 0.2) { // Chance for a random taunt
+    } else if (actor.relationalState && Math.random() < 0.2) { // Chance for a random taunt if relationship exists
         const tauntPool = emotionalFlavor[actor.id]?.taunt;
         const taunt = tauntPool ? tauntPool[target.id] || tauntPool.generic : null;
         if (taunt) {
@@ -275,7 +307,7 @@ function narrateMove(actor, target, move, result) {
     
     const intro = statePrefix ? '' : getRandomElement(introductoryPhrases);
     const verb = conjugateVerb(move.verb || 'executes');
-    const objectPhrase = move.object ? (move.requiresArticle ? `a ${move.object}` : move.object) : '';
+    const objectPhrase = assembleObjectPhrase(move);
     const adverb = getRandomElement(adverbPool.offensive);
     
     let fullAction = `${emotionalPrefix}${(statePrefix || intro).replace(/{possessive}/g, actor.pronouns.p)} ${actorSpan} ${verb} ${objectPhrase} ${adverb}.`;
@@ -352,11 +384,13 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
 function getAvailableMoves(actor, conditions) {
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [], usageRequirements: {} };
     if (!actor.techniques) return [struggleMove];
-
-    return actor.techniques.filter(move => {
+    
+    const available = actor.techniques.filter(move => {
         if (!move.usageRequirements) return true;
         return Object.entries(move.usageRequirements).every(([key, val]) => conditions[key] === val);
-    }) || [struggleMove];
+    });
+
+    return available.length > 0 ? available : [struggleMove];
 }
 
 function applyEnvironmentalModifiers(move, attacker, conditions) {
@@ -386,7 +420,7 @@ function applyEnvironmentalModifiers(move, attacker, conditions) {
         if(conditions[key]) { multiplier *= mod; logReasons.add(`move empowered by ${key}`); }
     });
     Object.entries(move.environmentPenalties || {}).forEach(([key, mod]) => {
-        if(conditions[key]) { multiplier *= mod; logReasons.add(`move weakened by ${key}`); }
+        if(conditions[key]) { multiplier *= (1/mod); logReasons.add(`move weakened by ${key}`); }
     });
 
     return { multiplier, logReasons: Array.from(logReasons) };
@@ -397,6 +431,36 @@ const isReactive = (defender) => defender.lastMove?.type === 'Offense';
 function updateMomentum(current, label) {
     const changes = { 'Critical': 3, 'Strong': 2, 'Normal': 1, 'Weak': -2, 'Counter': 2 };
     return clamp(current + (changes[label] || 0), -5, 5);
+}
+
+function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
+    const winnerChar = characters[winnerId];
+    const loserChar = characters[loserId];
+    const archetypePool = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
+    const endingTemplate = battleContext.isCloseCall ? (archetypePool.narrow || archetypePool.dominant) : archetypePool.dominant;
+    
+    let populatedEnding = endingTemplate
+        .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
+        .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`)
+        .replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
+
+    const finalQuote = getVictoryQuote(winnerChar, battleContext);
+    if (finalQuote && !populatedEnding.includes(finalQuote)) {
+        populatedEnding += ` "${finalQuote}"`;
+    }
+    return populatedEnding;
+}
+
+function getVictoryQuote(character, battleContext) {
+    if (!character || !character.quotes) return "Victory is mine.";
+    const { opponentId } = battleContext;
+    const quotes = character.quotes;
+    const quotePool = [];
+    if (opponentId && quotes.postWin_specific?.[opponentId]) quotePool.push(...[].concat(quotes.postWin_specific[opponentId]));
+    if (battleContext.isDominant && quotes.postWin_overwhelming) quotePool.push(...[].concat(quotes.postWin_overwhelming));
+    if (battleContext.isCloseCall && quotes.postWin_reflective) quotePool.push(...[].concat(quotes.postWin_reflective));
+    if (quotes.postWin) quotePool.push(...[].concat(quotes.postWin));
+    return getRandomElement(quotePool) || "The battle is won.";
 }
 
 function generateOutcomeSummary(winner, loser) {
