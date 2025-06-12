@@ -1,7 +1,7 @@
-// FILE: js/battle-engine-v2.js
+// FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v3A-Overhaul-Prototype';
+const systemVersion = 'v3B-Overhaul-Patch-1';
 const legacyMode = false; // Set to true to disable the move matrix for debugging
 
 import { characters } from './characters.js';
@@ -132,7 +132,7 @@ export function simulateBattle(f1Id, f2Id, locId) {
             
             phaseContent += narrateMove(attacker, defender, move, result);
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
-            attacker.energy = clamp(attacker.energy - Math.round((move.power || 0) * 0.5), 0, 100);
+            attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.lastMove = move;
             attacker.movesUsed.push(move.name);
             attacker.moveHistory.push(move);
@@ -150,6 +150,9 @@ export function simulateBattle(f1Id, f2Id, locId) {
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
     
     // Outcome Analysis
+    if (interactionLog.length === 0) {
+        interactionLog.push('No significant environmental or move-interaction modifiers were in play.');
+    }
     winner.interactionLog = interactionLog;
     const summary = generateOutcomeSummary(winner, loser);
     winner.summary = summary;
@@ -193,37 +196,68 @@ function selectMove(actor, turn, maxTurns) {
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
+    let logReasons = [];
     
     // Environmental Modifiers
     if (move.element === 'water' || move.element === 'ice') {
         if (conditions.isSandy || conditions.isHot) {
             multiplier *= 0.25; // Massive debuff
-            interactionLog.push(`${attacker.name}'s ${move.name} was weakened by the arid terrain.`);
+            logReasons.push("was weakened by the arid terrain");
         }
-        if (conditions.waterRich || conditions.iceRich) multiplier *= 1.3;
+        if (conditions.waterRich || conditions.iceRich) {
+            multiplier *= 1.3;
+            logReasons.push("was empowered by the abundant water/ice");
+        }
     }
-    if (move.element === 'earth' && conditions.earthRich) multiplier *= 1.3;
-    if (move.element === 'fire' && conditions.isHot) multiplier *= 1.25;
+    if (move.element === 'earth' && conditions.earthRich) {
+        multiplier *= 1.3;
+        logReasons.push("was empowered by the rich earth");
+    }
+    if (move.element === 'fire' && conditions.isHot) {
+        multiplier *= 1.25;
+        logReasons.push("was empowered by the intense heat");
+    }
     
     // Move Interaction Matrix
     if (!legacyMode && moveInteractionMatrix[move.name]) {
         const moveInteractions = moveInteractionMatrix[move.name];
         if (defender.lastMove && moveInteractions.counters?.[defender.lastMove.name]) {
-            multiplier *= moveInteractions.counters[defender.lastMove.name];
-            interactionLog.push(`${attacker.name}'s ${move.name} countered ${defender.name}'s ${defender.lastMove.name}.`);
+            const counterBonus = moveInteractions.counters[defender.lastMove.name];
+            multiplier *= counterBonus;
+            logReasons.push(`countered ${defender.name}'s ${defender.lastMove.name}`);
         }
     }
     
+    // Add to main log if any reasons were found
+    if (logReasons.length > 0) {
+        interactionLog.push(`${attacker.name}'s ${move.name} ${logReasons.join(' and ')}.`);
+    }
+
     const totalEffectiveness = basePower * multiplier;
     
     let level;
-    if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK;
-    else if (totalEffectiveness > basePower * 1.3) level = effectivenessLevels.CRITICAL;
-    else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
-    else level = effectivenessLevels.NORMAL;
+    let energyMultiplier = 1.0;
+    if (totalEffectiveness < basePower * 0.7) {
+        level = effectivenessLevels.WEAK;
+        energyMultiplier = 1.2; // Wasted effort costs more energy
+    } else if (totalEffectiveness > basePower * 1.3) {
+        level = effectivenessLevels.CRITICAL;
+        energyMultiplier = 0.9; // Efficient strike costs less
+    } else if (totalEffectiveness > basePower * 1.1) {
+        level = effectivenessLevels.STRONG;
+        energyMultiplier = 0.95;
+    } else {
+        level = effectivenessLevels.NORMAL;
+    }
     
     const damage = move.type.includes('Offense') ? Math.round(totalEffectiveness / 3) : 0;
-    return { effectiveness: level, damage: clamp(damage, 0, 50) };
+    const energyCost = Math.round(((move.power || 0) * 0.5) * energyMultiplier);
+
+    return { 
+        effectiveness: level, 
+        damage: clamp(damage, 0, 50),
+        energyCost: clamp(energyCost, 5, 100)
+    };
 }
 
 // --- NARRATIVE & OUTCOME ---
@@ -252,7 +286,11 @@ function narrateMove(actor, target, move, result) {
         actor.lastPrefixes.push(prefix);
         if (actor.lastPrefixes.length > 5) actor.lastPrefixes.shift();
         
-        const description = `${prefix} ${actorSpan} uses the ${move.name}. ` + getRandomElement(impactTemplates).replace(/{actorName}/g, actorSpan);
+        let impactSentence = getRandomElement(impactTemplates)
+            .replace(/{actorName}/g, actorSpan)
+            .replace(/{possessive}/g, actor.pronouns.p);
+        const description = `${prefix} ${actorSpan} uses the ${move.name}. ${impactSentence}`;
+
         const label = isReactive ? "Counter" : "Set-up";
         return phaseTemplates.move.replace(/{actorId}/g, actor.id).replace(/{actorName}/g, actor.name).replace(/{moveName}/g, move.name).replace(/{moveEmoji}/g, move.emoji || '✨').replace(/{effectivenessLabel}/g, label).replace(/{effectivenessEmoji}/g, '🛡️').replace(/{moveDescription}/g, description);
     }
@@ -322,7 +360,7 @@ function generateOutcomeSummary(winner, loser) {
     
     let summary = `${winner.name}'s victory was sealed by ${winner.pronouns.p} ${summaryMap[mostUsedType]}.`;
     if (winner.momentum - loser.momentum >= 3) {
-        summary += ` ${winner.pronouns.s.charAt(0).toUpperCase() + winner.pronouns.s.slice(1)} commanding momentum overwhelmed ${loser.name}.`;
+        summary += ` ${winner.pronouns.p.charAt(0).toUpperCase() + winner.pronouns.p.slice(1)} commanding momentum overwhelmed ${loser.name}.`;
     }
     return summary;
 }
