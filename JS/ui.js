@@ -1,4 +1,4 @@
-// FILE: ui.js
+// FILE: js/ui.js
 'use strict';
 
 import { characters } from './characters.js';
@@ -74,15 +74,26 @@ function displayFinalAnalysis(finalState, winnerId) {
         DOM.analysisList.appendChild(li);
     };
 
-    const createSummaryItem = (text) => {
+    const createSummaryItem = (text, className = 'analysis-summary') => {
         if (!text) return;
         const li = document.createElement('li');
-        li.className = 'analysis-summary';
+        li.className = className;
         li.innerHTML = `<em>${text}</em>`;
         DOM.analysisList.appendChild(li);
     }
+    
+    const createInteractionLog = (log) => {
+        if (!log || log.length === 0) return;
+        const li = document.createElement('li');
+        li.className = 'interaction-log';
+        li.innerHTML = '<strong>Interaction Log:</strong> ' + log.join(' ');
+        DOM.analysisList.appendChild(li);
+    }
 
-    createSummaryItem(winner.summary || loser.summary);
+    createSummaryItem(winner.summary);
+    if (winner.interactionLog && winner.interactionLog.length > 0) {
+        createInteractionLog(winner.interactionLog);
+    }
 
     createListItem(`<b>${winner.name}'s Final Status:</b>`, 'VICTORIOUS', 'modifier-plus');
     createListItem(`  • Health:`, `${Math.round(winner.hp)} / 100 HP`);
