@@ -75,6 +75,36 @@ function initializeFighterState(charId, locId) {
     };
 }
 
+function getVictoryQuote(character, battleContext) {
+    if (!character || !character.quotes) return "Victory is mine.";
+    const { opponentId } = battleContext;
+    const quotes = character.quotes;
+    const quotePool = [];
+    if (opponentId && quotes.postWin_specific?.[opponentId]) quotePool.push(...[].concat(quotes.postWin_specific[opponentId]));
+    if (battleContext.isDominant && quotes.postWin_overwhelming) quotePool.push(...[].concat(quotes.postWin_overwhelming));
+    if (battleContext.isCloseCall && quotes.postWin_reflective) quotePool.push(...[].concat(quotes.postWin_reflective));
+    if (quotes.postWin) quotePool.push(...[].concat(quotes.postWin));
+    return getRandomElement(quotePool) || "The battle is won.";
+}
+
+function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
+    const winnerChar = characters[winnerId];
+    const loserChar = characters[loserId];
+    const archetypePool = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
+    const endingTemplate = battleContext.isCloseCall ? (archetypePool.narrow || archetypePool.dominant) : archetypePool.dominant;
+    
+    let populatedEnding = endingTemplate
+        .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
+        .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`)
+        .replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
+
+    const finalQuote = getVictoryQuote(winnerChar, battleContext);
+    if (finalQuote && !populatedEnding.includes(finalQuote)) {
+        populatedEnding += ` "${finalQuote}"`;
+    }
+    return populatedEnding;
+}
+
 export function simulateBattle(f1Id, f2Id, locId) {
     let fighter1 = initializeFighterState(f1Id, locId);
     let fighter2 = initializeFighterState(f2Id, locId);
@@ -197,24 +227,6 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
 }
 
 // --- NARRATIVE & OUTCOME ---
-function getToneAlignedVictoryEnding(winnerId, loserId, battleContext) {
-    const winnerChar = characters[winnerId];
-    const loserChar = characters[loserId];
-    const archetypePool = postBattleVictoryPhrases[winnerChar.victoryStyle] || postBattleVictoryPhrases.default;
-    const endingTemplate = battleContext.isCloseCall ? (archetypePool.narrow || archetypePool.dominant) : archetypePool.dominant;
-    
-    let populatedEnding = endingTemplate
-        .replace(/{WinnerName}/g, `<span class="char-${winnerId}">${winnerChar.name}</span>`)
-        .replace(/{LoserName}/g, `<span class="char-${loserId}">${loserChar.name}</span>`)
-        .replace(/{WinnerPronounP}/g, winnerChar.pronouns.p);
-
-    const finalQuote = getVictoryQuote(winnerChar, battleContext);
-    if (finalQuote && !populatedEnding.includes(finalQuote)) {
-        populatedEnding += ` "${finalQuote}"`;
-    }
-    return populatedEnding;
-}
-
 function updateMomentum(currentMomentum, effectivenessLabel) {
     let change = 0;
     if (effectivenessLabel === 'Strong' || effectivenessLabel === 'Critical') change = 2;

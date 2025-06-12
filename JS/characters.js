@@ -128,5 +128,44 @@ export const characters = {
             { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['collateral_damage_medium'] }
         ],
         quotes: { postWin: ["Discipline prevails."], postWin_overwhelming: ["My mastery is absolute. There is no question of the outcome."] }
-    }
+    },
+    'jeong-jeong': {
+        id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+        victoryStyle: "Wise_Reluctant", powerTier: 6,
+        personalityProfile: { aggression: 0.2, riskTolerance: 0.3, opportunism: 0.5, patience: 0.9 },
+        techniques: [
+            { name: "Controlled Inferno", verb: 'create', object: 'a controlled inferno', type: 'Offense', power: 80, emoji: '🔥', requiresArticle: true, element: 'fire', moveTags: ['collateral_damage_medium'] },
+            { name: "Fire Wall", verb: 'raise', object: 'an impenetrable wall of fire', type: 'Defense', power: 85, emoji: '🧱', requiresArticle: true, element: 'fire', moveTags: ['collateral_damage_high'] },
+            { name: "Flame Whips", verb: 'conjure', object: 'precise flame whips', type: 'Offense', power: 55, emoji: '🐍', element: 'fire', moveTags: ['collateral_damage_low'] },
+            { name: "Precision Burn", verb: 'inflict', object: 'a surgical burn', type: 'Offense', power: 45, emoji: '🎯', requiresArticle: true, element: 'fire', moveTags: ['precise'] },
+            { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, emoji: '🛑', element: 'fire', moveTags: ['collateral_damage_high'] }
+        ],
+        quotes: { postWin: ["The destructive path of fire has been averted, for now."], postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."] }
+    },
+    'mai': {
+        id: 'mai', name: "Mai", type: "Nonbender", pronouns: { s: 'she', p: 'her', o: 'her' },
+        victoryStyle: "Deadpan", powerTier: 4,
+        personalityProfile: { aggression: 0.4, riskTolerance: 0.4, opportunism: 0.8, patience: 0.7 },
+        techniques: [
+            { name: "Knife Barrage", verb: 'unleash', object: 'a barrage of knives', type: 'Offense', power: 50, emoji: '🔪', requiresArticle: true, element: 'physical', moveTags: ['collateral_damage_low'] },
+            { name: "Precision Strike", verb: 'throw', object: 'a single, perfectly aimed knife', type: 'Offense', power: 65, emoji: '🎯', requiresArticle: true, element: 'physical', moveTags: ['precise'] },
+            { name: "Knife Wall", verb: 'create', object: 'a defensive wall of knives', type: 'Defense', power: 45, emoji: '🧱', requiresArticle: true, element: 'physical', moveTags: [] },
+            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, emoji: '📌', element: 'physical', moveTags: ['utility', 'precise'] },
+            { name: "Ricochet Shot", verb: 'launch', object: 'a ricochet shot', type: 'Offense', power: 55, emoji: '🔄', requiresArticle: true, element: 'physical', moveTags: ['precise'] },
+            { name: "Final Pin", verb: 'unleash', object: 'a final volley to trap her opponent', type: 'Finisher', power: 80, emoji: '📍', element: 'physical', moveTags: ['utility', 'precise'] }
+        ],
+        quotes: { postWin: ["That's it. Are we done now?"], postWin_overwhelming: ["You were never a threat. Just... annoying."] }
+    },
+    'ty-lee': {
+        id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", pronouns: { s: 'she', p: 'her', o: 'her' },
+        victoryStyle: "Playful", powerTier: 4,
+        personalityProfile: { aggression: 0.8, riskTolerance: 0.7, opportunism: 0.9, patience: 0.3 },
+        techniques: [
+            { name: "Acrobatic Flips", verb: 'execute', object: 'a series of acrobatic flips', type: 'Utility', power: 25, emoji: '🤸‍♀️', requiresArticle: true, element: 'utility', moveTags: ['evasive'] },
+            { name: "Pressure Point Strike", verb: 'strike', object: 'a vital pressure point', type: 'Offense', power: 60, emoji: '🎯', requiresArticle: true, element: 'physical', moveTags: ['precise', 'disabling'] },
+            { name: "Graceful Dodge", verb: 'dodge', object: 'an incoming attack', type: 'Defense', power: 40, emoji: '🍃', requiresArticle: true, element: 'utility', moveTags: ['evasive'] },
+            { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'a flurry of chi-blocking strikes', type: 'Finisher', power: 85, emoji: '🛑', requiresArticle: true, element: 'special', moveTags: ['precise', 'disabling'] }
+        ],
+        quotes: { postWin: ["Looks like your chi's... on vacation!"], postWin_overwhelming: ["Ta-da! That's how it's done!"] }
+    },
 };
