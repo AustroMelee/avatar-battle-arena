@@ -2,7 +2,7 @@
 'use strict';
 
 // ====================================================================================
-//  Move Interaction Matrix (v3 - Exhaustive Brute-Force Edition)
+//  Move Interaction Matrix (v3.1 - Corrected Brute-Force Edition)
 // ====================================================================================
 //  This matrix defines weighted interactions between specific moves.
 //  The system is bi-directional. The 'counters' property is the source of truth.
@@ -16,6 +16,17 @@
 //    Move A, it will receive a penalty (1 / 1.3x ≈ 0.77x).
 //  - This file is organized by CHARACTER for maximum clarity and exhaustive listing.
 // ====================================================================================
+
+
+// Define shared counter objects first to avoid self-reference errors during object creation.
+const pressurePointCounters = {
+    'Rock Armor': 1.7,
+    'Fire Shield': 1.5,
+    'Water Shield': 1.5,
+    'Octopus Form': 1.4,
+    'Defensive Stance': 2.0, // A simple block is useless
+};
+
 
 export const moveInteractionMatrix = {
 
@@ -180,11 +191,7 @@ export const moveInteractionMatrix = {
     //  NON-BENDERS & OTHER
     // ============================================================
     'Pressure Point Strike': {
-        counters: {
-            'Rock Armor': 1.7, 'Fire Shield': 1.5, 'Water Shield': 1.5, // Bypasses elemental shields to strike the user
-            'Octopus Form': 1.4, // Agile enough to get inside the tentacles
-            'Defensive Stance': 2.0, // A simple block is useless
-        },
+        counters: pressurePointCounters,
     },
     'Pinning Strike': { // Mai's specialty
         counters: {
@@ -226,7 +233,7 @@ export const moveInteractionMatrix = {
     },
     'Chi-Blocking Flurry': { // Ty Lee
         counters: {
-            ...this['Pressure Point Strike'].counters, // Inherits all benefits of its base move
+            ...pressurePointCounters, // Inherits all benefits from its base move
             'Seismic Slam': 1.5, // Flips over the shockwave to deliver the final blows
             'Redemption\'s Fury': 1.3, // Gets inside the flurry to disable the attacker
         },
