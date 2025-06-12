@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v16.3-StalemateBreaker';
+const systemVersion = 'v16.4-FinalBalance';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -104,7 +104,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     }
     
     // --- FINAL OUTCOME DETERMINATION ---
-    // DRAW Condition: If HPs are equal at timeout.
     if (fighter1.hp > 0 && fighter1.hp === fighter2.hp) {
          turnLog.push(phaseTemplates.drawResult);
          turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', "Both warriors fought to their absolute limit, but neither could secure the final blow. They stand exhausted, a testament to each other's strength."));
@@ -215,7 +214,10 @@ function selectMove(actor, defender, conditions) {
             }
         }
         
-        // FINAL OVERRIDE: Broken state logic
+        if (actor.personalityProfile.aggression > 0.9 && actor.momentum >= 3) {
+            if (move.type === 'Offense') weight *= 3.0; // Blood in the water bonus
+        }
+        
         if (actor.mentalState.level === 'broken' && move.type !== 'Offense') {
             weight = 0.01;
         }
@@ -288,12 +290,12 @@ function calculateMove(move, attacker, defender, conditions, interactionLog) {
                 consumedStateName = defender.tacticalState.name;
                 interactionLog.push(`${attacker.name}'s ${move.name} was amplified by ${defender.name} being ${defender.tacticalState.name}.`);
                 payoff = true;
-                damage += 5; // Flat damage bonus for consuming a tactical state.
+                damage += 5;
             } else if (defender.isStunned) {
                 multiplier *= 1.3;
                 interactionLog.push(`${attacker.name}'s ${move.name} capitalized on ${defender.name} being stunned.`);
                 payoff = true;
-                damage += 3; // Smaller bonus for a generic stun.
+                damage += 3;
             }
         } else if (punishableMoves[move.name]) {
             multiplier *= punishableMoves[move.name].penalty;
