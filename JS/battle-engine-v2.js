@@ -1,7 +1,7 @@
 // FILE: js/battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v17.0-FinalBalance';
+const systemVersion = 'v18.0-AI-Variance';
 const legacyMode = false;
 
 import { characters } from './characters.js';
@@ -129,17 +129,12 @@ function updateMentalState(actor, opponent, moveResult) {
     let stressThisTurn = 0;
     
     if (moveResult) {
-        // --- Psychological Warfare Mechanic ---
-        // Successful hits inflict stress based on effectiveness, amplified by relational dynamics
         const stressMultiplier = opponent.relationalState?.stressModifier || 1.0;
         if (moveResult.effectiveness.label === 'Critical') stressThisTurn += (20 * stressMultiplier);
         if (moveResult.effectiveness.label === 'Strong') stressThisTurn += (15 * stressMultiplier);
-        
-        // Standard stress from taking damage
         stressThisTurn += moveResult.damage / 2;
     }
     
-    // Ambient stress from being at a disadvantage
     if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
     if (actor.tacticalState) stressThisTurn += 15;
     
@@ -228,25 +223,37 @@ function selectMove(actor, defender, conditions) {
         }
         if (actor.id === 'azula' && defender.id === 'ozai-not-comet-enhanced' && defender.mentalState.level !== 'stable') {
              if (move.type === 'Finisher' || (move.type === 'Offense' && move.power > 65)) {
-                weight *= 5.0; // Royal Contempt bonus
+                weight *= 5.0;
              }
         }
         
         if (actor.mentalState.level === 'broken') {
              if (move.type === 'Utility' || move.type === 'Defense') weight *= 0.05;
-             if (move.type === 'Finisher') weight *= 0.2; // A desperate, last-ditch effort is possible
+             if (move.type === 'Finisher') weight *= 0.2;
         }
 
-        return { move, weight };
+        return { move, weight, originalMove: move };
     });
 
-    weightedMoves.push({move: struggleMove, weight: 0.1});
+    weightedMoves.push({move: struggleMove, weight: 0.1, originalMove: struggleMove});
     const validMoves = weightedMoves.filter(m => m.weight > 0);
-    const sortedMoves = validMoves.sort((a,b) => b.weight - a.weight);
-    const chosenMoveInfo = sortedMoves[0] || { move: struggleMove, weight: 0.1 };
-    const chosenMove = chosenMoveInfo.move;
     
-    let aiLogEntry = `Selected '${chosenMove.name}' (W: ${chosenMoveInfo.weight.toFixed(2)})|State:${actor.mentalState.level}|Stamina:${staminaState}`;
+    if (validMoves.length === 0) {
+        return { move: struggleMove, aiLogEntry: `Selected 'Struggle' (no valid moves)` };
+    }
+
+    const sortedMoves = validMoves.sort((a,b) => b.weight - a.weight);
+    const topMove = sortedMoves[0];
+
+    // --- AI TACTICAL VARIANCE ---
+    // Create a pool of "good enough" moves to introduce unpredictability.
+    const candidateThreshold = topMove.weight * 0.75;
+    const candidatePool = sortedMoves.filter(m => m.weight >= candidateThreshold);
+    
+    const chosenMoveInfo = getRandomElement(candidatePool) || topMove;
+    const chosenMove = chosenMoveInfo.originalMove;
+    
+    let aiLogEntry = `Selected '${chosenMove.name}' (W: ${chosenMoveInfo.weight.toFixed(2)}) from ${candidatePool.length} candidates|State:${actor.mentalState.level}|Stamina:${staminaState}`;
     if(defender.tacticalState) aiLogEntry += `|DEFENDER_STATE:${defender.tacticalState.name}`;
     
     return { move: chosenMove, aiLogEntry };
