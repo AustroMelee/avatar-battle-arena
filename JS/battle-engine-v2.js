@@ -1,7 +1,7 @@
 // FILE: battle-engine-v2.js
 'use strict';
 
-const systemVersion = 'v6.1-Bugfix-Final';
+const systemVersion = 'v6.2-Final-Bugfix';
 const legacyMode = false; // Set to true to disable matrix logic for debugging
 
 import { characters } from './characters.js';
@@ -12,7 +12,6 @@ import { battlePhases, effectivenessLevels, phaseTemplates, postBattleVictoryPhr
 // --- HELPER FUNCTIONS ---
 const getRandomElement = (arr, fallback = null) => {
     if (!arr || arr.length === 0) return fallback;
-    // This is a simple history-aware random picker to prevent immediate repetition
     const recentHistory = arr.slice(-3);
     const available = arr.filter(item => !recentHistory.includes(item));
     return (available.length > 0) ? available[Math.floor(Math.random() * available.length)] : arr[Math.floor(Math.random() * arr.length)];
@@ -23,7 +22,6 @@ function getWeightedRandom(items) {
     if (!items || items.length === 0) return null;
     const totalWeight = items.reduce((sum, item) => sum + (item.weight || 1), 0);
     if (totalWeight <= 0) {
-        // If all weights are zero, can't perform weighted random selection
         return null;
     }
 
@@ -32,7 +30,6 @@ function getWeightedRandom(items) {
         random -= (item.weight || 1);
         if (random <= 0) return item.move;
     }
-    // Fallback in case of floating point inaccuracies
     return items[items.length - 1].move;
 }
 
@@ -189,14 +186,13 @@ export function simulateBattle(f1Id, f2Id, locId) {
 function selectMove(actor, defender) {
     const suitableMoves = actor.techniques;
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
-    if (suitableMoves.length === 0) return struggleMove;
+    if (!suitableMoves || suitableMoves.length === 0) return struggleMove;
 
     const recentMoves = actor.movesUsed.slice(-3);
     const openingExists = (defender.isStunned || defender.momentum <= -3 || defender.lastMoveEffectiveness === 'Weak');
 
     const weightedMoves = suitableMoves.map(move => {
         let weight = 1.0;
-
         if (recentMoves.includes(move.name)) weight *= 0.2;
 
         if (move.moveTags.includes('requires_opening')) {
@@ -217,11 +213,15 @@ function selectMove(actor, defender) {
         return { move, weight };
     });
 
-    const selectedMove = getWeightedRandom(weightedMoves);
+    const chosenMove = getWeightedRandom(weightedMoves);
 
-    // **CRITICAL BUG FIX:** If getWeightedRandom returns null (e.g., all weights are 0 due to no energy),
-    // we MUST return a valid move object. "Struggle" is the designated fallback.
-    return selectedMove || struggleMove;
+    // **DEFINITIVE BUG FIX:** Explicitly check for a null or undefined result.
+    // This guarantees a valid move object is always returned, preventing the crash.
+    if (chosenMove) {
+        return chosenMove;
+    } else {
+        return struggleMove;
+    }
 }
 
 function calculateMove(move, attacker, defender, conditions, interactionLog) {
@@ -314,13 +314,12 @@ function getSmartRandomPhrase(actor, poolKey, pool) {
     if (available.length > 0) {
         chosenPhrase = available[Math.floor(Math.random() * available.length)];
     } else {
-        // If all phrases have been used, reset history and pick one
         history.length = 0;
         chosenPhrase = pool[Math.floor(Math.random() * pool.length)];
     }
     
     history.push(chosenPhrase);
-    if (history.length > 5) { // Keep history to the last 5 used phrases
+    if (history.length > 5) { 
         history.shift();
     }
     return chosenPhrase;
@@ -364,7 +363,7 @@ function narrateMove(actor, target, move, result) {
     if (actor.momentum <= -3) statePrefixPool.push(...narrativeStatePhrases.momentum_loss);
     
     let statePrefix = '';
-    if (statePrefixPool.length > 0 && Math.random() > 0.3) { // 70% chance to use a state phrase if available
+    if (statePrefixPool.length > 0 && Math.random() > 0.3) {
         statePrefix = getSmartRandomPhrase(actor, 'statePrefix', statePrefixPool);
     }
     
