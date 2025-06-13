@@ -1,10 +1,9 @@
-// FILE: data/characters/gaang.js
 'use strict';
 
 export const gaangCharacters = {
     'sokka': {
         id: 'sokka', name: "Sokka", type: "Nonbender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/c/cc/Sokka.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/c/cc/Sokka.png/revision/latest?cb=20140905085428',
         victoryStyle: "Madcap", powerTier: 3,
         personalityProfile: { aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8, signatureMoveBias: { "Boomerang Throw": 1.2, "Improvised Trap": 1.4 } },
         specialTraits: { resilientToManipulation: 0.2 },
@@ -49,7 +48,7 @@ export const gaangCharacters = {
     },
     'aang-airbending-only': {
         id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/ae/Aang_at_Jasmine_Dragon.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/ae/Aang_at_Jasmine_Dragon.png/revision/latest?cb=20250504214141',
         victoryStyle: "Pacifist", powerTier: 9,
         personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9, signatureMoveBias: { "Air Scooter": 1.5, "Wind Shield": 1.3 } },
         specialTraits: { resilientToManipulation: 0.6 },
@@ -92,7 +91,7 @@ export const gaangCharacters = {
     },
     'katara': {
         id: 'katara', name: "Katara", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/7/7a/Katara_smiles_at_coronation.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/7/7a/Katara_smiles_at_coronation.png/revision/latest?cb=20150104171449',
         victoryStyle: "Fierce", powerTier: 7,
         personalityProfile: { aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6, signatureMoveBias: { "Water Whip": 1.2, "Ice Prison": 1.3 } },
         specialTraits: { resilientToManipulation: 0.9 },
@@ -133,7 +132,7 @@ export const gaangCharacters = {
     },
     'toph-beifong': {
         id: 'toph-beifong', name: "Toph", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/46/Toph_Beifong.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/46/Toph_Beifong.png/revision/latest?cb=20131230122047',
         victoryStyle: "Cocky", powerTier: 7,
         personalityProfile: { aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8, signatureMoveBias: { "Seismic Slam": 1.4, "Metal Bending": 1.3 } },
         specialTraits: { resilientToManipulation: 0.5 },
@@ -173,7 +172,7 @@ export const gaangCharacters = {
     },
     'zuko': {
         id: 'zuko', name: "Zuko", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4b/Zuko.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4b/Zuko.png/revision/latest?cb=20180630112142',
         victoryStyle: "Determined", powerTier: 6,
         personalityProfile: { aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5, signatureMoveBias: { "Flame Sword": 1.2, "Dragon's Breath": 1.3 } },
         specialTraits: { resilientToManipulation: 0.1 },

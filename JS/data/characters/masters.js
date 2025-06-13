@@ -1,10 +1,9 @@
-// FILE: data/characters/masters.js
 'use strict';
 
 export const masterCharacters = {
     'bumi': {
         id: 'bumi', name: "Bumi", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/e/e8/King_Bumi.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/e/e8/King_Bumi.png/revision/latest?cb=20140106141303',
         victoryStyle: "Madcap", powerTier: 8,
         personalityProfile: { aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9, signatureMoveBias: { "Rock Avalanche": 1.2, "Terrain Reshape": 1.4 } },
         specialTraits: { resilientToManipulation: 1.0 },
@@ -33,7 +32,7 @@ export const masterCharacters = {
     },
     'pakku': {
         id: 'pakku', name: "Pakku", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/b/bb/Pakku_looking_smug.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/b/bb/Pakku_looking_smug.png/revision/latest?cb=20140119164142',
         victoryStyle: "Disciplined", powerTier: 7,
         personalityProfile: { aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2, signatureMoveBias: { "Octopus Form": 1.5, "Water Barrier": 1.3 } },
         specialTraits: { resilientToManipulation: 0.8 },
@@ -63,7 +62,7 @@ export const masterCharacters = {
     },
     'jeong-jeong': {
         id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/a7/Jeong_Jeong_serious.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/a7/Jeong_Jeong_serious.png/revision/latest?cb=20140116113256',
         victoryStyle: "Wise_Reluctant", powerTier: 6,
         personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4, signatureMoveBias: { "Fire Wall": 1.6 } },
         specialTraits: { resilientToManipulation: 1.0 },

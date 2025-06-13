@@ -1,10 +1,9 @@
-// FILE: data/characters/antagonists.js
 'use strict';
 
 export const antagonistCharacters = {
     'azula': {
         id: 'azula', name: "Azula", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/1/12/Azula.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/1/12/Azula.png/revision/latest?cb=20140905084941',
         victoryStyle: "Ruthless", powerTier: 8,
         personalityProfile: { aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3, signatureMoveBias: { "Lightning Generation": 1.5, "Blue Fire Daggers": 1.2 } },
         specialTraits: { manipulative: 0.8 },
@@ -50,7 +49,7 @@ export const antagonistCharacters = {
     },
     'ozai-not-comet-enhanced': {
         id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4a/Ozai.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4a/Ozai.png/revision/latest?cb=20130612170743',
         victoryStyle: "Supreme", powerTier: 9,
         personalityProfile: { aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2, signatureMoveBias: { "Dragon's Roar": 1.4, "Emperor's Wrath": 1.5 } },
         specialTraits: { manipulative: 0.6 },
@@ -79,7 +78,7 @@ export const antagonistCharacters = {
     },
     'mai': {
         id: 'mai', name: "Mai", type: "Nonbender", pronouns: { s: 'she', p: 'her', o: 'her' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/40/Mai.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/40/Mai.png/revision/latest?cb=20090406114652',
         victoryStyle: "Deadpan", powerTier: 4,
         personalityProfile: { aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1, signatureMoveBias: { "Precision Strike": 1.3, "Pinning Strike": 1.4 } },
         specialTraits: { resilientToManipulation: 0.3 },
@@ -122,7 +121,7 @@ export const antagonistCharacters = {
     },
     'ty-lee': {
         id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", pronouns: { s: 'she', p: 'her', o: 'her' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/6/6d/Ty_Lee.png/revision/latest',
+        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/6/6d/Ty_Lee.png/revision/latest?cb=20140905083814',
         victoryStyle: "Playful", powerTier: 4,
         personalityProfile: { aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6, signatureMoveBias: { "Chi-Blocking Flurry": 1.3, "Pressure Point Strike": 1.2 } },
         specialTraits: { resilientToManipulation: 0.2 },
