@@ -9,6 +9,7 @@ export const masterCharacters = {
         victoryStyle: "Madcap", powerTier: 8,
         pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.8, riskTolerance: 0.9, opportunism: 0.7, patience: 0.5 },
+        behaviorProfile: { predictability: 0.1, creativity: 1.0, focus: 0.4 }, // The definition of unpredictable and creative
         environmentalAffinity: { earthRich: 1.2, isRocky: 1.1, isUrban: 1.1 },
         techniques: [
             { name: "Rock Avalanche", verb: 'trigger', object: 'massive rock avalanche', type: 'Finisher', power: 95, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'requires_opening'] },
@@ -24,6 +25,7 @@ export const masterCharacters = {
         victoryStyle: "Disciplined", powerTier: 7,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.6, riskTolerance: 0.4, opportunism: 0.8, patience: 0.8 },
+        behaviorProfile: { predictability: 0.9, creativity: 0.4, focus: 0.9 }, // A traditionalist, follows established forms. Highly predictable.
         environmentalAffinity: { waterRich: 1.1, iceRich: 1.1, isCold: 1.1, isHot: 0.9, isUrban: 1.0 },
         techniques: [
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
@@ -39,6 +41,7 @@ export const masterCharacters = {
         victoryStyle: "Wise_Reluctant", powerTier: 6,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.2, riskTolerance: 0.3, opportunism: 0.5, patience: 0.9 },
+        behaviorProfile: { predictability: 0.8, creativity: 0.5, focus: 0.85 }, // Reluctant to fight, prefers defensive and predictable moves.
         environmentalAffinity: { isHot: 1.05, isCold: 0.95, isUrban: 0.9, plantsRich: 1.1 },
         techniques: [
             { name: "Controlled Inferno", verb: 'create', object: 'controlled inferno', type: 'Offense', power: 80, emoji: '🔥', requiresArticle: true, element: 'fire', moveTags: ['area_of_effect', 'channeled'] },

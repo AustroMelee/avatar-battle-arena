@@ -9,6 +9,7 @@ export const antagonistCharacters = {
         victoryStyle: "Ruthless", powerTier: 8,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0 },
+        behaviorProfile: { predictability: 0.9, creativity: 0.6, focus: 0.95 }, // Extremely predictable in her pursuit of the 'perfect' move
         environmentalAffinity: { isHot: 1.1, isCold: 0.9, isUrban: 1.1, isIndustrial: 1.05 },
         techniques: [
             { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition'], setup: { name: 'Exposed', duration: 2, intensity: 1.35 } },
@@ -30,6 +31,7 @@ export const antagonistCharacters = {
         victoryStyle: "Supreme", powerTier: 9,
         pacingProfile: 'berserker',
         personalityProfile: { aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0 },
+        behaviorProfile: { predictability: 0.8, creativity: 0.3, focus: 1.0 }, // Overwhelmingly direct and focused on raw power
         environmentalAffinity: { isHot: 1.2, isCold: 0.8, isIndustrial: 1.1, isUrban: 1.2 },
         techniques: [
             { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'] },
@@ -50,6 +52,7 @@ export const antagonistCharacters = {
         victoryStyle: "Deadpan", powerTier: 4,
         pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.4, riskTolerance: 0.4, opportunism: 0.8, patience: 0.7 },
+        behaviorProfile: { predictability: 0.95, creativity: 0.2, focus: 0.9 }, // Extremely predictable and focused on her main gimmick
         environmentalAffinity: { isUrban: 1.1, hasCover: 1.1, isCramped: 1.05, isExposed: 0.9 },
         techniques: [
             { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, emoji: '🔪', requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
@@ -67,6 +70,7 @@ export const antagonistCharacters = {
         victoryStyle: "Playful", powerTier: 4,
         pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.8, riskTolerance: 0.7, opportunism: 0.9, patience: 0.3 },
+        behaviorProfile: { predictability: 0.5, creativity: 0.6, focus: 0.8 }, // Acrobatic and opportunistic, less rigidly predictable
         environmentalAffinity: { isUrban: 1.1, isDense: 1.05, isExposed: 0.95, isSlippery: 0.9, hasShiftingGround: 0.95 },
         techniques: [
             { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, emoji: '🤸‍♀️', requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Distracted', duration: 1, intensity: 1.2 } },

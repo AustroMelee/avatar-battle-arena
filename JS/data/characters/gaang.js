@@ -9,6 +9,7 @@ export const gaangCharacters = {
         victoryStyle: "Madcap", powerTier: 3,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7 },
+        behaviorProfile: { predictability: 0.2, creativity: 0.9, focus: 0.6 }, // Highly creative, but can get distracted
         environmentalAffinity: { hasCover: 1.1, isUrban: 1.05, isExposed: 0.95, plantsRich: 1.05 },
         techniques: [
             { name: "Sword Strike", verb: 'strike', object: 'with his meteorite sword', type: 'Offense', power: 40, element: 'physical', moveTags: ['melee_range', 'single_target', 'precise'] },
@@ -28,6 +29,7 @@ export const gaangCharacters = {
         victoryStyle: "Pacifist", powerTier: 9,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.5, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7 },
+        behaviorProfile: { predictability: 0.4, creativity: 0.8, focus: 0.7 }, // Creative and evasive, but not rigidly optimal
         environmentalAffinity: { airRich: 1.1, isExposed: 1.05, isUrban: 0.9, isIndustrial: 0.9 },
         techniques: [
             { name: "Air Scooter", verb: 'ride', object: 'his air scooter', type: 'Utility', power: 20, element: 'air', moveTags: ['utility_reposition', 'evasive', 'channeled'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.15 } },
@@ -48,6 +50,7 @@ export const gaangCharacters = {
         victoryStyle: "Fierce", powerTier: 7,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8 },
+        behaviorProfile: { predictability: 0.6, creativity: 0.7, focus: 0.8 }, // Resourceful and adaptable
         environmentalAffinity: { waterRich: 1.1, isCold: 1.05, isUrban: 0.9, isHot: 0.9 },
         techniques: [
             { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'] },
@@ -68,6 +71,7 @@ export const gaangCharacters = {
         victoryStyle: "Cocky", powerTier: 7,
         pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9 },
+        behaviorProfile: { predictability: 0.3, creativity: 1.0, focus: 0.5 }, // Extremely creative, but can be overconfident and take risks
         environmentalAffinity: { earthRich: 1.2, isRocky: 1.1, metalRich: 1.1, isPrecarious: 0.8, isSlippery: 0.9, hasShiftingGround: 1.1 },
         techniques: [
             { name: "Earth Wave", verb: 'send', object: 'powerful wave of earth', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect', 'environmental_manipulation'] },
@@ -85,6 +89,7 @@ export const gaangCharacters = {
         victoryStyle: "Determined", powerTier: 6,
         pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8 },
+        behaviorProfile: { predictability: 0.7, creativity: 0.5, focus: 0.6 }, // Can be straightforward and focused, but prone to emotional decisions
         environmentalAffinity: { isHot: 1.05, isCold: 0.95, isUrban: 1.0 },
         techniques: [
             { name: "Fire Daggers", verb: 'throw', object: 'volley of fire daggers', type: 'Offense', power: 45, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },

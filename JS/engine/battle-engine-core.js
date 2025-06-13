@@ -1,19 +1,13 @@
 // FILE: engine/battle-engine-core.js
 'use strict';
 
-// This is the "Game Master" file. It orchestrates the entire battle flow,
-// calling upon specialized modules for calculations, AI decisions, and narration.
-// Its primary jobs are state management and turn sequencing.
+// This is the "Game Master" file. It orchestrates the entire battle flow.
+// VERSION 3: Passes more context to AI Memory for sequence learning.
 
-// --- IMPORTS (PATHS CORRECTED) ---
 import { characters } from '../data/characters.js';
-//- OLD PATH: ../js/location-battle-conditions.js
-//+ NEW PATH: ../location-battle-conditions.js
-import { locationConditions } from '../location-battle-conditions.js'; 
-//- OLD PATH: ../js/narrative-v2.js
-//+ NEW PATH: ../narrative-v2.js
+import { locationConditions } from '../location-battle-conditions.js';
 import { battlePhases, phaseTemplates } from '../narrative-v2.js';
-import { selectMove } from './ai-decision.js';
+import { selectMove, updateAiMemory } from './ai-decision.js';
 import { calculateMove } from './move-resolution.js';
 import { updateMentalState } from './mental-state.js';
 import { narrateMove, generateOutcomeSummary, getToneAlignedVictoryEnding } from './narration.js';
@@ -35,6 +29,13 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         relationalState: (emotionalMode && character.relationships?.[opponentId]) || null,
         mentalState: { level: 'stable', stress: 0 },
         mentalStateChangedThisTurn: false,
+        aiMemory: {
+            selfMoveEffectiveness: {}, // { moveName: { totalEffectiveness: number, uses: number } }
+            opponentModel: { isAggressive: 0, isDefensive: 0, isTurtling: false },
+            moveSuccessCooldown: {}, // { moveName: cooldownTurns }
+            // NEW: Tracks move sequences instead of just individual moves
+            opponentSequenceLog: {}, // { prevMoveName: { nextMoveName: count } }
+        }
     };
 }
 
@@ -56,6 +57,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
         [fighter1, fighter2].forEach(f => {
             f.mentalStateChangedThisTurn = false;
+            Object.keys(f.aiMemory.moveSuccessCooldown).forEach(moveName => {
+                f.aiMemory.moveSuccessCooldown[moveName]--;
+                if (f.aiMemory.moveSuccessCooldown[moveName] <= 0) {
+                    delete f.aiMemory.moveSuccessCooldown[moveName];
+                }
+            });
             if (f.tacticalState) {
                 f.tacticalState.duration--;
                 if (f.tacticalState.duration <= 0) {
@@ -73,8 +80,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             attacker.isStunned = false; 
             
             updateMentalState(attacker, defender, null);
-            const { move, aiLogEntry } = selectMove(attacker, defender, conditions);
-            attacker.aiLog.push(`[T${turn+1}] ${aiLogEntry}`);
+            const { move, aiLogEntry } = selectMove(attacker, defender, conditions, turn);
+            attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`); // Pretty-print the detailed log
 
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
@@ -102,6 +109,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             phaseContent += narrateMove(attacker, defender, move, result);
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
+            
+            // MODIFIED: Pass attacker's own last move to help the defender learn the sequence.
+            updateAiMemory(defender, attacker, defender.lastMove, result);
+
             attacker.lastMove = move;
             attacker.moveHistory.push(move);
 
@@ -115,7 +126,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
     
-    // --- FINAL OUTCOME DETERMINATION ---
     const finalInteractionLog = [...new Set(interactionLog)];
     fighter1.interactionLog = finalInteractionLog;
     fighter2.interactionLog = finalInteractionLog;
