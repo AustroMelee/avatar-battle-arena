@@ -1,7 +1,7 @@
 // FILE: data/characters/antagonists.js
 'use strict';
 
-// V2: OMEGA Narrative Expansion. Contains the full "Narrative Quiver" for each character.
+// V3: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object.
 
 export const antagonistCharacters = {
     'azula': {
@@ -10,22 +10,19 @@ export const antagonistCharacters = {
         personalityProfile: { aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3, signatureMoveBias: { "Lightning Generation": 1.5, "Blue Fire Daggers": 1.2 } },
         specialTraits: { manipulative: 0.8 },
         narrative: {
-            battleStart: [
-                { type: 'spoken', line: "You think you stand a chance against me? That's... adorable." },
-                { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }
-            ],
+            battleStart: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
             intent: {
                 CapitalizeOnOpening: [{ type: 'spoken', line: "There! An opening. This ends now." }],
                 PressAdvantage: [{ type: 'internal', line: "They're faltering. A sustained assault will break them completely." }],
+                DesperateGambit: [{ type: 'internal', line: "Unacceptable! I am not losing to this... peasant!" }]
             },
             manipulation: {
-                asAttacker: [
-                    { type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." },
-                    { type: 'spoken', line: "Still trying so hard? You'll always be second best." }
-                ],
+                asAttacker: [ { type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." }, { type: 'spoken', line: "Still trying so hard? You'll always be second best." } ],
+                asVictim: [{ type: 'internal', line: "Insolent worm. They will pay for that." }]
             },
             prediction: {
                 correct: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }],
+                wrong: [{ type: 'internal', line: "A deviation from the expected pattern. Unlikely to happen again."}]
             },
             mentalState: {
                 stressed: [{ type: 'internal', line: "Why isn't this working? I should have won already." }],
@@ -33,13 +30,7 @@ export const antagonistCharacters = {
                 broken: [{ type: 'spoken', line: "No... you all fear me! You have to!" }]
             },
             relationships: {
-                'zuko': {
-                    narrative: {
-                        manipulation: {
-                            asAttacker: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }]
-                        }
-                    }
-                }
+                'zuko': { narrative: { manipulation: { asAttacker: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } }
             }
         },
         techniques: [
@@ -62,6 +53,9 @@ export const antagonistCharacters = {
             battleStart: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
             intent: { PressAdvantage: [{ type: 'spoken', line: "There is no escape. Your world is ending." }] },
             manipulation: { asAttacker: [{ type: 'spoken', line: "Your friends cannot help you. Your hope is an illusion." }] },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "This insect is more resilient than expected. I will simply apply more pressure." }]
+            },
             relationships: {
                 'zuko': { narrative: { manipulation: { asAttacker: [{ type: 'spoken', line: "You were always a failure, Zuko. Weak and ungrateful." }] } } },
                 'aang-airbending-only': { narrative: { battleStart: [{ type: 'spoken', line: "So, the Avatar has come to meet his end." }] } }
@@ -82,7 +76,34 @@ export const antagonistCharacters = {
         victoryStyle: "Deadpan", powerTier: 4,
         personalityProfile: { aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1, signatureMoveBias: { "Precision Strike": 1.3, "Pinning Strike": 1.4 } },
         specialTraits: { resilientToManipulation: 0.3 },
-        narrative: { battleStart: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }] },
+        narrative: {
+            battleStart: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
+            intent: {
+                OpeningMoves: [{ type: 'internal', line: "Let's see how long it takes before they get bored and make a mistake." }],
+                PressAdvantage: [{ type: 'spoken', line: "If you’re going to surrender, now’s your chance." }],
+                DesperateGambit: [{ type: 'spoken', line: "Guess I have to try now. Great." }]
+            },
+            manipulation: {
+                asVictim: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }],
+            },
+            prediction: {
+                correct: [{ type: 'spoken', line: "Predictable. I could have thrown that with my eyes closed." }],
+                wrong: [{ type: 'internal', line: "Alright, that was actually clever. Doesn’t mean I care." }]
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "Now this is actually annoying." }],
+                shaken: [{ type: 'internal', line: "Just breathe. None of this really matters anyway." }],
+                broken: [{ type: 'spoken', line: "You win. Happy now?" }]
+            },
+            moveEffectiveness: {
+                Weak: [{ type: 'internal', line: "Perfect. I missed. Mai, you’re really on a roll." }],
+                Critical: [{ type: 'spoken', line: "That’s it. Next?" }]
+            },
+            relationships: {
+                'azula': { narrative: { manipulation: { asVictim: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } },
+                'ty-lee': { narrative: { battleStart: [{ type: 'spoken', line: "Ty Lee, can we not do this?" }] } }
+            }
+        },
         techniques: [
             { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
             { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'] },
@@ -99,7 +120,26 @@ export const antagonistCharacters = {
         victoryStyle: "Playful", powerTier: 4,
         personalityProfile: { aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6, signatureMoveBias: { "Chi-Blocking Flurry": 1.3, "Pressure Point Strike": 1.2 } },
         specialTraits: { resilientToManipulation: 0.2 },
-        narrative: { battleStart: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }] },
+        narrative: {
+            battleStart: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],
+            intent: {
+                CapitalizeOnOpening: [{ type: 'spoken', line: "Ooh, you're off-balance! Perfect time for a poke!" }],
+                PressAdvantage: [{ type: 'spoken', line: "Come on, let's dance!" }],
+            },
+            manipulation: {
+                asVictim: [{ type: 'spoken', line: "Hey, that's not very nice! My aura is turning a gloomy gray now." }]
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "This isn't as fun as I thought it would be." }],
+                shaken: [{ type: 'spoken', line: "Maybe we should just stop and talk about our feelings?" }]
+            },
+            moveEffectiveness: {
+                Critical: [{ type: 'spoken', line: "Boop! Your bending is gone!" }]
+            },
+            relationships: {
+                'mai': { narrative: { battleStart: [{ type: 'spoken', line: "Aww, don't be so gloomy, Mai! Let's play!" }] } }
+            }
+        },
         techniques: [
             { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Distracted', duration: 1, intensity: 1.2 } },
             { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'] },

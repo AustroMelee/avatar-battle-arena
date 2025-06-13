@@ -1,7 +1,7 @@
 // FILE: data/characters/masters.js
 'use strict';
 
-// V2: OMEGA Narrative Expansion. Contains the full "Narrative Quiver" for each character.
+// V3: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object.
 
 export const masterCharacters = {
     'bumi': {
@@ -10,12 +10,13 @@ export const masterCharacters = {
         personalityProfile: { aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9, signatureMoveBias: { "Rock Avalanche": 1.2, "Terrain Reshape": 1.4 } },
         specialTraits: { resilientToManipulation: 1.0 },
         narrative: {
-            battleStart: [
-                { type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" },
-                { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }
-            ],
+            battleStart: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
             intent: {
                 DesperateGambit: [{ type: 'spoken', line: "Let's try some neutral jing! You know, the kind where I wait... and then throw a building at you!" }],
+                BreakTheTurtle: [{ type: 'internal', line: "A rock can be a very patient opponent. But I'm more patient!" }]
+            },
+            manipulation: {
+                asVictim: [{ type: 'spoken', line: "Your words are like tiny pebbles! They bounce right off my magnificent rock-hard abs!" }]
             },
             prediction: {
                 correct: [{ type: 'spoken', line: "Your rock-and-roll is a little off-key! I knew you'd do that." }],
@@ -37,8 +38,17 @@ export const masterCharacters = {
         specialTraits: { resilientToManipulation: 0.8 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
-            intent: { CautiousDefense: [{ type: 'internal', line: "A flawless defense is the foundation of victory. Let them waste their energy." }] },
-            prediction: { correct: [{ type: 'internal', line: "An undisciplined attack. As expected." }] }
+            intent: {
+                CautiousDefense: [{ type: 'internal', line: "A flawless defense is the foundation of victory. Let them waste their energy." }],
+                OpeningMoves: [{ type: 'internal', line: "Observe their form. Find the weakness in their style." }]
+            },
+            manipulation: {
+                asVictim: [{ type: 'spoken', line: "Your pathetic attempts at mind games are as formless as your technique." }]
+            },
+            prediction: {
+                correct: [{ type: 'internal', line: "An undisciplined attack. As expected." }],
+                wrong: [{ type: 'internal', line: "A surprising lack of form. It will not work a second time." }]
+            }
         },
         techniques: [
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
@@ -56,8 +66,15 @@ export const masterCharacters = {
         specialTraits: { resilientToManipulation: 1.0 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],
-            intent: { CautiousDefense: [{ type: 'internal', line: "Control. Fire must be controlled, contained. I will not let it rage." }] },
-            moveEffectiveness: { Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }] }
+            intent: {
+                CautiousDefense: [{ type: 'internal', line: "Control. Fire must be controlled, contained. I will not let it rage." }],
+            },
+            manipulation: {
+                asVictim: [{ type: 'internal', line: "Words are wind. The flame within me is steady." }]
+            },
+            moveEffectiveness: {
+                Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }]
+            }
         },
         techniques: [
             { name: "Controlled Inferno", verb: 'create', object: 'controlled inferno', type: 'Offense', power: 80, requiresArticle: true, element: 'fire', moveTags: ['area_of_effect', 'channeled'] },
