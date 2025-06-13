@@ -1,3 +1,4 @@
+// FILE: engine_battle-engine-core.js
 'use strict';
 
 // VERSION 9.3: OVERKILL-COMPLIANT NARRATIVE DEDUPLICATION.
@@ -35,7 +36,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
 
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
-    let fighter2 = initializeFitterState(f2Id, f1Id, emotionalMode);
+    let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode); // FIXED: Typo initializeFitterState to initializeFighterState
     
     // NEW: Pass the full location conditions object
     const conditions = { ...locationConditions[locId], isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
