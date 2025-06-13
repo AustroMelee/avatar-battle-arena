@@ -1,20 +1,19 @@
-// FILE: narrative-v2.js
-'use strict';
-
+// FILE: js/narrative-v2.js
 // ====================================================================================
-//  Narrative Engine Library (v3.2 - Final Token Patch)
+//  Narrative Engine Library (v3.3 - Battle Phase Integration)
 // ====================================================================================
-//  - Corrected legacy `{possessive}` token to `{actor.p}`.
+//  - Updated `battlePhases` with more descriptive elements.
+//  - `phaseTemplates.header` now includes phase name from `battlePhases`.
+//  - Added concept of phase-specific generic phrases for narrative state.
 // ====================================================================================
 
 export const battlePhases = [
-    { name: "Opening Clash", emoji: "⚔️" },
-    { name: "Momentum Shift", emoji: "🔄" },
-    { name: "Counterplay", emoji: "🔃" },
-    { name: "Terrain Interaction", emoji: "🌍" },
-    { name: "Climactic Exchange", emoji: "💥" },
-    { name: "Finishing Move", emoji: "🏁" }
+    { name: "Opening Exchanges", emoji: "⚔️", key: "Early" }, // Used for narrative files
+    { name: "Escalating Conflict", emoji: "🔥", key: "Mid" },
+    { name: "Decisive Confrontation", emoji: "💥", key: "Late" } // Max 3 defined phases, but engine allows fewer/more
 ];
+// NOTE: The `key` property is for programmatic access if needed, while `name` is for display.
+// The engine will handle up to 6 turns, so narrative will map to these broadly.
 
 export const effectivenessLevels = {
     WEAK: { label: "Weak", emoji: "💤" },
@@ -24,8 +23,9 @@ export const effectivenessLevels = {
 };
 
 export const phaseTemplates = {
-    phaseWrapper: `<div class="battle-phase" data-phase="{phaseName}">{phaseContent}</div>`,
-    header: `<h4 class="phase-header">{phaseName} {phaseEmoji}</h4>`,
+    // The {phaseName} in header will now be dynamically pulled from battlePhases.
+    phaseWrapper: `<div class="battle-phase" data-phase="{phaseKey}">{phaseContent}</div>`,
+    header: `<h4 class="phase-header">{phaseDisplayName} {phaseEmoji}</h4>`, // {phaseDisplayName} and {phaseEmoji} will be populated
     move: `
         <div class="move-line">
             <div class="move-actor">
@@ -41,30 +41,47 @@ export const phaseTemplates = {
     finalBlow: `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
     drawResult: `<p class="final-blow">The battle timer expires! Both fighters are equally matched, their strength and will pushed to the absolute limit. The result is a DRAW!</p>`,
+    // NEW: Stalemate result phrase
+    stalemateResult: `<p class="final-blow">Neither fighter can break the deadlock. The intense confrontation ends in a STALEMATE, both combatants exhausted but unbroken!</p>`,
     conclusion: `<p class="conclusion">{endingNarration}</p>`,
     environmentalImpactHeader: `<h5 class="environmental-impact-header">Environmental Impact 🌍</h5>`
 };
 
+// Narrative State Phrases can be expanded with phase-specific versions
+// Example: narrativeStatePhrases.momentum_gain.Early, narrativeStatePhrases.momentum_gain.Mid, etc.
+// For now, these remain generic, but the structure allows for future phase-specific additions.
 export const narrativeStatePhrases = {
     energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {actor.p} last reserves,", "Struggling to stand,", "Gasping for breath,", "Pushing through the pain,", "Running on fumes,", "Their movements becoming sluggish,"],
     momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {opponent.p} on the back foot,", "Channeling their focus,", "With unshakable resolve,", "Seizing control of the fight,", "Finding a rhythm,", "Dominating the exchange,"],
     momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,", "In a daring gambit,", "In a bold maneuver,", "Scrambling for a response,", "Knocked off balance,", "Struggling to keep up,"]
 };
 
-export const introductoryPhrases = [
-    "With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,", 
-    "With an air of supreme confidence,", "Taking the offensive,", "With a ferocious cry,", "Deciding to end this quickly,",
-    "Lunging forward,", "Responding in kind,", "Seizing the opportunity,", "Countering the last move,", "Not missing a beat,",
-    "Pivoting smoothly,", "Without hesitation,", "With a quick movement,", "Looking for an opening,", "Switching tactics,",
-    "Testing the opponent's defenses,", "With calculated poise,", "Channeling inner strength,", "With steely determination,",
-    "Anticipating the attack,", "Exploiting a momentary gap,", "With a sudden burst of energy,", "Closing the distance,",
-    "Creating an opportunity,", "In a flash of inspiration,", "Trusting their instincts,", "With a battle-hardened glare,"
-];
+// Introductory phrases can also be phase-specific if desired.
+export const introductoryPhrases = {
+    Early: [
+        "Testing the opponent's defenses,", "With calculated poise,", "Looking for an opening,", "Switching tactics,",
+        "With a cautious approach,", "Observing {opponentName}'s stance,"
+    ],
+    Mid: [
+        "With a ferocious cry,", "Deciding to end this quickly,", "Lunging forward,", "Responding in kind,",
+        "Seizing the opportunity,", "Countering the last move,", "Not missing a beat,", "Pivoting smoothly,",
+        "With a sudden burst of energy,", "Closing the distance,", "Exploiting a momentary gap,"
+    ],
+    Late: [
+        "With steely determination,", "Channeling inner strength,", "Trusting their instincts,", "With a battle-hardened glare,",
+        "In a flash of inspiration,", "With nothing left to lose,", "In a final, desperate push,"
+    ],
+    Generic: [ // Fallback if phase-specific isn't defined or needed
+        "With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,",
+        "With an air of supreme confidence,", "Taking the offensive,", "Without hesitation,", "With a quick movement,"
+    ]
+};
+
 
 export const adverbPool = {
     offensive: [
-        'with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy', 
-        'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus', 
+        'with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy',
+        'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus',
         'with devastating speed', 'in a relentless assault', 'with pinpoint accuracy', 'in a fierce onslaught',
         'with blazing speed', 'in a masterful flourish', 'with unshakable resolve', 'with decisive force',
         'with methodical grace', 'in a sudden burst of power', 'without a moment of hesitation', 'in a perfectly timed maneuver',
@@ -90,12 +107,12 @@ export const finishingBlowPhrases = [
 export const impactPhrases = {
     DEFAULT: {
         WEAK: [
-            "but the attack glances off harmlessly.", "but {targetName} easily dodges it.", "but the technique lacks the power to connect meaningfully.", 
+            "but the attack glances off harmlessly.", "but {targetName} easily dodges it.", "but the technique lacks the power to connect meaningfully.",
             "but the strike is too slow to find its mark.", "but it's telegraphed, and {targetName} sidesteps.", "but the blow is absorbed with little effort.",
             "but it fails to penetrate {targetName}'s defense.", "but it's a weak and desperate attempt."
         ],
         NORMAL: [
-            "The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.", 
+            "The blow strikes {targetName} squarely.", "It forces {targetName} to brace for impact.", "A solid hit lands, and {targetName} stumbles.",
             "The attack connects, interrupting {targetName}'s rhythm.", "{targetName} reels from the precise strike.", "The move lands firmly, catching {targetName} off-guard.",
             "{targetName} struggles to recover from the hit.", "The strike catches {targetName} by surprise.", "A clean hit, forcing {targetName} back.",
             "{targetName} absorbs the blow, but it clearly hurts.", "{targetName} falters under the attack.", "The hit lands true.", "{targetName} grunts from the impact.",
@@ -103,7 +120,7 @@ export const impactPhrases = {
             "The blow disrupts {targetName}'s stance.", "A textbook hit.", "The attack lands as intended.", "A solid connection rocks {targetName}.", "{targetName} is forced to give ground."
         ],
         STRONG: [
-            "A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.", 
+            "A powerful blow sends {targetName} reeling!", "The attack smashes through {targetName}'s guard with ease.", "{targetName} staggers back, caught off-guard by the intensity.",
             "The impact is significant, leaving {targetName} momentarily stunned.", "{targetName} is rocked by the forceful strike.", "The blow overwhelms {targetName}'s defenses.",
             "A crushing impact! {targetName} struggles to stay standing.", "The fierce assault leaves {targetName} battered.", "{targetName} is thrown off balance by the powerful strike.",
             "The force of the attack is staggering.", "{targetName} buckles from the fierce blow.", "{targetName} is overwhelmed by the fierce assault.",
@@ -112,7 +129,7 @@ export const impactPhrases = {
             "The attack leaves a visible mark.", "An incredible display of power leaves {targetName} staggering.", "The guard is broken, and the hit connects with brutal force."
         ],
         CRITICAL: [
-            "A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground.", 
+            "A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground.",
             "The decisive strike connects, leaving no room for recovery.", "A flawless attack! {targetName} has no answer.", "The hit is perfectly placed, causing maximum damage.", "A critical blow that changes the course of the battle."
         ]
     },
@@ -130,7 +147,6 @@ export const impactPhrases = {
             "A tactical maneuver shifts the battlefield's layout.", "The area is fortified, giving {actorName} a distinct advantage."
         ]
     },
-    // NEW: Phrases for Repositioning move
     REPOSITION: {
         WEAK: [
             "but the attempt to reposition falls short, leaving {actorName} vulnerable.",
