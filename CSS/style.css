@@ -240,7 +240,6 @@ body {
     transition: color 0.3s ease;
 }
 
-/* === NEW STYLES START === */
 .location-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -295,10 +294,6 @@ body {
     flex-wrap: wrap;
 }
 
-.battlefield-controls { /* This class is no longer used for layout */
-    display: block; /* reset from grid */
-}
-
 .options-bar {
     margin-top: 0; /* Reset margin since it's now in a flex container */
     text-align: center;
@@ -307,14 +302,51 @@ body {
     align-items: center;
     gap: 0.5rem;
 }
-/* === NEW STYLES END === */
 
 .options-bar label {
     cursor: pointer;
 }
 
-/* Select Dropdowns */
-.select-group { position: relative; width: 100%; max-width: 250px; } /* Constrain width */
+/* === NEW STYLES START === */
+.time-toggle-container {
+    display: flex;
+    gap: 0.5rem;
+    background-color: var(--input-bg);
+    padding: 0.5rem;
+    border-radius: 50px; /* Pill shape */
+}
+
+.time-toggle-btn {
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.time-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.time-toggle-btn.selected {
+    background-color: rgba(255, 217, 61, 0.2);
+    border-color: var(--accent-gold);
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 217, 61, 0.3);
+}
+/* === NEW STYLES END === */
+
+
+/* Select Dropdowns (NO LONGER USED FOR TIME OF DAY) */
+.select-group { position: relative; width: 100%; max-width: 250px; } 
 .select-wrapper { position: relative; width: 100%; }
 select {
     width: 100%;

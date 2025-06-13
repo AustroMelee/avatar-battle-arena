@@ -1,7 +1,7 @@
 // FILE: js/ui.js
 'use strict';
 
-// V4: Replaces location dropdown with a card-based grid selection.
+// V5: Replaces time of day dropdown with a clickable emoji toggle.
 
 import { characters } from './data/characters.js';
 import { locations } from './locations.js';
@@ -10,7 +10,6 @@ const DOM = {
     fighter1Grid: document.getElementById('fighter1-grid'),
     fighter2Grid: document.getElementById('fighter2-grid'),
     locationGrid: document.getElementById('location-grid'),
-    timeOfDaySelect: document.getElementById('time-of-day'),
     emotionalModeCheckbox: document.getElementById('emotional-mode'),
     fighter1NameDisplay: document.getElementById('fighter1-name-display'),
     fighter2NameDisplay: document.getElementById('fighter2-name-display'),
@@ -24,6 +23,9 @@ const DOM = {
     winProbability: document.getElementById('win-probability'),
     battleStory: document.getElementById('battle-story'),
     analysisList: document.getElementById('analysis-list'),
+    // Time toggle elements
+    timeToggleContainer: document.getElementById('time-toggle-container'),
+    timeOfDayValue: document.getElementById('time-of-day-value'),
     // Hidden inputs to store the selected IDs
     fighter1Select: document.createElement('input'),
     fighter2Select: document.createElement('input'),
@@ -129,9 +131,24 @@ function populateLocationGrid() {
     }
 }
 
-export function populateDropdowns() {
+function initializeTimeToggle() {
+    const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove 'selected' from all buttons
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            // Add 'selected' to the clicked button
+            button.classList.add('selected');
+            // Update the hidden input value
+            DOM.timeOfDayValue.value = button.dataset.value;
+        });
+    });
+}
+
+export function populateUI() {
     populateCharacterGrids();
     populateLocationGrid();
+    initializeTimeToggle();
 }
 
 export function showLoadingState() {
