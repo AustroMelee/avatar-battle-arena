@@ -2,31 +2,31 @@
 'use strict';
 
 // This is the "Game Master" file. It orchestrates the entire battle flow.
-// VERSION 4: Fixes the critical AI learning timing bug.
+// VERSION 5: Adds Manipulation Phase and Adaptive Personality Drift.
 
 import { characters } from '../data/characters.js';
 import { locationConditions } from '../location-battle-conditions.js';
 import { battlePhases, phaseTemplates } from '../narrative-v2.js';
-import { selectMove, updateAiMemory } from './ai-decision.js';
+import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './ai-decision.js';
 import { calculateMove } from './move-resolution.js';
 import { updateMentalState } from './mental-state.js';
 import { narrateMove, generateOutcomeSummary, getToneAlignedVictoryEnding } from './narration.js';
 
-// --- HELPER FUNCTIONS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-// --- BATTLE STATE & SIMULATION ---
 function initializeFighterState(charId, opponentId, emotionalMode) {
-    const character = characters[charId];
-    if (!character) throw new Error(`Character with ID ${charId} not found.`);
+    const characterData = characters[charId];
+    if (!characterData) throw new Error(`Character with ID ${charId} not found.`);
     
     return { 
-        id: charId, name: character.name, ...JSON.parse(JSON.stringify(character)), 
+        id: charId,
+        name: characterData.name,
+        ...JSON.parse(JSON.stringify(characterData)), // Deep copy of all data
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         isStunned: false, tacticalState: null,
         movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
-        relationalState: (emotionalMode && character.relationships?.[opponentId]) || null,
+        relationalState: (emotionalMode && characterData.relationships?.[opponentId]) || null,
         mentalState: { level: 'stable', stress: 0 },
         mentalStateChangedThisTurn: false,
         aiMemory: {
@@ -38,10 +38,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
     };
 }
 
-function updateMomentum(current, label) {
-    const changes = { 'Critical': 3, 'Strong': 2, 'Normal': 1, 'Weak': -2, 'Counter': 2 };
-    return clamp(current + (changes[label] || 0), -5, 5);
-}
+const updateMomentum = (current, label) => clamp(current + ({ 'Critical': 3, 'Strong': 2, 'Normal': 1, 'Weak': -2, 'Counter': 2 }[label] || 0), -5, 5);
 
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
@@ -58,9 +55,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             f.mentalStateChangedThisTurn = false;
             Object.keys(f.aiMemory.moveSuccessCooldown).forEach(moveName => {
                 f.aiMemory.moveSuccessCooldown[moveName]--;
-                if (f.aiMemory.moveSuccessCooldown[moveName] <= 0) {
-                    delete f.aiMemory.moveSuccessCooldown[moveName];
-                }
+                if (f.aiMemory.moveSuccessCooldown[moveName] <= 0) delete f.aiMemory.moveSuccessCooldown[moveName];
             });
             if (f.tacticalState) {
                 f.tacticalState.duration--;
@@ -69,6 +64,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     interactionLog.push(`${f.name} recovered from their vulnerable state.`);
                 }
             }
+            // NEW: Adaptive Personality Drift
+            if (turn > 1) adaptPersonality(f);
         });
         
         const phaseName = battlePhases[turn]?.name || "Final Exchange";
@@ -78,6 +75,14 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (battleOver) return;
             attacker.isStunned = false; 
             
+            // NEW: Manipulation Phase
+            let manipulationResult = attemptManipulation(attacker, defender);
+            if (manipulationResult.success) {
+                defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2 };
+                phaseContent += manipulationResult.narration;
+                interactionLog.push(`${attacker.name} manipulated ${defender.name}, leaving them ${manipulationResult.effect}.`);
+            }
+
             updateMentalState(attacker, defender, null);
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions, turn);
             attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`);
@@ -85,19 +90,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             updateMentalState(defender, attacker, result);
-
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
             attacker.lastMoveEffectiveness = result.effectiveness.label;
             
-            const isDefensiveMove = move.type === 'Utility' || move.type === 'Defense';
-            attacker.consecutiveDefensiveTurns = isDefensiveMove ? attacker.consecutiveDefensiveTurns + 1 : 0;
+            attacker.consecutiveDefensiveTurns = (move.type === 'Utility' || move.type === 'Defense') ? attacker.consecutiveDefensiveTurns + 1 : 0;
             
-            if (move.setup && result.effectiveness.label !== 'Weak') {
-                defender.tacticalState = { ...move.setup };
-            }
-            if (move.moveTags?.includes('requires_opening') && result.payoff) {
-                defender.tacticalState = null;
-            }
+            if (move.setup && result.effectiveness.label !== 'Weak') defender.tacticalState = { ...move.setup };
+            if (move.moveTags?.includes('requires_opening') && result.payoff) defender.tacticalState = null;
             
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             if (result.wasPunished) {
@@ -109,13 +108,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             
-            // --- CRITICAL FIX: Update state BEFORE memory ---
-            // 1. Add the current move to history and set it as lastMove for the attacker.
             attacker.moveHistory.push(move);
             attacker.lastMove = move;
             
-            // 2. NOW update the defender's memory. The defender can now correctly see what the attacker *just* did.
-            updateAiMemory(defender, attacker, defender.lastMove, result);
+            updateAiMemory(defender, attacker); // No longer need to pass move/result, it reads from state
 
             if (defender.hp <= 0) battleOver = true;
         };
@@ -127,6 +123,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
     
+    // ... (Outcome determination is unchanged) ...
     const finalInteractionLog = [...new Set(interactionLog)];
     fighter1.interactionLog = finalInteractionLog;
     fighter2.interactionLog = finalInteractionLog;

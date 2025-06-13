@@ -1,161 +1,203 @@
 // FILE: engine/ai-decision.js
 'use strict';
 
-// This is the "AI Brain" module. It is solely responsible for a character's
-// decision-making process. It evaluates the situation, applies personality
-// and behavioral traits, and selects an appropriate move.
-// VERSION 6: Corrected sequence learning logic and refined prediction confidence.
+// This is the "AI Brain" module.
+// VERSION 7: Overkill Edition - Deep Personality Integration, Adaptive Drift, and Manipulation.
 
 import { getAvailableMoves } from './move-resolution.js';
 import { moveInteractionMatrix } from '../move-interaction-matrix.js';
 
-// --- HELPER FUNCTIONS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 /**
- * Updates the AI's memory based on the outcome of the last turn.
- * @param {object} learner - The AI fighter who is updating its memory.
- * @param {object} opponent - The opponent fighter.
- * @param {object} learnerLastMove - The move the LEARNER just used (for self-reflection).
- * @param {object} resultOfLearnerMove - The result of that move.
+ * NEW: Adapts a character's personality profile mid-battle based on performance.
+ * @param {object} actor - The fighter whose personality will adapt.
  */
-export function updateAiMemory(learner, opponent, learnerLastMove, resultOfLearnerMove) {
-    // 1. Update own move effectiveness (self-reflection)
-    if (learnerLastMove) {
-        if (!learner.aiMemory.selfMoveEffectiveness[learnerLastMove.name]) {
-            learner.aiMemory.selfMoveEffectiveness[learnerLastMove.name] = { totalEffectiveness: 0, uses: 0 };
-        }
-        const effectivenessValue = { 'Weak': -1, 'Normal': 1, 'Strong': 2, 'Critical': 3 }[resultOfLearnerMove.effectiveness.label] || 0;
-        learner.aiMemory.selfMoveEffectiveness[learnerLastMove.name].totalEffectiveness += effectivenessValue;
-        learner.aiMemory.selfMoveEffectiveness[learnerLastMove.name].uses++;
+export function adaptPersonality(actor) {
+    if (actor.moveHistory.length < 2) return;
 
-        if (resultOfLearnerMove.effectiveness.label === 'Weak') {
-            learner.aiMemory.moveSuccessCooldown[learnerLastMove.name] = 2; // Avoid for 2 turns
-        }
+    const lastTwoMoves = actor.moveHistory.slice(-2);
+    const lastTwoResults = lastTwoMoves.map(move => move.effectiveness || 'Normal');
+
+    if (lastTwoResults.every(r => r === 'Weak')) {
+        actor.personalityProfile.creativity = clamp(actor.personalityProfile.creativity + 0.15, 0, 1.0);
+        actor.personalityProfile.riskTolerance = clamp(actor.personalityProfile.riskTolerance + 0.1, 0, 1.0);
+        actor.aiLog.push("[Personality Drift: Increased Creativity due to failure streak]");
+    } else if (lastTwoResults.every(r => r === 'Strong' || r === 'Critical')) {
+        actor.personalityProfile.aggression = clamp(actor.personalityProfile.aggression + 0.1, 0, 1.0);
+        actor.aiLog.push("[Personality Drift: Increased Aggression due to success streak]");
+    }
+}
+
+/**
+ * NEW: The Manipulation "meta-move" check.
+ * @param {object} manipulator - The AI attempting to manipulate.
+ * @param {object} target - The character being manipulated.
+ * @returns {object} An object with { success: bool, effect: string, narration: string }.
+ */
+export function attemptManipulation(manipulator, target) {
+    const manipTrait = manipulator.specialTraits?.manipulative;
+    if (!manipTrait) return { success: false };
+
+    // Manipulation is more likely if the target is stressed or shaken.
+    const mentalStateModifier = { 'stable': 0.5, 'stressed': 1.0, 'shaken': 1.5, 'broken': 0.2 }[target.mentalState.level];
+    const resilience = target.specialTraits?.resilientToManipulation || 0;
+    
+    // The chance to attempt is based on manipulator's trait and target's state
+    const attemptChance = manipTrait * mentalStateModifier * (1 - resilience);
+
+    if (Math.random() < attemptChance) {
+        // Success! Apply an effect.
+        const effect = Math.random() > 0.5 ? 'Exposed' : 'Shaken'; // Two possible outcomes
+        const manipulatorSpan = `<span class="char-${manipulator.id}">${manipulator.name}</span>`;
+        const targetSpan = `<span class="char-${target.id}">${target.name}</span>`;
+        const narration = `<p class="move-description">${manipulatorSpan} unleashes a sharp taunt, preying on ${targetSpan}'s insecurities. It hits home, leaving ${target.pronouns.o} ${effect}!</p>`;
+        return { success: true, effect, narration };
     }
 
-    // 2. Log opponent's move sequence (learning about the opponent)
-    // We need at least two moves from the opponent to form a sequence.
+    return { success: false };
+}
+
+export function updateAiMemory(learner, opponent) {
+    if (learner.lastMove) {
+        if (!learner.aiMemory.selfMoveEffectiveness[learner.lastMove.name]) {
+            learner.aiMemory.selfMoveEffectiveness[learner.lastMove.name] = { totalEffectiveness: 0, uses: 0 };
+        }
+        const effectivenessValue = { 'Weak': -1, 'Normal': 1, 'Strong': 2, 'Critical': 3 }[learner.lastMoveEffectiveness] || 0;
+        learner.aiMemory.selfMoveEffectiveness[learner.lastMove.name].totalEffectiveness += effectivenessValue;
+        learner.aiMemory.selfMoveEffectiveness[learner.lastMove.name].uses++;
+        if (learner.lastMoveEffectiveness === 'Weak') learner.aiMemory.moveSuccessCooldown[learner.lastMove.name] = 2;
+    }
+
     if (opponent.moveHistory.length >= 2) {
-        const opponentPrevMoveName = opponent.moveHistory[opponent.moveHistory.length - 2].name;
-        const opponentCurrMoveName = opponent.moveHistory[opponent.moveHistory.length - 1].name;
-
-        if (!learner.aiMemory.opponentSequenceLog[opponentPrevMoveName]) {
-            learner.aiMemory.opponentSequenceLog[opponentPrevMoveName] = {};
-        }
-        if (!learner.aiMemory.opponentSequenceLog[opponentPrevMoveName][opponentCurrMoveName]) {
-            learner.aiMemory.opponentSequenceLog[opponentPrevMoveName][opponentCurrMoveName] = 0;
-        }
-        learner.aiMemory.opponentSequenceLog[opponentPrevMoveName][opponentCurrMoveName]++;
+        const prev = opponent.moveHistory[opponent.moveHistory.length - 2].name;
+        const curr = opponent.lastMove.name;
+        if (!learner.aiMemory.opponentSequenceLog[prev]) learner.aiMemory.opponentSequenceLog[prev] = {};
+        if (!learner.aiMemory.opponentSequenceLog[prev][curr]) learner.aiMemory.opponentSequenceLog[prev][curr] = 0;
+        learner.aiMemory.opponentSequenceLog[prev][curr]++;
     }
 
-    // 3. Update general opponent model based on their most recent move
-    const opponentCurrMove = opponent.lastMove;
-    if (opponentCurrMove) {
-        if (opponentCurrMove.type === 'Offense' || opponentCurrMove.type === 'Finisher') {
-            learner.aiMemory.opponentModel.isAggressive++;
-        } else if (opponentCurrMove.type === 'Defense') {
-            learner.aiMemory.opponentModel.isDefensive++;
-        }
+    if (opponent.lastMove) {
+        if (opponent.lastMove.type === 'Offense' || opponent.lastMove.type === 'Finisher') learner.aiMemory.opponentModel.isAggressive++;
+        else if (opponent.lastMove.type === 'Defense') learner.aiMemory.opponentModel.isDefensive++;
     }
     learner.aiMemory.opponentModel.isTurtling = opponent.consecutiveDefensiveTurns >= 2;
 }
 
-
-/**
- * Predicts the opponent's next move based on learned sequences.
- * @returns {object} An object like { predictedMove: string, confidence: number }
- */
 function predictOpponentNextMove(actor, defender) {
     const opponentLastMove = defender.lastMove;
-    if (!opponentLastMove) {
-        return { predictedMove: null, confidence: 0, reason: "No previous move to analyze." };
-    }
+    if (!opponentLastMove) return { predictedMove: null, confidence: 0 };
 
     const sequence = actor.aiMemory.opponentSequenceLog[opponentLastMove.name];
-    if (!sequence) {
-        return { predictedMove: null, confidence: 0, reason: `No observed sequence after ${opponentLastMove.name}.` };
-    }
+    if (!sequence) return { predictedMove: null, confidence: 0 };
 
-    let totalObservations = 0;
-    let mostLikelyMove = null;
-    let maxCount = 0;
-
+    let totalObservations = 0, mostLikelyMove = null, maxCount = 0;
     for (const moveName in sequence) {
         const count = sequence[moveName];
         totalObservations += count;
-        if (count > maxCount) {
-            maxCount = count;
-            mostLikelyMove = moveName;
-        }
+        if (count > maxCount) { maxCount = count; mostLikelyMove = moveName; }
     }
 
-    // A pattern needs to be seen at least once to be considered.
-    if (!mostLikelyMove) {
-        return { predictedMove: null, confidence: 0, reason: "No next-move data." };
-    }
-
-    const confidence = maxCount / totalObservations;
-    
-    // The prediction is only returned if it's somewhat reliable.
-    if (confidence < 0.4 || totalObservations < 2) {
-         return { predictedMove: mostLikelyMove, confidence: confidence, reason: `Low confidence (${(confidence*100).toFixed(0)}% from ${totalObservations} samples).` };
-    }
-    
-    return { predictedMove: mostLikelyMove, confidence: confidence, reason: `High confidence (${(confidence*100).toFixed(0)}% from ${totalObservations} samples).` };
+    if (!mostLikelyMove || totalObservations < 2) return { predictedMove: null, confidence: 0 };
+    return { predictedMove: mostLikelyMove, confidence: maxCount / totalObservations };
 }
 
-// --- The rest of the functions (getDynamicPersonality, getDynamicBehavior, etc.) have NO CHANGES ---
 function getDynamicPersonality(actor) {
     let profile = { ...actor.personalityProfile };
     if (actor.relationalState) {
         const modifiers = actor.relationalState.emotionalModifiers || {};
-        profile.aggression = clamp(profile.aggression + (modifiers.aggressionBoost || 0) - (modifiers.aggressionReduction || 0), 0, 1.2);
-        profile.patience = clamp(profile.patience + (modifiers.patienceBoost || 0) - (modifiers.patienceReduction || 0), 0, 1.2);
-        profile.riskTolerance = clamp(profile.riskTolerance + (modifiers.riskToleranceBoost || 0) - (modifiers.riskToleranceReduction || 0), 0, 1.2);
+        Object.keys(modifiers).forEach(key => profile[key] = (profile[key] || 0) + modifiers[key]);
     }
     switch (actor.mentalState.level) {
-        case 'stressed': profile.patience *= 0.7; profile.riskTolerance = clamp(profile.riskTolerance + 0.15, 0, 1.1); break;
+        case 'stressed': profile.patience *= 0.7; profile.riskTolerance = clamp(profile.riskTolerance + 0.15, 0, 1.2); break;
         case 'shaken': profile.patience *= 0.4; profile.opportunism *= 0.6; profile.aggression = clamp(profile.aggression + 0.2, 0, 1.2); profile.riskTolerance = clamp(profile.riskTolerance + 0.3, 0, 1.2); break;
         case 'broken': profile.patience = 0.05; profile.opportunism = 0.1; profile.aggression = clamp(profile.aggression + 0.4, 0, 1.3); profile.riskTolerance = clamp(profile.riskTolerance + 0.5, 0, 1.5); break;
     }
     return profile;
 }
 
-function getDynamicBehavior(actor, defender) {
-    let behavior = { ...actor.behaviorProfile };
-    const healthDifference = actor.hp - defender.hp;
-    if (healthDifference > 25) {
-        behavior.predictability *= 0.8;
-        behavior.creativity = clamp(behavior.creativity + 0.2, 0, 1.0);
-        behavior.focus *= 0.9;
-    } else if (healthDifference < -25) {
-        behavior.predictability = clamp(behavior.predictability + 0.2, 0, 1.0);
-        behavior.creativity *= 0.7;
-        behavior.focus = clamp(behavior.focus + 0.2, 0, 1.0);
-    }
-    if (actor.lastMoveEffectiveness === 'Critical') {
-        behavior.focus = clamp(behavior.focus + 0.15, 0, 1.0);
-    } else if (actor.lastMoveEffectiveness === 'Weak' && defender.lastMoveEffectiveness === 'Critical') {
-        behavior.predictability = clamp(behavior.predictability + 0.3, 0, 1.0);
-    }
-    return behavior;
-}
-
 function determineStrategicIntent(actor, defender, turn) {
-    const healthDifference = actor.hp - defender.hp;
+    const profile = getDynamicPersonality(actor);
+    const healthDiff = actor.hp - defender.hp;
+
+    // Personality-driven overrides
+    if (profile.opportunism > 0.8 && (defender.isStunned || defender.tacticalState)) return 'CapitalizeOnOpening';
+    if (profile.riskTolerance > 0.8 && actor.hp < 40) return 'DesperateGambit';
+    if (profile.patience > 0.8 && turn < 2) return 'CautiousDefense';
+    if (profile.aggression > 0.9 && healthDiff > 20) return 'PressAdvantage';
+
+    // Situational defaults
     if (actor.mentalState.level === 'broken') return 'UnfocusedRage';
     if (actor.mentalState.level === 'shaken') return 'PanickedDefense';
-    if (defender.isStunned || defender.tacticalState) return 'CapitalizeOnOpening';
-    if (healthDifference > 30 && actor.momentum >= 2) return 'PressAdvantage';
-    if (healthDifference < -30 || actor.hp < 35) return 'DesperateGambit';
-    if (turn < 2) return 'OpeningMoves';
     if (actor.aiMemory.opponentModel.isTurtling) return 'BreakTheTurtle';
     if (actor.energy < 30) return 'ConserveEnergy';
+    if (turn < 2) return 'OpeningMoves';
     return 'StandardExchange';
 }
 
-function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
+function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
+    const availableMoves = getAvailableMoves(actor, conditions);
+    const profile = getDynamicPersonality(actor);
+
+    const weights = availableMoves.map(move => {
+        let weight = 1.0;
+        let reasons = [];
+
+        // 1. Core Personality Weighting
+        switch (move.type) {
+            case 'Offense': weight *= (1 + profile.aggression * 1.5); reasons.push(`Aggro:${profile.aggression.toFixed(2)}`); break;
+            case 'Defense': weight *= (1 + profile.defensiveBias * 1.5 + profile.patience); reasons.push(`Def:${profile.defensiveBias.toFixed(2)}`); break;
+            case 'Utility': weight *= (1 + profile.creativity * 0.8 + profile.opportunism * 0.5); reasons.push(`Util:${profile.creativity.toFixed(2)}`); break;
+            case 'Finisher': weight *= (1 + profile.riskTolerance * 2.0); reasons.push(`Risk:${profile.riskTolerance.toFixed(2)}`); break;
+        }
+
+        // 2. Signature & Repetition Bias
+        if (profile.signatureMoveBias[move.name]) {
+            weight *= profile.signatureMoveBias[move.name];
+            reasons.push(`SigMove`);
+        }
+        if (actor.lastMove?.name === move.name) {
+            weight *= (1.0 - profile.antiRepeater);
+            reasons.push(`AntiRepeat`);
+        }
+
+        // 3. Tag-based Personality Bonuses
+        if (move.moveTags.includes('counter') && profile.opportunism > 0.7) { weight *= (1.0 + profile.opportunism); reasons.push('CounterTag'); }
+        if (move.moveTags.includes('evasive') && profile.patience > 0.6) { weight *= (1.0 + profile.patience); reasons.push('EvasiveTag'); }
+        if (move.moveTags.includes('highRisk') && profile.riskTolerance > 0.5) { weight *= (1.0 + profile.riskTolerance * 1.2); reasons.push('HighRiskTag'); }
+        
+        // 4. Intent-based Multipliers (Meta-Strategy)
+        const intentMultipliers = {
+            'PressAdvantage': { Offense: 2.0, Finisher: 1.5, Defense: 0.5 },
+            'CapitalizeOnOpening': { Offense: 1.8, Finisher: 2.5, Utility: 1.5, Defense: 0.2 },
+            'BreakTheTurtle': { 'bypasses_defense': 5.0, 'unblockable_ground': 5.0, 'utility_control': 2.0, Defense: 0.1 },
+        };
+        const multipliers = intentMultipliers[intent] || {};
+        if(multipliers[move.type]) { weight *= multipliers[move.type]; reasons.push(`Intent:${intent}`); }
+        move.moveTags.forEach(tag => { if (multipliers[tag]) { weight *= multipliers[tag]; reasons.push(`IntentTag:${tag}`); } });
+
+        // 5. Predictive Counter-Play
+        if (prediction.confidence > 0.4 && prediction.predictedMove) {
+            const counters = moveInteractionMatrix[move.name]?.counters;
+            if (counters && counters[prediction.predictedMove]) {
+                const bonus = 1 + (counters[prediction.predictedMove] * prediction.confidence * 3.0);
+                weight *= bonus;
+                reasons.push(`PredictiveCounter(x${bonus.toFixed(1)})`);
+            }
+        }
+
+        // 6. Hard Filters & Cooldowns
+        if (actor.energy < (Math.round((move.power || 0) * 0.22) + 4)) weight = 0;
+        if (actor.aiMemory.moveSuccessCooldown[move.name]) weight = 0;
+        if (move.moveTags.includes('requires_opening') && !(defender.isStunned || defender.tacticalState)) weight *= 0.01;
+
+        if (weight < 0.05) return { move, weight: 0, reasons }; // Soft pruning
+        return { move, weight, reasons };
+    });
+    return weights;
+}
+
+function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) { /* ... no changes ... */
     if (!weightedMoves.length) return [];
     const temp = Math.max(0.01, temperature);
     const maxWeight = Math.max(...weightedMoves.map(m => m.weight));
@@ -168,81 +210,14 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
     return movesWithExp.map(m => ({ ...m, probability: m.expWeight / weightExpSum }));
 }
 
-function selectFromDistribution(movesWithProbs) {
+function selectFromDistribution(movesWithProbs) { /* ... no changes ... */
     const rand = Math.random();
     let cumulativeProbability = 0;
     for (const moveInfo of movesWithProbs) {
         cumulativeProbability += moveInfo.probability;
-        if (rand < cumulativeProbability) {
-            return moveInfo;
-        }
+        if (rand < cumulativeProbability) return moveInfo;
     }
     return movesWithProbs[movesWithProbs.length - 1];
-}
-
-
-function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
-    const availableMoves = getAvailableMoves(actor, conditions);
-    const profile = getDynamicPersonality(actor);
-    const behavior = getDynamicBehavior(actor, defender);
-    
-    return availableMoves.map(move => {
-        let weight = 1.0;
-        const energyCost = Math.round((move.power || 0) * 0.22) + 4;
-        if (actor.energy < energyCost) return { move, weight: 0 };
-        
-        switch (move.type) {
-            case 'Offense': weight *= 1.2 * profile.aggression; break;
-            case 'Defense': weight *= 1.1 * (1 - profile.aggression); break;
-            case 'Utility': weight *= 1.0 * profile.patience; break;
-            case 'Finisher': weight *= 1.5 * profile.riskTolerance; break;
-        }
-
-        const intentMultipliers = {
-            'PressAdvantage': { Offense: 2.0, Finisher: 1.5, Defense: 0.5 },
-            'CapitalizeOnOpening': { Offense: 1.8, Finisher: 2.5, Utility: 1.5, Defense: 0.2 },
-            'DesperateGambit': { Offense: 1.5, Finisher: 2.0, riskTolerance: 1.5 },
-            'CautiousDefense': { Defense: 2.0, Utility: 1.5, Offense: 0.5, Finisher: 0.1 },
-            'BreakTheTurtle': { 'bypasses_defense': 5.0, 'unblockable_ground': 5.0, 'utility_control': 2.0, Defense: 0.1 },
-            'ConserveEnergy': { 'low_cost': 3.0 },
-            'UnfocusedRage': { Offense: 2.5, Defense: 0.1, Utility: 0.1 },
-            'PanickedDefense': { Defense: 3.0, 'evasive': 2.0, Offense: 0.3, Finisher: 0.05 },
-        };
-        const multipliers = intentMultipliers[intent] || {};
-        weight *= (multipliers[move.type] || 1.0);
-        if (multipliers['low_cost'] && energyCost < 20) weight *= multipliers['low_cost'];
-        move.moveTags.forEach(tag => { if (multipliers[tag]) weight *= multipliers[tag]; });
-
-        // --- PREDICTIVE COUNTER-PLAY (Threshold Lowered to 0.4 for more activity) ---
-        if (prediction.confidence > 0.4 && prediction.predictedMove) {
-            const counters = moveInteractionMatrix[move.name]?.counters;
-            if (counters && counters[prediction.predictedMove]) {
-                const counterBonus = counters[prediction.predictedMove];
-                // Apply a significant, confidence-scaled bonus for counter-picking
-                weight *= (1 + (counterBonus * prediction.confidence * 3.0));
-            }
-        }
-
-        if (actor.aiMemory.moveSuccessCooldown[move.name]) {
-            weight *= 0.01;
-        }
-        const moveEffectiveness = actor.aiMemory.selfMoveEffectiveness[move.name];
-        if (moveEffectiveness && moveEffectiveness.uses > 0) {
-            const avgEffectiveness = moveEffectiveness.totalEffectiveness / moveEffectiveness.uses;
-            if (avgEffectiveness > 1) weight *= 1.5;
-            if (avgEffectiveness < 0) weight *= 0.5;
-        }
-
-        if (actor.moveHistory.slice(-1)[0]?.name === move.name) {
-            weight *= (1.0 - behavior.creativity);
-        }
-
-        if (move.moveTags.includes('requires_opening')) {
-            weight *= (defender.isStunned || defender.tacticalState) ? (20.0 * (1 + profile.opportunism)) : 0.01;
-        }
-
-        return { move, weight };
-    });
 }
 
 export function selectMove(actor, defender, conditions, turn) {
@@ -255,10 +230,10 @@ export function selectMove(actor, defender, conditions, turn) {
     let validMoves = weightedMoves.filter(m => m.weight > 0);
 
     if (validMoves.length === 0) {
-        validMoves.push({move: struggleMove, weight: 1.0});
+        validMoves.push({move: struggleMove, weight: 1.0, reasons: ['Fallback']});
     }
 
-    const temperature = (1.0 - (actor.behaviorProfile.predictability || 0.8)) * 1.5 + 0.5;
+    const temperature = (1.0 - (actor.personalityProfile.predictability || 0.8)) * 1.5 + 0.5;
     const movesWithProbs = getSoftmaxProbabilities(validMoves, temperature);
     const chosenMoveInfo = selectFromDistribution(movesWithProbs);
     const chosenMove = chosenMoveInfo.move;
@@ -266,17 +241,11 @@ export function selectMove(actor, defender, conditions, turn) {
     const aiLogEntry = {
         chosenMove: chosenMove.name,
         intent: intent,
-        prediction: prediction,
+        prediction: { move: prediction.predictedMove, conf: prediction.confidence.toFixed(2) },
         weight: chosenMoveInfo.weight.toFixed(2),
         probability: `${(chosenMoveInfo.probability * 100).toFixed(1)}%`,
-        reasoning: {
-            actorHP: actor.hp,
-            defenderHP: defender.hp,
-            actorMomentum: actor.momentum,
-            actorMentalState: actor.mentalState.level,
-            opponentTacticalState: defender.tacticalState?.name || "None",
-            opponentIsTurtling: actor.aiMemory.opponentModel.isTurtling
-        }
+        weightingReasons: chosenMoveInfo.reasons,
+        actorState: { hp: actor.hp, energy: actor.energy, momentum: actor.momentum, mental: actor.mentalState.level },
     };
     
     return { move: chosenMove, aiLogEntry };
