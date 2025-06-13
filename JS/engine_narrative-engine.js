@@ -5,7 +5,8 @@
 // - Added legacy {possessive} token support to the substitution map for full redundancy.
 // - The root cause of the {possessive} leak in narrative-v2.js is also fixed.
 
-import { phaseTemplates, impactPhrases } from './narrative-v2.js';
+import { phaseTemplates, impactPhrases, collateralImpactPhrases } from './narrative-v2.js'; // Added collateralImpactPhrases
+import { locationConditions } from './location-battle-conditions.js'; // Added locationConditions
 
 const getRandomElement = (arr) => arr ? arr[Math.floor(Math.random() * arr.length)] : null;
 
@@ -46,7 +47,6 @@ function substituteTokens(template, actor, opponent, context = {}) {
         '{actorName}': actor.name,
         '{opponentName}': opponent.name,
         '{targetName}': opponent.name,
-        '{possessive}': actor.pronouns.p, // Legacy template fix
         '{actor.s}': actor.pronouns.s,
         '{actor.p}': actor.pronouns.p,
         '{actor.o}': actor.pronouns.o,
@@ -64,20 +64,30 @@ function substituteTokens(template, actor, opponent, context = {}) {
 export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
     const narrativeData = actor.narrative || {};
     let pool = null;
+
+    // Relationship-specific narrative first
     if (opponent.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]) {
         pool = actor.relationships[opponent.id].narrative[trigger][subTrigger];
-    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]) {
+    } 
+    // Move execution specific, checking for result as context
+    else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]) {
         pool = narrativeData[trigger][subTrigger][context.result];
-    } else if (narrativeData[trigger]?.[subTrigger]) {
+    } 
+    // General sub-trigger (e.g., onIntentSelection: CapitalizeOnOpening)
+    else if (narrativeData[trigger]?.[subTrigger]) {
         pool = narrativeData[trigger][subTrigger];
-    } else if (narrativeData[trigger]?.general) {
+    } 
+    // Fallback to general if available (e.g., battleStart: general)
+    else if (narrativeData[trigger]?.general) {
         pool = narrativeData[trigger].general;
     }
+
+    // Return a random quote from the selected pool
     return pool ? getRandomElement(pool) : null;
 }
 
 function renderQuote(quote, actor, opponent, context) {
-    if (!quote) return '';
+    if (!quote || !quote.line) return '';
     const { type, line } = quote;
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
     const narrativeClass = `narrative-${type || 'spoken'}`;
@@ -120,7 +130,59 @@ function generateActionDescription(move, actor, opponent, result) {
     return `<p class="move-description">${fullDesc}</p>`;
 }
 
-export function generateTurnNarration(events, move, actor, opponent, result) {
+// NEW FUNCTION: Generate collateral damage description
+function generateCollateralDamageDescription(move, actor, environmentState, locationData) {
+    if (!move.collateralImpact || move.collateralImpact === 'none' || environmentState.damageLevel === 0) {
+        return '';
+    }
+
+    const impactLevel = move.collateralImpact.toUpperCase(); // e.g., 'LOW', 'MEDIUM', 'HIGH'
+    const collateralPhrase = getRandomElement(collateralImpactPhrases[impactLevel]);
+
+    if (collateralPhrase) {
+        const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
+        // Use generic collateral phrase
+        let description = `${actorSpan}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, actor, {})}`;
+        
+        // Add location-specific impact description based on overall damage level, if applicable
+        const currentDamageThreshold = environmentState.damageLevel;
+        let specificImpactPhrase = '';
+
+        if (locationData && locationData.environmentalImpacts) {
+            let selectedImpacts = [];
+            if (currentDamageThreshold >= locationData.damageThresholds.catastrophic) {
+                selectedImpacts = locationData.environmentalImpacts.catastrophic;
+            } else if (currentDamageThreshold >= locationData.damageThresholds.severe) {
+                selectedImpacts = locationData.environmentalImpacts.severe;
+            } else if (currentDamageThreshold >= locationData.damageThresholds.moderate) {
+                selectedImpacts = locationData.environmentalImpacts.moderate;
+            } else if (currentDamageThreshold >= locationData.damageThresholds.minor) {
+                selectedImpacts = locationData.environmentalImpacts.minor;
+            }
+
+            if (selectedImpacts.length > 0) {
+                // Ensure unique impact descriptions for current turn, if applicable
+                const uniqueImpact = getRandomElement(selectedImpacts.filter(imp => !environmentState.specificImpacts.has(imp)));
+                if (uniqueImpact) {
+                    specificImpactPhrase = ` ${substituteTokens(uniqueImpact, actor, {})}`;
+                    environmentState.specificImpacts.add(uniqueImpact); // Mark as used for this turn
+                }
+            }
+        }
+        
+        // If the move itself has an element, add elemental flair to the collateral description
+        if (move.element && move.element !== 'physical' && move.element !== 'utility' && move.element !== 'special') {
+            description += ` The ${move.element} energy ripples through the area.`;
+        }
+
+        // Combine generic and specific impact
+        return `<p class="collateral-damage-description">${description}${specificImpactPhrase}</p>`;
+    }
+    return '';
+}
+
+
+export function generateTurnNarration(events, move, actor, opponent, result, environmentState, locationData) {
     let narrativeBlockContent = '';
 
     events.forEach(event => {
@@ -145,7 +207,11 @@ export function generateTurnNarration(events, move, actor, opponent, result) {
         actionDescription = generateActionDescription(move, actor, opponent, result);
     }
     
+    // NEW: Generate collateral damage description
+    const collateralDamageDescription = generateCollateralDamageDescription(move, actor, environmentState, locationData);
+
     mechanicalLog = mechanicalLog.replace(/{moveDescription}/g, actionDescription);
+    mechanicalLog = mechanicalLog.replace(/{collateralDamageDescription}/g, collateralDamageDescription); // Insert collateral description
     
     const narrativeWrapper = narrativeBlockContent ? `<div class="narrative-block">${narrativeBlockContent}</div>` : '';
     return narrativeWrapper + mechanicalLog;

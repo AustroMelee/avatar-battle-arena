@@ -2,6 +2,7 @@
 
 import { characters } from './data_characters.js';
 import { locations } from './locations.js';
+import { locationConditions } from './location-battle-conditions.js'; // Added for environmental data
 
 const DOM = {
     fighter1Grid: document.getElementById('fighter1-grid'),
@@ -22,11 +23,13 @@ const DOM = {
     analysisList: document.getElementById('analysis-list'),
     timeToggleContainer: document.getElementById('time-toggle-container'),
     timeOfDayValue: document.getElementById('time-of-day-value'),
-    // Added reference to the new feedback display
     timeFeedbackDisplay: document.getElementById('time-feedback'),
     fighter1Select: document.createElement('input'),
     fighter2Select: document.createElement('input'),
     locationSelect: document.createElement('input'),
+    // NEW: Add elements for collateral damage display
+    environmentDamageDisplay: document.getElementById('environment-damage-display'),
+    environmentImpactsList: document.getElementById('environment-impacts-list')
 };
 
 DOM.fighter1Select.type = 'hidden';
@@ -97,8 +100,6 @@ function populateCharacterGrids() {
     });
 }
 
-// === MODIFIED FUNCTION START ===
-// Updated to create image-based cards for locations.
 function createLocationCard(locationData, locationId) {
     const card = document.createElement('div');
     card.className = 'location-card';
@@ -120,7 +121,6 @@ function createLocationCard(locationData, locationId) {
 
     return card;
 }
-// === MODIFIED FUNCTION END ===
 
 function handleLocationCardSelection(locationData, locationId, selectedCard) {
     DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
@@ -137,8 +137,6 @@ function populateLocationGrid() {
     }
 }
 
-// === MODIFIED FUNCTION START ===
-// Updated to show feedback messages on click.
 function initializeTimeToggle() {
     const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
     
@@ -160,7 +158,6 @@ function initializeTimeToggle() {
         });
     });
 }
-// === MODIFIED FUNCTION END ===
 
 export function populateUI() {
     populateCharacterGrids();
@@ -191,7 +188,8 @@ export function showResultsState(battleResult) {
         DOM.winProbability.textContent = `A decisive victory after a fierce battle.`;
     }
     DOM.battleStory.innerHTML = battleResult.log;
-    displayFinalAnalysis(battleResult.finalState, battleResult.winnerId, battleResult.isDraw);
+    // NEW: Pass environmentState to displayFinalAnalysis
+    displayFinalAnalysis(battleResult.finalState, battleResult.winnerId, battleResult.isDraw, battleResult.environmentState, document.getElementById('location-value').value);
     DOM.loadingSpinner.classList.add('hidden');
     DOM.battleResultsContainer.classList.remove('hidden');
     DOM.battleBtn.disabled = false;
@@ -199,6 +197,11 @@ export function showResultsState(battleResult) {
 
 export function resetBattleUI() {
     DOM.resultsSection.classList.remove('show');
+    // NEW: Reset collateral damage displays
+    DOM.environmentDamageDisplay.textContent = '';
+    DOM.environmentImpactsList.innerHTML = '';
+    DOM.environmentDamageDisplay.classList.remove('low-damage', 'medium-damage', 'high-damage', 'catastrophic-damage');
+
     setTimeout(() => {
         if (!DOM.resultsSection.classList.contains('show')) {
             DOM.resultsSection.style.display = 'none';
@@ -206,7 +209,8 @@ export function resetBattleUI() {
     }, 500);
 }
 
-function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
+// NEW: Updated displayFinalAnalysis to take environmentState and locationId
+function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentState, locationId) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
 
@@ -266,6 +270,41 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
     createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
     createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
     
+    DOM.analysisList.appendChild(spacer.cloneNode());
+
+    // NEW: Display Environmental Damage Analysis
+    const currentLocData = locationConditions[locationId];
+    if (environmentState && currentLocData) {
+        DOM.environmentDamageDisplay.textContent = `Environmental Damage: ${environmentState.damageLevel.toFixed(0)}%`;
+        let damageClass = '';
+        if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) {
+            damageClass = 'catastrophic-damage';
+        } else if (environmentState.damageLevel >= currentLocData.damageThresholds.severe) {
+            damageClass = 'high-damage';
+        } else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) {
+            damageClass = 'medium-damage';
+        } else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) {
+            damageClass = 'low-damage';
+        }
+        DOM.environmentDamageDisplay.className = `environmental-damage-level ${damageClass}`;
+
+        DOM.environmentImpactsList.innerHTML = '';
+        if (environmentState.specificImpacts.size > 0) {
+            environmentState.specificImpacts.forEach(impact => {
+                const li = document.createElement('li');
+                li.textContent = impact;
+                DOM.environmentImpactsList.appendChild(li);
+            });
+        } else {
+            const li = document.createElement('li');
+            li.textContent = "The environment sustained minimal damage.";
+            DOM.environmentImpactsList.appendChild(li);
+        }
+    } else {
+        DOM.environmentDamageDisplay.textContent = '';
+        DOM.environmentImpactsList.innerHTML = '';
+    }
+
     DOM.analysisList.appendChild(spacer.cloneNode());
     createLog(fighter1.aiLog, `${fighter1.name}'s AI Log`, 'ai-log');
     createLog(fighter2.aiLog, `${fighter2.name}'s AI Log`, 'ai-log');

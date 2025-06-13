@@ -22,6 +22,12 @@
     --nonbender-color: #a4d2f7;
     --font-title: 'IM Fell English SC', serif;
     --font-body: 'Cinzel', serif;
+
+    /* NEW: Collateral Damage Colors */
+    --damage-low: #ffd700;
+    --damage-medium: #ff9900;
+    --damage-high: #ff4500;
+    --damage-catastrophic: #dc143c;
 }
 
 * {
@@ -427,9 +433,43 @@ body {
 .move-description {
     font-size: 0.95rem;
     color: var(--text-parchment-gold);
-    padding: 0.25rem 1rem 1rem;
+    padding: 0.25rem 1rem 0.5rem; /* Adjusted padding */
+    border-bottom: 1px dashed var(--surface-border); /* Removed bottom margin */
+    margin-bottom: 0.5rem; /* Added small bottom margin */
+}
+
+/* NEW: Style for collateral damage narrative */
+.collateral-damage-description {
+    font-size: 0.9rem;
+    color: var(--text-parchment-gold);
+    padding: 0.25rem 1rem 1rem; /* Padding adjusted */
     border-bottom: 1px dashed var(--surface-border);
     margin-bottom: 1rem;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* NEW: Styles for environmental summary block */
+.environmental-summary {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.environmental-impact-header {
+    font-size: 1rem;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.environmental-impact-text {
+    font-size: 0.9rem;
+    color: var(--text-parchment-gold);
+    margin-bottom: 0.2rem;
+    line-height: 1.4;
 }
 
 .final-blow, .conclusion {
@@ -511,6 +551,68 @@ body {
 .analysis-item .modifier-plus { color: #8bc34a; }
 .analysis-item .modifier-minus { color: #ef5350; }
 .analysis-item .modifier-neutral { color: #64b5f6; }
+
+/* NEW: Styles for Environmental Damage Display */
+.environmental-damage-section {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 2.5rem;
+    text-align: center;
+}
+
+.environmental-damage-section h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--accent-2);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--surface-border);
+    padding-bottom: 0.75rem;
+}
+
+.environmental-damage-level {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.environmental-damage-level.low-damage {
+    color: var(--damage-low);
+    border: 1px solid var(--damage-low);
+}
+
+.environmental-damage-level.medium-damage {
+    color: var(--damage-medium);
+    border: 1px solid var(--damage-medium);
+}
+
+.environmental-damage-level.high-damage {
+    color: var(--damage-high);
+    border: 1px solid var(--damage-high);
+}
+
+.environmental-damage-level.catastrophic-damage {
+    color: var(--damage-catastrophic);
+    border: 1px solid var(--damage-catastrophic);
+}
+
+.environment-impacts-list {
+    list-style: inside circle;
+    text-align: left;
+    margin: 1rem auto 0;
+    padding: 0 1rem;
+    max-width: 600px;
+}
+
+.environment-impacts-list li {
+    font-size: 0.95rem;
+    color: var(--text-parchment-gold);
+    margin-bottom: 0.5rem;
+}
 
 .loading {
     text-align: center;

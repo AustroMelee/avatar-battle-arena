@@ -5,23 +5,42 @@
 // effects of environmental factors and special conditions like punishments.
 
 // --- IMPORTS (PATHS CORRECTED) ---
-//- OLD PATH: ../js/narrative-v2.js
-//+ NEW PATH: ../narrative-v2.js
 import { effectivenessLevels } from './narrative-v2.js';
-//- OLD PATH: ../js/move-interaction-matrix.js
-//+ NEW PATH: ../move-interaction-matrix.js
 import { punishableMoves } from './move-interaction-matrix.js';
+import { locationConditions } from './location-battle-conditions.js'; // Added for collateral damage
 
 // --- HELPER FUNCTIONS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-export function calculateMove(move, attacker, defender, conditions, interactionLog) {
+// Collateral damage mapping
+const COLLATERAL_IMPACT_MULTIPLIERS = {
+    'none': 0,
+    'low': 0.05, // 5% of move power contributes to environment damage
+    'medium': 0.15, // 15%
+    'high': 0.3, // 30%
+    'catastrophic': 0.5 // 50%
+};
+
+export function calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locationId) {
     let basePower = move.power || 30;
     let multiplier = 1.0;
     let wasPunished = false;
     let payoff = false;
     let consumedStateName = null;
     let damage = 0;
+    let collateralDamage = 0; // New: Collateral damage value
+
+    // Collateral damage calculation
+    const locationData = locationConditions[locationId];
+    const baseCollateralImpact = COLLATERAL_IMPACT_MULTIPLIERS[move.collateralImpact || 'none'] || 0;
+    if (baseCollateralImpact > 0 && locationData) {
+        let fragilityMultiplier = locationData.fragility || 0.5; // Default fragility
+        // Apply location-specific collateral modifiers if available
+        const elementalCollateralMod = locationData.collateralModifiers?.[move.element]?.damageMultiplier || 1.0;
+        collateralDamage = Math.round(basePower * baseCollateralImpact * fragilityMultiplier * elementalCollateralMod);
+        // Ensure collateral damage is non-negative and within a reasonable range per move
+        collateralDamage = clamp(collateralDamage, 0, 30);
+    }
 
     if (move.moveTags?.includes('requires_opening')) {
         const openingExists = defender.isStunned || defender.tacticalState;
@@ -60,7 +79,15 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     }
     const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.22) + 4;
     
-    return { effectiveness: level, damage: clamp(damage, 0, 50), energyCost: clamp(energyCost, 4, 100), wasPunished, payoff, consumedStateName };
+    return { 
+        effectiveness: level, 
+        damage: clamp(damage, 0, 50), 
+        energyCost: clamp(energyCost, 4, 100), 
+        wasPunished, 
+        payoff, 
+        consumedStateName,
+        collateralDamage // New: Return collateral damage
+    };
 }
 
 export function getAvailableMoves(actor, conditions) {
@@ -73,7 +100,27 @@ function applyEnvironmentalModifiers(move, attacker, conditions) {
     let logReasons = [];
     const isFirebender = attacker.techniques.some(t => t.element === 'fire' || t.element === 'lightning');
     const isWaterbender = attacker.techniques.some(t => t.element === 'water' || t.element === 'ice');
-    if (conditions.isDay) { if (isFirebender) { multiplier *= 1.1; logReasons.push(`daylight`); } if (isWaterbender) { multiplier *= 0.9; }
-    } else if (conditions.isNight) { if (isFirebender) { multiplier *= 0.9; } if (isWaterbender) { multiplier *= 1.1; logReasons.push(`nighttime`); } }
+    // Ensure elemental condition checks are robust
+    const hasFireMove = move.element === 'fire' || move.element === 'lightning';
+    const hasWaterMove = move.element === 'water' || move.element === 'ice';
+    const hasEarthMove = move.element === 'earth' || move.element === 'metal';
+    const hasAirMove = move.element === 'air';
+
+    if (conditions.isDay) {
+        if (isFirebender) { multiplier *= 1.1; logReasons.push(`daylight for ${attacker.name}`); }
+        if (isWaterbender) { multiplier *= 0.9; logReasons.push(`daylight for ${attacker.name} (penalty)`); }
+    } else if (conditions.isNight) {
+        if (isFirebender) { multiplier *= 0.9; logReasons.push(`nighttime for ${attacker.name} (penalty)`); }
+        if (isWaterbender) { multiplier *= 1.1; logReasons.push(`nighttime for ${attacker.name}`); }
+    }
+
+    // Location-specific environmental modifiers for move effectiveness (not collateral damage)
+    // Example: Airbending stronger in windy air temple
+    if (conditions.airRich && hasAirMove) { multiplier *= 1.1; logReasons.push(`air-rich environment`); }
+    if (conditions.waterRich && hasWaterMove) { multiplier *= 1.1; logReasons.push(`water-rich environment`); }
+    if (conditions.earthRich && hasEarthMove) { multiplier *= 1.1; logReasons.push(`earth-rich environment`); }
+    if (conditions.isHot && hasFireMove) { multiplier *= 1.05; logReasons.push(`hot environment`); }
+    if (conditions.isSlippery && move.moveTags.includes('evasive')) { multiplier *= 1.05; logReasons.push(`slippery footing`); }
+
     return { multiplier, logReasons };
 }

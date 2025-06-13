@@ -35,11 +35,13 @@ export const phaseTemplates = {
             </div>
         </div>
         {moveDescription}
+        {collateralDamageDescription}
     `,
     finalBlow: `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
     drawResult: `<p class="final-blow">The battle timer expires! Both fighters are equally matched, their strength and will pushed to the absolute limit. The result is a DRAW!</p>`,
-    conclusion: `<p class="conclusion">{endingNarration}</p>`
+    conclusion: `<p class="conclusion">{endingNarration}</p>`,
+    environmentalImpactHeader: `<h5 class="environmental-impact-header">Environmental Impact 🌍</h5>`
 };
 
 export const narrativeStatePhrases = {
@@ -122,11 +124,35 @@ export const impactPhrases = {
         ],
         PROACTIVE: [
             "The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares {actor.p} defense, anticipating the next move.",
-            "A solid defense is established, challenging any approach.", "The strategic position makes {actorName} a difficult target.", "The field is reshaped to {actorName}'s advantage.",
+            "A solid defense is established, challenging any approach.", "The strategic position makes {actorName} a difficult target.", "The field is reshaped to {actor.p} advantage.",
             "{actorName} creates an obstacle, controlling the battlefield.", "The defensive posture is flawless.", "The battlefield shifts to favor {actorName}.", "{actorName} takes a commanding defensive position.",
             "A tactical maneuver shifts the battlefield's layout.", "The area is fortified, giving {actorName} a distinct advantage."
         ]
     }
+};
+
+export const collateralImpactPhrases = {
+    NONE: [],
+    LOW: [
+        "A stray blast grazes the surrounding environment.",
+        "The impact sends minor debris flying.",
+        "A small section of the ground or a nearby structure is superficially damaged."
+    ],
+    MEDIUM: [
+        "The area around them takes a significant hit, causing structural cracks.",
+        "A part of the environment buckles under the force of the attack.",
+        "The battle carves a noticeable mark into the surroundings."
+    ],
+    HIGH: [
+        "Widespread destruction erupts as the attack unleashes its full force.",
+        "The environment trembles and crumbles under the overwhelming power.",
+        "A massive section of the battlefield is obliterated, changing the landscape dramatically."
+    ],
+    CATASTROPHIC: [
+        "The attack tears through the environment, leaving a trail of utter devastation.",
+        "The very fabric of the battlefield is ripped apart, a monument to unchecked power.",
+        "Nothing remains standing as the raw force of the attack levels the surroundings."
+    ]
 };
 
 export const postBattleVictoryPhrases = {
@@ -179,3 +205,4 @@ export const postBattleVictoryPhrases = {
         narrow: "'Ooh, you almost had me!' {WinnerName} chirped, though {WinnerPronounP} narrow victory over {LoserName} suggested a genuine struggle."
     }
 };
+

@@ -9,28 +9,152 @@ export const locationConditions = {
         isVertical: true,
         isExposed: true,
         wind: 0.3, // Strong wind currents
-        notes: "High altitude and strong winds favor airbenders."
+        fragility: 0.5, // Ancient structures and natural rock formations have moderate fragility
+        damageThresholds: { // % of total damage capacity
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Dust billows from cracked stone.",
+                "Small sections of the ancient structure begin to crumble.",
+                "Loose rock slides down cliff faces."
+            ],
+            moderate: [
+                "A section of a tiered platform collapses with a groan.",
+                "Ancient carvings are obscured by falling debris.",
+                "The strong winds whip up clouds of shattered stone and dust."
+            ],
+            severe: [
+                "A large section of the temple's foundation gives way, threatening further collapse.",
+                "Whole sections of cliff crumble into the abyss.",
+                "The air currents become unpredictable, swirling with immense debris."
+            ],
+            catastrophic: [
+                "The once serene Eastern Air Temple is scarred by massive fissures and collapsing structures.",
+                "The sacred grounds are reduced to a perilous landscape of falling rock and violent updrafts.",
+                "The very air vibrates with the sound of grinding earth and crumbling masonry."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 0.8, description: "Fire struggles against the high winds." },
+            earth: { damageMultiplier: 1.2, description: "Earthbending naturally causes instability." },
+            air: { damageMultiplier: 1.1, description: "Air bending can redirect debris effectively." }
+        },
+        notes: "High altitude and strong winds favor airbenders. Structures are old and somewhat brittle."
     },
     'northern-water-tribe': {
         waterRich: true,
         iceRich: true,
         isSlippery: true,
         isCold: true,
-        notes: "An abundance of water and ice makes this a fortress for waterbenders."
+        fragility: 0.6, // Ice structures are somewhat fragile, but water can be reformed
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Cracks spiderweb across the ice bridges.",
+                "A spray of slush erupts from the canals.",
+                "Distant ice formations begin to groan and shift."
+            ],
+            moderate: [
+                "Sections of ice pathways shatter, plunging into the freezing water.",
+                "Waterbending constructs begin to destabilize from the force.",
+                "The intricate ice architecture shows significant fracturing."
+            ],
+            severe: [
+                "Large chunks of ice infrastructure break off, creating dangerous floes.",
+                "The canals churn violently as ice dams are breached.",
+                "The cold wind carries stinging shards of ice and snow."
+            ],
+            catastrophic: [
+                "The beautiful ice city is torn apart, leaving a chaotic seascape of shattered ice and raging water.",
+                "The tranquil canals are now violent currents, threatening to consume all in their path.",
+                "What remains are icy ruins, a testament to the battle's ferocity."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 1.5, description: "Fire melts and shatters ice." },
+            earth: { damageMultiplier: 0.7, description: "Earthbending has limited impact in icy water." },
+            water: { damageMultiplier: 1.2, description: "Waterbending can unleash the environment's fury." }
+        },
+        notes: "An abundance of water and ice makes this a fortress for waterbenders. Ice structures are vulnerable to heat."
     },
     'ba-sing-se': {
         isUrban: true,
         isDense: true,
         earthRich: true,
         hasCover: true,
-        notes: "Tight streets and abundant earth favor tactical and earthbending combat."
+        fragility: 0.7, // Buildings and city infrastructure are relatively fragile
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Dust rises from cracked cobblestones.",
+                "A street vendor's cart is overturned, cabbages scattering.",
+                "A small section of a building facade crumbles."
+            ],
+            moderate: [
+                "Roofs buckle and glass shatters as buildings take direct hits.",
+                "Deep fissures appear in the packed earth of the streets.",
+                "Civilians flee in terror as the battle intensifies, leaving debris-strewn alleys."
+            ],
+            severe: [
+                "Entire sections of city blocks begin to collapse, sending dust clouds skyward.",
+                "The once-impenetrable walls show alarming cracks and structural failure.",
+                "The urban landscape is transformed into a maze of rubble and falling masonry."
+            ],
+            catastrophic: [
+                "Ba Sing Se's lower ring is reduced to a smoking, crumbling ruin, barely recognizable.",
+                "The air chokes with dust and the cries of the displaced, a testament to utter devastation.",
+                "What once stood as a symbol of peace is now a monument to the battle's destructive power."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 1.0, description: "Fire causes fires in urban settings." },
+            earth: { damageMultiplier: 1.3, description: "Earthbending tears through stone and pavement." },
+            air: { damageMultiplier: 0.9, description: "Airbending primarily pushes, less structural damage." }
+        },
+        notes: "Tight streets and abundant earth favor tactical and earthbending combat. Urban structures are vulnerable."
     },
     'si-wong-desert': {
         isSandy: true,
         isHot: true,
         hasShiftingGround: true,
         lowVisibility: true,
-        notes: "Scorching heat and lack of water severely penalize waterbenders."
+        fragility: 0.2, // Natural desert is very resilient to damage, mostly just shifts sand
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Sand whips up into stinging gusts.",
+                "Small dunes are displaced.",
+                "The ground shudders, creating minor sand geysers."
+            ],
+            moderate: [
+                "Large sandstorms are stirred, reducing visibility further.",
+                "Deeper fissures appear in the desert floor.",
+                "Oasis flora is uprooted and buried under shifting sands."
+            ],
+            severe: [
+                "Massive sand whirlwinds tear across the landscape, obscuring everything.",
+                "Canyons widen and shift as the very ground gives way.",
+                "The desert environment becomes a chaotic, blinding maelstrom of sand and heat."
+            ],
+            catastrophic: [
+                "The desert is utterly transformed, vast dunes are flattened, and new canyons carved by destructive forces.",
+                "A blinding sandstorm rages, making continued combat almost impossible.",
+                "The once featureless expanse is now a scarred, tortured wasteland."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 0.9, description: "Fire has limited structural impact in sand, but intensifies heat." },
+            earth: { damageMultiplier: 1.5, description: "Earthbending can reshape the sandy terrain dramatically." },
+            water: { damageMultiplier: 0.5, description: "Waterbending struggles to cause widespread damage in dry sand." }
+        },
+        notes: "Scorching heat and lack of water severely penalize waterbenders. Sand shifts constantly."
     },
     'foggy-swamp': {
         waterRich: true,
@@ -39,7 +163,38 @@ export const locationConditions = {
         isDense: true,
         lowVisibility: true,
         isSlippery: true,
-        notes: "A unique environment where water and earthbending can be uniquely applied."
+        fragility: 0.4, // Natural environment, plants can be damaged, but ground/water absorb much
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Muck splashes as roots are torn up.",
+                "The thick fog briefly disperses in patches.",
+                "Ancient swamp trees groan from impacts."
+            ],
+            moderate: [
+                "Massive trees are uprooted, crashing into the murky water.",
+                "The swamp's mist thickens with disturbed spores and debris.",
+                "The ground becomes an even more treacherous bog of mud and shattered flora."
+            ],
+            severe: [
+                "The banyan-grove tree's roots themselves show deep scarring.",
+                "Sections of the swamp become impassable due to deep, destructive churns.",
+                "The air fills with the smell of disturbed earth and rotting vegetation."
+            ],
+            catastrophic: [
+                "The ancient swamp is scarred, its vibrant ecosystem ravaged by uncontrolled power.",
+                "The Banyan-Grove tree stands defiant but wounded, its surroundings a desolate mire.",
+                "What was once a living, breathing landscape is now a churned, broken battlefield."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 1.3, description: "Fire creates steam and burns vegetation." },
+            earth: { damageMultiplier: 1.2, description: "Earthbending causes massive mudslides and root damage." },
+            water: { damageMultiplier: 1.1, description: "Waterbending amplifies the swamp's natural currents." }
+        },
+        notes: "A unique environment where water and earthbending can be uniquely applied. Dense vegetation and muck."
     },
     'boiling-rock': {
         isIndustrial: true,
@@ -47,7 +202,38 @@ export const locationConditions = {
         metalRich: true,
         isPrecarious: true,
         waterRich: true, // The boiling lake is a water source, but a dangerous one.
-        notes: "Metal and heat are abundant, but the terrain is treacherous."
+        fragility: 0.8, // Industrial structures, metal walkways are very fragile when attacked
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Sparks fly as metal walkways are dented.",
+                "A geyser of scalding steam erupts from a damaged pipe.",
+                "The precarious walkways vibrate dangerously."
+            ],
+            moderate: [
+                "Metal scaffolding collapses into the boiling lake below.",
+                "Pipes rupture, spraying superheated water and steam across the arena.",
+                "The industrial complex groans under immense structural strain."
+            ],
+            severe: [
+                "Entire sections of the prison's outer structure begin to buckle and fall.",
+                "The air becomes thick with toxic steam and smoke from damaged machinery.",
+                "The boiling lake itself seems to churn more violently, threatening to overflow."
+            ],
+            catastrophic: [
+                "The Boiling Rock is a twisted ruin of molten metal and scalding water, a testament to ultimate destruction.",
+                "The prison, once a symbol of the Fire Nation's might, is now a burning, sinking wreck.",
+                "Survival itself becomes a challenge amidst the collapsing industrial nightmare."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 1.2, description: "Fire melts and warps metal." },
+            earth: { damageMultiplier: 1.1, description: "Earthbending causes structural collapse of metal." },
+            water: { damageMultiplier: 1.0, description: "Waterbending can disturb the boiling lake, causing steam explosions." }
+        },
+        notes: "Metal and heat are abundant, but the terrain is treacherous. Extremely volatile environment."
     },
     'fire-nation-capital': {
         isUrban: true,
@@ -56,7 +242,38 @@ export const locationConditions = {
         isHot: true,
         metalRich: true,
         isIndustrial: true,
-        notes: "The heart of the Fire Nation empowers firebenders."
+        fragility: 0.75, // Grand public spaces are built solid but can still be damaged dramatically
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Cracks appear in the elaborate pavement designs.",
+                "Statues are chipped by stray attacks.",
+                "The air shimmers with distorted heat from impacts."
+            ],
+            moderate: [
+                "Ornate buildings are scorched and their facades crumble.",
+                "Sections of the plaza pavement explode outwards, sending debris flying.",
+                "The very air seems to crackle with uncontrolled energy."
+            ],
+            severe: [
+                "Grand arches collapse, sending shockwaves through the plaza.",
+                "The central fountain shatters, its waters turning to scalding steam.",
+                "Once pristine streets are choked with rubble and smoke."
+            ],
+            catastrophic: [
+                "The Fire Nation Capital Plaza, a symbol of empire, is reduced to a smoking, ravaged ruin.",
+                "The air is thick with ash and the smell of burning stone, a true inferno.",
+                "A once-majestic urban landscape is now a monument to chaos and unchecked power."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 1.2, description: "Fire spreads rapidly in a dry, urban setting." },
+            earth: { damageMultiplier: 1.1, description: "Earthbending causes widespread structural damage." },
+            lightning: { damageMultiplier: 1.3, description: "Lightning arcs, causing widespread damage and fires." }
+        },
+        notes: "The heart of the Fire Nation empowers firebenders. Grand but still destructible."
     },
     'omashu': {
         isUrban: true,
@@ -65,7 +282,38 @@ export const locationConditions = {
         isVertical: true,
         hasCover: true,
         isPrecarious: true,
-        notes: "A massive, tiered city of stone perfect for earthbenders."
+        fragility: 0.65, // Massive stone structures, but can be brought down
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "A delivery chute rattles violently, nearly dislodging its contents.",
+                "Loose stones rain down from the towering buildings.",
+                "The ground shudders beneath the impact."
+            ],
+            moderate: [
+                "Sections of stone pathways collapse, revealing dizzying drops below.",
+                "The unique delivery chute system is severely damaged, sending packages crashing.",
+                "Dust clouds engulf entire sections of the tiered city."
+            ],
+            severe: [
+                "Massive support columns crack and begin to give way.",
+                "Entire sections of the cliffside city slide and crumble.",
+                "The once-bustling city is eerily silent, covered in a thick layer of rock dust."
+            ],
+            catastrophic: [
+                "Omashu, the great Earth Kingdom city, is a testament to raw, unchecked power, its tiers shattered and collapsing.",
+                "The air rings with the sounds of grinding earth and the groans of dying stone.",
+                "What remains is a perilous landscape of broken rock and treacherous chasms."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 0.9, description: "Fire has less effect on solid stone." },
+            earth: { damageMultiplier: 1.5, description: "Earthbending can tear Omashu apart with ease." },
+            metal: { damageMultiplier: 1.2, description: "Metalbending can warp the city's infrastructure." }
+        },
+        notes: "A massive, tiered city of stone perfect for earthbenders. Gravity is a significant factor."
     },
     'great-divide': {
         isExposed: true,
@@ -73,7 +321,38 @@ export const locationConditions = {
         isVertical: true,
         isPrecarious: true,
         earthRich: true,
-        notes: "A sheer canyon with little cover, favoring those with high mobility or powerful earthbending."
+        fragility: 0.3, // Natural canyon, mostly just causes rockslides or widens fissures
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Small pebbles dislodge from the canyon walls.",
+                "The echo of impacts rings through the chasm.",
+                "Dust puffs up from the dry riverbed."
+            ],
+            moderate: [
+                "A significant rockslide thunders down the cliff face.",
+                "New cracks appear in the sheer rock walls, revealing deeper fissures.",
+                "The chasm itself seems to widen under the pressure."
+            ],
+            severe: [
+                "Massive boulders detach and plummet to the canyon floor, shaking the very ground.",
+                "Sections of the canyon wall begin to collapse entirely.",
+                "The air is thick with rock dust, making breathing difficult."
+            ],
+            catastrophic: [
+                "The Great Divide is transformed into a chaotic abyss of shifting rock and active landslides.",
+                "The canyon's sheer walls are now crumbled, treacherous slopes.",
+                "The raw power of the battle has irrevocably reshaped the natural landscape."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 0.8, description: "Fire has limited structural effect on solid rock." },
+            earth: { damageMultiplier: 1.4, description: "Earthbending causes massive geological shifts." },
+            air: { damageMultiplier: 1.0, description: "Airbending can dislodge loose scree." }
+        },
+        notes: "A sheer canyon with little cover, favoring those with high mobility or powerful earthbending. Very stable."
     },
     'kyoshi-island': {
         isCoastal: true,
@@ -81,6 +360,37 @@ export const locationConditions = {
         earthRich: true,
         hasCover: true,
         plantsRich: true,
-        notes: "A balanced environment with access to multiple elements."
-    }
+        fragility: 0.6, // Village houses are moderately fragile, natural elements less so
+        damageThresholds: {
+            minor: 10, moderate: 25, severe: 50, catastrophic: 75
+        },
+        environmentalImpacts: {
+            minor: [
+                "Ocean spray mixes with kicked-up dust.",
+                "A small fishing boat bobs wildly from distant impacts.",
+                "Thatched roofs show minor damage."
+            ],
+            moderate: [
+                "Village houses are torn apart, their wooden frames splintering.",
+                "The coastline is eroded by powerful elemental forces.",
+                "The tranquil waters of the bay are churned into violent swells."
+            ],
+            severe: [
+                "The main village square is devastated, its buildings flattened and docks shattered.",
+                "The ocean itself seems to rage, sending massive waves crashing inland.",
+                "The once picturesque island is marred by widespread wreckage and flooding."
+            ],
+            catastrophic: [
+                "Kyoshi Island is ravaged, its gentle village obliterated and its natural beauty scarred.",
+                "The relentless ocean assaults the broken land, reclaiming what the battle has destroyed.",
+                "A once peaceful sanctuary is now a testament to the brutal force unleashed upon it."
+            ]
+        },
+        collateralModifiers: {
+            fire: { damageMultiplier: 1.1, description: "Fire burns wooden structures easily." },
+            earth: { damageMultiplier: 1.0, description: "Earthbending can damage village structures and terrain." },
+            water: { damageMultiplier: 1.3, description: "Waterbending can unleash the power of the ocean." }
+        },
+        notes: "A balanced environment with access to multiple elements. Village structures are relatively fragile."
+    },
 };
