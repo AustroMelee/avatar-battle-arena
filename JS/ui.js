@@ -29,7 +29,9 @@ const DOM = {
     locationSelect: document.createElement('input'),
     // NEW: Add elements for collateral damage display
     environmentDamageDisplay: document.getElementById('environment-damage-display'),
-    environmentImpactsList: document.getElementById('environment-impacts-list')
+    environmentImpactsList: document.getElementById('environment-impacts-list'),
+    // NEW: Element for environmental summary
+    locationEnvironmentSummary: document.createElement('p'), // Create a new P element
 };
 
 DOM.fighter1Select.type = 'hidden';
@@ -41,6 +43,15 @@ DOM.locationSelect.id = 'location-value';
 document.body.appendChild(DOM.fighter1Select);
 document.body.appendChild(DOM.fighter2Select);
 document.body.appendChild(DOM.locationSelect);
+
+// NEW: Append the environmental summary element to the location section
+DOM.locationEnvironmentSummary.id = 'location-environment-summary';
+DOM.locationEnvironmentSummary.className = 'location-environment-summary';
+// Assuming the location title is within the location section, place it after.
+// We need to ensure it's in the correct parent and position.
+// For now, let's just append it to the location section's container for simplicity.
+document.querySelector('.location-section').insertBefore(DOM.locationEnvironmentSummary, DOM.locationGrid);
+
 
 function getElementClass(character) {
     const mainElement = character.techniques.find(t => t.element)?.element || 'nonbender';
@@ -122,11 +133,80 @@ function createLocationCard(locationData, locationId) {
     return card;
 }
 
+// NEW FUNCTION: Update the environmental summary display
+function updateEnvironmentalSummary(locationId) {
+    const locConditions = locationConditions[locationId];
+    if (!locConditions) {
+        DOM.locationEnvironmentSummary.innerHTML = '';
+        return;
+    }
+
+    let summaryHtml = `This location is characterized by: `;
+    const traits = [];
+
+    // Add general environment traits
+    if (locConditions.isUrban) traits.push(`<span>urban</span> setting`);
+    if (locConditions.isDense) traits.push(`<span>dense</span> environment`);
+    if (locConditions.isVertical) traits.push(`<span>vertical</span> terrain`);
+    if (locConditions.isExposed) traits.push(`<span>exposed</span> areas`);
+    if (locConditions.isSlippery) traits.push(`<span>slippery</span> surfaces`);
+    if (locConditions.isHot) traits.push(`<span>intense heat</span>`);
+    if (locConditions.isCold) traits.push(`<span>cold</span> temperatures`);
+    if (locConditions.hasShiftingGround) traits.push(`<span>shifting ground</span>`);
+    if (locConditions.lowVisibility) traits.push(`<span>low visibility</span>`);
+    if (locConditions.isIndustrial) traits.push(`<span>industrial</span> elements`);
+    if (locConditions.isPrecarious) traits.push(`<span>precarious</span> footing`);
+    if (locConditions.isRocky) traits.push(`<span>rocky</span> terrain`);
+    if (locConditions.isCoastal) traits.push(`<span>coastal</span> features`);
+    if (locConditions.isSandy) traits.push(`<span>sandy</span> terrain`);
+    if (locConditions.hasCover) traits.push(`ample <span>cover</span>`);
+    if (locConditions.plantsRich) traits.push(`abundant <span>plant life</span>`);
+
+    // Add element-rich descriptors
+    if (locConditions.airRich) traits.push(`rich in <span>air</span>`);
+    if (locConditions.waterRich) traits.push(`rich in <span>water</span>`);
+    if (locConditions.iceRich) traits.push(`rich in <span>ice</span>`);
+    if (locConditions.earthRich) traits.push(`rich in <span>earth</span>`);
+    if (locConditions.metalRich) traits.push(`rich in <span>metal</span>`);
+    
+    summaryHtml += traits.join(', ');
+
+    // Add elemental modifier details
+    if (locConditions.environmentalModifiers) {
+        summaryHtml += `<br>Elemental Impact: `;
+        const elementalImpacts = [];
+        for (const element in locConditions.environmentalModifiers) {
+            const mod = locConditions.environmentalModifiers[element];
+            let impactDesc = `<span>${element}</span>: `;
+            if (mod.damageMultiplier !== undefined && mod.damageMultiplier !== 1.0) {
+                const impactClass = mod.damageMultiplier > 1.0 ? 'positive-impact' : 'negative-impact';
+                impactDesc += `<span class="${impactClass}">Damage ${mod.damageMultiplier > 1.0 ? '+' : ''}${(mod.damageMultiplier * 100 - 100).toFixed(0)}%</span> `;
+            }
+            if (mod.energyCostModifier !== undefined && mod.energyCostModifier !== 1.0) {
+                const impactClass = mod.energyCostModifier < 1.0 ? 'positive-impact' : 'negative-impact';
+                impactDesc += `<span class="${impactClass}">Energy ${mod.energyCostModifier < 1.0 ? '-' : '+'}${(mod.energyCostModifier * 100 - 100).toFixed(0)}%</span>`;
+            }
+            if (mod.description) {
+                impactDesc += ` (${mod.description})`;
+            }
+            elementalImpacts.push(impactDesc);
+        }
+        summaryHtml += elementalImpacts.join('; ');
+    }
+    
+    // Add fragility
+    summaryHtml += `<br>Fragility: <span>${(locConditions.fragility * 100).toFixed(0)}%</span>.`;
+
+
+    DOM.locationEnvironmentSummary.innerHTML = summaryHtml;
+}
+
 function handleLocationCardSelection(locationData, locationId, selectedCard) {
     DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
     selectedCard.classList.add('selected');
     DOM.locationNameDisplay.textContent = locationData.name;
     DOM.locationSelect.value = locationId;
+    updateEnvironmentalSummary(locationId); // NEW: Update summary when location is selected
 }
 
 function populateLocationGrid() {
@@ -135,6 +215,8 @@ function populateLocationGrid() {
         const card = createLocationCard(locationData, id);
         DOM.locationGrid.appendChild(card);
     }
+    // Initially hide the summary until a location is selected
+    DOM.locationEnvironmentSummary.innerHTML = 'Select a battlefield to see its environmental characteristics.';
 }
 
 function initializeTimeToggle() {

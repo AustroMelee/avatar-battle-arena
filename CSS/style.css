@@ -125,6 +125,27 @@ body {
 #fighter2-name-display { color: var(--accent-2); }
 #location-name-display { color: var(--accent-gold); }
 
+/* NEW: Location environment summary */
+.location-environment-summary {
+    font-size: 0.9rem;
+    color: var(--text-parchment-gold);
+    text-align: center;
+    margin-top: -1rem; /* Pull it up a bit */
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.location-environment-summary span {
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.location-environment-summary .positive-impact { color: var(--accent-2); }
+.location-environment-summary .negative-impact { color: var(--accent-red); }
+
 .character-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);

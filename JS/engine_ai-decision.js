@@ -144,7 +144,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
         };
         const multipliers = intentMultipliers[intent] || {};
         if(multipliers[move.type]) { weight *= multipliers[move.type]; reasons.push(`Intent:${intent}`); }
-        const energyCost = Math.round((move.power || 0) * 0.22) + 4;
+        const energyCost = Math.round((move.power || 0) * 0.22) + 4; // This is a rough estimate; actual cost comes from move-resolution
         if (multipliers['low_cost'] && energyCost < 20) weight *= multipliers['low_cost'];
         move.moveTags.forEach(tag => { if (multipliers[tag]) { weight *= multipliers[tag]; reasons.push(`IntentTag:${tag}`); } });
 
@@ -157,7 +157,16 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
             }
         }
 
-        if (actor.energy < energyCost) weight = 0;
+        // NEW: Factor in environmental energy cost if available (pre-calculation)
+        // This is an ESTIMATE for AI decision, actual cost will be from calculateMove
+        const { energyCostModifier } = conditions.environmentalModifiers?.[move.element] || { energyCostModifier: 1.0 };
+        const estimatedEnergyCost = energyCost * energyCostModifier;
+        if (actor.energy < estimatedEnergyCost) { // Use estimated energy cost
+            weight = 0; // Don't pick moves the actor can't afford
+            reasons.push(`EnergyTooHigh`);
+        }
+
+
         if (actor.aiMemory.moveSuccessCooldown[move.name]) weight *= 0.01;
         if (move.moveTags.includes('requires_opening') && !(defender.isStunned || defender.tacticalState)) weight *= 0.01;
         

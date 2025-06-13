@@ -205,4 +205,3 @@ export const postBattleVictoryPhrases = {
         narrow: "'Ooh, you almost had me!' {WinnerName} chirped, though {WinnerPronounP} narrow victory over {LoserName} suggested a genuine struggle."
     }
 };
-

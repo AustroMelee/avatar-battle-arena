@@ -29,6 +29,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     let consumedStateName = null;
     let damage = 0;
     let collateralDamage = 0; // New: Collateral damage value
+    let energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.22) + 4;
 
     // Collateral damage calculation
     const locationData = locationConditions[locationId];
@@ -63,8 +64,10 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         }
     }
     
-    const { multiplier: envMultiplier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
+    // NEW: Apply environmental modifiers to move effectiveness and energy cost
+    const { multiplier: envMultiplier, energyCostModifier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
     multiplier *= envMultiplier;
+    energyCost *= energyCostModifier; // Adjust energy cost based on environment
     if (envReasons.length > 0) interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${envReasons.join(', ')}.`);
     
     const totalEffectiveness = basePower * multiplier;
@@ -77,12 +80,11 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     if (move.type.includes('Offense') || move.type.includes('Finisher')) {
         damage += Math.round(totalEffectiveness / 3);
     }
-    const energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.22) + 4;
     
     return { 
         effectiveness: level, 
         damage: clamp(damage, 0, 50), 
-        energyCost: clamp(energyCost, 4, 100), 
+        energyCost: clamp(energyCost, 4, 100), // Ensure minimum energy cost
         wasPunished, 
         payoff, 
         consumedStateName,
@@ -97,30 +99,61 @@ export function getAvailableMoves(actor, conditions) {
 
 function applyEnvironmentalModifiers(move, attacker, conditions) {
     let multiplier = 1.0;
+    let energyCostModifier = 1.0; // NEW: Energy cost modifier
     let logReasons = [];
-    const isFirebender = attacker.techniques.some(t => t.element === 'fire' || t.element === 'lightning');
-    const isWaterbender = attacker.techniques.some(t => t.element === 'water' || t.element === 'ice');
-    // Ensure elemental condition checks are robust
-    const hasFireMove = move.element === 'fire' || move.element === 'lightning';
-    const hasWaterMove = move.element === 'water' || move.element === 'ice';
-    const hasEarthMove = move.element === 'earth' || move.element === 'metal';
-    const hasAirMove = move.element === 'air';
+    
+    // Determine the primary elemental type of the attacker's character
+    // This is a rough proxy, actual logic might be more complex if characters have multiple strong elements
+    const attackerPrimaryType = attacker.type; 
 
+    // General time-of-day modifiers (already present, ensured they interact correctly)
     if (conditions.isDay) {
-        if (isFirebender) { multiplier *= 1.1; logReasons.push(`daylight for ${attacker.name}`); }
-        if (isWaterbender) { multiplier *= 0.9; logReasons.push(`daylight for ${attacker.name} (penalty)`); }
+        if (attackerPrimaryType === 'Bender' && (move.element === 'fire' || move.element === 'lightning')) { 
+            multiplier *= 1.1; 
+            logReasons.push(`daylight empowers ${attacker.name}'s fire/lightning bending`); 
+        } else if (attackerPrimaryType === 'Bender' && (move.element === 'water' || move.element === 'ice')) { 
+            multiplier *= 0.9; energyCostModifier *= 1.1; 
+            logReasons.push(`daylight penalizes ${attacker.name}'s water/ice bending`); 
+        }
     } else if (conditions.isNight) {
-        if (isFirebender) { multiplier *= 0.9; logReasons.push(`nighttime for ${attacker.name} (penalty)`); }
-        if (isWaterbender) { multiplier *= 1.1; logReasons.push(`nighttime for ${attacker.name}`); }
+        if (attackerPrimaryType === 'Bender' && (move.element === 'fire' || move.element === 'lightning')) { 
+            multiplier *= 0.9; energyCostModifier *= 1.1; 
+            logReasons.push(`nighttime penalizes ${attacker.name}'s fire/lightning bending`); 
+        } else if (attackerPrimaryType === 'Bender' && (move.element === 'water' || move.element === 'ice')) { 
+            multiplier *= 1.1; 
+            logReasons.push(`nighttime empowers ${attacker.name}'s water/ice bending`); 
+        }
     }
 
-    // Location-specific environmental modifiers for move effectiveness (not collateral damage)
-    // Example: Airbending stronger in windy air temple
-    if (conditions.airRich && hasAirMove) { multiplier *= 1.1; logReasons.push(`air-rich environment`); }
-    if (conditions.waterRich && hasWaterMove) { multiplier *= 1.1; logReasons.push(`water-rich environment`); }
-    if (conditions.earthRich && hasEarthMove) { multiplier *= 1.1; logReasons.push(`earth-rich environment`); }
-    if (conditions.isHot && hasFireMove) { multiplier *= 1.05; logReasons.push(`hot environment`); }
-    if (conditions.isSlippery && move.moveTags.includes('evasive')) { multiplier *= 1.05; logReasons.push(`slippery footing`); }
+    // Location-specific environmental modifiers for move effectiveness and energy cost
+    const locationData = locationConditions[conditions.id]; // conditions.id should be the locationId passed
+    if (locationData && locationData.environmentalModifiers) {
+        const moveElement = move.element;
+        if (locationData.environmentalModifiers[moveElement]) {
+            const mod = locationData.environmentalModifiers[moveElement];
+            if (mod.damageMultiplier) { 
+                multiplier *= mod.damageMultiplier; 
+                logReasons.push(`${mod.description} (damage)`); 
+            }
+            if (mod.energyCostModifier) { 
+                energyCostModifier *= mod.energyCostModifier; 
+                logReasons.push(`${mod.description} (energy cost)`); 
+            }
+        }
+        // General environmental tags that apply to any move type or attacker type
+        if (conditions.isSlippery && move.moveTags.includes('evasive')) { 
+            multiplier *= 1.05; 
+            logReasons.push(`slippery footing aids evasive moves`); 
+        }
+        if (conditions.isHot && (moveElement === 'fire' || moveElement === 'lightning')) {
+            multiplier *= 1.05;
+            logReasons.push(`hot environment empowers fire/lightning`);
+        }
+        if (conditions.isCold && (moveElement === 'water' || moveElement === 'ice')) {
+            multiplier *= 1.05;
+            logReasons.push(`cold environment empowers water/ice`);
+        }
+    }
 
-    return { multiplier, logReasons };
+    return { multiplier, energyCostModifier, logReasons };
 }

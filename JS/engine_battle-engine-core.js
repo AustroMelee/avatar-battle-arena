@@ -35,8 +35,9 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
 
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
-    let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
+    let fighter2 = initializeFitterState(f2Id, f1Id, emotionalMode);
     
+    // NEW: Pass the full location conditions object
     const conditions = { ...locationConditions[locId], isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
     let turnLog = [], interactionLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;

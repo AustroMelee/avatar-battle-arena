@@ -35,10 +35,12 @@ export const locationConditions = {
                 "The very air vibrates with the sound of grinding earth and crumbling masonry."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 0.8, description: "Fire struggles against the high winds." },
-            earth: { damageMultiplier: 1.2, description: "Earthbending naturally causes instability." },
-            air: { damageMultiplier: 1.1, description: "Air bending can redirect debris effectively." }
+        // NEW: Environmental Modifiers for move effectiveness and energy cost
+        environmentalModifiers: {
+            air: { damageMultiplier: 1.15, energyCostModifier: 0.9, description: "Airbending flows freely with the winds." },
+            fire: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Fire struggles against the high winds." },
+            earth: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Earthbending is challenging on unstable platforms." },
+            physical: { damageMultiplier: 0.9, energyCostModifier: 1.05, description: "Physical attacks are hindered by footing and wind." }
         },
         notes: "High altitude and strong winds favor airbenders. Structures are old and somewhat brittle."
     },
@@ -73,10 +75,11 @@ export const locationConditions = {
                 "What remains are icy ruins, a testament to the battle's ferocity."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 1.5, description: "Fire melts and shatters ice." },
-            earth: { damageMultiplier: 0.7, description: "Earthbending has limited impact in icy water." },
-            water: { damageMultiplier: 1.2, description: "Waterbending can unleash the environment's fury." }
+        environmentalModifiers: {
+            water: { damageMultiplier: 1.15, energyCostModifier: 0.9, description: "Waterbending thrives with abundant water and ice." },
+            ice: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Ice bending is exceptionally potent here." },
+            fire: { damageMultiplier: 1.5, energyCostModifier: 1.2, description: "Fire melts and shatters ice, but faces moisture." },
+            earth: { damageMultiplier: 0.7, energyCostModifier: 1.3, description: "Earthbending is limited in icy water terrain." }
         },
         notes: "An abundance of water and ice makes this a fortress for waterbenders. Ice structures are vulnerable to heat."
     },
@@ -111,10 +114,11 @@ export const locationConditions = {
                 "What once stood as a symbol of peace is now a monument to the battle's destructive power."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 1.0, description: "Fire causes fires in urban settings." },
-            earth: { damageMultiplier: 1.3, description: "Earthbending tears through stone and pavement." },
-            air: { damageMultiplier: 0.9, description: "Airbending primarily pushes, less structural damage." }
+        environmentalModifiers: {
+            earth: { damageMultiplier: 1.3, energyCostModifier: 0.9, description: "Earthbending tears through stone and pavement." },
+            fire: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Fire causes fires in urban settings." },
+            air: { damageMultiplier: 0.9, energyCostModifier: 1.05, description: "Airbending primarily pushes, less structural damage." },
+            physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Tight spaces can impact physical combat." }
         },
         notes: "Tight streets and abundant earth favor tactical and earthbending combat. Urban structures are vulnerable."
     },
@@ -149,10 +153,11 @@ export const locationConditions = {
                 "The once featureless expanse is now a scarred, tortured wasteland."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 0.9, description: "Fire has limited structural impact in sand, but intensifies heat." },
-            earth: { damageMultiplier: 1.5, description: "Earthbending can reshape the sandy terrain dramatically." },
-            water: { damageMultiplier: 0.5, description: "Waterbending struggles to cause widespread damage in dry sand." }
+        environmentalModifiers: {
+            fire: { damageMultiplier: 0.9, energyCostModifier: 0.95, description: "Fire has limited structural impact but intensifies heat." },
+            earth: { damageMultiplier: 1.5, energyCostModifier: 0.85, description: "Earthbending can reshape the sandy terrain dramatically." },
+            water: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Waterbending struggles to cause widespread damage in dry sand and intense heat." },
+            air: { damageMultiplier: 1.0, energyCostModifier: 0.95, description: "Airbending can manipulate sand, but costs energy." }
         },
         notes: "Scorching heat and lack of water severely penalize waterbenders. Sand shifts constantly."
     },
@@ -189,10 +194,12 @@ export const locationConditions = {
                 "What was once a living, breathing landscape is now a churned, broken battlefield."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 1.3, description: "Fire creates steam and burns vegetation." },
-            earth: { damageMultiplier: 1.2, description: "Earthbending causes massive mudslides and root damage." },
-            water: { damageMultiplier: 1.1, description: "Waterbending amplifies the swamp's natural currents." }
+        environmentalModifiers: {
+            water: { damageMultiplier: 1.1, energyCostModifier: 0.9, description: "Waterbending amplifies the swamp's natural currents." },
+            earth: { damageMultiplier: 1.2, energyCostModifier: 0.95, description: "Earthbending causes massive mudslides and root damage." },
+            fire: { damageMultiplier: 1.3, energyCostModifier: 1.15, description: "Fire creates steam and burns vegetation, but struggles with moisture." },
+            air: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Airbending is partially absorbed by dense fog and humidity." },
+            physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Physical combat is hampered by thick muck and vegetation." }
         },
         notes: "A unique environment where water and earthbending can be uniquely applied. Dense vegetation and muck."
     },
@@ -228,10 +235,12 @@ export const locationConditions = {
                 "Survival itself becomes a challenge amidst the collapsing industrial nightmare."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 1.2, description: "Fire melts and warps metal." },
-            earth: { damageMultiplier: 1.1, description: "Earthbending causes structural collapse of metal." },
-            water: { damageMultiplier: 1.0, description: "Waterbending can disturb the boiling lake, causing steam explosions." }
+        environmentalModifiers: {
+            fire: { damageMultiplier: 1.2, energyCostModifier: 0.9, description: "Fire melts and warps metal, thriving in the heat." },
+            earth: { damageMultiplier: 1.1, energyCostModifier: 1.0, description: "Earthbending causes structural collapse of metal." },
+            water: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Waterbending can disturb the boiling lake, causing steam explosions." },
+            metal: { damageMultiplier: 1.3, energyCostModifier: 0.85, description: "Metalbending is empowered by the abundant metal structures." },
+            physical: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Precarious footing and extreme heat impact physical combat." }
         },
         notes: "Metal and heat are abundant, but the terrain is treacherous. Extremely volatile environment."
     },
@@ -268,10 +277,11 @@ export const locationConditions = {
                 "A once-majestic urban landscape is now a monument to chaos and unchecked power."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 1.2, description: "Fire spreads rapidly in a dry, urban setting." },
-            earth: { damageMultiplier: 1.1, description: "Earthbending causes widespread structural damage." },
-            lightning: { damageMultiplier: 1.3, description: "Lightning arcs, causing widespread damage and fires." }
+        environmentalModifiers: {
+            fire: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Fire spreads rapidly in a dry, urban setting and is empowered." },
+            lightning: { damageMultiplier: 1.3, energyCostModifier: 0.9, description: "Lightning arcs, causing widespread damage and fires." },
+            earth: { damageMultiplier: 1.1, energyCostModifier: 1.0, description: "Earthbending causes widespread structural damage." },
+            water: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Waterbending struggles against the dry, hot environment." }
         },
         notes: "The heart of the Fire Nation empowers firebenders. Grand but still destructible."
     },
@@ -308,10 +318,12 @@ export const locationConditions = {
                 "What remains is a perilous landscape of broken rock and treacherous chasms."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 0.9, description: "Fire has less effect on solid stone." },
-            earth: { damageMultiplier: 1.5, description: "Earthbending can tear Omashu apart with ease." },
-            metal: { damageMultiplier: 1.2, description: "Metalbending can warp the city's infrastructure." }
+        environmentalModifiers: {
+            earth: { damageMultiplier: 1.5, energyCostModifier: 0.8, description: "Earthbending can tear Omashu apart with ease and low energy cost." },
+            metal: { damageMultiplier: 1.2, energyCostModifier: 0.95, description: "Metalbending can warp the city's infrastructure." },
+            fire: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Fire has less effect on solid stone and can be diffused." },
+            air: { damageMultiplier: 1.05, energyCostModifier: 0.95, description: "Airbending can utilize verticality for increased mobility." },
+            physical: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Verticality and precarious footing can hinder physical attacks." }
         },
         notes: "A massive, tiered city of stone perfect for earthbenders. Gravity is a significant factor."
     },
@@ -347,10 +359,11 @@ export const locationConditions = {
                 "The raw power of the battle has irrevocably reshaped the natural landscape."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 0.8, description: "Fire has limited structural effect on solid rock." },
-            earth: { damageMultiplier: 1.4, description: "Earthbending causes massive geological shifts." },
-            air: { damageMultiplier: 1.0, description: "Airbending can dislodge loose scree." }
+        environmentalModifiers: {
+            earth: { damageMultiplier: 1.4, energyCostModifier: 0.9, description: "Earthbending causes massive geological shifts with ease." },
+            air: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Airbending can dislodge loose scree and move with currents." },
+            fire: { damageMultiplier: 0.8, energyCostModifier: 1.1, description: "Fire has limited structural effect on solid rock and can be diffused." },
+            physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Precarious footing and echoing sounds hinder physical combat." }
         },
         notes: "A sheer canyon with little cover, favoring those with high mobility or powerful earthbending. Very stable."
     },
@@ -386,10 +399,11 @@ export const locationConditions = {
                 "A once peaceful sanctuary is now a testament to the brutal force unleashed upon it."
             ]
         },
-        collateralModifiers: {
-            fire: { damageMultiplier: 1.1, description: "Fire burns wooden structures easily." },
-            earth: { damageMultiplier: 1.0, description: "Earthbending can damage village structures and terrain." },
-            water: { damageMultiplier: 1.3, description: "Waterbending can unleash the power of the ocean." }
+        environmentalModifiers: {
+            water: { damageMultiplier: 1.3, energyCostModifier: 0.85, description: "Waterbending can unleash the power of the ocean with ease." },
+            earth: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Earthbending can damage village structures and terrain." },
+            fire: { damageMultiplier: 1.1, energyCostModifier: 1.05, description: "Fire burns wooden structures easily, but moisture can hinder." },
+            physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "The varied terrain provides balanced physical combat." }
         },
         notes: "A balanced environment with access to multiple elements. Village structures are relatively fragile."
     },
