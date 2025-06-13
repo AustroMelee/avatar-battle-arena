@@ -291,6 +291,84 @@ body {
     animation: clashPulse 0.5s ease-out;
 }
 
+/* NEW: Archetype Info Section Styles */
+.archetype-info-section {
+    background-color: rgba(10, 10, 20, 0.5); /* Slightly different from surface-bg */
+    backdrop-filter: blur(3px);
+    border: 2px solid var(--border-scroll);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem auto;
+    max-width: 900px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.archetype-info-section.no-selection {
+    opacity: 0.7;
+}
+
+.archetype-info-section.error-active {
+    border-color: var(--accent-red);
+}
+
+.archetype-headline {
+    font-family: var(--font-title);
+    font-size: 2rem;
+    color: var(--text-title-gold);
+    margin-bottom: 1rem;
+    text-shadow: 1px 2px 0 var(--shadow-stone);
+    letter-spacing: 1px;
+}
+
+.archetype-info-section.no-selection .archetype-headline {
+    color: var(--text-parchment-gold);
+    font-style: italic;
+}
+
+.archetype-intros {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem; /* Reduced gap */
+    margin-bottom: 0.5rem; /* Reduced margin */
+}
+
+.archetype-intro {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin: 0;
+    padding: 0.25rem 0; /* Minimal padding */
+}
+
+.archetype-intro:nth-child(1) { /* Fighter A */
+    color: var(--accent-1);
+    font-weight: bold;
+}
+.archetype-intro:nth-child(2) { /* Fighter B */
+    color: var(--accent-2);
+    font-weight: bold;
+}
+
+.archetype-info-section.no-selection .archetype-intro {
+    color: var(--text-parchment-gold);
+    font-style: italic;
+}
+.archetype-info-section.no-selection .archetype-intro:nth-child(2) {
+    display: none; /* Hide second intro when no selection */
+}
+
+
+.archetype-error {
+    font-size: 1rem;
+    color: var(--accent-red);
+    font-weight: bold;
+    margin-top: 1rem;
+}
+/* End NEW Archetype Info Section Styles */
+
+
 .location-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -702,6 +780,13 @@ body {
     display: none !important;
 }
 
+@media (max-width: 1024px) {
+    .archetype-intros {
+        grid-template-columns: 1fr; /* Stack intros on smaller screens */
+    }
+}
+
+
 @media (max-width: 768px) {
     .container { padding: 1rem; }
     .battle-setup { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -710,6 +795,8 @@ body {
     .results-section { padding: 1.5rem; }
     .character-grid { grid-template-columns: repeat(3, 1fr); }
     .location-grid { grid-template-columns: repeat(2, 1fr); }
+    .archetype-headline { font-size: 1.5rem; }
+    .archetype-intro { font-size: 0.9rem; }
 }
 
 @media (max-width: 480px) {
@@ -717,6 +804,7 @@ body {
     .vs-divider { font-size: 2.5rem; }
     .character-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
     .location-grid { grid-template-columns: 1fr; }
+    .archetype-headline { font-size: 1.3rem; }
 }
 
 .char-sokka { color: #a4d2f7; font-weight: bold; }
