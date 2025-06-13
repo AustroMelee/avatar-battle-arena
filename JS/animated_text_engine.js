@@ -1,60 +1,52 @@
 // FILE: js/animated_text_engine.js
 'use strict';
 
-import { getCharacterImage } from './ui.js'; // Assume ui.js will export this
+import { getCharacterImage } from './ui.js'; 
 import { focusOnLatestMessage } from './camera_control.js';
 
-const TYPEWRITER_SPEED_MS = 25; // Milliseconds per character
-const EMOJI_ANIMATION_DURATION_MS = 500; // How long emoji animations last
-const HIGH_IMPACT_PAUSE_MS = 1500; // Pause for high-impact moves
-const DEFAULT_PAUSE_MS = 500; // Default pause after a line
+const TYPEWRITER_SPEED_MS = 25; 
+const EMOJI_ANIMATION_DURATION_MS = 500; 
+const HIGH_IMPACT_PAUSE_MS = 1500; 
+const DEFAULT_PAUSE_MS = 500; 
 
 let currentTimeoutId = null;
 let animationQueueInternal = [];
 let currentMessageIndex = 0;
 let simulationContainerElement = null;
-let onStepCompleteCallback = null; // Callback for simulation_mode_manager
+let onStepCompleteCallback = null; 
 
-/**
- * Stops any ongoing animation and clears timeouts.
- */
 export function stopCurrentAnimation() {
     if (currentTimeoutId) {
         clearTimeout(currentTimeoutId);
         currentTimeoutId = null;
     }
-    // Any other cleanup for ongoing animations if necessary
 }
 
-/**
- * Starts processing the animation queue.
- * @param {Array<object>} queue - The queue of message objects to animate.
- * @param {HTMLElement} container - The DOM element to render animations into.
- * @param {Function} onComplete - Callback when a step is done or queue is empty.
- */
 export function startAnimationSequence(queue, container, onComplete) {
-    stopCurrentAnimation(); // Ensure any previous animation is stopped
-    animationQueueInternal = [...queue]; // Copy the queue
+    stopCurrentAnimation(); 
+    animationQueueInternal = [...queue]; 
     currentMessageIndex = 0;
     simulationContainerElement = container;
     onStepCompleteCallback = onComplete;
 
     if (animationQueueInternal.length === 0) {
         console.warn("Animation queue is empty.");
-        if (onStepCompleteCallback) onStepCompleteCallback(true); // true for end of queue
+        if (onStepCompleteCallback) onStepCompleteCallback(true); 
         return;
     }
     
     processNextMessage();
 }
 
-/**
- * Processes the next message in the queue.
- */
 function processNextMessage() {
+    if (!simulationContainerElement) { // Guard if container somehow becomes null mid-sequence
+        console.error("Simulation container is null, cannot process messages.");
+        if (onStepCompleteCallback) onStepCompleteCallback(true); // End of queue due to error
+        return;
+    }
     if (currentMessageIndex >= animationQueueInternal.length) {
         console.log("Animation queue finished.");
-        if (onStepCompleteCallback) onStepCompleteCallback(true); // End of queue
+        if (onStepCompleteCallback) onStepCompleteCallback(true); 
         return;
     }
 
@@ -64,16 +56,13 @@ function processNextMessage() {
     renderMessage(message);
 }
 
-/**
- * Renders a single message object with animations.
- * @param {object} message - The message object to render.
- *                          { actorId, moveType, impactLevel, text, pauseAfter, characterName, moveName, effectivenessLabel }
- */
 function renderMessage(message) {
     if (!simulationContainerElement || !message || typeof message.text !== 'string') {
         console.error("Invalid message object or container for rendering:", message);
-        // Skip this message and proceed
-        currentTimeoutId = setTimeout(processNextMessage, DEFAULT_PAUSE_MS);
+        currentTimeoutId = setTimeout(() => {
+            if (onStepCompleteCallback) onStepCompleteCallback(false); // Still call callback
+            processNextMessage();
+        }, DEFAULT_PAUSE_MS);
         return;
     }
 
@@ -81,13 +70,15 @@ function renderMessage(message) {
     lineElement.className = 'simulation-line';
     if (message.isPhaseHeader) lineElement.classList.add('phase-header-simulated');
     if (message.isMoveAction) lineElement.classList.add('move-action-simulated');
-    if (message.isDialogue) lineElement.classList.add('dialogue-simulated');
+    if (message.isDialogue) {
+        lineElement.classList.add('dialogue-simulated');
+        // Add specific class for dialogue type (spoken, internal, action)
+        if(message.dialogueType) lineElement.classList.add(`dialogue-${message.dialogueType}`);
+    }
     if (message.isEnvironmental) lineElement.classList.add('environmental-simulated');
 
-
-    // 1. Character Icon (if actorId provided)
     if (message.actorId) {
-        const iconUrl = getCharacterImage(message.actorId); // This function needs to exist in ui.js or be passed
+        const iconUrl = getCharacterImage(message.actorId); 
         if (iconUrl) {
             const iconImg = document.createElement('img');
             iconImg.src = iconUrl;
@@ -99,63 +90,60 @@ function renderMessage(message) {
     
     const textSpan = document.createElement('span');
     textSpan.className = 'simulation-text-content';
-    lineElement.appendChild(textSpan);
-
-    // 2. Emoji (if moveType provided for move actions)
-    if (message.moveType && message.moveName) { // Only for actual moves
+    
+    // Prepend emoji to textSpan if it's a move action and emoji exists
+    if (message.isMoveAction && message.moveType) { 
         const emoji = getEmojiForMoveType(message.moveType, message.effectivenessLabel);
         if (emoji) {
             const emojiSpan = document.createElement('span');
             emojiSpan.className = 'simulation-move-emoji';
-            emojiSpan.textContent = emoji + ' '; // Add space after emoji
-            textSpan.appendChild(emojiSpan); // Prepend emoji to text
-            
-            // Trigger emoji animation based on impactLevel later, after text is typed
+            emojiSpan.textContent = emoji + ' '; 
+            textSpan.appendChild(emojiSpan); 
         }
     }
+    lineElement.appendChild(textSpan);
     
     simulationContainerElement.appendChild(lineElement);
-    focusOnLatestMessage(simulationContainerElement, lineElement); // Camera follow
+    focusOnLatestMessage(simulationContainerElement, lineElement); 
 
-    // 3. Typewriter Text
     typeMessage(textSpan, message.text, () => {
-        // After text is typed:
-        // 4. Animate Emoji (if applicable)
         const emojiElement = textSpan.querySelector('.simulation-move-emoji');
         if (emojiElement && message.impactLevel) {
             animateEmoji(emojiElement, message.impactLevel);
         }
 
-        // 5. Pause and proceed
         const pauseDuration = message.pauseAfter || 
                               (message.impactLevel === 'high' || message.impactLevel === 'critical' ? HIGH_IMPACT_PAUSE_MS : DEFAULT_PAUSE_MS);
         
         currentTimeoutId = setTimeout(() => {
-            if (onStepCompleteCallback) onStepCompleteCallback(false); // false for not end of queue (unless it is)
-            processNextMessage(); // Process next message after pause
+            if (onStepCompleteCallback) onStepCompleteCallback(false); 
+            processNextMessage(); 
         }, pauseDuration);
     });
 }
 
-/**
- * Types out a message character by character.
- * @param {HTMLElement} element - The DOM element to type into.
- * @param {string} text - The text to type.
- * @param {Function} onFinished - Callback when typing is complete.
- */
 function typeMessage(element, text, onFinished) {
     let i = 0;
-    element.innerHTML = ''; // Clear previous content
-    // Find if there's an emoji to preserve it during typing
-    const emojiSpan = element.querySelector('.simulation-move-emoji');
-    if (emojiSpan) {
-        element.appendChild(emojiSpan.cloneNode(true)); // Re-add emoji if it was there
+    // If there's an emoji already, we type after it.
+    // Otherwise, we clear and type.
+    const existingEmoji = element.querySelector('.simulation-move-emoji');
+    let textContentTarget = element;
+
+    if (existingEmoji) {
+        // Create a new span for the text itself, to append after the emoji
+        let actualTextSpan = element.querySelector('.typewriter-target');
+        if (!actualTextSpan) {
+            actualTextSpan = document.createElement('span');
+            actualTextSpan.className = 'typewriter-target';
+            element.appendChild(actualTextSpan);
+        }
+        textContentTarget = actualTextSpan;
     }
-    
+    textContentTarget.innerHTML = ''; // Clear only the target span for text
+
     function type() {
         if (i < text.length) {
-            // Append to existing content after emoji (if any)
-            element.insertAdjacentText('beforeend', text.charAt(i));
+            textContentTarget.insertAdjacentText('beforeend', text.charAt(i));
             i++;
             currentTimeoutId = setTimeout(type, TYPEWRITER_SPEED_MS);
         } else {
@@ -165,58 +153,53 @@ function typeMessage(element, text, onFinished) {
     type();
 }
 
-/**
- * Animates an emoji based on impact level.
- * @param {HTMLElement} emojiElement - The emoji span element.
- * @param {string} impactLevel - 'low', 'medium', 'high', 'critical'.
- */
 function animateEmoji(emojiElement, impactLevel) {
     if (!emojiElement) return;
-
     let animationClass = '';
-    switch (impactLevel.toLowerCase()) {
+    switch (impactLevel?.toLowerCase()) { // Add null check for impactLevel
         case 'critical':
         case 'high':
-            animationClass = 'emoji-animate-high'; // e.g., enlarge and shake
+            animationClass = 'emoji-animate-high'; 
             break;
-        case 'strong':
+        case 'strong': // Strong is often considered high impact
+             animationClass = 'emoji-animate-high'; 
+            break;
         case 'medium':
-            animationClass = 'emoji-animate-medium'; // e.g., shake
+            animationClass = 'emoji-animate-medium'; 
             break;
-        case 'normal':
+        case 'normal': // Normal impact
+            animationClass = 'emoji-animate-medium';
+            break;
         case 'low':
-            animationClass = 'emoji-animate-low'; // e.g., subtle pulse
+            animationClass = 'emoji-animate-low'; 
             break;
         default:
-            return; // No animation for weak or unspecified
+            return; 
     }
-
     emojiElement.classList.add(animationClass);
     setTimeout(() => {
         emojiElement.classList.remove(animationClass);
     }, EMOJI_ANIMATION_DURATION_MS);
 }
 
-/**
- * Gets an appropriate emoji for a move type and effectiveness.
- * (Simplified for this example)
- * @param {string} moveType - e.g., 'Offense', 'Defense', 'fire', 'water'
- * @param {string} effectivenessLabel - e.g., 'Strong', 'Weak'
- * @returns {string} Emoji character or empty string.
- */
 function getEmojiForMoveType(moveType, effectivenessLabel) {
+    if (!moveType) return '➡️'; // Default if moveType is undefined
     if (effectivenessLabel === 'Critical') return '💥';
-    if (effectivenessLabel === 'Strong') return '🔥';
+    if (effectivenessLabel === 'Strong') return '🔥'; // Strong can still use its own emoji
     
-    switch (moveType?.toLowerCase()) {
+    switch (moveType.toLowerCase()) {
         case 'fire': return '🔥';
-        case 'water': case 'ice': return '💧';
-        case 'earth': case 'metal': return '🪨';
+        case 'water': return '💧';
+        case 'ice': return '❄️'; // Specific for ice
+        case 'earth': return '🪨';
+        case 'metal': return '⚙️'; // Specific for metal
         case 'air': return '💨';
         case 'lightning': return '⚡';
-        case 'physical': case 'utility': return '⚔️';
-        case 'special': return '✨';
-        // Add more as needed
-        default: return '➡️'; // Default for generic actions
+        case 'physical': return '⚔️';
+        case 'utility': return '🛠️'; // More distinct utility emoji
+        case 'special': return '✨'; // For chi-blocking, bloodbending etc.
+        case 'offense': return '⚔️'; // Fallback for general offense
+        case 'defense': return '🛡️'; // Fallback for general defense
+        default: return '➡️'; 
     }
 }
