@@ -1,8 +1,6 @@
 // FILE: js/ui.js
 'use strict';
 
-// V5: Replaces time of day dropdown with a clickable emoji toggle.
-
 import { characters } from './data/characters.js';
 import { locations } from './locations.js';
 
@@ -23,16 +21,13 @@ const DOM = {
     winProbability: document.getElementById('win-probability'),
     battleStory: document.getElementById('battle-story'),
     analysisList: document.getElementById('analysis-list'),
-    // Time toggle elements
     timeToggleContainer: document.getElementById('time-toggle-container'),
     timeOfDayValue: document.getElementById('time-of-day-value'),
-    // Hidden inputs to store the selected IDs
     fighter1Select: document.createElement('input'),
     fighter2Select: document.createElement('input'),
     locationSelect: document.createElement('input'),
 };
 
-// Hide the new inputs and append them to the body
 DOM.fighter1Select.type = 'hidden';
 DOM.fighter1Select.id = 'fighter1-value';
 DOM.fighter2Select.type = 'hidden';
@@ -42,7 +37,6 @@ DOM.locationSelect.id = 'location-value';
 document.body.appendChild(DOM.fighter1Select);
 document.body.appendChild(DOM.fighter2Select);
 document.body.appendChild(DOM.locationSelect);
-
 
 function getElementClass(character) {
     const mainElement = character.techniques.find(t => t.element)?.element || 'nonbender';
@@ -62,6 +56,12 @@ function createCharacterCard(character, fighterKey) {
     card.classList.add(getElementClass(character));
     card.dataset.id = character.id;
     
+    const image = document.createElement('img');
+    image.src = character.imageUrl;
+    image.alt = character.name;
+    image.loading = 'lazy';
+    card.appendChild(image);
+
     const name = document.createElement('h3');
     name.textContent = character.name;
     card.appendChild(name);
@@ -135,11 +135,8 @@ function initializeTimeToggle() {
     const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove 'selected' from all buttons
             buttons.forEach(btn => btn.classList.remove('selected'));
-            // Add 'selected' to the clicked button
             button.classList.add('selected');
-            // Update the hidden input value
             DOM.timeOfDayValue.value = button.dataset.value;
         });
     });
