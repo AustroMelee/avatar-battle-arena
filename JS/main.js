@@ -3,17 +3,22 @@
 
 // This is the main entry point for the application.
 // It handles user interactions and initiates the battle simulation.
-// MODIFIED: The import for simulateBattle now points to the new engine core.
 
 import { simulateBattle } from './engine/battle-engine-core.js';
-import { DOM, populateDropdowns, updateFighterDisplay, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
+// MODIFIED: No longer imports DOM. It only imports the functions it needs.
+import { populateDropdowns, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
+
+// Get a reference to the battle button
+const battleBtn = document.getElementById('battleBtn');
 
 function handleBattleStart() {
-    const f1Id = DOM.fighter1Select.value;
-    const f2Id = DOM.fighter2Select.value;
-    const locId = DOM.locationSelect.value;
-    const timeOfDay = DOM.timeOfDaySelect.value;
-    const emotionalMode = DOM.emotionalModeCheckbox.checked;
+    // These values now come from the hidden input fields that the card UI updates.
+    // We get them here instead of importing the whole DOM object.
+    const f1Id = document.getElementById('fighter1-value').value;
+    const f2Id = document.getElementById('fighter2-value').value;
+    const locId = document.getElementById('location').value;
+    const timeOfDay = document.getElementById('time-of-day').value;
+    const emotionalMode = document.getElementById('emotional-mode').checked;
 
     if (!f1Id || !f2Id || !locId) {
         alert("Please select both fighters and a location.");
@@ -35,20 +40,19 @@ function handleBattleStart() {
         } catch (error) {
             console.error("An error occurred during battle simulation:", error);
             alert("A critical error occurred. Please check the console and refresh.");
-            DOM.loadingSpinner.classList.add('hidden');
-            DOM.battleBtn.disabled = false;
+            // Manually re-enable the button on error
+            document.getElementById('loading').classList.add('hidden');
+            battleBtn.disabled = false;
         }
     }, 1500);
 }
 
 function init() {
+    // Set up the UI
     populateDropdowns();
-    updateFighterDisplay('fighter1');
-    updateFighterDisplay('fighter2');
-
-    DOM.battleBtn.addEventListener('click', handleBattleStart);
-    DOM.fighter1Select.addEventListener('change', () => updateFighterDisplay('fighter1'));
-    DOM.fighter2Select.addEventListener('change', () => updateFighterDisplay('fighter2'));
+    // Set up the primary event listener
+    battleBtn.addEventListener('click', handleBattleStart);
 }
 
+// Run the application
 document.addEventListener('DOMContentLoaded', init);
