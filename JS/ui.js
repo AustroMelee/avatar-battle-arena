@@ -1,20 +1,20 @@
 // FILE: js/ui.js
 'use strict';
 
-// V3: Fixes the circular dependency error by making DOM a local constant.
+// V4: Replaces location dropdown with a card-based grid selection.
 
 import { characters } from './data/characters.js';
 import { locations } from './locations.js';
 
-// DOM is now a local constant within the module. It is not exported.
 const DOM = {
     fighter1Grid: document.getElementById('fighter1-grid'),
     fighter2Grid: document.getElementById('fighter2-grid'),
-    locationSelect: document.getElementById('location'),
+    locationGrid: document.getElementById('location-grid'),
     timeOfDaySelect: document.getElementById('time-of-day'),
     emotionalModeCheckbox: document.getElementById('emotional-mode'),
     fighter1NameDisplay: document.getElementById('fighter1-name-display'),
     fighter2NameDisplay: document.getElementById('fighter2-name-display'),
+    locationNameDisplay: document.getElementById('location-name-display'),
     battleBtn: document.getElementById('battleBtn'),
     resultsSection: document.getElementById('results'),
     loadingSpinner: document.getElementById('loading'),
@@ -24,39 +24,33 @@ const DOM = {
     winProbability: document.getElementById('win-probability'),
     battleStory: document.getElementById('battle-story'),
     analysisList: document.getElementById('analysis-list'),
-    // Hidden inputs to store the selected fighter IDs
+    // Hidden inputs to store the selected IDs
     fighter1Select: document.createElement('input'),
     fighter2Select: document.createElement('input'),
+    locationSelect: document.createElement('input'),
 };
 
 // Hide the new inputs and append them to the body
 DOM.fighter1Select.type = 'hidden';
-DOM.fighter1Select.id = 'fighter1-value'; // Give them IDs for clarity
+DOM.fighter1Select.id = 'fighter1-value';
 DOM.fighter2Select.type = 'hidden';
 DOM.fighter2Select.id = 'fighter2-value';
+DOM.locationSelect.type = 'hidden';
+DOM.locationSelect.id = 'location-value';
 document.body.appendChild(DOM.fighter1Select);
 document.body.appendChild(DOM.fighter2Select);
+document.body.appendChild(DOM.locationSelect);
 
 
 function getElementClass(character) {
-    // This is a helper function, it doesn't need to be exported.
     const mainElement = character.techniques.find(t => t.element)?.element || 'nonbender';
     switch (mainElement) {
-        case 'fire':
-        case 'lightning':
-            return 'card-fire';
-        case 'water':
-        case 'ice':
-            return 'card-water';
-        case 'earth':
-        case 'metal':
-            return 'card-earth';
-        case 'air':
-            return 'card-air';
-        case 'special': // chi-blocking
-            return 'card-chi';
-        default:
-            return 'card-nonbender';
+        case 'fire': case 'lightning': return 'card-fire';
+        case 'water': case 'ice': return 'card-water';
+        case 'earth': case 'metal': return 'card-earth';
+        case 'air': return 'card-air';
+        case 'special': return 'card-chi';
+        default: return 'card-nonbender';
     }
 }
 
@@ -82,9 +76,7 @@ function handleCardSelection(character, fighterKey, selectedCard) {
     const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
     const hiddenInput = fighterKey === 'fighter1' ? DOM.fighter1Select : DOM.fighter2Select;
 
-    grid.querySelectorAll('.character-card').forEach(card => {
-        card.classList.remove('selected');
-    });
+    grid.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
     selectedCard.classList.add('selected');
     nameDisplay.textContent = character.name;
     hiddenInput.value = character.id;
@@ -102,14 +94,44 @@ function populateCharacterGrids() {
     });
 }
 
-// These are the functions that main.js ACTUALLY needs to know about.
+function createLocationCard(locationData, locationId) {
+    const card = document.createElement('div');
+    card.className = 'location-card';
+    card.dataset.id = locationId;
+
+    const name = document.createElement('h3');
+    name.textContent = locationData.name;
+    card.appendChild(name);
+    
+    const terrain = document.createElement('p');
+    terrain.textContent = locationData.terrain;
+    card.appendChild(terrain);
+
+    card.addEventListener('click', () => {
+        handleLocationCardSelection(locationData, locationId, card);
+    });
+
+    return card;
+}
+
+function handleLocationCardSelection(locationData, locationId, selectedCard) {
+    DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
+    selectedCard.classList.add('selected');
+    DOM.locationNameDisplay.textContent = locationData.name;
+    DOM.locationSelect.value = locationId;
+}
+
+function populateLocationGrid() {
+    const sortedLocations = Object.entries(locations).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+    for (const [id, locationData] of sortedLocations) {
+        const card = createLocationCard(locationData, id);
+        DOM.locationGrid.appendChild(card);
+    }
+}
+
 export function populateDropdowns() {
     populateCharacterGrids();
-    for (const id in locations) {
-        if (locations.hasOwnProperty(id)) {
-            DOM.locationSelect.add(new Option(locations[id].name, id));
-        }
-    }
+    populateLocationGrid();
 }
 
 export function showLoadingState() {
@@ -150,7 +172,6 @@ export function resetBattleUI() {
     }, 500);
 }
 
-// This function is only used internally by showResultsState, so it doesn't need to be exported.
 function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
     DOM.analysisList.innerHTML = '';
     const { fighter1, fighter2 } = finalState;
@@ -180,7 +201,6 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
         if (!log || log.length === 0) return;
         const li = document.createElement('li');
         li.className = className;
-        // The log is now JSON, so we stringify it for display
         const formattedLog = log.map(entry => typeof entry === 'string' ? entry : JSON.stringify(entry, null, 2)).join('<br>');
         li.innerHTML = `<strong>${title}:</strong><br><pre><code>${formattedLog}</code></pre>`;
         DOM.analysisList.appendChild(li);

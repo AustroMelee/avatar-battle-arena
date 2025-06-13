@@ -5,7 +5,6 @@
 // It handles user interactions and initiates the battle simulation.
 
 import { simulateBattle } from './engine/battle-engine-core.js';
-// MODIFIED: No longer imports DOM. It only imports the functions it needs.
 import { populateDropdowns, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
 
 // Get a reference to the battle button
@@ -13,10 +12,9 @@ const battleBtn = document.getElementById('battleBtn');
 
 function handleBattleStart() {
     // These values now come from the hidden input fields that the card UI updates.
-    // We get them here instead of importing the whole DOM object.
     const f1Id = document.getElementById('fighter1-value').value;
     const f2Id = document.getElementById('fighter2-value').value;
-    const locId = document.getElementById('location').value;
+    const locId = document.getElementById('location-value').value; // Updated from 'location'
     const timeOfDay = document.getElementById('time-of-day').value;
     const emotionalMode = document.getElementById('emotional-mode').checked;
 

@@ -33,16 +33,13 @@
             </div>
         </section>
 
+        <!-- === MODIFIED SECTION START === -->
         <section class="location-section">
-            <h2 class="location-title">Battlefield Conditions</h2>
-            <div class="battlefield-controls">
-                <div class="select-group">
-                    <div class="select-wrapper">
-                        <select id="location">
-                            <option value="">Choose a battlefield...</option>
-                        </select>
-                    </div>
-                </div>
+            <h2 class="location-title" id="location-name-display">Choose a Battlefield</h2>
+            <div class="location-grid" id="location-grid">
+                <!-- Location cards will be dynamically inserted here -->
+            </div>
+            <div class="battlefield-options">
                 <div class="select-group">
                     <div class="select-wrapper">
                         <select id="time-of-day">
@@ -51,12 +48,13 @@
                         </select>
                     </div>
                 </div>
-            </div>
-             <div class="options-bar">
-                <input type="checkbox" id="emotional-mode" checked>
-                <label for="emotional-mode">Enable Emotional Mode</label>
+                <div class="options-bar">
+                    <input type="checkbox" id="emotional-mode" checked>
+                    <label for="emotional-mode">Enable Emotional Mode</label>
+                </div>
             </div>
         </section>
+        <!-- === MODIFIED SECTION END === -->
 
         <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
 
