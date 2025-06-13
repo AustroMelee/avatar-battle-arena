@@ -1,3 +1,4 @@
+// FILE: engine_narrative-engine.js
 'use strict';
 
 // VERSION 5.1: FINAL OVERKILL PATCH.
@@ -50,9 +51,10 @@ function substituteTokens(template, actor, opponent, context = {}) {
         '{actor.s}': actor.pronouns.s,
         '{actor.p}': actor.pronouns.p,
         '{actor.o}': actor.pronouns.o,
-        '{opponent.s}': opponent.pronouns.s,
-        '{opponent.p}': opponent.pronouns.p,
-        '{opponent.o}': opponent.pronouns.o,
+        // Ensure opponent properties are safely accessed
+        '{opponent.s}': opponent?.pronouns?.s || '',
+        '{opponent.p}': opponent?.pronouns?.p || '',
+        '{opponent.o}': opponent?.pronouns?.o || '',
         ...context
     };
     for (const [token, value] of Object.entries(replacements)) {
@@ -131,7 +133,7 @@ function generateActionDescription(move, actor, opponent, result) {
 }
 
 // NEW FUNCTION: Generate collateral damage description
-function generateCollateralDamageDescription(move, actor, environmentState, locationData) {
+function generateCollateralDamageDescription(move, actor, opponent, environmentState, locationData) {
     if (!move.collateralImpact || move.collateralImpact === 'none' || environmentState.damageLevel === 0) {
         return '';
     }
@@ -142,7 +144,7 @@ function generateCollateralDamageDescription(move, actor, environmentState, loca
     if (collateralPhrase) {
         const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
         // Use generic collateral phrase
-        let description = `${actorSpan}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, actor, {})}`;
+        let description = `${actorSpan}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, actor, opponent)}`; // Pass opponent
         
         // Add location-specific impact description based on overall damage level, if applicable
         const currentDamageThreshold = environmentState.damageLevel;
@@ -164,7 +166,7 @@ function generateCollateralDamageDescription(move, actor, environmentState, loca
                 // Ensure unique impact descriptions for current turn, if applicable
                 const uniqueImpact = getRandomElement(selectedImpacts.filter(imp => !environmentState.specificImpacts.has(imp)));
                 if (uniqueImpact) {
-                    specificImpactPhrase = ` ${substituteTokens(uniqueImpact, actor, {})}`;
+                    specificImpactPhrase = ` ${substituteTokens(uniqueImpact, actor, opponent)}`; // Pass opponent
                     environmentState.specificImpacts.add(uniqueImpact); // Mark as used for this turn
                 }
             }
@@ -207,8 +209,8 @@ export function generateTurnNarration(events, move, actor, opponent, result, env
         actionDescription = generateActionDescription(move, actor, opponent, result);
     }
     
-    // NEW: Generate collateral damage description
-    const collateralDamageDescription = generateCollateralDamageDescription(move, actor, environmentState, locationData);
+    // NEW: Generate collateral damage description, passing opponent
+    const collateralDamageDescription = generateCollateralDamageDescription(move, actor, opponent, environmentState, locationData);
 
     mechanicalLog = mechanicalLog.replace(/{moveDescription}/g, actionDescription);
     mechanicalLog = mechanicalLog.replace(/{collateralDamageDescription}/g, collateralDamageDescription); // Insert collateral description
