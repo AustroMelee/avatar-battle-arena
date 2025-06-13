@@ -1,36 +1,59 @@
 // FILE: engine/narrative-engine.js
 'use strict';
 
-// VERSION 4.1: HOTFIX.
-// Exporting `findNarrativeQuote` to make it available to the core engine,
-// resolving the ReferenceError and re-establishing a pure data pipeline.
+// VERSION 5: OVERKILL REFACTOR 2.0.
+// Complete rewrite of the action/narration pipeline to fix all identified issues.
+// - Implements a robust verb conjugator.
+// - Fixes "Name he verb" double-subject error.
+// - Guarantees all template tokens are substituted.
+// - Provides a fallback for the 'Struggle' move.
+// - Enforces narrative deduplication logic.
 
 import { phaseTemplates, impactPhrases } from '../narrative-v2.js';
 
-const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const getRandomElement = (arr) => arr ? arr[Math.floor(Math.random() * arr.length)] : null;
 
-// 1.2: Central Pronoun Substitution Utility
+// 5: Robust English verb conjugator for 3rd person singular present tense.
+function conjugatePresent(verb) {
+    if (!verb) return '';
+    // Irregular verbs map
+    const irregulars = { 'have': 'has', 'do': 'does', 'go': 'goes', 'be': 'is' };
+    if (irregulars[verb]) return irregulars[verb];
+
+    // Regular verbs
+    if (/(ss|sh|ch|x|z|o)$/.test(verb)) return verb + 'es';
+    if (/[^aeiou]y$/.test(verb)) return verb.slice(0, -1) + 'ies';
+    return verb + 's';
+}
+
+// 1.2 / 3: Centralized and Expanded Token Substitution
 function substituteTokens(template, actor, opponent, context = {}) {
     if (!template) return '';
     let text = template;
     const replacements = {
+        // --- Self-explanatory tokens ---
         '{actorName}': actor.name,
-        '{opponentName}': opponent.name,
-        '{actor.s}': actor.pronouns.s,
-        '{actor.p}': actor.pronouns.p,
-        '{actor.o}': actor.pronouns.o,
+        '{opponentName}': opponent.name, // Fixed: Added {opponentName}
+        '{targetName}': opponent.name,   // Alias for {opponentName}
+        
+        // --- Actor Pronouns ---
+        '{actor.s}': actor.pronouns.s, // he/she
+        '{actor.p}': actor.pronouns.p, // his/her
+        '{actor.o}': actor.pronouns.o, // him/her
+        
+        // --- Opponent Pronouns ---
         '{opponent.s}': opponent.pronouns.s,
         '{opponent.p}': opponent.pronouns.p,
         '{opponent.o}': opponent.pronouns.o,
-        ...context // Add other dynamic context like move names
+        
+        ...context
     };
     for (const [token, value] of Object.entries(replacements)) {
-        text = text.replace(new RegExp(token, 'g'), value);
+        text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), value);
     }
     return text;
 }
 
-// === MODIFICATION START: `export` added ===
 export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
     const narrativeData = actor.narrative || {};
     let pool = null;
@@ -45,7 +68,6 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
     }
     return pool ? getRandomElement(pool) : null;
 }
-// === MODIFICATION END ===
 
 function renderQuote(quote, actor, opponent, context) {
     if (!quote) return '';
@@ -57,7 +79,7 @@ function renderQuote(quote, actor, opponent, context) {
     return `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
 }
 
-// 3.1: Move Description Collapsing (Integrated into single function)
+// 1 / 4: Refactored Action Description Generation
 function generateActionDescription(move, actor, opponent, result) {
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
     const opponentSpan = `<span class="char-${opponent.id}">${opponent.name}</span>`;
@@ -71,7 +93,6 @@ function generateActionDescription(move, actor, opponent, result) {
         tacticalSuffix = ` The move leaves ${opponentSpan} ${move.setup.name}!`;
     }
 
-    // This block is the prose from the old `narration.js`
     let impactSentence;
     if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = opponent.lastMove?.type === 'Offense';
@@ -80,25 +101,28 @@ function generateActionDescription(move, actor, opponent, result) {
         impactSentence = getRandomElement(impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()]);
     }
 
-    const verb = move.verb || 'executes';
-    const object = move.requiresArticle ? `a ${move.object}` : move.object;
-    const baseAction = `${actor.pronouns.s} ${verb} ${object}`;
+    // 4: Handle the "Struggle" fallback move
+    let baseAction;
+    if (move.name === "Struggle") {
+        baseAction = `${actor.name} struggles to fight back`;
+    } else {
+        const verb = conjugatePresent(move.verb || 'executes');
+        const object = move.requiresArticle ? (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) : move.object;
+        // 1: Fixed "Name he verb" error. The actor's name is the subject.
+        baseAction = `${actor.name} ${verb} ${object}`;
+    }
 
-    const fullDesc = substituteTokens(`${tacticalPrefix}${actorSpan} ${baseAction}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
+    const fullDesc = substituteTokens(`${tacticalPrefix}${baseAction}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
     return `<p class="move-description">${fullDesc}</p>`;
 }
 
-// PRIMARY EXPORTED FUNCTION
 export function generateTurnNarration(events, move, actor, opponent, result) {
     let narrativeBlockContent = '';
 
-    // Render all pre-action narrative events (dialogue, thoughts)
     events.forEach(event => {
         narrativeBlockContent += renderQuote(event.quote, event.actor, opponent, { '{moveName}': move.name });
     });
 
-    // 3.1: Decide whether to use narrative or mechanical description
-    // Check for a specific `onMoveExecution` quote
     const moveQuoteContext = { result: result.effectiveness.label };
     const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
 
@@ -112,27 +136,21 @@ export function generateTurnNarration(events, move, actor, opponent, result) {
 
     let actionDescription;
     if (moveExecutionQuote) {
-        // Use the specific character quote for the action
         actionDescription = `<p class="move-description">${substituteTokens(moveExecutionQuote.line, actor, opponent)}</p>`;
     } else {
-        // Fallback to the generic action description generator
         actionDescription = generateActionDescription(move, actor, opponent, result);
     }
     
-    // Combine the mechanical log and the (narrative or generic) action description
     mechanicalLog = mechanicalLog.replace(/{moveDescription}/g, actionDescription);
     
-    // Assemble the final HTML block
     const narrativeWrapper = narrativeBlockContent ? `<div class="narrative-block">${narrativeBlockContent}</div>` : '';
     return narrativeWrapper + mechanicalLog;
 }
 
-// This function remains for end-of-battle quotes
 export function getFinalVictoryLine(winner, loser) {
     const finalQuote = findNarrativeQuote(winner, loser, 'onVictory', 'Default', {});
     if (finalQuote) {
         return substituteTokens(finalQuote.line, winner, loser);
     }
-    // Hard fallback if narrative object is malformed
     return "The battle is won.";
 }

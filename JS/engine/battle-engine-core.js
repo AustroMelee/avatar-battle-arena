@@ -1,9 +1,9 @@
 // FILE: engine/battle-engine-core.js
 'use strict';
 
-// VERSION 9.2: HOTFIX.
-// The call to `calculateMove` was missing the `interactionLog` argument.
-// This has been corrected to restore the data pipeline and prevent the TypeError.
+// VERSION 9.3: OVERKILL-COMPLIANT NARRATIVE DEDUPLICATION.
+// - Implements a `firedQuotes` Set to prevent the same narrative event from firing multiple times per turn.
+// - Fixes repetitive dialogue from the same intent/state trigger.
 
 import { characters } from '../data/characters.js';
 import { locationConditions } from '../location-battle-conditions.js';
@@ -33,14 +33,12 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
     };
 }
 
-const updateMomentum = (current, label) => clamp(current + ({ 'Critical': 3, 'Strong': 2, 'Normal': 1, 'Weak': -2, 'Counter': 2 }[label] || 0), -5, 5);
-
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
     let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
     
     const conditions = { ...locationConditions[locId], isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
-    let turnLog = [], interactionLog = []; // The `interactionLog` is defined here.
+    let turnLog = [], interactionLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
     let battleOver = false;
@@ -56,6 +54,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
         const phaseName = battlePhases[turn]?.name || "Final Exchange";
         let phaseContent = phaseTemplates.header.replace('{phaseName}', phaseName).replace('{phaseEmoji}', '⚔️');
+        // 2/6: Implemented narrative event deduplication for the turn.
+        const firedQuotesThisTurn = new Set();
         
         const processTurn = (attacker, defender) => {
             if (battleOver) return;
@@ -68,26 +68,29 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 if (attacker.tacticalState.duration <= 0) attacker.tacticalState = null;
             }
             attacker.isStunned = false;
+
+            const addNarrativeEvent = (quote, actor) => {
+                if (quote && !firedQuotesThisTurn.has(quote.line)) {
+                    narrativeEvents.push({ quote, actor });
+                    firedQuotesThisTurn.add(quote.line);
+                }
+            };
             
             let manipulationResult = attemptManipulation(attacker, defender);
             if (manipulationResult.success) {
                 defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2 };
-                const manipQuote = findNarrativeQuote(attacker, defender, 'onManipulation', 'asAttacker');
-                if (manipQuote) narrativeEvents.push({ quote: manipQuote, actor: attacker });
+                addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onManipulation', 'asAttacker'), attacker);
             }
 
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions, turn);
             attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`);
-            const intentQuote = findNarrativeQuote(attacker, defender, 'onIntentSelection', aiLogEntry.intent);
-            if(intentQuote) narrativeEvents.push({ quote: intentQuote, actor: attacker });
+            addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onIntentSelection', aiLogEntry.intent), attacker);
             
-            // === MODIFICATION: The `interactionLog` array is now passed as the fifth argument. ===
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             updateMentalState(defender, attacker, result);
             if (defender.mentalState.level !== oldDefenderMentalState) {
-                const stateChangeQuote = findNarrativeQuote(defender, attacker, 'onStateChange', defender.mentalState.level);
-                if (stateChangeQuote) narrativeEvents.push({ quote: stateChangeQuote, actor: defender });
+                addNarrativeEvent(findNarrativeQuote(defender, attacker, 'onStateChange', defender.mentalState.level), defender);
             }
             
             attacker.lastMoveEffectiveness = result.effectiveness.label;
@@ -127,7 +130,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const finalWords = getFinalVictoryLine(winner, loser);
     turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', `${winner.name} stands victorious. "${finalWords}"`));
 
-    // Pass the completed interactionLog to the final result object for analysis display.
     winner.interactionLog = interactionLog;
     loser.interactionLog = interactionLog;
 
