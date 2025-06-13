@@ -526,3 +526,73 @@ select:hover {
 .char-iroh { color: #66cc66; font-weight: bold; }
 .char-pakku { color: #add8e6; font-weight: bold; }
 .char-jeong-jeong { color: #cc6666; font-weight: bold; }
+
+/* AI LOGS */
+.ai-log, .interaction-log {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    background: rgba(0,0,0,0.2);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    border-left: 2px solid var(--accent-secondary);
+    color: var(--text-secondary);
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap; /* Allows wrapping */
+    word-break: break-all;
+}
+.analysis-item-spacer {
+    height: 1rem;
+    border-bottom: 1px solid var(--surface-border);
+}
+.analysis-summary {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    font-size: 0.95rem;
+    color: var(--accent-gold);
+    text-align: center;
+}
+
+/* OMEGA Narrative Engine Styles */
+.narrative-spoken, .narrative-internal, .narrative-manipulation {
+    font-style: italic;
+    padding: 0.75rem 1.25rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.narrative-spoken {
+    background-color: rgba(78, 205, 196, 0.1);
+    border-left-color: var(--accent-2);
+    color: var(--text-primary);
+}
+
+.narrative-internal {
+    background-color: rgba(100, 100, 120, 0.1);
+    border-left-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+.narrative-manipulation {
+    background-color: rgba(153, 51, 255, 0.1);
+    border-left-color: #9933ff; /* Azula's color */
+    color: #e6ccff;
+}
+
+/* This is a bit repetitive, but ensures character colors are applied inside narrative blocks */
+.narrative-spoken .char-sokka, .narrative-internal .char-sokka { color: #a4d2f7; font-weight: bold; }
+.narrative-spoken .char-aang-airbending-only, .narrative-internal .char-aang-airbending-only { color: #8aff8a; font-weight: bold; }
+.narrative-spoken .char-katara, .narrative-internal .char-katara { color: #87ceeb; font-weight: bold; }
+.narrative-spoken .char-toph-beifong, .narrative-internal .char-toph-beifong { color: #b7a476; font-weight: bold; }
+.narrative-spoken .char-zuko, .narrative-internal .char-zuko { color: #ff9966; font-weight: bold; }
+.narrative-spoken .char-azula, .narrative-internal .char-azula { color: #9933ff; font-weight: bold; }
+.narrative-spoken .char-ozai-not-comet-enhanced, .narrative-internal .char-ozai-not-comet-enhanced { color: #ff4d4d; font-weight: bold; }
+.narrative-spoken .char-bumi, .narrative-internal .char-bumi { color: #ffd700; font-weight: bold; }
+.narrative-spoken .char-ty-lee, .narrative-internal .char-ty-lee { color: #ffccff; font-weight: bold; }
+.narrative-spoken .char-mai, .narrative-internal .char-mai { color: #cccccc; font-weight: bold; }
+.narrative-spoken .char-iroh, .narrative-internal .char-iroh { color: #66cc66; font-weight: bold; }
+.narrative-spoken .char-pakku, .narrative-internal .char-pakku { color: #add8e6; font-weight: bold; }
+.narrative-spoken .char-jeong-jeong, .narrative-internal .char-jeong-jeong { color: #cc6666; font-weight: bold; }

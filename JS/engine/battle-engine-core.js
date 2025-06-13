@@ -1,8 +1,7 @@
 // FILE: engine/battle-engine-core.js
 'use strict';
 
-// This is the "Game Master" file. It orchestrates the entire battle flow.
-// VERSION 5: Adds Manipulation Phase and Adaptive Personality Drift.
+// VERSION 6: Final integration with the OMEGA Narrative Engine.
 
 import { characters } from '../data/characters.js';
 import { locationConditions } from '../location-battle-conditions.js';
@@ -10,7 +9,9 @@ import { battlePhases, phaseTemplates } from '../narrative-v2.js';
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './ai-decision.js';
 import { calculateMove } from './move-resolution.js';
 import { updateMentalState } from './mental-state.js';
-import { narrateMove, generateOutcomeSummary, getToneAlignedVictoryEnding } from './narration.js';
+import { narrateMove } from './narration.js';
+import { triggerNarrativeEvent } from './narrative-engine.js';
+import { getToneAlignedVictoryEnding, generateOutcomeSummary } from './narration.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -19,21 +20,15 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
     if (!characterData) throw new Error(`Character with ID ${charId} not found.`);
     
     return { 
-        id: charId,
-        name: characterData.name,
-        ...JSON.parse(JSON.stringify(characterData)), // Deep copy of all data
+        id: charId, name: characterData.name, ...JSON.parse(JSON.stringify(characterData)), 
         hp: 100, energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
-        isStunned: false, tacticalState: null,
-        movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
+        isStunned: false, tacticalState: null, movesUsed: [], phraseHistory: {}, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         relationalState: (emotionalMode && characterData.relationships?.[opponentId]) || null,
-        mentalState: { level: 'stable', stress: 0 },
-        mentalStateChangedThisTurn: false,
+        mentalState: { level: 'stable', stress: 0 }, mentalStateChangedThisTurn: false,
         aiMemory: {
-            selfMoveEffectiveness: {},
-            opponentModel: { isAggressive: 0, isDefensive: 0, isTurtling: false },
-            moveSuccessCooldown: {},
-            opponentSequenceLog: {},
+            selfMoveEffectiveness: {}, opponentModel: { isAggressive: 0, isDefensive: 0, isTurtling: false },
+            moveSuccessCooldown: {}, opponentSequenceLog: {},
         }
     };
 }
@@ -50,6 +45,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
     let battleOver = false;
 
+    // Battle Start Narrative
+    turnLog.push(triggerNarrativeEvent(fighter1, 'battleStart', 'general', { target: fighter2 }));
+    turnLog.push(triggerNarrativeEvent(fighter2, 'battleStart', 'general', { target: fighter1 }));
+
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
         [fighter1, fighter2].forEach(f => {
             f.mentalStateChangedThisTurn = false;
@@ -61,10 +60,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 f.tacticalState.duration--;
                 if (f.tacticalState.duration <= 0) {
                     f.tacticalState = null;
-                    interactionLog.push(`${f.name} recovered from their vulnerable state.`);
+                    interactionLog.push(`${f.name} recovered.`);
                 }
             }
-            // NEW: Adaptive Personality Drift
             if (turn > 1) adaptPersonality(f);
         });
         
@@ -73,25 +71,37 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         
         const processTurn = (attacker, defender) => {
             if (battleOver) return;
+            const oldAttackerMentalState = attacker.mentalState.level;
+            const oldDefenderMentalState = defender.mentalState.level;
+
             attacker.isStunned = false; 
             
-            // NEW: Manipulation Phase
             let manipulationResult = attemptManipulation(attacker, defender);
             if (manipulationResult.success) {
                 defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2 };
                 phaseContent += manipulationResult.narration;
+                phaseContent += triggerNarrativeEvent(defender, 'manipulation', 'asVictim', { attacker: attacker });
                 interactionLog.push(`${attacker.name} manipulated ${defender.name}, leaving them ${manipulationResult.effect}.`);
             }
 
             updateMentalState(attacker, defender, null);
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions, turn);
             attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`);
+            phaseContent += triggerNarrativeEvent(attacker, 'intent', aiLogEntry.intent, { target: defender });
+            if(aiLogEntry.prediction.confidence > 0.5 && aiLogEntry.prediction.move) {
+                 phaseContent += triggerNarrativeEvent(attacker, 'prediction', 'correct', { move: aiLogEntry.prediction.move, target: defender });
+            }
 
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
             updateMentalState(defender, attacker, result);
+            if (defender.mentalState.level !== oldDefenderMentalState) phaseContent += triggerNarrativeEvent(defender, 'mentalState', defender.mentalState.level);
+            if (attacker.mentalState.level !== oldAttackerMentalState) phaseContent += triggerNarrativeEvent(attacker, 'mentalState', attacker.mentalState.level);
+            
             attacker.momentum = updateMomentum(attacker.momentum, result.effectiveness.label);
             attacker.lastMoveEffectiveness = result.effectiveness.label;
+            
+            phaseContent += triggerNarrativeEvent(attacker, 'moveEffectiveness', result.effectiveness.label);
             
             attacker.consecutiveDefensiveTurns = (move.type === 'Utility' || move.type === 'Defense') ? attacker.consecutiveDefensiveTurns + 1 : 0;
             
@@ -111,7 +121,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             attacker.moveHistory.push(move);
             attacker.lastMove = move;
             
-            updateAiMemory(defender, attacker); // No longer need to pass move/result, it reads from state
+            updateAiMemory(defender, attacker);
 
             if (defender.hp <= 0) battleOver = true;
         };
@@ -119,11 +129,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         processTurn(initiator, responder);
         if (!battleOver) processTurn(responder, initiator);
 
-        turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', phaseName).replace('{phaseContent}', phaseContent));
+        turnLog.push(phaseTemplates.phaseWrapper.replace('{phaseName}', phaseName).replace('{phaseContent}', phaseContent.replace(/<p[^>]*><\/p>/g, '')));
         [initiator, responder] = [responder, initiator];
     }
     
-    // ... (Outcome determination is unchanged) ...
     const finalInteractionLog = [...new Set(interactionLog)];
     fighter1.interactionLog = finalInteractionLog;
     fighter2.interactionLog = finalInteractionLog;

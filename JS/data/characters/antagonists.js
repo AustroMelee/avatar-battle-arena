@@ -1,16 +1,47 @@
 // FILE: data/characters/antagonists.js
 'use strict';
 
-// Contains character data for the primary antagonists of the series. (V2 with full personality profiles)
+// V2: OMEGA Narrative Expansion. Contains the full "Narrative Quiver" for each character.
 
 export const antagonistCharacters = {
     'azula': {
         id: 'azula', name: "Azula", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Ruthless", powerTier: 8,
-        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3, signatureMoveBias: { "Lightning Generation": 1.5, "Blue Fire Daggers": 1.2 } },
-        behaviorProfile: { predictability: 0.9, creativity: 0.6, focus: 0.95 },
-        specialTraits: { manipulative: 0.8 }, // Master manipulator
+        specialTraits: { manipulative: 0.8 },
+        narrative: {
+            battleStart: [
+                { type: 'spoken', line: "You think you stand a chance against me? That's... adorable." },
+                { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }
+            ],
+            intent: {
+                CapitalizeOnOpening: [{ type: 'spoken', line: "There! An opening. This ends now." }],
+                PressAdvantage: [{ type: 'internal', line: "They're faltering. A sustained assault will break them completely." }],
+            },
+            manipulation: {
+                asAttacker: [
+                    { type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." },
+                    { type: 'spoken', line: "Still trying so hard? You'll always be second best." }
+                ],
+            },
+            prediction: {
+                correct: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }],
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "Why isn't this working? I should have won already." }],
+                shaken: [{ type: 'internal', line: "My hair... it's not perfect... stay calm... CALM!" }],
+                broken: [{ type: 'spoken', line: "No... you all fear me! You have to!" }]
+            },
+            relationships: {
+                'zuko': {
+                    narrative: {
+                        manipulation: {
+                            asAttacker: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }]
+                        }
+                    }
+                }
+            }
+        },
         techniques: [
             { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup'], setup: { name: 'Exposed', duration: 2, intensity: 1.35 } },
             { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'] },
@@ -25,10 +56,17 @@ export const antagonistCharacters = {
     'ozai-not-comet-enhanced': {
         id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Supreme", powerTier: 9,
-        pacingProfile: 'berserker',
         personalityProfile: { aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2, signatureMoveBias: { "Dragon's Roar": 1.4, "Emperor's Wrath": 1.5 } },
-        behaviorProfile: { predictability: 0.8, creativity: 0.3, focus: 1.0 },
-        specialTraits: { manipulative: 0.6 }, // Manipulative through fear and power
+        specialTraits: { manipulative: 0.6 },
+        narrative: {
+            battleStart: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
+            intent: { PressAdvantage: [{ type: 'spoken', line: "There is no escape. Your world is ending." }] },
+            manipulation: { asAttacker: [{ type: 'spoken', line: "Your friends cannot help you. Your hope is an illusion." }] },
+            relationships: {
+                'zuko': { narrative: { manipulation: { asAttacker: [{ type: 'spoken', line: "You were always a failure, Zuko. Weak and ungrateful." }] } } },
+                'aang-airbending-only': { narrative: { battleStart: [{ type: 'spoken', line: "So, the Avatar has come to meet his end." }] } }
+            }
+        },
         techniques: [
             { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'] },
             { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 60, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'] },
@@ -42,17 +80,16 @@ export const antagonistCharacters = {
     'mai': {
         id: 'mai', name: "Mai", type: "Nonbender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Deadpan", powerTier: 4,
-        pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1, signatureMoveBias: { "Precision Strike": 1.3, "Pinning Strike": 1.4 } },
-        behaviorProfile: { predictability: 0.95, creativity: 0.2, focus: 0.9 },
-        specialTraits: { resilientToManipulation: 0.3 }, // Apathetic, but Zuko is a weak spot
+        specialTraits: { resilientToManipulation: 0.3 },
+        narrative: { battleStart: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }] },
         techniques: [
-            { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, emoji: '🔪', requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
-            { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, emoji: '🎯', requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'] },
-            { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, emoji: '🧱', requiresArticle: true, element: 'physical', moveTags: ['defensive_stance', 'utility_block', 'trap_delayed'] },
-            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, emoji: '📌', element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 } },
-            { name: "Ricochet Shot", verb: 'launch', object: 'ricochet shot', type: 'Offense', power: 55, emoji: '🔄', requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'unpredictable', 'bypasses_defense'] },
-            { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, emoji: '📍', requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'area_of_effect', 'requires_opening'] }
+            { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
+            { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'] },
+            { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, requiresArticle: true, element: 'physical', moveTags: ['defensive_stance', 'utility_block', 'trap_delayed'] },
+            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 } },
+            { name: "Ricochet Shot", verb: 'launch', object: 'ricochet shot', type: 'Offense', power: 55, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'unpredictable', 'bypasses_defense'] },
+            { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'area_of_effect', 'requires_opening'] }
         ],
         quotes: { postWin: ["That's it. Are we done now?"], postWin_overwhelming: ["You were never a threat. Just... annoying."], postWin_specific: { 'ty-lee': "Try to flip your way out of that one." } },
         relationships: {}
@@ -60,15 +97,14 @@ export const antagonistCharacters = {
     'ty-lee': {
         id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Playful", powerTier: 4,
-        pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6, signatureMoveBias: { "Chi-Blocking Flurry": 1.3, "Pressure Point Strike": 1.2 } },
-        behaviorProfile: { predictability: 0.5, creativity: 0.6, focus: 0.8 },
-        specialTraits: { resilientToManipulation: 0.2 }, // Eager to please, making her susceptible
+        specialTraits: { resilientToManipulation: 0.2 },
+        narrative: { battleStart: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }] },
         techniques: [
-            { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, emoji: '🤸‍♀️', requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Distracted', duration: 1, intensity: 1.2 } },
-            { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, emoji: '🎯', requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'] },
-            { name: "Graceful Dodge", verb: 'dodge', object: 'incoming attack', type: 'Defense', power: 40, emoji: '🍃', requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'] },
-            { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'flurry of chi-blocking strikes', type: 'Finisher', power: 85, emoji: '🛑', requiresArticle: true, element: 'special', moveTags: ['melee_range', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening'] }
+            { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Distracted', duration: 1, intensity: 1.2 } },
+            { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'] },
+            { name: "Graceful Dodge", verb: 'dodge', object: 'incoming attack', type: 'Defense', power: 40, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'] },
+            { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'flurry of chi-blocking strikes', type: 'Finisher', power: 85, requiresArticle: true, element: 'special', moveTags: ['melee_range', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening'] }
         ],
         quotes: { postWin: ["Looks like your chi's... on vacation!"], postWin_overwhelming: ["Ta-da! That's how it's done!"], postWin_specific: { 'mai': "Sorry, Mai! Your aura is still a lovely shade of gloomy pink, though!" } },
         relationships: {}

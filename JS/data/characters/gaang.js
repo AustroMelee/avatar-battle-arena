@@ -1,16 +1,41 @@
 // FILE: data/characters/gaang.js
 'use strict';
 
-// Contains character data for the core members of Team Avatar. (V2 with full personality profiles)
+// V3: OMEGA Narrative Expansion. Contains the full "Narrative Quiver" for each character.
 
 export const gaangCharacters = {
     'sokka': {
         id: 'sokka', name: "Sokka", type: "Nonbender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Madcap", powerTier: 3,
-        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8, signatureMoveBias: { "Boomerang Throw": 1.2, "Improvised Trap": 1.4 } },
-        behaviorProfile: { predictability: 0.2, creativity: 0.9, focus: 0.6 },
-        specialTraits: { resilientToManipulation: 0.2 }, // A bit gullible but loyal
+        specialTraits: { resilientToManipulation: 0.2 },
+        narrative: {
+            battleStart: [
+                { type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" },
+                { type: 'internal', line: "Okay, they look tough. Don't panic. Just find an opening. You're the idea guy." }
+            ],
+            intent: {
+                OpeningMoves: [{ type: 'internal', line: "Gotta test their defenses first. See what I'm working with." }],
+                PressAdvantage: [{ type: 'spoken', line: "I've got you now! You can't escape my brilliant tactics!" }],
+                DesperateGambit: [{ type: 'spoken', line: "This is crazy... but it just might work!" }],
+                CautiousDefense: [{ type: 'internal', line: "Whoa, they're strong. Better play it safe for a bit." }]
+            },
+            manipulation: {
+                asVictim: [{ type: 'internal', line: "Ugh, don't listen to them! It's a trick! Focus, Sokka, focus!" }],
+            },
+            prediction: {
+                correct: [{ type: 'spoken', line: "Ha! I knew you'd do that! Classic rookie mistake." }],
+                wrong: [{ type: 'spoken', line: "Wha-? Okay, new plan! The old plan is bad." }]
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "This is not going according to plan. At all." }],
+                shaken: [{ type: 'internal', line: "Come on, pull it together! Can't let the team down!" }],
+            },
+            moveEffectiveness: {
+                Weak: [{ type: 'internal', line: "That... did not work. At all. Note to self: don't do that again." }],
+                Critical: [{ type: 'spoken', line: "See? Pure genius! That's why I'm the lead strategist!" }]
+            }
+        },
         techniques: [
             { name: "Sword Strike", verb: 'strike', object: 'with his meteorite sword', type: 'Offense', power: 40, element: 'physical', moveTags: ['melee_range', 'single_target', 'precise'] },
             { name: "Boomerang Throw", verb: 'throw', object: 'his trusty boomerang', type: 'Offense', power: 35, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'unpredictable'] },
@@ -25,10 +50,34 @@ export const gaangCharacters = {
     'aang-airbending-only': {
         id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Pacifist", powerTier: 9,
-        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9, signatureMoveBias: { "Air Scooter": 1.5, "Wind Shield": 1.3 } },
-        behaviorProfile: { predictability: 0.4, creativity: 0.8, focus: 0.7 },
-        specialTraits: { resilientToManipulation: 0.6 }, // Kind heart makes him somewhat vulnerable but his spirit is strong
+        specialTraits: { resilientToManipulation: 0.6 },
+        narrative: {
+            battleStart: [
+                { type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." },
+                { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }
+            ],
+            intent: {
+                OpeningMoves: [{ type: 'internal', line: "Maybe if I'm evasive enough, they'll just get tired and stop?" }],
+                CautiousDefense: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }],
+                CapitalizeOnOpening: [{ type: 'internal', line: "There's an opening! A quick puff of air should do it." }]
+            },
+            manipulation: {
+                asVictim: [{ type: 'internal', line: "Their words are... heavy. But I can't let them stop me." }],
+            },
+            prediction: {
+                correct: [{ type: 'internal', line: "I felt the shift in the air. I knew that was coming." }],
+                wrong: [{ type: 'internal', line: "Whoa, that was fast. Gotta be quicker." }]
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "This is getting too violent. I have to end it without anyone getting seriously hurt." }],
+                shaken: [{ type: 'spoken', line: "Please, stop! This isn't the way!" }],
+            },
+            moveEffectiveness: {
+                Weak: [{ type: 'internal', line: "That didn't work. Need to be more clever, less direct." }],
+                Critical: [{ type: 'internal', line: "Oops, was that too much? I hope they're okay..." }]
+            }
+        },
         techniques: [
             { name: "Air Scooter", verb: 'ride', object: 'his air scooter', type: 'Utility', power: 20, element: 'air', moveTags: ['utility_reposition', 'evasive', 'channeled'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.15 } },
             { name: "Air Blast", verb: 'unleash', object: 'focused blast of air', type: 'Offense', power: 40, requiresArticle: true, element: 'air', moveTags: ['ranged_attack', 'area_of_effect_small', 'pushback'] },
@@ -43,10 +92,35 @@ export const gaangCharacters = {
     'katara': {
         id: 'katara', name: "Katara", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Fierce", powerTier: 7,
-        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6, signatureMoveBias: { "Water Whip": 1.2, "Ice Prison": 1.3 } },
-        behaviorProfile: { predictability: 0.6, creativity: 0.7, focus: 0.8 },
-        specialTraits: { resilientToManipulation: 0.9 }, // Fiercely determined and emotionally intelligent
+        specialTraits: { resilientToManipulation: 0.9 },
+        narrative: {
+            battleStart: [
+                { type: 'spoken', line: "You want a fight? You've got one." },
+                { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }
+            ],
+            intent: {
+                PressAdvantage: [{ type: 'internal', line: "They're on the defensive. Now's my chance to press the attack." }],
+                DesperateGambit: [{ type: 'spoken', line: "I'm ending this. Right now." }],
+                BreakTheTurtle: [{ type: 'internal', line: "They think they can just hide? I'll tear that wall down." }]
+            },
+            prediction: {
+                correct: [{ type: 'internal', line: "Just as I thought. So predictable." }],
+                wrong: [{ type: 'internal', line: "A clever move. I'll have to be more careful." }]
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "Can't get sloppy. My family is counting on me." }],
+                shaken: [{ type: 'internal', line: "His face... No, don't think about Jet. Focus on the now!" }],
+                broken: [{ type: 'spoken', line: "You won't... take anyone else from me!" }]
+            },
+            relationships: {
+                'azula': {
+                    narrative: {
+                        battleStart: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }]
+                    }
+                }
+            }
+        },
         techniques: [
             { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'] },
             { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
@@ -61,10 +135,25 @@ export const gaangCharacters = {
     'toph-beifong': {
         id: 'toph-beifong', name: "Toph", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         victoryStyle: "Cocky", powerTier: 7,
-        pacingProfile: 'opportunist',
         personalityProfile: { aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8, signatureMoveBias: { "Seismic Slam": 1.4, "Metal Bending": 1.3 } },
-        behaviorProfile: { predictability: 0.3, creativity: 1.0, focus: 0.5 },
-        specialTraits: { resilientToManipulation: 0.5 }, // Stubborn, but can be provoked
+        specialTraits: { resilientToManipulation: 0.5 },
+        narrative: {
+            battleStart: [
+                { type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." },
+                { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }
+            ],
+            intent: {
+                PressAdvantage: [{ type: 'spoken', line: "Feeling the pressure, Twinkle Toes?" }],
+                BreakTheTurtle: [{ type: 'spoken', line: "You can't hide from me! I AM the ground you stand on!" }],
+            },
+            prediction: {
+                correct: [{ type: 'spoken', line: "HA! I could feel you winding up for that from a mile away!" }],
+                wrong: [{ type: 'internal', line: "Huh. They're lighter on their feet than I thought." }]
+            },
+            moveEffectiveness: {
+                Critical: [{ type: 'spoken', line: "That's how you do it! Did you SEE that? Oh, right." }]
+            }
+        },
         techniques: [
             { name: "Earth Wave", verb: 'send', object: 'powerful wave of earth', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect', 'environmental_manipulation'] },
             { name: "Rock Armor", verb: 'don', object: 'suit of rock armor', type: 'Defense', power: 75, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_armor', 'construct_creation', 'requires_opening'] },
@@ -79,10 +168,34 @@ export const gaangCharacters = {
     'zuko': {
         id: 'zuko', name: "Zuko", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         victoryStyle: "Determined", powerTier: 6,
-        pacingProfile: 'tactical',
         personalityProfile: { aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5, signatureMoveBias: { "Flame Sword": 1.2, "Dragon's Breath": 1.3 } },
-        behaviorProfile: { predictability: 0.7, creativity: 0.5, focus: 0.6 },
-        specialTraits: { resilientToManipulation: 0.1 }, // Highly susceptible due to emotional conflict
+        specialTraits: { resilientToManipulation: 0.1 },
+        narrative: {
+            battleStart: [
+                { type: 'spoken', line: "I must restore my honor!" },
+                { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }
+            ],
+            manipulation: {
+                asVictim: [{ type: 'internal', line: "Is she right? Am I weak? No! I choose my own destiny!" }],
+            },
+            mentalState: {
+                stressed: [{ type: 'internal', line: "Why can't I land a clean hit? Am I not strong enough?" }],
+                shaken: [{ type: 'internal', line: "Her voice... sounds just like Azula's. Get it together!" }],
+                broken: [{ type: 'spoken', line: "I'm... so confused..." }]
+            },
+            relationships: {
+                'azula': {
+                    narrative: {
+                        battleStart: [{ type: 'spoken', line: "I'm not the same person I was, Azula." }]
+                    }
+                },
+                'ozai-not-comet-enhanced': {
+                    narrative: {
+                        battleStart: [{ type: 'spoken', line: "I'm not afraid of you anymore, Father." }]
+                    }
+                }
+            }
+        },
         techniques: [
             { name: "Fire Daggers", verb: 'throw', object: 'volley of fire daggers', type: 'Offense', power: 45, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
             { name: "Flame Sword", verb: 'ignite', object: 'his dual dao swords', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'channeled', 'precise'] },
