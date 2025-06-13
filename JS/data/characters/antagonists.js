@@ -1,7 +1,7 @@
 // FILE: data/characters/antagonists.js
 'use strict';
 
-// V3: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object.
+// V4: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object. No omissions.
 
 export const antagonistCharacters = {
     'azula': {
@@ -11,30 +11,35 @@ export const antagonistCharacters = {
         specialTraits: { manipulative: 0.8 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
-            intent: {
+            onIntentSelection: {
                 CapitalizeOnOpening: [{ type: 'spoken', line: "There! An opening. This ends now." }],
                 PressAdvantage: [{ type: 'internal', line: "They're faltering. A sustained assault will break them completely." }],
                 DesperateGambit: [{ type: 'internal', line: "Unacceptable! I am not losing to this... peasant!" }]
             },
-            manipulation: {
+            onManipulation: {
                 asAttacker: [ { type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." }, { type: 'spoken', line: "Still trying so hard? You'll always be second best." } ],
                 asVictim: [{ type: 'internal', line: "Insolent worm. They will pay for that." }]
             },
-            prediction: {
+            onPrediction: {
                 correct: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }],
                 wrong: [{ type: 'internal', line: "A deviation from the expected pattern. Unlikely to happen again."}]
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "Why isn't this working? I should have won already." }],
                 shaken: [{ type: 'internal', line: "My hair... it's not perfect... stay calm... CALM!" }],
                 broken: [{ type: 'spoken', line: "No... you all fear me! You have to!" }]
             },
+            onVictory: {
+                Finisher: [{ line: "Almost a shame to have to snuff out such a pathetic flame." }],
+                Humiliation: [{ line: "You were beaten before you even began. Remember that." }],
+                Default: [{ line: "Flawless. As expected." }]
+            },
             relationships: {
-                'zuko': { narrative: { manipulation: { asAttacker: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } }
+                'zuko': { narrative: { onManipulation: { asAttacker: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } }
             }
         },
         techniques: [
-            { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup'], setup: { name: 'Exposed', duration: 2, intensity: 1.35 } },
+            { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], setup: { name: 'Exposed', duration: 2, intensity: 1.35 } },
             { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'] },
             { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'] },
             { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', type: 'Finisher', power: 100, requiresArticle: true, element: 'lightning', moveTags: ['ranged_attack', 'instantaneous', 'single_target', 'unblockable_standard', 'requires_opening', 'highRisk'] },
@@ -51,13 +56,14 @@ export const antagonistCharacters = {
         specialTraits: { manipulative: 0.6 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
-            intent: { PressAdvantage: [{ type: 'spoken', line: "There is no escape. Your world is ending." }] },
-            manipulation: { asAttacker: [{ type: 'spoken', line: "Your friends cannot help you. Your hope is an illusion." }] },
-            mentalState: {
+            onIntentSelection: { PressAdvantage: [{ type: 'spoken', line: "There is no escape. Your world is ending." }] },
+            onManipulation: { asAttacker: [{ type: 'spoken', line: "Your friends cannot help you. Your hope is an illusion." }] },
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "This insect is more resilient than expected. I will simply apply more pressure." }]
             },
+            onVictory: { Default: [{ line: "The Fire Nation is supreme! My power is absolute!" }] },
             relationships: {
-                'zuko': { narrative: { manipulation: { asAttacker: [{ type: 'spoken', line: "You were always a failure, Zuko. Weak and ungrateful." }] } } },
+                'zuko': { narrative: { onManipulation: { asAttacker: [{ type: 'spoken', line: "You were always a failure, Zuko. Weak and ungrateful." }] } } },
                 'aang-airbending-only': { narrative: { battleStart: [{ type: 'spoken', line: "So, the Avatar has come to meet his end." }] } }
             }
         },
@@ -78,29 +84,27 @@ export const antagonistCharacters = {
         specialTraits: { resilientToManipulation: 0.3 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
-            intent: {
+            onIntentSelection: {
                 OpeningMoves: [{ type: 'internal', line: "Let's see how long it takes before they get bored and make a mistake." }],
                 PressAdvantage: [{ type: 'spoken', line: "If you’re going to surrender, now’s your chance." }],
                 DesperateGambit: [{ type: 'spoken', line: "Guess I have to try now. Great." }]
             },
-            manipulation: {
-                asVictim: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }],
+            onMoveResult: {
+                'Pinning Strike': { Critical: [{ type: 'spoken', line: "Stay put." }] }
             },
-            prediction: {
+            onManipulation: { asVictim: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }] },
+            onPrediction: {
                 correct: [{ type: 'spoken', line: "Predictable. I could have thrown that with my eyes closed." }],
                 wrong: [{ type: 'internal', line: "Alright, that was actually clever. Doesn’t mean I care." }]
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "Now this is actually annoying." }],
                 shaken: [{ type: 'internal', line: "Just breathe. None of this really matters anyway." }],
                 broken: [{ type: 'spoken', line: "You win. Happy now?" }]
             },
-            moveEffectiveness: {
-                Weak: [{ type: 'internal', line: "Perfect. I missed. Mai, you’re really on a roll." }],
-                Critical: [{ type: 'spoken', line: "That’s it. Next?" }]
-            },
+            onVictory: { Default: [{ line: "That's it. Are we done now?" }] },
             relationships: {
-                'azula': { narrative: { manipulation: { asVictim: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } },
+                'azula': { narrative: { onManipulation: { asVictim: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } },
                 'ty-lee': { narrative: { battleStart: [{ type: 'spoken', line: "Ty Lee, can we not do this?" }] } }
             }
         },
@@ -108,7 +112,7 @@ export const antagonistCharacters = {
             { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
             { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'] },
             { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, requiresArticle: true, element: 'physical', moveTags: ['defensive_stance', 'utility_block', 'trap_delayed'] },
-            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 } },
+            { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise', 'humiliation'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 } },
             { name: "Ricochet Shot", verb: 'launch', object: 'ricochet shot', type: 'Offense', power: 55, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'unpredictable', 'bypasses_defense'] },
             { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'area_of_effect', 'requires_opening'] }
         ],
@@ -122,20 +126,21 @@ export const antagonistCharacters = {
         specialTraits: { resilientToManipulation: 0.2 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],
-            intent: {
+            onIntentSelection: {
                 CapitalizeOnOpening: [{ type: 'spoken', line: "Ooh, you're off-balance! Perfect time for a poke!" }],
                 PressAdvantage: [{ type: 'spoken', line: "Come on, let's dance!" }],
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'spoken', line: "Hey, that's not very nice! My aura is turning a gloomy gray now." }]
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "This isn't as fun as I thought it would be." }],
                 shaken: [{ type: 'spoken', line: "Maybe we should just stop and talk about our feelings?" }]
             },
-            moveEffectiveness: {
-                Critical: [{ type: 'spoken', line: "Boop! Your bending is gone!" }]
+            onMoveResult: {
+                'Chi-Blocking Flurry': { Critical: [{ type: 'spoken', line: "Boop! Your bending is gone!" }] }
             },
+            onVictory: { Default: [{ line: "Ta-da! That's how it's done!" }] },
             relationships: {
                 'mai': { narrative: { battleStart: [{ type: 'spoken', line: "Aww, don't be so gloomy, Mai! Let's play!" }] } }
             }

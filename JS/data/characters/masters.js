@@ -11,16 +11,17 @@ export const masterCharacters = {
         specialTraits: { resilientToManipulation: 1.0 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
-            intent: {
+            onIntentSelection: {
                 DesperateGambit: [{ type: 'spoken', line: "Let's try some neutral jing! You know, the kind where I wait... and then throw a building at you!" }],
                 BreakTheTurtle: [{ type: 'internal', line: "A rock can be a very patient opponent. But I'm more patient!" }]
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'spoken', line: "Your words are like tiny pebbles! They bounce right off my magnificent rock-hard abs!" }]
             },
-            prediction: {
+            onPrediction: {
                 correct: [{ type: 'spoken', line: "Your rock-and-roll is a little off-key! I knew you'd do that." }],
-            }
+            },
+            onVictory: { Default: [{ line: "Time for a nap! Or maybe some cabbage!" }] }
         },
         techniques: [
             { name: "Rock Avalanche", verb: 'trigger', object: 'massive rock avalanche', type: 'Finisher', power: 95, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'requires_opening', 'highRisk'] },
@@ -38,17 +39,18 @@ export const masterCharacters = {
         specialTraits: { resilientToManipulation: 0.8 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
-            intent: {
+            onIntentSelection: {
                 CautiousDefense: [{ type: 'internal', line: "A flawless defense is the foundation of victory. Let them waste their energy." }],
                 OpeningMoves: [{ type: 'internal', line: "Observe their form. Find the weakness in their style." }]
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'spoken', line: "Your pathetic attempts at mind games are as formless as your technique." }]
             },
-            prediction: {
+            onPrediction: {
                 correct: [{ type: 'internal', line: "An undisciplined attack. As expected." }],
                 wrong: [{ type: 'internal', line: "A surprising lack of form. It will not work a second time." }]
-            }
+            },
+            onVictory: { Default: [{ line: "Discipline prevails." }] }
         },
         techniques: [
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'] },
@@ -66,15 +68,16 @@ export const masterCharacters = {
         specialTraits: { resilientToManipulation: 1.0 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],
-            intent: {
+            onIntentSelection: {
                 CautiousDefense: [{ type: 'internal', line: "Control. Fire must be controlled, contained. I will not let it rage." }],
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'internal', line: "Words are wind. The flame within me is steady." }]
             },
-            moveEffectiveness: {
-                Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }]
-            }
+            onMoveResult: {
+                'Fire Wall': { Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }] }
+            },
+            onVictory: { Default: [{ line: "The destructive path of fire has been averted, for now." }] }
         },
         techniques: [
             { name: "Controlled Inferno", verb: 'create', object: 'controlled inferno', type: 'Offense', power: 80, requiresArticle: true, element: 'fire', moveTags: ['area_of_effect', 'channeled'] },

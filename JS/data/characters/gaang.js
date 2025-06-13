@@ -1,7 +1,7 @@
 // FILE: data/characters/gaang.js
 'use strict';
 
-// V4: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object.
+// V5: ULTIMATE NARRATIVE PASS - FINAL. Every character now has a fully-populated narrative object. No omissions.
 
 export const gaangCharacters = {
     'sokka': {
@@ -11,28 +11,38 @@ export const gaangCharacters = {
         specialTraits: { resilientToManipulation: 0.2 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, they look tough. Don't panic. Just find an opening. You're the idea guy." }],
-            intent: {
+            onIntentSelection: {
                 OpeningMoves: [{ type: 'internal', line: "Gotta test their defenses first. See what I'm working with." }],
                 PressAdvantage: [{ type: 'spoken', line: "I've got you now! You can't escape my brilliant tactics!" }],
                 DesperateGambit: [{ type: 'spoken', line: "This is crazy... but it just might work!" }],
                 CautiousDefense: [{ type: 'internal', line: "Whoa, they're strong. Better play it safe for a bit." }],
                 BreakTheTurtle: [{ type: 'spoken', line: "Think you can hide? My boomerang says otherwise!" }]
             },
-            manipulation: {
-                asVictim: [{ type: 'internal', line: "Ugh, don't listen to them! It's a trick! Focus, Sokka, focus!" }],
+            onMoveResult: {
+                'Boomerang Throw': {
+                    Critical: [{ type: 'spoken', line: "See? Boomerang always comes back! And it hits HARD!" }],
+                    Weak: [{ type: 'spoken', line: "Wait, where did it... oh, it's stuck in a tree. Great." }]
+                },
+                'Improvised Trap': {
+                    Critical: [{ type: 'spoken', line: "Ha! You fell right into my ingeniously designed trap!" }],
+                    Weak: [{ type: 'internal', line: "Okay, so the rope trap needs... more rope. And a better trigger. And maybe a sign." }]
+                }
             },
-            prediction: {
-                correct: [{ type: 'spoken', line: "Ha! I knew you'd do that! Classic rookie mistake." }],
-                wrong: [{ type: 'spoken', line: "Wha-? Okay, new plan! The old plan is bad." }]
-            },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "This is not going according to plan. At all." }],
                 shaken: [{ type: 'internal', line: "Come on, pull it together! Can't let the team down!" }],
-                broken: [{ type: 'spoken', line: "I... I need a meat break." }]
             },
-            moveEffectiveness: {
-                Weak: [{ type: 'internal', line: "That... did not work. At all. Note to self: don't do that again." }],
-                Critical: [{ type: 'spoken', line: "See? Pure genius! That's why I'm the lead strategist!" }]
+            onSelfRealization: {
+                moveRepeat: [{ type: 'internal', line: "Okay, Sokka, think! Can't just keep throwing the boomerang." }]
+            },
+            onVictory: {
+                Finisher: [{ line: "And that, my friends, is how you end a fight with *style* and *strategy*!" }],
+                Default: [{ line: "Boomerang! You *do* always come back!" }]
+            },
+            onManipulation: { asVictim: [{ type: 'internal', line: "Ugh, don't listen to them! It's a trick! Focus, Sokka, focus!" }] },
+            onPrediction: {
+                correct: [{ type: 'spoken', line: "Ha! I knew you'd do that! Classic rookie mistake." }],
+                wrong: [{ type: 'spoken', line: "Wha-? Okay, new plan! The old plan is bad." }]
             },
             relationships: { 'katara': { narrative: { battleStart: [{ type: 'spoken', line: "Don't go easy on me just 'cause I'm your brother!" }] } } }
         },
@@ -54,27 +64,28 @@ export const gaangCharacters = {
         specialTraits: { resilientToManipulation: 0.6 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
-            intent: {
+            onIntentSelection: {
                 OpeningMoves: [{ type: 'internal', line: "Maybe if I'm evasive enough, they'll just get tired and stop?" }],
                 CautiousDefense: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }],
                 CapitalizeOnOpening: [{ type: 'internal', line: "There's an opening! A quick puff of air should do it." }]
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'internal', line: "Their words are... heavy. But I can't let them stop me." }],
             },
-            prediction: {
+            onPrediction: {
                 correct: [{ type: 'internal', line: "I felt the shift in the air. I knew that was coming." }],
                 wrong: [{ type: 'internal', line: "Whoa, that was fast. Gotta be quicker." }]
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "This is getting too violent. I have to end it without anyone getting seriously hurt." }],
                 shaken: [{ type: 'spoken', line: "Please, stop! This isn't the way!" }],
                 broken: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }]
             },
-            moveEffectiveness: {
-                Weak: [{ type: 'internal', line: "That didn't work. Need to be more clever, less direct." }],
-                Critical: [{ type: 'internal', line: "Oops, was that too much? I hope they're okay..." }]
+            onMoveResult: {
+                'Air Scooter': { Critical: [{ type: 'spoken', line: "Whee! Try to catch me!" }] },
+                'Sweeping Gust': { Critical: [{ type: 'spoken', line: "Sorry about that!" }] }
             },
+            onVictory: { Default: [{ line: "Phew! Nobody got hurt, right? Mostly." }] },
             relationships: { 'ozai-not-comet-enhanced': { narrative: { battleStart: [{ type: 'spoken', line: "I will not let you destroy this world, Fire Lord." }] } } }
         },
         techniques: [
@@ -95,26 +106,26 @@ export const gaangCharacters = {
         specialTraits: { resilientToManipulation: 0.9 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
-            intent: {
+            onIntentSelection: {
                 PressAdvantage: [{ type: 'internal', line: "They're on the defensive. Now's my chance to press the attack." }],
                 DesperateGambit: [{ type: 'spoken', line: "I'm ending this. Right now." }],
                 BreakTheTurtle: [{ type: 'internal', line: "They think they can just hide? I'll tear that wall down." }]
             },
-            prediction: {
-                correct: [{ type: 'internal', line: "Just as I thought. So predictable." }],
-                wrong: [{ type: 'internal', line: "A clever move. I'll have to be more careful." }]
+            onMoveResult: {
+                'Bloodbending': { Critical: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] }
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "Can't get sloppy. My family is counting on me." }],
                 shaken: [{ type: 'internal', line: "His face... No, don't think about Jet. Focus on the now!" }],
                 broken: [{ type: 'spoken', line: "You won't... take anyone else from me!" }]
             },
+            onVictory: {
+                Finisher: [{ line: "It's over. You're beaten." }],
+                Humiliation: [{ line: "That's what happens when you underestimate a waterbender from the Southern Water Tribe." }],
+                Default: [{ line: "That's how you do it, for my family, for my tribe!" }]
+            },
             relationships: {
-                'azula': {
-                    narrative: {
-                        battleStart: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }]
-                    }
-                }
+                'azula': { narrative: { battleStart: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }] } }
             }
         },
         techniques: [
@@ -123,7 +134,7 @@ export const gaangCharacters = {
             { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'] },
             { name: "Ice Prison", verb: 'create', object: 'ice prison', type: 'Utility', power: 60, requiresArticle: true, element: 'ice', moveTags: ['utility_control', 'debuff_disable', 'construct_creation', 'single_target'], setup: { name: 'Immobilized', duration: 2, intensity: 1.4 } },
             { name: "Tidal Wave", verb: 'summon', object: 'massive tidal wave', type: 'Finisher', power: 90, requiresArticle: true, element: 'water', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'channeled', 'requires_opening'] },
-            { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk'] }
+            { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'] }
         ],
         quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"], postWin_specific: { 'azula': "You're beaten. It's over." } },
         relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1.0, resilienceModifier: 1.1 }, 'azula': { relationshipType: "bitter_rivalry", stressModifier: 1.5, resilienceModifier: 1.0 } }
@@ -135,25 +146,26 @@ export const gaangCharacters = {
         specialTraits: { resilientToManipulation: 0.5 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
-            intent: {
+            onIntentSelection: {
                 PressAdvantage: [{ type: 'spoken', line: "Feeling the pressure, Twinkle Toes?" }],
                 BreakTheTurtle: [{ type: 'spoken', line: "You can't hide from me! I AM the ground you stand on!" }],
                 CapitalizeOnOpening: [{ type: 'spoken', line: "You left your feet! Big mistake!" }]
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'spoken', line: "Is that supposed to hurt my feelings? I can't see your face, but I'm guessing it's real ugly." }]
             },
-            prediction: {
+            onPrediction: {
                 correct: [{ type: 'spoken', line: "HA! I could feel you winding up for that from a mile away!" }],
                 wrong: [{ type: 'internal', line: "Huh. They're lighter on their feet than I thought." }]
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "They're tougher than they look. Time to get serious." }],
                 shaken: [{ type: 'spoken', line: "Okay, that one actually hurt. You're gonna pay for that!" }]
             },
-            moveEffectiveness: {
-                Critical: [{ type: 'spoken', line: "That's how you do it! Did you SEE that? Oh, right." }]
-            }
+            onMoveResult: {
+                'Seismic Slam': { Critical: [{ type: 'spoken', line: "There! How'd you like that one?" }] }
+            },
+            onVictory: { Default: [{ line: "Told you I was the best. The greatest earthbender in the world!" }] }
         },
         techniques: [
             { name: "Earth Wave", verb: 'send', object: 'powerful wave of earth', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect', 'environmental_manipulation'] },
@@ -173,18 +185,19 @@ export const gaangCharacters = {
         specialTraits: { resilientToManipulation: 0.1 },
         narrative: {
             battleStart: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],
-            intent: {
+            onIntentSelection: {
                 PressAdvantage: [{ type: 'internal', line: "Now. Push hard while they're off balance." }],
                 CautiousDefense: [{ type: 'internal', line: "I can't be reckless. I need to wait for the right moment." }]
             },
-            manipulation: {
+            onManipulation: {
                 asVictim: [{ type: 'internal', line: "Is she right? Am I weak? No! I choose my own destiny!" }],
             },
-            mentalState: {
+            onStateChange: {
                 stressed: [{ type: 'internal', line: "Why can't I land a clean hit? Am I not strong enough?" }],
                 shaken: [{ type: 'internal', line: "Her voice... sounds just like Azula's. Get it together!" }],
                 broken: [{ type: 'spoken', line: "I'm... so confused..." }]
             },
+            onVictory: { Default: [{ line: "I fought for my own path. And I won." }] },
             relationships: {
                 'azula': { narrative: { battleStart: [{ type: 'spoken', line: "I'm not the same person I was, Azula." }] } },
                 'ozai-not-comet-enhanced': { narrative: { battleStart: [{ type: 'spoken', line: "I'm not afraid of you anymore, Father." }] } }
