@@ -4,41 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATLA Battle Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Added IM Fell English SC for the title font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="container">
     <header class="header">
         <h1 class="title">ATLA BATTLE ARENA</h1>
-        <p class="subtitle">Choose your fighters and witness legendary battles from the world of Avatar</p>
+        <p class="subtitle">SELECT YOUR CHAMPIONS AND UNLEASH THE ELEMENTS!</p>
     </header>
     <main>
         <section class="battle-setup">
-            <!-- FIGHTER 1 SELECTION -->
             <div class="fighter-selection-area">
                 <h2 class="fighter-title" id="fighter1-name-display">Choose Fighter 1</h2>
                 <div class="character-grid" id="fighter1-grid">
-                    <!-- Character cards will be dynamically inserted here -->
                 </div>
             </div>
-
             <div class="vs-divider" id="vsDivider">VS</div>
-
-            <!-- FIGHTER 2 SELECTION -->
             <div class="fighter-selection-area">
                 <h2 class="fighter-title" id="fighter2-name-display">Choose Fighter 2</h2>
                 <div class="character-grid" id="fighter2-grid">
-                    <!-- Character cards will be dynamically inserted here -->
                 </div>
             </div>
         </section>
-
         <section class="location-section">
             <h2 class="location-title" id="location-name-display">Choose a Battlefield</h2>
             <div class="location-grid" id="location-grid">
-                <!-- Location cards will be dynamically inserted here -->
             </div>
-            <!-- === MODIFIED SECTION START === -->
             <div class="battlefield-options">
                 <div class="time-toggle-container" id="time-toggle-container">
                     <button class="time-toggle-btn selected" data-value="day" aria-label="Select Day">☀️</button>
@@ -49,15 +44,10 @@
                     <label for="emotional-mode">Enable Emotional Mode</label>
                 </div>
             </div>
-            <!-- Added a new div to display time selection feedback -->
             <div id="time-feedback" class="time-feedback"></div>
-             <!-- Hidden input to store the value for the battle engine -->
             <input type="hidden" id="time-of-day-value" value="day">
-            <!-- === MODIFIED SECTION END === -->
         </section>
-
         <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
-
         <section class="results-section" id="results" style="display: none;">
             <div class="loading hidden" id="loading">
                 <div class="spinner"></div>
