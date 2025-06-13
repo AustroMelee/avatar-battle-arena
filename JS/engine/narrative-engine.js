@@ -1,51 +1,59 @@
 // FILE: engine/narrative-engine.js
 'use strict';
 
-// VERSION 5: OVERKILL REFACTOR 2.0.
-// Complete rewrite of the action/narration pipeline to fix all identified issues.
-// - Implements a robust verb conjugator.
-// - Fixes "Name he verb" double-subject error.
-// - Guarantees all template tokens are substituted.
-// - Provides a fallback for the 'Struggle' move.
-// - Enforces narrative deduplication logic.
+// VERSION 5.1: FINAL OVERKILL PATCH.
+// - Implemented a compound verb-aware conjugator to fix "erupt withs" bug.
+// - Added legacy {possessive} token support to the substitution map for full redundancy.
+// - The root cause of the {possessive} leak in narrative-v2.js is also fixed.
 
 import { phaseTemplates, impactPhrases } from '../narrative-v2.js';
 
 const getRandomElement = (arr) => arr ? arr[Math.floor(Math.random() * arr.length)] : null;
 
-// 5: Robust English verb conjugator for 3rd person singular present tense.
-function conjugatePresent(verb) {
-    if (!verb) return '';
+// 1: Patched verb conjugator for compound verbs.
+function conjugatePresent(verbPhrase) {
+    if (!verbPhrase) return '';
+    const words = verbPhrase.split(' ');
+    const verb = words[0];
+    const rest = words.slice(1).join(' ');
+    
+    // This handles the base case of an already-conjugated verb (e.g., from a quote)
+    if (verb.endsWith('s')) return verbPhrase;
+
     // Irregular verbs map
     const irregulars = { 'have': 'has', 'do': 'does', 'go': 'goes', 'be': 'is' };
-    if (irregulars[verb]) return irregulars[verb];
+    if (irregulars[verb]) {
+        return rest ? `${irregulars[verb]} ${rest}` : irregulars[verb];
+    }
 
     // Regular verbs
-    if (/(ss|sh|ch|x|z|o)$/.test(verb)) return verb + 'es';
-    if (/[^aeiou]y$/.test(verb)) return verb.slice(0, -1) + 'ies';
-    return verb + 's';
+    let conjugatedVerb;
+    if (/(ss|sh|ch|x|z|o)$/.test(verb)) {
+        conjugatedVerb = verb + 'es';
+    } else if (/[^aeiou]y$/.test(verb)) {
+        conjugatedVerb = verb.slice(0, -1) + 'ies';
+    } else {
+        conjugatedVerb = verb + 's';
+    }
+    
+    return rest ? `${conjugatedVerb} ${rest}` : conjugatedVerb;
 }
 
-// 1.2 / 3: Centralized and Expanded Token Substitution
+// 2: Patched token substitution map.
 function substituteTokens(template, actor, opponent, context = {}) {
     if (!template) return '';
     let text = template;
     const replacements = {
-        // --- Self-explanatory tokens ---
         '{actorName}': actor.name,
-        '{opponentName}': opponent.name, // Fixed: Added {opponentName}
-        '{targetName}': opponent.name,   // Alias for {opponentName}
-        
-        // --- Actor Pronouns ---
-        '{actor.s}': actor.pronouns.s, // he/she
-        '{actor.p}': actor.pronouns.p, // his/her
-        '{actor.o}': actor.pronouns.o, // him/her
-        
-        // --- Opponent Pronouns ---
+        '{opponentName}': opponent.name,
+        '{targetName}': opponent.name,
+        '{possessive}': actor.pronouns.p, // Legacy template fix
+        '{actor.s}': actor.pronouns.s,
+        '{actor.p}': actor.pronouns.p,
+        '{actor.o}': actor.pronouns.o,
         '{opponent.s}': opponent.pronouns.s,
         '{opponent.p}': opponent.pronouns.p,
         '{opponent.o}': opponent.pronouns.o,
-        
         ...context
     };
     for (const [token, value] of Object.entries(replacements)) {
@@ -79,7 +87,6 @@ function renderQuote(quote, actor, opponent, context) {
     return `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
 }
 
-// 1 / 4: Refactored Action Description Generation
 function generateActionDescription(move, actor, opponent, result) {
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
     const opponentSpan = `<span class="char-${opponent.id}">${opponent.name}</span>`;
@@ -101,14 +108,12 @@ function generateActionDescription(move, actor, opponent, result) {
         impactSentence = getRandomElement(impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()]);
     }
 
-    // 4: Handle the "Struggle" fallback move
     let baseAction;
     if (move.name === "Struggle") {
         baseAction = `${actor.name} struggles to fight back`;
     } else {
         const verb = conjugatePresent(move.verb || 'executes');
         const object = move.requiresArticle ? (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) : move.object;
-        // 1: Fixed "Name he verb" error. The actor's name is the subject.
         baseAction = `${actor.name} ${verb} ${object}`;
     }
 

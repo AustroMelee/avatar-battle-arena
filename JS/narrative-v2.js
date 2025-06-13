@@ -2,9 +2,9 @@
 'use strict';
 
 // ====================================================================================
-//  Narrative Engine Library (v3.1 - Draw Condition)
+//  Narrative Engine Library (v3.2 - Final Token Patch)
 // ====================================================================================
-//  - Added template for Draw/Stalemate outcomes.
+//  - Corrected legacy `{possessive}` token to `{actor.p}`.
 // ====================================================================================
 
 export const battlePhases = [
@@ -35,7 +35,7 @@ export const phaseTemplates = {
                 {effectivenessLabel} ({effectivenessEmoji})
             </div>
         </div>
-        <p class="move-description">{moveDescription}</p>
+        {moveDescription}
     `,
     finalBlow: `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
@@ -44,8 +44,8 @@ export const phaseTemplates = {
 };
 
 export const narrativeStatePhrases = {
-    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {possessive} last reserves,", "Struggling to stand,", "Gasping for breath,", "Pushing through the pain,", "Running on fumes,", "Their movements becoming sluggish,"],
-    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {possessive} opponent on the back foot,", "Channeling their focus,", "With unshakable resolve,", "Seizing control of the fight,", "Finding a rhythm,", "Dominating the exchange,"],
+    energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {actor.p} last reserves,", "Struggling to stand,", "Gasping for breath,", "Pushing through the pain,", "Running on fumes,", "Their movements becoming sluggish,"],
+    momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {opponent.p} on the back foot,", "Channeling their focus,", "With unshakable resolve,", "Seizing control of the fight,", "Finding a rhythm,", "Dominating the exchange,"],
     momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,", "In a daring gambit,", "In a bold maneuver,", "Scrambling for a response,", "Knocked off balance,", "Struggling to keep up,"]
 };
 
@@ -75,7 +75,7 @@ export const weakMoveTransitions = [
     "leaving an opening.", "giving {targetName} a chance to recover.", "creating a chance for {targetName} to counter.",
     "but it barely makes an impact.", "exposing a critical flaw in the approach.", "allowing {targetName} to seize the initiative.",
     "leaving {targetName} completely unfazed.", "but the execution is clumsy.", "but it lacks the force to be effective.",
-    "and the opportunity is wasted.", "but {targetName} easily shrugs it off.", "exposing {possessive} flank.",
+    "and the opportunity is wasted.", "but {targetName} easily shrugs it off.", "exposing {actor.p} flank.",
     "granting {targetName} the upper hand.", "leaving {actorName} open to retaliation.", "but it's a telling sign of fatigue."
 ];
 
@@ -122,7 +122,7 @@ export const impactPhrases = {
             "The attack proves useless against {actorName}'s prepared defense.", "The assault is rendered ineffective by a brilliant defensive play."
         ],
         PROACTIVE: [
-            "The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares {possessive} defense, anticipating the next move.",
+            "The armor forms perfectly, ready for the next assault.", "A formidable barrier now surrounds {actorName}, daring the opponent to attack.", "{actorName} prepares {actor.p} defense, anticipating the next move.",
             "A solid defense is established, challenging any approach.", "The strategic position makes {actorName} a difficult target.", "The field is reshaped to {actorName}'s advantage.",
             "{actorName} creates an obstacle, controlling the battlefield.", "The defensive posture is flawless.", "The battlefield shifts to favor {actorName}.", "{actorName} takes a commanding defensive position.",
             "A tactical maneuver shifts the battlefield's layout.", "The area is fortified, giving {actorName} a distinct advantage."
@@ -135,49 +135,47 @@ export const postBattleVictoryPhrases = {
         dominant: "{WinnerName} stood victorious over {LoserName}, the battle concluded.",
         narrow: "{WinnerName} stood breathing heavily, the hard-fought victory against {LoserName} finally secured."
     },
-    // Bender Archetypes
-    Ruthless: { // Azula
+    Ruthless: {
         dominant: "{WinnerName}'s blue flames flickered, leaving no doubt about {WinnerPronounP} cold, efficient triumph over {LoserName}.",
         narrow: "Even in a close-fought battle, {WinnerName}'s ruthless precision was the deciding factor against {LoserName}."
     },
-    Supreme: { // Ozai
+    Supreme: {
         dominant: "{WinnerName} stood radiating immense power, {WinnerPronounP} victory a declaration of {WinnerPronounP} absolute dominion over {LoserName}.",
         narrow: "Though the battle was intense, {WinnerName}'s superior power ultimately crushed {LoserName}'s hopes."
     },
-    Fierce: { // Katara
+    Fierce: {
         dominant: "{WinnerName}'s eyes burned with intensity. {WinnerPronounP} victory over {LoserName} was a testament to {WinnerPronounP} fierce spirit.",
         narrow: "Pushed to the brink, {WinnerName}'s fierce determination proved to be the key in overcoming {LoserName}."
     },
-    Cocky: { // Toph
+    Cocky: {
         dominant: "{WinnerName} brushed a fleck of dust from {WinnerPronounP} shoulder with a smirk, {WinnerPronounP} victory over {LoserName} a foregone conclusion.",
         narrow: "'That was almost a challenge,' {WinnerName} quipped, despite the close call against {LoserName}."
     },
-    Madcap: { // Sokka, Bumi
+    Madcap: {
         dominant: "{WinnerName} celebrated with a flourish, {WinnerPronounP} victory over {LoserName} a mix of genius and goofiness.",
         narrow: "Against all odds, {WinnerName}'s unconventional tactics secured a narrow victory over {LoserName}."
     },
-    Determined: { // Zuko
+    Determined: {
         dominant: "{WinnerName} radiated quiet power, {WinnerPronounP} victory over {LoserName} a hard-earned step on {WinnerPronounP} path.",
         narrow: "Breathing heavily, {WinnerName} stood over {LoserName}. The fight was close, but {WinnerPronounP} resolve never wavered."
     },
-    Wise_Reluctant: { // Jeong Jeong
+    Wise_Reluctant: {
         dominant: "A somber expression crossed {WinnerName}'s face. {WinnerPronounP} victory over {LoserName} was a necessary, but regrettable, display of power.",
         narrow: "{WinnerName} looked upon the defeated {LoserName}, the cost of the hard-fought victory weighing heavily on {WinnerPronounP} mind."
     },
-    Disciplined: { // Pakku
+    Disciplined: {
         dominant: "{WinnerName} gave a curt nod. The victory over {LoserName} was a simple matter of superior technique and discipline.",
         narrow: "Though tested by {LoserName}, {WinnerName}'s flawless form and rigid discipline ultimately carried the day."
     },
-    Pacifist: { // Aang
+    Pacifist: {
         dominant: "{WinnerName} landed softly, a concerned look on {WinnerPronounP} face despite having decisively defeated {LoserName}.",
         narrow: "With a sigh of relief, {WinnerName} secured the victory over {LoserName}, thankful the conflict hadn't escalated further."
     },
-    // Non-Bender Archetypes
-    Deadpan: { // Mai
+    Deadpan: {
         dominant: "{WinnerName} merely blinked, {WinnerPronounP} victory as precise and unemotional as {WinnerPronounP} throws against {LoserName}.",
         narrow: "With an unflappable expression, {WinnerName} confirmed the end of the duel with {LoserName}."
     },
-    Playful: { // Ty Lee
+    Playful: {
         dominant: "With a cheerful giggle, {WinnerName} cartwheeled away from the defeated {LoserName}, {WinnerPronounP} work clearly done.",
         narrow: "'Ooh, you almost had me!' {WinnerName} chirped, though {WinnerPronounP} narrow victory over {LoserName} suggested a genuine struggle."
     }
