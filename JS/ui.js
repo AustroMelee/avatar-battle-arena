@@ -23,6 +23,8 @@ const DOM = {
     analysisList: document.getElementById('analysis-list'),
     timeToggleContainer: document.getElementById('time-toggle-container'),
     timeOfDayValue: document.getElementById('time-of-day-value'),
+    // Added reference to the new feedback display
+    timeFeedbackDisplay: document.getElementById('time-feedback'),
     fighter1Select: document.createElement('input'),
     fighter2Select: document.createElement('input'),
     locationSelect: document.createElement('input'),
@@ -96,18 +98,22 @@ function populateCharacterGrids() {
     });
 }
 
+// === MODIFIED FUNCTION START ===
+// Updated to create image-based cards for locations.
 function createLocationCard(locationData, locationId) {
     const card = document.createElement('div');
     card.className = 'location-card';
     card.dataset.id = locationId;
 
+    const image = document.createElement('img');
+    image.src = locationData.imageUrl;
+    image.alt = locationData.name;
+    image.loading = 'lazy';
+    card.appendChild(image);
+    
     const name = document.createElement('h3');
     name.textContent = locationData.name;
     card.appendChild(name);
-    
-    const terrain = document.createElement('p');
-    terrain.textContent = locationData.terrain;
-    card.appendChild(terrain);
 
     card.addEventListener('click', () => {
         handleLocationCardSelection(locationData, locationId, card);
@@ -115,6 +121,7 @@ function createLocationCard(locationData, locationId) {
 
     return card;
 }
+// === MODIFIED FUNCTION END ===
 
 function handleLocationCardSelection(locationData, locationId, selectedCard) {
     DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
@@ -131,16 +138,30 @@ function populateLocationGrid() {
     }
 }
 
+// === MODIFIED FUNCTION START ===
+// Updated to show feedback messages on click.
 function initializeTimeToggle() {
     const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
+    
+    // Set initial feedback message on page load
+    DOM.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered.";
+
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
-            DOM.timeOfDayValue.value = button.dataset.value;
+            const time = button.dataset.value;
+            DOM.timeOfDayValue.value = time;
+
+            if (time === 'day') {
+                DOM.timeFeedbackDisplay.innerHTML = "It is now <b>Day</b>. Firebenders are empowered.";
+            } else {
+                DOM.timeFeedbackDisplay.innerHTML = "It is now <b>Night</b>. Waterbenders are empowered.";
+            }
         });
     });
 }
+// === MODIFIED FUNCTION END ===
 
 export function populateUI() {
     populateCharacterGrids();
