@@ -153,19 +153,30 @@ body {
     height: 120px;
 }
 
-.character-card h3, .location-card h3 {
-    font-size: 0.8rem;
+.character-card h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.5em;
+    line-height: 1.25;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
-    padding: 0.6rem 0.4rem;
-    background-color: rgba(0,0,0,0.4);
+    padding: 0.4rem;
+    background-color: rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
+    text-transform: uppercase;
 }
 
 .location-card h3 {
     font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
     padding: 0.75rem 0.5rem;
+    background-color: rgba(0,0,0,0.4);
+    backdrop-filter: blur(5px);
 }
 
 .character-card:hover, .location-card:hover {
