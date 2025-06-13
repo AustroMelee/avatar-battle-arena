@@ -35,7 +35,7 @@ const DOM = {
     environmentDamageDisplay: document.getElementById('environment-damage-display'),
     environmentImpactsList: document.getElementById('environment-impacts-list'),
     // NEW: Element for environmental summary
-    locationEnvironmentSummary: document.getElementById('location-environment-summary'), // Used existing one
+    locationEnvironmentSummary: document.getElementById('location-environment-summary'), 
     // NEW: Momentum display elements
     fighter1MomentumValue: document.getElementById('fighter1-momentum-value'),
     fighter2MomentumValue: document.getElementById('fighter2-momentum-value'),
@@ -57,12 +57,6 @@ document.body.appendChild(DOM.fighter1Select);
 document.body.appendChild(DOM.fighter2Select);
 document.body.appendChild(DOM.locationSelect);
 
-// // NEW: Append the environmental summary element to the location section
-// DOM.locationEnvironmentSummary.id = 'location-environment-summary'; // This line is redundant if element already exists
-// DOM.locationEnvironmentSummary.className = 'location-environment-summary';
-// // This was already in the HTML, so just ensure it's targeted correctly.
-// // document.querySelector('.location-section').insertBefore(DOM.locationEnvironmentSummary, DOM.locationGrid);
-
 
 function getElementClass(character) {
     const mainElement = character.techniques.find(t => t.element)?.element || 'nonbender';
@@ -76,11 +70,11 @@ function getElementClass(character) {
     }
 }
 
-// NEW: Function to update Archetype Information
+// Function to update Archetype Information
 function updateArchetypeInfo() {
-    const fighter1Id = DOM.fighter1Select.value;
-    const fighter2Id = DOM.fighter2Select.value;
-    const locationId = DOM.locationSelect.value;
+    const fighter1Id = DOM.fighter1Select.value || null; // Pass null if empty for initial placeholder
+    const fighter2Id = DOM.fighter2Select.value || null; // Pass null if empty
+    const locationId = DOM.locationSelect.value || null; // Pass null if empty
 
     const archetypeData = resolveArchetypeLabel(fighter1Id, fighter2Id, locationId);
     renderArchetypeDisplay(archetypeData, {
@@ -121,17 +115,14 @@ function handleCardSelection(character, fighterKey, selectedCard) {
     const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
     const hiddenInput = fighterKey === 'fighter1' ? DOM.fighter1Select : DOM.fighter2Select;
 
-    // Prevent selecting the same character in the other slot
     const otherFighterKey = fighterKey === 'fighter1' ? 'fighter2' : 'fighter1';
     const otherFighterInput = fighterKey === 'fighter1' ? DOM.fighter2Select : DOM.fighter1Select;
     if (otherFighterInput.value === character.id) {
-        // Optionally, provide feedback to the user, e.g., shake the other card or show a message
         const otherSelectedCard = (fighterKey === 'fighter1' ? DOM.fighter2Grid : DOM.fighter1Grid).querySelector(`.character-card[data-id="${character.id}"]`);
         if(otherSelectedCard) {
-            otherSelectedCard.classList.add('shake-animation'); // (Requires .shake-animation CSS)
-            setTimeout(() => otherSelectedCard.classList.remove('shake-animation'), 500);
+            // Simple alert for now, could add CSS animation
+            alert("A fighter cannot battle themselves. Please choose a different opponent.");
         }
-        alert("A fighter cannot battle themselves. Please choose a different opponent.");
         return; 
     }
 
@@ -140,7 +131,7 @@ function handleCardSelection(character, fighterKey, selectedCard) {
     selectedCard.classList.add('selected');
     nameDisplay.textContent = character.name;
     hiddenInput.value = character.id;
-    updateArchetypeInfo(); // NEW: Update archetype info on fighter selection
+    updateArchetypeInfo(); 
 }
 
 function populateCharacterGrids() {
@@ -177,9 +168,8 @@ function createLocationCard(locationData, locationId) {
     return card;
 }
 
-// NEW FUNCTION: Update the environmental summary display
 function updateEnvironmentalSummary(locationId) {
-    if (!DOM.locationEnvironmentSummary) return; // Guard clause if element isn't found
+    if (!DOM.locationEnvironmentSummary) return; 
     const locConditions = locationConditions[locationId];
     if (!locConditions) {
         DOM.locationEnvironmentSummary.innerHTML = 'Environmental details not available for this location.';
@@ -189,7 +179,6 @@ function updateEnvironmentalSummary(locationId) {
     let summaryHtml = `This location is characterized by: `;
     const traits = [];
 
-    // Add general environment traits
     if (locConditions.isUrban) traits.push(`<span>urban</span> setting`);
     if (locConditions.isDense) traits.push(`<span>dense</span> environment`);
     if (locConditions.isVertical) traits.push(`<span>vertical</span> terrain`);
@@ -207,7 +196,6 @@ function updateEnvironmentalSummary(locationId) {
     if (locConditions.hasCover) traits.push(`ample <span>cover</span>`);
     if (locConditions.plantsRich) traits.push(`abundant <span>plant life</span>`);
 
-    // Add element-rich descriptors
     if (locConditions.airRich) traits.push(`rich in <span>air</span>`);
     if (locConditions.waterRich) traits.push(`rich in <span>water</span>`);
     if (locConditions.iceRich) traits.push(`rich in <span>ice</span>`);
@@ -216,7 +204,6 @@ function updateEnvironmentalSummary(locationId) {
     
     summaryHtml += traits.join(', ') || 'a unique atmosphere';
 
-    // Add elemental modifier details
     if (locConditions.environmentalModifiers) {
         summaryHtml += `<br>Elemental Impact: `;
         const elementalImpacts = [];
@@ -245,11 +232,9 @@ function updateEnvironmentalSummary(locationId) {
         summaryHtml += elementalImpacts.join('; ') || 'None notable.';
     }
     
-    // Add fragility
     if (locConditions.fragility !== undefined) {
       summaryHtml += `<br>Fragility: <span>${(locConditions.fragility * 100).toFixed(0)}%</span>.`;
     }
-
 
     DOM.locationEnvironmentSummary.innerHTML = summaryHtml;
 }
@@ -260,7 +245,7 @@ function handleLocationCardSelection(locationData, locationId, selectedCard) {
     DOM.locationNameDisplay.textContent = locationData.name;
     DOM.locationSelect.value = locationId;
     updateEnvironmentalSummary(locationId); 
-    updateArchetypeInfo(); // NEW: Update archetype info on location selection
+    updateArchetypeInfo(); 
 }
 
 function populateLocationGrid() {
@@ -295,11 +280,6 @@ function initializeTimeToggle() {
     });
 }
 
-/**
- * Updates the momentum display for a given fighter.
- * @param {string} fighterKey - 'fighter1' or 'fighter2'.
- * @param {number} momentumValue - The current momentum value.
- */
 function updateMomentumDisplay(fighterKey, momentumValue) {
     const momentumElement = fighterKey === 'fighter1' ? DOM.fighter1MomentumValue : DOM.fighter2MomentumValue;
     momentumElement.textContent = momentumValue;
@@ -321,7 +301,7 @@ export function populateUI() {
     initializeTimeToggle();
     updateMomentumDisplay('fighter1', 0);
     updateMomentumDisplay('fighter2', 0);
-    updateArchetypeInfo(); // NEW: Initialize archetype info on page load
+    updateArchetypeInfo(); // Initialize archetype info on page load with null/empty selections
 }
 
 export function showLoadingState() {
@@ -360,7 +340,6 @@ export function resetBattleUI() {
     DOM.environmentDamageDisplay.classList.remove('low-damage', 'medium-damage', 'high-damage', 'catastrophic-damage');
     updateMomentumDisplay('fighter1', 0);
     updateMomentumDisplay('fighter2', 0);
-    // Note: Archetype info does not need to be reset here as it reflects current selections.
 
     setTimeout(() => {
         if (!DOM.resultsSection.classList.contains('show')) {
@@ -398,19 +377,22 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         if (!log || log.length === 0) return;
         const li = document.createElement('li');
         li.className = className;
-        const formattedLog = log.map(entry => typeof entry === 'string' ? entry : JSON.stringify(entry, null, 2)).join('<br>');
-        li.innerHTML = `<strong>${title}:</strong><br><pre><code>${formattedLog}</code></pre>`;
+        // Filter out any entries that are not strings or are empty strings after trimming
+        const validLogEntries = log.filter(entry => typeof entry === 'string' && entry.trim() !== '');
+        if (validLogEntries.length === 0 && (title.includes("AI Log") || title.includes("Interaction Log"))) {
+             // If it's an AI/Interaction log and it's empty after filtering, don't display it.
+            return;
+        }
+        const formattedLog = validLogEntries.map(entry => JSON.stringify(entry, null, 2).replace(/^"|"$/g, '')).join('<br>'); // Clean up JSON string quotes
+        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all;"><code>${formattedLog || "No relevant log entries."}</code></pre>`;
         DOM.analysisList.appendChild(li);
     };
     
     if (!isDraw) {
         const winner = winnerId === fighter1.id ? fighter1 : fighter2;
         createSummaryItem(winner.summary);
-        // createLog(winner.interactionLog, 'Interaction Log', 'interaction-log'); // Redundant?
     } else {
         createSummaryItem("The fighters were too evenly matched for a decisive outcome.");
-        // const combinedLog = [...new Set([...fighter1.interactionLog, ...fighter2.interactionLog])];
-        // createLog(combinedLog, 'Interaction Log', 'interaction-log'); // Redundant?
     }
     
     const spacer = document.createElement('li');
@@ -434,7 +416,7 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     DOM.analysisList.appendChild(spacer.cloneNode());
 
     const currentLocData = locationConditions[locationId];
-    if (environmentState && currentLocData) {
+    if (environmentState && currentLocData && currentLocData.damageThresholds) { // Added null check for damageThresholds
         DOM.environmentDamageDisplay.textContent = `Environmental Damage: ${environmentState.damageLevel.toFixed(0)}%`;
         let damageClass = '';
         if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) {
@@ -466,6 +448,11 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     }
 
     DOM.analysisList.appendChild(spacer.cloneNode());
-    createLog(fighter1.aiLog, `${fighter1.name}'s AI Log`, 'ai-log');
-    createLog(fighter2.aiLog, `${fighter2.name}'s AI Log`, 'ai-log');
+    // Only show AI logs if they contain meaningful entries
+    if (fighter1.aiLog && fighter1.aiLog.filter(e => typeof e === 'string' && e.trim() !== '').length > 0) {
+        createLog(fighter1.aiLog, `${fighter1.name}'s AI Log`, 'ai-log');
+    }
+    if (fighter2.aiLog && fighter2.aiLog.filter(e => typeof e === 'string' && e.trim() !== '').length > 0) {
+        createLog(fighter2.aiLog, `${fighter2.name}'s AI Log`, 'ai-log');
+    }
 }
