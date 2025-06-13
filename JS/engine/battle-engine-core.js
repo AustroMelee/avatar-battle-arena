@@ -1,9 +1,9 @@
 // FILE: engine/battle-engine-core.js
 'use strict';
 
-// VERSION 9: PRONOUN & NARRATIVE OVERKILL INTEGRATION.
-// The core loop now calls the new centralized narrative engine.
-// The old `narration.js` is no longer imported or used.
+// VERSION 9.1: HOTFIX.
+// Removed the dead local `findNarrativeQuote` function.
+// Now imports the single source of truth from the narrative engine.
 
 import { characters } from '../data/characters.js';
 import { locationConditions } from '../location-battle-conditions.js';
@@ -11,25 +11,15 @@ import { battlePhases, phaseTemplates } from '../narrative-v2.js';
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './ai-decision.js';
 import { calculateMove } from './move-resolution.js';
 import { updateMentalState } from './mental-state.js';
-// NARRATION.JS IS NO LONGER IMPORTED
-import { generateTurnNarration, getFinalVictoryLine } from './narrative-engine.js';
+// === MODIFICATION START: `findNarrativeQuote` is now imported. ===
+import { generateTurnNarration, getFinalVictoryLine, findNarrativeQuote } from './narrative-engine.js';
+// === MODIFICATION END ===
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
-    const narrativeData = actor.narrative || {};
-    let pool = null;
-    if (opponent.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]) {
-        pool = actor.relationships[opponent.id].narrative[trigger][subTrigger];
-    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]) {
-        pool = narrativeData[trigger][subTrigger][context.result];
-    } else if (narrativeData[trigger]?.[subTrigger]) {
-        pool = narrativeData[trigger][subTrigger];
-    } else if (narrativeData[trigger]?.general) {
-        pool = narrativeData[trigger].general;
-    }
-    return pool ? getRandomElement(pool) : null;
-}
+// === MODIFICATION START: Dead function removed. ===
+// The local `findNarrativeQuote` function that was here has been deleted.
+// === MODIFICATION END ===
 
 function initializeFighterState(charId, opponentId, emotionalMode) {
     const characterData = characters[charId];

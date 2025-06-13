@@ -1,10 +1,9 @@
 // FILE: engine/narrative-engine.js
 'use strict';
 
-// VERSION 4: OVERKILL REFACTOR.
-// This is now the sole engine for generating ALL user-facing battle text.
-// It contains the pronoun substitution utility and generates both narrative and mechanical descriptions.
-// The old `narration.js` file is now obsolete and has been removed.
+// VERSION 4.1: HOTFIX.
+// Exporting `findNarrativeQuote` to make it available to the core engine,
+// resolving the ReferenceError and re-establishing a pure data pipeline.
 
 import { phaseTemplates, impactPhrases } from '../narrative-v2.js';
 
@@ -31,7 +30,8 @@ function substituteTokens(template, actor, opponent, context = {}) {
     return text;
 }
 
-function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
+// === MODIFICATION START: `export` added ===
+export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
     const narrativeData = actor.narrative || {};
     let pool = null;
     if (opponent.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]) {
@@ -45,6 +45,7 @@ function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) 
     }
     return pool ? getRandomElement(pool) : null;
 }
+// === MODIFICATION END ===
 
 function renderQuote(quote, actor, opponent, context) {
     if (!quote) return '';
