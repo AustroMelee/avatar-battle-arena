@@ -2,7 +2,7 @@
 'use strict';
 
 // This is the "Game Master" file. It orchestrates the entire battle flow.
-// VERSION 3: Passes more context to AI Memory for sequence learning.
+// VERSION 4: Fixes the critical AI learning timing bug.
 
 import { characters } from '../data/characters.js';
 import { locationConditions } from '../location-battle-conditions.js';
@@ -30,11 +30,10 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         mentalState: { level: 'stable', stress: 0 },
         mentalStateChangedThisTurn: false,
         aiMemory: {
-            selfMoveEffectiveness: {}, // { moveName: { totalEffectiveness: number, uses: number } }
+            selfMoveEffectiveness: {},
             opponentModel: { isAggressive: 0, isDefensive: 0, isTurtling: false },
-            moveSuccessCooldown: {}, // { moveName: cooldownTurns }
-            // NEW: Tracks move sequences instead of just individual moves
-            opponentSequenceLog: {}, // { prevMoveName: { nextMoveName: count } }
+            moveSuccessCooldown: {},
+            opponentSequenceLog: {},
         }
     };
 }
@@ -81,7 +80,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             
             updateMentalState(attacker, defender, null);
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions, turn);
-            attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`); // Pretty-print the detailed log
+            attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`);
 
             const result = calculateMove(move, attacker, defender, conditions, interactionLog);
             
@@ -110,11 +109,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             
-            // MODIFIED: Pass attacker's own last move to help the defender learn the sequence.
-            updateAiMemory(defender, attacker, defender.lastMove, result);
-
-            attacker.lastMove = move;
+            // --- CRITICAL FIX: Update state BEFORE memory ---
+            // 1. Add the current move to history and set it as lastMove for the attacker.
             attacker.moveHistory.push(move);
+            attacker.lastMove = move;
+            
+            // 2. NOW update the defender's memory. The defender can now correctly see what the attacker *just* did.
+            updateAiMemory(defender, attacker, defender.lastMove, result);
 
             if (defender.hp <= 0) battleOver = true;
         };
