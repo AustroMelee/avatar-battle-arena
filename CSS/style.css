@@ -115,12 +115,16 @@ body {
 #fighter1-name-display { color: var(--accent-1); }
 #fighter2-name-display { color: var(--accent-2); }
 
+/* === MODIFIED SECTION START === */
 .character-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 1.5rem;
+    /* Create a 6-column grid to form two rows for 12 fighters */
+    grid-template-columns: repeat(6, 1fr);
+    /* Reduced gap for a more compact, MK-style layout */
+    gap: 1rem;
     padding: 10px;
 }
+/* === MODIFIED SECTION END === */
 
 .location-grid::-webkit-scrollbar {
   width: 8px;
@@ -153,23 +157,27 @@ body {
     padding: 0;
 }
 
+/* === MODIFIED SECTION START === */
 .character-card img {
     width: 100%;
-    height: 160px;
+    /* Reduced height to make cards smaller */
+    height: 110px;
     object-fit: cover;
     display: block;
     transition: transform 0.3s ease;
 }
 
 .character-card h3 {
-    font-size: 0.9rem;
+    /* Adjusted font size and padding for smaller cards */
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
-    padding: 0.75rem 0.5rem;
+    padding: 0.6rem 0.4rem;
     background-color: rgba(0,0,0,0.4);
     backdrop-filter: blur(5px);
 }
+/* === MODIFIED SECTION END === */
 
 .character-card:hover {
     transform: translateY(-5px);
