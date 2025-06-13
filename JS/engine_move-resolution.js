@@ -135,10 +135,12 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     }
     
     // Apply environmental modifiers to move effectiveness and energy cost
+    // Changed 'envReasons' to 'logReasons' to match the variable name in `applyEnvironmentalModifiers` return.
     const { multiplier: envMultiplier, energyCostModifier, logReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
+    
     multiplier *= envMultiplier;
     energyCost *= energyCostModifier; // Adjust energy cost based on environment
-    if (envReasons.length > 0) interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${envReasons.join(', ')}.`);
+    if (logReasons.length > 0) interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${logReasons.join(', ')}.`);
     
     // Base Critical Chance
     let critChance = 0.1; // 10% base crit chance
