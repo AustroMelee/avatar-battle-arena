@@ -1,3 +1,4 @@
+// FILE: narrative-v2.js
 'use strict';
 
 // ====================================================================================
@@ -127,6 +128,33 @@ export const impactPhrases = {
             "A solid defense is established, challenging any approach.", "The strategic position makes {actorName} a difficult target.", "The field is reshaped to {actor.p} advantage.",
             "{actorName} creates an obstacle, controlling the battlefield.", "The defensive posture is flawless.", "The battlefield shifts to favor {actorName}.", "{actorName} takes a commanding defensive position.",
             "A tactical maneuver shifts the battlefield's layout.", "The area is fortified, giving {actorName} a distinct advantage."
+        ]
+    },
+    // NEW: Phrases for Repositioning move
+    REPOSITION: {
+        WEAK: [
+            "but the attempt to reposition falls short, leaving {actorName} vulnerable.",
+            "but {actorName} stumbles, failing to gain the desired tactical edge.",
+            "and it's a poor choice, leaving {actorName} slightly exposed.",
+            "but a misstep leaves {actorName} less prepared than before."
+        ],
+        NORMAL: [
+            "and {actorName} shifts position, gaining a slight advantage.",
+            "and {actorName} finds a better angle, subtly improving their stance.",
+            "resulting in a minor but effective repositioning.",
+            "and {actorName} adjusts, preparing for the next exchange."
+        ],
+        STRONG: [
+            "and {actorName} expertly maneuvers into a superior position!",
+            "achieving a significant tactical advantage through skilled movement.",
+            "leaving {targetName} struggling to keep up with the new angle of attack.",
+            "A brilliant repositioning leaves {actorName} in prime striking range."
+        ],
+        CRITICAL: [
+            "a flawless repositioning leaves {actorName} in an unassailable position!",
+            "an incredible display of agility creates a massive tactical opening for {actorName}!",
+            "leaving {targetName} completely outmaneuvered and exposed!",
+            "The perfect repositioning sets up a devastating follow-up opportunity."
         ]
     }
 };

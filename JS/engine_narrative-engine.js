@@ -1,4 +1,5 @@
 // FILE: engine_narrative-engine.js
+// FILE: engine_narrative-engine.js
 'use strict';
 
 // VERSION 5.1: FINAL OVERKILL PATCH.
@@ -19,7 +20,7 @@ function conjugatePresent(verbPhrase) {
     const rest = words.slice(1).join(' ');
     
     // This handles the base case of an already-conjugated verb (e.g., from a quote)
-    if (verb.endsWith('s')) return verbPhrase;
+    if (verb.endsWith('s') && !['erupt', 'lash', 'assume', 'control'].includes(verb) ) return verbPhrase; // Allow specific verbs to be conjugated
 
     // Irregular verbs map
     const irregulars = { 'have': 'has', 'do': 'does', 'go': 'goes', 'be': 'is' };
@@ -55,6 +56,7 @@ function substituteTokens(template, actor, opponent, context = {}) {
         '{opponent.s}': opponent?.pronouns?.s || '',
         '{opponent.p}': opponent?.pronouns?.p || '',
         '{opponent.o}': opponent?.pronouns?.o || '',
+        '{possessive}': actor.pronouns.p, // Legacy support for {possessive}
         ...context
     };
     for (const [token, value] of Object.entries(replacements)) {
@@ -82,7 +84,11 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
     // Fallback to general if available (e.g., battleStart: general)
     else if (narrativeData[trigger]?.general) {
         pool = narrativeData[trigger].general;
+    } else if (trigger === 'onCollateral' && subTrigger === 'general' && context.impactText) {
+        // Special handling for general environmental impact messages
+        return { type: 'environmental', line: context.impactText };
     }
+
 
     // Return a random quote from the selected pool
     return pool ? getRandomElement(pool) : null;
@@ -95,6 +101,12 @@ function renderQuote(quote, actor, opponent, context) {
     const narrativeClass = `narrative-${type || 'spoken'}`;
     const verb = type === 'internal' ? 'thinks' : 'says';
     const formattedLine = substituteTokens(line, actor, opponent, context);
+    
+    // For environmental impacts, don't attribute to an actor
+    if (type === 'environmental') {
+        return formattedLine; // It's already the full phrase
+    }
+
     return `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
 }
 
@@ -107,12 +119,25 @@ function generateActionDescription(move, actor, opponent, result) {
     if (result.payoff && result.consumedStateName) {
         tacticalPrefix = `Capitalizing on ${opponentSpan} being ${result.consumedStateName}, `;
     }
-    if (move.setup && result.effectiveness.label !== 'Weak') {
-        tacticalSuffix = ` The move leaves ${opponentSpan} ${move.setup.name}!`;
+    
+    // Check if the move itself created a tactical state for the ACTOR
+    if (actor.tacticalState && actor.tacticalState.name && actor.tacticalState.duration > 0 && actor.tacticalState.isPositive) {
+        // If the actor's *own* move resulted in a positive tactical state
+        tacticalSuffix += ` ${actorSpan} is now ${actor.tacticalState.name}!`;
+    } else if (actor.tacticalState && actor.tacticalState.name && actor.tacticalState.duration > 0 && !actor.tacticalState.isPositive && move.isRepositionMove) {
+        // If the actor's *own* reposition move resulted in a negative tactical state (failure)
+        tacticalSuffix += ` However, ${actorSpan} is now ${actor.tacticalState.name}!`;
+    } else if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
+        // If the move set up a state for the OPPONENT
+        tacticalSuffix += ` The move leaves ${opponentSpan} ${move.setup.name}!`;
     }
 
+
     let impactSentence;
-    if (move.type === 'Defense' || move.type === 'Utility') {
+    // Special impact phrases for Reposition Move
+    if (move.isRepositionMove) {
+        impactSentence = getRandomElement(impactPhrases.REPOSITION[result.effectiveness.label.toUpperCase()]);
+    } else if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = opponent.lastMove?.type === 'Offense';
         impactSentence = getRandomElement(isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE);
     } else {

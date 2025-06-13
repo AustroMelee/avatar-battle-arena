@@ -1,6 +1,7 @@
 // FILE: engine_battle-engine-core.js
 'use strict';
 
+// FILE: engine_battle-engine-core.js
 // VERSION 9.3: OVERKILL-COMPLIANT NARRATIVE DEDUPLICATION.
 // - Implements a `firedQuotes` Set to prevent the same narrative event from firing multiple times per turn.
 // - Fixes repetitive dialogue from the same intent/state trigger.
@@ -27,9 +28,11 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         mentalState: { level: 'stable', stress: 0 },
         contextualState: {},
         collateralTolerance: characterData.collateralTolerance !== undefined ? characterData.collateralTolerance : 0.5, // Default collateral tolerance
+        mobility: characterData.mobility !== undefined ? characterData.mobility : 0.5, // Default mobility
         aiMemory: {
             selfMoveEffectiveness: {}, opponentModel: { isAggressive: 0, isDefensive: 0, isTurtling: false },
             moveSuccessCooldown: {}, opponentSequenceLog: {},
+            repositionCooldown: 0, // NEW: Cooldown for tactical repositioning
         }
     };
 }
@@ -73,11 +76,16 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const oldAttackerMentalState = attacker.mentalState.level; // Track attacker's mental state for collateral changes
 
             if (turn > 0) adaptPersonality(attacker); // Adapt personality after first turn
+            
+            // Apply/Expire Tactical State on Attacker (from own previous turn or environment)
             if (attacker.tacticalState) {
                 attacker.tacticalState.duration--;
-                if (attacker.tacticalState.duration <= 0) attacker.tacticalState = null;
+                if (attacker.tacticalState.duration <= 0) {
+                    attacker.tacticalState = null;
+                    attacker.aiLog.push(`[Tactical State]: ${attacker.name} is no longer ${attacker.tacticalState?.name || 'N/A'}.`);
+                }
             }
-            attacker.isStunned = false;
+            attacker.isStunned = false; // Reset stunned state each turn
 
             const addNarrativeEvent = (quote, actor) => {
                 // Deduplicate narrative quotes for the current turn
@@ -89,7 +97,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             
             let manipulationResult = attemptManipulation(attacker, defender);
             if (manipulationResult.success) {
-                defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2 };
+                defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2, isPositive: false }; // Manipulation is always negative
                 addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onManipulation', 'asAttacker'), attacker);
             }
 
@@ -139,8 +147,26 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             
             attacker.lastMoveEffectiveness = result.effectiveness.label;
             attacker.consecutiveDefensiveTurns = (move.type === 'Utility' || move.type === 'Defense') ? attacker.consecutiveDefensiveTurns + 1 : 0;
-            if (move.setup && result.effectiveness.label !== 'Weak') defender.tacticalState = { ...move.setup };
-            if (move.moveTags?.includes('requires_opening') && result.payoff) defender.tacticalState = null;
+            
+            // Apply setup state from the move if it's not a failed reposition
+            if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
+                defender.tacticalState = { ...move.setup, isPositive: false }; // Assume setup is always negative for opponent
+                attacker.aiLog.push(`[Tactical State Apply]: ${defender.name} is now ${defender.tacticalState.name}!`);
+            }
+            // Tactical Reposition specific setup (already handled in calculateMove, ensure it propagates)
+            if (move.isRepositionMove) {
+                 // The tacticalState for a reposition move is already set within calculateMove
+                 // We just need to check if it was set to log it
+                if (attacker.tacticalState) {
+                    if (attacker.tacticalState.isPositive) {
+                        attacker.aiLog.push(`[Tactical State Apply]: ${attacker.name} is now ${attacker.tacticalState.name}! (Self-Buff)`);
+                    } else {
+                        attacker.aiLog.push(`[Tactical State Apply]: ${attacker.name} is now ${attacker.tacticalState.name}! (Self-Debuff)`);
+                    }
+                }
+            }
+
+            if (move.moveTags?.includes('requires_opening') && result.payoff) defender.tacticalState = null; // Consume opponent's tactical state
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             
             // NEW: Pass environmentState and locationData to generateTurnNarration
@@ -150,7 +176,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
             attacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
             attacker.lastMove = move;
-            updateAiMemory(defender, attacker);
+            updateAiMemory(defender, attacker); // update opponent's memory of attacker
+            updateAiMemory(attacker, defender); // update attacker's memory of opponent
+
 
             if (defender.hp <= 0) battleOver = true;
         };
@@ -180,7 +208,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             phaseContent += `<div class="environmental-summary">`;
             phaseContent += phaseTemplates.environmentalImpactHeader;
             environmentState.specificImpacts.forEach(impact => {
-                phaseContent += `<p class="environmental-impact-text">${impact}</p>`;
+                // Ensure the specific impact is passed through substituteTokens if it has placeholders
+                const formattedImpact = findNarrativeQuote(initiator, responder, 'onCollateral', 'general', { impactText: impact });
+                if (formattedImpact) {
+                    phaseContent += `<p class="environmental-impact-text">${formattedImpact.line}</p>`;
+                } else {
+                    phaseContent += `<p class="environmental-impact-text">${impact}</p>`; // Fallback if no specific quote
+                }
             });
             phaseContent += `</div>`;
         }

@@ -1,3 +1,4 @@
+// FILE: engine_move-resolution.js
 'use strict';
 
 // This is the "Combat Math" module. Its sole purpose is to calculate the
@@ -63,8 +64,61 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             wasPunished = true;
         }
     }
+
+    // NEW: Handle "Tactical Reposition" move logic
+    if (move.isRepositionMove) {
+        const mobilityFactor = attacker.mobility || 0.5; // Default to neutral if not defined
+        const successChance = 0.4 + (mobilityFactor * 0.6); // 40% (min mobility) to 100% (max mobility)
+        const roll = Math.random();
+
+        if (roll < successChance) {
+            // Success: Apply a positive tactical state
+            const intensity = 1.1 + (mobilityFactor * 0.3); // Intensity 1.1 to 1.4
+            const duration = 1;
+            attacker.tacticalState = { name: 'Repositioned', duration, intensity, isPositive: true };
+            interactionLog.push(`${attacker.name} successfully repositioned, gaining a tactical advantage.`);
+            return {
+                effectiveness: effectivenessLevels.CRITICAL, // Critical for successful reposition
+                damage: 0,
+                energyCost: 10, // Fixed low cost for reposition
+                wasPunished: false,
+                payoff: false,
+                consumedStateName: null,
+                collateralDamage: 0
+            };
+        } else {
+            // Failure: Apply a negative tactical state or stun
+            const intensity = 1.0 + (1 - mobilityFactor) * 0.5; // Intensity 1.0 to 1.5 (more severe for low mobility)
+            const duration = 1;
+            if (roll > successChance + (0.5 * (1 - successChance))) { // Worse failure for lower mobility / higher roll
+                attacker.tacticalState = { name: 'Exposed', duration, intensity, isPositive: false }; // Exposed state
+                interactionLog.push(`${attacker.name} failed to reposition effectively and is now exposed.`);
+                return {
+                    effectiveness: effectivenessLevels.WEAK, // Weak for failed reposition
+                    damage: 0,
+                    energyCost: 10,
+                    wasPunished: true, // Mark as punished for AI to learn
+                    payoff: false,
+                    consumedStateName: null,
+                    collateralDamage: 0
+                };
+            } else {
+                attacker.tacticalState = { name: 'Off-Balance', duration, intensity, isPositive: false }; // Off-Balance state
+                interactionLog.push(`${attacker.name}'s repositioning attempt left them off-balance.`);
+                return {
+                    effectiveness: effectivenessLevels.NORMAL, // Normal for minor failed reposition
+                    damage: 0,
+                    energyCost: 10,
+                    wasPunished: false, // Not a punishment, but a neutral/minor negative outcome
+                    payoff: false,
+                    consumedStateName: null,
+                    collateralDamage: 0
+                };
+            }
+        }
+    }
     
-    // NEW: Apply environmental modifiers to move effectiveness and energy cost
+    // Apply environmental modifiers to move effectiveness and energy cost
     const { multiplier: envMultiplier, energyCostModifier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
     multiplier *= envMultiplier;
     energyCost *= energyCostModifier; // Adjust energy cost based on environment

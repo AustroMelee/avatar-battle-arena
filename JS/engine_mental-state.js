@@ -18,12 +18,13 @@ export function updateMentalState(actor, opponent, moveResult, environmentState 
     
     // Stress from momentum loss
     if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
-    // Stress from being tactically exposed
-    if (actor.tacticalState) stressThisTurn += 15;
+    // Stress from being tactically exposed (old logic, now updated to use tacticalState object)
+    if (actor.tacticalState?.name === 'Exposed' || actor.tacticalState?.name === 'Off-Balance') stressThisTurn += 15;
 
     // --- NEW: Stress from Collateral Damage ---
     if (environmentState && environmentState.damageLevel > 0) {
-        const collateralTolerance = actor.collateralTolerance !== undefined ? actor.collateralTolerance : 0.5; // Default to neutral if not defined
+        // Ensure collateralTolerance has a default if not explicitly defined on character
+        const collateralTolerance = actor.collateralTolerance !== undefined ? actor.collateralTolerance : 0.5; 
         const maxEnvironmentalStress = 30; // Max stress from environment per turn
         const environmentStressFactor = 0.8; // How much environment damage translates to stress
 

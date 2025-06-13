@@ -1,3 +1,4 @@
+// FILE: data_characters_gaang.js
 'use strict';
 
 export const gaangCharacters = {
@@ -8,6 +9,7 @@ export const gaangCharacters = {
         personalityProfile: { aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8, signatureMoveBias: { "Boomerang Throw": 1.2, "Improvised Trap": 1.4 } },
         specialTraits: { resilientToManipulation: 0.2 },
         collateralTolerance: 0.5, // Moderate tolerance, mostly dislikes it if it disrupts plans
+        mobility: 0.6, // Sokka is reasonably agile and clever in positioning
         narrative: {
             battleStart: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, {opponentName} looks tough. Don't panic. Just find an opening. You're the idea guy." }],
             onIntentSelection: {
@@ -19,7 +21,8 @@ export const gaangCharacters = {
             },
             onMoveExecution: {
                 'Boomerang Throw': { Critical: [{ type: 'spoken', line: "See? Boomerang always comes back! And it hits HARD!" }], Weak: [{ type: 'spoken', line: "Wait, where did it... oh, it's stuck in a tree. Great." }] },
-                'Improvised Trap': { Critical: [{ type: 'spoken', line: "Ha! You fell right into my ingeniously designed trap!" }], Weak: [{ type: 'internal', line: "Okay, so the rope trap needs... more rope. And a better trigger. And maybe a sign." }] }
+                'Improvised Trap': { Critical: [{ type: 'spoken', line: "Ha! You fell right into my ingeniously designed trap!" }], Weak: [{ type: 'internal', line: "Okay, so the rope trap needs... more rope. And a better trigger. And maybe a sign." }] },
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "Perfect! Just where I wanted to be!" }], Weak: [{ type: 'internal', line: "Whoops, almost tripped on my own feet. Gotta be quicker." }] }
             },
             onStateChange: {
                 stressed: [{ type: 'internal', line: "This is not going according to plan. At all." }],
@@ -59,7 +62,8 @@ export const gaangCharacters = {
             { name: "Shield Block", verb: 'block', object: 'with his shield', type: 'Defense', power: 30, element: 'utility', moveTags: ['defensive_stance', 'utility_block'], collateralImpact: 'none' },
             { name: "Tactical Positioning", verb: 'reposition', object: 'for a tactical advantage', type: 'Utility', power: 20, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Outmaneuvered', duration: 1, intensity: 1.1 }, collateralImpact: 'none' },
             { name: "Improvised Trap", verb: 'devise', object: 'clever trap', type: 'Utility', power: 50, requiresArticle: true, element: 'utility', moveTags: ['trap_delayed', 'utility_control', 'environmental_manipulation'], setup: { name: 'Trapped', duration: 2, intensity: 1.3 }, collateralImpact: 'low' },
-            { name: "The Sokka Special", verb: 'spring', object: 'masterfully constructed snare trap', type: 'Finisher', power: 75, requiresArticle: true, element: 'utility', moveTags: ['trap_delayed', 'debuff_disable', 'single_target', 'requires_opening', 'highRisk'], collateralImpact: 'medium' }
+            { name: "The Sokka Special", verb: 'spring', object: 'masterfully constructed snare trap', type: 'Finisher', power: 75, requiresArticle: true, element: 'utility', moveTags: ['trap_delayed', 'debuff_disable', 'single_target', 'requires_opening', 'highRisk'], collateralImpact: 'medium' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["Boomerang! You *do* always come back!"], postWin_overwhelming: ["Nailed it! I am the greatest warrior-inventor of our time!"], postWin_specific: { 'aang-airbending-only': "See? Brains beat brawn... and... wind." } },
         relationships: { 'katara': { relationshipType: 'sibling_support', stressModifier: 0.9, resilienceModifier: 1.2 } }
@@ -71,6 +75,7 @@ export const gaangCharacters = {
         personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9, signatureMoveBias: { "Air Scooter": 1.5, "Wind Shield": 1.3 } },
         specialTraits: { resilientToManipulation: 0.6 },
         collateralTolerance: 0.05, // Very low tolerance, deeply distressed by damage
+        mobility: 1.0, // Aang is extremely mobile
         narrative: {
             battleStart: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
             onIntentSelection: {
@@ -92,7 +97,8 @@ export const gaangCharacters = {
             },
             onMoveExecution: {
                 'Air Scooter': { Critical: [{ type: 'spoken', line: "Whee! Try to catch me!" }] },
-                'Sweeping Gust': { Critical: [{ type: 'spoken', line: "Sorry about that!" }] }
+                'Sweeping Gust': { Critical: [{ type: 'spoken', line: "Sorry about that!" }] },
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "Like the wind!" }], Weak: [{ type: 'internal', line: "Almost got caught there. Need to be more mindful." }] }
             },
             onCollateral: {
                 causingDamage: [
@@ -120,7 +126,8 @@ export const gaangCharacters = {
             { name: "Wind Shield", verb: 'form', object: 'swirling shield of wind', type: 'Defense', power: 50, requiresArticle: true, element: 'air', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense'], collateralImpact: 'none' },
             { name: "Tornado Whirl", verb: 'create', object: 'disorienting tornado', type: 'Offense', power: 65, requiresArticle: true, element: 'air', moveTags: ['area_of_effect', 'channeled', 'utility_control'], setup: { name: 'Disoriented', duration: 2, intensity: 1.25 }, collateralImpact: 'medium' },
             { name: "Gust Push", verb: 'push', object: 'with a sudden gust of wind', type: 'Offense', power: 30, element: 'air', moveTags: ['ranged_attack', 'single_target', 'pushback'], collateralImpact: 'none' },
-            { name: "Sweeping Gust", verb: 'sweep', object: 'his foe off their feet', type: 'Finisher', power: 80, element: 'air', moveTags: ['area_of_effect', 'debuff_disable', 'pushback', 'requires_opening'], collateralImpact: 'low' }
+            { name: "Sweeping Gust", verb: 'sweep', object: 'his foe off their feet', type: 'Finisher', power: 80, element: 'air', moveTags: ['area_of_effect', 'debuff_disable', 'pushback', 'requires_opening'], collateralImpact: 'low' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["Phew! Nobody got hurt, right? Mostly."], postWin_overwhelming: ["Whoa, that was a lot of air! Are you okay?"], postWin_specific: { 'ozai-not-comet-enhanced': "It's over. This world doesn't need any more destruction." } },
         relationships: { 'ozai-not-comet-enhanced': { relationshipType: "fated_adversary", stressModifier: 1.4, resilienceModifier: 1.3 }, 'azula': { relationshipType: "nonlethal_pacifism", stressModifier: 1.2, resilienceModifier: 1.2 } }
@@ -132,6 +139,7 @@ export const gaangCharacters = {
         personalityProfile: { aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6, signatureMoveBias: { "Water Whip": 1.2, "Ice Prison": 1.3 } },
         specialTraits: { resilientToManipulation: 0.9 },
         collateralTolerance: 0.15, // Low tolerance, compassionate
+        mobility: 0.7, // Katara is quite agile, especially with water
         narrative: {
             battleStart: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
             onIntentSelection: {
@@ -140,7 +148,8 @@ export const gaangCharacters = {
                 BreakTheTurtle: [{ type: 'internal', line: "They think they can just hide? I'll tear that wall down." }]
             },
             onMoveExecution: {
-                'Bloodbending': { Critical: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] }
+                'Bloodbending': { Critical: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] },
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "I'll control the flow of this fight!" }], Weak: [{ type: 'internal', line: "Too slow. Need to be more fluid." }] }
             },
             onStateChange: {
                 stressed: [{ type: 'internal', line: "Can't get sloppy. My family is counting on me." }],
@@ -179,7 +188,8 @@ export const gaangCharacters = {
             { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
             { name: "Ice Prison", verb: 'create', object: 'ice prison', type: 'Utility', power: 60, requiresArticle: true, element: 'ice', moveTags: ['utility_control', 'debuff_disable', 'construct_creation', 'single_target'], setup: { name: 'Immobilized', duration: 2, intensity: 1.4 }, collateralImpact: 'low' },
             { name: "Tidal Wave", verb: 'summon', object: 'massive tidal wave', type: 'Finisher', power: 90, requiresArticle: true, element: 'water', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'channeled', 'requires_opening'], collateralImpact: 'high' },
-            { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'], collateralImpact: 'none' }
+            { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'], collateralImpact: 'none' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"], postWin_specific: { 'azula': "You're beaten. It's over." } },
         relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1.0, resilienceModifier: 1.1 }, 'azula': { relationshipType: "bitter_rivalry", stressModifier: 1.5, resilienceModifier: 1.0 } }
@@ -191,6 +201,7 @@ export const gaangCharacters = {
         personalityProfile: { aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8, signatureMoveBias: { "Seismic Slam": 1.4, "Metal Bending": 1.3 } },
         specialTraits: { resilientToManipulation: 0.5 },
         collateralTolerance: 0.6, // Higher than human element, but still cares about structures and earth
+        mobility: 0.2, // Toph relies on earth-based movement, less nimble than airbenders
         narrative: {
             battleStart: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
             onIntentSelection: {
@@ -210,7 +221,8 @@ export const gaangCharacters = {
                 shaken: [{ type: 'spoken', line: "Okay, that one actually hurt. You're gonna pay for that!" }]
             },
             onMoveExecution: {
-                'Seismic Slam': { Critical: [{ type: 'spoken', line: "There! How'd you like that one?" }] }
+                'Seismic Slam': { Critical: [{ type: 'spoken', line: "There! How'd you like that one?" }] },
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "Ground control, baby!" }], Weak: [{ type: 'internal', line: "Ugh, this ground is lumpy. Didn't move fast enough." }] }
             },
             onCollateral: {
                 causingDamage: [
@@ -240,7 +252,8 @@ export const gaangCharacters = {
             { name: "Seismic Slam", verb: 'slam', object: 'her fists to the ground', type: 'Offense', power: 70, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'unblockable_ground'], collateralImpact: 'high' },
             { name: "Metal Bending", verb: 'bend', object: 'the metal in the environment', type: 'Offense', power: 80, element: 'metal', moveTags: ['environmental_manipulation', 'utility_control', 'versatile'], collateralImpact: 'medium' },
             { name: "Boulder Throw", verb: 'launch', object: 'volley of rock projectiles', type: 'Offense', power: 65, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
-            { name: "Rock Coffin", verb: 'entomb', object: 'her foe in a prison of rock', type: 'Finisher', power: 95, element: 'earth', moveTags: ['debuff_disable', 'single_target', 'construct_creation', 'requires_opening'], collateralImpact: 'low' }
+            { name: "Rock Coffin", verb: 'entomb', object: 'her foe in a prison of rock', type: 'Finisher', power: 95, element: 'earth', moveTags: ['debuff_disable', 'single_target', 'construct_creation', 'requires_opening'], collateralImpact: 'low' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["Told you I was the best. The greatest earthbender in the world!"], postWin_overwhelming: ["HA! That's what happens when you fight the greatest earthbender in the world!"], postWin_specific: { 'bumi': "Looks like I'm still the champ, Bumi!" } },
         relationships: {}
@@ -252,6 +265,7 @@ export const gaangCharacters = {
         personalityProfile: { aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5, signatureMoveBias: { "Flame Sword": 1.2, "Dragon's Breath": 1.3 } },
         specialTraits: { resilientToManipulation: 0.1 },
         collateralTolerance: 0.25, // Low-moderate tolerance, due to redemption arc
+        mobility: 0.65, // Zuko is quite agile
         narrative: {
             battleStart: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],
             onIntentSelection: {
@@ -295,7 +309,8 @@ export const gaangCharacters = {
             { name: "Fire Shield", verb: 'create', object: 'swirling fire shield', type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense'], collateralImpact: 'none' },
             { name: "Dragon's Breath", verb: 'unleash', object: 'sustained stream of fire', type: 'Offense', power: 70, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'channeled', 'area_of_effect'], collateralImpact: 'medium' },
             { name: "Fire Whip", verb: 'lash', object: 'out with a whip of fire', type: 'Offense', power: 60, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
-            { name: "Redemption's Fury", verb: 'overwhelm', object: 'his opponent with a flurry of attacks', type: 'Finisher', power: 85, element: 'fire', moveTags: ['melee_range', 'area_of_effect_small', 'versatile', 'requires_opening'], collateralImpact: 'medium' }
+            { name: "Redemption's Fury", verb: 'overwhelm', object: 'his opponent with a flurry of attacks', type: 'Finisher', power: 85, element: 'fire', moveTags: ['melee_range', 'area_of_effect_small', 'versatile', 'requires_opening'], collateralImpact: 'medium' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["I fought for my own path. And I won."], postWin_overwhelming: ["My fire burns hotter because I fight for something real!"], postWin_specific: { 'azula': "It's over, Azula. I've found my own strength." } },
         relationships: { 'azula': { relationshipType: "sibling_rivalry_inferior", stressModifier: 2.0, resilienceModifier: 0.8 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_defiance", stressModifier: 1.8, resilienceModifier: 1.2 }, 'iroh': { relationshipType: "mentor_respect", stressModifier: 0.5, resilienceModifier: 1.5 } }

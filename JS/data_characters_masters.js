@@ -1,3 +1,4 @@
+// FILE: data_characters_masters.js
 'use strict';
 
 export const masterCharacters = {
@@ -8,6 +9,7 @@ export const masterCharacters = {
         personalityProfile: { aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9, signatureMoveBias: { "Rock Avalanche": 1.2, "Terrain Reshape": 1.4 } },
         specialTraits: { resilientToManipulation: 1.0 },
         collateralTolerance: 0.5, // Moderate tolerance. Enjoys chaos, but cares about his city/earth kingdom
+        mobility: 0.3, // Bumi relies on raw earth power, not nimble movement
         narrative: {
             battleStart: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
             onIntentSelection: {
@@ -40,13 +42,17 @@ export const masterCharacters = {
                     { type: 'spoken', line: "Come on, make more noise! The more unstable it gets, the more fun I have!" }
                 ]
             },
-            onVictory: { Default: [{ line: "Time for a nap! Or maybe some cabbage!" }] }
+            onVictory: { Default: [{ line: "Time for a nap! Or maybe some cabbage!" }] },
+            onMoveExecution: {
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "Didn't see that coming, did ya?!" }], Weak: [{ type: 'internal', line: "Ugh, my knees aren't what they used to be." }] }
+            }
         },
         techniques: [
             { name: "Rock Avalanche", verb: 'trigger', object: 'massive rock avalanche', type: 'Finisher', power: 95, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'requires_opening', 'highRisk'], collateralImpact: 'high' },
             { name: "Boulder Throw", verb: 'hurl', object: 'giant boulder', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'single_target'], collateralImpact: 'medium' },
             { name: "Ground Spike", verb: 'erupt with', object: 'spike of rock from the ground', type: 'Offense', power: 45, requiresArticle: true, element: 'earth', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'unblockable_ground'], collateralImpact: 'low' },
-            { name: "Terrain Reshape", verb: 'reshape', object: 'the battlefield', type: 'Utility', power: 40, element: 'earth', moveTags: ['utility_control', 'environmental_manipulation'], collateralImpact: 'low' }
+            { name: "Terrain Reshape", verb: 'reshape', object: 'the battlefield', type: 'Utility', power: 40, element: 'earth', moveTags: ['utility_control', 'environmental_manipulation'], collateralImpact: 'low' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["Time for a nap! Or maybe some cabbage!"], postWin_overwhelming: ["The earth moves for me! No one can stop the Mad King!"], postWin_specific: { 'toph-beifong': "Not bad, Twinkle-toes! But you have to get up pretty early in the morning to out-crazy me!" } },
         relationships: {}
@@ -58,6 +64,7 @@ export const masterCharacters = {
         personalityProfile: { aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2, signatureMoveBias: { "Octopus Form": 1.5, "Water Barrier": 1.3 } },
         specialTraits: { resilientToManipulation: 0.8 },
         collateralTolerance: 0.3, // Moderate-low tolerance, values order and control
+        mobility: 0.5, // Pakku is disciplined, not particularly nimble but efficient
         narrative: {
             battleStart: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
             onIntentSelection: {
@@ -87,13 +94,17 @@ export const masterCharacters = {
                 ],
                 thrivingInDamage: [] // Not applicable for Pakku
             },
-            onVictory: { Default: [{ line: "Discipline prevails." }] }
+            onVictory: { Default: [{ line: "Discipline prevails." }] },
+            onMoveExecution: {
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "Proper form is everything." }], Weak: [{ type: 'internal', line: "My movements were not precise enough." }] }
+            }
         },
         techniques: [
             { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
             { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
             { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
-            { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['defensive_stance', 'channeled', 'versatile', 'area_of_effect_small', 'requires_opening'], collateralImpact: 'low' }
+            { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['defensive_stance', 'channeled', 'versatile', 'area_of_effect_small', 'requires_opening'], collateralImpact: 'low' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["Discipline prevails."], postWin_overwhelming: ["My mastery is absolute. There is no question of the outcome."], postWin_specific: { 'katara': "You have learned much, but the student has not yet surpassed the master." } },
         relationships: {}
@@ -105,6 +116,7 @@ export const masterCharacters = {
         personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4, signatureMoveBias: { "Fire Wall": 1.6 } },
         specialTraits: { resilientToManipulation: 1.0 },
         collateralTolerance: 0.0, // Extremely low tolerance, fears fire's destructive potential
+        mobility: 0.4, // Jeong Jeong is disciplined, but not known for rapid movement
         narrative: {
             battleStart: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],
             onIntentSelection: {
@@ -114,7 +126,8 @@ export const masterCharacters = {
                 asVictim: [{ type: 'internal', line: "Words are wind. The flame within me is steady." }]
             },
             onMoveExecution: {
-                'Fire Wall': { Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }] }
+                'Fire Wall': { Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }] },
+                'Tactical Reposition': { Critical: [{ type: 'spoken', line: "The flame is where I direct it." }], Weak: [{ type: 'internal', line: "A lapse in control. Unacceptable." }] }
             },
             onCollateral: {
                 causingDamage: [
@@ -140,7 +153,8 @@ export const masterCharacters = {
             { name: "Fire Wall", verb: 'raise', object: 'impenetrable wall of fire', type: 'Defense', power: 85, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'area_of_effect_large'], setup: { name: 'Cornered', duration: 2, intensity: 1.2 }, collateralImpact: 'medium' },
             { name: "Flame Whips", verb: 'conjure', object: 'precise flame whips', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'precise'], collateralImpact: 'low' },
             { name: "Precision Burn", verb: 'inflict', object: 'surgical burn', type: 'Offense', power: 45, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'single_target', 'precise'], collateralImpact: 'none' },
-            { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, element: 'fire', moveTags: ['area_of_effect_large', 'pushback', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' }
+            { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, element: 'fire', moveTags: ['area_of_effect_large', 'pushback', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // NEW MOVE
         ],
         quotes: { postWin: ["The destructive path of fire has been averted, for now."], postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."] },
         relationships: {}

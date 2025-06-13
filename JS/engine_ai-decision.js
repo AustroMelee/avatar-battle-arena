@@ -1,3 +1,4 @@
+// FILE: engine_ai-decision.js
 'use strict';
 
 // This is the "AI Brain" module.
@@ -48,7 +49,18 @@ export function updateAiMemory(learner, opponent) {
         learner.aiMemory.selfMoveEffectiveness[learner.lastMove.name].totalEffectiveness += effectivenessValue;
         learner.aiMemory.selfMoveEffectiveness[learner.lastMove.name].uses++;
         if (learner.lastMoveEffectiveness === 'Weak') learner.aiMemory.moveSuccessCooldown[learner.lastMove.name] = 2;
+
+        // NEW: Update reposition cooldown
+        if (learner.lastMove.isRepositionMove) {
+            learner.aiMemory.repositionCooldown = 2; // Cooldown for 2 turns after attempting
+        }
     }
+    // NEW: Decrement reposition cooldown
+    if (learner.aiMemory.repositionCooldown > 0) {
+        learner.aiMemory.repositionCooldown--;
+    }
+
+
     if (opponent.moveHistory.length >= 2) {
         const prev = opponent.moveHistory[opponent.moveHistory.length - 2].name;
         const curr = opponent.lastMove.name;
@@ -122,12 +134,43 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
     return availableMoves.map(move => {
         let weight = 1.0;
         let reasons = [];
+        
+        // Base move type weighting
         switch (move.type) {
             case 'Offense': weight *= (1 + profile.aggression * 1.5); reasons.push(`Aggro:${profile.aggression.toFixed(2)}`); break;
             case 'Defense': weight *= (1 + profile.defensiveBias * 1.5 + profile.patience); reasons.push(`Def:${profile.defensiveBias.toFixed(2)}`); break;
             case 'Utility': weight *= (1 + profile.creativity * 0.8 + profile.opportunism * 0.5); reasons.push(`Util:${profile.creativity.toFixed(2)}`); break;
             case 'Finisher': weight *= (1 + profile.riskTolerance * 2.0); reasons.push(`Risk:${profile.riskTolerance.toFixed(2)}`); break;
         }
+
+        // NEW: Specific weighting for "Tactical Reposition" move
+        if (move.isRepositionMove) {
+            // Factor in character's mobility directly
+            weight *= (1 + actor.mobility * 2.0); reasons.push(`Mobility:${actor.mobility.toFixed(2)}`);
+
+            // If actor is currently exposed/vulnerable, prioritize reposition
+            if (actor.tacticalState?.name === 'Exposed' || actor.tacticalState?.name === 'Off-Balance') {
+                weight *= 3.0; reasons.push('SelfVulnerable');
+            }
+            // If opponent has an opening, it might be better to attack than reposition, but reposition can also be a setup
+            if (defender.isStunned || defender.tacticalState) {
+                weight *= 0.5; reasons.push('OpponentVulnerable_LessReposition'); // Less appealing if opponent is already vulnerable
+            }
+            // If reposition on cooldown, severely penalize
+            if (actor.aiMemory.repositionCooldown > 0) {
+                weight *= 0.001; reasons.push('RepositionCooldown');
+            }
+            // Prioritize reposition if energy is low for other moves, but still want to do *something*
+            if (actor.energy < 20 && !move.moveTags.includes('low_cost')) { // If it's a cheap reposition
+                weight *= 1.5; reasons.push('LowEnergyReposition');
+            }
+            // Increase weight if the actor is trying to be defensive or patient
+            if (profile.patience > 0.7 || profile.defensiveBias > 0.7) {
+                weight *= 1.5; reasons.push('PatienceDefensiveBias');
+            }
+        }
+
+
         if (profile.signatureMoveBias[move.name]) { weight *= profile.signatureMoveBias[move.name]; reasons.push(`SigMove`); }
         if (actor.lastMove?.name === move.name) { weight *= (1.0 - profile.antiRepeater); reasons.push(`AntiRepeat`); }
         if (move.moveTags.includes('counter') && profile.opportunism > 0.7) { weight *= (1.0 + profile.opportunism); reasons.push('CounterTag'); }
@@ -138,9 +181,10 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
             'PressAdvantage': { Offense: 2.0, Finisher: 1.5, Defense: 0.5 },
             'CapitalizeOnOpening': { Offense: 1.8, Finisher: 2.5, Utility: 1.5, Defense: 0.2 },
             'BreakTheTurtle': { 'bypasses_defense': 5.0, 'unblockable_ground': 5.0, 'utility_control': 2.0, Defense: 0.1 },
-            'ConserveEnergy': { 'low_cost': 3.0 },
+            'ConserveEnergy': { 'low_cost': 3.0, 'reposition': 2.0 }, // Prioritize cheap reposition
             'UnfocusedRage': { Offense: 2.5, Defense: 0.1, Utility: 0.1 },
-            'PanickedDefense': { Defense: 3.0, 'evasive': 2.0, Offense: 0.3, Finisher: 0.05 },
+            'PanickedDefense': { Defense: 3.0, 'evasive': 2.0, 'reposition': 2.5, Offense: 0.3, Finisher: 0.05 }, // Prioritize reposition in panic
+            'OpeningMoves': { Offense: 1.2, Defense: 1.0, Utility: 1.0, 'reposition': 1.5 } // Good for initial probing
         };
         const multipliers = intentMultipliers[intent] || {};
         if(multipliers[move.type]) { weight *= multipliers[move.type]; reasons.push(`Intent:${intent}`); }
@@ -157,15 +201,13 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
             }
         }
 
-        // NEW: Factor in environmental energy cost if available (pre-calculation)
-        // This is an ESTIMATE for AI decision, actual cost will be from calculateMove
+        // Factor in environmental energy cost if available (pre-calculation)
         const { energyCostModifier } = conditions.environmentalModifiers?.[move.element] || { energyCostModifier: 1.0 };
         const estimatedEnergyCost = energyCost * energyCostModifier;
         if (actor.energy < estimatedEnergyCost) { // Use estimated energy cost
             weight = 0; // Don't pick moves the actor can't afford
             reasons.push(`EnergyTooHigh`);
         }
-
 
         if (actor.aiMemory.moveSuccessCooldown[move.name]) weight *= 0.01;
         if (move.moveTags.includes('requires_opening') && !(defender.isStunned || defender.tacticalState)) weight *= 0.01;
