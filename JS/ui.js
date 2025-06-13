@@ -1,3 +1,4 @@
+// FILE: ui.js
 'use strict';
 
 import { characters } from './data_characters.js';
@@ -32,6 +33,9 @@ const DOM = {
     environmentImpactsList: document.getElementById('environment-impacts-list'),
     // NEW: Element for environmental summary
     locationEnvironmentSummary: document.createElement('p'), // Create a new P element
+    // NEW: Momentum display elements
+    fighter1MomentumValue: document.getElementById('fighter1-momentum-value'),
+    fighter2MomentumValue: document.getElementById('fighter2-momentum-value'),
 };
 
 DOM.fighter1Select.type = 'hidden';
@@ -241,10 +245,35 @@ function initializeTimeToggle() {
     });
 }
 
+/**
+ * Updates the momentum display for a given fighter.
+ * @param {string} fighterKey - 'fighter1' or 'fighter2'.
+ * @param {number} momentumValue - The current momentum value.
+ */
+function updateMomentumDisplay(fighterKey, momentumValue) {
+    const momentumElement = fighterKey === 'fighter1' ? DOM.fighter1MomentumValue : DOM.fighter2MomentumValue;
+    momentumElement.textContent = momentumValue;
+
+    // Remove existing momentum color classes
+    momentumElement.classList.remove('momentum-positive', 'momentum-negative', 'momentum-neutral');
+
+    // Add appropriate class based on momentum value
+    if (momentumValue > 0) {
+        momentumElement.classList.add('momentum-positive');
+    } else if (momentumValue < 0) {
+        momentumElement.classList.add('momentum-negative');
+    } else {
+        momentumElement.classList.add('momentum-neutral');
+    }
+}
+
 export function populateUI() {
     populateCharacterGrids();
     populateLocationGrid();
     initializeTimeToggle();
+    // Initialize momentum display to neutral (0)
+    updateMomentumDisplay('fighter1', 0);
+    updateMomentumDisplay('fighter2', 0);
 }
 
 export function showLoadingState() {
@@ -283,6 +312,9 @@ export function resetBattleUI() {
     DOM.environmentDamageDisplay.textContent = '';
     DOM.environmentImpactsList.innerHTML = '';
     DOM.environmentDamageDisplay.classList.remove('low-damage', 'medium-damage', 'high-damage', 'catastrophic-damage');
+    // NEW: Reset momentum display
+    updateMomentumDisplay('fighter1', 0);
+    updateMomentumDisplay('fighter2', 0);
 
     setTimeout(() => {
         if (!DOM.resultsSection.classList.contains('show')) {
@@ -345,12 +377,14 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     createListItem(`<b>${fighter1.name}'s Final Status:</b>`, f1_status, f1_class);
     createListItem(`  • Health:`, `${Math.round(fighter1.hp)} / 100 HP`);
     createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
+    createListItem(`  • Momentum:`, fighter1.momentum);
 
     const f2_status = isDraw ? 'DRAW' : (fighter2.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
     const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
     createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
     createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
+    createListItem(`  • Momentum:`, fighter2.momentum);
     
     DOM.analysisList.appendChild(spacer.cloneNode());
 

@@ -1,3 +1,5 @@
+<!-- FILE: index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,12 +22,20 @@
         <section class="battle-setup">
             <div class="fighter-selection-area">
                 <h2 class="fighter-title" id="fighter1-name-display">Choose Fighter 1</h2>
+                <!-- NEW: Momentum display for Fighter 1 -->
+                <div class="momentum-display" id="fighter1-momentum-display">
+                    Momentum: <span class="momentum-value momentum-neutral" id="fighter1-momentum-value">0</span>
+                </div>
                 <div class="character-grid" id="fighter1-grid">
                 </div>
             </div>
             <div class="vs-divider" id="vsDivider">VS</div>
             <div class="fighter-selection-area">
                 <h2 class="fighter-title" id="fighter2-name-display">Choose Fighter 2</h2>
+                <!-- NEW: Momentum display for Fighter 2 -->
+                <div class="momentum-display" id="fighter2-momentum-display">
+                    Momentum: <span class="momentum-value momentum-neutral" id="fighter2-momentum-value">0</span>
+                </div>
                 <div class="character-grid" id="fighter2-grid">
                 </div>
             </div>

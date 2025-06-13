@@ -9,6 +9,7 @@
 import { effectivenessLevels } from './narrative-v2.js';
 import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js'; // Added for collateral damage
+import { getMomentumCritModifier } from './engine_momentum.js'; // NEW: Import momentum crit modifier
 
 // --- HELPER FUNCTIONS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
@@ -32,6 +33,10 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     let collateralDamage = 0; // New: Collateral damage value
     let energyCost = (move.name === 'Struggle') ? 0 : Math.round((move.power || 0) * 0.22) + 4;
 
+    // NEW: Initialize momentum changes for the result
+    let momentumChangeAttacker = 0;
+    let momentumChangeDefender = 0;
+
     // Collateral damage calculation
     const locationData = locationConditions[locationId];
     const baseCollateralImpact = COLLATERAL_IMPACT_MULTIPLIERS[move.collateralImpact || 'none'] || 0;
@@ -53,15 +58,19 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                 interactionLog.push(`${attacker.name}'s ${move.name} was amplified by ${defender.name} being ${defender.tacticalState.name}.`);
                 payoff = true;
                 damage += 5;
+                momentumChangeAttacker += 1; // Reward for capitalizing
             } else if (defender.isStunned) {
                 multiplier *= 1.3;
                 interactionLog.push(`${attacker.name}'s ${move.name} capitalized on ${defender.name} being stunned.`);
                 payoff = true;
                 damage += 3;
+                momentumChangeAttacker += 1; // Reward for capitalizing
             }
         } else if (punishableMoves[move.name]) {
             multiplier *= punishableMoves[move.name].penalty;
             wasPunished = true;
+            momentumChangeAttacker -= 1; // Penalty for misusing
+            momentumChangeDefender += 1; // Gain for opponent
         }
     }
 
@@ -77,6 +86,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             const duration = 1;
             attacker.tacticalState = { name: 'Repositioned', duration, intensity, isPositive: true };
             interactionLog.push(`${attacker.name} successfully repositioned, gaining a tactical advantage.`);
+            momentumChangeAttacker += 1; // Gain momentum for successful reposition
             return {
                 effectiveness: effectivenessLevels.CRITICAL, // Critical for successful reposition
                 damage: 0,
@@ -84,7 +94,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                 wasPunished: false,
                 payoff: false,
                 consumedStateName: null,
-                collateralDamage: 0
+                collateralDamage: 0,
+                momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender } // NEW: Return momentum changes
             };
         } else {
             // Failure: Apply a negative tactical state or stun
@@ -93,6 +104,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             if (roll > successChance + (0.5 * (1 - successChance))) { // Worse failure for lower mobility / higher roll
                 attacker.tacticalState = { name: 'Exposed', duration, intensity, isPositive: false }; // Exposed state
                 interactionLog.push(`${attacker.name} failed to reposition effectively and is now exposed.`);
+                momentumChangeAttacker -= 2; // Significant penalty for critical failure
+                momentumChangeDefender += 1; // Gain for opponent
                 return {
                     effectiveness: effectivenessLevels.WEAK, // Weak for failed reposition
                     damage: 0,
@@ -100,11 +113,13 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                     wasPunished: true, // Mark as punished for AI to learn
                     payoff: false,
                     consumedStateName: null,
-                    collateralDamage: 0
+                    collateralDamage: 0,
+                    momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender } // NEW: Return momentum changes
                 };
             } else {
                 attacker.tacticalState = { name: 'Off-Balance', duration, intensity, isPositive: false }; // Off-Balance state
                 interactionLog.push(`${attacker.name}'s repositioning attempt left them off-balance.`);
+                momentumChangeAttacker -= 1; // Minor penalty for regular failure
                 return {
                     effectiveness: effectivenessLevels.NORMAL, // Normal for minor failed reposition
                     damage: 0,
@@ -112,27 +127,53 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                     wasPunished: false, // Not a punishment, but a neutral/minor negative outcome
                     payoff: false,
                     consumedStateName: null,
-                    collateralDamage: 0
+                    collateralDamage: 0,
+                    momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender } // NEW: Return momentum changes
                 };
             }
         }
     }
     
     // Apply environmental modifiers to move effectiveness and energy cost
-    const { multiplier: envMultiplier, energyCostModifier, logReasons: envReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
+    const { multiplier: envMultiplier, energyCostModifier, logReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
     multiplier *= envMultiplier;
     energyCost *= energyCostModifier; // Adjust energy cost based on environment
     if (envReasons.length > 0) interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${envReasons.join(', ')}.`);
     
+    // Base Critical Chance
+    let critChance = 0.1; // 10% base crit chance
+    // Apply momentum modifier
+    critChance = clamp(critChance + getMomentumCritModifier(attacker), 0.01, 0.5); // Min 1% max 50% crit chance
+
     const totalEffectiveness = basePower * multiplier;
     let level;
-    if (totalEffectiveness < basePower * 0.7) level = effectivenessLevels.WEAK; 
-    else if (totalEffectiveness > basePower * 1.5) level = effectivenessLevels.CRITICAL;
-    else if (totalEffectiveness > basePower * 1.1) level = effectivenessLevels.STRONG;
-    else level = effectivenessLevels.NORMAL;
+    if (Math.random() < critChance) { // Check for critical hit after all modifiers
+        level = effectivenessLevels.CRITICAL;
+        damage += Math.round(totalEffectiveness / 2); // Apply critical damage bonus
+        momentumChangeAttacker += 2; // Big momentum gain for critical hit
+        momentumChangeDefender -= 1; // Opponent loses momentum
+        interactionLog.push(`Critical Hit Chance (Momentum Modified): ${attacker.name}'s crit chance was ${Math.round(critChance * 100)}%.`);
+    } else if (totalEffectiveness < basePower * 0.7) {
+        level = effectivenessLevels.WEAK; 
+        momentumChangeAttacker -= 1; // Attacker loses momentum for weak hit
+        momentumChangeDefender += 1; // Defender gains momentum
+    } else if (totalEffectiveness > basePower * 1.1) {
+        level = effectivenessLevels.STRONG;
+        damage += Math.round(totalEffectiveness / 4); // Apply strong hit damage bonus
+        momentumChangeAttacker += 1; // Attacker gains momentum for strong hit
+    } else {
+        level = effectivenessLevels.NORMAL;
+    }
     
     if (move.type.includes('Offense') || move.type.includes('Finisher')) {
         damage += Math.round(totalEffectiveness / 3);
+    } else if (move.type.includes('Defense')) { // Defensive moves can affect momentum
+        if (level === effectivenessLevels.CRITICAL) { // Perfect defense
+            momentumChangeAttacker += 1;
+            momentumChangeDefender -= 1;
+        } else if (level === effectivenessLevels.WEAK) { // Failed defense
+            momentumChangeAttacker -= 1;
+        }
     }
     
     return { 
@@ -142,7 +183,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         wasPunished, 
         payoff, 
         consumedStateName,
-        collateralDamage // New: Return collateral damage
+        collateralDamage, // New: Return collateral damage
+        momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender } // NEW: Return momentum changes
     };
 }
 

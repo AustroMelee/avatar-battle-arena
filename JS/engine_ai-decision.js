@@ -6,6 +6,7 @@
 
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
+import { MAX_MOMENTUM, MIN_MOMENTUM } from './engine_momentum.js'; // NEW: Import momentum constants
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -130,6 +131,17 @@ function determineStrategicIntent(actor, defender, turn) {
 function calculateMoveWeights(actor, defender, conditions, intent, prediction) {
     const availableMoves = getAvailableMoves(actor, conditions);
     const profile = getDynamicPersonality(actor);
+
+    // NEW: Momentum impact on weights
+    const momentumInfluence = actor.momentum / (MAX_MOMENTUM - MIN_MOMENTUM) * 2; // Normalize to -1 to 1 range, then scale
+    // Positive momentum makes AI more aggressive and risk-tolerant
+    // Negative momentum makes AI more defensive and less risk-tolerant
+    profile.aggression = clamp(profile.aggression + (momentumInfluence * 0.2), 0, 1.0);
+    profile.riskTolerance = clamp(profile.riskTolerance + (momentumInfluence * 0.3), 0, 1.0);
+    profile.defensiveBias = clamp(profile.defensiveBias - (momentumInfluence * 0.2), 0, 1.0);
+    profile.patience = clamp(profile.patience - (momentumInfluence * 0.1), 0, 1.0);
+    actor.aiLog.push(`[Momentum Effect]: Momentum (${actor.momentum}) adjusted AI profile. Aggression: ${profile.aggression.toFixed(2)}, Risk: ${profile.riskTolerance.toFixed(2)}`);
+
 
     return availableMoves.map(move => {
         let weight = 1.0;

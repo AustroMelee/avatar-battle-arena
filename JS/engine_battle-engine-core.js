@@ -13,6 +13,7 @@ import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } fro
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
 import { generateTurnNarration, getFinalVictoryLine, findNarrativeQuote } from './engine_narrative-engine.js';
+import { modifyMomentum } from './engine_momentum.js'; // NEW: Import momentum logic
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -108,6 +109,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             // NEW: Pass locationId and environmentState to calculateMove
             const result = calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locId);
             
+            // NEW: Update momentum based on move result
+            modifyMomentum(attacker, result.momentumChange.attacker, `Move Effectiveness (${result.effectiveness.label})`);
+            modifyMomentum(defender, result.momentumChange.defender, `Opponent Move Effectiveness (${result.effectiveness.label})`);
+
             // NEW: Update environmental state
             if (result.collateralDamage > 0) {
                 environmentState.damageLevel = clamp(environmentState.damageLevel + result.collateralDamage, 0, 100);

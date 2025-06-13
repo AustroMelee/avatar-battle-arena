@@ -1,3 +1,5 @@
+/* FILE: style.css */
+
 :root {
     --bg-parchment: #2a231c;
     --text-primary: #e0e6ed;
@@ -28,6 +30,11 @@
     --damage-medium: #ff9900;
     --damage-high: #ff4500;
     --damage-catastrophic: #dc143c;
+
+    /* NEW: Momentum Colors */
+    --momentum-positive: #8aff8a; /* Green */
+    --momentum-negative: #ff6b6b; /* Red */
+    --momentum-neutral: #c5b89a;  /* Gold/Parchment */
 }
 
 * {
@@ -634,6 +641,36 @@ body {
     color: var(--text-parchment-gold);
     margin-bottom: 0.5rem;
 }
+
+/* NEW: Momentum Display Styles */
+.momentum-display {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--surface-border);
+}
+
+.momentum-value {
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.momentum-value.momentum-positive {
+    color: var(--momentum-positive);
+}
+
+.momentum-value.momentum-negative {
+    color: var(--momentum-negative);
+}
+
+.momentum-value.momentum-neutral {
+    color: var(--momentum-neutral);
+}
+
 
 .loading {
     text-align: center;
