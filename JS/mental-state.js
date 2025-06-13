@@ -1,4 +1,3 @@
-// FILE: engine/mental-state.js
 'use strict';
 
 // This is the "Psychological Warfare" module. It handles all logic related to

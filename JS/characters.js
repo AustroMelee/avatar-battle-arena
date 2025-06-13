@@ -1,4 +1,3 @@
-// FILE: data/characters.js
 'use strict';
 
 // This file serves as the central assembler for all character data.
@@ -7,9 +6,9 @@
 // This approach keeps the data organized without requiring changes to
 // any other part of the engine.
 
-import { gaangCharacters } from './characters/gaang.js';
-import { antagonistCharacters } from './characters/antagonists.js';
-import { masterCharacters } from './characters/masters.js';
+import { gaangCharacters } from './data_characters_gaang.js';
+import { antagonistCharacters } from './data_characters_antagonists.js';
+import { masterCharacters } from './data_characters_masters.js';
 
 export const characters = {
     ...gaangCharacters,

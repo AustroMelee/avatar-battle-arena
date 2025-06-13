@@ -1,7 +1,6 @@
-// FILE: js/ui.js
 'use strict';
 
-import { characters } from './data/characters.js';
+import { characters } from './data_characters.js';
 import { locations } from './locations.js';
 
 const DOM = {
@@ -258,14 +257,14 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false) {
     const f1_status = isDraw ? 'DRAW' : (fighter1.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
     const f1_class = isDraw ? 'modifier-neutral' : (fighter1.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter1.name}'s Final Status:</b>`, f1_status, f1_class);
-    createListItem(`  • Health:`, `${Math.round(fighter1.hp)} / 100 HP`);
-    createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
+    createListItem(`  • Health:`, `${Math.round(fighter1.hp)} / 100 HP`);
+    createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
 
     const f2_status = isDraw ? 'DRAW' : (fighter2.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
     const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
-    createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
-    createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
+    createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
+    createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
     
     DOM.analysisList.appendChild(spacer.cloneNode());
     createLog(fighter1.aiLog, `${fighter1.name}'s AI Log`, 'ai-log');

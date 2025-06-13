@@ -1,10 +1,9 @@
-// FILE: js/main.js
 'use strict';
 
 // This is the main entry point for the application.
 // It handles user interactions and initiates the battle simulation.
 
-import { simulateBattle } from './engine/battle-engine-core.js';
+import { simulateBattle } from './engine_battle-engine-core.js';
 // MODIFIED: Calling a single UI setup function.
 import { populateUI, showLoadingState, showResultsState, resetBattleUI } from './ui.js';
 

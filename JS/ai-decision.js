@@ -1,11 +1,10 @@
-// FILE: engine/ai-decision.js
 'use strict';
 
 // This is the "AI Brain" module.
 // VERSION 7: Final version with all overkill features integrated.
 
-import { getAvailableMoves } from './move-resolution.js';
-import { moveInteractionMatrix } from '../move-interaction-matrix.js';
+import { getAvailableMoves } from './engine_move-resolution.js';
+import { moveInteractionMatrix } from './move-interaction-matrix.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 

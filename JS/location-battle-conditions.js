@@ -1,4 +1,3 @@
-// FILE: js/location-battle-conditions.js
 'use strict';
 
 // This file provides detailed environmental data for each location.

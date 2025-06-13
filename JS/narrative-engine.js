@@ -1,4 +1,3 @@
-// FILE: engine/narrative-engine.js
 'use strict';
 
 // VERSION 5.1: FINAL OVERKILL PATCH.
@@ -6,7 +5,7 @@
 // - Added legacy {possessive} token support to the substitution map for full redundancy.
 // - The root cause of the {possessive} leak in narrative-v2.js is also fixed.
 
-import { phaseTemplates, impactPhrases } from '../narrative-v2.js';
+import { phaseTemplates, impactPhrases } from './narrative-v2.js';
 
 const getRandomElement = (arr) => arr ? arr[Math.floor(Math.random() * arr.length)] : null;
 

@@ -1,17 +1,16 @@
-// FILE: engine/battle-engine-core.js
 'use strict';
 
 // VERSION 9.3: OVERKILL-COMPLIANT NARRATIVE DEDUPLICATION.
 // - Implements a `firedQuotes` Set to prevent the same narrative event from firing multiple times per turn.
 // - Fixes repetitive dialogue from the same intent/state trigger.
 
-import { characters } from '../data/characters.js';
-import { locationConditions } from '../location-battle-conditions.js';
-import { battlePhases, phaseTemplates } from '../narrative-v2.js';
-import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './ai-decision.js';
-import { calculateMove } from './move-resolution.js';
-import { updateMentalState } from './mental-state.js';
-import { generateTurnNarration, getFinalVictoryLine, findNarrativeQuote } from './narrative-engine.js';
+import { characters } from './data_characters.js';
+import { locationConditions } from './location-battle-conditions.js';
+import { battlePhases, phaseTemplates } from './narrative-v2.js';
+import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
+import { calculateMove } from './engine_move-resolution.js';
+import { updateMentalState } from './engine_mental-state.js';
+import { generateTurnNarration, getFinalVictoryLine, findNarrativeQuote } from './engine_narrative-engine.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 

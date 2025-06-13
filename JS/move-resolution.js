@@ -1,4 +1,3 @@
-// FILE: engine/move-resolution.js
 'use strict';
 
 // This is the "Combat Math" module. Its sole purpose is to calculate the
@@ -8,10 +7,10 @@
 // --- IMPORTS (PATHS CORRECTED) ---
 //- OLD PATH: ../js/narrative-v2.js
 //+ NEW PATH: ../narrative-v2.js
-import { effectivenessLevels } from '../narrative-v2.js';
+import { effectivenessLevels } from './narrative-v2.js';
 //- OLD PATH: ../js/move-interaction-matrix.js
 //+ NEW PATH: ../move-interaction-matrix.js
-import { punishableMoves } from '../move-interaction-matrix.js';
+import { punishableMoves } from './move-interaction-matrix.js';
 
 // --- HELPER FUNCTIONS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
