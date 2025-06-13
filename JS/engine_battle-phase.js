@@ -1,12 +1,6 @@
 // FILE: js/engine_battle-phase.js
 'use strict';
 
-// ====================================================================================
-//  Battle Phase Engine (v1.1 - Single Transition Patch)
-// ====================================================================================
-//  - Ensures only one phase transition can occur per call to checkAndTransitionPhase.
-// ====================================================================================
-
 export const BATTLE_PHASES = {
     EARLY: 'Early', 
     MID: 'Mid',     
@@ -21,20 +15,10 @@ export function initializeBattlePhaseState() {
     };
 }
 
-/**
- * Checks and potentially transitions the battle phase based on game state.
- * Allows only ONE phase transition per call.
- * @param {object} phaseState - The current phase state object.
- * @param {object} fighter1 - State object for fighter 1.
- * @param {object} fighter2 - State object for fighter 2.
- * @param {number} totalTurnsElapsed - Total turns passed in the battle.
- * @returns {boolean} - True if a phase transition occurred, false otherwise.
- */
 export function checkAndTransitionPhase(phaseState, fighter1, fighter2, totalTurnsElapsed) {
     const originalPhase = phaseState.currentPhase;
     phaseState.turnInCurrentPhase++;
 
-    // --- Conditions for transitioning to MID Phase ---
     if (phaseState.currentPhase === BATTLE_PHASES.EARLY) {
         let midPhaseTriggers = 0;
         if (fighter1.hp <= 70 || fighter2.hp <= 70) midPhaseTriggers++;
@@ -48,12 +32,10 @@ export function checkAndTransitionPhase(phaseState, fighter1, fighter2, totalTur
             phaseState.currentPhase = BATTLE_PHASES.MID;
             phaseState.turnInCurrentPhase = 1; 
             phaseState.phaseLog.push(`Transitioned to ${BATTLE_PHASES.MID} Phase on turn ${totalTurnsElapsed + 1}. Triggers: ${midPhaseTriggers}.`);
-            return true; // Transitioned, so exit
+            return true; 
         }
     }
 
-    // --- Conditions for transitioning to LATE Phase ---
-    // Can only transition to LATE from MID
     if (phaseState.currentPhase === BATTLE_PHASES.MID) {
         let latePhaseTriggers = 0;
         if (fighter1.hp <= 40 || fighter2.hp <= 40) latePhaseTriggers++;
@@ -67,11 +49,10 @@ export function checkAndTransitionPhase(phaseState, fighter1, fighter2, totalTur
             phaseState.currentPhase = BATTLE_PHASES.LATE;
             phaseState.turnInCurrentPhase = 1;
             phaseState.phaseLog.push(`Transitioned to ${BATTLE_PHASES.LATE} Phase on turn ${totalTurnsElapsed + 1}. Triggers: ${latePhaseTriggers}.`);
-            return true; // Transitioned, so exit
+            return true; 
         }
     }
     
-    // No transition occurred if we reach here
     return originalPhase !== phaseState.currentPhase;
 }
 

@@ -4,13 +4,17 @@
 import { characters } from './data_characters.js'; 
 import { phaseTemplates } from './narrative-v2.js';
 
+function determineImpactLevel(effectivenessLabel, moveType) {
+    if (!effectivenessLabel) return 'low';
+    switch (effectivenessLabel.toLowerCase()) {
+        case 'critical': return 'critical';
+        case 'strong': return 'high';
+        case 'normal': return moveType === 'Finisher' ? 'high' : 'medium';
+        case 'weak': return 'low';
+        default: return 'low';
+    }
+}
 
-/**
- * Transforms the battle engine's structured event array into a queue
- * of message objects suitable for the animated_text_engine.
- * @param {Array<object>} structuredLogEvents - The raw event array from the battle engine.
- * @returns {Array<object>} An array of message objects for animation.
- */
 export function transformEventsToAnimationQueue(structuredLogEvents) {
     const animationQueue = [];
     if (!structuredLogEvents || !Array.isArray(structuredLogEvents)) {
@@ -18,10 +22,17 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
         return animationQueue;
     }
 
+    let lastEventWasKOAction = false;
+
     structuredLogEvents.forEach(event => {
         if (!event || typeof event.type !== 'string') {
             console.warn("Skipping invalid event object:", event);
             return;
+        }
+
+        // Reset flag for new events unless it's the direct follow-up summary KO event
+        if (event.type !== 'battle_end_ko_event') {
+             lastEventWasKOAction = false;
         }
 
         switch (event.type) {
@@ -52,8 +63,11 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                     impactLevel: determineImpactLevel(event.effectivenessLabel, event.moveType),
                     text: event.text, 
                     isMoveAction: true,
-                    pauseAfter: 1000,
+                    pauseAfter: 1000, 
                 });
+                if (event.isKOAction) {
+                    lastEventWasKOAction = true;
+                }
                 break;
             case 'collateral_damage_event':
                 animationQueue.push({
@@ -77,16 +91,23 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                     });
                 }
                 break;
-            // Handle final battle outcome events
-            case 'final_blow_summary_event': // This is the summary, the actual KO is in the move text now
-                 animationQueue.push({
-                    text: event.text, // "X lands the finishing blow, defeating Y!"
-                    impactLevel: 'critical', // Very high impact for this summary
-                    isMoveAction: false, // Not a move, but a concluding statement
-                    isDialogue: false,
-                    pauseAfter: 2500,
-                });
+            
+            case 'battle_end_ko_event': 
+                if (!lastEventWasKOAction) { 
+                    animationQueue.push({
+                        text: event.text, 
+                        impactLevel: 'critical', 
+                        isMoveAction: false, 
+                        isDialogue: false,
+                        pauseAfter: 2500,
+                    });
+                } else {
+                    // Optionally, push a very short "VICTORY!" or similar if desired,
+                    // or simply let the subsequent conclusion_event handle the win text.
+                    // For now, we skip if the KO was already in the move.
+                }
                 break;
+
             case 'stalemate_result_event':
             case 'draw_result_event':
             case 'timeout_victory_event':
@@ -100,7 +121,7 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                 });
                 break;
             default:
-                console.warn(`Unknown event type for animation: ${event.type}`, event);
+                // console.warn(`Unknown event type for animation: ${event.type}`, event);
                 if (event.text && typeof event.text === 'string') {
                     animationQueue.push({
                         text: event.text,
@@ -111,16 +132,10 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                 break;
         }
     });
-    console.log("Transformed animation queue:", animationQueue);
+    // console.log("Transformed animation queue:", animationQueue);
     return animationQueue;
 }
 
-/**
- * Transforms the battle engine's structured event array into a full HTML log string
- * for the "Instant Simulation" mode.
- * @param {Array<object>} structuredLogEvents - The raw event array from the battle engine.
- * @returns {string} A single HTML string representing the entire battle log.
- */
 export function transformEventsToHtmlLog(structuredLogEvents) {
     if (!structuredLogEvents || !Array.isArray(structuredLogEvents)) {
         console.error("Battle Log Transformer: Invalid structuredLogEvents input for HTML log", structuredLogEvents);
@@ -136,40 +151,32 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
 
         if (event.type === 'phase_header_event') {
             if (isPhaseDivOpen) { 
-                htmlLog += `</div>`; // Close previous phase div
+                htmlLog += `</div>`; 
             }
             currentPhaseKeyForHtml = event.phaseKey;
-            htmlLog += phaseTemplates.phaseWrapper.replace('{phaseKey}', currentPhaseKeyForHtml).replace('{phaseContent}', ''); 
-            htmlLog = htmlLog.slice(0, -6); // Remove closing </div> to inject header and content
-            htmlLog += event.html_content; // Add the pre-rendered header
-            isPhaseDivOpen = true;
+            htmlLog += phaseTemplates.phaseWrapper.replace('{phaseKey}', currentPhaseKeyForHtml).replace('{phaseContent}', event.html_content || ''); 
+            isPhaseDivOpen = true; 
         } else if (event.html_content && typeof event.html_content === 'string') {
-            // If not inside a phase div (e.g., initial banter before first phase header), don't wrap.
-            // Otherwise, ensure it's part of the current phase content.
-             if (!isPhaseDivOpen && !currentPhaseKeyForHtml && event.type === 'dialogue_event') { // For initial banter
-                htmlLog += event.html_content;
+            if (isPhaseDivOpen && htmlLog.endsWith(event.html_content)) {
+                // Header was already added with the wrapper
             } else if (isPhaseDivOpen) {
-                htmlLog += event.html_content;
-            } else { // Fallback for events without specific html_content, if they get here
-                htmlLog += `<p>${event.text || 'Narrative event occurred.'}</p>`;
+                htmlLog = htmlLog.slice(0, -6); 
+                htmlLog += event.html_content + `</div>`; 
+            } else {
+                 htmlLog += event.html_content; 
             }
         } 
-        // For events that might not have pre-rendered HTML but have text for instant mode
-        else if (event.text && typeof event.text === 'string') {
+        else if (event.text && typeof event.text === 'string') { 
             let contentToAppend = "";
             switch(event.type) {
-                case 'final_blow_summary_event': // Use the renamed event type
+                case 'battle_end_ko_event': 
                     contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${event.text}</p>`;
                     break;
                 case 'stalemate_result_event':
                     contentToAppend = `<p class="final-blow">${event.text}</p>`;
                     break;
-                case 'draw_result_event':
-                    contentToAppend = `<p class="final-blow">${event.text}</p>`;
-                    break;
-                case 'timeout_victory_event':
-                     contentToAppend = `<p class="final-blow">${event.text}</p>`;
-                    break;
+                case 'draw_result_event': contentToAppend = `<p class="final-blow">${event.text}</p>`; break;
+                case 'timeout_victory_event': contentToAppend = `<p class="final-blow">${event.text}</p>`; break;
                 case 'conclusion_event':
                     contentToAppend = `<p class="conclusion">${event.text}</p>`;
                     break;
@@ -187,29 +194,19 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                     contentToAppend = `<p>${event.text}</p>`; 
                     break;
             }
+            
             if (isPhaseDivOpen) {
-                htmlLog += contentToAppend;
-            } else { // If no phase div is open yet (e.g. for final summary outside a phase)
-                htmlLog += contentToAppend;
+                htmlLog = htmlLog.slice(0, -6); 
+                htmlLog += contentToAppend + `</div>`; 
+            } else {
+                 htmlLog += contentToAppend;
             }
         }
     });
 
-    if (isPhaseDivOpen) { // Close the last phase div if it was opened
+    if (isPhaseDivOpen && !htmlLog.endsWith(`</div>`)) { 
         htmlLog += `</div>`;
     }
     
     return htmlLog || "<p>The battle unfolds...</p>"; 
-}
-
-
-function determineImpactLevel(effectivenessLabel, moveType) {
-    if (!effectivenessLabel) return 'low';
-    switch (effectivenessLabel.toLowerCase()) {
-        case 'critical': return 'critical';
-        case 'strong': return 'high';
-        case 'normal': return moveType === 'Finisher' ? 'high' : 'medium';
-        case 'weak': return 'low';
-        default: return 'low';
-    }
 }

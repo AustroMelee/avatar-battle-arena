@@ -1,11 +1,7 @@
 // FILE: js/engine_narrative-engine.js
 'use strict';
 
-// VERSION 6.2: Enhanced KO Narration
-// - `generateActionDescriptionObject` now appends a KO confirmation to the move's `text`
-//   if the move results in the opponent's HP dropping to 0 or below.
-
-import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, battlePhases as phaseDefinitions, finishingBlowPhrases } from './narrative-v2.js'; // Added finishingBlowPhrases
+import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, battlePhases as phaseDefinitions, finishingBlowPhrases } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
 
 const getRandomElement = (arr) => arr ? arr[Math.floor(Math.random() * arr.length)] : null;
@@ -157,18 +153,25 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     }
     
     let fullDescText = substituteTokens(`${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
+    let isKO = false;
 
-    // NEW: Append KO confirmation if this move defeated the opponent
-    if (opponent.hp - result.damage <= 0 && result.damage > 0 && (move.type === 'Offense' || move.type === 'Finisher')) {
-        const koPhrase = getRandomElement(finishingBlowPhrases) || "{targetName} is defeated!";
+    if (opponent.hp <= 0 && result.damage > 0 && (move.type === 'Offense' || move.type === 'Finisher')) {
+        const koVariations = [
+            "...and {targetName} collapses, utterly defeated!",
+            "...delivering the final, decisive blow! {targetName} is out!",
+            "...leaving {targetName} with no strength left to fight. The battle is over!",
+            "...and with that, {targetName}'s resistance ends completely!"
+        ];
+        const koPhrase = getRandomElement(koVariations);
         fullDescText += ` ${substituteTokens(koPhrase, actor, opponent)}`;
+        isKO = true; 
     }
     
     const moveLineHtml = phaseTemplates.move
         .replace(/{actorId}/g, actor.id)
         .replace(/{actorName}/g, actor.name)
         .replace(/{moveName}/g, move.name)
-        .replace(/{moveEmoji}/g, '⚔️')
+        .replace(/{moveEmoji}/g, '⚔️') 
         .replace(/{effectivenessLabel}/g, result.effectiveness.label)
         .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
         .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`) 
@@ -183,6 +186,7 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
         effectivenessLabel: result.effectiveness.label,
         text: fullDescText, 
         isMoveAction: true,
+        isKOAction: isKO, 
         html_content: moveLineHtml 
     };
 }
@@ -201,10 +205,10 @@ function generateCollateralDamageEvent(move, actor, opponent, environmentState, 
     if (locationData && locationData.environmentalImpacts) {
         const currentDamageThreshold = environmentState.damageLevel;
         let selectedImpactsPool = [];
-        if (currentDamageThreshold >= locationData.damageThresholds.catastrophic) selectedImpactsPool = locationData.environmentalImpacts.catastrophic;
-        else if (currentDamageThreshold >= locationData.damageThresholds.severe) selectedImpactsPool = locationData.environmentalImpacts.severe;
-        else if (currentDamageThreshold >= locationData.damageThresholds.moderate) selectedImpactsPool = locationData.environmentalImpacts.moderate;
-        else if (currentDamageThreshold >= locationData.damageThresholds.minor) selectedImpactsPool = locationData.environmentalImpacts.minor;
+        if (currentDamageThreshold >= locationData.damageThresholds.catastrophic && locationData.environmentalImpacts.catastrophic) selectedImpactsPool = locationData.environmentalImpacts.catastrophic;
+        else if (currentDamageThreshold >= locationData.damageThresholds.severe && locationData.environmentalImpacts.severe) selectedImpactsPool = locationData.environmentalImpacts.severe;
+        else if (currentDamageThreshold >= locationData.damageThresholds.moderate && locationData.environmentalImpacts.moderate) selectedImpactsPool = locationData.environmentalImpacts.moderate;
+        else if (currentDamageThreshold >= locationData.damageThresholds.minor && locationData.environmentalImpacts.minor) selectedImpactsPool = locationData.environmentalImpacts.minor;
 
         if (selectedImpactsPool.length > 0) {
             const uniqueImpact = getRandomElement(selectedImpactsPool.filter(imp => !environmentState.specificImpacts.has(imp)));
