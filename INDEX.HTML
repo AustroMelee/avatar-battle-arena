@@ -1,5 +1,4 @@
 <!-- FILE: index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,6 @@
     <title>ATLA Battle Arena</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Added IM Fell English SC for the title font -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -18,11 +16,27 @@
         <h1 class="title">ATLA BATTLE ARENA</h1>
         <p class="subtitle">SELECT YOUR CHAMPIONS AND UNLEASH THE ELEMENTS!</p>
     </header>
+
     <main>
+        <!-- NEW: Mode Selection UI -->
+        <section class="mode-selection-section">
+            <h2 class="mode-selection-title">Choose Simulation Mode</h2>
+            <div class="mode-options">
+                <label class="mode-option">
+                    <input type="radio" name="simulationMode" value="animated" id="mode-animated" checked>
+                    <span>🎬 Animated Simulation</span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="simulationMode" value="instant" id="mode-instant">
+                    <span>⚡ Instant Results</span>
+                </label>
+            </div>
+        </section>
+        <!-- End NEW Mode Selection UI -->
+
         <section class="battle-setup">
             <div class="fighter-selection-area">
                 <h2 class="fighter-title" id="fighter1-name-display">Choose Fighter 1</h2>
-                <!-- NEW: Momentum display for Fighter 1 -->
                 <div class="momentum-display" id="fighter1-momentum-display">
                     Momentum: <span class="momentum-value momentum-neutral" id="fighter1-momentum-value">0</span>
                 </div>
@@ -32,7 +46,6 @@
             <div class="vs-divider" id="vsDivider">VS</div>
             <div class="fighter-selection-area">
                 <h2 class="fighter-title" id="fighter2-name-display">Choose Fighter 2</h2>
-                <!-- NEW: Momentum display for Fighter 2 -->
                 <div class="momentum-display" id="fighter2-momentum-display">
                     Momentum: <span class="momentum-value momentum-neutral" id="fighter2-momentum-value">0</span>
                 </div>
@@ -41,7 +54,6 @@
             </div>
         </section>
 
-        <!-- NEW: Archetype Info Section -->
         <section class="archetype-info-section" id="archetype-info-container">
             <h3 class="archetype-headline" id="archetype-headline"></h3>
             <div class="archetype-intros">
@@ -50,7 +62,6 @@
             </div>
             <p class="archetype-error" id="archetype-error"></p>
         </section>
-        <!-- End NEW Archetype Info Section -->
 
         <section class="location-section">
             <h2 class="location-title" id="location-name-display">Choose a Battlefield</h2>
@@ -71,6 +82,22 @@
             <input type="hidden" id="time-of-day-value" value="day">
         </section>
         <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
+
+        <!-- NEW: Simulation Mode Container -->
+        <section id="simulation-mode-container" class="simulation-mode-container hidden">
+            <div class="simulation-controls">
+                <button id="cancel-simulation" class="simulation-cancel-btn">Cancel Simulation</button>
+                <div class="zoom-controls">
+                    <button id="zoom-out" class="simulation-zoom-btn">-</button>
+                    <button id="zoom-in" class="simulation-zoom-btn">+</button>
+                </div>
+            </div>
+            <div id="animated-log-output" class="animated-log-output">
+                <!-- Animated text will appear here -->
+            </div>
+        </section>
+        <!-- End NEW Simulation Mode Container -->
+
         <section class="results-section" id="results" style="display: none;">
             <div class="loading hidden" id="loading">
                 <div class="spinner"></div>
@@ -81,12 +108,12 @@
                     <div class="winner-name" id="winner-name"></div>
                     <div class="win-probability" id="win-probability"></div>
                 </div>
+                <!-- Battle story will be populated here for instant mode, or after animation for animated mode -->
                 <article class="battle-story" id="battle-story"></article>
                 <div class="outcome-analysis" id="outcome-analysis">
                     <h3 class="analysis-title">Outcome Analysis</h3>
                     <ul class="analysis-list" id="analysis-list">
                     </ul>
-                    <!-- NEW: Environmental Damage Analysis Section -->
                     <div class="environmental-damage-section">
                         <h3>Environmental Damage Analysis</h3>
                         <div id="environment-damage-display" class="environmental-damage-level"></div>

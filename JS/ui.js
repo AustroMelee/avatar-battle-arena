@@ -1,5 +1,4 @@
 // FILE: js/ui.js
-// FILE: ui.js
 'use strict';
 
 import { characters } from './data_characters.js';
@@ -7,6 +6,9 @@ import { locations } from './locations.js';
 import { locationConditions } from './location-battle-conditions.js'; 
 import { resolveArchetypeLabel } from './engine_archetype-engine.js'; 
 import { renderArchetypeDisplay } from './ui_archetype-display.js'; 
+import { startSimulation, resetSimulationManager } from './simulation_mode_manager.js';
+import { transformEventsToAnimationQueue, transformEventsToHtmlLog } from './battle_log_transformer.js';
+import { initializeCameraControls } from './camera_control.js';
 
 const DOM = {
     fighter1Grid: document.getElementById('fighter1-grid'),
@@ -22,15 +24,15 @@ const DOM = {
     battleResultsContainer: document.getElementById('battle-results'),
     vsDivider: document.getElementById('vsDivider'),
     winnerName: document.getElementById('winner-name'),
-    winProbability: document.getElementById('win-probability'), // This element's text will be updated based on battle outcome
-    battleStory: document.getElementById('battle-story'),
+    winProbability: document.getElementById('win-probability'),
+    battleStory: document.getElementById('battle-story'), 
     analysisList: document.getElementById('analysis-list'),
     timeToggleContainer: document.getElementById('time-toggle-container'),
     timeOfDayValue: document.getElementById('time-of-day-value'),
     timeFeedbackDisplay: document.getElementById('time-feedback'),
-    fighter1Select: document.createElement('input'),
-    fighter2Select: document.createElement('input'),
-    locationSelect: document.createElement('input'),
+    fighter1Select: document.createElement('input'), 
+    fighter2Select: document.createElement('input'), 
+    locationSelect: document.createElement('input'), 
     environmentDamageDisplay: document.getElementById('environment-damage-display'),
     environmentImpactsList: document.getElementById('environment-impacts-list'),
     locationEnvironmentSummary: document.getElementById('location-environment-summary'), 
@@ -41,6 +43,22 @@ const DOM = {
     archetypeIntroA: document.getElementById('archetype-intro-a'),
     archetypeIntroB: document.getElementById('archetype-intro-b'),
     archetypeError: document.getElementById('archetype-error'),
+    simulationModeContainer: document.getElementById('simulation-mode-container'),
+    animatedLogOutput: document.getElementById('animated-log-output'),
+    cancelSimulationBtn: document.getElementById('cancel-simulation'),
+    zoomInBtn: document.getElementById('zoom-in'),
+    zoomOutBtn: document.getElementById('zoom-out'),
+    modeAnimatedRadio: document.getElementById('mode-animated'),
+    modeInstantRadio: document.getElementById('mode-instant'),
+};
+
+export const DOM_simulation_references = {
+    simulationContainer: DOM.simulationModeContainer,
+    cancelButton: DOM.cancelSimulationBtn,
+    battleResultsContainer: DOM.battleResultsContainer,
+    winnerNameDisplay: DOM.winnerName,
+    analysisListDisplay: DOM.analysisList,
+    battleStoryDisplay: DOM.battleStory 
 };
 
 DOM.fighter1Select.type = 'hidden';
@@ -49,15 +67,28 @@ DOM.fighter2Select.type = 'hidden';
 DOM.fighter2Select.id = 'fighter2-value';
 DOM.locationSelect.type = 'hidden';
 DOM.locationSelect.id = 'location-value';
-document.body.appendChild(DOM.fighter1Select);
-document.body.appendChild(DOM.fighter2Select);
-document.body.appendChild(DOM.locationSelect);
 
+if (!document.getElementById('fighter1-value')) document.body.appendChild(DOM.fighter1Select);
+if (!document.getElementById('fighter2-value')) document.body.appendChild(DOM.fighter2Select);
+if (!document.getElementById('location-value')) document.body.appendChild(DOM.locationSelect);
 
+/**
+ * Gets the image URL for a character. Used by animated_text_engine.
+ * @param {string} characterId - The ID of the character.
+ * @returns {string|null} The image URL or null if not found.
+ */
+export function getCharacterImage(characterId) {
+    return characters[characterId]?.imageUrl || null;
+}
+
+/**
+ * Determines the CSS class for a character card based on their primary element.
+ * @param {object} character - The character object.
+ * @returns {string} The CSS class name.
+ */
 function getElementClass(character) {
-    // Ensure techniques array exists and is not empty
     if (!character.techniques || character.techniques.length === 0) {
-        return 'card-nonbender'; // Default or error class
+        return 'card-nonbender';
     }
     const mainElement = character.techniques.find(t => t.element)?.element || 'nonbender';
     switch (mainElement) {
@@ -65,11 +96,14 @@ function getElementClass(character) {
         case 'water': case 'ice': return 'card-water';
         case 'earth': case 'metal': return 'card-earth';
         case 'air': return 'card-air';
-        case 'special': return 'card-chi'; // For chi blockers like Ty Lee
+        case 'special': return 'card-chi';
         default: return 'card-nonbender';
     }
 }
 
+/**
+ * Updates the archetype information display based on selected fighters and location.
+ */
 function updateArchetypeInfo() {
     const fighter1Id = DOM.fighter1Select.value || null; 
     const fighter2Id = DOM.fighter2Select.value || null; 
@@ -85,7 +119,12 @@ function updateArchetypeInfo() {
     });
 }
 
-
+/**
+ * Creates a character card DOM element.
+ * @param {object} character - The character data.
+ * @param {string} fighterKey - 'fighter1' or 'fighter2'.
+ * @returns {HTMLElement} The created character card element.
+ */
 function createCharacterCard(character, fighterKey) {
     const card = document.createElement('div');
     card.className = 'character-card';
@@ -105,16 +144,20 @@ function createCharacterCard(character, fighterKey) {
     card.addEventListener('click', () => {
         handleCardSelection(character, fighterKey, card);
     });
-
     return card;
 }
 
+/**
+ * Handles the selection of a character card.
+ * @param {object} character - The selected character data.
+ * @param {string} fighterKey - 'fighter1' or 'fighter2'.
+ * @param {HTMLElement} selectedCard - The clicked card element.
+ */
 function handleCardSelection(character, fighterKey, selectedCard) {
     const grid = fighterKey === 'fighter1' ? DOM.fighter1Grid : DOM.fighter2Grid;
     const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
     const hiddenInput = fighterKey === 'fighter1' ? DOM.fighter1Select : DOM.fighter2Select;
 
-    const otherFighterKey = fighterKey === 'fighter1' ? 'fighter2' : 'fighter1';
     const otherFighterInput = fighterKey === 'fighter1' ? DOM.fighter2Select : DOM.fighter1Select;
     if (otherFighterInput.value === character.id) {
         alert("A fighter cannot battle themselves. Please choose a different opponent.");
@@ -128,7 +171,17 @@ function handleCardSelection(character, fighterKey, selectedCard) {
     updateArchetypeInfo(); 
 }
 
+/**
+ * Populates the character selection grids.
+ */
 function populateCharacterGrids() {
+    if (!DOM.fighter1Grid || !DOM.fighter2Grid) {
+        console.error("Character grids not found in DOM.");
+        return;
+    }
+    DOM.fighter1Grid.innerHTML = ''; // Clear existing
+    DOM.fighter2Grid.innerHTML = ''; // Clear existing
+
     const availableCharacters = Object.values(characters).filter(c => c.techniques && c.techniques.length > 0);
     const sortedCharacters = availableCharacters.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -140,6 +193,12 @@ function populateCharacterGrids() {
     });
 }
 
+/**
+ * Creates a location card DOM element.
+ * @param {object} locationData - The location data.
+ * @param {string} locationId - The ID of the location.
+ * @returns {HTMLElement} The created location card element.
+ */
 function createLocationCard(locationData, locationId) {
     const card = document.createElement('div');
     card.className = 'location-card';
@@ -158,10 +217,13 @@ function createLocationCard(locationData, locationId) {
     card.addEventListener('click', () => {
         handleLocationCardSelection(locationData, locationId, card);
     });
-
     return card;
 }
 
+/**
+ * Updates the environmental summary display for the selected location.
+ * @param {string} locationId - The ID of the selected location.
+ */
 function updateEnvironmentalSummary(locationId) {
     if (!DOM.locationEnvironmentSummary) return; 
     const locConditions = locationConditions[locationId];
@@ -172,7 +234,6 @@ function updateEnvironmentalSummary(locationId) {
 
     let summaryHtml = `This location is characterized by: `;
     const traits = [];
-
     if (locConditions.isUrban) traits.push(`<span>urban</span> setting`);
     if (locConditions.isDense) traits.push(`<span>dense</span> environment`);
     if (locConditions.isVertical) traits.push(`<span>vertical</span> terrain`);
@@ -189,13 +250,11 @@ function updateEnvironmentalSummary(locationId) {
     if (locConditions.isSandy) traits.push(`<span>sandy</span> terrain`);
     if (locConditions.hasCover) traits.push(`ample <span>cover</span>`);
     if (locConditions.plantsRich) traits.push(`abundant <span>plant life</span>`);
-
     if (locConditions.airRich) traits.push(`rich in <span>air</span>`);
     if (locConditions.waterRich) traits.push(`rich in <span>water</span>`);
     if (locConditions.iceRich) traits.push(`rich in <span>ice</span>`);
     if (locConditions.earthRich) traits.push(`rich in <span>earth</span>`);
     if (locConditions.metalRich) traits.push(`rich in <span>metal</span>`);
-    
     summaryHtml += traits.join(', ') || 'a unique atmosphere';
 
     if (locConditions.environmentalModifiers) {
@@ -206,34 +265,29 @@ function updateEnvironmentalSummary(locationId) {
             let impactDesc = `<span>${element}</span>: `;
             let effects = []
             if (mod.damageMultiplier !== undefined && mod.damageMultiplier !== 1.0) {
-                const impactClass = mod.damageMultiplier > 1.0 ? 'positive-impact' : 'negative-impact';
-                effects.push(`<span class="${impactClass}">Dmg ${mod.damageMultiplier > 1.0 ? '+' : ''}${(mod.damageMultiplier * 100 - 100).toFixed(0)}%</span>`);
+                effects.push(`<span class="${mod.damageMultiplier > 1.0 ? 'positive-impact' : 'negative-impact'}">Dmg ${mod.damageMultiplier > 1.0 ? '+' : ''}${(mod.damageMultiplier * 100 - 100).toFixed(0)}%</span>`);
             }
             if (mod.energyCostModifier !== undefined && mod.energyCostModifier !== 1.0) {
-                const impactClass = mod.energyCostModifier < 1.0 ? 'positive-impact' : 'negative-impact';
-                effects.push(`<span class="${impactClass}">Energy ${mod.energyCostModifier < 1.0 ? '-' : '+'}${(mod.energyCostModifier * 100 - 100).toFixed(0)}%</span>`);
+                effects.push(`<span class="${mod.energyCostModifier < 1.0 ? 'positive-impact' : 'negative-impact'}">Energy ${mod.energyCostModifier < 1.0 ? '-' : '+'}${(mod.energyCostModifier * 100 - 100).toFixed(0)}%</span>`);
             }
-            if (effects.length > 0) {
-                 impactDesc += effects.join(', ');
-            } else {
-                impactDesc += `neutral`;
-            }
-            if (mod.description) {
-                 impactDesc += ` <em style="font-size:0.9em; opacity:0.8">(${mod.description})</em>`;
-            }
+            impactDesc += effects.length > 0 ? effects.join(', ') : `neutral`;
+            if (mod.description) impactDesc += ` <em style="font-size:0.9em; opacity:0.8">(${mod.description})</em>`;
             elementalImpacts.push(impactDesc);
         }
         summaryHtml += elementalImpacts.join('; ') || 'None notable.';
     }
-    
-    if (locConditions.fragility !== undefined) {
-      summaryHtml += `<br>Fragility: <span>${(locConditions.fragility * 100).toFixed(0)}%</span>.`;
-    }
-
+    if (locConditions.fragility !== undefined) summaryHtml += `<br>Fragility: <span>${(locConditions.fragility * 100).toFixed(0)}%</span>.`;
     DOM.locationEnvironmentSummary.innerHTML = summaryHtml;
 }
 
+/**
+ * Handles the selection of a location card.
+ * @param {object} locationData - The selected location data.
+ * @param {string} locationId - The ID of the selected location.
+ * @param {HTMLElement} selectedCard - The clicked card element.
+ */
 function handleLocationCardSelection(locationData, locationId, selectedCard) {
+    if (!DOM.locationGrid || !DOM.locationNameDisplay || !DOM.locationSelect) return;
     DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
     selectedCard.classList.add('selected');
     DOM.locationNameDisplay.textContent = locationData.name;
@@ -242,7 +296,16 @@ function handleLocationCardSelection(locationData, locationId, selectedCard) {
     updateArchetypeInfo(); 
 }
 
+/**
+ * Populates the location selection grid.
+ */
 function populateLocationGrid() {
+    if (!DOM.locationGrid) {
+        console.error("Location grid not found in DOM.");
+        return;
+    }
+    DOM.locationGrid.innerHTML = ''; // Clear existing
+
     const sortedLocations = Object.entries(locations).sort(([, a], [, b]) => a.name.localeCompare(b.name));
     for (const [id, locationData] of sortedLocations) {
         const card = createLocationCard(locationData, id);
@@ -253,190 +316,257 @@ function populateLocationGrid() {
     }
 }
 
+/**
+ * Initializes the time of day toggle buttons.
+ */
 function initializeTimeToggle() {
+    if (!DOM.timeToggleContainer || !DOM.timeFeedbackDisplay || !DOM.timeOfDayValue) {
+        console.error("Time toggle elements not found in DOM.");
+        return;
+    }
     const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
-    
-    DOM.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered."; // Default
-
+    DOM.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered.";
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
             const time = button.dataset.value;
-            DOM.timeOfDayValue.value = time; // Update hidden input
-
-            // Update feedback display
-            if (time === 'day') {
-                DOM.timeFeedbackDisplay.innerHTML = "It is now <b>Day</b>. Firebenders are empowered.";
-            } else {
-                DOM.timeFeedbackDisplay.innerHTML = "It is now <b>Night</b>. Waterbenders are empowered.";
-            }
+            DOM.timeOfDayValue.value = time;
+            DOM.timeFeedbackDisplay.innerHTML = `It is now <b>${time.charAt(0).toUpperCase() + time.slice(1)}</b>. ${time === 'day' ? 'Firebenders are empowered.' : 'Waterbenders are empowered.'}`;
         });
     });
 }
 
+/**
+ * Updates the momentum display for a given fighter.
+ * @param {string} fighterKey - 'fighter1' or 'fighter2'.
+ * @param {number} momentumValue - The current momentum value.
+ */
 function updateMomentumDisplay(fighterKey, momentumValue) {
     const momentumElement = fighterKey === 'fighter1' ? DOM.fighter1MomentumValue : DOM.fighter2MomentumValue;
-    if (!momentumElement) return; // Guard against missing element
-
+    if (!momentumElement) return;
     momentumElement.textContent = momentumValue;
     momentumElement.classList.remove('momentum-positive', 'momentum-negative', 'momentum-neutral');
-
-    if (momentumValue > 0) {
-        momentumElement.classList.add('momentum-positive');
-    } else if (momentumValue < 0) {
-        momentumElement.classList.add('momentum-negative');
-    } else {
-        momentumElement.classList.add('momentum-neutral');
-    }
+    if (momentumValue > 0) momentumElement.classList.add('momentum-positive');
+    else if (momentumValue < 0) momentumElement.classList.add('momentum-negative');
+    else momentumElement.classList.add('momentum-neutral');
 }
 
+/**
+ * Populates all UI elements on page load.
+ */
 export function populateUI() {
     populateCharacterGrids();
     populateLocationGrid();
     initializeTimeToggle();
-    updateMomentumDisplay('fighter1', 0); // Initialize display
-    updateMomentumDisplay('fighter2', 0); // Initialize display
-    updateArchetypeInfo(); 
-}
-
-export function showLoadingState() {
-    DOM.resultsSection.classList.remove('show'); // Remove show immediately to reset animation
-    DOM.resultsSection.style.display = 'block'; // Ensure it's block for layout calculations
-    DOM.loadingSpinner.classList.remove('hidden');
-    DOM.battleResultsContainer.classList.add('hidden');
-    DOM.battleBtn.disabled = true;
-    DOM.vsDivider.classList.add('clash'); // Add clash animation
-    // Force reflow for animation restart
-    void DOM.resultsSection.offsetWidth; 
-    // Add show class to trigger transition
-    setTimeout(() => {
-        DOM.resultsSection.classList.add('show');
-        DOM.resultsSection.scrollIntoView({ behavior: 'smooth' });
-    }, 10); // Small delay ensures transition occurs
-}
-
-export function showResultsState(battleResult) {
-    DOM.vsDivider.classList.remove('clash'); // Remove clash animation
-    if (battleResult.isDraw) {
-        DOM.winnerName.textContent = `A Stalemate!`;
-        DOM.winProbability.textContent = `The battle ends in a draw, with neither fighter able to gain the upper hand.`;
+    updateMomentumDisplay('fighter1', 0);
+    updateMomentumDisplay('fighter2', 0);
+    updateArchetypeInfo();
+    if (DOM.simulationModeContainer && DOM.zoomInBtn && DOM.zoomOutBtn && DOM.animatedLogOutput) {
+        initializeCameraControls(DOM.animatedLogOutput, DOM.zoomInBtn, DOM.zoomOutBtn); // Pass animatedLogOutput for zooming its content
     } else {
-        DOM.winnerName.textContent = `${characters[battleResult.winnerId].name} Wins!`;
-        DOM.winProbability.textContent = `A decisive victory after a fierce battle.`; // Generic win text for now
-    }
-    DOM.battleStory.innerHTML = battleResult.log;
-    displayFinalAnalysis(battleResult.finalState, battleResult.winnerId, battleResult.isDraw, battleResult.environmentState, document.getElementById('location-value').value);
-    DOM.loadingSpinner.classList.add('hidden');
-    DOM.battleResultsContainer.classList.remove('hidden');
-    DOM.battleBtn.disabled = false;
-
-    // NEW: Update momentum display for both fighters from finalState
-    if (battleResult.finalState.fighter1) {
-        updateMomentumDisplay('fighter1', battleResult.finalState.fighter1.momentum);
-    }
-    if (battleResult.finalState.fighter2) {
-        updateMomentumDisplay('fighter2', battleResult.finalState.fighter2.momentum);
+        console.warn("One or more camera control DOM elements are missing for initialization in populateUI.");
     }
 }
 
-export function resetBattleUI() {
-    DOM.resultsSection.classList.remove('show');
-    // Reset environmental damage display
-    DOM.environmentDamageDisplay.textContent = '';
-    DOM.environmentImpactsList.innerHTML = '';
-    DOM.environmentDamageDisplay.className = 'environmental-damage-level'; // Reset classes
+/**
+ * Shows the loading state UI.
+ * @param {"animated" | "instant"} simulationMode - The current simulation mode.
+ */
+export function showLoadingState(simulationMode) {
+    if (simulationMode === "animated") {
+        if(DOM.resultsSection) DOM.resultsSection.style.display = 'none'; 
+        if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.remove('hidden');
+        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
+    } else { 
+        if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden'); 
+        if(DOM.resultsSection) {
+            DOM.resultsSection.classList.remove('show');
+            DOM.resultsSection.style.display = 'block';
+        }
+        if(DOM.loadingSpinner) DOM.loadingSpinner.classList.remove('hidden');
+        if(DOM.battleResultsContainer) DOM.battleResultsContainer.classList.add('hidden');
+    }
+    if(DOM.battleBtn) DOM.battleBtn.disabled = true;
+    if(DOM.vsDivider) DOM.vsDivider.classList.add('clash');
+    
+    const targetScrollElement = simulationMode === "animated" ? DOM.simulationModeContainer : DOM.resultsSection;
+    if (targetScrollElement) {
+        targetScrollElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
 
-    // Reset momentum display to neutral for next battle
+/**
+ * Displays the battle results based on the simulation mode.
+ * @param {object} battleResult - The result object from simulateBattle.
+ * @param {"animated" | "instant"} simulationMode - The current simulation mode.
+ */
+export function showResultsState(battleResult, simulationMode) {
+    if(DOM.vsDivider) DOM.vsDivider.classList.remove('clash');
+    if(DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden'); 
+
+    const displayFinalResultsPanel = (result) => {
+        if (!DOM.winnerName || !DOM.winProbability || !DOM.battleResultsContainer || !DOM.resultsSection || !DOM.battleBtn) {
+            console.error("One or more critical DOM elements for displaying final results are missing.");
+            return;
+        }
+
+        if (result.isDraw) {
+            DOM.winnerName.textContent = `A Stalemate!`;
+            DOM.winProbability.textContent = `The battle ends in a draw.`;
+        } else if (result.winnerId && characters[result.winnerId]) {
+            DOM.winnerName.textContent = `${characters[result.winnerId].name} Wins!`;
+            DOM.winProbability.textContent = `A decisive victory.`;
+        } else { 
+            DOM.winnerName.textContent = `Battle Concluded`;
+            DOM.winProbability.textContent = `Outcome details below.`;
+        }
+        displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, document.getElementById('location-value').value);
+        
+        if (result.finalState?.fighter1) updateMomentumDisplay('fighter1', result.finalState.fighter1.momentum);
+        if (result.finalState?.fighter2) updateMomentumDisplay('fighter2', result.finalState.fighter2.momentum);
+        
+        DOM.battleResultsContainer.classList.remove('hidden');
+        DOM.resultsSection.style.display = 'block'; 
+        void DOM.resultsSection.offsetWidth;
+        DOM.resultsSection.classList.add('show');
+        DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        DOM.battleBtn.disabled = false;
+    };
+    
+    if (simulationMode === "animated") {
+        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = ''; 
+        
+        const animationQueue = transformEventsToAnimationQueue(battleResult.log);
+        startSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
+            if (wasCancelledOrError && DOM.battleStory) {
+                DOM.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
+            }
+            displayFinalResultsPanel(finalBattleResult); 
+        });
+    } else { 
+        if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden'); 
+        if(DOM.battleStory) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
+        displayFinalResultsPanel(battleResult);
+    }
+}
+
+/**
+ * Resets the UI elements related to battle results and simulation display.
+ */
+export function resetBattleUI() {
+    if(DOM.resultsSection) DOM.resultsSection.classList.remove('show');
+    if(DOM.environmentDamageDisplay) {
+        DOM.environmentDamageDisplay.textContent = '';
+        DOM.environmentDamageDisplay.className = 'environmental-damage-level';
+    }
+    if(DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '';
+    if(DOM.battleStory) DOM.battleStory.innerHTML = ''; 
+    if(DOM.analysisList) DOM.analysisList.innerHTML = '';
+    if(DOM.winnerName) DOM.winnerName.textContent = '';
+    if(DOM.winProbability) DOM.winProbability.textContent = '';
+    
+    resetSimulationManager();
+
     updateMomentumDisplay('fighter1', 0);
     updateMomentumDisplay('fighter2', 0);
     
-    // Delay hiding to allow 'show' class removal animation to complete
     setTimeout(() => {
-        if (!DOM.resultsSection.classList.contains('show')) {
+        if (DOM.resultsSection && !DOM.resultsSection.classList.contains('show')) {
             DOM.resultsSection.style.display = 'none';
         }
-    }, 500); // Match transition duration
+    }, 500);
 }
 
+/**
+ * Displays the final analysis of the battle.
+ * @param {object} finalState - The final state of both fighters.
+ * @param {string|null} winnerId - The ID of the winning fighter, or null if draw.
+ * @param {boolean} isDraw - True if the battle was a draw.
+ * @param {object} environmentState - The final state of the environment.
+ * @param {string} locationId - The ID of the battle location.
+ */
 function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentState, locationId) {
-    DOM.analysisList.innerHTML = ''; // Clear previous analysis
+    if (!DOM.analysisList) {
+        console.error("Analysis list DOM element not found.");
+        return;
+    }
+    DOM.analysisList.innerHTML = ''; 
+    if (!finalState || !finalState.fighter1 || !finalState.fighter2) {
+        console.error("Final state for analysis is incomplete.");
+        DOM.analysisList.innerHTML = "<li>Error: Analysis data incomplete.</li>";
+        return;
+    }
     const { fighter1, fighter2 } = finalState;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
         li.className = 'analysis-item';
         const spanReason = document.createElement('span');
-        spanReason.innerHTML = text; // Use innerHTML to allow bold tags
+        spanReason.innerHTML = text;
         const spanValue = document.createElement('span');
-        spanValue.textContent = value;
-        spanValue.className = valueClass; // Apply class for styling
+        spanValue.textContent = String(value); // Ensure value is string
+        spanValue.className = valueClass;
         li.appendChild(spanReason);
         li.appendChild(spanValue);
         DOM.analysisList.appendChild(li);
     };
-
-    const createSummaryItem = (text, className = 'analysis-summary') => {
-        if (!text) return; // Don't create if text is empty
+    
+    const createSummaryItem = (text) => {
+        if (!text || typeof text !== 'string') return; 
         const li = document.createElement('li');
-        li.className = className;
-        li.innerHTML = `<em>${text}</em>`; // Use innerHTML for italics
+        li.className = 'analysis-summary'; 
+        li.innerHTML = `<em>${text}</em>`; 
         DOM.analysisList.appendChild(li);
     };
     
-    const createLog = (log, title, className) => {
-        if (!log || log.length === 0) return;
-        const li = document.createElement('li');
-        li.className = className;
-        // Filter out any entries that are not strings or are empty strings after trimming
-        const validLogEntries = log.filter(entry => {
-            if (typeof entry === 'object' && entry !== null) { // Handle structured log entries
-                return true; // Assume structured entries are always valid for now
-            }
+    const createLog = (logArray, title, className) => {
+        if (!logArray || !Array.isArray(logArray) || logArray.length === 0) return;
+        
+        const validLogEntries = logArray.filter(entry => {
+            if (typeof entry === 'object' && entry !== null) return true;
             return typeof entry === 'string' && entry.trim() !== '';
         });
-        if (validLogEntries.length === 0 && (title.includes("AI Log") || title.includes("Interaction Log"))) {
-            return;
-        }
+
+        if (validLogEntries.length === 0) return;
+
+        const li = document.createElement('li');
+        li.className = className;
         const formattedLog = validLogEntries.map(entry => {
             if (typeof entry === 'object' && entry !== null) {
-                // Basic formatting for structured AI log entries
                 let parts = [];
-                if(entry.turn) parts.push(`T${entry.turn}`);
+                if(entry.turn !== undefined) parts.push(`T${entry.turn}`);
                 if(entry.phase) parts.push(`Phase:${entry.phase}`);
                 if(entry.intent) parts.push(`Intent:${entry.intent}`);
                 if(entry.prediction) parts.push(`Pred:${entry.prediction}`);
                 if(entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
                 if(entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
-                if(entry.actorState) parts.push(`HP:${entry.actorState.hp.toFixed(0)} E:${entry.actorState.energy.toFixed(0)} M:${entry.actorState.momentum} MS:${entry.actorState.mental}`);
-
-                // Detailed considerations if available
+                if(entry.actorState) parts.push(`HP:${entry.actorState.hp?.toFixed(0)} E:${entry.actorState.energy?.toFixed(0)} M:${entry.actorState.momentum} MS:${entry.actorState.mental}`);
                 if (entry.consideredMoves && entry.consideredMoves.length > 0) {
                     const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name}(${m.prob})`).join(', ');
-                    parts.push(`TopConsiderations:[${topConsiderations}]`);
+                    parts.push(`Considered:[${topConsiderations}]`);
                 }
-
+                // Fallback for other object structures
+                if (parts.length === 0) return JSON.stringify(entry);
                 return parts.join(' | ');
             }
-            return JSON.stringify(entry, null, 2).replace(/^"|"$/g, '');
+            return String(entry); // Ensure it's a string
         }).join('<br>');
-        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all; font-size: 0.8em;"><code>${formattedLog || "No relevant log entries."}</code></pre>`;
+        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all; font-size: 0.8em;"><code>${formattedLog}</code></pre>`;
         DOM.analysisList.appendChild(li);
     };
     
-    // Display winner summary or draw summary
-    if (!isDraw) {
+    if (!isDraw && winnerId) {
         const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-        createSummaryItem(winner.summary); // Assuming summary is populated in battle engine
+        createSummaryItem(winner.summary || `${winner.name} demonstrated superior skill.`);
     } else {
         createSummaryItem("The fighters were too evenly matched for a decisive outcome.");
     }
     
     const spacer = document.createElement('li');
-    spacer.className = 'analysis-item-spacer'; // For visual separation if needed
+    spacer.className = 'analysis-item-spacer';
     DOM.analysisList.appendChild(spacer);
     
-    // Fighter 1 Final Status
     const f1_status = isDraw ? 'DRAW' : (fighter1.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
     const f1_class = isDraw ? 'modifier-neutral' : (fighter1.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter1.name}'s Final Status:</b>`, f1_status, f1_class);
@@ -444,7 +574,6 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
     createListItem(`  • Momentum:`, fighter1.momentum);
 
-    // Fighter 2 Final Status
     const f2_status = isDraw ? 'DRAW' : (fighter2.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
     const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
@@ -452,25 +581,18 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
     createListItem(`  • Momentum:`, fighter2.momentum);
     
-    DOM.analysisList.appendChild(spacer.cloneNode()); // Another spacer
+    DOM.analysisList.appendChild(spacer.cloneNode()); 
 
-    // Environmental Damage Analysis
     const currentLocData = locationConditions[locationId];
-    if (environmentState && currentLocData && currentLocData.damageThresholds) {
+    if (environmentState && DOM.environmentDamageDisplay && DOM.environmentImpactsList && currentLocData && currentLocData.damageThresholds) {
         DOM.environmentDamageDisplay.textContent = `Environmental Damage: ${environmentState.damageLevel.toFixed(0)}%`;
         let damageClass = '';
-        if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) {
-            damageClass = 'catastrophic-damage';
-        } else if (environmentState.damageLevel >= currentLocData.damageThresholds.severe) {
-            damageClass = 'high-damage';
-        } else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) {
-            damageClass = 'medium-damage';
-        } else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) {
-            damageClass = 'low-damage';
-        }
+        if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) damageClass = 'catastrophic-damage';
+        else if (environmentState.damageLevel >= currentLocData.damageThresholds.severe) damageClass = 'high-damage';
+        else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) damageClass = 'medium-damage';
+        else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) damageClass = 'low-damage';
         DOM.environmentDamageDisplay.className = `environmental-damage-level ${damageClass}`;
-
-        DOM.environmentImpactsList.innerHTML = ''; // Clear previous impacts
+        DOM.environmentImpactsList.innerHTML = '';
         if (environmentState.specificImpacts && environmentState.specificImpacts.size > 0) {
             environmentState.specificImpacts.forEach(impact => {
                 const li = document.createElement('li');
@@ -478,25 +600,21 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
                 DOM.environmentImpactsList.appendChild(li);
             });
         } else {
-            const li = document.createElement('li');
-            li.textContent = "The environment sustained minimal noticeable damage.";
-            DOM.environmentImpactsList.appendChild(li);
+            DOM.environmentImpactsList.innerHTML = '<li>The environment sustained minimal noticeable damage.</li>';
         }
     } else {
-        DOM.environmentDamageDisplay.textContent = 'Environmental Damage: N/A';
-        DOM.environmentImpactsList.innerHTML = '<li>No specific impact data.</li>';
+        if(DOM.environmentDamageDisplay) DOM.environmentDamageDisplay.textContent = 'Environmental Damage: N/A';
+        if(DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '<li>No specific impact data.</li>';
     }
 
     DOM.analysisList.appendChild(spacer.cloneNode());
-    // AI Logs
-    if (fighter1.aiLog && fighter1.aiLog.filter(e => (typeof e === 'string' && e.trim() !== '') || (typeof e === 'object' && e !== null)).length > 0) {
-        createLog(fighter1.aiLog, `${fighter1.name}'s Battle Log`, 'ai-log');
+    if (fighter1.aiLog && fighter1.aiLog.length > 0) {
+      createLog(fighter1.aiLog, `${fighter1.name}'s Battle Log`, 'ai-log');
     }
-    if (fighter2.aiLog && fighter2.aiLog.filter(e => (typeof e === 'string' && e.trim() !== '') || (typeof e === 'object' && e !== null)).length > 0) {
-        createLog(fighter2.aiLog, `${fighter2.name}'s Battle Log`, 'ai-log');
+    if (fighter2.aiLog && fighter2.aiLog.length > 0) {
+      createLog(fighter2.aiLog, `${fighter2.name}'s Battle Log`, 'ai-log');
     }
-     // Phase Log (appended to one of the AI logs or separately)
-    if (fighter1.phaseLog && fighter1.phaseLog.length > 0) { // Assuming phaseLog is stored in fighter1
+    if (fighter1.phaseLog && fighter1.phaseLog.length > 0) { 
         createLog(fighter1.phaseLog, `Battle Phase Progression`, 'phase-log');
     }
 }
