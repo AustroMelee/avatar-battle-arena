@@ -193,7 +193,7 @@ export const gaangCharacters = {
             },
             onVictory: { Default: [{ line: "I fought for my own path. And I won." }] },
             relationships: {
-                'azula': { narrative: { battleStart: [{ type: 'spoken', line: "I'm not the same person I was, Azula." }] } } },
+                'azula': { narrative: { battleStart: [{ type: 'spoken', line: "I'm not the same person I was, Azula." }] } },
                 'ozai-not-comet-enhanced': { narrative: { battleStart: [{ type: 'spoken', line: "I'm not afraid of you anymore, Father." }] } }
             }
         },
