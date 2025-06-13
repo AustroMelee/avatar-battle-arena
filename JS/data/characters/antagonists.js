@@ -1,7 +1,7 @@
 // FILE: data/characters/antagonists.js
 'use strict';
 
-// V4: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object. No omissions.
+// V5: PRONOUN OVERKILL. Every character object now has a compliant `pronouns` object.
 
 export const antagonistCharacters = {
     'azula': {
@@ -18,7 +18,7 @@ export const antagonistCharacters = {
             },
             onManipulation: {
                 asAttacker: [ { type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." }, { type: 'spoken', line: "Still trying so hard? You'll always be second best." } ],
-                asVictim: [{ type: 'internal', line: "Insolent worm. They will pay for that." }]
+                asVictim: [{ type: 'internal', line: "Insolent worm. {opponent.s} will pay for that." }]
             },
             onPrediction: {
                 correct: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }],
@@ -85,11 +85,11 @@ export const antagonistCharacters = {
         narrative: {
             battleStart: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
             onIntentSelection: {
-                OpeningMoves: [{ type: 'internal', line: "Let's see how long it takes before they get bored and make a mistake." }],
+                OpeningMoves: [{ type: 'internal', line: "Let's see how long it takes before {opponent.s} gets bored and makes a mistake." }],
                 PressAdvantage: [{ type: 'spoken', line: "If you’re going to surrender, now’s your chance." }],
                 DesperateGambit: [{ type: 'spoken', line: "Guess I have to try now. Great." }]
             },
-            onMoveResult: {
+            onMoveExecution: {
                 'Pinning Strike': { Critical: [{ type: 'spoken', line: "Stay put." }] }
             },
             onManipulation: { asVictim: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }] },
@@ -137,7 +137,7 @@ export const antagonistCharacters = {
                 stressed: [{ type: 'internal', line: "This isn't as fun as I thought it would be." }],
                 shaken: [{ type: 'spoken', line: "Maybe we should just stop and talk about our feelings?" }]
             },
-            onMoveResult: {
+            onMoveExecution: {
                 'Chi-Blocking Flurry': { Critical: [{ type: 'spoken', line: "Boop! Your bending is gone!" }] }
             },
             onVictory: { Default: [{ line: "Ta-da! That's how it's done!" }] },

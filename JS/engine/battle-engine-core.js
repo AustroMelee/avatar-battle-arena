@@ -1,7 +1,9 @@
 // FILE: engine/battle-engine-core.js
 'use strict';
 
-// VERSION 8: Final integration with the OMEGA Narrative Engine rendering pipeline.
+// VERSION 9: PRONOUN & NARRATIVE OVERKILL INTEGRATION.
+// The core loop now calls the new centralized narrative engine.
+// The old `narration.js` is no longer imported or used.
 
 import { characters } from '../data/characters.js';
 import { locationConditions } from '../location-battle-conditions.js';
@@ -9,10 +11,25 @@ import { battlePhases, phaseTemplates } from '../narrative-v2.js';
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './ai-decision.js';
 import { calculateMove } from './move-resolution.js';
 import { updateMentalState } from './mental-state.js';
-import { narrateMove, generateOutcomeSummary } from './narration.js';
-import { generateNarrativeEvent, renderNarrativeEvent, getFinalVictoryLine } from './narrative-engine.js';
+// NARRATION.JS IS NO LONGER IMPORTED
+import { generateTurnNarration, getFinalVictoryLine } from './narrative-engine.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
+    const narrativeData = actor.narrative || {};
+    let pool = null;
+    if (opponent.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]) {
+        pool = actor.relationships[opponent.id].narrative[trigger][subTrigger];
+    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]) {
+        pool = narrativeData[trigger][subTrigger][context.result];
+    } else if (narrativeData[trigger]?.[subTrigger]) {
+        pool = narrativeData[trigger][subTrigger];
+    } else if (narrativeData[trigger]?.general) {
+        pool = narrativeData[trigger].general;
+    }
+    return pool ? getRandomElement(pool) : null;
+}
 
 function initializeFighterState(charId, opponentId, emotionalMode) {
     const characterData = characters[charId];
@@ -39,16 +56,19 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
     
     const conditions = { ...locationConditions[locId], isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
-    let turnLog = [], interactionLog = [];
+    let turnLog = [];
     let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : fighter2;
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
-    let battleOver = false, finalMove = null;
+    let battleOver = false;
 
+    // Initial battle start banter
+    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', 'general');
+    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general');
     let initialNarration = '';
-    initialNarration += renderNarrativeEvent(generateNarrativeEvent(fighter1, 'battleStart', 'general', { target: fighter2 }));
-    initialNarration += renderNarrativeEvent(generateNarrativeEvent(fighter2, 'battleStart', 'general', { target: fighter1 }));
-    if(initialNarration) turnLog.push(`<div class="narrative-block">${initialNarration}</div>`);
-
+    if (initialBanter1) initialNarration += generateTurnNarration([{quote: initialBanter1, actor: fighter1}], {}, fighter1, fighter2, {});
+    if (initialBanter2) initialNarration += generateTurnNarration([{quote: initialBanter2, actor: fighter2}], {}, fighter2, fighter1, {});
+    if (initialNarration) turnLog.push(initialNarration.replace(/<div class="move-line".*?<\/div>/g, '')); // Strip empty move lines
+    
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
         const phaseName = battlePhases[turn]?.name || "Final Exchange";
         let phaseContent = phaseTemplates.header.replace('{phaseName}', phaseName).replace('{phaseEmoji}', '⚔️');
@@ -68,42 +88,31 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             let manipulationResult = attemptManipulation(attacker, defender);
             if (manipulationResult.success) {
                 defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2 };
-                defender.contextualState.isManipulatedBy = attacker.id;
-                narrativeEvents.push({ raw: manipulationResult.narration }); // Push raw HTML for this special case
-                narrativeEvents.push(generateNarrativeEvent(defender, 'onManipulation', 'asVictim', { attacker: attacker }));
-                interactionLog.push(`${attacker.name} manipulated ${defender.name}.`);
+                const manipQuote = findNarrativeQuote(attacker, defender, 'onManipulation', 'asAttacker');
+                if (manipQuote) narrativeEvents.push({ quote: manipQuote, actor: attacker });
             }
 
-            updateMentalState(attacker, defender, null);
             const { move, aiLogEntry } = selectMove(attacker, defender, conditions, turn);
             attacker.aiLog.push(`[T${turn+1}] ${JSON.stringify(aiLogEntry, null, 2)}`);
-            narrativeEvents.push(generateNarrativeEvent(attacker, 'onIntentSelection', aiLogEntry.intent, { target: defender }));
+            const intentQuote = findNarrativeQuote(attacker, defender, 'onIntentSelection', aiLogEntry.intent);
+            if(intentQuote) narrativeEvents.push({ quote: intentQuote, actor: attacker });
             
-            if(aiLogEntry.prediction.confidence > 0.4 && aiLogEntry.prediction.move) {
-                 narrativeEvents.push(generateNarrativeEvent(attacker, 'onPrediction', 'correct', { move: aiLogEntry.prediction.move, target: defender }));
-            }
-
-            const result = calculateMove(move, attacker, defender, conditions, interactionLog);
+            const result = calculateMove(move, attacker, defender, conditions);
             
             updateMentalState(defender, attacker, result);
             if (defender.mentalState.level !== oldDefenderMentalState) {
-                narrativeEvents.push(generateNarrativeEvent(defender, 'onStateChange', defender.mentalState.level));
+                const stateChangeQuote = findNarrativeQuote(defender, attacker, 'onStateChange', defender.mentalState.level);
+                if (stateChangeQuote) narrativeEvents.push({ quote: stateChangeQuote, actor: defender });
             }
             
             attacker.lastMoveEffectiveness = result.effectiveness.label;
-            narrativeEvents.push(generateNarrativeEvent(attacker, 'onMoveResult', move.name, { result: result.effectiveness.label }));
-
             attacker.consecutiveDefensiveTurns = (move.type === 'Utility' || move.type === 'Defense') ? attacker.consecutiveDefensiveTurns + 1 : 0;
             if (move.setup && result.effectiveness.label !== 'Weak') defender.tacticalState = { ...move.setup };
             if (move.moveTags?.includes('requires_opening') && result.payoff) defender.tacticalState = null;
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             
-            // RENDER NARRATIVE BLOCK
-            const narrativeBlock = narrativeEvents.filter(e => e).map(e => e.raw || renderNarrativeEvent(e)).join('');
-            if(narrativeBlock) phaseContent += `<div class="narrative-block">${narrativeBlock}</div>`;
-            
-            // RENDER ACTION
-            phaseContent += narrateMove(attacker, defender, move, result);
+            // RENDER NARRATIVE & ACTION BLOCK
+            phaseContent += generateTurnNarration(narrativeEvents, move, attacker, defender, result);
 
             // APPLY RESULTS
             defender.hp = clamp(defender.hp - result.damage, 0, 100);
@@ -112,10 +121,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             attacker.lastMove = move;
             updateAiMemory(defender, attacker);
 
-            if (defender.hp <= 0) {
-                battleOver = true;
-                finalMove = move;
-            }
+            if (defender.hp <= 0) battleOver = true;
         };
         
         processTurn(initiator, responder);
@@ -128,7 +134,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     // FINAL OUTCOME
     const winner = (fighter1.hp <= 0) ? fighter2 : ((fighter2.hp <= 0) ? fighter1 : (fighter1.hp > fighter2.hp ? fighter1 : fighter2));
     const loser = (winner.id === fighter1.id) ? fighter2 : fighter1;
-    winner.summary = generateOutcomeSummary(winner);
+    winner.summary = `${winner.name}'s victory was sealed by ${winner.pronouns.p} superior strategy.`;
     
     if (loser.hp > 0) {
         turnLog.push(phaseTemplates.timeOutVictory.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
@@ -136,7 +142,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         turnLog.push(phaseTemplates.finalBlow.replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`).replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`));
     }
     
-    const finalWords = getFinalVictoryLine(winner, loser, finalMove);
+    const finalWords = getFinalVictoryLine(winner, loser);
     turnLog.push(phaseTemplates.conclusion.replace('{endingNarration}', `${winner.name} stands victorious. "${finalWords}"`));
 
     return { log: turnLog.join(''), winnerId: winner.id, loserId: loser.id, finalState: { fighter1, fighter2 } };

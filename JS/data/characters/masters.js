@@ -1,7 +1,7 @@
 // FILE: data/characters/masters.js
 'use strict';
 
-// V3: OMEGA NARRATIVE PASS. Every character now has a fully-populated narrative object.
+// V4: PRONOUN OVERKILL. Every character object now has a compliant `pronouns` object.
 
 export const masterCharacters = {
     'bumi': {
@@ -74,7 +74,7 @@ export const masterCharacters = {
             onManipulation: {
                 asVictim: [{ type: 'internal', line: "Words are wind. The flame within me is steady." }]
             },
-            onMoveResult: {
+            onMoveExecution: {
                 'Fire Wall': { Critical: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }] }
             },
             onVictory: { Default: [{ line: "The destructive path of fire has been averted, for now." }] }

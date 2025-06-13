@@ -1,95 +1,137 @@
 // FILE: engine/narrative-engine.js
 'use strict';
 
-// VERSION 3: OMEGA Narrative Engine, refactored to return structured data for better integration.
+// VERSION 4: OVERKILL REFACTOR.
+// This is now the sole engine for generating ALL user-facing battle text.
+// It contains the pronoun substitution utility and generates both narrative and mechanical descriptions.
+// The old `narration.js` file is now obsolete and has been removed.
+
+import { phaseTemplates, impactPhrases } from '../narrative-v2.js';
 
 const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-function formatLine(line, context) {
-    let formatted = line;
-    if (context.target) formatted = formatted.replace(/{target}/g, context.target.name);
-    if (context.move) formatted = formatted.replace(/{move}/g, context.move.name);
-    return formatted;
+// 1.2: Central Pronoun Substitution Utility
+function substituteTokens(template, actor, opponent, context = {}) {
+    if (!template) return '';
+    let text = template;
+    const replacements = {
+        '{actorName}': actor.name,
+        '{opponentName}': opponent.name,
+        '{actor.s}': actor.pronouns.s,
+        '{actor.p}': actor.pronouns.p,
+        '{actor.o}': actor.pronouns.o,
+        '{opponent.s}': opponent.pronouns.s,
+        '{opponent.p}': opponent.pronouns.p,
+        '{opponent.o}': opponent.pronouns.o,
+        ...context // Add other dynamic context like move names
+    };
+    for (const [token, value] of Object.entries(replacements)) {
+        text = text.replace(new RegExp(token, 'g'), value);
+    }
+    return text;
 }
 
-function findNarrativePool(actor, trigger, subTrigger, context) {
+function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
     const narrativeData = actor.narrative || {};
     let pool = null;
-
-    // 1. Hyper-specific: Relationship + Contextual State
-    if (context.target?.id && actor.relationships?.[context.target.id]?.narrative?.states?.[context.actorState]) {
-        pool = actor.relationships[context.target.id].narrative.states[context.actorState];
-        if (pool) return pool;
-    }
-    
-    // 2. Specific: Relationship + Trigger
-    if (context.target?.id && actor.relationships?.[context.target.id]?.narrative?.[trigger]?.[subTrigger]) {
-        pool = actor.relationships[context.target.id].narrative[trigger][subTrigger];
-        if (pool) return pool;
-    }
-
-    // 3. Move-specific trigger (e.g., onMoveResult -> Boomerang Throw -> Critical)
-    if (trigger === 'onMoveResult' && narrativeData[trigger]?.[subTrigger]?.[context.result]) {
+    if (opponent.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]) {
+        pool = actor.relationships[opponent.id].narrative[trigger][subTrigger];
+    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]) {
         pool = narrativeData[trigger][subTrigger][context.result];
-        if(pool) return pool;
-    }
-
-    // 4. Character Specific: Trigger + Subtrigger
-    if (narrativeData[trigger]?.[subTrigger]) {
+    } else if (narrativeData[trigger]?.[subTrigger]) {
         pool = narrativeData[trigger][subTrigger];
-        if (Array.isArray(pool)) return pool;
+    } else if (narrativeData[trigger]?.general) {
+        pool = narrativeData[trigger].general;
     }
-    
-    // 5. Character Specific: General Trigger
-    if (narrativeData[trigger]?.general) {
-        return narrativeData[trigger].general;
-    }
-
-    return null;
+    return pool ? getRandomElement(pool) : null;
 }
 
-/**
- * Returns a structured narrative event object, or null if no quote is found.
- */
-export function generateNarrativeEvent(actor, trigger, subTrigger, context = {}) {
-    const narrativePool = findNarrativePool(actor, trigger, subTrigger, context);
-    if (!narrativePool || narrativePool.length === 0) {
-        return null;
-    }
-    const quote = getRandomElement(narrativePool);
-    return {
-        actor,
-        line: formatLine(quote.line, context),
-        type: quote.type || 'spoken' // Default to 'spoken'
-    };
-}
-
-/**
- * Renders a narrative event object into an HTML string.
- */
-export function renderNarrativeEvent(event) {
-    if (!event) return '';
-    const { actor, line, type } = event;
+function renderQuote(quote, actor, opponent, context) {
+    if (!quote) return '';
+    const { type, line } = quote;
     const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
-    const narrativeClass = `narrative-${type}`;
+    const narrativeClass = `narrative-${type || 'spoken'}`;
     const verb = type === 'internal' ? 'thinks' : 'says';
-
-    return `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${line}</em>"</p>`;
+    const formattedLine = substituteTokens(line, actor, opponent, context);
+    return `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
 }
 
-export function getFinalVictoryLine(winner, loser, lastMove) {
-    const trigger = 'onVictory';
-    let subTrigger = 'Default';
+// 3.1: Move Description Collapsing (Integrated into single function)
+function generateActionDescription(move, actor, opponent, result) {
+    const actorSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
+    const opponentSpan = `<span class="char-${opponent.id}">${opponent.name}</span>`;
+    let tacticalPrefix = '';
+    let tacticalSuffix = '';
 
-    if (lastMove?.moveTags.includes('Finisher')) subTrigger = 'Finisher';
-    if (lastMove?.moveTags.includes('humiliation')) subTrigger = 'Humiliation';
-    
-    const pool = findNarrativePool(winner, trigger, subTrigger, { target: loser });
-    
-    if(pool) {
-        return getRandomElement(pool).line.replace(/{target}/g, loser.name);
+    if (result.payoff && result.consumedStateName) {
+        tacticalPrefix = `Capitalizing on ${opponentSpan} being ${result.consumedStateName}, `;
+    }
+    if (move.setup && result.effectiveness.label !== 'Weak') {
+        tacticalSuffix = ` The move leaves ${opponentSpan} ${move.setup.name}!`;
+    }
+
+    // This block is the prose from the old `narration.js`
+    let impactSentence;
+    if (move.type === 'Defense' || move.type === 'Utility') {
+        const isReactive = opponent.lastMove?.type === 'Offense';
+        impactSentence = getRandomElement(isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE);
+    } else {
+        impactSentence = getRandomElement(impactPhrases.DEFAULT[result.effectiveness.label.toUpperCase()]);
+    }
+
+    const verb = move.verb || 'executes';
+    const object = move.requiresArticle ? `a ${move.object}` : move.object;
+    const baseAction = `${actor.pronouns.s} ${verb} ${object}`;
+
+    const fullDesc = substituteTokens(`${tacticalPrefix}${actorSpan} ${baseAction}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
+    return `<p class="move-description">${fullDesc}</p>`;
+}
+
+// PRIMARY EXPORTED FUNCTION
+export function generateTurnNarration(events, move, actor, opponent, result) {
+    let narrativeBlockContent = '';
+
+    // Render all pre-action narrative events (dialogue, thoughts)
+    events.forEach(event => {
+        narrativeBlockContent += renderQuote(event.quote, event.actor, opponent, { '{moveName}': move.name });
+    });
+
+    // 3.1: Decide whether to use narrative or mechanical description
+    // Check for a specific `onMoveExecution` quote
+    const moveQuoteContext = { result: result.effectiveness.label };
+    const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
+
+    let mechanicalLog = phaseTemplates.move
+        .replace(/{actorId}/g, actor.id)
+        .replace(/{actorName}/g, actor.name)
+        .replace(/{moveName}/g, move.name)
+        .replace(/{moveEmoji}/g, '⚔️')
+        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
+        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji);
+
+    let actionDescription;
+    if (moveExecutionQuote) {
+        // Use the specific character quote for the action
+        actionDescription = `<p class="move-description">${substituteTokens(moveExecutionQuote.line, actor, opponent)}</p>`;
+    } else {
+        // Fallback to the generic action description generator
+        actionDescription = generateActionDescription(move, actor, opponent, result);
     }
     
-    // Fallback to old quote system if new one isn't populated
-    return winner.quotes.postWin[0];
+    // Combine the mechanical log and the (narrative or generic) action description
+    mechanicalLog = mechanicalLog.replace(/{moveDescription}/g, actionDescription);
+    
+    // Assemble the final HTML block
+    const narrativeWrapper = narrativeBlockContent ? `<div class="narrative-block">${narrativeBlockContent}</div>` : '';
+    return narrativeWrapper + mechanicalLog;
+}
+
+// This function remains for end-of-battle quotes
+export function getFinalVictoryLine(winner, loser) {
+    const finalQuote = findNarrativeQuote(winner, loser, 'onVictory', 'Default', {});
+    if (finalQuote) {
+        return substituteTokens(finalQuote.line, winner, loser);
+    }
+    // Hard fallback if narrative object is malformed
+    return "The battle is won.";
 }
