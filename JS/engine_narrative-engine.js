@@ -1,13 +1,11 @@
 // FILE: js/engine_narrative-engine.js
 'use strict';
 
-// VERSION 6.1: Structured Event Output for Animation
-// - `generateTurnNarrationObjects` now returns an array of structured event objects
-//   suitable for the animation engine. Each object will have `type`, `text`, `actorId`, etc.
-// - It will also include a pre-rendered `html_content` field for each event object,
-//   which `transformEventsToHtmlLog` can use for instant mode display.
+// VERSION 6.2: Enhanced KO Narration
+// - `generateActionDescriptionObject` now appends a KO confirmation to the move's `text`
+//   if the move results in the opponent's HP dropping to 0 or below.
 
-import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, battlePhases as phaseDefinitions } from './narrative-v2.js';
+import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, battlePhases as phaseDefinitions, finishingBlowPhrases } from './narrative-v2.js'; // Added finishingBlowPhrases
 import { locationConditions } from './location-battle-conditions.js';
 
 const getRandomElement = (arr) => arr ? arr[Math.floor(Math.random() * arr.length)] : null;
@@ -92,30 +90,30 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
 
 function formatQuoteToStructuredEvent(quoteObj, actor, opponent, context) {
     if (!quoteObj || !quoteObj.line) return null;
-    const { type, line } = quoteObj; // type is 'spoken', 'internal', 'action'
-    const characterName = actor?.name || 'Narrator'; // Fallback for general narration
+    const { type, line } = quoteObj; 
+    const characterName = actor?.name || 'Narrator'; 
     const textContent = substituteTokens(line, actor, opponent, context);
     
     let htmlClassType = `narrative-${type || 'general'}`;
     let htmlContent;
 
-    if (type === 'environmental') { // This should be handled by its specific function
+    if (type === 'environmental') { 
         htmlContent = textContent;
     } else if (type === 'action') {
         htmlContent = `<p class="${htmlClassType}">${substituteTokens(actor.name, actor, opponent)} ${textContent}</p>`;
-    } else { // spoken, internal
+    } else { 
         htmlContent = `<p class="${htmlClassType}">${substituteTokens(actor.name, actor, opponent)} ${type === 'internal' ? 'thinks' : 'says'}, "<em>${textContent}</em>"</p>`;
     }
 
     return {
-        type: 'dialogue_event', // Standardized type for transformer
+        type: 'dialogue_event', 
         actorId: actor?.id || null,
         characterName: characterName,
         text: textContent,
         isDialogue: (type === 'spoken' || type === 'internal'),
         isActionNarrative: (type === 'action'),
-        dialogueType: type, // 'spoken', 'internal', 'action' for styling/handling
-        html_content: `<div class="narrative-block">${htmlContent}</div>` // Pre-render HTML for instant mode
+        dialogueType: type, 
+        html_content: `<div class="narrative-block">${htmlContent}</div>` 
     };
 }
 
@@ -158,7 +156,13 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
         baseActionText = `${actor.name} ${verb} ${object}`;
     }
     
-    const fullDescText = substituteTokens(`${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
+    let fullDescText = substituteTokens(`${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
+
+    // NEW: Append KO confirmation if this move defeated the opponent
+    if (opponent.hp - result.damage <= 0 && result.damage > 0 && (move.type === 'Offense' || move.type === 'Finisher')) {
+        const koPhrase = getRandomElement(finishingBlowPhrases) || "{targetName} is defeated!";
+        fullDescText += ` ${substituteTokens(koPhrase, actor, opponent)}`;
+    }
     
     const moveLineHtml = phaseTemplates.move
         .replace(/{actorId}/g, actor.id)
@@ -167,8 +171,8 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
         .replace(/{moveEmoji}/g, '⚔️')
         .replace(/{effectivenessLabel}/g, result.effectiveness.label)
         .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-        .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`) // Insert the text-only description here
-        .replace(/{collateralDamageDescription}/g, ''); // Collateral will be its own event
+        .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`) 
+        .replace(/{collateralDamageDescription}/g, ''); 
 
     return {
         type: 'move_action_event',
@@ -192,9 +196,8 @@ function generateCollateralDamageEvent(move, actor, opponent, environmentState, 
     if (!collateralPhrase) return null;
 
     let descriptionText = `${actor.name}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, actor, opponent)}`;
-    let specificImpactText = ''; // For text log
+    let specificImpactText = ''; 
 
-    // Add specific impact from location data
     if (locationData && locationData.environmentalImpacts) {
         const currentDamageThreshold = environmentState.damageLevel;
         let selectedImpactsPool = [];
@@ -249,15 +252,12 @@ export function generateTurnNarrationObjects(narrativeEvents, move, actor, oppon
 
         const collateralEvent = generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData);
         if (collateralEvent) {
-            // To correctly insert collateral HTML into the action event's HTML for instant mode:
             const lastActionEvent = turnEventObjects.find(e => e.type === 'move_action_event' && e.html_content);
             if(lastActionEvent) {
                 lastActionEvent.html_content = lastActionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
             }
-            // The collateralEvent is still pushed for the animated queue as its own item.
             turnEventObjects.push(collateralEvent); 
         } else {
-            // If no collateral, ensure the placeholder is removed from the action event's HTML
             const lastActionEvent = turnEventObjects.find(e => e.type === 'move_action_event' && e.html_content);
             if(lastActionEvent) {
                 lastActionEvent.html_content = lastActionEvent.html_content.replace(/{collateralDamageDescription}/g, '');
@@ -280,7 +280,7 @@ export function getFinalVictoryLine(winner, loser) {
     
     return substituteTokens(phrase, winner, loser, {
         WinnerName: winner.name, 
-        LoserName: loser?.name || "the opponent", // Handle if loser is not defined (e.g. draw)
+        LoserName: loser?.name || "the opponent", 
         WinnerPronounS: winner.pronouns?.s || 'they',
         WinnerPronounP: winner.pronouns?.p || 'their',
         WinnerPronounO: winner.pronouns?.o || 'them'

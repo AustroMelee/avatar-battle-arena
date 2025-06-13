@@ -29,7 +29,7 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                 animationQueue.push({
                     isPhaseHeader: true,
                     text: `${event.phaseName || 'New Phase'} ${event.phaseEmoji || '⚔️'}`,
-                    pauseAfter: 1200, // Longer pause for phase headers
+                    pauseAfter: 1200, 
                 });
                 break;
             case 'dialogue_event':
@@ -37,9 +37,9 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                     actorId: event.actorId,
                     characterName: event.characterName,
                     text: event.text,
-                    isDialogue: true, // For specific styling or handling
-                    dialogueType: event.dialogueType, // 'spoken', 'internal', 'action'
-                    pauseAfter: event.text.length > 50 ? 1000 : 600, // Pause based on text length
+                    isDialogue: true, 
+                    dialogueType: event.dialogueType, 
+                    pauseAfter: event.text.length > 50 ? 1000 : 600, 
                 });
                 break;
             case 'move_action_event':
@@ -47,21 +47,21 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                     actorId: event.actorId,
                     characterName: event.characterName,
                     moveName: event.moveName,
-                    moveType: event.moveType, // Used for emoji
-                    effectivenessLabel: event.effectivenessLabel, // For emoji and impact
+                    moveType: event.moveType, 
+                    effectivenessLabel: event.effectivenessLabel, 
                     impactLevel: determineImpactLevel(event.effectivenessLabel, event.moveType),
-                    text: event.text, // The main narrative description of the move
+                    text: event.text, 
                     isMoveAction: true,
                     pauseAfter: 1000,
                 });
                 break;
             case 'collateral_damage_event':
                 animationQueue.push({
-                    actorId: event.actorId, // Person who caused the collateral
+                    actorId: event.actorId, 
                     characterName: event.actorId ? characters[event.actorId]?.name : 'Environment',
                     text: event.text,
                     isEnvironmental: true,
-                    impactLevel: 'medium', // Collateral usually has a noticeable impact
+                    impactLevel: 'medium', 
                     pauseAfter: 700,
                 });
                 break;
@@ -71,28 +71,36 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                         animationQueue.push({
                             text: `🌍 Environment: ${txt}`,
                             isEnvironmental: true,
-                            impactLevel: 'low', // Summary items are less "active"
+                            impactLevel: 'low', 
                             pauseAfter: 600,
                         });
                     });
                 }
                 break;
             // Handle final battle outcome events
-            case 'final_blow_event':
+            case 'final_blow_summary_event': // This is the summary, the actual KO is in the move text now
+                 animationQueue.push({
+                    text: event.text, // "X lands the finishing blow, defeating Y!"
+                    impactLevel: 'critical', // Very high impact for this summary
+                    isMoveAction: false, // Not a move, but a concluding statement
+                    isDialogue: false,
+                    pauseAfter: 2500,
+                });
+                break;
             case 'stalemate_result_event':
             case 'draw_result_event':
             case 'timeout_victory_event':
             case 'conclusion_event':
                 animationQueue.push({
                     text: event.text,
-                    impactLevel: 'high', // Battle end events are high impact
-                    isMoveAction: true, // Treat as an important concluding action
+                    impactLevel: 'high', 
+                    isMoveAction: false, 
+                    isDialogue: false,
                     pauseAfter: 2000,
                 });
                 break;
             default:
                 console.warn(`Unknown event type for animation: ${event.type}`, event);
-                // Push a generic text event if it has text
                 if (event.text && typeof event.text === 'string') {
                     animationQueue.push({
                         text: event.text,
@@ -120,70 +128,74 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
     }
     
     let htmlLog = "";
-    let currentPhaseKey = null; // To wrap turns in phase divs
+    let currentPhaseKeyForHtml = null; 
+    let isPhaseDivOpen = false;
 
     structuredLogEvents.forEach(event => {
         if (!event || typeof event.type !== 'string') return;
 
-        // Phase handling for HTML structure
         if (event.type === 'phase_header_event') {
-            if (currentPhaseKey) { // Close previous phase div
-                htmlLog += `</div>`; 
+            if (isPhaseDivOpen) { 
+                htmlLog += `</div>`; // Close previous phase div
             }
-            currentPhaseKey = event.phaseKey;
-            htmlLog += phaseTemplates.phaseWrapper.replace('{phaseKey}', currentPhaseKey).replace('{phaseContent}', ''); // Open new phase div, content added below
-            // Add the phase header itself
-            htmlLog = htmlLog.slice(0, -6) + phaseTemplates.header // Remove closing </div> to inject header
-                .replace('{phaseDisplayName}', event.phaseName)
-                .replace('{phaseEmoji}', event.phaseEmoji) + `</div>`; // Add header and then close the wrapper (it will be reopened)
-            
-            // Re-open the phase content div part (this is a bit hacky due to template structure)
-            const phaseWrapperOpening = phaseTemplates.phaseWrapper.replace('{phaseKey}', currentPhaseKey);
-            const contentMarker = '{phaseContent}';
-            htmlLog = htmlLog.slice(0, htmlLog.lastIndexOf('</div>')) + phaseWrapperOpening.substring(phaseWrapperOpening.indexOf(contentMarker) + contentMarker.length);
-        }
-
-        // Append pre-rendered HTML content if available
-        if (event.html_content && typeof event.html_content === 'string') {
-            htmlLog += event.html_content;
+            currentPhaseKeyForHtml = event.phaseKey;
+            htmlLog += phaseTemplates.phaseWrapper.replace('{phaseKey}', currentPhaseKeyForHtml).replace('{phaseContent}', ''); 
+            htmlLog = htmlLog.slice(0, -6); // Remove closing </div> to inject header and content
+            htmlLog += event.html_content; // Add the pre-rendered header
+            isPhaseDivOpen = true;
+        } else if (event.html_content && typeof event.html_content === 'string') {
+            // If not inside a phase div (e.g., initial banter before first phase header), don't wrap.
+            // Otherwise, ensure it's part of the current phase content.
+             if (!isPhaseDivOpen && !currentPhaseKeyForHtml && event.type === 'dialogue_event') { // For initial banter
+                htmlLog += event.html_content;
+            } else if (isPhaseDivOpen) {
+                htmlLog += event.html_content;
+            } else { // Fallback for events without specific html_content, if they get here
+                htmlLog += `<p>${event.text || 'Narrative event occurred.'}</p>`;
+            }
         } 
-        // For events that might not have pre-rendered HTML (like simpler outcome events)
+        // For events that might not have pre-rendered HTML but have text for instant mode
         else if (event.text && typeof event.text === 'string') {
+            let contentToAppend = "";
             switch(event.type) {
-                case 'final_blow_event':
-                    htmlLog += `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${event.text}</p>`;
+                case 'final_blow_summary_event': // Use the renamed event type
+                    contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${event.text}</p>`;
                     break;
                 case 'stalemate_result_event':
-                    htmlLog += `<p class="final-blow">${event.text}</p>`; // Uses same class for now
+                    contentToAppend = `<p class="final-blow">${event.text}</p>`;
                     break;
                 case 'draw_result_event':
-                    htmlLog += `<p class="final-blow">${event.text}</p>`;
+                    contentToAppend = `<p class="final-blow">${event.text}</p>`;
                     break;
                 case 'timeout_victory_event':
-                     htmlLog += `<p class="final-blow">${event.text}</p>`;
+                     contentToAppend = `<p class="final-blow">${event.text}</p>`;
                     break;
                 case 'conclusion_event':
-                    htmlLog += `<p class="conclusion">${event.text}</p>`;
+                    contentToAppend = `<p class="conclusion">${event.text}</p>`;
                     break;
-                case 'environmental_summary_event': // This one is special
+                case 'environmental_summary_event': 
                     if (event.texts && event.texts.length > 0) {
-                        htmlLog += `<div class="environmental-summary">`;
-                        htmlLog += phaseTemplates.environmentalImpactHeader;
+                        contentToAppend += `<div class="environmental-summary">`;
+                        contentToAppend += phaseTemplates.environmentalImpactHeader;
                         event.texts.forEach(txt => {
-                            htmlLog += `<p class="environmental-impact-text">${txt}</p>`;
+                            contentToAppend += `<p class="environmental-impact-text">${txt}</p>`;
                         });
-                        htmlLog += `</div>`;
+                        contentToAppend += `</div>`;
                     }
                     break;
                 default:
-                     // Generic text handling if no specific HTML rendering rule and no html_content
-                    htmlLog += `<p>${event.text}</p>`; 
+                    contentToAppend = `<p>${event.text}</p>`; 
                     break;
+            }
+            if (isPhaseDivOpen) {
+                htmlLog += contentToAppend;
+            } else { // If no phase div is open yet (e.g. for final summary outside a phase)
+                htmlLog += contentToAppend;
             }
         }
     });
 
-    if (currentPhaseKey) { // Close the last phase div
+    if (isPhaseDivOpen) { // Close the last phase div if it was opened
         htmlLog += `</div>`;
     }
     

@@ -1,9 +1,9 @@
 // FILE: js/engine_battle-engine-core.js
 'use strict';
 
-// VERSION 10.1: Corrected Log Structure for Transformer
-// - Ensures `battleEventLog` is an array of structured event objects.
-// - Removes hacky `html_content` concatenation for turn events; transformer will handle HTML assembly.
+// VERSION 10.2: KO Narration Flow Adjustment
+// - Ensures KO description from `generateActionDescriptionObject` is the primary animated KO text.
+// - The separate `final_blow_event` is now more of a summary for instant log and less emphasized in animation.
 
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
@@ -56,24 +56,29 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const locationData = locationConditions[locId];
 
     const initialBanter1Objects = findNarrativeQuote(fighter1, fighter2, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase });
-    if (initialBanter1Objects) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1Objects, actor: fighter1}], {}, fighter1, fighter2, {}, environmentState, locationData, phaseState.currentPhase, true));
+    if (initialBanter1Objects) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1Objects, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true));
     
     const initialBanter2Objects = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase });
-    if (initialBanter2Objects) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2Objects, actor: fighter2}], {}, fighter2, fighter1, {}, environmentState, locationData, phaseState.currentPhase, true));
+    if (initialBanter2Objects) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2Objects, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true));
+
 
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
-        const phaseChanged = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn);
+        const phaseChangedThisCheck = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn);
         const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase) || phaseDefinitions[0];
 
-        if (phaseChanged) {
+        if (phaseChangedThisCheck) { // Only log if it *just* changed
             const transitionMessage = phaseState.phaseLog[phaseState.phaseLog.length - 1];
             fighter1.aiLog.push(transitionMessage);
             fighter2.aiLog.push(transitionMessage);
             battleEventLog.push({ 
-                type: 'phase_header_event', // More specific type for transformer
+                type: 'phase_header_event', 
                 phaseName: currentPhaseInfo.name,
                 phaseEmoji: currentPhaseInfo.emoji,
-                phaseKey: phaseState.currentPhase
+                phaseKey: phaseState.currentPhase,
+                // For instant HTML transformation:
+                html_content: phaseTemplates.header
+                    .replace('{phaseDisplayName}', currentPhaseInfo.name)
+                    .replace('{phaseEmoji}', currentPhaseInfo.emoji)
             });
         }
         
@@ -106,19 +111,17 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase }), attacker);
             }
 
-            const { move, aiLogEntryFromSelectMove } = selectMove(attacker, defender, conditions, turn, phaseState.currentPhase); 
-            // The detailed AI log is now pushed within selectMove itself.
-            // For a simpler top-level battle log, we can just note the chosen move.
-            interactionLog.push(`T${turn+1} ${attacker.name} (Intent: ${aiLogEntryFromSelectMove?.intent || 'N/A'}) chose ${move.name}`);
+            const { move } = selectMove(attacker, defender, conditions, turn, phaseState.currentPhase); 
+            // AI log is now pushed internally by selectMove
 
-            addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase }), attacker);
+            addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onIntentSelection', attacker.aiLog[attacker.aiLog.length-1]?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase }), attacker);
             
             const result = calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locId);
             modifyMomentum(attacker, result.momentumChange.attacker, `Move (${result.effectiveness.label})`);
             modifyMomentum(defender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label})`);
             
-            const oldDefenderMentalState = defender.mentalState.level; // Capture before update
-            const oldAttackerMentalState = attacker.mentalState.level; // Capture before update
+            const oldDefenderMentalState = defender.mentalState.level; 
+            const oldAttackerMentalState = attacker.mentalState.level; 
 
             if (result.collateralDamage > 0) {
                 environmentState.damageLevel = clamp(environmentState.damageLevel + result.collateralDamage, 0, 100);
@@ -140,13 +143,17 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 }
             }
             
+            // Crucially, update HP *before* generating narration for this action, so KO text can be included
+            defender.hp = clamp(defender.hp - result.damage, 0, 100);
+            attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
+
             updateMentalState(defender, attacker, result, environmentState);
-            updateMentalState(attacker, defender, null, environmentState); // Attacker's mental state can also be affected by environment
+            updateMentalState(attacker, defender, null, environmentState);
 
             if (defender.mentalState.level !== oldDefenderMentalState) {
                  addNarrativeEvent(findNarrativeQuote(defender, attacker, 'onStateChange', defender.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), defender);
             }
-            if (attacker.mentalState.level !== oldAttackerMentalState) { // Check if it actually changed
+            if (attacker.mentalState.level !== oldAttackerMentalState) { 
                  addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onStateChange', attacker.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), attacker);
             }
             
@@ -165,10 +172,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (move.moveTags?.includes('requires_opening') && result.payoff) defender.tacticalState = null;
             if (result.effectiveness.label === 'Critical') defender.isStunned = true;
             
+            // Generate narration *after* HP update, so KO can be included in move description
             turnSpecificEvents.push(...generateTurnNarrationObjects(narrativeEventsForAction, move, attacker, defender, result, environmentState, locationData, phaseState.currentPhase));
-
-            defender.hp = clamp(defender.hp - result.damage, 0, 100);
-            attacker.energy = clamp(attacker.energy - result.energyCost, 0, 100);
+            
             attacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
             attacker.lastMove = move;
             
@@ -214,7 +220,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             });
             turnSpecificEvents.push({ 
                 type: 'environmental_summary_event', 
-                texts: impactTexts // Array of impact strings
+                texts: impactTexts 
             });
         }
         
@@ -250,22 +256,25 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
     }
 
+    // The KO text is now part of the move description that caused it.
+    // The "final_blow_event" can be a more generic summary or removed for animation if redundant.
+    // For now, keep it for instant log clarity, transformer can choose to ignore for animation.
     if (!isStalemate && winner && loser && loser.hp <= 0) {
-        const finalText = phaseTemplates.finalBlow
-            .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
-            .replace(/{loserName}/g, `<span class="char-${loser.id}">${loser.name}</span>`)
-            .replace(/<div class="final-blow-header">Final Blow 💥<\/div><p class="final-blow">|<\/p>/g, '');
-        battleEventLog.push({ type: 'final_blow_event', text: finalText });
+        const finalText = `<span class="char-${winner.id}">${winner.name}</span> lands the finishing blow, defeating <span class="char-${loser.id}">${loser.name}</span>!`;
+        battleEventLog.push({ type: 'final_blow_summary_event', text: finalText }); // Renamed for clarity
     }
     
     if (!isStalemate && winner) {
-         winner.summary = winner.summary || `${winner.name}'s victory was sealed.`;
+         winner.summary = winner.summary || `${winner.name}'s victory was sealed.`; // Ensure summary exists
         const finalWords = getFinalVictoryLine(winner, loser);
-        const conclusionText = phaseTemplates.conclusion.replace('{endingNarration}', `${winner.name} stands victorious. "${finalWords}"`).replace(/<p class="conclusion">|<\/p>/g, '');
+        const conclusionText = `${winner.name} stands victorious. "${finalWords}"`;
         battleEventLog.push({ type: 'conclusion_event', text: conclusionText });
-    } else if(!isStalemate && !winner) { 
-        battleEventLog.push({ type: 'conclusion_event', text: phaseTemplates.conclusion.replace('{endingNarration}', "The battle concludes. Neither could claim victory.").replace(/<p class="conclusion">|<\/p>/g, '') });
+    } else if(!isStalemate && !winner && fighter1.hp === fighter2.hp) { // True Draw by timeout
+        battleEventLog.push({ type: 'conclusion_event', text: "The battle concludes. Neither could claim victory." });
+    } else if (isStalemate) { // Stalemate conclusion
+        battleEventLog.push({ type: 'conclusion_event', text: "The intense confrontation ends, both combatants pushed to their limits but neither broken." });
     }
+
 
     if(winner) winner.interactionLog = interactionLog;
     if(loser) loser.interactionLog = interactionLog;
