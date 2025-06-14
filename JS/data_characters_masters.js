@@ -7,7 +7,17 @@ export const masterCharacters = {
 id: 'bumi', name: "Bumi", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/e/e8/King_Bumi.png',
 victoryStyle: "Madcap", powerTier: 8,
-personalityProfile: { aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9, signatureMoveBias: { "Rock Avalanche": 1.2, "Terrain Reshape": 1.4 } },
+personalityProfile: { 
+    aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, 
+    creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9,
+    predictability: 0.1, // Very Low: Chaotic, unpredictable
+    signatureMoveBias: { 
+        "Rock Avalanche": 1.6, 
+        "Boulder Throw": 1.5,
+        "Terrain Reshape": 1.7,
+        "Ground Spike": 1.0
+    } 
+},
 specialTraits: { resilientToManipulation: 1.0 },
 collateralTolerance: 0.5,
 mobility: 0.3,
@@ -55,7 +65,17 @@ relationships: {}
 id: 'pakku', name: "Pakku", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/b/bb/Pakku_looking_smug.png',
 victoryStyle: "Disciplined", powerTier: 7,
-personalityProfile: { aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2, signatureMoveBias: { "Octopus Form": 1.5, "Water Barrier": 1.3 } },
+personalityProfile: { 
+    aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, 
+    creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2,
+    predictability: 0.8, // High: Traditional, disciplined
+    signatureMoveBias: { 
+        "Octopus Form": 1.7, 
+        "Water Barrier": 1.4,
+        "Ice Spikes": 1.1,
+        "Tidal Surge": 1.3
+    } 
+},
 specialTraits: { resilientToManipulation: 0.8 },
 collateralTolerance: 0.3,
 mobility: 0.5,
@@ -112,7 +132,18 @@ relationships: {}
 id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/a7/Jeong_Jeong_serious.png',
 victoryStyle: "Wise_Reluctant", powerTier: 6,
-personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4, signatureMoveBias: { "Fire Wall": 1.6 } },
+personalityProfile: { 
+    aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, 
+    creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4,
+    predictability: 0.8, // High: Very controlled, defensive
+    signatureMoveBias: { 
+        "Fire Wall": 1.9, 
+        "Flame Whips": 0.7,
+        "Precision Burn": 0.6,
+        "Controlled Inferno": 0.3, // Reluctant for big offensive moves
+        "Reluctant Finale": 0.5
+    } 
+},
 specialTraits: { resilientToManipulation: 1.0 },
 collateralTolerance: 0.0,
 mobility: 0.4,
@@ -155,4 +186,3 @@ quotes: { postWin: ["The destructive path of fire has been averted, for now."], 
 relationships: {}
 },
 };
-

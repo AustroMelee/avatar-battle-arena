@@ -6,7 +6,17 @@ export const gaangCharacters = {
 id: 'sokka', name: "Sokka", type: "Nonbender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/c/cc/Sokka.png',
 victoryStyle: "Madcap", powerTier: 3,
-personalityProfile: { aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8, signatureMoveBias: { "Boomerang Throw": 1.2, "Improvised Trap": 1.4 } },
+personalityProfile: { 
+    aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, 
+    creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8,
+    predictability: 0.4, // Medium-Low: Strategist but can be unorthodox
+    signatureMoveBias: { 
+        "Boomerang Throw": 1.6, 
+        "Improvised Trap": 1.5,
+        "Sword Strike": 1.0,
+        "Tactical Positioning": 1.1 
+    } 
+},
 specialTraits: { resilientToManipulation: 0.2 },
 collateralTolerance: 0.5,
 mobility: 0.6,
@@ -74,7 +84,20 @@ relationships: { 'katara': { relationshipType: 'sibling_support', stressModifier
 id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/ae/Aang_at_Jasmine_Dragon.png',
 victoryStyle: "Pacifist", powerTier: 9,
-personalityProfile: { aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9, signatureMoveBias: { "Air Scooter": 1.5, "Wind Shield": 1.3 } },
+personalityProfile: { 
+    aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, 
+    creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9,
+    predictability: 0.2, // Low: Creative, evasive
+    signatureMoveBias: { 
+        "Air Scooter": 1.8, 
+        "Wind Shield": 1.4,
+        "Air Blast": 1.0,
+        "Tornado Whirl": 1.3,
+        "Gust Push": 0.9,
+        "Sweeping Gust": 1.1,
+        "Tactical Reposition": 1.5
+    } 
+},
 specialTraits: { resilientToManipulation: 0.6 },
 collateralTolerance: 0.05,
 mobility: 1.0,
@@ -134,7 +157,18 @@ relationships: { 'ozai-not-comet-enhanced': { relationshipType: "fated_adversary
 id: 'katara', name: "Katara", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/7/7a/Katara_smiles_at_coronation.png',
 victoryStyle: "Fierce", powerTier: 7,
-personalityProfile: { aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6, signatureMoveBias: { "Water Whip": 1.2, "Ice Prison": 1.3 } },
+personalityProfile: { 
+    aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, 
+    creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6,
+    predictability: 0.5, // Medium: Versatile, can be emotional
+    signatureMoveBias: { 
+        "Water Whip": 1.5,
+        "Ice Spears": 1.3,
+        "Water Shield": 1.4,
+        "Ice Prison": 1.2,
+        "Bloodbending": 0.1 // Very low unless conditions are extreme
+    } 
+},
 specialTraits: { resilientToManipulation: 0.9 },
 collateralTolerance: 0.15,
 mobility: 0.7,
@@ -201,7 +235,18 @@ relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1
 id: 'toph-beifong', name: "Toph", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/46/Toph_Beifong.png',
 victoryStyle: "Cocky", powerTier: 7,
-personalityProfile: { aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8, signatureMoveBias: { "Seismic Slam": 1.4, "Metal Bending": 1.3 } },
+personalityProfile: { 
+    aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, 
+    creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8,
+    predictability: 0.7, // Medium-High: Confident, direct
+    signatureMoveBias: { 
+        "Seismic Slam": 1.7,
+        "Metal Bending": 1.5,
+        "Earth Wave": 1.3,
+        "Rock Armor": 1.1,
+        "Boulder Throw": 1.2
+    } 
+},
 specialTraits: { resilientToManipulation: 0.5 },
 collateralTolerance: 0.6,
 mobility: 0.2,
@@ -258,7 +303,17 @@ relationships: {}
 id: 'zuko', name: "Zuko", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4b/Zuko.png',
 victoryStyle: "Determined", powerTier: 6,
-personalityProfile: { aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5, signatureMoveBias: { "Flame Sword": 1.2, "Dragon's Breath": 1.3 } },
+personalityProfile: { 
+    aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, 
+    creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5,
+    predictability: 0.6, // Medium: Can be aggressive, but also more thoughtful
+    signatureMoveBias: { 
+        "Flame Sword": 1.5,
+        "Dragon's Breath": 1.3,
+        "Fire Daggers": 1.1,
+        "Redemption's Fury": 1.4
+    } 
+},
 specialTraits: { resilientToManipulation: 0.1 },
 collateralTolerance: 0.25,
 mobility: 0.65,
@@ -311,4 +366,3 @@ quotes: { postWin: ["I fought for my own path. And I won."], postWin_overwhelmin
 relationships: { 'azula': { relationshipType: "sibling_rivalry_inferior", stressModifier: 2.0, resilienceModifier: 0.8 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_defiance", stressModifier: 1.8, resilienceModifier: 1.2 }, 'iroh': { relationshipType: "mentor_respect", stressModifier: 0.5, resilienceModifier: 1.5 } }
 }
 };
-

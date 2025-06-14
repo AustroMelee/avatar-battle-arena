@@ -7,7 +7,18 @@ export const antagonistCharacters = {
         id: 'azula', name: "Azula", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/1/12/Azula.png',
         victoryStyle: "Ruthless", powerTier: 8,
-        personalityProfile: { aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3, signatureMoveBias: { "Lightning Generation": 1.5, "Blue Fire Daggers": 1.2 } },
+        personalityProfile: { 
+            aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, 
+            creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3,
+            predictability: 0.8, // High: Calculated, perfectionist
+            signatureMoveBias: { 
+                "Lightning Generation": 1.9, 
+                "Blue Fire Daggers": 1.4,
+                "Precision Strike": 1.3,
+                "Flame Burst": 1.1,
+                "Tactical Reposition": 0.9
+            } 
+        },
         specialTraits: { manipulative: 0.8 },
         collateralTolerance: 0.9, 
         mobility: 0.95, 
@@ -72,7 +83,17 @@ export const antagonistCharacters = {
         id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4a/Ozai.png',
         victoryStyle: "Supreme", powerTier: 9,
-        personalityProfile: { aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2, signatureMoveBias: { "Dragon's Roar": 1.4, "Emperor's Wrath": 1.5 } },
+        personalityProfile: { 
+            aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, 
+            creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2,
+            predictability: 0.9, // High: Overconfident, relies on overwhelming power
+            signatureMoveBias: { 
+                "Dragon's Roar": 1.8, 
+                "Emperor's Wrath": 1.7,
+                "Scorching Blast": 1.5,
+                "Flame Wall": 1.0 
+            } 
+        },
         specialTraits: { manipulative: 0.6 },
         collateralTolerance: 1.0, 
         mobility: 0.3, 
@@ -120,7 +141,17 @@ export const antagonistCharacters = {
         id: 'mai', name: "Mai", type: "Nonbender", pronouns: { s: 'she', p: 'her', o: 'her' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/40/Mai.png',
         victoryStyle: "Deadpan", powerTier: 4,
-        personalityProfile: { aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1, signatureMoveBias: { "Precision Strike": 1.3, "Pinning Strike": 1.4 } },
+        personalityProfile: { 
+            aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, 
+            creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1,
+            predictability: 0.9, // Very High: Direct, precise style
+            signatureMoveBias: { 
+                "Precision Strike": 1.7,
+                "Pinning Strike": 1.5,
+                "Knife Barrage": 1.1,
+                "Ricochet Shot": 0.8 
+            } 
+        },
         specialTraits: { resilientToManipulation: 0.3 },
         collateralTolerance: 0.4, 
         mobility: 0.6, 
@@ -180,7 +211,17 @@ export const antagonistCharacters = {
         id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", pronouns: { s: 'she', p: 'her', o: 'her' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/6/6d/Ty_Lee.png',
         victoryStyle: "Playful", powerTier: 4,
-        personalityProfile: { aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6, signatureMoveBias: { "Chi-Blocking Flurry": 1.3, "Pressure Point Strike": 1.2 } },
+        personalityProfile: { 
+            aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, 
+            creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6,
+            predictability: 0.3, // Medium-Low: Acrobatic, seems less predictable
+            signatureMoveBias: { 
+                "Pressure Point Strike": 1.8,
+                "Chi-Blocking Flurry": 1.7,
+                "Acrobatic Flips": 1.5,
+                "Graceful Dodge": 1.2
+            } 
+        },
         specialTraits: { resilientToManipulation: 0.2 },
         collateralTolerance: 0.1, 
         mobility: 1.0, 
