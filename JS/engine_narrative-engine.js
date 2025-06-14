@@ -3,6 +3,7 @@
 
 import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
+import { characters as characterData } from './data_characters.js'; // For name lookups if actor/opponent is just ID
 
 const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
@@ -45,24 +46,54 @@ function conjugatePresent(verbPhrase) {
     return rest ? `${verb} ${rest}` : verb;
 }
 
+/**
+ * Substitutes tokens in a template string with provided values.
+ * Actor/Opponent are the primary context. Context object can override or add.
+ * @param {string} template - The template string with tokens.
+ * @param {object} [actor] - The primary acting character object.
+ * @param {object} [opponent] - The primary opposing character object.
+ * @param {object} [context={}] - Additional context for token replacement.
+ *                                 Special keys: '{WinnerName}', '{LoserName}' for victory lines.
+ *                                 '{attackerName}', '{targetName}' for curbstomp/action lines.
+ * @returns {string} The string with tokens replaced.
+ */
 function substituteTokens(template, actor, opponent, context = {}) {
     if (typeof template !== 'string') return ''; 
     let text = template;
+
+    // Determine primary actor/opponent for pronouns and default names
+    // If context provides Winner/Loser, those take precedence for naming in those specific templates
+    const primaryActor = context.WinnerName && actor?.name === context.WinnerName ? actor : (context.attackerName && actor?.name === context.attackerName ? actor : actor);
+    const primaryOpponent = context.LoserName && opponent?.name === context.LoserName ? opponent : (context.targetName && opponent?.name === context.targetName ? opponent : opponent);
+
     const replacements = {
-        '{actorName}': actor?.name || 'A fighter',
-        '{opponentName}': opponent?.name || 'Their opponent',
-        '{targetName}': opponent?.name || 'The target',
-        '{characterName}': context?.characterName || actor?.name || 'A fighter', // For curbstomp characterName
-        '{attackerName}': context?.attackerName || actor?.name || 'Attacker', // For curbstomp rule messages
-        '{actor.s}': actor?.pronouns?.s || 'they',
-        '{actor.p}': actor?.pronouns?.p || 'their',
-        '{actor.o}': actor?.pronouns?.o || 'them',
-        '{opponent.s}': opponent?.pronouns?.s || 'they',
-        '{opponent.p}': opponent?.pronouns?.p || 'their',
-        '{opponent.o}': opponent?.pronouns?.o || 'them',
-        '{possessive}': actor?.pronouns?.p || 'their', 
-        ...context
+        '{actorName}': primaryActor?.name || context.attackerName || 'A fighter',
+        '{opponentName}': primaryOpponent?.name || context.targetName || 'Their opponent',
+        '{targetName}': primaryOpponent?.name || context.targetName || 'The target', // Often same as opponent
+        '{attackerName}': primaryActor?.name || context.attackerName || 'The attacker', // For curbstomp messages
+        '{WinnerName}': context.WinnerName || primaryActor?.name || 'The Victor',
+        '{LoserName}': context.LoserName || primaryOpponent?.name || 'The Vanquished',
+        
+        '{actor.s}': primaryActor?.pronouns?.s || 'they',
+        '{actor.p}': primaryActor?.pronouns?.p || 'their',
+        '{actor.o}': primaryActor?.pronouns?.o || 'them',
+        
+        '{opponent.s}': primaryOpponent?.pronouns?.s || 'they',
+        '{opponent.p}': primaryOpponent?.pronouns?.p || 'their',
+        '{opponent.o}': primaryOpponent?.pronouns?.o || 'them',
+        
+        // Specific possessives if context has Winner/Loser (actor/opponent might be ambiguous then)
+        '{WinnerPronounS}': (context.WinnerName === actor?.name ? actor?.pronouns?.s : opponent?.pronouns?.s) || 'they',
+        '{WinnerPronounP}': (context.WinnerName === actor?.name ? actor?.pronouns?.p : opponent?.pronouns?.p) || 'their',
+        '{WinnerPronounO}': (context.WinnerName === actor?.name ? actor?.pronouns?.o : opponent?.pronouns?.o) || 'them',
+        '{LoserPronounS}': (context.LoserName === actor?.name ? actor?.pronouns?.s : opponent?.pronouns?.s) || 'they',
+        '{LoserPronounP}': (context.LoserName === actor?.name ? actor?.pronouns?.p : opponent?.pronouns?.p) || 'their',
+        '{LoserPronounO}': (context.LoserName === actor?.name ? actor?.pronouns?.o : opponent?.pronouns?.o) || 'them',
+
+        '{possessive}': primaryActor?.pronouns?.p || 'their', 
+        ...context // Spread other context items last to allow specific overrides
     };
+
     for (const [token, value] of Object.entries(replacements)) {
         if (typeof token === 'string' && value !== undefined) {
             text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), String(value));
@@ -134,6 +165,7 @@ function formatQuoteEvent(quote, actor, opponent, context) {
     if (!quote || typeof quote.line !== 'string') return null; 
     const { type, line } = quote;
     const characterName = actor?.name || 'Narrator';
+    // Pass actor and opponent directly for pronoun resolution, context for specific name overrides
     const formattedLine = substituteTokens(line, actor, opponent, context);
     
     const actorNameForHtml = actor ? actor.name : "Narrator"; 
@@ -173,15 +205,15 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,"; 
 
     if (result.payoff && result.consumedStateName) {
-        tacticalPrefix = `Capitalizing on ${opponent?.name || 'the opponent'} being ${result.consumedStateName}, `;
+        tacticalPrefix = `Capitalizing on {opponentName} being ${result.consumedStateName}, `;
     }
     
     if (actor.tacticalState?.name && actor.tacticalState.duration >= 0 && actor.tacticalState.isPositive) {
-        tacticalSuffix += ` ${actor.name} is now ${actor.tacticalState.name}!`;
+        tacticalSuffix += ` {actorName} is now ${actor.tacticalState.name}!`; // actorName explicitly for clarity
     } else if (actor.tacticalState?.name && actor.tacticalState.duration >= 0 && !actor.tacticalState.isPositive && move.isRepositionMove) {
-        tacticalSuffix += ` However, ${actor.name} is now ${actor.tacticalState.name}!`;
+        tacticalSuffix += ` However, {actorName} is now ${actor.tacticalState.name}!`;
     } else if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
-        tacticalSuffix += ` The move leaves ${opponent?.name || 'the opponent'} ${move.setup.name}!`;
+        tacticalSuffix += ` The move leaves {opponentName} ${move.setup.name}!`;
     }
 
     let impactSentenceKey = result.effectiveness.label.toUpperCase();
@@ -195,21 +227,24 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     } else {
         impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
-    const impactSentence = getRandomElement(impactSentencePool) || "The move unfolds."; 
+    const impactSentenceTemplate = getRandomElement(impactSentencePool) || "The move unfolds."; 
+    // Substitute tokens in impact sentence separately to ensure {targetName} is opponent
+    const impactSentence = substituteTokens(impactSentenceTemplate, actor, opponent, {'{targetName}': opponent?.name || 'the opponent'});
 
 
     let baseActionText;
     if (move.name === "Struggle") {
-        baseActionText = `${actor.name} struggles to fight back`;
+        baseActionText = `{actorName} struggles to fight back`; // Use actorName token
     } else {
         const verb = conjugatePresent(move.verb || 'executes');
         const objectString = (typeof move.object === 'string') ? move.object : "an action";
         const article = (move.requiresArticle && typeof objectString === 'string' && objectString.length > 0) ? 
                         ((['a','e','i','o','u'].includes(objectString[0].toLowerCase()) ? `an ${objectString}` : `a ${objectString}`)) 
                         : objectString;
-        baseActionText = `${actor.name} ${verb} ${article}`;
+        baseActionText = `{actorName} ${verb} ${article}`; // Use actorName token
     }
     
+    // Substitute everything together, ensuring actor and opponent are correctly contextualized for this line
     const fullDescText = substituteTokens(`${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
     
     const moveLineHtml = phaseTemplates.move
@@ -232,7 +267,7 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
         text: fullDescText, 
         isMoveAction: true,
         html_content: moveLineHtml,
-        isKOAction: result.isKOAction || false // Add this from result if it exists
+        isKOAction: result.isKOAction || false 
     };
 }
 
@@ -243,10 +278,13 @@ function generateCollateralDamageEvent(move, actor, opponent, environmentState, 
     const impactLevel = move.collateralImpact.toUpperCase();
     if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) return null;
     
-    const collateralPhrase = getRandomElement(collateralImpactPhrases[impactLevel]);
-    if (!collateralPhrase) return null;
+    const collateralPhraseTemplate = getRandomElement(collateralImpactPhrases[impactLevel]);
+    if (!collateralPhraseTemplate) return null;
 
-    let description = `${actor.name}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, actor, opponent)}`;
+    // Ensure actor and opponent context is correctly passed for token substitution
+    const collateralPhrase = substituteTokens(collateralPhraseTemplate, actor, opponent);
+
+    let description = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`;
     let specificImpactPhrase = '';
 
     if (locationData && locationData.environmentalImpacts && environmentState.specificImpacts.size > 0) {
@@ -272,6 +310,7 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
     let turnEventObjects = [];
 
     events.forEach(event => {
+        // For dialogue, the "actor" of the quote is primary for pronouns, opponent is secondary
         const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey });
         if (quoteEvent) {
             turnEventObjects.push(quoteEvent);
@@ -280,6 +319,7 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
     
     if (!isInitialBanter && move && result) {
         const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey };
+        // For move execution quotes, "actor" is the one performing the move
         const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
         if (moveExecutionQuote) {
             const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey});
@@ -307,50 +347,69 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
 
 export function getFinalVictoryLine(winner, loser) { 
     if (!winner) return "The battle ends."; 
-    if (!loser) return `${winner.name} stands victorious.`; 
+    
+    // Ensure loser is at least a minimal object for token substitution if null
+    const safeLoser = loser || { name: "their opponent", pronouns: { s: 'they', p: 'their', o: 'them' } };
 
-    const finalQuote = findNarrativeQuote(winner, loser, 'onVictory', 'Default', {});
+    const finalQuote = findNarrativeQuote(winner, safeLoser, 'onVictory', 'Default', {});
     if (finalQuote && typeof finalQuote.line === 'string') {
-        return substituteTokens(finalQuote.line, winner, loser);
+        // Pass winner as actor, loser as opponent for this specific substitution context
+        return substituteTokens(finalQuote.line, winner, safeLoser, {
+            '{WinnerName}': winner.name, // Explicitly for victory lines
+            '{LoserName}': safeLoser.name
+        });
     }
     
-    const winnerVictoryStyle = winner.victoryStyle || 'default'; // ensure victoryStyle exists
+    const winnerVictoryStyle = winner.victoryStyle || 'default'; 
     const victoryPhrasesPool = postBattleVictoryPhrases[winnerVictoryStyle] || postBattleVictoryPhrases.default;
-    const outcomeType = winner.hp > 50 ? 'dominant' : 'narrow'; // ensure hp exists
-    let phraseTemplate = victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant; // Fallback for safety
+    const outcomeType = winner.hp > 50 ? 'dominant' : 'narrow'; 
+    let phraseTemplate = victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant; 
     
-    // Ensure pronouns exist on winner object before substitution
     const winnerPronounP = winner.pronouns?.p || 'their'; 
 
-    return substituteTokens(phraseTemplate, winner, loser, {
+    return substituteTokens(phraseTemplate, winner, safeLoser, {
         '{WinnerName}': winner.name,
-        '{LoserName}': loser.name,
+        '{LoserName}': safeLoser.name,
         '{WinnerPronounP}': winnerPronounP 
     });
 }
 
-// --- NEW: Narrative for Curbstomp Events ---
 export function generateCurbstompNarration(rule, attacker, target, isEscape = false) {
-    let text;
-    let htmlClass = "narrative-curbstomp highlight-major"; // Default for significant event
+    let textTemplate;
+    let htmlClass = "narrative-curbstomp highlight-major"; 
+
+    const attackerName = attacker?.name || "Attacker";
+    const targetName = target?.name || "Target";
+    // Determine the character name for "{characterName}" token if rule applies to "All" or specific character
+    let genericCharacterName = attackerName; // Default to attacker
+    if (rule.appliesToAll) {
+        // If applies to all, and there's a clear "loser" from the rule type, use that
+        if (rule.outcome?.type?.includes("loss_random") || rule.outcome?.type?.includes("death_target")) {
+            genericCharacterName = targetName;
+        } else if (rule.outcome?.type?.includes("loss_character") && rule.appliesToCharacter === target?.id) {
+            genericCharacterName = targetName;
+        }
+    } else if (rule.appliesToCharacter) {
+        genericCharacterName = characterData[rule.appliesToCharacter]?.name || (rule.appliesToCharacter === attacker?.id ? attackerName : targetName);
+    }
+
 
     if (isEscape) {
-        text = rule.outcome.escapeMessage || `${target.name} narrowly escapes ${attacker.name}'s devastating attempt using ${rule.id}!`;
+        textTemplate = rule.outcome.escapeMessage || `{targetName} narrowly escapes ${attackerName}'s devastating attempt!`;
         htmlClass = "narrative-curbstomp highlight-escape";
     } else if (rule.outcome.type === "conditional_instant_kill_or_self_sabotage" && rule.outcome.selfSabotageMessage) {
-        // This case will be handled by battle engine based on the sabotage roll
-        // For now, assume success if not escape
-        text = rule.outcome.successMessage || `${attacker.name}'s ${rule.id} overwhelmingly defeats ${target.name}!`;
+        // This specific text is for self-sabotage, success message will be used otherwise.
+        // The actual determination of self-sabotage happens in battle-engine-core.
+        // This function assumes it's being called for the *successful* outcome if not escape.
+        textTemplate = rule.outcome.successMessage || `${attackerName}'s ${rule.id} overwhelmingly defeats ${targetName}!`;
     } else {
-        text = rule.outcome.successMessage || `${attacker.name}'s ${rule.id} overwhelmingly defeats ${target.name}!`;
+        textTemplate = rule.outcome.successMessage || `${attackerName}'s ${rule.id} overwhelmingly defeats ${targetName}!`;
     }
     
-    // Substitute placeholders in the chosen message
-    const characterForName = rule.appliesToAll ? (Math.random() < 0.5 ? attacker : target) : (rule.appliesToCharacter ? (characters[rule.appliesToCharacter] || attacker) : attacker);
-    const substitutedText = substituteTokens(text, attacker, target, {
-        '{attackerName}': attacker.name,
-        '{targetName}': target.name,
-        '{characterName}': characterForName.name // For appliesToAll or appliesToCharacter outcomes
+    const substitutedText = substituteTokens(textTemplate, attacker, target, {
+        '{attackerName}': attackerName,
+        '{targetName}': targetName,
+        '{characterName}': genericCharacterName 
     });
 
     return {
@@ -359,6 +418,6 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
         html_content: `<p class="${htmlClass}">${substitutedText}</p>`,
         curbstompRuleId: rule.id,
         isEscape: isEscape,
-        isMajorEvent: !isEscape // Major if not an escape
+        isMajorEvent: !isEscape 
     };
 }
