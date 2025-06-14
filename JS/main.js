@@ -3,16 +3,11 @@
 
 import { simulateBattle } from './engine_battle-engine-core.js';
 import { populateUI, showLoadingState, showResultsState, resetBattleUI, DOM_simulation_references } from './ui.js';
-import { setSimulationMode, initializeSimulationManagerDOM, resetSimulationManager } from './simulation_mode_manager.js'; // Import new manager functions
+import { setSimulationMode, initializeSimulationManagerDOM, resetSimulationManager } from './simulation_mode_manager.js'; 
 
 const battleBtn = document.getElementById('battleBtn');
-let currentSimMode = "animated"; // Default to animated
+let currentSimMode = "animated"; 
 
-/**
- * Handles the start of a battle simulation.
- * Gathers selected fighter IDs, location, time of day, and emotional mode.
- * Initiates loading state, then runs the simulation and displays results.
- */
 function handleBattleStart() {
     const f1Id = document.getElementById('fighter1-value').value;
     const f2Id = document.getElementById('fighter2-value').value;
@@ -29,8 +24,8 @@ function handleBattleStart() {
         return;
     }
 
-    resetBattleUI(); // Resets standard results and simulation container via simulation_mode_manager
-    showLoadingState(currentSimMode); // Pass currentSimMode to showLoadingState
+    resetBattleUI(); 
+    showLoadingState(currentSimMode); 
 
     setTimeout(() => {
         try {
@@ -39,7 +34,6 @@ function handleBattleStart() {
         } catch (error) {
             console.error("An error occurred during battle simulation:", error);
             alert("A critical error occurred. Please check the console and refresh.");
-            // Ensure UI is reset/usable on error
             const loadingSpinner = document.getElementById('loading');
             if(loadingSpinner) loadingSpinner.classList.add('hidden');
             
@@ -50,13 +44,9 @@ function handleBattleStart() {
             if(battleBtn) battleBtn.disabled = false;
             resetSimulationManager(); 
         }
-    }, 1500); // Artificial delay for loading spinner
+    }, 1500); 
 }
 
-/**
- * Handles changes in the simulation mode selection.
- * @param {Event} event - The change event from the radio button group.
- */
 function handleModeSelectionChange(event) {
     if (event.target.name === "simulationMode") {
         currentSimMode = event.target.value;
@@ -65,10 +55,47 @@ function handleModeSelectionChange(event) {
     }
 }
 
-/**
- * Initializes the application.
- * Populates UI elements, sets up event listeners, and initializes managers.
- */
+// --- NEW FUNCTION for setting up detailed log controls ---
+function setupDetailedLogControls() {
+    const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
+    const copyBtn = document.getElementById('copy-detailed-logs-btn');
+    const contentDiv = document.getElementById('detailed-battle-logs-content');
+
+    if (toggleBtn && contentDiv) {
+        toggleBtn.addEventListener('click', () => {
+            const isCollapsed = contentDiv.classList.toggle('collapsed');
+            toggleBtn.setAttribute('aria-expanded', String(!isCollapsed)); // Ensure string value for attribute
+            toggleBtn.textContent = isCollapsed ? 'Show Detailed Battle Logs ►' : 'Hide Detailed Battle Logs ▼';
+        });
+    } else {
+        if (!toggleBtn) console.warn("Toggle detailed logs button not found.");
+        if (!contentDiv) console.warn("Detailed battle logs content div not found.");
+    }
+
+    if (copyBtn && contentDiv) {
+        copyBtn.addEventListener('click', async () => {
+            try {
+                // For <pre><code>, textContent is usually best for copying underlying text
+                await navigator.clipboard.writeText(contentDiv.textContent || ''); 
+                copyBtn.textContent = '📋 Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Copy Battle Logs';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy detailed logs: ', err);
+                copyBtn.textContent = 'Error Copying';
+                 setTimeout(() => {
+                    copyBtn.textContent = '📋 Copy Battle Logs';
+                }, 2000);
+            }
+        });
+    } else {
+        if (!copyBtn) console.warn("Copy detailed logs button not found.");
+        // contentDiv warning handled by toggle button section
+    }
+}
+// --- END NEW FUNCTION ---
+
 function init() {
     populateUI(); 
     
@@ -92,6 +119,9 @@ function init() {
     } else {
         console.error("Battle button not found.");
     }
+    
+    // --- CALL a new function to setup detailed log controls ---
+    setupDetailedLogControls();
 }
 
 document.addEventListener('DOMContentLoaded', init);

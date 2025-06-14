@@ -728,13 +728,15 @@ body {
     color: var(--text-parchment-gold);
 }
 
-/* NEW: Styles for results actions bar and buttons */
+/* MODIFIED: Styles for results actions bar and buttons */
+/* This class is now only used for the Detailed Battle Logs controls */
 .results-actions-bar {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    margin: -1rem auto 1.5rem auto; /* Positioned after winner announcement, before details */
+    /* Adjusted margin as it's now within outcome-analysis, before AI log content */
+    margin: 1rem auto 1rem auto; 
 }
 
 .results-details-toggle-btn,
@@ -757,19 +759,46 @@ body {
     border-color: var(--surface-border-hover);
 }
 
-/* NEW: For collapsing results details content */
+/* Styles for #results-details-content (the main story/analysis wrapper) */
+/* This will now always be expanded. The .collapsed class is not used for it anymore. */
 #results-details-content {
-    transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* For smooth collapse */
-    max-height: 5000px; /* Arbitrary large number for open state, adjust as needed */
+    /* No transition or max-height needed here anymore if always expanded */
     opacity: 1;
-    overflow: hidden; /* Can be hidden to prevent content peeking during animation */
+    overflow: visible; 
 }
-#results-details-content.collapsed {
+/* REMOVED: #results-details-content.collapsed styles as it's no longer toggled */
+
+/* Styles for #detailed-battle-logs-content (the AI log content) */
+.collapsible-content { /* Generic class for collapsible sections */
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out, padding-top 0.3s ease-out, padding-bottom 0.3s ease-out;
+    overflow: hidden;
+    opacity: 1;
+    max-height: 5000px; /* Arbitrary large number for open state */
+}
+.collapsible-content.collapsed {
     max-height: 0;
     opacity: 0;
-    overflow: hidden; /* Important for collapse */
-    margin-top: 0;
-    margin-bottom: 0;
+    margin-top: 0 !important; /* Ensure no margin when collapsed */
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+/* Styling for the AI Log content itself, if needed */
+#detailed-battle-logs-content .ai-log-fighter {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: rgba(0,0,0,0.1);
+    border-left: 3px solid var(--border-scroll);
+    border-radius: 4px;
+}
+#detailed-battle-logs-content pre {
+    font-family: 'Courier New', Courier, monospace; /* Ensure monospace for pre/code */
+    font-size: 0.85em; /* Adjust as needed */
+    line-height: 1.4;
+    color: var(--text-parchment-gold);
+}
+#detailed-battle-logs-content code {
+    display: block;
 }
 
 
@@ -779,7 +808,7 @@ body {
     color: var(--text-primary);
     text-align: left;
     max-width: 80ch;
-    margin: 1rem auto 2rem auto; /* Adjusted margin as actions bar is above */
+    margin: 1rem auto 2rem auto; /* Keep existing margin */
 }
 
 .phase-header {
@@ -1060,6 +1089,17 @@ body {
 .char-pakku { color: #add8e6; font-weight: bold; }
 .char-jeong-jeong { color: #cc6666; font-weight: bold; }
 
+/* Detailed Battle Logs specific styling */
+.detailed-battle-logs-section {
+    margin-top: 2rem; /* Space above this section */
+    border-top: 1px solid var(--surface-border);
+    padding-top: 1.5rem;
+}
+
+.detailed-battle-logs-controls { /* Uses .results-actions-bar styling */
+    margin-bottom: 1rem; /* Space between controls and log content */
+}
+
 
 @media (max-width: 1024px) {
     .archetype-intros { grid-template-columns: 1fr; }
@@ -1082,8 +1122,18 @@ body {
     .archetype-intro { font-size: 0.9rem; }
     .mode-options { flex-direction: column; gap: 0.5rem; }
     
-    .results-actions-bar { flex-direction: column; gap: 0.5rem; }
-    .results-details-toggle-btn, .results-copy-btn { font-size: 0.85rem; padding: 0.5rem 1rem; width: 100%; max-width: 200px; }
+    /* Updated for when .results-actions-bar is used for AI log controls */
+    .detailed-battle-logs-controls.results-actions-bar { 
+        flex-direction: column; 
+        gap: 0.5rem; 
+    }
+    .detailed-battle-logs-controls .results-details-toggle-btn, 
+    .detailed-battle-logs-controls .results-copy-btn { 
+        font-size: 0.85rem; 
+        padding: 0.5rem 1rem; 
+        width: 100%; 
+        max-width: 250px; /* Adjusted max-width */
+    }
 }
 
 @media (max-width: 480px) {

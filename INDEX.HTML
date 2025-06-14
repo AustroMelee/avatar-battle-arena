@@ -113,13 +113,15 @@
                     <div class="win-probability" id="win-probability"></div>
                 </div>
                 
-                <!-- This toggle button is for battle-story and outcome-analysis (excluding detailed-battle-logs) -->
+                <!-- REMOVED general results toggle and copy bar -->
+                <!-- 
                 <div class="results-actions-bar">
                     <button id="toggle-results-details-btn" class="results-details-toggle-btn" aria-expanded="true">Hide Story & Analysis ▼</button>
                     <button id="copy-results-story-btn" class="results-copy-btn">📋 Copy Story</button> 
                 </div>
+                -->
 
-                <div id="results-details-content"> 
+                <div id="results-details-content"> <!-- This div will no longer be directly toggled by its own button -->
                     <article class="battle-story" id="battle-story"></article>
                     <div class="outcome-analysis" id="outcome-analysis">
                         <h3 class="analysis-title">Outcome Analysis</h3>
@@ -134,9 +136,11 @@
                         <!-- NEW: Detailed Battle Logs Section (within outcome-analysis) -->
                         <div class="detailed-battle-logs-section">
                             <div class="detailed-battle-logs-controls results-actions-bar">
+                                <!-- MODIFIED: Button text and aria-expanded -->
                                 <button id="toggle-detailed-logs-btn" class="results-details-toggle-btn" aria-expanded="false">Show Detailed Battle Logs ►</button>
                                 <button id="copy-detailed-logs-btn" class="results-copy-btn">📋 Copy Battle Logs</button>
                             </div>
+                            <!-- MODIFIED: Add .collapsed class by default -->
                             <div id="detailed-battle-logs-content" class="collapsible-content collapsed">
                                 <!-- AI Logs will be populated here by JS -->
                             </div>
