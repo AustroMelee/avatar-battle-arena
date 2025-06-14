@@ -1,10 +1,3 @@
-Okay, I understand the request. You want to change the visual order of elements on the page so that the "Location Selection" section appears before the "Archetype Info Section" (which displays the battle lore/matchup text).
-
-This is primarily an HTML structure change. I'll modify index.html to reflect this new order.
-
-Here's the updated index.html file. I've moved the <section class="archetype-info-section" ...> block to appear after the <section class="location-section" ...> block.
-
-<!-- FILE: index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -136,6 +129,3 @@ Here's the updated index.html file. I've moved the <section class="archetype-inf
 <script src="js/main.js" type="module" defer></script>
 </body>
 </html>
-
-
-No changes to CSS or JavaScript files are needed for this specific layout adjustment. The existing CSS should adapt to the new order of these block-level sections. The JavaScript logic that populates these sections (updateArchetypeInfo(), etc.) will still function correctly as it targets elements by their IDs, which haven't changed.
