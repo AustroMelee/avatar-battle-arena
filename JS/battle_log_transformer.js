@@ -1,15 +1,17 @@
 // FILE: js/battle_log_transformer.js
 'use strict';
 
-import { characters } from './data_characters.js'; 
-import { phaseTemplates } from './narrative-v2.js';
+// Version 1.1: Null-Safety Pass
+
+import { characters } from './data_characters.js';
+import { phaseTemplates } from './narrative-v2.js'; // Assuming this is correctly structured
 
 function determineImpactLevel(effectivenessLabel, moveType) {
-    if (!effectivenessLabel) return 'low';
+    if (!effectivenessLabel || typeof effectivenessLabel !== 'string') return 'low'; // Default if label is missing
     switch (effectivenessLabel.toLowerCase()) {
         case 'critical': return 'critical';
         case 'strong': return 'high';
-        case 'normal': return moveType === 'Finisher' ? 'high' : 'medium';
+        case 'normal': return (moveType === 'Finisher' || moveType === 'finisher') ? 'high' : 'medium'; // Ensure case insensitivity for moveType
         case 'weak': return 'low';
         default: return 'low';
     }
@@ -18,93 +20,90 @@ function determineImpactLevel(effectivenessLabel, moveType) {
 export function transformEventsToAnimationQueue(structuredLogEvents) {
     const animationQueue = [];
     if (!structuredLogEvents || !Array.isArray(structuredLogEvents)) {
-        console.error("Battle Log Transformer: Invalid structuredLogEvents input", structuredLogEvents);
-        return animationQueue;
+        // console.error("Battle Log Transformer (transformEventsToAnimationQueue): Invalid structuredLogEvents input", structuredLogEvents);
+        return animationQueue; // Return empty queue
     }
 
     let lastEventWasKOAction = false;
 
     structuredLogEvents.forEach(event => {
         if (!event || typeof event.type !== 'string') {
-            console.warn("Skipping invalid event object:", event);
-            return;
+            // console.warn("Battle Log Transformer: Skipping invalid event object in animation queue:", event);
+            return; // Skip invalid event
         }
 
-        // Reset flag for new events unless it's the direct follow-up summary KO event
         if (event.type !== 'battle_end_ko_event') {
              lastEventWasKOAction = false;
         }
+
+        let textContent = typeof event.text === 'string' ? event.text : ''; // Ensure text is always a string
 
         switch (event.type) {
             case 'phase_header_event':
                 animationQueue.push({
                     isPhaseHeader: true,
                     text: `${event.phaseName || 'New Phase'} ${event.phaseEmoji || '⚔️'}`,
-                    pauseAfter: 1200, 
+                    pauseAfter: event.pauseAfter || 1200,
                 });
                 break;
             case 'dialogue_event':
                 animationQueue.push({
-                    actorId: event.actorId,
-                    characterName: event.characterName,
-                    text: event.text,
-                    isDialogue: true, 
-                    dialogueType: event.dialogueType, 
-                    pauseAfter: event.text.length > 50 ? 1000 : 600, 
+                    actorId: event.actorId, // May be null for narrator
+                    characterName: event.characterName || (event.actorId ? (characters[event.actorId]?.name || event.actorId) : 'Narrator'),
+                    text: textContent,
+                    isDialogue: true,
+                    dialogueType: event.dialogueType || 'general', // Default dialogueType
+                    pauseAfter: event.pauseAfter !== undefined ? event.pauseAfter : (textContent.length > 50 ? 1000 : 600),
                 });
                 break;
             case 'move_action_event':
                 animationQueue.push({
                     actorId: event.actorId,
-                    characterName: event.characterName,
-                    moveName: event.moveName,
-                    moveType: event.moveType, 
-                    effectivenessLabel: event.effectivenessLabel, 
+                    characterName: event.characterName || (event.actorId ? (characters[event.actorId]?.name || event.actorId) : 'Attacker'),
+                    moveName: event.moveName || 'Unknown Move',
+                    moveType: event.moveType || 'unknown',
+                    effectivenessLabel: event.effectivenessLabel || 'Normal',
                     impactLevel: determineImpactLevel(event.effectivenessLabel, event.moveType),
-                    text: event.text, 
+                    text: textContent,
                     isMoveAction: true,
-                    pauseAfter: 1000, 
+                    pauseAfter: event.pauseAfter || 1000,
                 });
-                if (event.isKOAction) {
+                if (event.isKOAction) { // Check if this specific move was a KO
                     lastEventWasKOAction = true;
                 }
                 break;
             case 'collateral_damage_event':
                 animationQueue.push({
-                    actorId: event.actorId, 
-                    characterName: event.actorId ? characters[event.actorId]?.name : 'Environment',
-                    text: event.text,
+                    actorId: event.actorId, // Might be null if environment acts on its own
+                    characterName: event.actorId ? (characters[event.actorId]?.name || event.actorId) : 'Environment',
+                    text: textContent,
                     isEnvironmental: true,
-                    impactLevel: 'medium', 
-                    pauseAfter: 700,
+                    impactLevel: event.impactLevel || 'medium', // Default impact for collateral
+                    pauseAfter: event.pauseAfter || 700,
                 });
                 break;
             case 'environmental_summary_event':
-                if (event.texts && event.texts.length > 0) {
+                if (event.texts && Array.isArray(event.texts) && event.texts.length > 0) {
                     event.texts.forEach(txt => {
-                        animationQueue.push({
-                            text: `🌍 Environment: ${txt}`,
-                            isEnvironmental: true,
-                            impactLevel: 'low', 
-                            pauseAfter: 600,
-                        });
+                        if (typeof txt === 'string') { // Ensure each text is a string
+                            animationQueue.push({
+                                text: `🌍 Environment: ${txt}`,
+                                isEnvironmental: true,
+                                impactLevel: 'low',
+                                pauseAfter: event.pauseAfterPerItem || 600, // Allow per-item pause customization
+                            });
+                        }
                     });
                 }
                 break;
-            
-            case 'battle_end_ko_event': 
-                if (!lastEventWasKOAction) { 
+
+            case 'battle_end_ko_event':
+                if (!lastEventWasKOAction) { // Only add if KO wasn't part of the move description
                     animationQueue.push({
-                        text: event.text, 
-                        impactLevel: 'critical', 
-                        isMoveAction: false, 
-                        isDialogue: false,
-                        pauseAfter: 2500,
+                        text: textContent,
+                        impactLevel: 'critical', // High impact for battle end
+                        pauseAfter: event.pauseAfter || 2500,
                     });
-                } else {
-                    // Optionally, push a very short "VICTORY!" or similar if desired,
-                    // or simply let the subsequent conclusion_event handle the win text.
-                    // For now, we skip if the KO was already in the move.
                 }
                 break;
 
@@ -113,100 +112,116 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
             case 'timeout_victory_event':
             case 'conclusion_event':
                 animationQueue.push({
-                    text: event.text,
-                    impactLevel: 'high', 
-                    isMoveAction: false, 
-                    isDialogue: false,
-                    pauseAfter: 2000,
+                    text: textContent,
+                    impactLevel: 'high',
+                    pauseAfter: event.pauseAfter || 2000,
                 });
                 break;
             default:
-                // console.warn(`Unknown event type for animation: ${event.type}`, event);
-                if (event.text && typeof event.text === 'string') {
+                // For unknown event types, if they have text, add them as general informational lines
+                if (textContent) {
                     animationQueue.push({
-                        text: event.text,
-                        impactLevel: 'low',
-                        pauseAfter: 500
+                        text: textContent,
+                        impactLevel: 'low', // Low impact for unknown events
+                        pauseAfter: event.pauseAfter || 500,
                     });
+                } else {
+                    // console.warn(`Battle Log Transformer: Unknown event type for animation with no text: ${event.type}`, event);
                 }
                 break;
         }
     });
-    // console.log("Transformed animation queue:", animationQueue);
     return animationQueue;
 }
 
 export function transformEventsToHtmlLog(structuredLogEvents) {
     if (!structuredLogEvents || !Array.isArray(structuredLogEvents)) {
-        console.error("Battle Log Transformer: Invalid structuredLogEvents input for HTML log", structuredLogEvents);
-        return "<p>Error: Battle log data is corrupted.</p>";
+        // console.error("Battle Log Transformer (transformEventsToHtmlLog): Invalid structuredLogEvents input", structuredLogEvents);
+        return "<p>Error: Battle log data is corrupted or unavailable.</p>";
     }
-    
+
     let htmlLog = "";
-    let currentPhaseKeyForHtml = null; 
+    let currentPhaseKeyForHtml = null;
     let isPhaseDivOpen = false;
 
     structuredLogEvents.forEach(event => {
-        if (!event || typeof event.type !== 'string') return;
+        if (!event || typeof event.type !== 'string') {
+            // console.warn("Battle Log Transformer: Skipping invalid event object for HTML log:", event);
+            return;
+        }
+
+        let textContent = typeof event.text === 'string' ? event.text : ''; // Ensure text is a string
+        let htmlContentForEvent = event.html_content && typeof event.html_content === 'string' ? event.html_content : '';
 
         if (event.type === 'phase_header_event') {
-            if (isPhaseDivOpen) { 
-                htmlLog += `</div>`; 
+            if (isPhaseDivOpen) {
+                htmlLog += `</div>`; // Close previous phase div
             }
-            currentPhaseKeyForHtml = event.phaseKey;
-            htmlLog += phaseTemplates.phaseWrapper.replace('{phaseKey}', currentPhaseKeyForHtml).replace('{phaseContent}', event.html_content || ''); 
-            isPhaseDivOpen = true; 
-        } else if (event.html_content && typeof event.html_content === 'string') {
-            if (isPhaseDivOpen && htmlLog.endsWith(event.html_content)) {
-                // Header was already added with the wrapper
-            } else if (isPhaseDivOpen) {
-                htmlLog = htmlLog.slice(0, -6); 
-                htmlLog += event.html_content + `</div>`; 
+            currentPhaseKeyForHtml = event.phaseKey || 'unknown-phase';
+            // Use html_content if provided (which already includes header template), otherwise build it
+            const phaseHeaderHtml = htmlContentForEvent ||
+                (phaseTemplates.header || '')
+                    .replace('{phaseDisplayName}', event.phaseName || 'New Phase')
+                    .replace('{phaseEmoji}', event.phaseEmoji || '⚔️');
+
+            htmlLog += (phaseTemplates.phaseWrapper || '<div>{phaseContent}</div>')
+                .replace('{phaseKey}', currentPhaseKeyForHtml)
+                .replace('{phaseContent}', phaseHeaderHtml);
+            isPhaseDivOpen = true;
+
+        } else if (htmlContentForEvent) { // For events that provide pre-formatted HTML (like move_action_event)
+            if (isPhaseDivOpen) {
+                htmlLog = htmlLog.slice(0, -6); // Remove closing </div> of phaseWrapper
+                htmlLog += htmlContentForEvent + `</div>`; // Add event's HTML and re-close
             } else {
-                 htmlLog += event.html_content; 
+                htmlLog += htmlContentForEvent; // Append directly if not in a phase
             }
-        } 
-        else if (event.text && typeof event.text === 'string') { 
+        } else if (textContent) { // For text-only events, wrap them
             let contentToAppend = "";
-            switch(event.type) {
-                case 'battle_end_ko_event': 
-                    contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${event.text}</p>`;
+            switch (event.type) {
+                case 'battle_end_ko_event':
+                    contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${textContent}</p>`;
                     break;
                 case 'stalemate_result_event':
-                    contentToAppend = `<p class="final-blow">${event.text}</p>`;
+                case 'draw_result_event':
+                case 'timeout_victory_event':
+                    contentToAppend = `<p class="final-blow">${textContent}</p>`;
                     break;
-                case 'draw_result_event': contentToAppend = `<p class="final-blow">${event.text}</p>`; break;
-                case 'timeout_victory_event': contentToAppend = `<p class="final-blow">${event.text}</p>`; break;
                 case 'conclusion_event':
-                    contentToAppend = `<p class="conclusion">${event.text}</p>`;
+                    contentToAppend = `<p class="conclusion">${textContent}</p>`;
                     break;
-                case 'environmental_summary_event': 
-                    if (event.texts && event.texts.length > 0) {
+                case 'environmental_summary_event':
+                    if (event.texts && Array.isArray(event.texts) && event.texts.length > 0) {
                         contentToAppend += `<div class="environmental-summary">`;
-                        contentToAppend += phaseTemplates.environmentalImpactHeader;
+                        contentToAppend += (phaseTemplates.environmentalImpactHeader || '<h5>Environmental Impact 🌍</h5>');
                         event.texts.forEach(txt => {
-                            contentToAppend += `<p class="environmental-impact-text">${txt}</p>`;
+                            if (typeof txt === 'string') { // Ensure text is string
+                                contentToAppend += `<p class="environmental-impact-text">${txt}</p>`;
+                            }
                         });
                         contentToAppend += `</div>`;
                     }
                     break;
-                default:
-                    contentToAppend = `<p>${event.text}</p>`; 
+                default: // For dialogue_event, collateral_damage_event (if no html_content), etc.
+                    let pClass = "log-generic";
+                    if (event.isDialogue) pClass = "log-dialogue";
+                    if (event.isEnvironmental) pClass = "log-environmental";
+                    contentToAppend = `<p class="${pClass}">${textContent}</p>`;
                     break;
             }
-            
+
             if (isPhaseDivOpen) {
-                htmlLog = htmlLog.slice(0, -6); 
-                htmlLog += contentToAppend + `</div>`; 
+                htmlLog = htmlLog.slice(0, -6); // Remove closing </div>
+                htmlLog += contentToAppend + `</div>`; // Add content and re-close
             } else {
-                 htmlLog += contentToAppend;
+                htmlLog += contentToAppend;
             }
         }
     });
 
-    if (isPhaseDivOpen && !htmlLog.endsWith(`</div>`)) { 
+    if (isPhaseDivOpen && !htmlLog.endsWith(`</div>`)) { // Ensure the last phase div is closed
         htmlLog += `</div>`;
     }
-    
-    return htmlLog || "<p>The battle unfolds...</p>"; 
+
+    return htmlLog || "<p>The battle unfolds...</p>"; // Fallback if log is empty
 }

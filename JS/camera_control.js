@@ -1,6 +1,8 @@
 // FILE: js/camera_control.js
 'use strict';
 
+// Version 1.1: Null-Safety Pass
+
 let simulationContainer = null;
 let zoomLevel = 1.0;
 const MIN_ZOOM = 0.5;
@@ -12,134 +14,111 @@ let scrollTimeoutId = null;
 let zoomInButton = null;
 let zoomOutButton = null;
 
-/**
- * Initializes camera controls with the simulation container and buttons.
- * @param {HTMLElement} container - The main simulation log container.
- * @param {HTMLElement} zInBtn - The zoom-in button.
- * @param {HTMLElement} zOutBtn - The zoom-out button.
- */
 export function initializeCameraControls(container, zInBtn, zOutBtn) {
+    // container, zInBtn, zOutBtn can be null if IDs are not found in DOM
     simulationContainer = container;
     zoomInButton = zInBtn;
     zoomOutButton = zOutBtn;
 
     if (simulationContainer) {
-        // Detect manual scroll
         simulationContainer.addEventListener('scroll', () => {
             isUserScrolling = true;
-            clearTimeout(scrollTimeoutId);
+            clearTimeout(scrollTimeoutId); // Clear existing timeout
             scrollTimeoutId = setTimeout(() => {
                 isUserScrolling = false;
-            }, 1000); // User is considered "done" scrolling after 1s of no scroll events
+            }, 1000);
         });
+    } else {
+        // console.warn("Camera Control: Simulation container not provided for scroll listener.");
     }
 
     if (zoomInButton) {
         zoomInButton.addEventListener('click', handleZoomIn);
+    } else {
+        // console.warn("Camera Control: Zoom-in button not provided.");
     }
     if (zoomOutButton) {
         zoomOutButton.addEventListener('click', handleZoomOut);
+    } else {
+        // console.warn("Camera Control: Zoom-out button not provided.");
     }
-    updateZoomButtons();
+    updateZoomButtons(); // Update button states initially
 }
 
-/**
- * Enables camera controls.
- * @param {HTMLElement} container - The simulation container to apply controls to.
- */
 export function enableCameraControls(container) {
-    simulationContainer = container; // Ensure it's set if called standalone
+    if (container) simulationContainer = container; // Update container if a new one is passed
+    
     if (zoomInButton) zoomInButton.disabled = false;
     if (zoomOutButton) zoomOutButton.disabled = false;
     updateZoomButtons();
 }
 
-/**
- * Disables camera controls.
- */
 export function disableCameraControls() {
     if (zoomInButton) zoomInButton.disabled = true;
     if (zoomOutButton) zoomOutButton.disabled = true;
 }
 
-/**
- * Resets camera zoom and scroll position.
- * @param {HTMLElement} container - The simulation container.
- */
 export function resetCamera(container) {
-    simulationContainer = container || simulationContainer;
+    if (container) simulationContainer = container; // Update if new container passed
+
     if (simulationContainer) {
         zoomLevel = 1.0;
-        applyZoom();
-        simulationContainer.scrollTop = 0; // Scroll to top
+        applyZoom(); // applyZoom handles null simulationContainer
+        simulationContainer.scrollTop = 0;
     }
-    isUserScrolling = false;
+    isUserScrolling = false; // Reset user scroll lock
+    clearTimeout(scrollTimeoutId); // Clear any pending scroll timeout
     updateZoomButtons();
 }
 
-/**
- * Scrolls the simulation container to keep the latest message in view.
- * Only scrolls if the user is not currently manually scrolling.
- * @param {HTMLElement} container - The simulation container.
- * @param {HTMLElement} latestMessageElement - The newly added message element.
- */
 export function focusOnLatestMessage(container, latestMessageElement) {
-    simulationContainer = container || simulationContainer;
+    if (container) simulationContainer = container; // Update if new container passed
+
     if (simulationContainer && latestMessageElement && !isUserScrolling) {
-        // Smooth scroll to the bottom or to the element
-        // latestMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        // A simpler scrollTop for potentially better control with typewriter
+        // Using scrollTop = scrollHeight is generally more reliable for "always scroll to bottom"
         simulationContainer.scrollTop = simulationContainer.scrollHeight;
     }
 }
 
-/**
- * Handles zoom-in button click.
- */
 function handleZoomIn() {
     if (zoomLevel < MAX_ZOOM) {
-        zoomLevel = parseFloat((zoomLevel + ZOOM_INCREMENT).toFixed(2)); // toFixed to handle floating point issues
-        zoomLevel = Math.min(zoomLevel, MAX_ZOOM);
+        zoomLevel = parseFloat((zoomLevel + ZOOM_INCREMENT).toFixed(2));
+        zoomLevel = Math.min(zoomLevel, MAX_ZOOM); // Ensure it doesn't exceed MAX_ZOOM
         applyZoom();
     }
     updateZoomButtons();
 }
 
-/**
- * Handles zoom-out button click.
- */
 function handleZoomOut() {
     if (zoomLevel > MIN_ZOOM) {
         zoomLevel = parseFloat((zoomLevel - ZOOM_INCREMENT).toFixed(2));
-        zoomLevel = Math.max(zoomLevel, MIN_ZOOM);
+        zoomLevel = Math.max(zoomLevel, MIN_ZOOM); // Ensure it doesn't go below MIN_ZOOM
         applyZoom();
     }
     updateZoomButtons();
 }
 
-/**
- * Applies the current zoom level to the simulation container.
- */
 function applyZoom() {
     if (simulationContainer) {
-        // It's often better to zoom a child content wrapper than the scroll container itself
-        // to avoid issues with scrollbar calculations. Assuming a direct child or the container itself for now.
-        simulationContainer.style.transformOrigin = 'top left'; // Or 'center center' depending on desired effect
-        simulationContainer.style.transform = `scale(${zoomLevel})`;
-
-        // If zooming the container itself, might need to adjust parent height or overflow
-        // For simplicity, this example scales the container. A more robust solution might scale an inner div.
+        // Ensure style object exists
+        if (simulationContainer.style) {
+            simulationContainer.style.transformOrigin = 'top left';
+            simulationContainer.style.transform = `scale(${zoomLevel})`;
+        } else {
+            // console.warn("Camera Control (applyZoom): simulationContainer.style is undefined.");
+        }
+    } else {
+        // console.warn("Camera Control (applyZoom): simulationContainer is null.");
     }
 }
 
-/**
- * Updates the enabled/disabled state of zoom buttons based on current zoom level.
- */
 function updateZoomButtons() {
     if (zoomInButton) {
-        zoomInButton.disabled = zoomLevel >= MAX_ZOOM;
+        // Disable if zoomLevel is at or above MAX_ZOOM (allowing for floating point inaccuracies)
+        zoomInButton.disabled = zoomLevel >= MAX_ZOOM - (ZOOM_INCREMENT / 2);
     }
     if (zoomOutButton) {
-        zoomOutButton.disabled = zoomLevel <= MIN_ZOOM;
+        // Disable if zoomLevel is at or below MIN_ZOOM
+        zoomOutButton.disabled = zoomLevel <= MIN_ZOOM + (ZOOM_INCREMENT / 2);
     }
 }

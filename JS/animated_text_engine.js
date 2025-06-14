@@ -1,19 +1,21 @@
 // FILE: js/animated_text_engine.js
 'use strict';
 
-import { getCharacterImage } from './ui.js'; 
-import { focusOnLatestMessage } from './camera_control.js';
+// Version 1.1: Null-Safety Pass
 
-const TYPEWRITER_SPEED_MS = 25; 
-const EMOJI_ANIMATION_DURATION_MS = 500; 
-const HIGH_IMPACT_PAUSE_MS = 1500; 
-const DEFAULT_PAUSE_MS = 500; 
+import { getCharacterImage } from './ui.js'; // ui.js should be robust
+import { focusOnLatestMessage } from './camera_control.js'; // camera_control.js should be robust
+
+const TYPEWRITER_SPEED_MS = 25;
+const EMOJI_ANIMATION_DURATION_MS = 500;
+const HIGH_IMPACT_PAUSE_MS = 1500;
+const DEFAULT_PAUSE_MS = 500;
 
 let currentTimeoutId = null;
 let animationQueueInternal = [];
 let currentMessageIndex = 0;
 let simulationContainerElement = null;
-let onStepCompleteCallback = null; 
+let onStepCompleteCallbackInternal = null; // Renamed to avoid conflict
 
 export function stopCurrentAnimation() {
     if (currentTimeoutId) {
@@ -23,114 +25,130 @@ export function stopCurrentAnimation() {
 }
 
 export function startAnimationSequence(queue, container, onComplete) {
-    stopCurrentAnimation(); 
-    animationQueueInternal = [...queue]; 
+    stopCurrentAnimation();
+    animationQueueInternal = Array.isArray(queue) ? [...queue] : []; // Ensure queue is an array
     currentMessageIndex = 0;
-    simulationContainerElement = container;
-    onStepCompleteCallback = onComplete;
+    simulationContainerElement = container; // Assume container is valid HTMLElement if passed
+    onStepCompleteCallbackInternal = typeof onComplete === 'function' ? onComplete : null;
 
-    if (animationQueueInternal.length === 0) {
-        console.warn("Animation queue is empty.");
-        if (onStepCompleteCallback) onStepCompleteCallback(true); 
+    if (!simulationContainerElement) {
+        // console.error("Animated Text Engine: Simulation container is null. Cannot start animation.");
+        if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true); // Indicate completion (due to error)
         return;
     }
-    
+
+    if (animationQueueInternal.length === 0) {
+        // console.warn("Animated Text Engine: Animation queue is empty.");
+        if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true);
+        return;
+    }
+
     processNextMessage();
 }
 
 function processNextMessage() {
-    if (!simulationContainerElement) { // Guard if container somehow becomes null mid-sequence
-        console.error("Simulation container is null, cannot process messages.");
-        if (onStepCompleteCallback) onStepCompleteCallback(true); // End of queue due to error
+    if (!simulationContainerElement) {
+        // console.error("Animated Text Engine: Simulation container became null during processing.");
+        if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true); // End due to error
         return;
     }
     if (currentMessageIndex >= animationQueueInternal.length) {
-        console.log("Animation queue finished.");
-        if (onStepCompleteCallback) onStepCompleteCallback(true); 
+        // console.log("Animated Text Engine: Animation queue finished.");
+        if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true);
         return;
     }
 
     const message = animationQueueInternal[currentMessageIndex];
     currentMessageIndex++;
 
-    renderMessage(message);
-}
-
-function renderMessage(message) {
-    if (!simulationContainerElement || !message || typeof message.text !== 'string') {
-        console.error("Invalid message object or container for rendering:", message);
+    if (!message || typeof message.text !== 'string') { // Basic validation of message object
+        // console.warn("Animated Text Engine: Skipping invalid message object:", message);
+        // Schedule next message processing to keep the queue moving
         currentTimeoutId = setTimeout(() => {
-            if (onStepCompleteCallback) onStepCompleteCallback(false); // Still call callback
+            if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(false); // Indicate a step was "processed" (skipped)
             processNextMessage();
         }, DEFAULT_PAUSE_MS);
         return;
     }
 
+    renderMessage(message);
+}
+
+function renderMessage(message) { // message is already validated by processNextMessage
     const lineElement = document.createElement('div');
     lineElement.className = 'simulation-line';
     if (message.isPhaseHeader) lineElement.classList.add('phase-header-simulated');
     if (message.isMoveAction) lineElement.classList.add('move-action-simulated');
     if (message.isDialogue) {
         lineElement.classList.add('dialogue-simulated');
-        // Add specific class for dialogue type (spoken, internal, action)
-        if(message.dialogueType) lineElement.classList.add(`dialogue-${message.dialogueType}`);
+        if (message.dialogueType) lineElement.classList.add(`dialogue-${message.dialogueType}`);
     }
     if (message.isEnvironmental) lineElement.classList.add('environmental-simulated');
 
-    if (message.actorId) {
-        const iconUrl = getCharacterImage(message.actorId); 
+    if (message.actorId) { // Check if actorId exists
+        const iconUrl = getCharacterImage(message.actorId); // getCharacterImage should return null if not found
         if (iconUrl) {
             const iconImg = document.createElement('img');
             iconImg.src = iconUrl;
-            iconImg.alt = message.characterName || message.actorId;
+            iconImg.alt = message.characterName || message.actorId; // Fallback alt text
             iconImg.className = 'simulation-char-icon';
             lineElement.appendChild(iconImg);
         }
     }
-    
+
     const textSpan = document.createElement('span');
     textSpan.className = 'simulation-text-content';
-    
-    // Prepend emoji to textSpan if it's a move action and emoji exists
-    if (message.isMoveAction && message.moveType) { 
+
+    if (message.isMoveAction && message.moveType) {
         const emoji = getEmojiForMoveType(message.moveType, message.effectivenessLabel);
         if (emoji) {
             const emojiSpan = document.createElement('span');
             emojiSpan.className = 'simulation-move-emoji';
-            emojiSpan.textContent = emoji + ' '; 
-            textSpan.appendChild(emojiSpan); 
+            emojiSpan.textContent = emoji + ' '; // Add space after emoji
+            textSpan.appendChild(emojiSpan);
         }
     }
     lineElement.appendChild(textSpan);
-    
-    simulationContainerElement.appendChild(lineElement);
-    focusOnLatestMessage(simulationContainerElement, lineElement); 
 
-    typeMessage(textSpan, message.text, () => {
+    if (simulationContainerElement) { // Ensure container still exists
+        simulationContainerElement.appendChild(lineElement);
+        focusOnLatestMessage(simulationContainerElement, lineElement); // focusOnLatestMessage should be robust
+    }
+
+
+    typeMessage(textSpan, message.text, () => { // typeMessage handles onFinished
         const emojiElement = textSpan.querySelector('.simulation-move-emoji');
         if (emojiElement && message.impactLevel) {
-            animateEmoji(emojiElement, message.impactLevel);
+            animateEmoji(emojiElement, message.impactLevel); // animateEmoji should be robust
         }
 
-        const pauseDuration = message.pauseAfter || 
-                              (message.impactLevel === 'high' || message.impactLevel === 'critical' ? HIGH_IMPACT_PAUSE_MS : DEFAULT_PAUSE_MS);
-        
+        // Determine pause duration, ensuring message.pauseAfter is a number if it exists
+        let pauseDuration = DEFAULT_PAUSE_MS;
+        if (typeof message.pauseAfter === 'number' && message.pauseAfter > 0) {
+            pauseDuration = message.pauseAfter;
+        } else if (message.impactLevel === 'high' || message.impactLevel === 'critical') {
+            pauseDuration = HIGH_IMPACT_PAUSE_MS;
+        }
+
         currentTimeoutId = setTimeout(() => {
-            if (onStepCompleteCallback) onStepCompleteCallback(false); 
-            processNextMessage(); 
+            if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(false); // Step complete, not end of queue
+            processNextMessage();
         }, pauseDuration);
     });
 }
 
 function typeMessage(element, text, onFinished) {
+    if (!element || typeof text !== 'string') { // Basic validation
+        // console.warn("Animated Text Engine (typeMessage): Invalid element or text.", { element, text });
+        if (typeof onFinished === 'function') onFinished();
+        return;
+    }
+
     let i = 0;
-    // If there's an emoji already, we type after it.
-    // Otherwise, we clear and type.
     const existingEmoji = element.querySelector('.simulation-move-emoji');
     let textContentTarget = element;
 
     if (existingEmoji) {
-        // Create a new span for the text itself, to append after the emoji
         let actualTextSpan = element.querySelector('.typewriter-target');
         if (!actualTextSpan) {
             actualTextSpan = document.createElement('span');
@@ -139,42 +157,47 @@ function typeMessage(element, text, onFinished) {
         }
         textContentTarget = actualTextSpan;
     }
-    textContentTarget.innerHTML = ''; // Clear only the target span for text
+    textContentTarget.innerHTML = ''; // Clear only the target span
 
     function type() {
+        if (currentTimeoutId === null && i > 0) return; // Animation was stopped
+
         if (i < text.length) {
             textContentTarget.insertAdjacentText('beforeend', text.charAt(i));
             i++;
             currentTimeoutId = setTimeout(type, TYPEWRITER_SPEED_MS);
         } else {
-            if (onFinished) onFinished();
+            currentTimeoutId = null; // Clear ID as this typing session is done
+            if (typeof onFinished === 'function') onFinished();
         }
     }
     type();
 }
 
 function animateEmoji(emojiElement, impactLevel) {
-    if (!emojiElement) return;
+    if (!emojiElement) return; // Guard against null element
+
     let animationClass = '';
-    switch (impactLevel?.toLowerCase()) { // Add null check for impactLevel
+    // Safe access to impactLevel and toLowerCase
+    const level = typeof impactLevel === 'string' ? impactLevel.toLowerCase() : 'low';
+
+    switch (level) {
         case 'critical':
         case 'high':
-            animationClass = 'emoji-animate-high'; 
+            animationClass = 'emoji-animate-high';
             break;
-        case 'strong': // Strong is often considered high impact
-             animationClass = 'emoji-animate-high'; 
+        case 'strong': // Keep existing behavior for 'strong'
+             animationClass = 'emoji-animate-high';
             break;
         case 'medium':
-            animationClass = 'emoji-animate-medium'; 
-            break;
-        case 'normal': // Normal impact
+        case 'normal':
             animationClass = 'emoji-animate-medium';
             break;
         case 'low':
-            animationClass = 'emoji-animate-low'; 
+            animationClass = 'emoji-animate-low';
             break;
         default:
-            return; 
+            return; // No animation for unknown levels
     }
     emojiElement.classList.add(animationClass);
     setTimeout(() => {
@@ -183,23 +206,26 @@ function animateEmoji(emojiElement, impactLevel) {
 }
 
 function getEmojiForMoveType(moveType, effectivenessLabel) {
-    if (!moveType) return '➡️'; // Default if moveType is undefined
-    if (effectivenessLabel === 'Critical') return '💥';
-    if (effectivenessLabel === 'Strong') return '🔥'; // Strong can still use its own emoji
-    
+    if (typeof effectivenessLabel === 'string') {
+        if (effectivenessLabel.toLowerCase() === 'critical') return '💥';
+        if (effectivenessLabel.toLowerCase() === 'strong') return '🔥';
+    }
+
+    if (!moveType || typeof moveType !== 'string') return '➡️'; // Default if moveType is undefined or not a string
+
     switch (moveType.toLowerCase()) {
         case 'fire': return '🔥';
         case 'water': return '💧';
-        case 'ice': return '❄️'; // Specific for ice
+        case 'ice': return '❄️';
         case 'earth': return '🪨';
-        case 'metal': return '⚙️'; // Specific for metal
+        case 'metal': return '⚙️';
         case 'air': return '💨';
         case 'lightning': return '⚡';
         case 'physical': return '⚔️';
-        case 'utility': return '🛠️'; // More distinct utility emoji
-        case 'special': return '✨'; // For chi-blocking, bloodbending etc.
-        case 'offense': return '⚔️'; // Fallback for general offense
-        case 'defense': return '🛡️'; // Fallback for general defense
-        default: return '➡️'; 
+        case 'utility': return '🛠️';
+        case 'special': return '✨';
+        case 'offense': return '⚔️';
+        case 'defense': return '🛡️';
+        default: return '➡️';
     }
 }
