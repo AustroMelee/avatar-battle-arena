@@ -7,7 +7,9 @@ import { phaseTemplates, battlePhases as phaseDefinitions } from './narrative-v2
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
-import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration } from './engine_narrative-engine.js';
+// --- MODIFIED: Import substituteTokens ---
+import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens } from './engine_narrative-engine.js';
+// --- END MODIFICATION ---
 import { modifyMomentum } from './engine_momentum.js';
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
 import { universalMechanics, locationCurbstompRules, characterCurbstompRules } from './mechanics.js';
@@ -101,7 +103,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
 
     Object.values(universalMechanics).forEach(rule => {
         if (rule.characterId === attacker.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: true, actualAttacker: attacker, actualTarget: defender });
-        if (rule.characterId === defender.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: false, actualAttacker: attacker, actualTarget: defender }); // Attacker is still attacker, rule applies *to* defender
+        if (rule.characterId === defender.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: false, actualAttacker: attacker, actualTarget: defender }); 
     });
 
     if (locationCurbstompRules[locationId]) {
@@ -112,14 +114,14 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
 
             if (rule.appliesToPair && rule.appliesToPair[0] === attacker.id && rule.appliesToPair[1] === defender.id) { applies = true; }
             else if (rule.appliesToCharacter) {
-                if (rule.appliesToCharacter === attacker.id) { applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;} // Rule is about attacker acting
-                else if (rule.appliesToCharacter === defender.id) { applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;} // Rule is about defender being vulnerable to attacker
+                if (rule.appliesToCharacter === attacker.id) { applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;} 
+                else if (rule.appliesToCharacter === defender.id) { applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;} 
             }
             else if (rule.appliesToCharacterElement) {
                 if (attacker.element === rule.appliesToCharacterElement) {applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;}
-                else if (defender.element === rule.appliesToCharacterElement && rule.outcome.type.includes("loss_character")) {applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;} // e.g. firebender penalty
+                else if (defender.element === rule.appliesToCharacterElement && rule.outcome.type.includes("loss_character")) {applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;} 
             }
-            else if (rule.appliesToAll) { applies = true; } // For appliesToAll, attacker/target context for narration can be tricky
+            else if (rule.appliesToAll) { applies = true; } 
 
             if (applies) rulesToCheck.push({ ...rule, source: 'location', actualAttacker: ruleActualAttacker, actualTarget: ruleActualTarget });
         });
@@ -130,7 +132,6 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
     }
     if (characterCurbstompRules[defender.id]) { 
         characterCurbstompRules[defender.id].forEach(rule => {
-            // Only add if it's a vulnerability of the defender that the attacker might exploit, or a self-inflicted rule
             if (rule.outcome.type.includes("loss_character") || rule.outcome.type.includes("self_sabotage") || rule.outcome.type.includes("disadvantage")) {
                  rulesToCheck.push({ ...rule, source: 'character', forAttacker: false, actualAttacker: attacker, actualTarget: defender });
             }
@@ -138,7 +139,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
     }
     
     for (const rule of rulesToCheck) {
-        const characterForRuleApplication = rule.forAttacker ? rule.actualAttacker : rule.actualTarget; // Character whose rule set is being checked
+        const characterForRuleApplication = rule.forAttacker ? rule.actualAttacker : rule.actualTarget; 
         const opponentForRuleApplication = characterForRuleApplication.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker;
         
         const appliedRuleKey = `${rule.id}_${characterForRuleApplication.id}`;
@@ -185,23 +186,32 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                 }
             }
             
-            // Determine narrative attacker/target based on who the rule primarily affects
-            let narrativeAttacker = rule.actualAttacker;
-            let narrativeTarget = rule.actualTarget;
-            if (rule.outcome.type.includes("loss_character") && rule.appliesToCharacter) {
-                narrativeTarget = (rule.appliesToCharacter === attacker.id) ? attacker : defender;
-                narrativeAttacker = (narrativeTarget.id === attacker.id) ? defender : attacker; // The one "causing" the loss
+            let narrativeAttackerForThisRule = rule.actualAttacker;
+            let narrativeTargetForThisRule = rule.actualTarget;
+            
+            // Special handling for "appliesToAll" rules to determine who is the "target" for narrative
+            if (rule.appliesToAll && (rule.outcome.type === "instant_loss_random_character" || rule.outcome.type === "instant_loss_character_if_fall" || rule.outcome.type === "instant_loss_random_character_if_knocked_off")) {
+                 // If a random character is defeated, the rule "acted".
+                 // The one who gets defeated is the target, the other is, by default, the "winner" of this interaction.
+                 // This logic is simplified here; the actual random loser is determined in the outcome block.
+                 // For narration, we might need a more generic source like "The Environment" or "Fate".
+                 // Let's assume the rule implies an "attacker" (the hazard itself) and a "target" (the one affected).
+                 // generateCurbstompNarration will handle substituting "{characterName}" based on the rule's context.
+            } else if (rule.appliesToCharacter && rule.appliesToCharacter === defender.id && !rule.forAttacker) {
+                // Rule applies to defender, so defender is the target for narrative
+                narrativeTargetForThisRule = defender;
+                narrativeAttackerForThisRule = attacker; // Attacker is still the one "causing" the context
             }
 
 
-            const narrativeEvent = generateCurbstompNarration(rule, narrativeAttacker, narrativeTarget, isEscape);
+            const narrativeEvent = generateCurbstompNarration(rule, narrativeAttackerForThisRule, narrativeTargetForThisRule, isEscape);
             if (narrativeEvent) battleEventLog.push(narrativeEvent);
             
             characterForRuleApplication.curbstompRulesAppliedThisBattle.add(appliedRuleKey + (isEscape ? "_escaped" : ""));
 
             if (!isEscape) {
                 const outcome = rule.outcome;
-                let currentTargetForDefeat = narrativeTarget; // Default target is the narrative target
+                let currentTargetForDefeat = narrativeTargetForThisRule; 
 
                 switch (outcome.type) {
                     case "instant_kill_target":
@@ -225,25 +235,30 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     case "instant_loss_random_character":
                     case "instant_loss_character_if_fall":
                     case "instant_loss_random_character_if_knocked_off":
-                        const randomLoser = Math.random() < 0.5 ? rule.actualAttacker : rule.actualTarget; // Use rule's actual attacker/target
+                        const randomLoser = Math.random() < 0.5 ? rule.actualAttacker : rule.actualTarget; 
                         charactersMarkedForDefeat.add(randomLoser.id);
                         aDefeatWasMarkedByThisCheck = true;
                         break;
                     case "conditional_instant_kill_or_self_sabotage":
-                        if (Math.random() < (1 - (rule.selfSabotageChance || 0))) { // Target is defeated
-                            charactersMarkedForDefeat.add(narrativeTarget.id);
+                        if (Math.random() < (1 - (rule.selfSabotageChance || 0))) { 
+                            charactersMarkedForDefeat.add(narrativeTargetForThisRule.id);
                             aDefeatWasMarkedByThisCheck = true;
-                        } else { // Self-sabotage by attacker
-                            narrativeAttacker.hp = clamp(narrativeAttacker.hp - 15, 0, narrativeAttacker.maxHp);
-                            modifyMomentum(narrativeAttacker, -2, `${rule.id} backfired on ${narrativeAttacker.name}`);
+                        } else { 
+                            narrativeAttackerForThisRule.hp = clamp(narrativeAttackerForThisRule.hp - 15, 0, narrativeAttackerForThisRule.maxHp);
+                            modifyMomentum(narrativeAttackerForThisRule, -2, `${rule.id} backfired on ${narrativeAttackerForThisRule.name}`);
                             
-                            // Generate specific self-sabotage narration
-                            const selfSabotageOutcome = {...rule.outcome, successMessage: rule.outcome.selfSabotageMessage || `${narrativeAttacker.name}'s move backfires!`};
-                            const selfSabotageEvent = generateCurbstompNarration({...rule, outcome: selfSabotageOutcome }, narrativeAttacker, narrativeTarget, false);
+                            const selfSabotageOutcome = {...rule.outcome, successMessage: rule.outcome.selfSabotageMessage || `${narrativeAttackerForThisRule.name}'s move backfires!`};
+                            const selfSabotageEvent = generateCurbstompNarration(
+                                {...rule, outcome: selfSabotageOutcome }, 
+                                narrativeAttackerForThisRule, 
+                                narrativeTargetForThisRule, 
+                                false,
+                                { isSelfSabotageOutcome: true } // Pass context to generateCurbstompNarration
+                            );
                             if(selfSabotageEvent) battleEventLog.push(selfSabotageEvent);
 
-                            if (narrativeAttacker.hp <=0) { 
-                                charactersMarkedForDefeat.add(narrativeAttacker.id);
+                            if (narrativeAttackerForThisRule.hp <=0) { 
+                                charactersMarkedForDefeat.add(narrativeAttackerForThisRule.id);
                                 aDefeatWasMarkedByThisCheck = true;
                             }
                         }
@@ -252,13 +267,13 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     case "incapacitation_target_disable_limbs":
                     case "instant_incapacitation_target_bury":
                     case "instant_incapacitation_target_burn":
-                        narrativeTarget.isStunned = true; 
-                        narrativeTarget.hp = clamp(Math.min(narrativeTarget.hp, 10), 0, narrativeTarget.maxHp);
-                        if (narrativeTarget.hp <= 0) {
-                            charactersMarkedForDefeat.add(narrativeTarget.id);
+                        narrativeTargetForThisRule.isStunned = true; 
+                        narrativeTargetForThisRule.hp = clamp(Math.min(narrativeTargetForThisRule.hp, 10), 0, narrativeTargetForThisRule.maxHp);
+                        if (narrativeTargetForThisRule.hp <= 0) {
+                            charactersMarkedForDefeat.add(narrativeTargetForThisRule.id);
                             aDefeatWasMarkedByThisCheck = true;
                         }
-                        battleState.logSystemMessage = `${narrativeTarget.name} is incapacitated by ${narrativeAttacker.name}'s ${rule.id}!`;
+                        battleState.logSystemMessage = `${narrativeTargetForThisRule.name} is incapacitated by ${narrativeAttackerForThisRule.name}'s ${rule.id}!`;
                         break;
                 }
                 if (aDefeatWasMarkedByThisCheck) return true; 
@@ -629,8 +644,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) { 
         const isKOByHp = finalLoserFull.hp <= 0;
+        
         const wasCurbstompKOAlreadyNarrated = battleEventLog.some(
-            e => e.type === 'curbstomp_event' && !e.isEscape && e.text?.includes(finalLoserFull.name) // Check if curbstomp already narrated this defeat
+            e => e.type === 'curbstomp_event' && 
+                 !e.isEscape && 
+                 e.text?.toLowerCase().includes(finalLoserFull.name.toLowerCase()) && // Check if curbstomp text mentioned the loser
+                 (e.text?.toLowerCase().includes("fatal") || e.text?.toLowerCase().includes("defeats") || e.text?.toLowerCase().includes("overwhelms")) // And implies defeat
         );
 
         const isTimeoutVictoryLoopFinished = turn >= 6; 
@@ -649,8 +668,17 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
         }
         
-        fighter1.summary = finalWinnerFull.id === fighter1.id ? (fighter1.summary || `${finalWinnerFull.name}'s victory was sealed by their superior strategy and power.`) : (finalLoserFull.id === fighter1.id ? (fighter1.summary || `${fighter1.name} fought bravely but was ultimately overcome.`) : fighter1.summary);
-        fighter2.summary = finalWinnerFull.id === fighter2.id ? (fighter2.summary || `${finalWinnerFull.name}'s victory was sealed by their superior strategy and power.`) : (finalLoserFull.id === fighter2.id ? (fighter2.summary || `${fighter2.name} fought bravely but was ultimately overcome.`) : fighter2.summary);
+        // --- MODIFIED: Ensure correct context for summary generation ---
+        const winnerSummaryContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
+        const loserSummaryContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name }; // For loser, they are the "loser"
+
+        fighter1.summary = finalWinnerFull.id === fighter1.id 
+            ? substituteTokens(fighter1.summary || "{WinnerName}'s victory was sealed by their superior strategy and power.", finalWinnerFull, finalLoserFull, winnerSummaryContext)
+            : substituteTokens(fighter1.summary || "{LoserName} fought bravely but was ultimately overcome.", finalLoserFull, finalWinnerFull, loserSummaryContext);
+        
+        fighter2.summary = finalWinnerFull.id === fighter2.id 
+            ? substituteTokens(fighter2.summary || "{WinnerName}'s victory was sealed by their superior strategy and power.", finalWinnerFull, finalLoserFull, winnerSummaryContext)
+            : substituteTokens(fighter2.summary || "{LoserName} fought bravely but was ultimately overcome.", finalLoserFull, finalWinnerFull, loserSummaryContext);
 
     } else if (fighter1.hp === fighter2.hp && turn >= 6) { 
         isStalemate = true; 
@@ -665,6 +693,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     if (!isStalemate && finalWinnerFull) {
         const finalWords = getFinalVictoryLine(finalWinnerFull, finalLoserFull); 
         const conclusionContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull?.name || "their opponent" };
+        // --- MODIFIED: Call substituteTokens for conclusionTextRaw as well ---
         const conclusionTextRaw = substituteTokens(`${finalWinnerFull.name} stands victorious. "${finalWords}"`, finalWinnerFull, finalLoserFull, conclusionContext);
         const conclusionTextHtml = phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw);
         battleEventLog.push({ type: 'conclusion_event', text: conclusionTextRaw, html_content: conclusionTextHtml });
