@@ -15,7 +15,6 @@ import { universalMechanics, locationCurbstompRules, characterCurbstompRules } f
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
-// --- Centralized Death Registry ---
 let charactersMarkedForDefeat = new Set();
 
 function initializeFighterState(charId, opponentId, emotionalMode) {
@@ -65,31 +64,31 @@ function evaluatePersonalityTrigger(triggerId, character, opponent, battleState)
     } = battleState;
 
     switch (triggerId) {
-        case "provoked": // Mai
+        case "provoked": 
             return opponentLandedCriticalHit || opponentTaunted || (allyTargeted && ally && ['ty-lee', 'zuko'].includes(ally.id));
-        case "serious_fight": // Ty Lee
+        case "serious_fight": 
             return (ally && ally.hp < ally.maxHp * 0.3) || opponentUsedLethalForce;
-        case "authority_challenged": // Ozai
+        case "authority_challenged": 
             return (opponentLandedSignificantHits >= 2) || opponentTaunted;
-        case "underestimated": // Bumi
+        case "underestimated": 
             return opponentTauntedAgeOrStrategy || (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove?.power > 50);
-        case "in_control": // Azula (Sane)
+        case "in_control": 
             return (character.hp > character.maxHp * 0.5) && !characterReceivedCriticalHit && (opponent.mentalState.level === 'stable' || opponent.mentalState.level === 'stressed');
-        case "desperate_broken": // Azula (Insane), Katara
+        case "desperate_broken": 
             return (character.hp < character.maxHp * 0.3) || (character.mentalState.level === 'broken') || (character.id === 'katara' && allyDowned) || (character.id === 'katara' && character.criticalHitsTaken >= 2);
-        case "doubted": // Toph
+        case "doubted": 
             return opponentTauntedBlindness || opponentLandedBlindHit;
-        case "mortal_danger": // Aang
+        case "mortal_danger": 
             return (ally && ally.hp < ally.maxHp * 0.05) || (character.hp < character.maxHp * 0.2);
-        case "honor_violated": // Zuko
+        case "honor_violated": 
             return opponentCheated || allyDisarmedUnfairly;
-        case "meticulous_planning": // Sokka
+        case "meticulous_planning": 
             return (opponent.lastMove?.isHighRisk && opponent.lastMoveEffectiveness === 'Weak') || (battleState.location?.tags?.includes('trap_favorable'));
-        case "confident_stance": // Jeong Jeong
+        case "confident_stance": 
             return characterLandedStrongOrCriticalHitLastTurn || allyBuffedSelf;
-        case "skill_challenged": // Pakku
+        case "skill_challenged": 
             return opponentTauntedSkillOrTradition || opponentAttackedFirstAggressively;
-        case "disrespected": // Bumi in Omashu specific
+        case "disrespected": 
              return battleState.locationId === 'omashu' && opponentTauntedAgeOrStrategy;
         default:
             return false;
@@ -140,17 +139,15 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
         if (rule.conditionLogic) {
             const actorLogic = (rule.forAttacker === undefined || rule.forAttacker) ? attacker : defender;
             const oppLogic = actorLogic.id === attacker.id ? defender : attacker;
-            // Pass battleState to conditionLogic
             if (!rule.conditionLogic(actorLogic, oppLogic, { ...battleState, locationTags: battleState.location?.tags || [] })) continue;
         }
         
         if (rule.source === 'universal' && rule.conditions) {
             let universalMet = false;
             rule.conditions.forEach(cond => {
-                if (cond.type === "target_technique_speed" && defender.lastMove?.speed === cond.value) { // Assuming moves have speed tag
+                if (cond.type === "target_technique_speed" && defender.lastMove?.speed === cond.value) {
                     effectiveChance = cond.triggerChance; universalMet = true;
                 }
-                // Check if battleState.location and battleState.location.tags exist
                 if (cond.type === "location_property" && battleState.location?.tags?.includes(cond.property)) {
                     effectiveChance = Math.min(rule.maxChance || 1, (effectiveChance || rule.triggerChance) + (cond.modifier || 0));
                     universalMet = true; 
@@ -164,7 +161,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
         if (ruleTriggered) {
             let isEscape = false;
             if (rule.escapeCondition) {
-                const escapeChar = rule.escapeCondition.character === attacker.id ? attacker : defender; // Simpler assignment
+                const escapeChar = rule.escapeCondition.character === attacker.id ? attacker : defender; 
                 if (escapeChar.id === rule.escapeCondition.character && Math.random() < rule.escapeCondition.successChance) {
                     if ((rule.escapeCondition.type === "intelligence_roll" && escapeChar.intelligence > rule.escapeCondition.threshold)) {
                         isEscape = true;
@@ -280,6 +277,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     let isStalemate = false;
     let winnerId = null; 
     let loserId = null;  
+    let turn = 0; // Moved declaration outside the loop
 
     let phaseState = initializeBattlePhaseState();
     fighter1.aiLog.push(...phaseState.phaseLog); 
@@ -292,7 +290,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         locationId: locId,
         location: locationData, 
         locationTags: locationData?.tags || [], 
-        turn: 0,
+        turn: 0, // Will be updated by the loop
         isFullMoon: conditions.isNight && Math.random() < 0.25, 
         opponentLandedCriticalHit: false, opponentTaunted: false, allyTargeted: false, ally: null,
         opponentUsedLethalForce: false, opponentLandedSignificantHits: 0, opponentTauntedAgeOrStrategy: false,
@@ -314,19 +312,19 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
       checkCurbstompConditions(responder, initiator, locId, currentBattleState, battleEventLog);
     }
     
-    let terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate); // Pass initial isStalemate
+    let terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate); 
     battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
 
 
-    for (let turn = 0; turn < 6 && !battleOver; turn++) {
+    for (turn = 0; turn < 6 && !battleOver; turn++) { // Loop uses the 'turn' declared outside
         currentBattleState.turn = turn; 
         currentBattleState.opponentLandedCriticalHit = false; currentBattleState.opponentTaunted = false; 
         currentBattleState.opponentUsedLethalForce = false; currentBattleState.opponentLandedSignificantHits = 0;
-        currentBattleState.characterReceivedCriticalHit = false; // Reset for the turn
-        currentBattleState.characterLandedStrongOrCriticalHitLastTurn = false; // Reset for the turn
+        currentBattleState.characterReceivedCriticalHit = false; 
+        currentBattleState.characterLandedStrongOrCriticalHitLastTurn = false; 
 
         const phaseChanged = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn);
         if (phaseChanged) {
@@ -348,25 +346,22 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         const battleContextFiredQuotes = new Set();
         
         const processTurnSegment = (attacker, defender) => {
-            // --- MODIFIED: Early exit if attacker is already marked for defeat ---
             if (charactersMarkedForDefeat.has(attacker.id)) {
                 attacker.aiLog.push(`[Action Skipped]: ${attacker.name} is already marked for defeat and cannot act this segment.`);
                 return;
             }
-            // --- END MODIFICATION ---
 
             if (battleOver || isStalemate) return; 
 
-            // Update battleState flags based on *defender's* last action towards *current attacker*
             currentBattleState.opponentLandedCriticalHit = defender.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
             currentBattleState.opponentUsedLethalForce = defender.lastMoveForPersonalityCheck?.isHighRisk || false;
-            currentBattleState.characterReceivedCriticalHit = false; // Reset for current attacker for THEIR turn segment
+            currentBattleState.characterReceivedCriticalHit = false; 
 
             if (checkCurbstompConditions(attacker, defender, locId, currentBattleState, battleEventLog)) {
                 terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
                 if (terminalOutcome.battleOver) { battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate; return; }
             }
-            if (charactersMarkedForDefeat.has(defender.id)) { // Check if the defender was just curbstomped by attacker
+            if (charactersMarkedForDefeat.has(defender.id)) { 
                 terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
                  if (terminalOutcome.battleOver) { battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate; return; }
             }
@@ -377,7 +372,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const oldAttackerMentalState = attacker.mentalState.level;
             attacker.mentalStateChangedThisTurn = false; 
 
-            if (turn > 0) adaptPersonality(attacker);
+            if (currentBattleState.turn > 0) adaptPersonality(attacker); // Use currentBattleState.turn
             
             if (attacker.tacticalState) {
                 attacker.tacticalState.duration--;
@@ -418,24 +413,16 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 currentBattleState.opponentTaunted = true; 
             }
 
-            const { move, aiLogEntryFromSelectMove } = selectMove(attacker, defender, conditions, turn, phaseState.currentPhase); 
+            const { move, aiLogEntryFromSelectMove } = selectMove(attacker, defender, conditions, currentBattleState.turn, phaseState.currentPhase); 
             addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase }), attacker);
             
             const result = calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locId);
             result.isKOAction = (defender.hp - result.damage <= 0);
 
             attacker.lastMoveForPersonalityCheck = { isHighRisk: move.isHighRisk, effectiveness: result.effectiveness.label, power: move.power };
-            if (result.effectiveness.label === 'Critical') currentBattleState.characterReceivedCriticalHit = true; // For defender's next personality check
+            if (result.effectiveness.label === 'Critical') currentBattleState.characterReceivedCriticalHit = true; 
             if (result.effectiveness.label === 'Strong' || result.effectiveness.label === 'Critical') {
-                // This flag is about what the *current attacker* did for the *defender's next turn evaluation*.
-                // So if attacker is initiator, defender is responder. Responder's "opponentLandedStrongOrCriticalHitLastTurn" becomes true.
-                if (attacker.id === fighter1.id) { // fighter1 is initiator
-                    currentBattleState.f1LandedStrongOrCritical = true; // initiator (f1) landed it
-                    currentBattleState.f2LandedStrongOrCritical = false;
-                } else { // fighter2 is initiator
-                    currentBattleState.f2LandedStrongOrCritical = true; // initiator (f2) landed it
-                    currentBattleState.f1LandedStrongOrCritical = false;
-                }
+                currentBattleState.characterLandedStrongOrCriticalHitLastTurn = true; // For the current attacker
             }
 
 
@@ -517,13 +504,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
         }
         
-        // --- Initiator's Turn Segment ---
-        currentBattleState.characterLandedStrongOrCriticalHitLastTurn = initiator.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || initiator.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
         processTurnSegment(initiator, responder);
 
         if (!battleOver) { 
-            // --- Responder's Turn Segment ---
-            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = responder.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || responder.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
             processTurnSegment(responder, initiator);
         }
 
@@ -548,12 +531,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         
         battleEventLog.push(...turnSpecificEventsForLog);
 
-        if (!battleOver && turn >= 2) { 
+        // Check stalemate at end of full turn
+        if (!battleOver && currentBattleState.turn >= 2) { 
             if (fighter1.consecutiveDefensiveTurns >= 3 && fighter2.consecutiveDefensiveTurns >= 3 &&
                 Math.abs(fighter1.hp - fighter2.hp) < 15 && 
                 phaseState.currentPhase !== BATTLE_PHASES.EARLY) { 
                 
-                // Force stalemate by marking both for defeat if they are still up
                 if (fighter1.hp > 0) charactersMarkedForDefeat.add(fighter1.id);
                 if (fighter2.hp > 0) charactersMarkedForDefeat.add(fighter2.id);
 
@@ -561,7 +544,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 battleOver = true; 
                 winnerId = terminalOutcome.winnerId; 
                 loserId = terminalOutcome.loserId; 
-                isStalemate = terminalOutcome.isStalemate; // Should be true
+                isStalemate = terminalOutcome.isStalemate; 
                 fighter1.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
                 fighter2.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
             }
@@ -571,52 +554,58 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
     
-    if (!battleOver) { // If loop finished by max turns
-        terminalOutcome = evaluateTerminalState(fighter1, fighter2, false); // Evaluate one last time
-        battleOver = terminalOutcome.battleOver; // This might still be false if no one is KO'd
+    // Final outcome determination logic
+    if (!battleOver) { 
+        terminalOutcome = evaluateTerminalState(fighter1, fighter2, false);
+        battleOver = terminalOutcome.battleOver; 
         winnerId = terminalOutcome.winnerId;
         loserId = terminalOutcome.loserId;
         isStalemate = terminalOutcome.isStalemate;
 
-        if (!battleOver) { // If still not over (no one KO'd, not stalemate by registry) -> timeout logic
+        if (!battleOver) { 
              if (fighter1.hp === fighter2.hp) {
-                isStalemate = true; // Draw by timeout, equal HP
-            } else { // Winner by HP at timeout
+                isStalemate = true;
+            } else { 
                 winnerId = (fighter1.hp > fighter2.hp) ? fighter1.id : fighter2.id;
                 loserId = (winnerId === fighter1.id) ? fighter2.id : fighter1.id;
             }
         }
     }
 
-    // Consolidate final narrative generation
-    const finalWinnerObject = winnerId ? characters[winnerId] : null;
-    const finalLoserObject = loserId ? characters[loserId] : null;
+    const finalWinnerObject = winnerId ? fighter1.id === winnerId ? fighter1 : fighter2 : null;
+    const finalLoserObject = loserId ? fighter1.id === loserId ? fighter1 : fighter2 : null;
+
 
     if (isStalemate) {
         battleEventLog.push({ type: 'stalemate_result_event', text: "The battle ends in a STALEMATE!", html_content: phaseTemplates.stalemateResult });
         fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
-    } else if (finalWinnerObject && finalLoserObject) { // A winner was determined
-        if (finalLoserObject.hp <= 0 && !battleEventLog.some(e => e.isKOAction || (e.type === 'curbstomp_event' && !e.isEscape && e.curbstompRuleId?.includes(finalLoserObject.id)))) {
-            // This log only if KO by HP and not already logged by a specific curbstomp that defeated this loser.
+    } else if (finalWinnerObject && finalLoserObject) { 
+        const isKOByHp = finalLoserObject.hp <= 0;
+        const wasCurbstompKO = charactersMarkedForDefeat.has(finalLoserObject.id) && battleEventLog.some(e => e.type === 'curbstomp_event' && !e.isEscape && e.curbstompRuleId?.includes(finalLoserObject.id));
+        const isTimeoutVictory = turn >= 6 && finalWinnerObject.hp > finalLoserObject.hp && !isKOByHp && !wasCurbstompKO;
+
+        if (isKOByHp && !wasCurbstompKO && !battleEventLog.some(e => e.isKOAction)) {
             const finalBlowTextRaw = `${finalWinnerObject.name} lands the finishing blow, defeating ${finalLoserObject.name}!`;
             const finalBlowTextHtml = phaseTemplates.finalBlow
                 .replace(/{winnerName}/g, `<span class="char-${finalWinnerObject.id}">${finalWinnerObject.name}</span>`)
                 .replace(/{loserName}/g, `<span class="char-${finalLoserObject.id}">${finalLoserObject.name}</span>`);
             battleEventLog.push({ type: 'final_blow_event', text: finalBlowTextRaw, html_content: finalBlowTextHtml, isKOAction: true });
-        } else if (turn >= 6 && finalWinnerObject.hp > finalLoserObject.hp) { // Timeout victory
+        } else if (isTimeoutVictory) {
              const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerObject.name} is declared the victor over ${finalLoserObject.name}!`;
             const timeoutTextHtml = phaseTemplates.timeOutVictory
                 .replace(/{winnerName}/g, `<span class="char-${finalWinnerObject.id}">${finalWinnerObject.name}</span>`)
                 .replace(/{loserName}/g, `<span class="char-${finalLoserObject.id}">${finalLoserObject.name}</span>`);
             battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
         }
-        // Assign summaries
-        fighter1.summary = finalWinnerObject.id === fighter1.id ? (finalWinnerObject.summary || `${finalWinnerObject.name}'s victory was sealed by their superior strategy and power.`) : (finalLoserObject.id === fighter1.id ? (fighter1.summary || `${fighter1.name} fought bravely but was ultimately overcome.`) : fighter1.summary);
-        fighter2.summary = finalWinnerObject.id === fighter2.id ? (finalWinnerObject.summary || `${finalWinnerObject.name}'s victory was sealed by their superior strategy and power.`) : (finalLoserObject.id === fighter2.id ? (fighter2.summary || `${fighter2.name} fought bravely but was ultimately overcome.`) : fighter2.summary);
+        
+        fighter1.summary = finalWinnerObject.id === fighter1.id ? (fighter1.summary || `${finalWinnerObject.name}'s victory was sealed by their superior strategy and power.`) : (finalLoserObject.id === fighter1.id ? (fighter1.summary || `${fighter1.name} fought bravely but was ultimately overcome.`) : fighter1.summary);
+        fighter2.summary = finalWinnerObject.id === fighter2.id ? (fighter2.summary || `${finalWinnerObject.name}'s victory was sealed by their superior strategy and power.`) : (finalLoserObject.id === fighter2.id ? (fighter2.summary || `${fighter2.name} fought bravely but was ultimately overcome.`) : fighter2.summary);
 
-    } else if (fighter1.hp === fighter2.hp && turn >= 6) { // Draw by timeout, equal HP
-        isStalemate = true; // Explicitly set for draw
+    } else if (fighter1.hp === fighter2.hp && turn >= 6) { 
+        isStalemate = true; 
+        winnerId = null; // Ensure winnerId is null for draws
+        loserId = null;  // Ensure loserId is null for draws
         battleEventLog.push({ type: 'draw_result_event', text: "The battle is a DRAW!", html_content: phaseTemplates.drawResult });
         fighter1.summary = "The battle ended in a perfect draw, neither giving an inch.";
         fighter2.summary = "The battle ended in a perfect draw, neither giving an inch.";
@@ -633,8 +622,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         battleEventLog.push({ type: 'conclusion_event', text: conclusionTextRaw, html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw) });
     }
 
-    // Ensure interaction logs are assigned to the correct final fighter states
-    fighter1.interactionLog = [...interactionLog]; // Give both the full log for now, can be filtered later if needed
+    fighter1.interactionLog = [...interactionLog]; 
     fighter2.interactionLog = [...interactionLog];
 
     fighter1.phaseLog = [...phaseState.phaseLog];
