@@ -1,3 +1,9 @@
+Okay, I understand the request. You want to change the visual order of elements on the page so that the "Location Selection" section appears before the "Archetype Info Section" (which displays the battle lore/matchup text).
+
+This is primarily an HTML structure change. I'll modify index.html to reflect this new order.
+
+Here's the updated index.html file. I've moved the <section class="archetype-info-section" ...> block to appear after the <section class="location-section" ...> block.
+
 <!-- FILE: index.html -->
 <!DOCTYPE html>
 <html lang="en">
@@ -54,15 +60,7 @@
             </div>
         </section>
 
-        <section class="archetype-info-section" id="archetype-info-container">
-            <h3 class="archetype-headline" id="archetype-headline"></h3>
-            <div class="archetype-intros">
-                <p class="archetype-intro" id="archetype-intro-a"></p>
-                <p class="archetype-intro" id="archetype-intro-b"></p>
-            </div>
-            <p class="archetype-error" id="archetype-error"></p>
-        </section>
-
+        <!-- Location Section now comes BEFORE Archetype Info Section -->
         <section class="location-section">
             <h2 class="location-title" id="location-name-display">Choose a Battlefield</h2>
             <div id="location-environment-summary" class="location-environment-summary"></div>
@@ -81,6 +79,17 @@
             <div id="time-feedback" class="time-feedback"></div>
             <input type="hidden" id="time-of-day-value" value="day">
         </section>
+
+        <!-- Archetype Info Section is now AFTER Location Section -->
+        <section class="archetype-info-section" id="archetype-info-container">
+            <h3 class="archetype-headline" id="archetype-headline"></h3>
+            <div class="archetype-intros">
+                <p class="archetype-intro" id="archetype-intro-a"></p>
+                <p class="archetype-intro" id="archetype-intro-b"></p>
+            </div>
+            <p class="archetype-error" id="archetype-error"></p>
+        </section>
+        
         <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
 
         <!-- NEW: Simulation Mode Container -->
@@ -127,3 +136,6 @@
 <script src="js/main.js" type="module" defer></script>
 </body>
 </html>
+
+
+No changes to CSS or JavaScript files are needed for this specific layout adjustment. The existing CSS should adapt to the new order of these block-level sections. The JavaScript logic that populates these sections (updateArchetypeInfo(), etc.) will still function correctly as it targets elements by their IDs, which haven't changed.
