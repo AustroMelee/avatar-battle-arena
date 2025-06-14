@@ -88,13 +88,17 @@
         <!-- NEW: Simulation Mode Container -->
         <section id="simulation-mode-container" class="simulation-mode-container hidden">
             <div class="simulation-controls">
-                <button id="cancel-simulation" class="simulation-cancel-btn">Cancel Simulation</button>
+                <div class="simulation-controls-group"> 
+                    <button id="cancel-simulation" class="simulation-cancel-btn">Cancel</button>
+                    <button id="toggle-sim-log-btn" class="simulation-log-toggle-btn" aria-expanded="true">Hide Log ▼</button> 
+                    <button id="copy-sim-log-btn" class="simulation-copy-btn">📋 Copy Log</button> <!-- NEW: Copy Log Button -->
+                </div>
                 <div class="zoom-controls">
                     <button id="zoom-out" class="simulation-zoom-btn">-</button>
                     <button id="zoom-in" class="simulation-zoom-btn">+</button>
                 </div>
             </div>
-            <div id="animated-log-output" class="animated-log-output">
+            <div id="animated-log-output" class="animated-log-output"> 
                 <!-- Animated text will appear here -->
             </div>
         </section>
@@ -110,16 +114,24 @@
                     <div class="winner-name" id="winner-name"></div>
                     <div class="win-probability" id="win-probability"></div>
                 </div>
-                <!-- Battle story will be populated here for instant mode, or after animation for animated mode -->
-                <article class="battle-story" id="battle-story"></article>
-                <div class="outcome-analysis" id="outcome-analysis">
-                    <h3 class="analysis-title">Outcome Analysis</h3>
-                    <ul class="analysis-list" id="analysis-list">
-                    </ul>
-                    <div class="environmental-damage-section">
-                        <h3>Environmental Damage Analysis</h3>
-                        <div id="environment-damage-display" class="environmental-damage-level"></div>
-                        <ul id="environment-impacts-list" class="environment-impacts-list"></ul>
+                
+                <!-- NEW: Action bar for toggle and copy buttons -->
+                <div class="results-actions-bar">
+                    <button id="toggle-results-details-btn" class="results-details-toggle-btn" aria-expanded="true">Hide Details ▼</button>
+                    <button id="copy-results-details-btn" class="results-copy-btn">📋 Copy Details</button> <!-- NEW: Copy Details Button -->
+                </div>
+
+                <div id="results-details-content"> 
+                    <article class="battle-story" id="battle-story"></article>
+                    <div class="outcome-analysis" id="outcome-analysis">
+                        <h3 class="analysis-title">Outcome Analysis</h3>
+                        <ul class="analysis-list" id="analysis-list">
+                        </ul>
+                        <div class="environmental-damage-section">
+                            <h3>Environmental Damage Analysis</h3>
+                            <div id="environment-damage-display" class="environmental-damage-level"></div>
+                            <ul id="environment-impacts-list" class="environment-impacts-list"></ul>
+                        </div>
                     </div>
                 </div>
             </div>

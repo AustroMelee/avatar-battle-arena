@@ -498,7 +498,7 @@ body {
     border-style: inset;
 }
 
-/* NEW: Simulation Mode Container Styles */
+/* Simulation Mode Container Styles */
 .simulation-mode-container {
     background: var(--simulation-bg);
     border: 2px solid var(--simulation-border);
@@ -530,7 +530,10 @@ body {
     z-index: 10;
 }
 
-.simulation-cancel-btn, .simulation-zoom-btn {
+.simulation-cancel-btn, 
+.simulation-zoom-btn, 
+.simulation-log-toggle-btn,
+.simulation-copy-btn { /* ADDED .simulation-copy-btn */
     background: var(--border-scroll);
     color: var(--text-primary);
     border: 2px outset var(--surface-border);
@@ -540,7 +543,10 @@ body {
     cursor: pointer;
     transition: background-color 0.2s;
 }
-.simulation-cancel-btn:hover, .simulation-zoom-btn:hover {
+.simulation-cancel-btn:hover, 
+.simulation-zoom-btn:hover, 
+.simulation-log-toggle-btn:hover,
+.simulation-copy-btn:hover { /* ADDED .simulation-copy-btn:hover */
     background-color: var(--surface-border-hover);
 }
 .simulation-zoom-btn {
@@ -548,6 +554,22 @@ body {
     font-size: 1.2rem;
     line-height: 1;
 }
+
+.simulation-log-toggle-btn,
+.simulation-copy-btn { /* ADDED .simulation-copy-btn */
+    margin-left: 0.5rem; 
+}
+.simulation-copy-btn { /* Slightly different padding for copy button if needed */
+    padding: 0.5rem 0.8rem; 
+}
+
+
+.simulation-controls-group { 
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap; /* Prevent wrapping within this specific group */
+}
+
 .zoom-controls {
     display: flex;
     gap: 0.5rem;
@@ -559,6 +581,19 @@ body {
     line-height: 1.7;
     color: var(--simulation-text);
     text-align: left;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* For smooth collapse */
+    max-height: 1000px; /* Arbitrary large number for open state */
+    opacity: 1;
+}
+
+.animated-log-output.collapsed {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden; /* Important for collapse */
+    margin-top: 0; /* Remove margin when collapsed */
+    margin-bottom: 0; /* Remove margin when collapsed */
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .simulation-line {
@@ -619,16 +654,6 @@ body {
     position: relative;
     display: inline-block; */
 }
-/* Basic typewriter cursor example:
-.simulation-text-content::after {
-    content: '|';
-    animation: blink 0.7s infinite;
-    position: absolute;
-    right: -5px; 
-}
-@keyframes blink {
-    50% { opacity: 0; }
-} */
 
 .simulation-move-emoji {
     display: inline-block; /* Allows transform */
@@ -703,13 +728,58 @@ body {
     color: var(--text-parchment-gold);
 }
 
+/* NEW: Styles for results actions bar and buttons */
+.results-actions-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: -1rem auto 1.5rem auto; /* Positioned after winner announcement, before details */
+}
+
+.results-details-toggle-btn,
+.results-copy-btn { /* Common styles for these buttons */
+    padding: 0.6rem 1.2rem;
+    background-color: rgba(0,0,0,0.2);
+    color: var(--text-parchment-gold);
+    border: 1px solid var(--border-scroll);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.results-details-toggle-btn:hover,
+.results-copy-btn:hover {
+    background-color: rgba(0,0,0,0.4);
+    color: var(--text-primary);
+    border-color: var(--surface-border-hover);
+}
+
+/* NEW: For collapsing results details content */
+#results-details-content {
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* For smooth collapse */
+    max-height: 5000px; /* Arbitrary large number for open state, adjust as needed */
+    opacity: 1;
+    overflow: hidden; /* Can be hidden to prevent content peeking during animation */
+}
+#results-details-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden; /* Important for collapse */
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+
 .battle-story {
     line-height: 1.7;
     font-size: 1.1rem;
     color: var(--text-primary);
     text-align: left;
     max-width: 80ch;
-    margin: 2rem auto;
+    margin: 1rem auto 2rem auto; /* Adjusted margin as actions bar is above */
 }
 
 .phase-header {
@@ -1003,14 +1073,17 @@ body {
     .title { font-size: 2.5rem; }
     .results-section { padding: 1.5rem; }
     .simulation-mode-container { padding: 1rem; max-height: 50vh; }
-    .simulation-controls { padding: 0.3rem 0.5rem; margin: -1rem -1rem 0.75rem -1rem; top: -1rem;}
-    .simulation-cancel-btn, .simulation-zoom-btn { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+    .simulation-controls { padding: 0.3rem 0.5rem; margin: -1rem -1rem 0.75rem -1rem; top: -1rem; flex-wrap: wrap; gap: 0.5rem;}
+    .simulation-cancel-btn, .simulation-zoom-btn, .simulation-log-toggle-btn, .simulation-copy-btn { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
     .animated-log-output { font-size: 0.95rem; }
     .character-grid { grid-template-columns: repeat(3, 1fr); }
     .location-grid { grid-template-columns: repeat(2, 1fr); }
     .archetype-headline { font-size: 1.5rem; }
     .archetype-intro { font-size: 0.9rem; }
     .mode-options { flex-direction: column; gap: 0.5rem; }
+    
+    .results-actions-bar { flex-direction: column; gap: 0.5rem; }
+    .results-details-toggle-btn, .results-copy-btn { font-size: 0.85rem; padding: 0.5rem 1rem; width: 100%; max-width: 200px; }
 }
 
 @media (max-width: 480px) {
@@ -1021,4 +1094,7 @@ body {
     .archetype-headline { font-size: 1.3rem; }
     .simulation-mode-container { font-size: 0.9rem; }
     .simulation-char-icon { width: 24px; height: 24px; }
+    .simulation-controls-group { flex-basis: 100%; justify-content: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;} /* Allow wrapping in the group */
+    .simulation-copy-btn, .simulation-log-toggle-btn { margin-left: 0; } /* Reset margin for wrapped items */
+    .zoom-controls { flex-basis: 100%; justify-content: center; }
 }
