@@ -10,12 +10,13 @@ victoryStyle: "Madcap", powerTier: 8,
 personalityProfile: { 
     aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, 
     creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9,
-    predictability: 0.1, // Very Low: Chaotic, unpredictable
+    predictability: 0.1, 
     signatureMoveBias: { 
         "Rock Avalanche": 1.6, 
         "Boulder Throw": 1.5,
+        "Ground Spike": 1.0,
         "Terrain Reshape": 1.7,
-        "Ground Spike": 1.0
+        "Tactical Reposition": 0.5 // He'd rather reshape than reposition himself
     } 
 },
 specialTraits: { resilientToManipulation: 1.0 },
@@ -68,12 +69,17 @@ victoryStyle: "Disciplined", powerTier: 7,
 personalityProfile: { 
     aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, 
     creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2,
-    predictability: 0.8, // High: Traditional, disciplined
+    predictability: 0.8, 
     signatureMoveBias: { 
-        "Octopus Form": 1.7, 
-        "Water Barrier": 1.4,
         "Ice Spikes": 1.1,
-        "Tidal Surge": 1.3
+        "Water Barrier": 1.4,
+        "Tidal Surge": 1.3,
+        "Octopus Form": 1.7, 
+        "Canteen Water Stream": 1.0,
+        "Ice Darts": 1.0,
+        "Minor Water Shield": 1.0,
+        "Water Pouch Splash": 1.0,
+        "Tactical Reposition": 1.0
     } 
 },
 specialTraits: { resilientToManipulation: 0.8 },
@@ -110,21 +116,21 @@ Weak: { Generic: [{ type: 'internal', line: "My movements were not precise enoug
 }
 }
 },
-techniquesFull: [ // Standard moveset
+techniquesFull: [ 
 { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
 { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
 { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
 { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['defensive_stance', 'channeled', 'versatile', 'area_of_effect_small', 'requires_opening'], collateralImpact: 'low' },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniquesCanteen: [ // Canteen-only moveset
+techniquesCanteen: [ 
 { name: "Canteen Water Stream", verb: 'unleash', object: 'a stream of water from his canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Ice Darts", verb: 'create', object: 'sharp ice darts from his canteen', type: 'Offense', power: 35, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'limited_resource', 'precise'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Minor Water Shield", verb: 'form', object: 'a minor water shield from his canteen', type: 'Defense', power: 25, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Water Pouch Splash", verb: 'splash', object: 'water from his pouch to distract', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'limited_resource'], setup: { name: 'Slightly Distracted', duration: 1, intensity: 1.05 }, collateralImpact: 'none', isCanteenMove: true },
-{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // Reposition is always available
+{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } 
 ],
-techniques: [], // Default to empty; will be populated by getAvailableMoves
+techniques: [], 
 quotes: { postWin: ["Discipline prevails."], postWin_overwhelming: ["My mastery is absolute. There is no question of the outcome."], postWin_specific: { 'katara': "You have learned much, but the student has not yet surpassed the master." } },
 relationships: {}
 },
@@ -135,13 +141,14 @@ victoryStyle: "Wise_Reluctant", powerTier: 6,
 personalityProfile: { 
     aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, 
     creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4,
-    predictability: 0.8, // High: Very controlled, defensive
+    predictability: 0.8, 
     signatureMoveBias: { 
+        "Controlled Inferno": 0.3,
         "Fire Wall": 1.9, 
         "Flame Whips": 0.7,
         "Precision Burn": 0.6,
-        "Controlled Inferno": 0.3, // Reluctant for big offensive moves
-        "Reluctant Finale": 0.5
+        "Reluctant Finale": 0.5,
+        "Tactical Reposition": 1.0
     } 
 },
 specialTraits: { resilientToManipulation: 1.0 },
@@ -186,3 +193,4 @@ quotes: { postWin: ["The destructive path of fire has been averted, for now."], 
 relationships: {}
 },
 };
+

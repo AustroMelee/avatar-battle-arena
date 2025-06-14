@@ -9,19 +9,22 @@ victoryStyle: "Madcap", powerTier: 3,
 personalityProfile: { 
     aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, 
     creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8,
-    predictability: 0.4, // Medium-Low: Strategist but can be unorthodox
+    predictability: 0.4, 
     signatureMoveBias: { 
-        "Boomerang Throw": 1.6, 
-        "Improvised Trap": 1.5,
         "Sword Strike": 1.0,
-        "Tactical Positioning": 1.1 
+        "Boomerang Throw": 1.6, 
+        "Shield Block": 1.0,
+        "Tactical Positioning": 1.1, // Sokka would value this
+        "Improvised Trap": 1.5,
+        "The Sokka Special": 1.3, // Iconic, but high risk
+        "Tactical Reposition": 1.1 
     } 
 },
 specialTraits: { resilientToManipulation: 0.2 },
 collateralTolerance: 0.5,
 mobility: 0.6,
 narrative: {
-battleStart: { // Now an object with phase keys
+battleStart: { 
 Early: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, {opponentName} looks tough. Don't panic. Just find an opening. You're the idea guy." }],
 Mid: [{ type: 'spoken', line: "Okay, things are heating up! Time for Plan B... or C? I'll figure it out!"}],
 Late: [{ type: 'spoken', line: "I'm not backing down! For my friends!"}]
@@ -35,7 +38,7 @@ BreakTheTurtle: { Mid: [{ type: 'spoken', line: "Think you can hide? My boomeran
 },
 onMoveExecution: {
 'Boomerang Throw': {
-Critical: { Generic: [{ type: 'spoken', line: "See? Boomerang always comes back! And it hits HARD!" }] }, // Generic as it applies to all phases
+Critical: { Generic: [{ type: 'spoken', line: "See? Boomerang always comes back! And it hits HARD!" }] }, 
 Weak: { Generic: [{ type: 'spoken', line: "Wait, where did it... oh, it's stuck in a tree. Great." }] }
 },
 'Improvised Trap': {
@@ -47,7 +50,7 @@ Critical: { Generic: [{ type: 'spoken', line: "Perfect! Just where I wanted to b
 Weak: { Generic: [{ type: 'internal', line: "Whoops, almost tripped on my own feet. Gotta be quicker." }] }
 }
 },
-onStateChange: { // These can be generic or have phase-specifics
+onStateChange: { 
 stressed: { Mid: [{ type: 'internal', line: "This is not going according to plan. At all." }] },
 shaken: { Late: [{ type: 'internal', line: "Come on, pull it together! Can't let the team down!" }] },
 },
@@ -87,11 +90,11 @@ victoryStyle: "Pacifist", powerTier: 9,
 personalityProfile: { 
     aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, 
     creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9,
-    predictability: 0.2, // Low: Creative, evasive
+    predictability: 0.2, 
     signatureMoveBias: { 
         "Air Scooter": 1.8, 
-        "Wind Shield": 1.4,
         "Air Blast": 1.0,
+        "Wind Shield": 1.4,
         "Tornado Whirl": 1.3,
         "Gust Push": 0.9,
         "Sweeping Gust": 1.1,
@@ -109,7 +112,7 @@ Late: [{ type: 'spoken', line: "I won't let you hurt anyone else!"}]
 },
 onIntentSelection: {
 OpeningMoves: { Early: [{ type: 'internal', line: "Maybe if I'm evasive enough, {opponent.s} will just get tired and stop?" }] },
-CautiousDefense: { Generic: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }] }, // Generic, can apply anytime
+CautiousDefense: { Generic: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }] }, 
 CapitalizeOnOpening: { Mid: [{ type: 'internal', line: "There's an opening! A quick puff of air should do it." }] }
 },
 onManipulation: {
@@ -122,7 +125,7 @@ wrong: { Generic: [{ type: 'internal', line: "Whoa, that was fast. Gotta be quic
 onStateChange: {
 stressed: { Mid: [{ type: 'internal', line: "This is getting too violent. I have to end it without anyone getting seriously hurt." }] },
 shaken: { Late: [{ type: 'spoken', line: "Please, stop! This isn't the way!" }] },
-broken: { Late: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }] } // Could lead to Avatar State later
+broken: { Late: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }] } 
 },
 onMoveExecution: {
 'Air Scooter': { Critical: { Generic: [{ type: 'spoken', line: "Whee! Try to catch me!" }] } },
@@ -160,13 +163,20 @@ victoryStyle: "Fierce", powerTier: 7,
 personalityProfile: { 
     aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, 
     creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6,
-    predictability: 0.5, // Medium: Versatile, can be emotional
+    predictability: 0.5, 
     signatureMoveBias: { 
         "Water Whip": 1.5,
         "Ice Spears": 1.3,
         "Water Shield": 1.4,
         "Ice Prison": 1.2,
-        "Bloodbending": 0.1 // Very low unless conditions are extreme
+        "Tidal Wave": 1.1,
+        "Bloodbending": 0.1,
+        "Canteen Water Jet": 1.0,
+        "Small Ice Darts": 1.0,
+        "Canteen Water Shield": 1.0,
+        "Slippery Puddle": 1.0,
+        "Canteen Whip": 1.0,
+        "Tactical Reposition": 1.0
     } 
 },
 specialTraits: { resilientToManipulation: 0.9 },
@@ -184,7 +194,7 @@ DesperateGambit: { Late: [{ type: 'spoken', line: "I'm ending this. Right now." 
 BreakTheTurtle: { Generic: [{ type: 'internal', line: "They think they can just hide? I'll tear that wall down." }] }
 },
 onMoveExecution: {
-'Bloodbending': { Critical: { Late: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] } }, // Only in Late phase
+'Bloodbending': { Critical: { Late: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] } }, 
 'Tactical Reposition': {
 Critical: { Generic: [{ type: 'spoken', line: "I'll control the flow of this fight!" }] },
 Weak: { Generic: [{ type: 'internal', line: "Too slow. Need to be more fluid." }] }
@@ -210,7 +220,7 @@ relationships: {
 'azula': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }] } } }
 }
 },
-techniquesFull: [ // Standard moveset
+techniquesFull: [ 
 { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
 { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
 { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
@@ -219,15 +229,15 @@ techniquesFull: [ // Standard moveset
 { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'], collateralImpact: 'none' },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniquesCanteen: [ // Canteen-only moveset
+techniquesCanteen: [ 
 { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from her canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Small Ice Darts", verb: 'form', object: 'small ice darts from her canteen', type: 'Offense', power: 35, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'limited_resource', 'precise'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Canteen Water Shield", verb: 'create', object: 'a small water shield from her canteen', type: 'Defense', power: 25, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Slippery Puddle", verb: 'spill', object: 'water to create a slippery puddle', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
 { name: "Canteen Whip", verb: 'lash', object: 'out with a small water whip from her canteen', type: 'Offense', power: 25, element: 'water', moveTags: ['melee_range', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
-{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } // Reposition is always available
+{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } 
 ],
-techniques: [], // Default to empty; will be populated by getAvailableMoves
+techniques: [], 
 quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"], postWin_specific: { 'azula': "You're beaten. It's over." } },
 relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1.0, resilienceModifier: 1.1 }, 'azula': { relationshipType: "bitter_rivalry", stressModifier: 1.5, resilienceModifier: 1.0 } }
 },
@@ -238,13 +248,15 @@ victoryStyle: "Cocky", powerTier: 7,
 personalityProfile: { 
     aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, 
     creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8,
-    predictability: 0.7, // Medium-High: Confident, direct
+    predictability: 0.7, 
     signatureMoveBias: { 
-        "Seismic Slam": 1.7,
-        "Metal Bending": 1.5,
         "Earth Wave": 1.3,
         "Rock Armor": 1.1,
-        "Boulder Throw": 1.2
+        "Seismic Slam": 1.7,
+        "Metal Bending": 1.5,
+        "Boulder Throw": 1.2,
+        "Rock Coffin": 1.4,
+        "Tactical Reposition": 0.8 // Less likely to reposition, prefers direct confrontation
     } 
 },
 specialTraits: { resilientToManipulation: 0.5 },
@@ -306,12 +318,15 @@ victoryStyle: "Determined", powerTier: 6,
 personalityProfile: { 
     aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, 
     creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5,
-    predictability: 0.6, // Medium: Can be aggressive, but also more thoughtful
+    predictability: 0.6, 
     signatureMoveBias: { 
-        "Flame Sword": 1.5,
-        "Dragon's Breath": 1.3,
         "Fire Daggers": 1.1,
-        "Redemption's Fury": 1.4
+        "Flame Sword": 1.5,
+        "Fire Shield": 1.0,
+        "Dragon's Breath": 1.3,
+        "Fire Whip": 1.2,
+        "Redemption's Fury": 1.4,
+        "Tactical Reposition": 1.0
     } 
 },
 specialTraits: { resilientToManipulation: 0.1 },
@@ -366,3 +381,4 @@ quotes: { postWin: ["I fought for my own path. And I won."], postWin_overwhelmin
 relationships: { 'azula': { relationshipType: "sibling_rivalry_inferior", stressModifier: 2.0, resilienceModifier: 0.8 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_defiance", stressModifier: 1.8, resilienceModifier: 1.2 }, 'iroh': { relationshipType: "mentor_respect", stressModifier: 0.5, resilienceModifier: 1.5 } }
 }
 };
+

@@ -10,12 +10,14 @@ export const antagonistCharacters = {
         personalityProfile: { 
             aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, 
             creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3,
-            predictability: 0.8, // High: Calculated, perfectionist
+            predictability: 0.8, 
             signatureMoveBias: { 
-                "Lightning Generation": 1.9, 
+                "Calculated Feint": 1.2,
                 "Blue Fire Daggers": 1.4,
-                "Precision Strike": 1.3,
+                "Fire Whip": 1.1, // Changed from missing
+                "Lightning Generation": 1.9, 
                 "Flame Burst": 1.1,
+                "Precision Strike": 1.3,
                 "Tactical Reposition": 0.9
             } 
         },
@@ -86,12 +88,14 @@ export const antagonistCharacters = {
         personalityProfile: { 
             aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, 
             creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2,
-            predictability: 0.9, // High: Overconfident, relies on overwhelming power
+            predictability: 0.9, 
             signatureMoveBias: { 
+                "Jet Propulsion": 1.0,
+                "Scorching Blast": 1.5,
+                "Flame Wall": 1.0,
                 "Dragon's Roar": 1.8, 
                 "Emperor's Wrath": 1.7,
-                "Scorching Blast": 1.5,
-                "Flame Wall": 1.0 
+                "Tactical Reposition": 0.7 // He'd rather overpower than reposition
             } 
         },
         specialTraits: { manipulative: 0.6 },
@@ -144,12 +148,15 @@ export const antagonistCharacters = {
         personalityProfile: { 
             aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, 
             creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1,
-            predictability: 0.9, // Very High: Direct, precise style
+            predictability: 0.9, 
             signatureMoveBias: { 
-                "Precision Strike": 1.7,
-                "Pinning Strike": 1.5,
                 "Knife Barrage": 1.1,
-                "Ricochet Shot": 0.8 
+                "Precision Strike": 1.7,
+                "Knife Wall": 1.0,
+                "Pinning Strike": 1.5,
+                "Ricochet Shot": 0.8,
+                "Final Pin": 1.3,
+                "Tactical Reposition": 1.0
             } 
         },
         specialTraits: { resilientToManipulation: 0.3 },
@@ -214,12 +221,13 @@ export const antagonistCharacters = {
         personalityProfile: { 
             aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, 
             creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6,
-            predictability: 0.3, // Medium-Low: Acrobatic, seems less predictable
+            predictability: 0.3, 
             signatureMoveBias: { 
-                "Pressure Point Strike": 1.8,
-                "Chi-Blocking Flurry": 1.7,
                 "Acrobatic Flips": 1.5,
-                "Graceful Dodge": 1.2
+                "Pressure Point Strike": 1.8,
+                "Graceful Dodge": 1.2,
+                "Chi-Blocking Flurry": 1.7,
+                "Tactical Reposition": 1.3
             } 
         },
         specialTraits: { resilientToManipulation: 0.2 },
