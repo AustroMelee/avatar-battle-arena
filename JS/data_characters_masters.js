@@ -1,12 +1,13 @@
-// FILE: js/data_characters_masters.js
+// FILE: data_characters_masters.js
 // FILE: data_characters_masters.js
 'use strict';
 
 export const masterCharacters = {
 'bumi': {
-id: 'bumi', name: "Bumi", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+id: 'bumi', name: "Bumi", type: "Bender", element: "earth", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/e/e8/King_Bumi.png',
 victoryStyle: "Madcap", powerTier: 8,
+faction: "EarthKingdom",
 personalityProfile: { 
     aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, 
     creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9,
@@ -16,12 +17,19 @@ personalityProfile: {
         "Boulder Throw": 1.5,
         "Ground Spike": 1.0,
         "Terrain Reshape": 1.7,
-        "Tactical Reposition": 0.5 // He'd rather reshape than reposition himself
+        "Tactical Reposition": 0.5 
     } 
 },
-specialTraits: { resilientToManipulation: 1.0 },
+specialTraits: { resilientToManipulation: 1.0, madGenius: true }, // madGenius is conceptual
 collateralTolerance: 0.5,
 mobility: 0.3,
+curbstompRules: [ // New field
+    { ruleId: "bumi_massive_earthbending_bury", characterId: "bumi" },
+    { ruleId: "bumi_structural_collapse", characterId: "bumi" }
+],
+personalityTriggers: { // New field
+    "underestimated": "(battleState.opponentTauntedAgeOrStrategy) || (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove.power > 50)" // Assumes these states
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
@@ -63,9 +71,10 @@ quotes: { postWin: ["Time for a nap! Or maybe some cabbage!"], postWin_overwhelm
 relationships: {}
 },
 'pakku': {
-id: 'pakku', name: "Pakku", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+id: 'pakku', name: "Pakku", type: "Bender", element: "water", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/b/bb/Pakku_looking_smug.png',
 victoryStyle: "Disciplined", powerTier: 7,
+faction: "WaterTribe",
 personalityProfile: { 
     aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, 
     creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2,
@@ -82,9 +91,16 @@ personalityProfile: {
         "Tactical Reposition": 1.0
     } 
 },
-specialTraits: { resilientToManipulation: 0.8 },
+specialTraits: { resilientToManipulation: 0.8, traditionalMaster: true },
 collateralTolerance: 0.3,
 mobility: 0.5,
+curbstompRules: [ // New field
+    { ruleId: "pakku_water_mastery_curbstomp", characterId: "pakku" },
+    { ruleId: "pakku_ice_daggers_kill", characterId: "pakku" }
+],
+personalityTriggers: { // New field
+    "skill_challenged": "(battleState.opponentTauntedSkillOrTradition) || (battleState.opponentAttackedFirstAggressively)" // Assumes these states
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
@@ -130,7 +146,7 @@ techniquesCanteen: [
 { name: "Water Pouch Splash", verb: 'splash', object: 'water from his pouch to distract', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'limited_resource'], setup: { name: 'Slightly Distracted', duration: 1, intensity: 1.05 }, collateralImpact: 'none', isCanteenMove: true },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } 
 ],
-techniques: [
+techniques: [ // This should be determined dynamically or merge Full/Canteen
     { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
     { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
     { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
@@ -141,9 +157,10 @@ quotes: { postWin: ["Discipline prevails."], postWin_overwhelming: ["My mastery 
 relationships: {}
 },
 'jeong-jeong': {
-id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", element: "fire", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/a7/Jeong_Jeong_serious.png',
 victoryStyle: "Wise_Reluctant", powerTier: 6,
+faction: "FireNationExile", // Or neutral, depending on interpretation
 personalityProfile: { 
     aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, 
     creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4,
@@ -157,9 +174,16 @@ personalityProfile: {
         "Tactical Reposition": 1.0
     } 
 },
-specialTraits: { resilientToManipulation: 1.0 },
+specialTraits: { resilientToManipulation: 1.0, fireMaster: true },
 collateralTolerance: 0.0,
 mobility: 0.4,
+curbstompRules: [ // New field
+    { ruleId: "jeongjeong_fire_whips_disable", characterId: "jeong-jeong" },
+    { ruleId: "jeongjeong_desert_advantage", characterId: "jeong-jeong" }
+],
+personalityTriggers: { // New field
+    "confident_stance": "(battleState.characterLandedStrongOrCriticalHitLastTurn) || (battleState.allyBuffedSelf)"
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],

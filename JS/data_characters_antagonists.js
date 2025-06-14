@@ -1,12 +1,14 @@
-// FILE: js/data_characters_antagonists.js
+// FILE: data_characters_antagonists.js
 // FILE: data_characters_antagonists.js
 'use strict';
 
 export const antagonistCharacters = {
     'azula': {
-        id: 'azula', name: "Azula", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
+        id: 'azula', name: "Azula", type: "Bender", element: "fire", pronouns: { s: 'she', p: 'her', o: 'her' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/1/12/Azula.png',
         victoryStyle: "Ruthless", powerTier: 8,
+        faction: "FireNation",
+        isInsane: false, // Add this flag, engine can toggle it based on mental state
         personalityProfile: { 
             aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, 
             creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3,
@@ -14,16 +16,26 @@ export const antagonistCharacters = {
             signatureMoveBias: { 
                 "Calculated Feint": 1.2,
                 "Blue Fire Daggers": 1.4,
-                "Fire Whip": 1.1, // Changed from missing
+                "Fire Whip": 1.1, 
                 "Lightning Generation": 1.9, 
                 "Flame Burst": 1.1,
                 "Precision Strike": 1.3,
                 "Tactical Reposition": 0.9
             } 
         },
-        specialTraits: { manipulative: 0.8 },
+        specialTraits: { manipulative: 0.8, canGenerateLightning: true },
         collateralTolerance: 0.9, 
         mobility: 0.95, 
+        curbstompRules: [ // New field
+            { ruleId: "azula_sane_lightning_precision", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
+            { ruleId: "azula_sane_fire_tornado", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
+            { ruleId: "azula_insane_unpredictable_attacks", characterId: "azula", conditionLogic: (azula) => azula.isInsane },
+            { ruleId: "azula_insane_blue_fire_buff", characterId: "azula", conditionLogic: (azula) => azula.isInsane }
+        ],
+        personalityTriggers: { // New field
+            "in_control": "(character.hp > character.maxHp * 0.5) && !(battleState.characterReceivedCriticalHit) && (opponent.mentalState.level === 'stable' || opponent.mentalState.level === 'stressed')",
+            "desperate_broken": "(character.hp < character.maxHp * 0.3) || (character.mentalState.level === 'broken')"
+        },
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
@@ -82,9 +94,10 @@ export const antagonistCharacters = {
         relationships: { 'zuko': { relationshipType: "sibling_rivalry_dominant", stressModifier: 1.5, resilienceModifier: 0.9 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_fear", stressModifier: 2.5, resilienceModifier: 0.7 }, 'iroh': { relationshipType: "contemptuous_underestimation", stressModifier: 0.8, resilienceModifier: 1.1 } }
     },
     'ozai-not-comet-enhanced': {
-        id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+        id: 'ozai-not-comet-enhanced', name: "Ozai (No Comet)", type: "Bender", element: "fire", pronouns: { s: 'he', p: 'his', o: 'him' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4a/Ozai.png',
         victoryStyle: "Supreme", powerTier: 9,
+        faction: "FireNation",
         personalityProfile: { 
             aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, 
             creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2,
@@ -95,12 +108,19 @@ export const antagonistCharacters = {
                 "Flame Wall": 1.0,
                 "Dragon's Roar": 1.8, 
                 "Emperor's Wrath": 1.7,
-                "Tactical Reposition": 0.7 // He'd rather overpower than reposition
+                "Tactical Reposition": 0.7 
             } 
         },
-        specialTraits: { manipulative: 0.6 },
+        specialTraits: { manipulative: 0.6, canGenerateLightning: true },
         collateralTolerance: 1.0, 
         mobility: 0.3, 
+        curbstompRules: [ // New field
+            { ruleId: "ozai_fire_comet_mode", characterId: "ozai-not-comet-enhanced" },
+            { ruleId: "ozai_lightning_spam", characterId: "ozai-not-comet-enhanced" }
+        ],
+        personalityTriggers: { // New field
+            "authority_challenged": "(battleState.opponentLandedSignificantHits >= 2) || (battleState.opponentUsedTaunt)" // Assumes these states
+        },
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
@@ -145,6 +165,7 @@ export const antagonistCharacters = {
         id: 'mai', name: "Mai", type: "Nonbender", pronouns: { s: 'she', p: 'her', o: 'her' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/40/Mai.png',
         victoryStyle: "Deadpan", powerTier: 4,
+        faction: "FireNation",
         personalityProfile: { 
             aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, 
             creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1,
@@ -162,6 +183,12 @@ export const antagonistCharacters = {
         specialTraits: { resilientToManipulation: 0.3 },
         collateralTolerance: 0.4, 
         mobility: 0.6, 
+        curbstompRules: [ // New field
+            { ruleId: "mai_knife_advantage", characterId: "mai" }
+        ],
+        personalityTriggers: { // New field
+            "provoked": "(battleState.opponentLandedCriticalHit) || (battleState.opponentTaunted) || (battleState.allyTargeted && ['ty-lee', 'zuko'].includes(battleState.ally.id))"
+        },
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
@@ -218,6 +245,7 @@ export const antagonistCharacters = {
         id: 'ty-lee', name: "Ty Lee", type: "Chi Blocker", pronouns: { s: 'she', p: 'her', o: 'her' },
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/6/6d/Ty_Lee.png',
         victoryStyle: "Playful", powerTier: 4,
+        faction: "FireNation",
         personalityProfile: { 
             aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, 
             creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6,
@@ -230,9 +258,15 @@ export const antagonistCharacters = {
                 "Tactical Reposition": 1.3
             } 
         },
-        specialTraits: { resilientToManipulation: 0.2 },
+        specialTraits: { resilientToManipulation: 0.2, chiBlocker: true },
         collateralTolerance: 0.1, 
         mobility: 1.0, 
+        curbstompRules: [ // New field
+            { ruleId: "tylee_chi_blocking", characterId: "ty-lee" }
+        ],
+        personalityTriggers: { // New field
+            "serious_fight": "(battleState.ally?.hp < battleState.ally?.maxHp * 0.3) || (battleState.opponentUsedLethalForce)"
+        },
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],

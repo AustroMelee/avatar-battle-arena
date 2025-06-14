@@ -1,4 +1,4 @@
-// FILE: js/main.js
+// FILE: main.js
 'use strict';
 
 import { simulateBattle } from './engine_battle-engine-core.js';
@@ -55,7 +55,6 @@ function handleModeSelectionChange(event) {
     }
 }
 
-// --- NEW FUNCTION for setting up detailed log controls ---
 function setupDetailedLogControls() {
     const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
     const copyBtn = document.getElementById('copy-detailed-logs-btn');
@@ -64,7 +63,7 @@ function setupDetailedLogControls() {
     if (toggleBtn && contentDiv) {
         toggleBtn.addEventListener('click', () => {
             const isCollapsed = contentDiv.classList.toggle('collapsed');
-            toggleBtn.setAttribute('aria-expanded', String(!isCollapsed)); // Ensure string value for attribute
+            toggleBtn.setAttribute('aria-expanded', String(!isCollapsed)); 
             toggleBtn.textContent = isCollapsed ? 'Show Detailed Battle Logs ►' : 'Hide Detailed Battle Logs ▼';
         });
     } else {
@@ -75,7 +74,6 @@ function setupDetailedLogControls() {
     if (copyBtn && contentDiv) {
         copyBtn.addEventListener('click', async () => {
             try {
-                // For <pre><code>, textContent is usually best for copying underlying text
                 await navigator.clipboard.writeText(contentDiv.textContent || ''); 
                 copyBtn.textContent = '📋 Copied!';
                 setTimeout(() => {
@@ -91,10 +89,8 @@ function setupDetailedLogControls() {
         });
     } else {
         if (!copyBtn) console.warn("Copy detailed logs button not found.");
-        // contentDiv warning handled by toggle button section
     }
 }
-// --- END NEW FUNCTION ---
 
 function init() {
     populateUI(); 
@@ -120,7 +116,6 @@ function init() {
         console.error("Battle button not found.");
     }
     
-    // --- CALL a new function to setup detailed log controls ---
     setupDetailedLogControls();
 }
 

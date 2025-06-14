@@ -1,4 +1,4 @@
-// FILE: js/data_characters_gaang.js
+// FILE: data_characters_gaang.js
 // FILE: data_characters_gaang.js
 'use strict';
 export const gaangCharacters = {
@@ -6,6 +6,7 @@ export const gaangCharacters = {
 id: 'sokka', name: "Sokka", type: "Nonbender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/c/cc/Sokka.png',
 victoryStyle: "Madcap", powerTier: 3,
+faction: "WaterTribe", // Added for rule checking
 personalityProfile: { 
     aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, 
     creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8,
@@ -14,15 +15,22 @@ personalityProfile: {
         "Sword Strike": 1.0,
         "Boomerang Throw": 1.6, 
         "Shield Block": 1.0,
-        "Tactical Positioning": 1.1, // Sokka would value this
+        "Tactical Positioning": 1.1, 
         "Improvised Trap": 1.5,
-        "The Sokka Special": 1.3, // Iconic, but high risk
+        "The Sokka Special": 1.3, 
         "Tactical Reposition": 1.1 
     } 
 },
-specialTraits: { resilientToManipulation: 0.2 },
+specialTraits: { resilientToManipulation: 0.2, intelligence: 75 }, // Added intelligence
 collateralTolerance: 0.5,
 mobility: 0.6,
+curbstompRules: [ // New field
+    { ruleId: "sokka_strategy_exploit", characterId: "sokka" },
+    { ruleId: "sokka_vulnerability_death", characterId: "sokka" }
+],
+personalityTriggers: { // New field
+    "meticulous_planning": "(opponent.lastMove?.isHighRisk && opponent.lastMoveEffectiveness === 'Weak') || battleState.locationTags.includes('trap_favorable')" // Example logic string
+},
 narrative: {
 battleStart: { 
 Early: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, {opponentName} looks tough. Don't panic. Just find an opening. You're the idea guy." }],
@@ -84,9 +92,10 @@ quotes: { postWin: ["Boomerang! You do always come back!"], postWin_overwhelming
 relationships: { 'katara': { relationshipType: 'sibling_support', stressModifier: 0.9, resilienceModifier: 1.2 } }
 },
 'aang-airbending-only': {
-id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", element: "air", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/ae/Aang_at_Jasmine_Dragon.png',
 victoryStyle: "Pacifist", powerTier: 9,
+faction: "AirNomad",
 personalityProfile: { 
     aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, 
     creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9,
@@ -101,9 +110,16 @@ personalityProfile: {
         "Tactical Reposition": 1.5
     } 
 },
-specialTraits: { resilientToManipulation: 0.6 },
+specialTraits: { resilientToManipulation: 0.6, isAvatar: true },
 collateralTolerance: 0.05,
 mobility: 1.0,
+curbstompRules: [ // New field
+    { ruleId: "aang_avatar_state_air", characterId: "aang-airbending-only" },
+    { ruleId: "aang_air_scooter_evasion", characterId: "aang-airbending-only" }
+],
+personalityTriggers: { // New field
+    "mortal_danger": "(character.hp < character.maxHp * 0.2) || (battleState.ally?.hp < battleState.ally?.maxHp * 0.05)" // Assumes ally state is available
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
@@ -157,9 +173,10 @@ quotes: { postWin: ["Phew! Nobody got hurt, right? Mostly."], postWin_overwhelmi
 relationships: { 'ozai-not-comet-enhanced': { relationshipType: "fated_adversary", stressModifier: 1.4, resilienceModifier: 1.3 }, 'azula': { relationshipType: "nonlethal_pacifism", stressModifier: 1.2, resilienceModifier: 1.2 } }
 },
 'katara': {
-id: 'katara', name: "Katara", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
+id: 'katara', name: "Katara", type: "Bender", element: "water", pronouns: { s: 'she', p: 'her', o: 'her' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/7/7a/Katara_smiles_at_coronation.png',
 victoryStyle: "Fierce", powerTier: 7,
+faction: "WaterTribe",
 personalityProfile: { 
     aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, 
     creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6,
@@ -179,9 +196,16 @@ personalityProfile: {
         "Tactical Reposition": 1.0
     } 
 },
-specialTraits: { resilientToManipulation: 0.9 },
+specialTraits: { resilientToManipulation: 0.9, isHealer: true }, // isHealer is conceptual here
 collateralTolerance: 0.15,
 mobility: 0.7,
+curbstompRules: [ // New field
+    { ruleId: "katara_bloodbending", characterId: "katara" },
+    { ruleId: "katara_ice_prison_kill", characterId: "katara" }
+],
+personalityTriggers: { // New field
+    "desperate_mentally_broken": "(character.hp < character.maxHp * 0.1) || (battleState.ally?.isDowned) || (character.criticalHitsTaken >= 2) || (character.mentalState.level === 'broken')"
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
@@ -237,7 +261,7 @@ techniquesCanteen: [
 { name: "Canteen Whip", verb: 'lash', object: 'out with a small water whip from her canteen', type: 'Offense', power: 25, element: 'water', moveTags: ['melee_range', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } 
 ],
-techniques: [
+techniques: [ // This should ideally be determined dynamically based on conditions, or merge Full/Canteen
     { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
     { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
     { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
@@ -250,9 +274,10 @@ quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postW
 relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1.0, resilienceModifier: 1.1 }, 'azula': { relationshipType: "bitter_rivalry", stressModifier: 1.5, resilienceModifier: 1.0 } }
 },
 'toph-beifong': {
-id: 'toph-beifong', name: "Toph", type: "Bender", pronouns: { s: 'she', p: 'her', o: 'her' },
+id: 'toph-beifong', name: "Toph", type: "Bender", element: "earth", pronouns: { s: 'she', p: 'her', o: 'her' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/46/Toph_Beifong.png',
 victoryStyle: "Cocky", powerTier: 7,
+faction: "EarthKingdom",
 personalityProfile: { 
     aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, 
     creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8,
@@ -264,12 +289,19 @@ personalityProfile: {
         "Metal Bending": 1.5,
         "Boulder Throw": 1.2,
         "Rock Coffin": 1.4,
-        "Tactical Reposition": 0.8 // Less likely to reposition, prefers direct confrontation
+        "Tactical Reposition": 0.8 
     } 
 },
-specialTraits: { resilientToManipulation: 0.5 },
+specialTraits: { resilientToManipulation: 0.5, seismicSense: true }, // seismicSense is conceptual
 collateralTolerance: 0.6,
 mobility: 0.2,
+curbstompRules: [ // New field
+    { ruleId: "toph_seismic_sense_accuracy", characterId: "toph-beifong" },
+    { ruleId: "toph_metal_bending_vs_armor", characterId: "toph-beifong" }
+],
+personalityTriggers: { // New field
+    "doubted": "(battleState.opponentTauntedBlindness) || (battleState.opponentLandedBlindHit)" // Assumes these states
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
@@ -320,9 +352,10 @@ quotes: { postWin: ["Told you I was the best. The greatest earthbender in the wo
 relationships: {}
 },
 'zuko': {
-id: 'zuko', name: "Zuko", type: "Bender", pronouns: { s: 'he', p: 'his', o: 'him' },
+id: 'zuko', name: "Zuko", type: "Bender", element: "fire", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4b/Zuko.png',
 victoryStyle: "Determined", powerTier: 6,
+faction: "FireNation",
 personalityProfile: { 
     aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, 
     creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5,
@@ -337,9 +370,16 @@ personalityProfile: {
         "Tactical Reposition": 1.0
     } 
 },
-specialTraits: { resilientToManipulation: 0.1 },
+specialTraits: { resilientToManipulation: 0.1, canRedirectLightning: true }, // canRedirectLightning is conceptual
 collateralTolerance: 0.25,
 mobility: 0.65,
+curbstompRules: [ // New field
+    { ruleId: "zuko_scar_intimidation", characterId: "zuko" },
+    { ruleId: "zuko_dual_dao_kill", characterId: "zuko" }
+],
+personalityTriggers: { // New field
+    "honor_violated": "(battleState.opponentCheated) || (battleState.allyDisarmedUnfairly)" // Assumes these states
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],

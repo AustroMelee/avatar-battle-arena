@@ -1,4 +1,4 @@
-// FILE: js/location-battle-conditions.js
+// FILE: location-battle-conditions.js
 'use strict';
 
 // This file provides detailed environmental data for each location.
@@ -9,9 +9,9 @@ export const locationConditions = {
 airRich: true,
 isVertical: true,
 isExposed: true,
-wind: 0.3, // Strong wind currents
-fragility: 0.5, // Ancient structures and natural rock formations have moderate fragility
-damageThresholds: { // % of total damage capacity
+wind: 0.3, 
+fragility: 0.5, 
+damageThresholds: { 
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
 environmentalImpacts: {
@@ -36,22 +36,22 @@ catastrophic: [
 "The very air vibrates with the sound of grinding earth and crumbling masonry."
 ]
 },
-// NEW: Environmental Modifiers for move effectiveness and energy cost
 environmentalModifiers: {
 air: { damageMultiplier: 1.15, energyCostModifier: 0.9, description: "Airbending flows freely with the winds." },
 fire: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Fire struggles against the high winds." },
 earth: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Earthbending is challenging on unstable platforms." },
 physical: { damageMultiplier: 0.9, energyCostModifier: 1.05, description: "Physical attacks are hindered by footing and wind." }
 },
-disabledElements: [], // No specific element bans here
-notes: "High altitude and strong winds favor airbenders. Structures are old and somewhat brittle."
+disabledElements: [], 
+notes: "High altitude and strong winds favor airbenders. Structures are old and somewhat brittle.",
+curbstompRules: [] // No specific location curbstomps defined yet for this location
 },
 'northern-water-tribe': {
 waterRich: true,
 iceRich: true,
 isSlippery: true,
 isCold: true,
-fragility: 0.6, // Ice structures are somewhat fragile, but water can be reformed
+fragility: 0.6, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -80,18 +80,23 @@ catastrophic: [
 environmentalModifiers: {
 water: { damageMultiplier: 1.15, energyCostModifier: 0.9, description: "Waterbending thrives with abundant water and ice." },
 ice: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Ice bending is exceptionally potent here." },
-fire: { damageMultiplier: 1.5, energyCostModifier: 1.2, description: "Fire melts and shatters ice, but faces moisture." },
+fire: { damageMultiplier: 1.5, energyCostModifier: 1.2, description: "Fire melts and shatters ice, but faces moisture." }, // Fire does more damage *to the ice structures*, but might cost more for the bender
 earth: { damageMultiplier: 0.7, energyCostModifier: 1.3, description: "Earthbending is limited in icy water terrain." }
 },
 disabledElements: [],
-notes: "An abundance of water and ice makes this a fortress for waterbenders. Ice structures are vulnerable to heat."
+notes: "An abundance of water and ice makes this a fortress for waterbenders. Ice structures are vulnerable to heat.",
+curbstompRules: [ // New field
+    { ruleId: "nwt_katara_vs_firebenders" },
+    { ruleId: "nwt_pakku_curbstomp" },
+    { ruleId: "nwt_firebender_penalty" }
+]
 },
 'ba-sing-se': {
 isUrban: true,
 isDense: true,
 earthRich: true,
 hasCover: true,
-fragility: 0.7, // Buildings and city infrastructure are relatively fragile
+fragility: 0.7, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -124,14 +129,19 @@ air: { damageMultiplier: 0.9, energyCostModifier: 1.05, description: "Airbending
 physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Tight spaces can impact physical combat." }
 },
 disabledElements: [],
-notes: "Tight streets and abundant earth favor tactical and earthbending combat. Urban structures are vulnerable."
+notes: "Tight streets and abundant earth favor tactical and earthbending combat. Urban structures are vulnerable.",
+curbstompRules: [ // New field for Ba Sing Se (Lower Ring specifically)
+    { ruleId: "bs_lower_ring_toph_advantage" },
+    { ruleId: "bs_lower_ring_crowd_interference" },
+    { ruleId: "bs_lower_ring_tylee_chiblock" }
+]
 },
 'si-wong-desert': {
 isSandy: true,
 isHot: true,
 hasShiftingGround: true,
 lowVisibility: true,
-fragility: 0.2, // Natural desert is very resilient to damage, mostly just shifts sand
+fragility: 0.2, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -163,8 +173,14 @@ earth: { damageMultiplier: 1.5, energyCostModifier: 0.85, description: "Earthben
 water: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Waterbending struggles to cause widespread damage in dry sand and intense heat." },
 air: { damageMultiplier: 1.0, energyCostModifier: 0.95, description: "Airbending can manipulate sand, but costs energy." }
 },
-disabledElements: ['water', 'ice'], // Water and Ice bending are disabled (except canteen moves)
-notes: "Scorching heat and lack of water severely penalize waterbenders. Sand shifts constantly."
+disabledElements: ['water', 'ice'], 
+notes: "Scorching heat and lack of water severely penalize waterbenders. Sand shifts constantly.",
+curbstompRules: [ // New field
+    { ruleId: "si_wong_azula_vs_katara" },
+    { ruleId: "si_wong_azula_vs_aang_heat" },
+    { ruleId: "si_wong_toph_disadvantage" },
+    { ruleId: "si_wong_sokka_heatstroke" }
+]
 },
 'foggy-swamp': {
 waterRich: true,
@@ -173,7 +189,7 @@ plantsRich: true,
 isDense: true,
 lowVisibility: true,
 isSlippery: true,
-fragility: 0.4, // Natural environment, plants can be damaged, but ground/water absorb much
+fragility: 0.4, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -207,15 +223,20 @@ air: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Airbending 
 physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Physical combat is hampered by thick muck and vegetation." }
 },
 disabledElements: [],
-notes: "A unique environment where water and earthbending can be uniquely applied. Dense vegetation and muck."
+notes: "A unique environment where water and earthbending can be uniquely applied. Dense vegetation and muck.",
+curbstompRules: [ // New field
+    { ruleId: "swamp_toph_weakness" },
+    { ruleId: "swamp_katara_buff" },
+    { ruleId: "swamp_ranged_accuracy_loss" }
+]
 },
 'boiling-rock': {
 isIndustrial: true,
 isHot: true,
 metalRich: true,
 isPrecarious: true,
-waterRich: true, // The boiling lake is a water source, but a dangerous one.
-fragility: 0.8, // Industrial structures, metal walkways are very fragile when attacked
+waterRich: true, 
+fragility: 0.8, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -248,19 +269,18 @@ water: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Waterbend
 metal: { damageMultiplier: 1.3, energyCostModifier: 0.85, description: "Metalbending is empowered by the abundant metal structures." },
 physical: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Precarious footing and extreme heat impact physical combat." }
 },
-// Waterbending is allowed, but it's boiling water (or steam). Canteen moves are normal.
-// No specific disabledElements but water moves might be re-flavored or have special effects.
 disabledElements: [],
-notes: "Metal and heat are abundant, but the terrain is treacherous. Extremely volatile environment. Water is present but dangerous."
+notes: "Metal and heat are abundant, but the terrain is treacherous. Extremely volatile environment. Water is present but dangerous.",
+curbstompRules: [] // No specific location curbstomps defined yet
 },
 'fire-nation-capital': {
 isUrban: true,
 isDense: true,
-earthRich: true, // Cities are made of earth/rock
+earthRich: true, 
 isHot: true,
 metalRich: true,
 isIndustrial: true,
-fragility: 0.75, // Grand public spaces are built solid but can still be damaged dramatically
+fragility: 0.75, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -293,7 +313,12 @@ earth: { damageMultiplier: 1.1, energyCostModifier: 1.0, description: "Earthbend
 water: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Waterbending struggles against the dry, hot environment." }
 },
 disabledElements: [],
-notes: "The heart of the Fire Nation empowers firebenders. Grand but still destructible."
+notes: "The heart of the Fire Nation empowers firebenders. Grand but still destructible.",
+curbstompRules: [ // New field
+    { ruleId: "fn_capital_ozai_azula_buff" },
+    { ruleId: "fn_capital_open_space_ranged" },
+    { ruleId: "fn_capital_intimidation" }
+]
 },
 'omashu': {
 isUrban: true,
@@ -302,7 +327,7 @@ earthRich: true,
 isVertical: true,
 hasCover: true,
 isPrecarious: true,
-fragility: 0.65, // Massive stone structures, but can be brought down
+fragility: 0.65, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -336,7 +361,12 @@ air: { damageMultiplier: 1.05, energyCostModifier: 0.95, description: "Airbendin
 physical: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Verticality and precarious footing can hinder physical attacks." }
 },
 disabledElements: [],
-notes: "A massive, tiered city of stone perfect for earthbenders. Gravity is a significant factor."
+notes: "A massive, tiered city of stone perfect for earthbenders. Gravity is a significant factor.",
+curbstompRules: [ // New field
+    { ruleId: "omashu_bumi_advantage" },
+    { ruleId: "omashu_tylee_chiblock" }, // Specifically if fighting *in* the chutes
+    { ruleId: "omashu_crushing_hazard" }
+]
 },
 'great-divide': {
 isExposed: true,
@@ -344,7 +374,7 @@ isRocky: true,
 isVertical: true,
 isPrecarious: true,
 earthRich: true,
-fragility: 0.3, // Natural canyon, mostly just causes rockslides or widens fissures
+fragility: 0.3, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -376,8 +406,13 @@ air: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Airbending 
 fire: { damageMultiplier: 0.8, energyCostModifier: 1.1, description: "Fire has limited structural effect on solid rock and can be diffused." },
 physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Precarious footing and echoing sounds hinder physical combat." }
 },
-disabledElements: ['water', 'ice'], // No significant water sources
-notes: "A sheer canyon with little cover, favoring those with high mobility or powerful earthbending. Very stable."
+disabledElements: ['water', 'ice'], 
+notes: "A sheer canyon with little cover, favoring those with high mobility or powerful earthbending. Very stable.",
+curbstompRules: [ // New field
+    { ruleId: "divide_aang_air_buff" },
+    { ruleId: "divide_fall_risk" },
+    { ruleId: "divide_mai_accuracy_buff" }
+]
 },
 'kyoshi-island': {
 isCoastal: true,
@@ -385,7 +420,7 @@ waterRich: true,
 earthRich: true,
 hasCover: true,
 plantsRich: true,
-fragility: 0.6, // Village houses are moderately fragile, natural elements less so
+fragility: 0.6, 
 damageThresholds: {
 minor: 10, moderate: 25, severe: 50, catastrophic: 75
 },
@@ -418,7 +453,11 @@ fire: { damageMultiplier: 1.1, energyCostModifier: 1.05, description: "Fire burn
 physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "The varied terrain provides balanced physical combat." }
 },
 disabledElements: [],
-notes: "A balanced environment with access to multiple elements. Village structures are relatively fragile."
+notes: "A balanced environment with access to multiple elements. Village structures are relatively fragile.",
+curbstompRules: [ // New field
+    { ruleId: "kyoshi_environmental_traps" },
+    { ruleId: "kyoshi_narrow_bridges_knockoff" },
+    { ruleId: "kyoshi_sokka_strategy_escape" }
+]
 },
 };
-
