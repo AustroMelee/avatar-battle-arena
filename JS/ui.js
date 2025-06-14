@@ -6,9 +6,11 @@ import { locations } from './locations.js';
 import { locationConditions } from './location-battle-conditions.js'; 
 import { resolveArchetypeLabel } from './engine_archetype-engine.js'; 
 import { renderArchetypeDisplay } from './ui_archetype-display.js'; 
-import { startSimulation, resetSimulationManager } from './simulation_mode_manager.js';
+// NEW Imports for Simulation Mode
+import { startSimulation, resetSimulationManager } from './simulation_mode_manager.js'; // Removed getSimulationMode as it's not used directly by ui.js
 import { transformEventsToAnimationQueue, transformEventsToHtmlLog } from './battle_log_transformer.js';
 import { initializeCameraControls } from './camera_control.js';
+
 
 const DOM = {
     fighter1Grid: document.getElementById('fighter1-grid'),
@@ -44,7 +46,7 @@ const DOM = {
     archetypeIntroB: document.getElementById('archetype-intro-b'),
     archetypeError: document.getElementById('archetype-error'),
     simulationModeContainer: document.getElementById('simulation-mode-container'),
-    animatedLogOutput: document.getElementById('animated-log-output'),
+    animatedLogOutput: document.getElementById('animated-log-output'), 
     cancelSimulationBtn: document.getElementById('cancel-simulation'),
     zoomInBtn: document.getElementById('zoom-in'),
     zoomOutBtn: document.getElementById('zoom-out'),
@@ -78,7 +80,8 @@ if (!document.getElementById('location-value')) document.body.appendChild(DOM.lo
  * @returns {string|null} The image URL or null if not found.
  */
 export function getCharacterImage(characterId) {
-    return characters[characterId]?.imageUrl || null;
+    const character = characters[characterId];
+    return character ? character.imageUrl : null;
 }
 
 /**
@@ -87,16 +90,19 @@ export function getCharacterImage(characterId) {
  * @returns {string} The CSS class name.
  */
 function getElementClass(character) {
-    if (!character.techniques || character.techniques.length === 0) {
-        return 'card-nonbender';
+    if (!character || !character.techniques || character.techniques.length === 0) {
+        return 'card-nonbender'; // Default or error class
     }
-    const mainElement = character.techniques.find(t => t.element)?.element || 'nonbender';
+    // Find the first technique with an element property to determine main element
+    const mainElementTechnique = character.techniques.find(t => t.element);
+    const mainElement = mainElementTechnique ? mainElementTechnique.element : 'nonbender';
+
     switch (mainElement) {
         case 'fire': case 'lightning': return 'card-fire';
         case 'water': case 'ice': return 'card-water';
         case 'earth': case 'metal': return 'card-earth';
         case 'air': return 'card-air';
-        case 'special': return 'card-chi';
+        case 'special': return 'card-chi'; // For chi blockers like Ty Lee
         default: return 'card-nonbender';
     }
 }
@@ -128,22 +134,26 @@ function updateArchetypeInfo() {
 function createCharacterCard(character, fighterKey) {
     const card = document.createElement('div');
     card.className = 'character-card';
-    card.classList.add(getElementClass(character));
-    card.dataset.id = character.id;
-    
-    const image = document.createElement('img');
-    image.src = character.imageUrl;
-    image.alt = character.name;
-    image.loading = 'lazy';
-    card.appendChild(image);
+    if (character) { // Add null check for character
+        card.classList.add(getElementClass(character));
+        card.dataset.id = character.id;
+        
+        const image = document.createElement('img');
+        image.src = character.imageUrl;
+        image.alt = character.name;
+        image.loading = 'lazy';
+        card.appendChild(image);
 
-    const name = document.createElement('h3');
-    name.textContent = character.name;
-    card.appendChild(name);
+        const name = document.createElement('h3');
+        name.textContent = character.name;
+        card.appendChild(name);
 
-    card.addEventListener('click', () => {
-        handleCardSelection(character, fighterKey, card);
-    });
+        card.addEventListener('click', () => {
+            handleCardSelection(character, fighterKey, card);
+        });
+    } else {
+        card.textContent = "Error: Character undefined"; // Fallback for safety
+    }
     return card;
 }
 
@@ -154,6 +164,8 @@ function createCharacterCard(character, fighterKey) {
  * @param {HTMLElement} selectedCard - The clicked card element.
  */
 function handleCardSelection(character, fighterKey, selectedCard) {
+    if (!character) return; // Safety check
+
     const grid = fighterKey === 'fighter1' ? DOM.fighter1Grid : DOM.fighter2Grid;
     const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
     const hiddenInput = fighterKey === 'fighter1' ? DOM.fighter1Select : DOM.fighter2Select;
@@ -164,27 +176,37 @@ function handleCardSelection(character, fighterKey, selectedCard) {
         return; 
     }
 
-    grid.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
+    if(grid) grid.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
     selectedCard.classList.add('selected');
-    nameDisplay.textContent = character.name;
-    hiddenInput.value = character.id;
+    if(nameDisplay) nameDisplay.textContent = character.name;
+    if(hiddenInput) hiddenInput.value = character.id;
     updateArchetypeInfo(); 
 }
 
 /**
  * Populates the character selection grids.
+ * Ensures that grids are cleared BEFORE new cards are added.
  */
 function populateCharacterGrids() {
     if (!DOM.fighter1Grid || !DOM.fighter2Grid) {
-        console.error("Character grids not found in DOM.");
+        console.error("Character grids not found in DOM for population.");
         return;
     }
-    DOM.fighter1Grid.innerHTML = ''; // Clear existing
-    DOM.fighter2Grid.innerHTML = ''; // Clear existing
+    // --- FIX: Clear grids BEFORE populating ---
+    DOM.fighter1Grid.innerHTML = ''; 
+    DOM.fighter2Grid.innerHTML = '';
+    // --- END FIX ---
 
-    const availableCharacters = Object.values(characters).filter(c => c.techniques && c.techniques.length > 0);
+    const availableCharacters = Object.values(characters).filter(c => c && c.techniques && c.techniques.length > 0);
     const sortedCharacters = availableCharacters.sort((a, b) => a.name.localeCompare(b.name));
 
+    if (sortedCharacters.length === 0) {
+        console.warn("No available characters to populate grids.");
+        DOM.fighter1Grid.textContent = "No characters available."; // User feedback
+        DOM.fighter2Grid.textContent = "No characters available.";
+        return;
+    }
+    
     sortedCharacters.forEach(character => {
         const card1 = createCharacterCard(character, 'fighter1');
         const card2 = createCharacterCard(character, 'fighter2');
@@ -202,21 +224,25 @@ function populateCharacterGrids() {
 function createLocationCard(locationData, locationId) {
     const card = document.createElement('div');
     card.className = 'location-card';
-    card.dataset.id = locationId;
+    if (locationData) { // Add null check
+        card.dataset.id = locationId;
 
-    const image = document.createElement('img');
-    image.src = locationData.imageUrl;
-    image.alt = locationData.name;
-    image.loading = 'lazy';
-    card.appendChild(image);
-    
-    const name = document.createElement('h3');
-    name.textContent = locationData.name;
-    card.appendChild(name);
+        const image = document.createElement('img');
+        image.src = locationData.imageUrl;
+        image.alt = locationData.name;
+        image.loading = 'lazy';
+        card.appendChild(image);
+        
+        const name = document.createElement('h3');
+        name.textContent = locationData.name;
+        card.appendChild(name);
 
-    card.addEventListener('click', () => {
-        handleLocationCardSelection(locationData, locationId, card);
-    });
+        card.addEventListener('click', () => {
+            handleLocationCardSelection(locationData, locationId, card);
+        });
+    } else {
+        card.textContent = "Error: Location undefined"; // Fallback
+    }
     return card;
 }
 
@@ -290,7 +316,7 @@ function handleLocationCardSelection(locationData, locationId, selectedCard) {
     if (!DOM.locationGrid || !DOM.locationNameDisplay || !DOM.locationSelect) return;
     DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
     selectedCard.classList.add('selected');
-    DOM.locationNameDisplay.textContent = locationData.name;
+    DOM.locationNameDisplay.textContent = locationData ? locationData.name : "Unknown Location";
     DOM.locationSelect.value = locationId;
     updateEnvironmentalSummary(locationId); 
     updateArchetypeInfo(); 
@@ -301,15 +327,23 @@ function handleLocationCardSelection(locationData, locationId, selectedCard) {
  */
 function populateLocationGrid() {
     if (!DOM.locationGrid) {
-        console.error("Location grid not found in DOM.");
+        console.error("Location grid not found in DOM for population.");
         return;
     }
     DOM.locationGrid.innerHTML = ''; // Clear existing
 
-    const sortedLocations = Object.entries(locations).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+    const sortedLocations = Object.entries(locations).sort(([, a], [, b]) => (a.name || "").localeCompare(b.name || ""));
+    
+    if (sortedLocations.length === 0) {
+        DOM.locationGrid.textContent = "No locations available.";
+        return;
+    }
+
     for (const [id, locationData] of sortedLocations) {
-        const card = createLocationCard(locationData, id);
-        DOM.locationGrid.appendChild(card);
+        if (locationData) { // Ensure locationData is not null/undefined
+            const card = createLocationCard(locationData, id);
+            DOM.locationGrid.appendChild(card);
+        }
     }
     if (DOM.locationEnvironmentSummary) {
         DOM.locationEnvironmentSummary.innerHTML = 'Select a battlefield to see its environmental characteristics.';
@@ -325,6 +359,10 @@ function initializeTimeToggle() {
         return;
     }
     const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
+    if (buttons.length === 0) {
+        console.warn("No time toggle buttons found.");
+        return;
+    }
     DOM.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered.";
     buttons.forEach(button => {
         button.addEventListener('click', () => {
@@ -345,7 +383,7 @@ function initializeTimeToggle() {
 function updateMomentumDisplay(fighterKey, momentumValue) {
     const momentumElement = fighterKey === 'fighter1' ? DOM.fighter1MomentumValue : DOM.fighter2MomentumValue;
     if (!momentumElement) return;
-    momentumElement.textContent = momentumValue;
+    momentumElement.textContent = String(momentumValue);
     momentumElement.classList.remove('momentum-positive', 'momentum-negative', 'momentum-neutral');
     if (momentumValue > 0) momentumElement.classList.add('momentum-positive');
     else if (momentumValue < 0) momentumElement.classList.add('momentum-negative');
@@ -362,10 +400,10 @@ export function populateUI() {
     updateMomentumDisplay('fighter1', 0);
     updateMomentumDisplay('fighter2', 0);
     updateArchetypeInfo();
-    if (DOM.simulationModeContainer && DOM.zoomInBtn && DOM.zoomOutBtn && DOM.animatedLogOutput) {
-        initializeCameraControls(DOM.animatedLogOutput, DOM.zoomInBtn, DOM.zoomOutBtn); // Pass animatedLogOutput for zooming its content
+    if (DOM.animatedLogOutput && DOM.zoomInBtn && DOM.zoomOutBtn) { // Changed simulationModeContainer to animatedLogOutput for zoom target
+        initializeCameraControls(DOM.animatedLogOutput, DOM.zoomInBtn, DOM.zoomOutBtn);
     } else {
-        console.warn("One or more camera control DOM elements are missing for initialization in populateUI.");
+        console.warn("One or more camera control DOM elements are missing for initialization in populateUI (animatedLogOutput, zoomInBtn, or zoomOutBtn).");
     }
 }
 
@@ -428,25 +466,33 @@ export function showResultsState(battleResult, simulationMode) {
         
         DOM.battleResultsContainer.classList.remove('hidden');
         DOM.resultsSection.style.display = 'block'; 
-        void DOM.resultsSection.offsetWidth;
+        void DOM.resultsSection.offsetWidth; // Force reflow
         DOM.resultsSection.classList.add('show');
-        DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Only scroll to results section if not in animated mode, or if animation was cancelled.
+        // Animated mode handles its own scrolling initially.
+        if (simulationMode === "instant" || (simulationMode === "animated" && !document.getElementById('simulation-mode-container')?.classList.contains('hidden'))) {
+           DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         DOM.battleBtn.disabled = false;
     };
     
     if (simulationMode === "animated") {
-        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = ''; 
+        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = ''; // Clear "Preparing..." message
         
         const animationQueue = transformEventsToAnimationQueue(battleResult.log);
         startSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
-            if (wasCancelledOrError && DOM.battleStory) {
+            // This callback is executed by simulation_mode_manager when animation is done or cancelled
+            if (wasCancelledOrError && DOM.battleStory && finalBattleResult.log) { // Also check finalBattleResult.log
                 DOM.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
             }
+            // Always display final analysis panel.
             displayFinalResultsPanel(finalBattleResult); 
+             // Hide simulation container after completion or cancellation if animated.
+            if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
         });
-    } else { 
+    } else { // Instant Mode
         if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden'); 
-        if(DOM.battleStory) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
+        if(DOM.battleStory && battleResult.log) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
         displayFinalResultsPanel(battleResult);
     }
 }
@@ -475,7 +521,7 @@ export function resetBattleUI() {
         if (DOM.resultsSection && !DOM.resultsSection.classList.contains('show')) {
             DOM.resultsSection.style.display = 'none';
         }
-    }, 500);
+    }, 500); // Match CSS transition duration
 }
 
 /**
@@ -503,9 +549,9 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         const li = document.createElement('li');
         li.className = 'analysis-item';
         const spanReason = document.createElement('span');
-        spanReason.innerHTML = text;
+        spanReason.innerHTML = text; // Allows <b> tags
         const spanValue = document.createElement('span');
-        spanValue.textContent = String(value); // Ensure value is string
+        spanValue.textContent = String(value); 
         spanValue.className = valueClass;
         li.appendChild(spanReason);
         li.appendChild(spanValue);
@@ -516,7 +562,7 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         if (!text || typeof text !== 'string') return; 
         const li = document.createElement('li');
         li.className = 'analysis-summary'; 
-        li.innerHTML = `<em>${text}</em>`; 
+        li.innerHTML = `<em>${text.trim()}</em>`; 
         DOM.analysisList.appendChild(li);
     };
     
@@ -528,7 +574,14 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
             return typeof entry === 'string' && entry.trim() !== '';
         });
 
-        if (validLogEntries.length === 0) return;
+        if (validLogEntries.length === 0 && !(title.includes("AI Log") || title.includes("Interaction Log") || title.includes("Battle Phase"))) { // Don't render empty if it's an optional log
+             return;
+        }
+        if (validLogEntries.length === 0 && (title.includes("AI Log") || title.includes("Interaction Log"))) {
+            // console.warn(`${title} had no valid entries to display.`); // Log for dev, but don't render empty essential logs
+            // return;
+        }
+
 
         const li = document.createElement('li');
         li.className = className;
@@ -541,18 +594,21 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
                 if(entry.prediction) parts.push(`Pred:${entry.prediction}`);
                 if(entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
                 if(entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
-                if(entry.actorState) parts.push(`HP:${entry.actorState.hp?.toFixed(0)} E:${entry.actorState.energy?.toFixed(0)} M:${entry.actorState.momentum} MS:${entry.actorState.mental}`);
-                if (entry.consideredMoves && entry.consideredMoves.length > 0) {
-                    const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name}(${m.prob})`).join(', ');
+                if(entry.actorState) {
+                    const as = entry.actorState;
+                    parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum} MS:${as.mental}`);
+                }
+                if (entry.consideredMoves && Array.isArray(entry.consideredMoves) && entry.consideredMoves.length > 0) {
+                    const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name}(${m.prob || 'N/A'})`).join(', ');
                     parts.push(`Considered:[${topConsiderations}]`);
                 }
-                // Fallback for other object structures
-                if (parts.length === 0) return JSON.stringify(entry);
+                // Fallback for other object structures or simple stringification
+                if (parts.length === 0) return JSON.stringify(entry); // Basic fallback for unknown objects
                 return parts.join(' | ');
             }
-            return String(entry); // Ensure it's a string
+            return String(entry).replace(/</g, "<").replace(/>/g, ">"); // Escape HTML in strings
         }).join('<br>');
-        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all; font-size: 0.8em;"><code>${formattedLog}</code></pre>`;
+        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all; font-size: 0.8em;"><code>${formattedLog || "No relevant log entries."}</code></pre>`;
         DOM.analysisList.appendChild(li);
     };
     
@@ -571,6 +627,7 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     const f1_class = isDraw ? 'modifier-neutral' : (fighter1.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter1.name}'s Final Status:</b>`, f1_status, f1_class);
     createListItem(`  • Health:`, `${Math.round(fighter1.hp)} / 100 HP`);
+    createListItem(`  • Energy:`, `${Math.round(fighter1.energy)} / 100`);
     createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
     createListItem(`  • Momentum:`, fighter1.momentum);
 
@@ -578,6 +635,7 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
     createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
+    createListItem(`  • Energy:`, `${Math.round(fighter2.energy)} / 100`);
     createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
     createListItem(`  • Momentum:`, fighter2.momentum);
     
@@ -609,10 +667,10 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
 
     DOM.analysisList.appendChild(spacer.cloneNode());
     if (fighter1.aiLog && fighter1.aiLog.length > 0) {
-      createLog(fighter1.aiLog, `${fighter1.name}'s Battle Log`, 'ai-log');
+      createLog(fighter1.aiLog, `${fighter1.name}'s AI Decision Log`, 'ai-log');
     }
     if (fighter2.aiLog && fighter2.aiLog.length > 0) {
-      createLog(fighter2.aiLog, `${fighter2.name}'s Battle Log`, 'ai-log');
+      createLog(fighter2.aiLog, `${fighter2.name}'s AI Decision Log`, 'ai-log');
     }
     if (fighter1.phaseLog && fighter1.phaseLog.length > 0) { 
         createLog(fighter1.phaseLog, `Battle Phase Progression`, 'phase-log');
