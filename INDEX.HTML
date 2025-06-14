@@ -17,7 +17,7 @@
     </header>
 
     <main>
-        <!-- NEW: Mode Selection UI -->
+        <!-- Mode Selection UI -->
         <section class="mode-selection-section">
             <h2 class="mode-selection-title">Choose Simulation Mode</h2>
             <div class="mode-options">
@@ -31,7 +31,7 @@
                 </label>
             </div>
         </section>
-        <!-- End NEW Mode Selection UI -->
+        <!-- End Mode Selection UI -->
 
         <section class="battle-setup">
             <div class="fighter-selection-area">
@@ -53,7 +53,6 @@
             </div>
         </section>
 
-        <!-- Location Section now comes BEFORE Archetype Info Section -->
         <section class="location-section">
             <h2 class="location-title" id="location-name-display">Choose a Battlefield</h2>
             <div id="location-environment-summary" class="location-environment-summary"></div>
@@ -73,7 +72,6 @@
             <input type="hidden" id="time-of-day-value" value="day">
         </section>
 
-        <!-- Archetype Info Section is now AFTER Location Section -->
         <section class="archetype-info-section" id="archetype-info-container">
             <h3 class="archetype-headline" id="archetype-headline"></h3>
             <div class="archetype-intros">
@@ -85,24 +83,24 @@
         
         <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
 
-        <!-- NEW: Simulation Mode Container -->
+        <!-- Simulation Mode Container -->
         <section id="simulation-mode-container" class="simulation-mode-container hidden">
             <div class="simulation-controls">
                 <div class="simulation-controls-group"> 
                     <button id="cancel-simulation" class="simulation-cancel-btn">Cancel</button>
-                    <button id="toggle-sim-log-btn" class="simulation-log-toggle-btn" aria-expanded="false">Show Log ►</button> 
-                    <button id="copy-sim-log-btn" class="simulation-copy-btn">📋 Copy Log</button>
+                    <button id="toggle-sim-log-btn" class="simulation-log-toggle-btn" aria-expanded="true">Hide Log ▼</button> 
+                    <button id="copy-sim-log-btn" class="simulation-copy-btn">📋 Copy Sim Log</button> 
                 </div>
                 <div class="zoom-controls">
                     <button id="zoom-out" class="simulation-zoom-btn">-</button>
                     <button id="zoom-in" class="simulation-zoom-btn">+</button>
                 </div>
             </div>
-            <div id="animated-log-output" class="animated-log-output collapsed"> 
+            <div id="animated-log-output" class="animated-log-output"> 
                 <!-- Animated text will appear here -->
             </div>
         </section>
-        <!-- End NEW Simulation Mode Container -->
+        <!-- End Simulation Mode Container -->
 
         <section class="results-section" id="results" style="display: none;">
             <div class="loading hidden" id="loading">
@@ -115,12 +113,13 @@
                     <div class="win-probability" id="win-probability"></div>
                 </div>
                 
+                <!-- This toggle button is for battle-story and outcome-analysis (excluding detailed-battle-logs) -->
                 <div class="results-actions-bar">
-                    <button id="toggle-results-details-btn" class="results-details-toggle-btn" aria-expanded="false">Show Details ►</button>
-                    <button id="copy-results-details-btn" class="results-copy-btn">📋 Copy Details</button>
+                    <button id="toggle-results-details-btn" class="results-details-toggle-btn" aria-expanded="true">Hide Story & Analysis ▼</button>
+                    <button id="copy-results-story-btn" class="results-copy-btn">📋 Copy Story</button> 
                 </div>
 
-                <div id="results-details-content" class="collapsed"> 
+                <div id="results-details-content"> 
                     <article class="battle-story" id="battle-story"></article>
                     <div class="outcome-analysis" id="outcome-analysis">
                         <h3 class="analysis-title">Outcome Analysis</h3>
@@ -131,6 +130,18 @@
                             <div id="environment-damage-display" class="environmental-damage-level"></div>
                             <ul id="environment-impacts-list" class="environment-impacts-list"></ul>
                         </div>
+
+                        <!-- NEW: Detailed Battle Logs Section (within outcome-analysis) -->
+                        <div class="detailed-battle-logs-section">
+                            <div class="detailed-battle-logs-controls results-actions-bar">
+                                <button id="toggle-detailed-logs-btn" class="results-details-toggle-btn" aria-expanded="false">Show Detailed Battle Logs ►</button>
+                                <button id="copy-detailed-logs-btn" class="results-copy-btn">📋 Copy Battle Logs</button>
+                            </div>
+                            <div id="detailed-battle-logs-content" class="collapsible-content collapsed">
+                                <!-- AI Logs will be populated here by JS -->
+                            </div>
+                        </div>
+                        <!-- END NEW: Detailed Battle Logs Section -->
                     </div>
                 </div>
             </div>

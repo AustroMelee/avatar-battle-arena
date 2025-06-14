@@ -1,29 +1,24 @@
 // FILE: js/engine_narrative-engine.js
 'use strict';
 
-// Version 3.3.2: Fix ReferenceError in formatQuoteToStructuredEvent & General Null Safety Clean-up
+import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, battlePhases as phaseDefinitions } from './narrative-v2.js'; // Assuming narrative-v2.js is renamed to data_narrative_config.js later
+import { locationConditions } from './location-battle-conditions.js'; // Assuming renamed to data_location_conditions.js
 
-import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, battlePhases as phaseDefinitions, finishingBlowPhrases } from './narrative-v2.js';
-import { locationConditions } from './location-battle-conditions.js';
+const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
-const DEFAULT_PRONOUNS = { s: 'they', p: 'their', o: 'them' };
-const MINIMAL_ACTOR_FALLBACK = { name: 'Narrator', pronouns: DEFAULT_PRONOUNS, id: 'narrator' }; // Used if actor is truly null
-
-const getRandomElement = (arr) => {
-    if (!arr || !Array.isArray(arr) || arr.length === 0) {
-        return null;
-    }
-    return arr[Math.floor(Math.random() * arr.length)];
-};
-
-function conjugatePresent(verbPhrase) {
-    if (!verbPhrase || typeof verbPhrase !== 'string') {
-        return '';
-    }
+/**
+ * Conjugates a verb phrase for third-person singular present tense.
+ * @param {string} verbPhrase - The verb phrase to conjugate.
+ * @returns {string} The conjugated verb phrase.
+ */
+function conjugatePresent(verbPhrase) { 
+    if (!verbPhrase) return '';
     const words = verbPhrase.split(' ');
     const verb = words[0];
     const rest = words.slice(1).join(' ');
-    if (verb.endsWith('s') && !['erupt', 'lash', 'assume', 'control', 'focus'].includes(verb)) return verbPhrase;
+    // Simple check for already conjugated common forms or specific verbs.
+    if (verb.endsWith('s') && !['erupt', 'lash', 'assume', 'control', 'focus', 'execute', 'block', 'throw', 'strike', 'ride', 'unleash', 'form', 'create', 'push', 'sweep', 'send', 'don', 'slam', 'bend', 'launch', 'entomb', 'pin', 'devise', 'spring', 'ignite', 'generate', 'summon', 'propel', 'trigger', 'hurl', 'raise', 'conjure', 'inflict', 'end'].includes(verb) ) return verbPhrase;
+    
     const irregulars = { 'have': 'has', 'do': 'does', 'go': 'goes', 'be': 'is' };
     if (irregulars[verb]) {
         return rest ? `${irregulars[verb]} ${rest}` : irregulars[verb];
@@ -31,154 +26,138 @@ function conjugatePresent(verbPhrase) {
     let conjugatedVerb;
     if (/(ss|sh|ch|x|z|o)$/.test(verb)) {
         conjugatedVerb = verb + 'es';
-    } else if (/[^aeiou]y$/.test(verb)) {
+    } else if (/[^aeiou]y$/.test(verb)) { // Verbs ending in consonant + y
         conjugatedVerb = verb.slice(0, -1) + 'ies';
-    } else {
+    } else { // Default: add -s
         conjugatedVerb = verb + 's';
     }
     return rest ? `${conjugatedVerb} ${rest}` : conjugatedVerb;
 }
 
+/**
+ * Substitutes tokens in a template string with provided values.
+ * @param {string} template - The template string with tokens.
+ * @param {object} actor - The acting character object.
+ * @param {object} opponent - The opposing character object.
+ * @param {object} [context={}] - Additional context for token replacement.
+ * @returns {string} The string with tokens replaced.
+ */
 function substituteTokens(template, actor, opponent, context = {}) {
-    if (typeof template !== 'string') {
-        return '';
-    }
+    if (!template) return '';
     let text = template;
-    // Ensure actor and opponent are at least minimal objects for safe property access
-    // If actor/opponent is null, MINIMAL_ACTOR_FALLBACK provides default name/pronouns
-    const currentActor = actor || MINIMAL_ACTOR_FALLBACK;
-    const currentOpponent = opponent || MINIMAL_ACTOR_FALLBACK;
-
-    const actorName = currentActor.name || 'Someone'; // Fallback if name somehow missing from currentActor
-    const opponentName = currentOpponent.name || 'Someone else';
-    const actorPronouns = currentActor.pronouns || DEFAULT_PRONOUNS;
-    const opponentPronouns = currentOpponent.pronouns || DEFAULT_PRONOUNS;
-
     const replacements = {
-        '{actorName}': actorName,
-        '{opponentName}': opponentName,
-        '{targetName}': opponentName, // targetName is often the opponent
-        '{actor.s}': actorPronouns.s,
-        '{actor.p}': actorPronouns.p,
-        '{actor.o}': actorPronouns.o,
-        '{opponent.s}': opponentPronouns.s,
-        '{opponent.p}': opponentPronouns.p,
-        '{opponent.o}': opponentPronouns.o,
-        '{possessive}': actorPronouns.p, // Usually actor's possessive
+        '{actorName}': actor?.name || 'A fighter',
+        '{opponentName}': opponent?.name || 'Their opponent',
+        '{targetName}': opponent?.name || 'The target',
+        '{actor.s}': actor?.pronouns?.s || 'they',
+        '{actor.p}': actor?.pronouns?.p || 'their',
+        '{actor.o}': actor?.pronouns?.o || 'them',
+        '{opponent.s}': opponent?.pronouns?.s || 'they',
+        '{opponent.p}': opponent?.pronouns?.p || 'their',
+        '{opponent.o}': opponent?.pronouns?.o || 'them',
+        '{possessive}': actor?.pronouns?.p || 'their', // Defaulted to actor's possessive
         ...context
     };
     for (const [token, value] of Object.entries(replacements)) {
-        const replacementValue = (value === null || value === undefined) ? '' : String(value);
-        text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), replacementValue);
+        text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), String(value));
     }
     return text;
-}
+ }
 
+/**
+ * Finds a narrative quote based on trigger, sub-trigger, and context.
+ * @param {object} actor - The character performing the action or being described.
+ * @param {object} opponent - The opposing character.
+ * @param {string} trigger - The main trigger for the narrative (e.g., 'battleStart', 'onMoveExecution').
+ * @param {string} subTrigger - The specific sub-trigger (e.g., 'Early', move name).
+ * @param {object} [context={}] - Additional context (e.g., currentPhaseKey, result).
+ * @returns {object|null} The selected quote object or null.
+ */
 export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
-    // If actor is null (e.g. for purely environmental effects not tied to a specific character),
-    // we use MINIMAL_ACTOR_FALLBACK to prevent errors when accessing actor.narrative or actor.relationships.
-    // However, environmental quotes should ideally be handled differently or have specific narrator structures.
-    const currentActor = actor || MINIMAL_ACTOR_FALLBACK;
-
-    const narrativeData = currentActor.narrative || {};
+    const narrativeData = actor.narrative || {};
     let pool = null;
-    const currentPhaseKey = context?.currentPhaseKey || 'Generic';
-    const opponentId = opponent?.id;
+    const currentPhaseKey = context.currentPhaseKey || 'Generic';
 
-    const getPath = (obj, pathArray) => pathArray.reduce((acc, key) => (acc && acc[key] !== undefined) ? acc[key] : undefined, obj);
-
-    // Try most specific paths first
-    pool = pool || getPath(currentActor.relationships, [opponentId, 'narrative', trigger, subTrigger, currentPhaseKey]);
-    pool = pool || getPath(currentActor.relationships, [opponentId, 'narrative', trigger, subTrigger, 'Generic']);
-    const relBase = getPath(currentActor.relationships, [opponentId, 'narrative', trigger, subTrigger]);
-    if (!pool && Array.isArray(relBase)) pool = relBase;
-
-    pool = pool || getPath(narrativeData, [trigger, subTrigger, currentPhaseKey]);
-    pool = pool || getPath(narrativeData, [trigger, subTrigger, 'Generic']);
-
-    if (trigger === 'onMoveExecution' && context?.result) {
-        pool = pool || getPath(narrativeData, [trigger, subTrigger, context.result, currentPhaseKey]);
-        pool = pool || getPath(narrativeData, [trigger, subTrigger, context.result, 'Generic']);
-        const moveExecBase = getPath(narrativeData, [trigger, subTrigger, context.result]);
-        if (!pool && Array.isArray(moveExecBase)) pool = moveExecBase;
-    }
-    
-    const generalBase = getPath(narrativeData, [trigger, subTrigger]);
-    if (!pool && Array.isArray(generalBase)) pool = generalBase;
-
-    pool = pool || getPath(narrativeData, [trigger, 'general', currentPhaseKey]);
-    pool = pool || getPath(narrativeData, [trigger, 'general', 'Generic']);
-    const triggerGeneralBase = getPath(narrativeData, [trigger, 'general']);
-    if (!pool && Array.isArray(triggerGeneralBase)) pool = triggerGeneralBase;
-    
-    if (trigger === 'onCollateral' && subTrigger === 'general' && context?.impactText) {
+    // Path priority: Relationship -> Character -> Move -> General Trigger
+    if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]?.[currentPhaseKey]) {
+        pool = actor.relationships[opponent.id].narrative[trigger][subTrigger][currentPhaseKey];
+    } else if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]?.Generic) {
+        pool = actor.relationships[opponent.id].narrative[trigger][subTrigger].Generic;
+    } else if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger] && Array.isArray(actor.relationships[opponent.id].narrative[trigger][subTrigger])) { // Legacy support
+        pool = actor.relationships[opponent.id].narrative[trigger][subTrigger];
+    } else if (narrativeData[trigger]?.[subTrigger]?.[currentPhaseKey]) {
+        pool = narrativeData[trigger][subTrigger][currentPhaseKey];
+    } else if (narrativeData[trigger]?.[subTrigger]?.Generic) {
+        pool = narrativeData[trigger][subTrigger].Generic;
+    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]?.[currentPhaseKey]) {
+        pool = narrativeData[trigger][subTrigger][context.result][currentPhaseKey];
+    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]?.Generic) {
+        pool = narrativeData[trigger][subTrigger][context.result].Generic;
+    } else if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result] && Array.isArray(narrativeData[trigger]?.[subTrigger]?.[context.result])) { // Legacy support
+        pool = narrativeData[trigger][subTrigger][context.result];
+    } else if (narrativeData[trigger]?.[subTrigger] && Array.isArray(narrativeData[trigger]?.[subTrigger])) { // Legacy general sub-trigger
+        pool = narrativeData[trigger][subTrigger];
+    } else if (narrativeData[trigger]?.general?.[currentPhaseKey]) { // General trigger fallback with phase
+        pool = narrativeData[trigger].general[currentPhaseKey];
+    } else if (narrativeData[trigger]?.general?.Generic) { // General trigger fallback to Generic
+        pool = narrativeData[trigger].general.Generic;
+    } else if (narrativeData[trigger]?.general && Array.isArray(narrativeData[trigger]?.general)) { // Legacy general trigger
+        pool = narrativeData[trigger].general;
+    } else if (trigger === 'onCollateral' && subTrigger === 'general' && context.impactText) {
+        // Special handling for raw impact text for collateral damage
         return { type: 'environmental', line: context.impactText };
     }
-    
-    return (pool && Array.isArray(pool)) ? getRandomElement(pool) : null;
+
+    return pool ? getRandomElement(pool) : null;
 }
 
-function formatQuoteToStructuredEvent(quoteObj, actor, opponent, context) {
-    if (!quoteObj || typeof quoteObj.line !== 'string') {
-        return null;
-    }
-    const { type, line } = quoteObj;
+/**
+ * Formats a quote object into a structured event for the battle log.
+ * @param {object} quote - The quote object from findNarrativeQuote.
+ * @param {object} actor - The character associated with the quote.
+ * @param {object} opponent - The opposing character.
+ * @param {object} context - Additional context.
+ * @returns {object|null} A structured event object or null.
+ */
+function formatQuoteEvent(quote, actor, opponent, context) {
+    if (!quote || !quote.line) return null;
+    const { type, line } = quote;
+    const characterName = actor?.name || 'Narrator';
+    const formattedLine = substituteTokens(line, actor, opponent, context);
     
-    // Ensure actor is an object for substituteTokens, even if it's just the fallback.
-    // characterName will be 'Narrator' if actor is null/undefined.
-    const currentActor = actor || MINIMAL_ACTOR_FALLBACK;
-    const characterName = currentActor.name;
-
-    // The line template itself should contain tokens like {actorName}
-    // substituteTokens will handle replacing them based on currentActor
-    const textContent = substituteTokens(line, currentActor, opponent, context);
-
-    let htmlClassType = `narrative-${type || 'general'}`;
-    let htmlContent;
-
-    // Construct HTML based on the quote type
+    const actorSpan = actor ? `<span class="char-${actor.id}">${characterName}</span>` : characterName;
+    const verb = type === 'internal' ? 'thinks' : (type === 'action' ? '' : 'says');
+    let htmlContent = "";
     if (type === 'environmental') {
-        // Environmental quotes are direct descriptions, not attributed to a character saying/thinking them
-        htmlContent = `<p class="${htmlClassType}">${textContent}</p>`;
+        htmlContent = `<p class="narrative-environmental">${formattedLine}</p>`;
     } else if (type === 'action') {
-        // Action lines typically describe what the character *does*.
-        // Example template for 'action': "{actorName} unleashes a furious roar."
-        // textContent will become "Azula unleashes a furious roar."
-        htmlContent = `<p class="${htmlClassType}">${textContent}</p>`;
-    } else { // 'spoken' or 'internal', or fallback 'general'
-        // Example template for 'spoken': "You are weak!"
-        // textContent will become "You are weak!"
-        // htmlContent will be "Azula says, "<em>You are weak!</em>""
-        htmlContent = `<p class="${htmlClassType}">${characterName} ${type === 'internal' ? 'thinks' : 'says'}, "<em>${textContent}</em>"</p>`;
+        htmlContent = `<p class="narrative-action">${actorSpan} ${formattedLine}</p>`;
+    } else {
+        htmlContent = `<p class="narrative-${type || 'spoken'}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
     }
 
     return {
         type: 'dialogue_event',
-        actorId: currentActor.id,
+        actorId: actor?.id || null,
         characterName: characterName,
-        text: textContent, // The pure, substituted text content
+        text: formattedLine, // Raw text for animation
         isDialogue: (type === 'spoken' || type === 'internal'),
         isActionNarrative: (type === 'action'),
-        isEnvironmentalNarrative: (type === 'environmental'),
-        dialogueType: type || 'general', // The original type for potential specific styling
-        html_content: `<div class="narrative-block">${htmlContent}</div>` // Formatted HTML
+        isEnvironmental: (type === 'environmental'),
+        html_content: htmlContent, // HTML for instant mode
     };
 }
 
+/**
+ * Generates a structured object describing a move action.
+ * @param {object} move - The move object.
+ * @param {object} actor - The attacking character.
+ * @param {object} opponent - The defending character.
+ * @param {object} result - The result of the move calculation.
+ * @param {string} currentPhaseKey - The current battle phase key.
+ * @returns {object} A structured event object for the move action.
+ */
 function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey) {
-    if (!move || !result || !result.effectiveness) {
-        const errActorName = actor?.name || "Unknown Attacker";
-        const errMoveName = move?.name || "Unknown Move";
-        return {
-            type: 'move_action_event', actorId: actor?.id || 'unknown', characterName: errActorName, moveName: errMoveName,
-            moveType: move?.element || move?.type || "Unknown", effectivenessLabel: "Error",
-            text: `Error generating action description for ${errMoveName} by ${errActorName}.`, isMoveAction: true, isKOAction: false,
-            html_content: `<p>Error generating action description for ${errMoveName}.</p>`
-        };
-    }
-    const currentActor = actor || MINIMAL_ACTOR_FALLBACK;
-    const currentOpponent = opponent || MINIMAL_ACTOR_FALLBACK;
-
     let introPhrase = '';
     let tacticalPrefix = '';
     let tacticalSuffix = '';
@@ -187,207 +166,182 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
 
     if (result.payoff && result.consumedStateName) {
-        tacticalPrefix = `Capitalizing on ${currentOpponent.name} being ${result.consumedStateName}, `;
+        tacticalPrefix = `Capitalizing on ${opponent.name} being ${result.consumedStateName}, `;
     }
     
-    const actorTacticalState = currentActor.tacticalState;
-    if (actorTacticalState && actorTacticalState.name && (actorTacticalState.duration || 0) >= 0) {
-        if (actorTacticalState.isPositive) {
-            tacticalSuffix += ` ${currentActor.name} is now ${actorTacticalState.name}!`;
-        } else if (move.isRepositionMove) {
-            tacticalSuffix += ` However, ${currentActor.name} is now ${actorTacticalState.name}!`;
-        }
-    }
-    
-    if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
-        tacticalSuffix += ` The move leaves ${currentOpponent.name} ${move.setup.name}!`;
+    if (actor.tacticalState && actor.tacticalState.name && actor.tacticalState.duration >= 0 && actor.tacticalState.isPositive) {
+        tacticalSuffix += ` ${actor.name} is now ${actor.tacticalState.name}!`;
+    } else if (actor.tacticalState && actor.tacticalState.name && actor.tacticalState.duration >= 0 && !actor.tacticalState.isPositive && move.isRepositionMove) {
+        tacticalSuffix += ` However, ${actor.name} is now ${actor.tacticalState.name}!`;
+    } else if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
+        tacticalSuffix += ` The move leaves ${opponent.name} ${move.setup.name}!`;
     }
 
-    let impactSentence;
-    const effectivenessLabelUpper = result.effectiveness.label?.toUpperCase() || 'NORMAL';
-    if (move.isRepositionMove && impactPhrases.REPOSITION?.[effectivenessLabelUpper]) {
-        impactSentence = getRandomElement(impactPhrases.REPOSITION[effectivenessLabelUpper]);
-    } else if ((move.type === 'Defense' || move.type === 'Utility') && impactPhrases.DEFENSE) {
-        const isReactive = currentOpponent.lastMove?.type === 'Offense';
-        impactSentence = getRandomElement(isReactive ? impactPhrases.DEFENSE.REACTIVE : impactPhrases.DEFENSE.PROACTIVE);
-    } else if (impactPhrases.DEFAULT?.[effectivenessLabelUpper]) {
-        impactSentence = getRandomElement(impactPhrases.DEFAULT[effectivenessLabelUpper]);
+    let impactSentenceKey = result.effectiveness.label.toUpperCase();
+    let impactSentencePool;
+
+    if (move.isRepositionMove) {
+        impactSentencePool = impactPhrases.REPOSITION?.[impactSentenceKey];
+    } else if (move.type === 'Defense' || move.type === 'Utility') {
+        const isReactive = opponent.lastMove?.type === 'Offense';
+        impactSentencePool = isReactive ? impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE;
     } else {
-        impactSentence = "The move unfolds.";
+        impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
+    const impactSentence = getRandomElement(impactSentencePool) || "The move is made.";
+
 
     let baseActionText;
     if (move.name === "Struggle") {
-        baseActionText = `${currentActor.name} struggles to fight back`;
+        baseActionText = `${actor.name} struggles to fight back`;
     } else {
         const verb = conjugatePresent(move.verb || 'executes');
-        const objectText = move.object || "an action";
-        const article = move.requiresArticle ? (['a','e','i','o','u'].includes(objectText[0]?.toLowerCase()) ? `an ${objectText}` : `a ${objectText}`) : objectText;
-        baseActionText = `${currentActor.name} ${verb} ${article}`;
+        const object = move.requiresArticle ? ((['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`)) : move.object;
+        baseActionText = `${actor.name} ${verb} ${object}`;
     }
     
-    let fullDescText = substituteTokens(`${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence || ''}${tacticalSuffix}`, currentActor, currentOpponent);
-    let isKO = false;
-
-    if ((currentOpponent.hp || 0) <= 0 && (result.damage || 0) > 0 && (move.type === 'Offense' || move.type === 'Finisher')) {
-        const koVariations = finishingBlowPhrases || [ "...and {targetName} collapses, utterly defeated!" ];
-        const koPhrase = getRandomElement(koVariations) || "...and {targetName} is defeated!";
-        fullDescText += ` ${substituteTokens(koPhrase, currentActor, currentOpponent)}`;
-        isKO = true; 
-    }
+    const fullDescText = substituteTokens(`${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`, actor, opponent);
     
-    const moveLineHtml = (phaseTemplates.move || '')
-        .replace(/{actorId}/g, currentActor.id || 'unknown-actor')
-        .replace(/{actorName}/g, currentActor.name)
-        .replace(/{moveName}/g, move.name || 'Unknown Move')
-        .replace(/{moveEmoji}/g, result.effectiveness?.emoji || '⚔️') 
-        .replace(/{effectivenessLabel}/g, result.effectiveness?.label || 'Normal')
-        .replace(/{effectivenessEmoji}/g, result.effectiveness?.emoji || '⚔️')
-        .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`) 
-        .replace(/{collateralDamageDescription}/g, ''); 
+    const moveLineHtml = phaseTemplates.move
+        .replace(/{actorId}/g, actor.id)
+        .replace(/{actorName}/g, actor.name)
+        .replace(/{moveName}/g, move.name)
+        .replace(/{moveEmoji}/g, '⚔️') // Placeholder, animation engine will handle better emoji
+        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
+        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
+        .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`) // Full description in its own p tag
+        .replace(/{collateralDamageDescription}/g, ''); // Collateral will be a separate event or appended
 
     return {
         type: 'move_action_event',
-        actorId: currentActor.id,
-        characterName: currentActor.name,
+        actorId: actor.id,
+        characterName: actor.name,
         moveName: move.name,
         moveType: move.element || move.type, 
         effectivenessLabel: result.effectiveness.label,
         text: fullDescText, 
         isMoveAction: true,
-        isKOAction: isKO, 
         html_content: moveLineHtml 
     };
 }
 
+/**
+ * Generates a structured event for collateral damage.
+ * @param {object} move - The move that caused collateral.
+ * @param {object} actor - The character who performed the move.
+ * @param {object} opponent - The opposing character.
+ * @param {object} environmentState - Current state of the environment.
+ * @param {object} locationData - Data for the current location.
+ * @returns {object|null} A structured event object or null if no collateral.
+ */
 function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData) {
-    const currentActor = actor || MINIMAL_ACTOR_FALLBACK;
-    const currentOpponent = opponent || MINIMAL_ACTOR_FALLBACK;
-
-    if (!move || !environmentState) {
+    if (!move.collateralImpact || move.collateralImpact === 'none' || environmentState.damageLevel === 0) {
         return null;
     }
-    if (!move.collateralImpact || move.collateralImpact === 'none' || (environmentState.damageLevel || 0) === 0) {
-        return null;
-    }
-    const impactLevel = move.collateralImpact.toUpperCase(); 
-    const collateralPhrasePool = collateralImpactPhrases[impactLevel];
-    if (!collateralPhrasePool || collateralPhrasePool.length === 0) {
-        return null;
-    }
-    const collateralPhrase = getRandomElement(collateralPhrasePool);
+    const impactLevel = move.collateralImpact.toUpperCase();
+    if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) return null;
+    
+    const collateralPhrase = getRandomElement(collateralImpactPhrases[impactLevel]);
     if (!collateralPhrase) return null;
 
-    let descriptionText = `${currentActor.name}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, currentActor, currentOpponent)}`;
-    let specificImpactText = ''; 
+    let description = `${actor.name}'s attack impacts the surroundings: ${substituteTokens(collateralPhrase, actor, opponent)}`;
+    let specificImpactPhrase = '';
 
-    if (locationData && locationData.environmentalImpacts && environmentState.specificImpacts) {
-        const currentDamageThreshold = environmentState.damageLevel || 0;
-        let selectedImpactsPool = [];
-        const thresholds = locationData.damageThresholds || {};
-        const impacts = locationData.environmentalImpacts || {};
-
-        if (currentDamageThreshold >= (thresholds.catastrophic || 101) && impacts.catastrophic) selectedImpactsPool = impacts.catastrophic;
-        else if (currentDamageThreshold >= (thresholds.severe || 101) && impacts.severe) selectedImpactsPool = impacts.severe;
-        else if (currentDamageThreshold >= (thresholds.moderate || 101) && impacts.moderate) selectedImpactsPool = impacts.moderate;
-        else if (currentDamageThreshold >= (thresholds.minor || 0) && impacts.minor) selectedImpactsPool = impacts.minor;
-        
-        if (selectedImpactsPool.length > 0) {
-            const availableImpacts = selectedImpactsPool.filter(imp => !environmentState.specificImpacts.has(imp));
-            const uniqueImpact = availableImpacts.length > 0 ? getRandomElement(availableImpacts) : getRandomElement(selectedImpactsPool);
-            
-            if (uniqueImpact) {
-                specificImpactText = ` ${substituteTokens(uniqueImpact, currentActor, currentOpponent)}`;
-                environmentState.specificImpacts.add(uniqueImpact); 
-            }
-        }
+    if (locationData && locationData.environmentalImpacts && environmentState.specificImpacts.size > 0) {
+        // Use the already populated specificImpacts from environmentState, which engine_battle-core now handles
+        specificImpactPhrase = ` ${Array.from(environmentState.specificImpacts).join(' ')}`;
     }
+    
      if (move.element && !['physical', 'utility', 'special'].includes(move.element)) {
-        descriptionText += ` The ${move.element} energy ripples through the area.`;
+        description += ` The ${move.element} energy ripples through the area.`;
     }
-    const fullCollateralText = `${descriptionText}${specificImpactText}`.trim();
+    const fullCollateralText = `${description}${specificImpactPhrase}`;
     const collateralHtml = `<p class="collateral-damage-description">${fullCollateralText}</p>`;
 
     return {
         type: 'collateral_damage_event',
-        actorId: currentActor.id, 
+        actorId: actor.id, 
         text: fullCollateralText,
         isEnvironmental: true,
-        html_content: collateralHtml 
+        html_content: collateralHtml
     };
 }
 
-export function generateTurnNarrationObjects(narrativeEvents, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false) {
-    if (!narrativeEvents || !Array.isArray(narrativeEvents)) {
-        narrativeEvents = []; 
-    }
+/**
+ * Generates an array of structured narrative event objects for a turn's actions.
+ * @param {Array<object>} events - Array of pre-action narrative events (dialogue, thoughts).
+ * @param {object} move - The move object being executed.
+ * @param {object} actor - The attacking character.
+ * @param {object} opponent - The defending character.
+ * @param {object} result - The result of the move calculation.
+ * @param {object} environmentState - Current state of the environment.
+ * @param {object} locationData - Data for the current location.
+ * @param {string} currentPhaseKey - The current battle phase key.
+ * @param {boolean} [isInitialBanter=false] - True if these are pre-battle banter events.
+ * @returns {Array<object>} An array of structured event objects.
+ */
+export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false) {
     let turnEventObjects = [];
 
-    narrativeEvents.forEach(event => {
-        if (event && event.quote) { 
-            const quoteEvent = formatQuoteToStructuredEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey });
-            if (quoteEvent) {
-                turnEventObjects.push(quoteEvent);
-            }
+    events.forEach(event => {
+        const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey });
+        if (quoteEvent) {
+            turnEventObjects.push(quoteEvent);
         }
     });
     
     if (!isInitialBanter && move && result) {
-        const currentActorForMove = actor || MINIMAL_ACTOR_FALLBACK;
-        const currentOpponentForMove = opponent || MINIMAL_ACTOR_FALLBACK;
-
-        const moveQuoteContext = { result: result.effectiveness?.label || 'Normal', currentPhaseKey };
-        const moveExecutionQuote = findNarrativeQuote(currentActorForMove, currentOpponentForMove, 'onMoveExecution', move.name, moveQuoteContext);
+        const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey };
+        const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
         if (moveExecutionQuote) {
-            const quoteEvent = formatQuoteToStructuredEvent(moveExecutionQuote, currentActorForMove, currentOpponentForMove, {currentPhaseKey});
-            if(quoteEvent) turnEventObjects.push(quoteEvent);
+            const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey});
+            if(quoteEvent) {
+                turnEventObjects.push(quoteEvent);
+            }
         }
 
-        const actionEvent = generateActionDescriptionObject(move, currentActorForMove, currentOpponentForMove, result, currentPhaseKey);
-        if (actionEvent) turnEventObjects.push(actionEvent);
+        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey);
+        turnEventObjects.push(actionEvent);
 
-        const collateralEvent = generateCollateralDamageEvent(move, currentActorForMove, currentOpponentForMove, environmentState, locationData);
+        const collateralEvent = generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData);
         if (collateralEvent) {
-            const lastActionEvent = turnEventObjects.find(e => e.type === 'move_action_event' && e.html_content);
-            if(lastActionEvent && lastActionEvent.html_content) {
-                lastActionEvent.html_content = lastActionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
-            } else if (lastActionEvent) {
-                turnEventObjects.push(collateralEvent);
-            } else { 
-                turnEventObjects.push(collateralEvent);
+            // Append collateral HTML to the main move action's HTML for instant mode
+            if (actionEvent.html_content) { // Ensure html_content exists
+                actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
             }
-        } else { 
-            const lastActionEvent = turnEventObjects.find(e => e.type === 'move_action_event' && e.html_content);
-            if(lastActionEvent && lastActionEvent.html_content) {
-                lastActionEvent.html_content = lastActionEvent.html_content.replace(/{collateralDamageDescription}/g, '');
-            }
+            // Push collateral as a separate event for animated mode
+            turnEventObjects.push(collateralEvent); 
+        } else if (actionEvent.html_content) {
+             actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, '');
         }
     }
     return turnEventObjects;
 }
 
+/**
+ * Generates the final victory line for the winning character.
+ * @param {object} winner - The winning character object.
+ * @param {object} loser - The losing character object.
+ * @returns {string} The final victory line.
+ */
 export function getFinalVictoryLine(winner, loser) { 
-    const currentWinner = winner || MINIMAL_ACTOR_FALLBACK;
-    const currentLoser = loser || MINIMAL_ACTOR_FALLBACK;
+    if (!winner) return "The battle ends."; // Graceful handling if no clear winner (e.g. true draw)
+    if (!loser && winner) return `${winner.name} stands victorious.`; // If only winner is known (e.g. stalemate but one has more HP)
 
-    const finalQuote = findNarrativeQuote(currentWinner, currentLoser, 'onVictory', 'Default', {});
-    if (finalQuote && typeof finalQuote.line === 'string') {
-        return substituteTokens(finalQuote.line, currentWinner, currentLoser);
+    const finalQuote = findNarrativeQuote(winner, loser, 'onVictory', 'Default', {});
+    if (finalQuote && finalQuote.line) {
+        return substituteTokens(finalQuote.line, winner, loser);
     }
-    const winnerVictoryStyle = currentWinner.victoryStyle || 'default';
-    const victoryPhrasesPool = postBattleVictoryPhrases[winnerVictoryStyle] || postBattleVictoryPhrases.default;
-    if (!victoryPhrasesPool) {
-        return `${currentWinner.name} stands triumphant.`;
-    }
-
-    const outcomeType = (currentWinner.hp || 0) > 50 ? 'dominant' : 'narrow';
-    let phrase = victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant || "{WinnerName} is victorious."; 
     
-    return substituteTokens(phrase, currentWinner, currentLoser, {
-        WinnerName: currentWinner.name, 
-        LoserName: currentLoser.name, 
-        WinnerPronounS: (currentWinner.pronouns || DEFAULT_PRONOUNS).s,
-        WinnerPronounP: (currentWinner.pronouns || DEFAULT_PRONOUNS).p,
-        WinnerPronounO: (currentWinner.pronouns || DEFAULT_PRONOUNS).o
+    const victoryPhrases = postBattleVictoryPhrases[winner.victoryStyle] || postBattleVictoryPhrases.default;
+    const outcomeType = winner.hp > 50 ? 'dominant' : 'narrow';
+    let phrase = victoryPhrases[outcomeType] || victoryPhrases.dominant; // Default to dominant if narrow not defined
+    
+    return substituteTokens(phrase, winner, loser, {
+        WinnerName: winner.name, 
+        LoserName: loser?.name || "their opponent", // Loser might be null in some draw scenarios
+        WinnerPronounS: winner.pronouns?.s || 'they',
+        WinnerPronounP: winner.pronouns?.p || 'their',
+        WinnerPronounO: winner.pronouns?.o || 'them'
     });
 }
