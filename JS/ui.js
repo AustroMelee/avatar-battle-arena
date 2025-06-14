@@ -6,8 +6,7 @@ import { locations } from './locations.js';
 import { locationConditions } from './location-battle-conditions.js'; 
 import { resolveArchetypeLabel } from './engine_archetype-engine.js'; 
 import { renderArchetypeDisplay } from './ui_archetype-display.js'; 
-// NEW Imports for Simulation Mode
-import { startSimulation, resetSimulationManager } from './simulation_mode_manager.js'; // Removed getSimulationMode as it's not used directly by ui.js
+import { startSimulation, resetSimulationManager } from './simulation_mode_manager.js';
 import { transformEventsToAnimationQueue, transformEventsToHtmlLog } from './battle_log_transformer.js';
 import { initializeCameraControls } from './camera_control.js';
 
@@ -55,7 +54,7 @@ const DOM = {
 };
 
 export const DOM_simulation_references = {
-    simulationContainer: DOM.simulationModeContainer,
+    simulationContainer: DOM.simulationModeContainer, // This should be the animatedLogOutput for content scrolling
     cancelButton: DOM.cancelSimulationBtn,
     battleResultsContainer: DOM.battleResultsContainer,
     winnerNameDisplay: DOM.winnerName,
@@ -91,9 +90,8 @@ export function getCharacterImage(characterId) {
  */
 function getElementClass(character) {
     if (!character || !character.techniques || character.techniques.length === 0) {
-        return 'card-nonbender'; // Default or error class
+        return 'card-nonbender'; 
     }
-    // Find the first technique with an element property to determine main element
     const mainElementTechnique = character.techniques.find(t => t.element);
     const mainElement = mainElementTechnique ? mainElementTechnique.element : 'nonbender';
 
@@ -102,7 +100,7 @@ function getElementClass(character) {
         case 'water': case 'ice': return 'card-water';
         case 'earth': case 'metal': return 'card-earth';
         case 'air': return 'card-air';
-        case 'special': return 'card-chi'; // For chi blockers like Ty Lee
+        case 'special': return 'card-chi'; 
         default: return 'card-nonbender';
     }
 }
@@ -134,7 +132,7 @@ function updateArchetypeInfo() {
 function createCharacterCard(character, fighterKey) {
     const card = document.createElement('div');
     card.className = 'character-card';
-    if (character) { // Add null check for character
+    if (character) { 
         card.classList.add(getElementClass(character));
         card.dataset.id = character.id;
         
@@ -152,7 +150,7 @@ function createCharacterCard(character, fighterKey) {
             handleCardSelection(character, fighterKey, card);
         });
     } else {
-        card.textContent = "Error: Character undefined"; // Fallback for safety
+        card.textContent = "Error: Char Undefined"; 
     }
     return card;
 }
@@ -164,7 +162,7 @@ function createCharacterCard(character, fighterKey) {
  * @param {HTMLElement} selectedCard - The clicked card element.
  */
 function handleCardSelection(character, fighterKey, selectedCard) {
-    if (!character) return; // Safety check
+    if (!character) return; 
 
     const grid = fighterKey === 'fighter1' ? DOM.fighter1Grid : DOM.fighter2Grid;
     const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
@@ -185,24 +183,31 @@ function handleCardSelection(character, fighterKey, selectedCard) {
 
 /**
  * Populates the character selection grids.
- * Ensures that grids are cleared BEFORE new cards are added.
  */
 function populateCharacterGrids() {
     if (!DOM.fighter1Grid || !DOM.fighter2Grid) {
         console.error("Character grids not found in DOM for population.");
         return;
     }
-    // --- FIX: Clear grids BEFORE populating ---
     DOM.fighter1Grid.innerHTML = ''; 
     DOM.fighter2Grid.innerHTML = '';
+
+    // --- FIX: Ensure `characters` is properly iterable and items are valid ---
+    if (typeof characters !== 'object' || characters === null) {
+        console.error("`characters` data is not a valid object.");
+        DOM.fighter1Grid.textContent = "Character data error.";
+        DOM.fighter2Grid.textContent = "Character data error.";
+        return;
+    }
+    const characterList = Object.values(characters);
     // --- END FIX ---
 
-    const availableCharacters = Object.values(characters).filter(c => c && c.techniques && c.techniques.length > 0);
-    const sortedCharacters = availableCharacters.sort((a, b) => a.name.localeCompare(b.name));
+    const availableCharacters = characterList.filter(c => c && c.id && c.name && c.techniques && c.techniques.length > 0);
+    const sortedCharacters = availableCharacters.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
     if (sortedCharacters.length === 0) {
-        console.warn("No available characters to populate grids.");
-        DOM.fighter1Grid.textContent = "No characters available."; // User feedback
+        console.warn("No available characters with techniques to populate grids.");
+        DOM.fighter1Grid.textContent = "No characters available.";
         DOM.fighter2Grid.textContent = "No characters available.";
         return;
     }
@@ -224,7 +229,7 @@ function populateCharacterGrids() {
 function createLocationCard(locationData, locationId) {
     const card = document.createElement('div');
     card.className = 'location-card';
-    if (locationData) { // Add null check
+    if (locationData) { 
         card.dataset.id = locationId;
 
         const image = document.createElement('img');
@@ -241,7 +246,7 @@ function createLocationCard(locationData, locationId) {
             handleLocationCardSelection(locationData, locationId, card);
         });
     } else {
-        card.textContent = "Error: Location undefined"; // Fallback
+        card.textContent = "Error: Location Undefined"; 
     }
     return card;
 }
@@ -330,8 +335,15 @@ function populateLocationGrid() {
         console.error("Location grid not found in DOM for population.");
         return;
     }
-    DOM.locationGrid.innerHTML = ''; // Clear existing
+    DOM.locationGrid.innerHTML = ''; 
 
+    // --- FIX: Ensure `locations` is properly iterable ---
+    if (typeof locations !== 'object' || locations === null) {
+        console.error("`locations` data is not a valid object.");
+        DOM.locationGrid.textContent = "Location data error.";
+        return;
+    }
+    // --- END FIX ---
     const sortedLocations = Object.entries(locations).sort(([, a], [, b]) => (a.name || "").localeCompare(b.name || ""));
     
     if (sortedLocations.length === 0) {
@@ -340,9 +352,11 @@ function populateLocationGrid() {
     }
 
     for (const [id, locationData] of sortedLocations) {
-        if (locationData) { // Ensure locationData is not null/undefined
+        if (locationData && locationData.name && locationData.imageUrl) { // More robust check
             const card = createLocationCard(locationData, id);
             DOM.locationGrid.appendChild(card);
+        } else {
+            console.warn(`Skipping invalid location data for ID: ${id}`);
         }
     }
     if (DOM.locationEnvironmentSummary) {
@@ -361,6 +375,7 @@ function initializeTimeToggle() {
     const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
     if (buttons.length === 0) {
         console.warn("No time toggle buttons found.");
+        DOM.timeFeedbackDisplay.innerHTML = "Time toggle unavailable.";
         return;
     }
     DOM.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered.";
@@ -400,10 +415,11 @@ export function populateUI() {
     updateMomentumDisplay('fighter1', 0);
     updateMomentumDisplay('fighter2', 0);
     updateArchetypeInfo();
-    if (DOM.animatedLogOutput && DOM.zoomInBtn && DOM.zoomOutBtn) { // Changed simulationModeContainer to animatedLogOutput for zoom target
+    // Ensure animatedLogOutput exists before initializing camera controls on it
+    if (DOM.animatedLogOutput && DOM.zoomInBtn && DOM.zoomOutBtn) {
         initializeCameraControls(DOM.animatedLogOutput, DOM.zoomInBtn, DOM.zoomOutBtn);
     } else {
-        console.warn("One or more camera control DOM elements are missing for initialization in populateUI (animatedLogOutput, zoomInBtn, or zoomOutBtn).");
+        console.warn("Animated log output or zoom buttons not found for camera control initialization.");
     }
 }
 
@@ -440,6 +456,16 @@ export function showLoadingState(simulationMode) {
  * @param {"animated" | "instant"} simulationMode - The current simulation mode.
  */
 export function showResultsState(battleResult, simulationMode) {
+    if (!battleResult || !battleResult.finalState) {
+        console.error("Invalid battleResult passed to showResultsState", battleResult);
+        // Potentially show an error message to the user in the UI
+        if (DOM.winnerName) DOM.winnerName.textContent = "Error processing results.";
+        if (DOM.battleStory) DOM.battleStory.innerHTML = "<p>An error occurred, and results cannot be displayed.</p>";
+        if (DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden');
+        if (DOM.battleBtn) DOM.battleBtn.disabled = false;
+        return;
+    }
+
     if(DOM.vsDivider) DOM.vsDivider.classList.remove('clash');
     if(DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden'); 
 
@@ -459,38 +485,41 @@ export function showResultsState(battleResult, simulationMode) {
             DOM.winnerName.textContent = `Battle Concluded`;
             DOM.winProbability.textContent = `Outcome details below.`;
         }
-        displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, document.getElementById('location-value').value);
+        
+        const locationId = document.getElementById('location-value')?.value;
+        if (locationId) { // Ensure locationId is available
+            displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, locationId);
+        } else {
+            console.error("Location ID not found for final analysis.");
+            if(DOM.analysisList) DOM.analysisList.innerHTML = "<li>Error: Location data missing for analysis.</li>";
+        }
         
         if (result.finalState?.fighter1) updateMomentumDisplay('fighter1', result.finalState.fighter1.momentum);
         if (result.finalState?.fighter2) updateMomentumDisplay('fighter2', result.finalState.fighter2.momentum);
         
         DOM.battleResultsContainer.classList.remove('hidden');
         DOM.resultsSection.style.display = 'block'; 
-        void DOM.resultsSection.offsetWidth; // Force reflow
+        void DOM.resultsSection.offsetWidth;
         DOM.resultsSection.classList.add('show');
-        // Only scroll to results section if not in animated mode, or if animation was cancelled.
-        // Animated mode handles its own scrolling initially.
-        if (simulationMode === "instant" || (simulationMode === "animated" && !document.getElementById('simulation-mode-container')?.classList.contains('hidden'))) {
+        
+        if (simulationMode === "instant" || (simulationMode === "animated" && DOM.simulationModeContainer?.classList.contains('hidden'))) {
            DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         DOM.battleBtn.disabled = false;
     };
     
     if (simulationMode === "animated") {
-        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = ''; // Clear "Preparing..." message
+        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = ''; 
         
         const animationQueue = transformEventsToAnimationQueue(battleResult.log);
         startSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
-            // This callback is executed by simulation_mode_manager when animation is done or cancelled
-            if (wasCancelledOrError && DOM.battleStory && finalBattleResult.log) { // Also check finalBattleResult.log
+            if (wasCancelledOrError && DOM.battleStory && finalBattleResult.log) {
                 DOM.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
             }
-            // Always display final analysis panel.
             displayFinalResultsPanel(finalBattleResult); 
-             // Hide simulation container after completion or cancellation if animated.
             if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
         });
-    } else { // Instant Mode
+    } else { 
         if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden'); 
         if(DOM.battleStory && battleResult.log) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
         displayFinalResultsPanel(battleResult);
@@ -521,7 +550,7 @@ export function resetBattleUI() {
         if (DOM.resultsSection && !DOM.resultsSection.classList.contains('show')) {
             DOM.resultsSection.style.display = 'none';
         }
-    }, 500); // Match CSS transition duration
+    }, 500);
 }
 
 /**
@@ -549,7 +578,7 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         const li = document.createElement('li');
         li.className = 'analysis-item';
         const spanReason = document.createElement('span');
-        spanReason.innerHTML = text; // Allows <b> tags
+        spanReason.innerHTML = text; 
         const spanValue = document.createElement('span');
         spanValue.textContent = String(value); 
         spanValue.className = valueClass;
@@ -567,21 +596,23 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     };
     
     const createLog = (logArray, title, className) => {
-        if (!logArray || !Array.isArray(logArray) || logArray.length === 0) return;
+        if (!logArray || !Array.isArray(logArray) || logArray.length === 0) {
+            // Optionally log that an expected log is empty, but don't render empty sections for optional logs
+            if (title.includes("AI Decision Log") || title.includes("Battle Phase Progression")) { 
+                 // console.log(`${title} is empty, not rendering.`);
+            }
+            return;
+        }
         
         const validLogEntries = logArray.filter(entry => {
             if (typeof entry === 'object' && entry !== null) return true;
             return typeof entry === 'string' && entry.trim() !== '';
         });
 
-        if (validLogEntries.length === 0 && !(title.includes("AI Log") || title.includes("Interaction Log") || title.includes("Battle Phase"))) { // Don't render empty if it's an optional log
-             return;
+        if (validLogEntries.length === 0) {
+            // console.log(`${title} had no valid entries after filtering.`);
+            return;
         }
-        if (validLogEntries.length === 0 && (title.includes("AI Log") || title.includes("Interaction Log"))) {
-            // console.warn(`${title} had no valid entries to display.`); // Log for dev, but don't render empty essential logs
-            // return;
-        }
-
 
         const li = document.createElement('li');
         li.className = className;
@@ -599,16 +630,15 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
                     parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum} MS:${as.mental}`);
                 }
                 if (entry.consideredMoves && Array.isArray(entry.consideredMoves) && entry.consideredMoves.length > 0) {
-                    const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name}(${m.prob || 'N/A'})`).join(', ');
+                    const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name || 'UnknownMove'}(${m.prob || 'N/A'})`).join(', ');
                     parts.push(`Considered:[${topConsiderations}]`);
                 }
-                // Fallback for other object structures or simple stringification
-                if (parts.length === 0) return JSON.stringify(entry); // Basic fallback for unknown objects
+                if (parts.length === 0) return JSON.stringify(entry); 
                 return parts.join(' | ');
             }
-            return String(entry).replace(/</g, "<").replace(/>/g, ">"); // Escape HTML in strings
+            return String(entry).replace(/</g, "<").replace(/>/g, ">"); 
         }).join('<br>');
-        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all; font-size: 0.8em;"><code>${formattedLog || "No relevant log entries."}</code></pre>`;
+        li.innerHTML = `<strong>${title}:</strong><br><pre style="white-space: pre-wrap; word-break: break-all; font-size: 0.8em;"><code>${formattedLog}</code></pre>`;
         DOM.analysisList.appendChild(li);
     };
     
@@ -653,9 +683,11 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         DOM.environmentImpactsList.innerHTML = '';
         if (environmentState.specificImpacts && environmentState.specificImpacts.size > 0) {
             environmentState.specificImpacts.forEach(impact => {
-                const li = document.createElement('li');
-                li.textContent = impact;
-                DOM.environmentImpactsList.appendChild(li);
+                if (typeof impact === 'string') { // Ensure impact is a string
+                    const li = document.createElement('li');
+                    li.textContent = impact;
+                    DOM.environmentImpactsList.appendChild(li);
+                }
             });
         } else {
             DOM.environmentImpactsList.innerHTML = '<li>The environment sustained minimal noticeable damage.</li>';

@@ -13,6 +13,15 @@ import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } fr
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
+// --- FIX: Define getRandomElement locally or import if it becomes a shared utility ---
+/**
+ * Selects a random element from an array.
+ * @param {Array<any>} arr - The array to select from.
+ * @returns {any|null} A random element from the array, or null if the array is null or empty.
+ */
+const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
+// --- END FIX ---
+
 /**
  * Initializes the state for a fighter at the start of a battle.
  * @param {string} charId - The ID of the character.
@@ -35,7 +44,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         isStunned: false, tacticalState: null, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         relationalState: (emotionalMode && characterData.relationships?.[opponentId]) || null,
-        mentalState: { level: 'stable', stress: 0, mentalStateChangedThisTurn: false }, // Added mentalStateChangedThisTurn
+        mentalState: { level: 'stable', stress: 0, mentalStateChangedThisTurn: false },
         contextualState: {},
         collateralTolerance: characterData.collateralTolerance !== undefined ? characterData.collateralTolerance : 0.5,
         mobility: characterData.mobility !== undefined ? characterData.mobility : 0.5,
@@ -64,7 +73,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const conditions = { ...locationConditions[locId], id: locId, isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
     let battleEventLog = []; 
     let interactionLog = []; 
-    let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : ((fighter2.powerTier > fighter1.powerTier) ? fighter2 : (Math.random() < 0.5 ? fighter1 : fighter2)); // Initiative based on powerTier, random if equal
+    let initiator = (fighter1.powerTier > fighter2.powerTier) ? fighter1 : ((fighter2.powerTier > fighter1.powerTier) ? fighter2 : (Math.random() < 0.5 ? fighter1 : fighter2));
     let responder = (initiator.id === fighter1.id) ? fighter2 : fighter1;
     let battleOver = false;
     let isStalemate = false;
@@ -81,6 +90,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     
     const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase });
     if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true));
+
 
     for (let turn = 0; turn < 6 && !battleOver; turn++) {
         const phaseChanged = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn);
@@ -106,7 +116,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             let narrativeEventsForAction = []; 
             const oldDefenderMentalState = defender.mentalState.level;
             const oldAttackerMentalState = attacker.mentalState.level;
-            attacker.mentalStateChangedThisTurn = false; // Reset flag for attacker
+            attacker.mentalStateChangedThisTurn = false; 
 
             if (turn > 0) adaptPersonality(attacker);
             
@@ -117,17 +127,17 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     attacker.tacticalState = null;
                 }
             }
-            if (attacker.isStunned) { // If attacker starts their segment stunned
+            if (attacker.isStunned) { 
                 attacker.aiLog.push(`[Action Skipped]: ${attacker.name} is stunned and cannot act this segment.`);
                 turnSpecificEventsForLog.push({
                     type: 'stun_event',
                     actorId: attacker.id,
                     characterName: attacker.name,
                     text: `${attacker.name} is stunned and unable to move!`,
-                    html_content: `<p class="narrative-action">${attacker.name} is stunned and unable to move!</p>`
+                    html_content: `<p class="narrative-action char-${attacker.id}">${attacker.name} is stunned and unable to move!</p>`
                 });
-                attacker.isStunned = false; // Stun wears off after missing a segment
-                return; // Skip this segment
+                attacker.isStunned = false; 
+                return; 
             }
             
             const addNarrativeEvent = (quote, actorForQuote) => {
@@ -142,7 +152,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 defender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2, isPositive: false };
                 addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase }), attacker);
                 if (manipulationResult.narration) {
-                     turnSpecificEventsForLog.push({ // Add manipulation narration directly
+                     turnSpecificEventsForLog.push({
                         type: 'manipulation_narration_event',
                         actorId: attacker.id,
                         text: manipulationResult.narration.replace(/<[^>]+>/g, ''),
@@ -153,7 +163,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
 
             const { move, aiLogEntryFromSelectMove } = selectMove(attacker, defender, conditions, turn, phaseState.currentPhase); 
-            // AI Log is handled internally in selectMove
+            
             addNarrativeEvent(findNarrativeQuote(attacker, defender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase }), attacker);
             
             const result = calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locId);
@@ -161,7 +171,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             modifyMomentum(attacker, result.momentumChange.attacker, `Move (${result.effectiveness.label}) by ${attacker.name}`);
             modifyMomentum(defender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label}) by ${attacker.name}`);
 
-            if (result.collateralDamage > 0 && environmentState.damageLevel < 100) { // Cap collateral damage effect
+            if (result.collateralDamage > 0 && environmentState.damageLevel < 100) { 
                 environmentState.damageLevel = clamp(environmentState.damageLevel + result.collateralDamage, 0, 100);
                 environmentState.lastDamageSourceId = attacker.id;
                 const collateralContext = { currentPhaseKey: phaseState.currentPhase };
@@ -236,7 +246,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) impactTier = 'minor';
 
             if (impactTier && locationData.environmentalImpacts[impactTier] && locationData.environmentalImpacts[impactTier].length > 0) {
-                 const randomImpact = getRandomElement(locationData.environmentalImpacts[impactTier]);
+                 const randomImpact = getRandomElement(locationData.environmentalImpacts[impactTier]); // Ensure getRandomElement is available
                  if (randomImpact) environmentState.specificImpacts.add(randomImpact);
             }
         }
@@ -268,20 +278,18 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
     
-    let winner = null, loser = null; // Initialize to null
+    let winner = null, loser = null; 
     if (isStalemate) {
         battleEventLog.push({ type: 'stalemate_result_event', text: "The battle ends in a STALEMATE!", html_content: phaseTemplates.stalemateResult });
         fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
-        // No clear winner/loser in stalemate for ID purposes, but can assign for final state consistency if needed.
-        // For now, winnerId/loserId will be null as per the requirement.
     } else if (fighter1.hp <= 0) {
         winner = fighter2; loser = fighter1;
     } else if (fighter2.hp <= 0) {
         winner = fighter1; loser = fighter2;
-    } else { // Timeout
+    } else { 
         if (fighter1.hp === fighter2.hp) { 
-            isStalemate = true; // Treat as a draw
+            isStalemate = true; 
             battleEventLog.push({ type: 'draw_result_event', text: "The battle is a DRAW!", html_content: phaseTemplates.drawResult });
             fighter1.summary = "The battle ended in a perfect draw, neither giving an inch.";
             fighter2.summary = "The battle ended in a perfect draw, neither giving an inch.";
@@ -296,7 +304,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
     }
 
-    if (!isStalemate && winner && loser && loser.hp <= 0) { // Only if it's not a timeout/stalemate and there's a KO
+    if (!isStalemate && winner && loser && loser.hp <= 0) { 
         const finalBlowTextRaw = `${winner.name} lands the finishing blow, defeating ${loser.name}!`;
         const finalBlowTextHtml = phaseTemplates.finalBlow
             .replace(/{winnerName}/g, `<span class="char-${winner.id}">${winner.name}</span>`)
@@ -306,15 +314,15 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     
     if (!isStalemate && winner) {
          winner.summary = winner.summary || `${winner.name}'s victory was sealed by their superior strategy and power.`;
-        const finalWords = getFinalVictoryLine(winner, loser); // loser might be null
+        const finalWords = getFinalVictoryLine(winner, loser); 
         const conclusionTextRaw = `${winner.name} stands victorious. "${finalWords}"`;
         const conclusionTextHtml = phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw);
         battleEventLog.push({ type: 'conclusion_event', text: conclusionTextRaw, html_content: conclusionTextHtml });
-    } else if(!isStalemate && !winner && fighter1.hp > 0 && fighter2.hp > 0) { // This implies a draw by timeout with equal HP
-        const conclusionTextRaw = "The battle concludes. Neither could claim victory.";
+    } else if(isStalemate || (!winner && !loser && fighter1.hp === fighter2.hp)) { 
+        // This handles the case where it's a draw by timeout with equal HP, or explicit stalemate
+        const conclusionTextRaw = "The battle concludes. Neither could claim outright victory.";
         battleEventLog.push({ type: 'conclusion_event', text: conclusionTextRaw, html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw) });
     }
-
 
     if(winner) winner.interactionLog = [...interactionLog];
     if(loser) loser.interactionLog = [...interactionLog];
@@ -326,7 +334,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         log: battleEventLog, 
         winnerId: isStalemate ? null : (winner ? winner.id : null), 
         loserId: isStalemate ? null : (loser ? loser.id : null), 
-        isDraw: isStalemate, // Simplified draw condition
+        isDraw: isStalemate,
         finalState: { fighter1, fighter2 }, 
         environmentState 
     };
