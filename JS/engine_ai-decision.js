@@ -1,23 +1,21 @@
 // FILE: engine_ai-decision.js
-// FILE: engine_ai-decision.js
 'use strict';
 
-// This is the "AI Brain" module.
-// VERSION 8.3: No direct changes needed for curbstomp-move association,
-// as selectMove already returns the full move object.
-// The battle engine core will use this selected move for curbstomp checks.
+// Version 8.4: Escalation AI Bias Integration
 
 import { getAvailableMoves } from './engine_move-resolution.js';
-import { moveInteractionMatrix } from './move-interaction-matrix.js'; 
+import { moveInteractionMatrix } from './move-interaction-matrix.js';
 import { MAX_MOMENTUM, MIN_MOMENTUM } from './engine_momentum.js';
 import { getPhaseAIModifiers } from './engine_battle-phase.js';
+// NEW IMPORT FOR ESCALATION
+import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 const DEFAULT_PERSONALITY_PROFILE = {
     aggression: 0.5, patience: 0.5, riskTolerance: 0.5, opportunism: 0.5,
     creativity: 0.5, defensiveBias: 0.5, antiRepeater: 0.5, signatureMoveBias: {},
-    predictability: 0.5 
+    predictability: 0.5
 };
 
 const DEFAULT_AI_MEMORY = {
@@ -35,17 +33,17 @@ function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor', propertyP
         const isTacticalStateNullDefault = (propertyPathName === 'tacticalState' && defaultValue === null);
         const isMoveCooldownZeroDefault = (propertyPathName.startsWith('aiMemory.moveSuccessCooldown') && defaultValue === 0);
         const isSignatureBiasOneDefault = (propertyPathName.startsWith('profile.signatureMoveBias') && defaultValue === 1.0);
-        
+
         const suppressWarningForThisDefault = isTacticalStateNullDefault || isMoveCooldownZeroDefault || isSignatureBiasOneDefault;
 
         if (defaultValue !== undefined) {
-            if (!suppressWarningForThisDefault) { 
+            if (!suppressWarningForThisDefault) {
                 // console.warn(`AI Decision: Missing ${propertyPathName} for ${actorName}. Using default: ${defaultValue}.`);
             }
             return defaultValue;
         }
         console.error(`AI Decision: CRITICAL data ${propertyPathName} missing for ${actorName}. This WILL cause issues.`);
-        return null; 
+        return null;
     }
     return value;
 }
@@ -84,7 +82,7 @@ export function attemptManipulation(manipulator, target) {
     const attemptChance = manipTrait * mentalStateModifier * (1 - resilience);
 
     if (Math.random() < attemptChance) {
-        const effect = Math.random() > 0.5 ? 'Exposed' : 'Shaken';
+        const effect = Math.random() > 0.5 ? 'Exposed' : 'Shaken'; // 'Shaken' can be a tactical state or influence mental state directly
         const manipulatorName = manipulator.name || 'Manipulator';
         const manipulatorId = manipulator.id || 'unknown-manipulator';
         const targetName = target.name || 'Target';
@@ -170,7 +168,7 @@ function predictOpponentNextMove(actor, defender) {
 
 function getDynamicPersonality(actor, currentPhase) {
     if (!actor || !actor.aiLog || !actor.mentalState) {
-        return { ...DEFAULT_PERSONALITY_PROFILE }; 
+        return { ...DEFAULT_PERSONALITY_PROFILE };
     }
     const baseActorProfile = actor.personalityProfile || DEFAULT_PERSONALITY_PROFILE;
     let dynamicProfile = { ...baseActorProfile };
@@ -190,7 +188,7 @@ function getDynamicPersonality(actor, currentPhase) {
     if (actor.relationalState?.emotionalModifiers) {
         Object.keys(actor.relationalState.emotionalModifiers).forEach(key => {
             const value = actor.relationalState.emotionalModifiers[key];
-            if (typeof value !== 'number') return; 
+            if (typeof value !== 'number') return;
 
             if (key.includes('Boost')) {
                 const trait = key.replace('Boost', '');
@@ -233,11 +231,17 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     const defenderHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
     const healthDiff = actorHp - defenderHp;
 
+    // NEW: Escalation state can influence intent
+    const defenderEscalationState = safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState');
+    if (defenderEscalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED || defenderEscalationState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
+        if (profile.opportunism > 0.6) return 'FinishingBlowAttempt'; // High priority to finish vulnerable opponent
+    }
+
     if (currentPhase === 'Early' && profile.patience > 0.7 && turn < 2) return 'OpeningMoves';
     if (currentPhase === 'Late' && actorHp < 30 && profile.riskTolerance > 0.7) return 'DesperateGambit';
     if (currentPhase === 'Late' && defenderHp < 25 && profile.opportunism > 0.8) return 'FinishingBlowAttempt';
 
-    const defenderIsStunned = safeGet(defender, 'isStunned', false, defender.name, 'isStunned');
+    const defenderIsStunned = safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0; // MODIFIED
     const defenderTacticalState = safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState');
     if (profile.opportunism > 0.8 && (defenderIsStunned || defenderTacticalState)) return 'CapitalizeOnOpening';
 
@@ -268,7 +272,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
     const profile = getDynamicPersonality(actor, currentPhase);
 
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
-    const momentumInfluence = actorMomentum / (MAX_MOMENTUM - MIN_MOMENTUM) * 2; // Normalize to -1 to 1 range
+    const momentumInfluence = actorMomentum / (MAX_MOMENTUM - MIN_MOMENTUM) * 2;
     profile.aggression = clamp(profile.aggression + (momentumInfluence * 0.2), 0, 1.0);
     profile.riskTolerance = clamp(profile.riskTolerance + (momentumInfluence * 0.3), 0, 1.0);
     profile.defensiveBias = clamp(profile.defensiveBias - (momentumInfluence * 0.2), 0, 1.0);
@@ -305,7 +309,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             if (actorTacticalStateName === 'Exposed' || actorTacticalStateName === 'Off-Balance') {
                 weight *= 3.0; reasons.push('SelfVulnerable');
             }
-            if (safeGet(defender, 'isStunned', false, defender.name, 'isStunned') || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState')) {
+            if (safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState')) { // MODIFIED
                 weight *= 0.5; reasons.push('OpponentVulnerable_LessReposition');
             }
             const repositionCooldown = safeGet(actor.aiMemory, 'repositionCooldown', 0, actor.name, 'aiMemory.repositionCooldown');
@@ -332,7 +336,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         if (move.moveTags?.includes('evasive') && profile.patience > 0.6) { weight *= (1.0 + profile.patience); reasons.push('EvasiveTag'); }
         if (move.moveTags?.includes('highRisk') && profile.riskTolerance > 0.5) { weight *= (1.0 + profile.riskTolerance * 1.2); reasons.push('HighRiskTag'); }
 
-        const intentMultipliers = { 
+        const intentMultipliers = {
             StandardExchange: { Offense: 1.2, Defense: 1.0, Utility: 1.0, Finisher: 0.8 },
             OpeningMoves: { Offense: 0.8, Defense: 1.2, Utility: 1.3, Finisher: 0.1, low_cost: 1.5, evasive: 1.3 },
             CautiousDefense: { Offense: 0.5, Defense: 1.8, Utility: 1.2, Finisher: 0.05, utility_block: 2.0 },
@@ -370,11 +374,19 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         }
 
         const moveCooldown = safeGet(actor.aiMemory?.moveSuccessCooldown, move.name, 0, actor.name, `aiMemory.moveSuccessCooldown.${move.name}`);
-        if (moveCooldown > 0) { 
-             weight *= 0.01; 
+        if (moveCooldown > 0) {
+             weight *= 0.01;
              reasons.push('MoveCooldown');
         }
-        if (move.moveTags?.includes('requires_opening') && !(safeGet(defender, 'isStunned', false, defender.name, 'isStunned') || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState'))) weight *= 0.01;
+        if (move.moveTags?.includes('requires_opening') && !(safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState'))) weight *= 0.01; // MODIFIED
+
+        // --- NEW: APPLY ESCALATION AI BIAS ---
+        const escalationWeightMultiplier = getEscalationAIWeights(actor, defender, move); // Pass defender
+        if (escalationWeightMultiplier !== 1.0) {
+            weight *= escalationWeightMultiplier;
+            reasons.push(`EscalationBias(x${escalationWeightMultiplier.toFixed(1)})`);
+        }
+        // --- END NEW ---
 
         if (weight < 0.05 && move.name !== "Struggle") return { move, weight: 0, reasons };
         return { move, weight, reasons };
@@ -388,7 +400,7 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
     const temp = Math.max(0.01, temperature);
 
     const positiveWeightMoves = weightedMoves.filter(m => m.weight > 0);
-    const targetMovesForExp = positiveWeightMoves.length > 0 ? positiveWeightMoves : weightedMoves.filter(m => m.move); 
+    const targetMovesForExp = positiveWeightMoves.length > 0 ? positiveWeightMoves : weightedMoves.filter(m => m.move);
 
     if (targetMovesForExp.length === 0) {
         return weightedMoves.map(m => ({ ...m, probability: (m.move ? 1 : 0) / weightedMoves.filter(wm => wm.move).length || 0 }));
@@ -403,9 +415,11 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
         return { ...m, expWeight };
     });
 
-    if (weightExpSum === 0) {
-        return movesWithExp.map(m => ({ ...m, probability: 1 / movesWithExp.length }));
+    if (weightExpSum === 0) { // Avoid division by zero if all expWeights are extremely small
+        const numMoves = movesWithExp.length;
+        return movesWithExp.map(m => ({ ...m, probability: numMoves > 0 ? 1 / numMoves : 0 }));
     }
+
 
     return movesWithExp.map(m => ({ ...m, probability: m.expWeight / weightExpSum }));
 }
@@ -419,11 +433,12 @@ function selectFromDistribution(movesWithProbs) {
     let cumulativeProbability = 0;
     for (const moveInfo of movesWithProbs) {
         if (typeof moveInfo.probability !== 'number' || isNaN(moveInfo.probability)) {
-            continue; 
+            continue;
         }
         cumulativeProbability += moveInfo.probability;
         if (rand < cumulativeProbability) return moveInfo;
     }
+    // Fallback if somehow rand is >= cumulativeProbability (should not happen if probs sum to 1)
     return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'] };
 }
 
@@ -447,19 +462,19 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
         validMoves = [{ move: struggleMove, weight: 1.0, reasons: ['FallbackOnlyStruggle'] }];
     } else {
         const struggleWeightInfo = weightedMoves.find(m => m.move?.name === "Struggle");
-        if (!struggleWeightInfo) { 
+        if (!struggleWeightInfo) {
             validMoves.push({ move: struggleMove, weight: 0.01, reasons: ['LowProbStruggleDefault'] });
-        } else if (!validMoves.find(m => m.move?.name === "Struggle")){ 
-             validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) }); 
+        } else if (!validMoves.find(m => m.move?.name === "Struggle")){
+             validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) });
         }
     }
-    
+
     const predictability = safeGet(actor.personalityProfile, 'predictability', DEFAULT_PERSONALITY_PROFILE.predictability, actor.name, 'personalityProfile.predictability');
-    const temperature = (1.0 - predictability) * 1.5 + 0.5; 
-    const movesWithProbs = getSoftmaxProbabilities(validMoves, temperature); 
+    const temperature = (1.0 - predictability) * 1.5 + 0.5;
+    const movesWithProbs = getSoftmaxProbabilities(validMoves, temperature);
     const chosenMoveInfo = selectFromDistribution(movesWithProbs);
 
-    const chosenMove = chosenMoveInfo?.move || struggleMove; 
+    const chosenMove = chosenMoveInfo?.move || struggleMove;
 
     actor.aiLog.push({
         turn: turn + 1,
@@ -478,11 +493,15 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
             hp: safeGet(actor, 'hp', 0, actor.name, 'hp'),
             energy: safeGet(actor, 'energy', 0, actor.name, 'energy'),
             momentum: safeGet(actor, 'momentum', 0, actor.name, 'momentum'),
-            mental: safeGet(actor.mentalState, 'level', 'stable', actor.name, 'mentalState.level')
-        }
+            mental: safeGet(actor.mentalState, 'level', 'stable', actor.name, 'mentalState.level'),
+            // NEW: Log actor's own escalation state for context
+            escalation: safeGet(actor, 'escalationState', ESCALATION_STATES.NORMAL, actor.name, 'escalationState')
+        },
+        // NEW: Log defender's escalation state as it influences AI
+        opponentEscalation: safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState')
     });
 
     return {
-        move: chosenMove // This returns the full move object
+        move: chosenMove
     };
 }

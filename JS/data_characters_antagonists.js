@@ -1,6 +1,9 @@
 // FILE: data_characters_antagonists.js
-// FILE: data_characters_antagonists.js
 'use strict';
+
+// Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
+// If not, and these objects are used directly, you'd need:
+// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
 
 export const antagonistCharacters = {
     'azula': {
@@ -8,34 +11,53 @@ export const antagonistCharacters = {
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/1/12/Azula.png',
         victoryStyle: "Ruthless", powerTier: 8,
         faction: "FireNation",
-        isInsane: false, // Add this flag, engine can toggle it based on mental state
-        personalityProfile: { 
-            aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0, 
+        isInsane: false,
+        personalityProfile: {
+            aggression: 0.9, patience: 0.3, riskTolerance: 0.9, opportunism: 1.0,
             creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3,
-            predictability: 0.8, 
-            signatureMoveBias: { 
+            predictability: 0.8,
+            signatureMoveBias: {
                 "Calculated Feint": 1.2,
                 "Blue Fire Daggers": 1.4,
-                "Fire Whip": 1.1, 
-                "Lightning Generation": 1.9, 
+                "Fire Whip": 1.1,
+                "Lightning Generation": 1.9,
                 "Flame Burst": 1.1,
                 "Precision Strike": 1.3,
                 "Tactical Reposition": 0.9
-            } 
+            }
         },
         specialTraits: { manipulative: 0.8, canGenerateLightning: true },
-        collateralTolerance: 0.9, 
-        mobility: 0.95, 
-        curbstompRules: [ // New field
+        collateralTolerance: 0.9,
+        mobility: 0.95,
+        curbstompRules: [
             { ruleId: "azula_sane_lightning_precision", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
             { ruleId: "azula_sane_fire_tornado", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
             { ruleId: "azula_insane_unpredictable_attacks", characterId: "azula", conditionLogic: (azula) => azula.isInsane },
             { ruleId: "azula_insane_blue_fire_buff", characterId: "azula", conditionLogic: (azula) => azula.isInsane }
         ],
-        personalityTriggers: { // New field
+        personalityTriggers: {
             "in_control": "(character.hp > character.maxHp * 0.5) && !(battleState.characterReceivedCriticalHit) && (opponent.mentalState.level === 'stable' || opponent.mentalState.level === 'stressed')",
             "desperate_broken": "(character.hp < character.maxHp * 0.3) || (character.mentalState.level === 'broken')"
         },
+        // NEW FIELDS FOR ESCALATION
+        incapacitationScore: 0,
+        escalationState: 'Normal', // Will be ESCALATION_STATES.NORMAL if imported
+        stunDuration: 0,
+        escalationBehavior: { // Using string keys for states if ESCALATION_STATES not directly imported here
+            'Severely Incapacitated': { // Opponent is Severely Incapacitated
+                signatureMoveBias: { "Lightning Generation": 2.5, "Precision Strike": 1.8 },
+                offensiveBias: 1.5,
+                finisherBias: 2.0, // Lightning Generation is often a finisher
+                utilityBias: 0.2,
+            },
+            'Terminal Collapse': { // Opponent is in Terminal Collapse
+                signatureMoveBias: { "Lightning Generation": 3.0, "Blue Fire Daggers": 2.0 }, // Overkill
+                offensiveBias: 2.0,
+                finisherBias: 2.5,
+                utilityBias: 0.1,
+            }
+        },
+        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
@@ -63,7 +85,7 @@ export const antagonistCharacters = {
             onCollateral: {
                 causingDamage: { Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "The weak will always be swept away. This is merely an extension of my will." }] },
                 observingDamage: { Generic: [{ type: 'internal', line: "Amateurish destruction. But effective enough." }, { type: 'spoken', line: "Good. Let the world burn around you. It's only fitting." }] },
-                stressedByDamage: [], 
+                stressedByDamage: [],
                 thrivingInDamage: { Generic: [{ type: 'spoken', line: "This is where true power is forged: in the ashes." }, { type: 'internal', line: "The destruction enhances my focus. There is no escape here." }] }
             },
             onVictory: {
@@ -72,8 +94,8 @@ export const antagonistCharacters = {
                 Default: { Generic: [{ line: "Flawless. As expected." }] }
             },
             onMoveExecution: {
-                'Tactical Reposition': { 
-                    Critical: { Generic: [{ type: 'spoken', line: "Perfectly executed, as always." }] }, 
+                'Tactical Reposition': {
+                    Critical: { Generic: [{ type: 'spoken', line: "Perfectly executed, as always." }] },
                     Weak: { Generic: [{ type: 'internal', line: "A momentary lapse. Unacceptable." }] }
                 }
             },
@@ -98,29 +120,48 @@ export const antagonistCharacters = {
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4a/Ozai.png',
         victoryStyle: "Supreme", powerTier: 9,
         faction: "FireNation",
-        personalityProfile: { 
-            aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0, 
+        personalityProfile: {
+            aggression: 0.95, patience: 0.2, riskTolerance: 1.0, opportunism: 1.0,
             creativity: 0.3, defensiveBias: 0.05, antiRepeater: 0.2,
-            predictability: 0.9, 
-            signatureMoveBias: { 
+            predictability: 0.9,
+            signatureMoveBias: {
                 "Jet Propulsion": 1.0,
                 "Scorching Blast": 1.5,
                 "Flame Wall": 1.0,
-                "Dragon's Roar": 1.8, 
+                "Dragon's Roar": 1.8,
                 "Emperor's Wrath": 1.7,
-                "Tactical Reposition": 0.7 
-            } 
+                "Tactical Reposition": 0.7
+            }
         },
         specialTraits: { manipulative: 0.6, canGenerateLightning: true },
-        collateralTolerance: 1.0, 
-        mobility: 0.3, 
-        curbstompRules: [ // New field
+        collateralTolerance: 1.0,
+        mobility: 0.3,
+        curbstompRules: [
             { ruleId: "ozai_fire_comet_mode", characterId: "ozai-not-comet-enhanced" },
             { ruleId: "ozai_lightning_spam", characterId: "ozai-not-comet-enhanced" }
         ],
-        personalityTriggers: { // New field
-            "authority_challenged": "(battleState.opponentLandedSignificantHits >= 2) || (battleState.opponentUsedTaunt)" // Assumes these states
+        personalityTriggers: {
+            "authority_challenged": "(battleState.opponentLandedSignificantHits >= 2) || (battleState.opponentUsedTaunt)"
         },
+        // NEW FIELDS FOR ESCALATION
+        incapacitationScore: 0,
+        escalationState: 'Normal',
+        stunDuration: 0,
+        escalationBehavior: { // Ozai's escalation is pure overwhelming power
+            'Severely Incapacitated': { // Opponent is Severely Incapacitated
+                signatureMoveBias: { "Dragon's Roar": 2.0, "Emperor's Wrath": 2.2 },
+                offensiveBias: 1.6,
+                finisherBias: 1.8,
+                utilityBias: 0.1, // No time for subtlety
+            },
+            'Terminal Collapse': { // Opponent is in Terminal Collapse
+                signatureMoveBias: { "Emperor's Wrath": 3.0, "Scorching Blast": 2.5 }, // Utter annihilation
+                offensiveBias: 2.2,
+                finisherBias: 2.5,
+                utilityBias: 0.05,
+            }
+        },
+        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
@@ -135,13 +176,13 @@ export const antagonistCharacters = {
             onCollateral: {
                 causingDamage: { Generic: [{ type: 'spoken', line: "Witness the true might of the Fire Nation! All will burn!" }, { type: 'internal', line: "Let the world tremble. Their structures are as flimsy as their hope." }] },
                 observingDamage: { Generic: [{ type: 'spoken', line: "Good. Now you understand the scope of destruction." }, { type: 'internal', line: "Such weakness, to struggle within the very chaos I embrace." }] },
-                stressedByDamage: [], 
+                stressedByDamage: [],
                 thrivingInDamage: { Generic: [{ type: 'spoken', line: "The world groans under my feet! This is exhilarating!" }, { type: 'internal', line: "Absolute power manifests as absolute destruction. I am unstoppable." }] }
             },
             onVictory: { Default: { Generic: [{ line: "The Fire Nation is supreme! My power is absolute!" }] } },
             onMoveExecution: {
-                'Tactical Reposition': { 
-                    Critical: { Generic: [{ type: 'spoken', line: "My will shapes the battlefield." }] }, 
+                'Tactical Reposition': {
+                    Critical: { Generic: [{ type: 'spoken', line: "My will shapes the battlefield." }] },
                     Weak: { Generic: [{ type: 'internal', line: "Insignificant. I shall simply burn through." }] }
                 }
             },
@@ -166,11 +207,11 @@ export const antagonistCharacters = {
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/40/Mai.png',
         victoryStyle: "Deadpan", powerTier: 4,
         faction: "FireNation",
-        personalityProfile: { 
-            aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8, 
+        personalityProfile: {
+            aggression: 0.4, patience: 0.7, riskTolerance: 0.4, opportunism: 0.8,
             creativity: 0.2, defensiveBias: 0.5, antiRepeater: 0.1,
-            predictability: 0.9, 
-            signatureMoveBias: { 
+            predictability: 0.9,
+            signatureMoveBias: {
                 "Knife Barrage": 1.1,
                 "Precision Strike": 1.7,
                 "Knife Wall": 1.0,
@@ -178,17 +219,36 @@ export const antagonistCharacters = {
                 "Ricochet Shot": 0.8,
                 "Final Pin": 1.3,
                 "Tactical Reposition": 1.0
-            } 
+            }
         },
         specialTraits: { resilientToManipulation: 0.3 },
-        collateralTolerance: 0.4, 
-        mobility: 0.6, 
-        curbstompRules: [ // New field
+        collateralTolerance: 0.4,
+        mobility: 0.6,
+        curbstompRules: [
             { ruleId: "mai_knife_advantage", characterId: "mai" }
         ],
-        personalityTriggers: { // New field
+        personalityTriggers: {
             "provoked": "(battleState.opponentLandedCriticalHit) || (battleState.opponentTaunted) || (battleState.allyTargeted && ['ty-lee', 'zuko'].includes(battleState.ally.id))"
         },
+        // NEW FIELDS FOR ESCALATION
+        incapacitationScore: 0,
+        escalationState: 'Normal',
+        stunDuration: 0,
+        escalationBehavior: { // Mai's escalation is about efficient elimination
+            'Severely Incapacitated': { // Opponent is Severely Incapacitated
+                signatureMoveBias: { "Pinning Strike": 2.0, "Precision Strike": 1.8 }, // Setup for the kill
+                offensiveBias: 1.3,
+                finisherBias: 1.0, // Final Pin might not be her first choice if a quicker Precision Strike is available
+                utilityBias: 0.7, // Knife Wall if needed
+            },
+            'Terminal Collapse': { // Opponent is in Terminal Collapse
+                signatureMoveBias: { "Precision Strike": 3.0, "Final Pin": 2.0 }, // Direct, lethal strikes
+                offensiveBias: 1.9,
+                finisherBias: 1.5,
+                utilityBias: 0.2,
+            }
+        },
+        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
@@ -202,8 +262,8 @@ export const antagonistCharacters = {
             },
             onMoveExecution: {
                 'Pinning Strike': { Critical: { Generic: [{ type: 'spoken', line: "Stay put." }] } },
-                'Tactical Reposition': { 
-                    Critical: { Generic: [{ type: 'spoken', line: "Barely worth the effort." }] }, 
+                'Tactical Reposition': {
+                    Critical: { Generic: [{ type: 'spoken', line: "Barely worth the effort." }] },
                     Weak: { Generic: [{ type: 'internal', line: "This is getting annoying." }] }
                 }
             },
@@ -221,7 +281,7 @@ export const antagonistCharacters = {
                 causingDamage: { Generic: [{ type: 'internal', line: "Another broken window. This is getting messy." }, { type: 'spoken', line: "Can you try not to ruin everything? Some of us prefer order." }] },
                 observingDamage: { Generic: [{ type: 'internal', line: "Ugh. Now there's debris everywhere. This is a hassle." }, { type: 'spoken', line: "Are you done making a scene? Some of us have plans." }] },
                 stressedByDamage: { Generic: [{ type: 'internal', line: "This is getting out of hand. I need to end this quickly." }, { type: 'spoken', line: "You're really going to pay for this mess." }] },
-                thrivingInDamage: [] 
+                thrivingInDamage: []
             },
             onVictory: { Default: { Generic: [{ line: "That's it. Are we done now?" }] } },
             relationships: {
@@ -246,27 +306,48 @@ export const antagonistCharacters = {
         imageUrl: 'https://static.wikia.nocookie.net/avatar/images/6/6d/Ty_Lee.png',
         victoryStyle: "Playful", powerTier: 4,
         faction: "FireNation",
-        personalityProfile: { 
-            aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9, 
+        personalityProfile: {
+            aggression: 0.8, patience: 0.3, riskTolerance: 0.7, opportunism: 0.9,
             creativity: 0.6, defensiveBias: 0.3, antiRepeater: 0.6,
-            predictability: 0.3, 
-            signatureMoveBias: { 
+            predictability: 0.3,
+            signatureMoveBias: {
                 "Acrobatic Flips": 1.5,
                 "Pressure Point Strike": 1.8,
                 "Graceful Dodge": 1.2,
                 "Chi-Blocking Flurry": 1.7,
                 "Tactical Reposition": 1.3
-            } 
+            }
         },
         specialTraits: { resilientToManipulation: 0.2, chiBlocker: true },
-        collateralTolerance: 0.1, 
-        mobility: 1.0, 
-        curbstompRules: [ // New field
+        collateralTolerance: 0.1,
+        mobility: 1.0,
+        curbstompRules: [
             { ruleId: "tylee_chi_blocking", characterId: "ty-lee" }
         ],
-        personalityTriggers: { // New field
+        personalityTriggers: {
             "serious_fight": "(battleState.ally?.hp < battleState.ally?.maxHp * 0.3) || (battleState.opponentUsedLethalForce)"
         },
+        // NEW FIELDS FOR ESCALATION
+        incapacitationScore: 0,
+        escalationState: 'Normal',
+        stunDuration: 0,
+        escalationBehavior: { // Ty Lee aims to fully disable, then maybe a final "boop"
+            'Severely Incapacitated': { // Opponent is Severely Incapacitated
+                signatureMoveBias: { "Chi-Blocking Flurry": 2.2, "Pressure Point Strike": 1.9 }, // Chain disables
+                offensiveBias: 1.4,
+                finisherBias: 1.6, // Chi-Blocking Flurry can be a finisher
+                utilityBias: 0.8, // Acrobatic Flips to maintain advantage
+            },
+            'Terminal Collapse': { // Opponent is in Terminal Collapse
+                signatureMoveBias: { "Chi-Blocking Flurry": 2.5, "Pressure Point Strike": 2.0 }, // Ensure they stay down
+                offensiveBias: 1.0, // Less raw offense, more targeted disabling
+                finisherBias: 1.8,
+                utilityBias: 0.5,
+                // Ty Lee might not have a "kill" move; her goal is paralysis.
+                // The system could interpret "finisher" for her as "complete incapacitation."
+            }
+        },
+        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],
@@ -286,8 +367,8 @@ export const antagonistCharacters = {
             },
             onMoveExecution: {
                 'Chi-Blocking Flurry': { Critical: { Generic: [{ type: 'spoken', line: "Boop! Your bending is gone!" }] } },
-                'Tactical Reposition': { 
-                    Critical: { Generic: [{ type: 'spoken', line: "Whee! Catch me if you can!" }] }, 
+                'Tactical Reposition': {
+                    Critical: { Generic: [{ type: 'spoken', line: "Whee! Catch me if you can!" }] },
                     Weak: { Generic: [{ type: 'internal', line: "Ugh, almost bumped into something. Needs more grace." }] }
                 }
             },
@@ -295,7 +376,7 @@ export const antagonistCharacters = {
                 causingDamage: { Generic: [{ type: 'internal', line: "Oops! Did I do that? I hope no one got hurt..." }, { type: 'spoken', line: "Watch out! Don't damage the pretty flowers!" }] },
                 observingDamage: { Generic: [{ type: 'spoken', line: "Wow, that's a lot of broken stuff! Can we clean it up later?" }, { type: 'internal', line: "All this destruction... it's making my aura feel all crumby." }] },
                 stressedByDamage: { Generic: [{ type: 'internal', line: "My chi is getting all tangled with all this bad energy around!" }, { type: 'spoken', line: "Please, stop destroying things! It's so unharmonious!" }] },
-                thrivingInDamage: [] 
+                thrivingInDamage: []
             },
             onVictory: { Default: { Generic: [{ line: "Ta-da! That's how it's done!" }] } },
             relationships: {

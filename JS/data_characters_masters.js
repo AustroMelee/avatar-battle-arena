@@ -1,6 +1,9 @@
 // FILE: data_characters_masters.js
-// FILE: data_characters_masters.js
 'use strict';
+
+// Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
+// If not, and these objects are used directly, you'd need:
+// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
 
 export const masterCharacters = {
 'bumi': {
@@ -8,28 +11,47 @@ id: 'bumi', name: "Bumi", type: "Bender", element: "earth", pronouns: { s: 'he',
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/e/e8/King_Bumi.png',
 victoryStyle: "Madcap", powerTier: 8,
 faction: "EarthKingdom",
-personalityProfile: { 
-    aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7, 
+personalityProfile: {
+    aggression: 0.8, patience: 0.5, riskTolerance: 0.9, opportunism: 0.7,
     creativity: 1.0, defensiveBias: 0.3, antiRepeater: 0.9,
-    predictability: 0.1, 
-    signatureMoveBias: { 
-        "Rock Avalanche": 1.6, 
+    predictability: 0.1,
+    signatureMoveBias: {
+        "Rock Avalanche": 1.6,
         "Boulder Throw": 1.5,
         "Ground Spike": 1.0,
         "Terrain Reshape": 1.7,
-        "Tactical Reposition": 0.5 
-    } 
+        "Tactical Reposition": 0.5
+    }
 },
-specialTraits: { resilientToManipulation: 1.0, madGenius: true }, // madGenius is conceptual
+specialTraits: { resilientToManipulation: 1.0, madGenius: true },
 collateralTolerance: 0.5,
 mobility: 0.3,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "bumi_massive_earthbending_bury", characterId: "bumi" },
     { ruleId: "bumi_structural_collapse", characterId: "bumi" }
 ],
-personalityTriggers: { // New field
-    "underestimated": "(battleState.opponentTauntedAgeOrStrategy) || (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove.power > 50)" // Assumes these states
+personalityTriggers: {
+    "underestimated": "(battleState.opponentTauntedAgeOrStrategy) || (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove.power > 50)"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal', // Will be ESCALATION_STATES.NORMAL if imported
+stunDuration: 0,
+escalationBehavior: { // Bumi's escalation is overwhelming power
+    'Severely Incapacitated': { // Opponent is Severely Incapacitated
+        signatureMoveBias: { "Rock Avalanche": 2.0, "Terrain Reshape": 1.8, "Boulder Throw": 1.5 },
+        offensiveBias: 1.7,
+        finisherBias: 1.8, // Rock Avalanche is a finisher
+        utilityBias: 0.5, // Less Terrain Reshape unless it's for a direct setup
+    },
+    'Terminal Collapse': { // Opponent is in Terminal Collapse
+        signatureMoveBias: { "Rock Avalanche": 3.0, "Seismic Slam": 2.5 }, // From Toph's file, assuming Bumi has it or similar
+        offensiveBias: 2.0,
+        finisherBias: 2.5,
+        utilityBias: 0.2,
+    }
+},
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
@@ -75,32 +97,38 @@ id: 'pakku', name: "Pakku", type: "Bender", element: "water", pronouns: { s: 'he
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/b/bb/Pakku_looking_smug.png',
 victoryStyle: "Disciplined", powerTier: 7,
 faction: "WaterTribe",
-personalityProfile: { 
-    aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8, 
+personalityProfile: {
+    aggression: 0.6, patience: 0.8, riskTolerance: 0.4, opportunism: 0.8,
     creativity: 0.4, defensiveBias: 0.7, antiRepeater: 0.2,
-    predictability: 0.8, 
-    signatureMoveBias: { 
+    predictability: 0.8,
+    signatureMoveBias: {
         "Ice Spikes": 1.1,
         "Water Barrier": 1.4,
         "Tidal Surge": 1.3,
-        "Octopus Form": 1.7, 
+        "Octopus Form": 1.7,
         "Canteen Water Stream": 1.0,
         "Ice Darts": 1.0,
         "Minor Water Shield": 1.0,
         "Water Pouch Splash": 1.0,
         "Tactical Reposition": 1.0
-    } 
+    }
 },
 specialTraits: { resilientToManipulation: 0.8, traditionalMaster: true },
 collateralTolerance: 0.3,
 mobility: 0.5,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "pakku_water_mastery_curbstomp", characterId: "pakku" },
     { ruleId: "pakku_ice_daggers_kill", characterId: "pakku" }
 ],
-personalityTriggers: { // New field
-    "skill_challenged": "(battleState.opponentTauntedSkillOrTradition) || (battleState.opponentAttackedFirstAggressively)" // Assumes these states
+personalityTriggers: {
+    "skill_challenged": "(battleState.opponentTauntedSkillOrTradition) || (battleState.opponentAttackedFirstAggressively)"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal',
+stunDuration: 0,
+escalationBehavior: {}, // Pakku uses default AI escalation biases
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
@@ -132,27 +160,27 @@ Weak: { Generic: [{ type: 'internal', line: "My movements were not precise enoug
 }
 }
 },
-techniquesFull: [ 
+techniquesFull: [
 { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
 { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
 { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
 { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['defensive_stance', 'channeled', 'versatile', 'area_of_effect_small', 'requires_opening'], collateralImpact: 'low' },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniquesCanteen: [ 
+techniquesCanteen: [
 { name: "Canteen Water Stream", verb: 'unleash', object: 'a stream of water from his canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Ice Darts", verb: 'create', object: 'sharp ice darts from his canteen', type: 'Offense', power: 35, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'limited_resource', 'precise'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Minor Water Shield", verb: 'form', object: 'a minor water shield from his canteen', type: 'Defense', power: 25, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Water Pouch Splash", verb: 'splash', object: 'water from his pouch to distract', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'limited_resource'], setup: { name: 'Slightly Distracted', duration: 1, intensity: 1.05 }, collateralImpact: 'none', isCanteenMove: true },
-{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } 
+{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniques: [ // This should be determined dynamically or merge Full/Canteen
+techniques: [
     { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
     { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
     { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
     { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['defensive_stance', 'channeled', 'versatile', 'area_of_effect_small', 'requires_opening'], collateralImpact: 'low' },
     { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-], 
+],
 quotes: { postWin: ["Discipline prevails."], postWin_overwhelming: ["My mastery is absolute. There is no question of the outcome."], postWin_specific: { 'katara': "You have learned much, but the student has not yet surpassed the master." } },
 relationships: {}
 },
@@ -160,30 +188,36 @@ relationships: {}
 id: 'jeong-jeong', name: "Jeong Jeong", type: "Bender", element: "fire", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/a7/Jeong_Jeong_serious.png',
 victoryStyle: "Wise_Reluctant", powerTier: 6,
-faction: "FireNationExile", // Or neutral, depending on interpretation
-personalityProfile: { 
-    aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5, 
+faction: "FireNationExile",
+personalityProfile: {
+    aggression: 0.2, patience: 0.9, riskTolerance: 0.3, opportunism: 0.5,
     creativity: 0.5, defensiveBias: 0.9, antiRepeater: 0.4,
-    predictability: 0.8, 
-    signatureMoveBias: { 
+    predictability: 0.8,
+    signatureMoveBias: {
         "Controlled Inferno": 0.3,
-        "Fire Wall": 1.9, 
+        "Fire Wall": 1.9,
         "Flame Whips": 0.7,
         "Precision Burn": 0.6,
         "Reluctant Finale": 0.5,
         "Tactical Reposition": 1.0
-    } 
+    }
 },
 specialTraits: { resilientToManipulation: 1.0, fireMaster: true },
 collateralTolerance: 0.0,
 mobility: 0.4,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "jeongjeong_fire_whips_disable", characterId: "jeong-jeong" },
     { ruleId: "jeongjeong_desert_advantage", characterId: "jeong-jeong" }
 ],
-personalityTriggers: { // New field
+personalityTriggers: {
     "confident_stance": "(battleState.characterLandedStrongOrCriticalHitLastTurn) || (battleState.allyBuffedSelf)"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal',
+stunDuration: 0,
+escalationBehavior: {}, // Jeong Jeong uses default AI escalation biases (likely defensive even then)
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],

@@ -3,13 +3,15 @@
 
 import { characters } from './data_characters.js';
 import { phaseTemplates } from './narrative-v2.js';
+// NEW IMPORT FOR ESCALATION
+import { ESCALATION_STATES } from './engine_escalation.js';
 
 function determineImpactLevel(effectivenessLabel, moveType) {
-    if (!effectivenessLabel || typeof effectivenessLabel !== 'string') return 'low'; 
+    if (!effectivenessLabel || typeof effectivenessLabel !== 'string') return 'low';
     switch (effectivenessLabel.toLowerCase()) {
         case 'critical': return 'critical';
         case 'strong': return 'high';
-        case 'normal': return (moveType === 'Finisher' || moveType === 'finisher') ? 'high' : 'medium'; 
+        case 'normal': return (moveType === 'Finisher' || moveType === 'finisher') ? 'high' : 'medium';
         case 'weak': return 'low';
         default: return 'low';
     }
@@ -18,38 +20,37 @@ function determineImpactLevel(effectivenessLabel, moveType) {
 export function transformEventsToAnimationQueue(structuredLogEvents) {
     const animationQueue = [];
     if (!structuredLogEvents || !Array.isArray(structuredLogEvents)) {
-        return animationQueue; 
+        return animationQueue;
     }
 
     let lastEventWasKOAction = false;
 
     structuredLogEvents.forEach(event => {
         if (!event || typeof event.type !== 'string') {
-            return; 
+            return;
         }
 
-        // Reset KO flag if current event is not a KO event
-        if (event.type !== 'battle_end_ko_event' && event.type !== 'curbstomp_event') { // Curbstomp might also be a KO
+        if (event.type !== 'battle_end_ko_event' && event.type !== 'curbstomp_event') {
              lastEventWasKOAction = false;
         }
 
-        let textContent = typeof event.text === 'string' ? event.text : ''; 
+        let textContent = typeof event.text === 'string' ? event.text : '';
 
         switch (event.type) {
             case 'phase_header_event':
                 animationQueue.push({
                     isPhaseHeader: true,
-                    text: `${event.phaseName || 'New Phase'} ${event.phaseEmoji || '⚔️'}`, // Use passed name/emoji
+                    text: `${event.phaseName || 'New Phase'} ${event.phaseEmoji || '⚔️'}`,
                     pauseAfter: event.pauseAfter || 1200,
                 });
                 break;
             case 'dialogue_event':
                 animationQueue.push({
-                    actorId: event.actorId, 
+                    actorId: event.actorId,
                     characterName: event.characterName || (event.actorId ? (characters[event.actorId]?.name || event.actorId) : 'Narrator'),
                     text: textContent,
                     isDialogue: true,
-                    dialogueType: event.dialogueType || 'general', 
+                    dialogueType: event.dialogueType || 'general',
                     pauseAfter: event.pauseAfter !== undefined ? event.pauseAfter : (textContent.length > 50 ? 1000 : 600),
                 });
                 break;
@@ -65,57 +66,79 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                     isMoveAction: true,
                     pauseAfter: event.pauseAfter || 1000,
                 });
-                if (event.isKOAction) { 
+                if (event.isKOAction) {
                     lastEventWasKOAction = true;
                 }
                 break;
             case 'collateral_damage_event':
-            case 'manipulation_narration_event': // Treat manipulation narration similarly to collateral
+            case 'manipulation_narration_event':
                 animationQueue.push({
-                    actorId: event.actorId, 
+                    actorId: event.actorId,
                     characterName: event.actorId ? (characters[event.actorId]?.name || event.actorId) : 'Environment',
                     text: textContent,
-                    isEnvironmental: event.type === 'collateral_damage_event', // True for collateral
-                    isDialogue: event.type === 'manipulation_narration_event', // True for manip narration
-                    impactLevel: event.impactLevel || 'medium', 
+                    isEnvironmental: event.type === 'collateral_damage_event',
+                    isDialogue: event.type === 'manipulation_narration_event',
+                    impactLevel: event.impactLevel || 'medium',
                     pauseAfter: event.pauseAfter || 700,
                 });
                 break;
             case 'environmental_summary_event':
                 if (event.texts && Array.isArray(event.texts) && event.texts.length > 0) {
                     event.texts.forEach(txt => {
-                        if (typeof txt === 'string') { 
+                        if (typeof txt === 'string') {
                             animationQueue.push({
                                 text: `🌍 Environment: ${txt}`,
                                 isEnvironmental: true,
                                 impactLevel: 'low',
-                                pauseAfter: event.pauseAfterPerItem || 600, 
+                                pauseAfter: event.pauseAfterPerItem || 600,
                             });
                         }
                     });
                 }
                 break;
-            // --- NEW: Curbstomp Event for Animation ---
             case 'curbstomp_event':
                 animationQueue.push({
                     text: textContent,
-                    impactLevel: event.isEscape ? 'medium' : 'critical', // Escapes are less critically impactful than KOs
-                    isMajorEvent: event.isMajorEvent !== undefined ? event.isMajorEvent : !event.isEscape, // Mark as major if it's not an escape
+                    impactLevel: event.isEscape ? 'medium' : 'critical',
+                    isMajorEvent: event.isMajorEvent !== undefined ? event.isMajorEvent : !event.isEscape,
                     pauseAfter: event.pauseAfter || (event.isEscape ? 1500 : 2500),
-                    // Optionally, add actorId if the curbstomp is clearly attributed to one character's action
-                    // actorId: event.attackerId || null, 
-                    // characterName: event.attackerId ? (characters[event.attackerId]?.name || event.attackerId) : 'System',
                 });
-                 if (event.isMajorEvent !== undefined && event.isMajorEvent && !event.isEscape) { // If it's a decisive curbstomp
+                 if (event.isMajorEvent !== undefined && event.isMajorEvent && !event.isEscape) {
                     lastEventWasKOAction = true;
                 }
                 break;
+            // --- NEW: Escalation Change Event for Animation Queue ---
+            case 'escalation_change_event':
+                let impact = 'medium';
+                if (event.newState === ESCALATION_STATES.SEVERELY_INCAPACITATED) impact = 'high';
+                if (event.newState === ESCALATION_STATES.TERMINAL_COLLAPSE) impact = 'critical';
+                if (event.newState === ESCALATION_STATES.NORMAL && event.oldState !== ESCALATION_STATES.NORMAL) impact = 'low'; // Reverting
+
+                animationQueue.push({
+                    actorId: event.actorId,
+                    characterName: event.characterName || (event.actorId ? (characters[event.actorId]?.name || event.actorId) : 'Fighter'),
+                    text: textContent, // The full text including flavor
+                    isEscalationEvent: true, // Custom flag for styling if needed
+                    impactLevel: impact,
+                    pauseAfter: event.pauseAfter || 1300,
+                });
+                break;
             // --- END NEW ---
+            case 'stun_event': // Added to handle stun messages
+                animationQueue.push({
+                    actorId: event.actorId,
+                    characterName: event.characterName,
+                    text: textContent,
+                    isStatusEvent: true, // A general flag for status changes
+                    impactLevel: 'medium',
+                    pauseAfter: event.pauseAfter || 800,
+                });
+                break;
             case 'battle_end_ko_event':
-                if (!lastEventWasKOAction) { 
+                if (!lastEventWasKOAction) {
                     animationQueue.push({
                         text: textContent,
-                        impactLevel: 'critical', 
+                        impactLevel: 'critical',
                         pauseAfter: event.pauseAfter || 2500,
                     });
                 }
@@ -135,7 +158,7 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
                 if (textContent) {
                     animationQueue.push({
                         text: textContent,
-                        impactLevel: 'low', 
+                        impactLevel: 'low',
                         pauseAfter: event.pauseAfter || 500,
                     });
                 }
@@ -159,12 +182,12 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
             return;
         }
 
-        let textContent = typeof event.text === 'string' ? event.text : ''; 
+        let textContent = typeof event.text === 'string' ? event.text : '';
         let htmlContentForEvent = event.html_content && typeof event.html_content === 'string' ? event.html_content : '';
 
         if (event.type === 'phase_header_event') {
             if (isPhaseDivOpen) {
-                htmlLog += `</div>`; 
+                htmlLog += `</div>`;
             }
             currentPhaseKeyForHtml = event.phaseKey || 'unknown-phase';
             const phaseHeaderHtml = htmlContentForEvent ||
@@ -177,25 +200,37 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                 .replace('{phaseContent}', phaseHeaderHtml);
             isPhaseDivOpen = true;
 
-        } else if (htmlContentForEvent) { 
+        } else if (htmlContentForEvent) {
+             // If html_content is directly provided (like for escalation or curbstomp), use it
             if (isPhaseDivOpen) {
-                htmlLog = htmlLog.slice(0, -6); 
-                htmlLog += htmlContentForEvent + `</div>`; 
+                htmlLog = htmlLog.slice(0, -6); // Remove closing </div>
+                htmlLog += htmlContentForEvent + `</div>`; // Add new content and re-close
             } else {
-                htmlLog += htmlContentForEvent; 
+                htmlLog += htmlContentForEvent; // Add directly if not in a phase
             }
-        } else if (textContent) { 
+        } else if (textContent) {
+            // Fallback for events that might only have `text` and not pre-formatted `html_content`
             let contentToAppend = "";
             switch (event.type) {
                 case 'battle_end_ko_event':
                     contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${textContent}</p>`;
                     break;
-                // --- NEW: Curbstomp Event for HTML ---
-                case 'curbstomp_event':
+                case 'curbstomp_event': // Should ideally use html_content from generateCurbstompNarration
                     const curbstompClass = event.isEscape ? "highlight-escape" : (event.isMajorEvent ? "highlight-major" : "highlight-neutral");
                     contentToAppend = `<div class="curbstomp-event-header">Curbstomp! 🌪️</div><p class="narrative-curbstomp ${curbstompClass}">${textContent}</p>`;
                     break;
+                // --- NEW: Escalation Change Event for HTML Log (should use html_content if available) ---
+                case 'escalation_change_event': // This case should ideally not be hit if html_content is always provided
+                    let escalationClass = 'highlight-neutral';
+                    if (event.newState === ESCALATION_STATES.PRESSURED) escalationClass = 'highlight-pressured';
+                    else if (event.newState === ESCALATION_STATES.SEVERELY_INCAPACITATED) escalationClass = 'highlight-severe';
+                    else if (event.newState === ESCALATION_STATES.TERMINAL_COLLAPSE) escalationClass = 'highlight-terminal';
+                    contentToAppend = `<p class="narrative-escalation ${escalationClass} char-${event.actorId || 'unknown'}">${textContent}</p>`;
+                    break;
                 // --- END NEW ---
+                case 'stun_event': // Added to handle stun messages
+                    contentToAppend = `<p class="narrative-action char-${event.actorId || 'unknown'}">${textContent}</p>`;
+                    break;
                 case 'stalemate_result_event':
                 case 'draw_result_event':
                 case 'timeout_victory_event':
@@ -209,14 +244,14 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                         contentToAppend += `<div class="environmental-summary">`;
                         contentToAppend += (phaseTemplates.environmentalImpactHeader || '<h5>Environmental Impact 🌍</h5>');
                         event.texts.forEach(txt => {
-                            if (typeof txt === 'string') { 
+                            if (typeof txt === 'string') {
                                 contentToAppend += `<p class="environmental-impact-text">${txt}</p>`;
                             }
                         });
                         contentToAppend += `</div>`;
                     }
                     break;
-                default: 
+                default:
                     let pClass = "log-generic";
                     if (event.isDialogue) pClass = "log-dialogue";
                     if (event.isEnvironmental) pClass = "log-environmental";
@@ -225,17 +260,17 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
             }
 
             if (isPhaseDivOpen) {
-                htmlLog = htmlLog.slice(0, -6); 
-                htmlLog += contentToAppend + `</div>`; 
+                htmlLog = htmlLog.slice(0, -6);
+                htmlLog += contentToAppend + `</div>`;
             } else {
                 htmlLog += contentToAppend;
             }
         }
     });
 
-    if (isPhaseDivOpen && !htmlLog.endsWith(`</div>`)) { 
+    if (isPhaseDivOpen && !htmlLog.endsWith(`</div>`)) {
         htmlLog += `</div>`;
     }
 
-    return htmlLog || "<p>The battle unfolds...</p>"; 
+    return htmlLog || "<p>The battle unfolds...</p>";
 }

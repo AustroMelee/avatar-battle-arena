@@ -1,38 +1,48 @@
 // FILE: data_characters_gaang.js
-// FILE: data_characters_gaang.js
 'use strict';
+
+// Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
+// If not, and these objects are used directly, you'd need:
+// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
+
 export const gaangCharacters = {
 'sokka': {
 id: 'sokka', name: "Sokka", type: "Nonbender", pronouns: { s: 'he', p: 'his', o: 'him' },
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/c/cc/Sokka.png',
 victoryStyle: "Madcap", powerTier: 3,
-faction: "WaterTribe", // Added for rule checking
-personalityProfile: { 
-    aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7, 
+faction: "WaterTribe",
+personalityProfile: {
+    aggression: 0.5, patience: 0.6, riskTolerance: 0.4, opportunism: 0.7,
     creativity: 0.9, defensiveBias: 0.3, antiRepeater: 0.8,
-    predictability: 0.4, 
-    signatureMoveBias: { 
+    predictability: 0.4,
+    signatureMoveBias: {
         "Sword Strike": 1.0,
-        "Boomerang Throw": 1.6, 
+        "Boomerang Throw": 1.6,
         "Shield Block": 1.0,
-        "Tactical Positioning": 1.1, 
+        "Tactical Positioning": 1.1,
         "Improvised Trap": 1.5,
-        "The Sokka Special": 1.3, 
-        "Tactical Reposition": 1.1 
-    } 
+        "The Sokka Special": 1.3,
+        "Tactical Reposition": 1.1
+    }
 },
-specialTraits: { resilientToManipulation: 0.2, intelligence: 75 }, // Added intelligence
+specialTraits: { resilientToManipulation: 0.2, intelligence: 75 },
 collateralTolerance: 0.5,
 mobility: 0.6,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "sokka_strategy_exploit", characterId: "sokka" },
     { ruleId: "sokka_vulnerability_death", characterId: "sokka" }
 ],
-personalityTriggers: { // New field
-    "meticulous_planning": "(opponent.lastMove?.isHighRisk && opponent.lastMoveEffectiveness === 'Weak') || battleState.locationTags.includes('trap_favorable')" // Example logic string
+personalityTriggers: {
+    "meticulous_planning": "(opponent.lastMove?.isHighRisk && opponent.lastMoveEffectiveness === 'Weak') || battleState.locationTags.includes('trap_favorable')"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal', // Will be ESCALATION_STATES.NORMAL if imported
+stunDuration: 0,
+escalationBehavior: {}, // Sokka uses default AI escalation biases
+// END NEW FIELDS
 narrative: {
-battleStart: { 
+battleStart: {
 Early: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, {opponentName} looks tough. Don't panic. Just find an opening. You're the idea guy." }],
 Mid: [{ type: 'spoken', line: "Okay, things are heating up! Time for Plan B... or C? I'll figure it out!"}],
 Late: [{ type: 'spoken', line: "I'm not backing down! For my friends!"}]
@@ -46,7 +56,7 @@ BreakTheTurtle: { Mid: [{ type: 'spoken', line: "Think you can hide? My boomeran
 },
 onMoveExecution: {
 'Boomerang Throw': {
-Critical: { Generic: [{ type: 'spoken', line: "See? Boomerang always comes back! And it hits HARD!" }] }, 
+Critical: { Generic: [{ type: 'spoken', line: "See? Boomerang always comes back! And it hits HARD!" }] },
 Weak: { Generic: [{ type: 'spoken', line: "Wait, where did it... oh, it's stuck in a tree. Great." }] }
 },
 'Improvised Trap': {
@@ -58,7 +68,7 @@ Critical: { Generic: [{ type: 'spoken', line: "Perfect! Just where I wanted to b
 Weak: { Generic: [{ type: 'internal', line: "Whoops, almost tripped on my own feet. Gotta be quicker." }] }
 }
 },
-onStateChange: { 
+onStateChange: {
 stressed: { Mid: [{ type: 'internal', line: "This is not going according to plan. At all." }] },
 shaken: { Late: [{ type: 'internal', line: "Come on, pull it together! Can't let the team down!" }] },
 },
@@ -96,30 +106,36 @@ id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", elem
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/ae/Aang_at_Jasmine_Dragon.png',
 victoryStyle: "Pacifist", powerTier: 9,
 faction: "AirNomad",
-personalityProfile: { 
-    aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7, 
+personalityProfile: {
+    aggression: 0.2, patience: 0.9, riskTolerance: 0.2, opportunism: 0.7,
     creativity: 0.8, defensiveBias: 0.6, antiRepeater: 0.9,
-    predictability: 0.2, 
-    signatureMoveBias: { 
-        "Air Scooter": 1.8, 
+    predictability: 0.2,
+    signatureMoveBias: {
+        "Air Scooter": 1.8,
         "Air Blast": 1.0,
         "Wind Shield": 1.4,
         "Tornado Whirl": 1.3,
         "Gust Push": 0.9,
         "Sweeping Gust": 1.1,
         "Tactical Reposition": 1.5
-    } 
+    }
 },
 specialTraits: { resilientToManipulation: 0.6, isAvatar: true },
 collateralTolerance: 0.05,
 mobility: 1.0,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "aang_avatar_state_air", characterId: "aang-airbending-only" },
     { ruleId: "aang_air_scooter_evasion", characterId: "aang-airbending-only" }
 ],
-personalityTriggers: { // New field
-    "mortal_danger": "(character.hp < character.maxHp * 0.2) || (battleState.ally?.hp < battleState.ally?.maxHp * 0.05)" // Assumes ally state is available
+personalityTriggers: {
+    "mortal_danger": "(character.hp < character.maxHp * 0.2) || (battleState.ally?.hp < battleState.ally?.maxHp * 0.05)"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal',
+stunDuration: 0,
+escalationBehavior: {}, // Aang uses default AI escalation biases; Avatar State is a separate curbstomp.
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
@@ -128,7 +144,7 @@ Late: [{ type: 'spoken', line: "I won't let you hurt anyone else!"}]
 },
 onIntentSelection: {
 OpeningMoves: { Early: [{ type: 'internal', line: "Maybe if I'm evasive enough, {opponent.s} will just get tired and stop?" }] },
-CautiousDefense: { Generic: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }] }, 
+CautiousDefense: { Generic: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }] },
 CapitalizeOnOpening: { Mid: [{ type: 'internal', line: "There's an opening! A quick puff of air should do it." }] }
 },
 onManipulation: {
@@ -141,7 +157,7 @@ wrong: { Generic: [{ type: 'internal', line: "Whoa, that was fast. Gotta be quic
 onStateChange: {
 stressed: { Mid: [{ type: 'internal', line: "This is getting too violent. I have to end it without anyone getting seriously hurt." }] },
 shaken: { Late: [{ type: 'spoken', line: "Please, stop! This isn't the way!" }] },
-broken: { Late: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }] } 
+broken: { Late: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }] }
 },
 onMoveExecution: {
 'Air Scooter': { Critical: { Generic: [{ type: 'spoken', line: "Whee! Try to catch me!" }] } },
@@ -177,35 +193,41 @@ id: 'katara', name: "Katara", type: "Bender", element: "water", pronouns: { s: '
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/7/7a/Katara_smiles_at_coronation.png',
 victoryStyle: "Fierce", powerTier: 7,
 faction: "WaterTribe",
-personalityProfile: { 
-    aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8, 
+personalityProfile: {
+    aggression: 0.6, patience: 0.7, riskTolerance: 0.5, opportunism: 0.8,
     creativity: 0.7, defensiveBias: 0.5, antiRepeater: 0.6,
-    predictability: 0.5, 
-    signatureMoveBias: { 
+    predictability: 0.5,
+    signatureMoveBias: {
         "Water Whip": 1.5,
         "Ice Spears": 1.3,
         "Water Shield": 1.4,
         "Ice Prison": 1.2,
         "Tidal Wave": 1.1,
-        "Bloodbending": 0.1,
+        "Bloodbending": 0.1, // Generally low unless specific conditions
         "Canteen Water Jet": 1.0,
         "Small Ice Darts": 1.0,
         "Canteen Water Shield": 1.0,
         "Slippery Puddle": 1.0,
         "Canteen Whip": 1.0,
         "Tactical Reposition": 1.0
-    } 
+    }
 },
-specialTraits: { resilientToManipulation: 0.9, isHealer: true }, // isHealer is conceptual here
+specialTraits: { resilientToManipulation: 0.9, isHealer: true },
 collateralTolerance: 0.15,
 mobility: 0.7,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "katara_bloodbending", characterId: "katara" },
     { ruleId: "katara_ice_prison_kill", characterId: "katara" }
 ],
-personalityTriggers: { // New field
+personalityTriggers: {
     "desperate_mentally_broken": "(character.hp < character.maxHp * 0.1) || (battleState.ally?.isDowned) || (character.criticalHitsTaken >= 2) || (character.mentalState.level === 'broken')"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal',
+stunDuration: 0,
+escalationBehavior: {}, // Katara uses default AI escalation biases
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
@@ -218,7 +240,7 @@ DesperateGambit: { Late: [{ type: 'spoken', line: "I'm ending this. Right now." 
 BreakTheTurtle: { Generic: [{ type: 'internal', line: "They think they can just hide? I'll tear that wall down." }] }
 },
 onMoveExecution: {
-'Bloodbending': { Critical: { Late: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] } }, 
+'Bloodbending': { Critical: { Late: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] } },
 'Tactical Reposition': {
 Critical: { Generic: [{ type: 'spoken', line: "I'll control the flow of this fight!" }] },
 Weak: { Generic: [{ type: 'internal', line: "Too slow. Need to be more fluid." }] }
@@ -244,7 +266,7 @@ relationships: {
 'azula': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }] } } }
 }
 },
-techniquesFull: [ 
+techniquesFull: [
 { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
 { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
 { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
@@ -253,15 +275,15 @@ techniquesFull: [
 { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'], collateralImpact: 'none' },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniquesCanteen: [ 
+techniquesCanteen: [
 { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from her canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Small Ice Darts", verb: 'form', object: 'small ice darts from her canteen', type: 'Offense', power: 35, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'limited_resource', 'precise'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Canteen Water Shield", verb: 'create', object: 'a small water shield from her canteen', type: 'Defense', power: 25, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Slippery Puddle", verb: 'spill', object: 'water to create a slippery puddle', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
 { name: "Canteen Whip", verb: 'lash', object: 'out with a small water whip from her canteen', type: 'Offense', power: 25, element: 'water', moveTags: ['melee_range', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
-{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' } 
+{ name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniques: [ // This should ideally be determined dynamically based on conditions, or merge Full/Canteen
+techniques: [
     { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
     { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
     { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
@@ -278,30 +300,36 @@ id: 'toph-beifong', name: "Toph", type: "Bender", element: "earth", pronouns: { 
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/46/Toph_Beifong.png',
 victoryStyle: "Cocky", powerTier: 7,
 faction: "EarthKingdom",
-personalityProfile: { 
-    aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9, 
+personalityProfile: {
+    aggression: 0.85, patience: 0.4, riskTolerance: 0.8, opportunism: 0.9,
     creativity: 1.0, defensiveBias: 0.2, antiRepeater: 0.8,
-    predictability: 0.7, 
-    signatureMoveBias: { 
+    predictability: 0.7,
+    signatureMoveBias: {
         "Earth Wave": 1.3,
         "Rock Armor": 1.1,
         "Seismic Slam": 1.7,
         "Metal Bending": 1.5,
         "Boulder Throw": 1.2,
         "Rock Coffin": 1.4,
-        "Tactical Reposition": 0.8 
-    } 
+        "Tactical Reposition": 0.8
+    }
 },
-specialTraits: { resilientToManipulation: 0.5, seismicSense: true }, // seismicSense is conceptual
+specialTraits: { resilientToManipulation: 0.5, seismicSense: true },
 collateralTolerance: 0.6,
 mobility: 0.2,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "toph_seismic_sense_accuracy", characterId: "toph-beifong" },
     { ruleId: "toph_metal_bending_vs_armor", characterId: "toph-beifong" }
 ],
-personalityTriggers: { // New field
-    "doubted": "(battleState.opponentTauntedBlindness) || (battleState.opponentLandedBlindHit)" // Assumes these states
+personalityTriggers: {
+    "doubted": "(battleState.opponentTauntedBlindness) || (battleState.opponentLandedBlindHit)"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal',
+stunDuration: 0,
+escalationBehavior: {}, // Toph uses default AI escalation biases
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
@@ -356,11 +384,11 @@ id: 'zuko', name: "Zuko", type: "Bender", element: "fire", pronouns: { s: 'he', 
 imageUrl: 'https://static.wikia.nocookie.net/avatar/images/4/4b/Zuko.png',
 victoryStyle: "Determined", powerTier: 6,
 faction: "FireNation",
-personalityProfile: { 
-    aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8, 
+personalityProfile: {
+    aggression: 0.75, patience: 0.6, riskTolerance: 0.6, opportunism: 0.8,
     creativity: 0.5, defensiveBias: 0.4, antiRepeater: 0.5,
-    predictability: 0.6, 
-    signatureMoveBias: { 
+    predictability: 0.6,
+    signatureMoveBias: {
         "Fire Daggers": 1.1,
         "Flame Sword": 1.5,
         "Fire Shield": 1.0,
@@ -368,18 +396,24 @@ personalityProfile: {
         "Fire Whip": 1.2,
         "Redemption's Fury": 1.4,
         "Tactical Reposition": 1.0
-    } 
+    }
 },
-specialTraits: { resilientToManipulation: 0.1, canRedirectLightning: true }, // canRedirectLightning is conceptual
+specialTraits: { resilientToManipulation: 0.1, canRedirectLightning: true },
 collateralTolerance: 0.25,
 mobility: 0.65,
-curbstompRules: [ // New field
+curbstompRules: [
     { ruleId: "zuko_scar_intimidation", characterId: "zuko" },
     { ruleId: "zuko_dual_dao_kill", characterId: "zuko" }
 ],
-personalityTriggers: { // New field
-    "honor_violated": "(battleState.opponentCheated) || (battleState.allyDisarmedUnfairly)" // Assumes these states
+personalityTriggers: {
+    "honor_violated": "(battleState.opponentCheated) || (battleState.allyDisarmedUnfairly)"
 },
+// NEW FIELDS FOR ESCALATION
+incapacitationScore: 0,
+escalationState: 'Normal',
+stunDuration: 0,
+escalationBehavior: {}, // Zuko uses default AI escalation biases
+// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],

@@ -1,19 +1,17 @@
 // FILE: js/narrative-v2.js
 // ====================================================================================
-//  Narrative Engine Library (v3.3 - Battle Phase Integration)
+//  Narrative Engine Library (v3.4 - Escalation State Narrative - FULL)
 // ====================================================================================
-//  - Updated `battlePhases` with more descriptive elements.
-//  - `phaseTemplates.header` now includes phase name from `battlePhases`.
-//  - Added concept of phase-specific generic phrases for narrative state.
+//  - Added `escalationStateChangeTemplates` for HTML structure.
+//  - Added `escalationStateNarratives` for flavor text.
+//  - Restored all previously existing phrase objects.
 // ====================================================================================
 
 export const battlePhases = [
-    { name: "Opening Exchanges", emoji: "⚔️", key: "Early" }, // Used for narrative files
+    { name: "Opening Exchanges", emoji: "⚔️", key: "Early" },
     { name: "Escalating Conflict", emoji: "🔥", key: "Mid" },
-    { name: "Decisive Confrontation", emoji: "💥", key: "Late" } // Max 3 defined phases, but engine allows fewer/more
+    { name: "Decisive Confrontation", emoji: "💥", key: "Late" }
 ];
-// NOTE: The `key` property is for programmatic access if needed, while `name` is for display.
-// The engine will handle up to 6 turns, so narrative will map to these broadly.
 
 export const effectivenessLevels = {
     WEAK: { label: "Weak", emoji: "💤" },
@@ -23,9 +21,8 @@ export const effectivenessLevels = {
 };
 
 export const phaseTemplates = {
-    // The {phaseName} in header will now be dynamically pulled from battlePhases.
     phaseWrapper: `<div class="battle-phase" data-phase="{phaseKey}">{phaseContent}</div>`,
-    header: `<h4 class="phase-header">{phaseDisplayName} {phaseEmoji}</h4>`, // {phaseDisplayName} and {phaseEmoji} will be populated
+    header: `<h4 class="phase-header">{phaseDisplayName} {phaseEmoji}</h4>`,
     move: `
         <div class="move-line">
             <div class="move-actor">
@@ -41,22 +38,24 @@ export const phaseTemplates = {
     finalBlow: `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">{winnerName} lands the finishing blow, defeating {loserName}!</p>`,
     timeOutVictory: `<p class="final-blow">The battle timer expires! With more health remaining, {winnerName} is declared the victor over {loserName}!</p>`,
     drawResult: `<p class="final-blow">The battle timer expires! Both fighters are equally matched, their strength and will pushed to the absolute limit. The result is a DRAW!</p>`,
-    // NEW: Stalemate result phrase
     stalemateResult: `<p class="final-blow">Neither fighter can break the deadlock. The intense confrontation ends in a STALEMATE, both combatants exhausted but unbroken!</p>`,
     conclusion: `<p class="conclusion">{endingNarration}</p>`,
-    environmentalImpactHeader: `<h5 class="environmental-impact-header">Environmental Impact 🌍</h5>`
+    environmentalImpactHeader: `<h5 class="environmental-impact-header">Environmental Impact 🌍</h5>`,
+    escalationStateChangeTemplates: {
+        general: `<p class="narrative-escalation char-{actorId}">{escalationFlavorText}</p>`,
+        pressured: `<p class="narrative-escalation highlight-pressured char-{actorId}">{actorName} is now <strong>Pressured</strong>! {escalationFlavorText}</p>`,
+        severely_incapacitated: `<p class="narrative-escalation highlight-severe char-{actorId}">{actorName} is <strong>Severely Incapacitated</strong>! {escalationFlavorText}</p>`,
+        terminal_collapse: `<p class="narrative-escalation highlight-terminal char-{actorId}">{actorName} has reached <strong>Terminal Collapse</strong>! {escalationFlavorText}</p>`,
+        reverted_to_normal: `<p class="narrative-escalation highlight-neutral char-{actorId}">The immediate crisis defers. {actorName} returns to a <strong>Normal</strong> combat state, but the tension remains.</p>`
+    }
 };
 
-// Narrative State Phrases can be expanded with phase-specific versions
-// Example: narrativeStatePhrases.momentum_gain.Early, narrativeStatePhrases.momentum_gain.Mid, etc.
-// For now, these remain generic, but the structure allows for future phase-specific additions.
 export const narrativeStatePhrases = {
     energy_depletion: ["Nearing exhaustion,", "Digging deep for energy,", "Visibly tiring,", "Summoning {actor.p} last reserves,", "Struggling to stand,", "Gasping for breath,", "Pushing through the pain,", "Running on fumes,", "Their movements becoming sluggish,"],
     momentum_gain: ["Building on the prior momentum,", "Pressing the advantage,", "Sensing weakness,", "With {opponent.p} on the back foot,", "Channeling their focus,", "With unshakable resolve,", "Seizing control of the fight,", "Finding a rhythm,", "Dominating the exchange,"],
     momentum_loss: ["Desperate to turn the tide,", "Trying to regain composure,", "Forced onto the defensive,", "Struggling to find an answer,", "In a daring gambit,", "In a bold maneuver,", "Scrambling for a response,", "Knocked off balance,", "Struggling to keep up,"]
 };
 
-// Introductory phrases can also be phase-specific if desired.
 export const introductoryPhrases = {
     Early: [
         "Testing the opponent's defenses,", "With calculated poise,", "Looking for an opening,", "Switching tactics,",
@@ -71,12 +70,11 @@ export const introductoryPhrases = {
         "With steely determination,", "Channeling inner strength,", "Trusting their instincts,", "With a battle-hardened glare,",
         "In a flash of inspiration,", "With nothing left to lose,", "In a final, desperate push,"
     ],
-    Generic: [ // Fallback if phase-specific isn't defined or needed
+    Generic: [
         "With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,",
         "With an air of supreme confidence,", "Taking the offensive,", "Without hesitation,", "With a quick movement,"
     ]
 };
-
 
 export const adverbPool = {
     offensive: [
@@ -247,5 +245,37 @@ export const postBattleVictoryPhrases = {
     Playful: {
         dominant: "With a cheerful giggle, {WinnerName} cartwheeled away from the defeated {LoserName}, {WinnerPronounP} work clearly done.",
         narrow: "'Ooh, you almost had me!' {WinnerName} chirped, though {WinnerPronounP} narrow victory over {LoserName} suggested a genuine struggle."
+    }
+};
+
+export const escalationStateNarratives = {
+    PRESSURED: [
+        "The intensity of the fight is taking its toll on {actorName}!",
+        "{actorName} is visibly struggling to keep up the pace.",
+        "A grimace of effort shows on {actorName}'s face as the pressure mounts.",
+        "Each exchange seems to drain {actorName} further."
+    ],
+    SEVERELY_INCAPACITATED: [
+        "{actorName} is staggering, barely able to maintain {actor.p} guard!",
+        "The onslaught has left {actorName} on the verge of collapse!",
+        "It's a desperate struggle for survival now for {actorName}!",
+        "One more solid hit might be all it takes to finish {actorName}."
+    ],
+    TERMINAL_COLLAPSE: [
+        "{actorName} is on {actor.p} last legs, fighting purely on instinct!",
+        "The light is fading from {actorName}'s eyes; defeat seems inevitable.",
+        "Any moment now, {actorName} is going to fall!",
+        "This is the end of the line for {actorName}; {actor.s} can barely stand."
+    ],
+    // Character-specific examples (can be expanded)
+    'azula': { // If Azula herself is in these states
+        PRESSURED: ["Azula's perfect facade shows the barest hint of a crack under the strain."],
+        SEVERELY_INCAPACITATED: ["A flicker of genuine fear, quickly suppressed, crosses Azula's face as her control slips."],
+        TERMINAL_COLLAPSE: ["Azula lets out a wild, desperate shriek, her blue fire becoming dangerously erratic!"]
+    },
+    'sokka': {
+        PRESSURED: ["Sokka's usual stream of witty banter slows as he focuses on just staying in the fight."],
+        SEVERELY_INCAPACITATED: ["'Just... a little... longer...' Sokka pants, his boomerang feeling impossibly heavy."],
+        TERMINAL_COLLAPSE: ["Sokka's eyes glaze over, his brilliant plans lost in a haze of exhaustion and pain."]
     }
 };
