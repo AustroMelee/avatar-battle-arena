@@ -1,9 +1,9 @@
 // FILE: engine_narrative-engine.js
 'use strict';
 
-// Version 3.1: Lightning Redirection Narrative Integration
+// Version 3.2: Enhanced Lightning Redirection Narrative Output
 
-import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives } from './narrative-v2.js';
+import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives, effectivenessLevels } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
@@ -116,15 +116,30 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
 
     const lookupPaths = [];
 
-    if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]?.[currentPhaseKey]) {
-        lookupPaths.push(() => actor.relationships[opponent.id].narrative[trigger][subTrigger][currentPhaseKey]);
+    // Relationship-specific narrative first
+    if (opponent?.id && actor.relationships?.[opponent.id]?.narrative) {
+        const relNarrative = actor.relationships[opponent.id].narrative;
+        if (relNarrative[trigger]?.[subTrigger]?.[currentPhaseKey]) {
+            lookupPaths.push(() => relNarrative[trigger][subTrigger][currentPhaseKey]);
+        }
+        if (relNarrative[trigger]?.[subTrigger]?.Generic) {
+            lookupPaths.push(() => relNarrative[trigger][subTrigger].Generic);
+        }
+        if (trigger === 'onMoveExecution' && relNarrative[trigger]?.[subTrigger]?.[context.result]?.[currentPhaseKey]) {
+            lookupPaths.push(() => relNarrative[trigger][subTrigger][context.result][currentPhaseKey]);
+        }
+        if (trigger === 'onMoveExecution' && relNarrative[trigger]?.[subTrigger]?.[context.result]?.Generic) {
+            lookupPaths.push(() => relNarrative[trigger][subTrigger][context.result].Generic);
+        }
+        if (trigger === 'onMoveExecution' && relNarrative[trigger]?.[subTrigger]?.[context.result] && Array.isArray(relNarrative[trigger]?.[subTrigger]?.[context.result])) {
+           lookupPaths.push(() => relNarrative[trigger][subTrigger][context.result]);
+        }
+         if (relNarrative[trigger]?.[subTrigger] && Array.isArray(relNarrative[trigger]?.[subTrigger])) { // General subtrigger array
+            lookupPaths.push(() => relNarrative[trigger][subTrigger]);
+        }
     }
-    if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]?.Generic) {
-        lookupPaths.push(() => actor.relationships[opponent.id].narrative[trigger][subTrigger].Generic);
-    }
-    if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger] && Array.isArray(actor.relationships[opponent.id].narrative[trigger][subTrigger])) {
-        lookupPaths.push(() => actor.relationships[opponent.id].narrative[trigger][subTrigger]);
-    }
+
+    // Character's general narrative
     if (narrativeData[trigger]?.[subTrigger]?.[currentPhaseKey]) {
         lookupPaths.push(() => narrativeData[trigger][subTrigger][currentPhaseKey]);
     }
@@ -144,6 +159,7 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
         lookupPaths.push(() => narrativeData[trigger][subTrigger]);
     }
 
+    // Escalation state observed
     if (trigger === 'onEscalationStateObserved' && narrativeData[trigger]?.[context.observedStateKey]?.[currentPhaseKey]) {
         lookupPaths.push(() => narrativeData[trigger][context.observedStateKey][currentPhaseKey]);
     }
@@ -151,6 +167,7 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
         lookupPaths.push(() => narrativeData[trigger][context.observedStateKey].Generic);
     }
 
+    // General trigger narrative (less specific than subTrigger)
     if (narrativeData[trigger]?.general?.[currentPhaseKey]) {
         lookupPaths.push(() => narrativeData[trigger].general[currentPhaseKey]);
     }
@@ -215,37 +232,42 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     let tacticalPrefix = '';
     let tacticalSuffix = '';
 
-    if (result.isRedirected) { // Handle Lightning Redirection narrative first
-        introPhrase = substituteTokens(result.redirectLog, defender, attacker, {
-            '{attackerName}': attacker.name, // Original attacker
-            '{defenderName}': defender.name  // Zuko, who redirected
-        });
-         const moveLineHtml = phaseTemplates.move
-            .replace(/{actorId}/g, defender.id) // Zuko is the "actor" of the redirection
-            .replace(/{actorName}/g, defender.name)
-            .replace(/{moveName}/g, "Lightning Redirection") // Specific name for the reactive move
-            .replace(/{moveEmoji}/g, result.effectiveness.emoji || '⚡↩️')
+    // Handle Lightning Redirection narrative first, based on result flags
+    if (result.isReactedAction && result.reactionType === 'lightning_redirection') {
+        // Narrative events for redirection are now expected to be in result.narrativeEvents
+        // This function will primarily format the "move line" part.
+        // The actual descriptive text of what happened during redirection comes from narrativeEvents.
+        const redirector = actor; // In this context, actor is the one who redirected (Zuko)
+        const lightningUser = opponent; // Opponent is the one who threw lightning (Azula/Ozai)
+
+        const redirectEffectiveness = effectivenessLevels[result.effectiveness.label.toUpperCase()] || effectivenessLevels.NORMAL;
+
+        const moveLineHtml = phaseTemplates.move
+            .replace(/{actorId}/g, redirector.id)
+            .replace(/{actorName}/g, redirector.name)
+            .replace(/{moveName}/g, "Lightning Redirection") // Standardized name for the reactive move
+            .replace(/{moveEmoji}/g, redirectEffectiveness.emoji || '⚡↩️')
             .replace(/{effectivenessLabel}/g, result.effectiveness.label)
-            .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-            .replace(/{moveDescription}/g, `<p class="move-description">${introPhrase}</p>`)
-            .replace(/{collateralDamageDescription}/g, ''); // Collateral for redirected lightning handled separately or omitted for simplicity
+            .replace(/{effectivenessEmoji}/g, redirectEffectiveness.emoji)
+            .replace(/{moveDescription}/g, '') // Narrative events from result.narrativeEvents will fill this
+            .replace(/{collateralDamageDescription}/g, '');
 
         return {
             type: 'move_action_event',
-            actorId: defender.id,
-            characterName: defender.name,
+            actorId: redirector.id,
+            characterName: redirector.name,
             moveName: "Lightning Redirection",
-            moveType: "lightning", // or 'special'
+            moveType: "lightning",
             effectivenessLabel: result.effectiveness.label,
-            text: introPhrase,
+            text: result.narrativeEvents.map(e => e.text).join(' ') || `${redirector.name} redirects ${lightningUser.name}'s lightning!`, // Fallback text
             isMoveAction: true,
-            html_content: moveLineHtml,
-            isKOAction: false, // Redirection itself isn't usually a KO, the original attacker might get KO'd by their own move later
-            isRedirectedAction: true // Custom flag
+            html_content: moveLineHtml, // This will be combined with narrativeEvents from result
+            isKOAction: false, // Redirection itself isn't usually a KO
+            isRedirectedAction: true,
+            narrativeEventsToPrepend: result.narrativeEvents || [] // To be processed by generateTurnNarrationObjects
         };
     }
-
-
+    // Standard move narrative generation
     if (aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
         const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late;
         introPhrase = getRandomElement(escalationFinisherPool) || "Sensing the end is near,";
@@ -255,10 +277,7 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
         const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move });
         if (introQuote && introQuote.type === 'action') {
             introPhrase = substituteTokens(introQuote.line, actor, opponent);
-        } else if (introQuote) {
-            const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
-            introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
-        } else {
+        } else { // If introQuote is dialogue or null, use default phase/generic intro
             const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
             introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
         }
@@ -280,7 +299,10 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     let impactSentenceKey = result.effectiveness.label.toUpperCase();
     let impactSentencePool;
 
-    if (move.isRepositionMove) {
+    // Use specific impact phrases for redirection if they exist
+    if (result.effectiveness.label === "RedirectedSuccess" || result.effectiveness.label === "RedirectedFail") {
+        impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey]; // These are now in DEFAULT
+    } else if (move.isRepositionMove) {
         impactSentencePool = impactPhrases.REPOSITION?.[impactSentenceKey];
     } else if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = opponent?.lastMove?.type === 'Offense';
@@ -288,10 +310,16 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     } else {
         impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
+
     const impactSentenceTemplate = getRandomElement(impactSentencePool) || "The move unfolds.";
-    const impactSentence = substituteTokens(impactSentenceTemplate, actor, opponent, {
-        '{targetName}': opponent?.name || 'the opponent',
-        '{actorName}': actor?.name || 'The attacker'
+    // For redirection, the "actor" of the impact phrase is the one who *attempted* redirection (Zuko).
+    // The "target" is the original attacker (Azula/Ozai).
+    const impactActor = (result.effectiveness.label === "RedirectedSuccess" || result.effectiveness.label === "RedirectedFail") ? actor : actor; // Correct actor for impact phrase context
+    const impactTarget = (result.effectiveness.label === "RedirectedSuccess" || result.effectiveness.label === "RedirectedFail") ? opponent : opponent;
+
+    const impactSentence = substituteTokens(impactSentenceTemplate, impactActor, impactTarget, {
+        '{targetName}': impactTarget?.name || 'the opponent',
+        '{actorName}': impactActor?.name || 'The attacker'
     });
 
 
@@ -309,7 +337,11 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent);
 
     let fullDescText;
-    if (introPhrase.includes(actor.name)) {
+    // For redirected actions, the introPhrase might already be set by the redirection logic.
+    // We want the main "move description" to be the impact sentence.
+    if (result.isRedirectedAction) {
+        fullDescText = impactSentence; // The introPhrase is handled by the narrativeEventsToPrepend
+    } else if (introPhrase.includes(actor.name)) {
         fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
     } else {
         fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
@@ -451,6 +483,18 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
 export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}) {
     let turnEventObjects = [];
 
+    // Handle narrative events from reactive defenses first if they exist on the result
+    if (result && result.isReactedAction && result.narrativeEventsToPrepend) {
+        result.narrativeEventsToPrepend.forEach(event => {
+            // These events are already formatted by formatQuoteEvent in engine_lightning-redirection.js
+            // We just need to ensure they are added to the log.
+            if (event) { // Ensure event is not null/undefined
+                turnEventObjects.push(event);
+            }
+        });
+    }
+
+    // Standard dialogue events (quotes, etc.)
     events.forEach(event => {
         const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry });
         if (quoteEvent) {
@@ -459,23 +503,31 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
     });
 
     if (!isInitialBanter && move && result) {
-        const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry };
-        const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
-        if (moveExecutionQuote) {
-            const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey, aiLogEntry});
-            if(quoteEvent) {
-                quoteEvent.isMoveExecutionQuote = true;
-                turnEventObjects.push(quoteEvent);
+        // Generate the main action description, which could be a standard move or the "move line" part of a reacted action
+        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry);
+        turnEventObjects.push(actionEvent); // This actionEvent will now be simpler for reacted actions
+
+        // Standard move execution quote (if not a reacted action that already has its narrative)
+        if (!result.isReactedAction) {
+            const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry };
+            const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
+            if (moveExecutionQuote) {
+                const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, { currentPhaseKey, aiLogEntry });
+                if (quoteEvent) {
+                    quoteEvent.isMoveExecutionQuote = true;
+                    turnEventObjects.push(quoteEvent);
+                }
             }
         }
 
-        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry);
-        turnEventObjects.push(actionEvent);
 
         const collateralEvent = generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData);
         if (collateralEvent) {
-            if (actionEvent.html_content) {
-                actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
+            // Append collateral HTML to the actionEvent's HTML if it exists and is not already handled
+            if (actionEvent.html_content && !actionEvent.html_content.includes('collateral-damage-description')) {
+                 actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
+            } else if (!actionEvent.html_content.includes('collateral-damage-description')) { // If no main action HTML, just add collateral
+                turnEventObjects.push(collateralEvent);
             }
         } else if (actionEvent.html_content) {
              actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, '');

@@ -1,7 +1,7 @@
 // FILE: engine_move-resolution.js
 'use strict';
 
-// Version 1.3: Lightning Redirection Mechanics & Enhanced Logging
+// Version 1.4: Integrated Reactive Defense Hook
 
 // --- IMPORTS ---
 import { effectivenessLevels } from './narrative-v2.js';
@@ -9,6 +9,7 @@ import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { getMomentumCritModifier } from './engine_momentum.js';
 import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js';
+import { checkReactiveDefense } from './engine_reactive-defense.js'; // Import the new hook
 
 // --- CONSTANTS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
@@ -32,15 +33,15 @@ const DEFAULT_MOVE_PROPERTIES = {
 const DEFAULT_EFFECTIVENESS = effectivenessLevels.NORMAL || { label: "Normal", emoji: "⚔️" };
 
 // --- LIGHTNING REDIRECTION CONSTANTS ---
-const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.80; // Base chance for Zuko to successfully redirect
-const LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW = 30; // Zuko's HP below this starts to significantly impact success
+const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.80;
+const LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW = 30;
 const LIGHTNING_REDIRECTION_HP_THRESHOLD_MID = 60;
 const LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY = {
     stressed: 0.05,
     shaken: 0.15,
     broken: 0.30
 };
-const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.10; // Minimum chance even if very low HP/bad mental state
+const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.10;
 
 // --- MAIN MOVE RESOLUTION FUNCTION ---
 export function calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locationId) {
@@ -65,6 +66,65 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     if (typeof locationId !== 'string') {
         locationId = conditions.id || 'unknown-location';
     }
+
+    // --- GLOBAL REACTIVE DEFENSE HOOK ---
+    // Pass the current battle state if available, default to empty object if not
+    const battleStateForReactive = {
+        locationId: locationId,
+        turn: attacker.currentTurn || 0, // Assuming currentTurn is tracked on actor, otherwise pass from battle engine
+        isDay: conditions.isDay,
+        isNight: conditions.isNight,
+        // ... other relevant battle state properties if needed by reactive defenses
+    };
+    const reactiveResult = checkReactiveDefense(attacker, defender, move, battleStateForReactive, interactionLog);
+
+    if (reactiveResult.reacted) {
+        attacker.aiLog.push(`[Reactive Defense Triggered]: ${defender.name}'s ${reactiveResult.type} against ${move.name}. Success: ${reactiveResult.success}`);
+        defender.aiLog.push(`[Reactive Defense Activated]: ${reactiveResult.type} against ${attacker.name}'s ${move.name}. Success: ${reactiveResult.success}`);
+        console.log(`[REDIRECTION CHECK]: Attacker=${attacker.id}, Defender=${defender.id}, Move=${move.name}`); // Debug log
+        console.log(`[REDIRECTION RESULT]: Reacted=${reactiveResult.reacted}, Success=${reactiveResult.success}`); // Debug log
+
+        // The reactiveResult should now contain all necessary outcome details.
+        // The core idea is that if a reaction *happened*, it dictates the immediate outcome of *this specific interaction*.
+        // The actual damage/stun/etc., should be part of the reactiveResult.
+        let finalDamageToDefender = 0;
+        let stunToAttacker = 0;
+        let resultingMomentumChangeAttacker = reactiveResult.momentumChangeAttacker || 0;
+        let resultingMomentumChangeDefender = reactiveResult.momentumChangeDefender || 0;
+
+        if (reactiveResult.type === 'lightning_redirection') {
+            if (reactiveResult.success) {
+                finalDamageToDefender = 0; // Zuko takes no damage on success
+                stunToAttacker = reactiveResult.stunAppliedToAttacker || 0;
+                // Momentum already set in reactiveResult
+            } else { // Failed redirection
+                // Damage calculation for failed redirect is now part of reactiveResult
+                // basePower and multiplier are defined below, ensure they are accessible if needed
+                // For now, assume reactiveResult.damage is the damage Zuko takes on fail
+                finalDamageToDefender = Math.round((move.power || DEFAULT_MOVE_PROPERTIES.power) * (1.0 - (reactiveResult.damageMitigation || 0)));
+                // Momentum already set
+            }
+        }
+        // Other reactive types would go here
+
+        return {
+            effectiveness: { label: reactiveResult.effectivenessLabel || "Reacted", emoji: reactiveResult.effectivenessEmoji || "🛡️" },
+            damage: clamp(Math.round(finalDamageToDefender), 0, 100), // Damage to the defender (Zuko in this case)
+            energyCost: clamp(Math.round((move.power || DEFAULT_MOVE_PROPERTIES.power) * 0.22) + 4, 4, 100), // Attacker still uses energy
+            wasPunished: !reactiveResult.success, // Defender might be "punished" by a failed reaction
+            payoff: reactiveResult.success, // Successful reaction is a payoff for the defender
+            consumedStateName: null,
+            collateralDamage: reactiveResult.collateralDamage !== undefined ? reactiveResult.collateralDamage : Math.round((COLLATERAL_IMPACT_MULTIPLIERS[move.collateralImpact || 'none'] || 0) * (move.power || 0) * 0.3),
+            momentumChange: { attacker: resultingMomentumChangeAttacker, defender: resultingMomentumChangeDefender },
+            isReactedAction: true, // Flag that this was a reactive outcome
+            reactionType: reactiveResult.type,
+            reactionSuccess: reactiveResult.success,
+            narrativeEvents: reactiveResult.narrativeEvents || [], // Pass narrative events generated by the reactive defense
+            stunAppliedToOriginalAttacker: stunToAttacker // Specific for redirection
+        };
+    }
+    // --- END GLOBAL REACTIVE DEFENSE HOOK ---
+
 
     let basePower = move.power || DEFAULT_MOVE_PROPERTIES.power;
     let multiplier = 1.0;
@@ -91,86 +151,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         collateralDamage = clamp(collateralDamage, 0, 30);
     }
 
-    const moveTags = move.moveTags || [];
-
-    // --- LIGHTNING REDIRECTION CHECK ---
-    if (defender.id === 'zuko' && defender.specialTraits?.canRedirectLightning &&
-        (attacker.id === 'azula' || attacker.id === 'ozai-not-comet-enhanced') &&
-        moveTags.includes('lightning_attack')) {
-
-        interactionLog.push(`${defender.name} attempts to redirect ${attacker.name}'s ${move.name}!`);
-        attacker.aiLog.push(`[Redirection Attempt]: ${defender.name} is attempting to redirect lightning!`);
-        defender.aiLog.push(`[Redirection Attempt]: Attempting to redirect ${attacker.name}'s ${move.name}!`);
-
-
-        let successChance = LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE;
-        if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW) {
-            successChance -= 0.30;
-            defender.aiLog.push(`[Redirection Mod]: HP critically low, success chance reduced by 0.30.`);
-        } else if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_MID) {
-            successChance -= 0.15;
-            defender.aiLog.push(`[Redirection Mod]: HP low, success chance reduced by 0.15.`);
-        }
-
-        const mentalStatePenalty = LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY[defender.mentalState?.level] || 0;
-        successChance -= mentalStatePenalty;
-        if (mentalStatePenalty > 0) {
-            defender.aiLog.push(`[Redirection Mod]: Mental state '${defender.mentalState?.level}', success chance reduced by ${mentalStatePenalty}.`);
-        }
-
-        successChance = Math.max(LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE, successChance);
-        defender.aiLog.push(`[Redirection Chance]: Final success chance: ${successChance.toFixed(2)}`);
-
-
-        if (Math.random() < successChance) {
-            // Successful Redirection
-            interactionLog.push(`Lightning attack intercepted by ${defender.name}'s Lightning Redirection!`);
-            defender.aiLog.push(`[Redirection Success]: Successfully redirected ${attacker.name}'s ${move.name}!`);
-            attacker.aiLog.push(`[Redirection Impact]: ${defender.name} successfully redirected the lightning!`);
-
-
-            attacker.stunDuration = (attacker.stunDuration || 0) + 1; // Attacker is stunned for 1 turn
-            momentumChangeDefender += 3; // Zuko gains significant momentum
-            momentumChangeAttacker -= 2; // Azula/Ozai lose momentum
-
-            return {
-                effectiveness: { label: "RedirectedSuccess", emoji: "⚡↩️" }, // Custom effectiveness label
-                damage: 0, // Zuko takes no damage
-                energyCost: clamp(Math.round(energyCost * 0.5), 4, 100), // Redirection still costs energy
-                wasPunished: false,
-                payoff: true,
-                consumedStateName: null,
-                collateralDamage: Math.round(collateralDamage * 0.3), // Reduced collateral as energy is absorbed/redirected
-                momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender },
-                isRedirected: true,
-                redirectedTargetStun: 1,
-                redirectLog: `${defender.name} successfully redirected ${attacker.name}'s lightning, stunning them!`
-            };
-        } else {
-            // Failed Redirection (Zuko still takes some damage, but less than full)
-            interactionLog.push(`Redirection failed! ${defender.name} is hit by ${attacker.name}'s ${move.name}! (Threshold: ${successChance.toFixed(2)})`);
-            defender.aiLog.push(`[Redirection Fail]: Failed to fully redirect ${attacker.name}'s ${move.name}.`);
-            attacker.aiLog.push(`[Redirection Impact]: ${defender.name} failed to redirect the lightning.`);
-
-            damage = Math.round(basePower * multiplier * 0.6); // Takes 60% of the damage on a failed redirect
-            momentumChangeDefender -= 1; // Loses some momentum for failure
-            // No stun for the attacker here
-            return {
-                effectiveness: { label: "RedirectedFail", emoji: "⚡🤕" }, // Custom effectiveness label
-                damage: clamp(Math.round(damage), 0, 100),
-                energyCost: clamp(Math.round(energyCost * 0.7), 4, 100), // Higher energy cost for failed attempt
-                wasPunished: true, // Counts as a punishment for Zuko
-                payoff: false,
-                consumedStateName: null,
-                collateralDamage: Math.round(collateralDamage * 0.8), // More collateral on failed redirect
-                momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender },
-                isRedirected: false, // Explicitly false
-                redirectLog: `${defender.name} failed to redirect the lightning and took partial damage.`
-            };
-        }
-    }
-    // --- END LIGHTNING REDIRECTION ---
-
+    // This was already here, no change
+    // const moveTags = move.moveTags || []; // already defined at top of function for reactive check
 
     if (moveTags.includes('requires_opening')) {
         const openingExists = defender.stunDuration > 0 || defender.tacticalState;
