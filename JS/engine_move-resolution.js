@@ -1,7 +1,7 @@
 // FILE: engine_move-resolution.js
 'use strict';
 
-// Version 1.4: Integrated Reactive Defense Hook
+// Version 1.6: Robust moveTags handling in applyEnvironmentalModifiers
 
 // --- IMPORTS ---
 import { effectivenessLevels } from './narrative-v2.js';
@@ -9,7 +9,7 @@ import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { getMomentumCritModifier } from './engine_momentum.js';
 import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js';
-import { checkReactiveDefense } from './engine_reactive-defense.js'; // Import the new hook
+import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 // --- CONSTANTS ---
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
@@ -25,7 +25,7 @@ const COLLATERAL_IMPACT_MULTIPLIERS = {
 const DEFAULT_MOVE_PROPERTIES = {
     power: 30,
     collateralImpact: 'none',
-    moveTags: [],
+    moveTags: [], // Ensure default has moveTags
     element: 'physical',
     type: 'Offense'
 };
@@ -48,6 +48,9 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     if (!move || typeof move !== 'object' || !move.name) {
         move = { ...DEFAULT_MOVE_PROPERTIES, name: "ErrorMove", type: 'Offense', power: 5 };
     }
+    // Ensure move.moveTags exists and is an array, even for default/error moves
+    const currentMoveTags = Array.isArray(move.moveTags) ? move.moveTags : [];
+
     if (!attacker || typeof attacker !== 'object') {
         attacker = { id: 'unknown-attacker', name: 'Unknown Attacker', momentum: 0, tacticalState: null, mobility: 0.5, type: 'Unknown', pronouns: {s:'they', p:'their', o:'them'}, escalationState: ESCALATION_STATES.NORMAL, aiLog: [] };
     }
@@ -68,25 +71,21 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     }
 
     // --- GLOBAL REACTIVE DEFENSE HOOK ---
-    // Pass the current battle state if available, default to empty object if not
     const battleStateForReactive = {
         locationId: locationId,
-        turn: attacker.currentTurn || 0, // Assuming currentTurn is tracked on actor, otherwise pass from battle engine
+        turn: attacker.currentTurn || 0,
         isDay: conditions.isDay,
         isNight: conditions.isNight,
-        // ... other relevant battle state properties if needed by reactive defenses
     };
+    // Pass the move object which now reliably has move.moveTags
     const reactiveResult = checkReactiveDefense(attacker, defender, move, battleStateForReactive, interactionLog);
 
     if (reactiveResult.reacted) {
         attacker.aiLog.push(`[Reactive Defense Triggered]: ${defender.name}'s ${reactiveResult.type} against ${move.name}. Success: ${reactiveResult.success}`);
         defender.aiLog.push(`[Reactive Defense Activated]: ${reactiveResult.type} against ${attacker.name}'s ${move.name}. Success: ${reactiveResult.success}`);
-        console.log(`[REDIRECTION CHECK]: Attacker=${attacker.id}, Defender=${defender.id}, Move=${move.name}`); // Debug log
-        console.log(`[REDIRECTION RESULT]: Reacted=${reactiveResult.reacted}, Success=${reactiveResult.success}`); // Debug log
+        console.log(`[REDIRECTION CHECK]: Attacker=${attacker.id}, Defender=${defender.id}, Move=${move.name}`);
+        console.log(`[REDIRECTION RESULT]: Reacted=${reactiveResult.reacted}, Success=${reactiveResult.success}`);
 
-        // The reactiveResult should now contain all necessary outcome details.
-        // The core idea is that if a reaction *happened*, it dictates the immediate outcome of *this specific interaction*.
-        // The actual damage/stun/etc., should be part of the reactiveResult.
         let finalDamageToDefender = 0;
         let stunToAttacker = 0;
         let resultingMomentumChangeAttacker = reactiveResult.momentumChangeAttacker || 0;
@@ -94,33 +93,27 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
 
         if (reactiveResult.type === 'lightning_redirection') {
             if (reactiveResult.success) {
-                finalDamageToDefender = 0; // Zuko takes no damage on success
+                finalDamageToDefender = 0;
                 stunToAttacker = reactiveResult.stunAppliedToAttacker || 0;
-                // Momentum already set in reactiveResult
-            } else { // Failed redirection
-                // Damage calculation for failed redirect is now part of reactiveResult
-                // basePower and multiplier are defined below, ensure they are accessible if needed
-                // For now, assume reactiveResult.damage is the damage Zuko takes on fail
+            } else {
                 finalDamageToDefender = Math.round((move.power || DEFAULT_MOVE_PROPERTIES.power) * (1.0 - (reactiveResult.damageMitigation || 0)));
-                // Momentum already set
             }
         }
-        // Other reactive types would go here
 
         return {
             effectiveness: { label: reactiveResult.effectivenessLabel || "Reacted", emoji: reactiveResult.effectivenessEmoji || "🛡️" },
-            damage: clamp(Math.round(finalDamageToDefender), 0, 100), // Damage to the defender (Zuko in this case)
-            energyCost: clamp(Math.round((move.power || DEFAULT_MOVE_PROPERTIES.power) * 0.22) + 4, 4, 100), // Attacker still uses energy
-            wasPunished: !reactiveResult.success, // Defender might be "punished" by a failed reaction
-            payoff: reactiveResult.success, // Successful reaction is a payoff for the defender
+            damage: clamp(Math.round(finalDamageToDefender), 0, 100),
+            energyCost: clamp(Math.round((move.power || DEFAULT_MOVE_PROPERTIES.power) * 0.22) + 4, 4, 100),
+            wasPunished: !reactiveResult.success,
+            payoff: reactiveResult.success,
             consumedStateName: null,
             collateralDamage: reactiveResult.collateralDamage !== undefined ? reactiveResult.collateralDamage : Math.round((COLLATERAL_IMPACT_MULTIPLIERS[move.collateralImpact || 'none'] || 0) * (move.power || 0) * 0.3),
             momentumChange: { attacker: resultingMomentumChangeAttacker, defender: resultingMomentumChangeDefender },
-            isReactedAction: true, // Flag that this was a reactive outcome
+            isReactedAction: true,
             reactionType: reactiveResult.type,
             reactionSuccess: reactiveResult.success,
-            narrativeEvents: reactiveResult.narrativeEvents || [], // Pass narrative events generated by the reactive defense
-            stunAppliedToOriginalAttacker: stunToAttacker // Specific for redirection
+            narrativeEvents: reactiveResult.narrativeEvents || [],
+            stunAppliedToOriginalAttacker: stunToAttacker
         };
     }
     // --- END GLOBAL REACTIVE DEFENSE HOOK ---
@@ -151,10 +144,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         collateralDamage = clamp(collateralDamage, 0, 30);
     }
 
-    // This was already here, no change
-    // const moveTags = move.moveTags || []; // already defined at top of function for reactive check
-
-    if (moveTags.includes('requires_opening')) {
+    if (currentMoveTags.includes('requires_opening')) {
         const openingExists = defender.stunDuration > 0 || defender.tacticalState;
         if (openingExists) {
             if (defender.tacticalState) {
@@ -224,7 +214,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         };
     }
 
-    const { multiplier: envMultiplier, energyCostModifier: envEnergyMod, logReasons } = applyEnvironmentalModifiers(move, attacker, conditions);
+    // Pass currentMoveTags to applyEnvironmentalModifiers
+    const { multiplier: envMultiplier, energyCostModifier: envEnergyMod, logReasons } = applyEnvironmentalModifiers(move, attacker, conditions, currentMoveTags);
     multiplier *= envMultiplier;
     energyCost *= envEnergyMod;
     if (logReasons.length > 0) {
@@ -348,7 +339,6 @@ export function getAvailableMoves(actor, conditions) {
             if (move.isRepositionMove) return true;
             return false;
         }
-        // Lightning Redirection is reactive, not actively chosen from available moves
         if (move.name === "Lightning Redirection") return false;
 
         const usageRequirements = move.usageRequirements || {};
@@ -361,13 +351,17 @@ export function getAvailableMoves(actor, conditions) {
     return available;
 }
 
-function applyEnvironmentalModifiers(move, attacker, conditions) {
+// Corrected applyEnvironmentalModifiers to robustly use moveTagsParam
+function applyEnvironmentalModifiers(move, attacker, conditions, moveTagsParam) {
     let multiplier = 1.0;
     let energyCostModifier = 1.0;
     let logReasons = [];
 
     const attackerPrimaryType = attacker?.type || 'Unknown';
     const moveElement = move?.element || DEFAULT_MOVE_PROPERTIES.element;
+    // Ensure moveTags is always an array, prioritizing moveTagsParam if provided
+    const moveTags = Array.isArray(moveTagsParam) ? moveTagsParam : (Array.isArray(move?.moveTags) ? move.moveTags : []);
+
 
     if (conditions?.isDay) {
         if (attackerPrimaryType === 'Bender' && (moveElement === 'fire' || moveElement === 'lightning')) {
@@ -408,8 +402,7 @@ function applyEnvironmentalModifiers(move, attacker, conditions) {
         }
     }
 
-    const moveTags = Array.isArray(move?.moveTags) ? move.moveTags : [];
-
+    // Now use the correctly initialized moveTags variable
     if (conditions?.isSlippery && moveTags.includes('evasive')) {
         multiplier *= 1.05;
         logReasons.push(`slippery footing aids evasive moves`);
