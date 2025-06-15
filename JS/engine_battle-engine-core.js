@@ -1,7 +1,7 @@
 // FILE: engine_battle-engine-core.js
 'use strict';
 
-// Version 1.3: Contextual Battle Summaries for Curbstomp/Reactive Endings
+// Version 1.4: decisiveSummaryPatch v1.1 - Corrected summary binding for curbstomp/reactive endings
 
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
@@ -230,23 +230,28 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
         if (Math.random() < effectiveChance) ruleTriggered = true;
 
         if (ruleTriggered) {
+            // This `move` object is a conceptual representation of the curbstomp attack for the reactive defense check.
             let curbstompMoveConcept = {
                 name: rule.activatingMoveName || `Curbstomp (${rule.id})`,
                 moveTags: rule.activatingMoveTags || [],
-                element: rule.activatingMoveElement || 'special',
-                power: rule.activatingMovePower || 100
+                element: rule.activatingMoveElement || 'special', // Default to special if not specified
+                power: rule.activatingMovePower || 100 // Assume high power
             };
 
+            // The 'target' of the curbstomp rule is rule.actualTarget
+            // The 'attacker' of the curbstomp rule is rule.actualAttacker
             const isPotentiallyFatalToTargetOfTheRule =
                 rule.outcome.type.includes("kill_target") ||
                 rule.outcome.type.includes("death_target") ||
-                rule.outcome.type.includes("win_attacker") ||
+                rule.outcome.type.includes("win_attacker") || // Attacker wins means target loses
                 (rule.outcome.type.includes("loss_character") && rule.appliesToCharacter === rule.actualTarget.id) ||
-                (rule.outcome.type.includes("loss_weighted_character"));
+                (rule.outcome.type.includes("loss_weighted_character")); // Weighted could fall on target
+
 
             if (isPotentiallyFatalToTargetOfTheRule) {
                 console.log(`[CURBSTOMP REACTION CHECK]: Rule ${rule.id} (Attacker: ${rule.actualAttacker.name}, Target: ${rule.actualTarget.name}). Checking reactive defense for ${rule.actualTarget.name}.`);
-                battleState.currentTurn = battleState.currentTurn || 0;
+                // battleState.currentTurn is already set in the main loop
+                // battleState.currentPhase is also set
                 const reactiveCurbstompResult = checkReactiveDefense(rule.actualAttacker, rule.actualTarget, curbstompMoveConcept, battleState, battleEventLog);
 
                 if (reactiveCurbstompResult.reacted) {
@@ -257,7 +262,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     if (reactiveCurbstompResult.narrativeEvents && reactiveCurbstompResult.narrativeEvents.length > 0) {
                         reactiveCurbstompResult.narrativeEvents.forEach(rawEventData => {
                             if (rawEventData.quote && rawEventData.actor) {
-                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, (rawEventData.actor.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker), null, battleState.environmentState, battleState.location, battleState.currentPhase, true); // isInitialBanter = true to simplify
+                                const opponentForNarration = rawEventData.actor.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker;
+                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForNarration, null, battleState.environmentState, battleState.location, battleState.currentPhase, true);
                                 battleEventLog.push(...formattedEventArray);
                             }
                         });
@@ -277,9 +283,15 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                         if (reactiveCurbstompResult.momentumChangeDefender) modifyMomentum(rule.actualTarget, reactiveCurbstompResult.momentumChangeDefender, `Successful reactive defense`);
 
                         characterForRuleApplication.curbstompRulesAppliedThisBattle.add(appliedRuleKey + "_reacted_override");
-                        continue;
-                    } else {
-                        if (reactiveCurbstompResult.damageMitigation < 1.0) {
+                        // If the curbstomp was on the 'attacker' of the rule, and their reaction KOd the 'target' of the rule
+                        if (rule.actualAttacker.hp <= 0 && !charactersMarkedForDefeat.has(rule.actualAttacker.id) && rule.appliesToCharacter === rule.actualAttacker.id) {
+                           charactersMarkedForDefeat.add(rule.actualAttacker.id);
+                           aDefeatWasMarkedByThisCheck = true;
+                           return true; // Reaction caused KO, end check
+                        }
+                        continue; // Skip original curbstomp outcome because reaction was successful
+                    } else { // Reaction failed
+                        if (reactiveCurbstompResult.damageMitigation < 1.0) { // Defender takes partial damage
                              const lightningDamageToDefender = Math.round(curbstompMoveConcept.power * (1.0 - reactiveCurbstompResult.damageMitigation));
                              rule.actualTarget.hp = clamp(rule.actualTarget.hp - lightningDamageToDefender, 0, rule.actualTarget.maxHp);
                              battleEventLog.push({
@@ -291,12 +303,16 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                                 if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
                                     charactersMarkedForDefeat.add(rule.actualTarget.id);
                                     aDefeatWasMarkedByThisCheck = true;
+                                    // If this KO's them, the original curbstomp still "triggered" leading to this point.
                                 }
                              }
                         }
+                        // If the reaction failed and the target is KO'd, the original curbstomp might still apply or be redundant.
+                        if (aDefeatWasMarkedByThisCheck) return true; // Exit if KO'd by failed reaction
                     }
                 }
             }
+
 
             let isEscape = false;
             const characterPotentiallyEscaping = rule.outcome.type.includes("target") || (rule.appliesToCharacter === opponentForRuleApplication.id && !rule.outcome.type.includes("loss_character") && !rule.outcome.type.includes("death_character")) ? opponentForRuleApplication : characterForRuleApplication;
@@ -337,13 +353,15 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
             } else if (rule.outcome?.type === "instant_death_character" && rule.appliesToCharacter) {
                 mechanicallyDeterminedLoserId = rule.appliesToCharacter;
                 actualVictimForNarrationObject = (mechanicallyDeterminedLoserId === rule.actualAttacker.id) ? rule.actualAttacker : rule.actualTarget;
+            } else if (rule.outcome?.type?.includes("target")) { // For rules like "instant_kill_target"
+                actualVictimForNarrationObject = rule.actualTarget;
             }
 
 
             const narrationContext = {};
             if (actualVictimForNarrationObject) {
                 narrationContext.actualVictimName = actualVictimForNarrationObject.name;
-            } else if (rule.outcome?.type?.includes("target")) { // If it's a target-affecting rule without weighting
+            } else if (rule.outcome?.type?.includes("target")) {
                 narrationContext.actualVictimName = rule.actualTarget.name;
             }
 
@@ -352,13 +370,12 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                  narrationContext['{moveName}'] = rule.activatingMoveName;
             }
 
-            if (!curbstompNarrativeGeneratedThisRule) {
+            if (!curbstompNarrativeGeneratedThisRule) { // Only generate if no reactive narrative took precedence
                 const narrativeEvent = generateCurbstompNarration(rule, rule.actualAttacker, rule.actualTarget, isEscape, narrationContext);
                 if (narrativeEvent) {
                     battleEventLog.push(narrativeEvent);
                 }
             }
-
 
             characterForRuleApplication.curbstompRulesAppliedThisBattle.add(appliedRuleKey + (isEscape ? "_escaped" : ""));
 
@@ -674,7 +691,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (result.isReactedAction && result.narrativeEventsToPrepend) {
                 result.narrativeEventsToPrepend.forEach(rawEventData => {
                      if (rawEventData.quote && rawEventData.actor) {
-                        // Pass currentAttacker as opponent for context if actor is currentDefender (Zuko)
                         const opponentForReactionNarrative = rawEventData.actor.id === currentDefender.id ? currentAttacker : currentDefender;
                         const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, environmentState, locationData, phaseState.currentPhase, true);
                         turnSpecificEventsForLog.push(...formattedEventArray);
@@ -683,15 +699,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
 
             if (result.isReactedAction) {
-                // For reacted actions, the "action description" is part of the prepended narrative.
-                // We still need to log the "move line" part which shows who reacted with what.
                  const reactionMoveLine = generateActionDescriptionObject(
-                    { name: result.reactionType || "Reactive Defense", verb: "reacts", object: "to the attack" }, // Simplified move for line display
-                    currentDefender, // The one reacting
-                    currentAttacker, // The original attacker
-                    result, // Pass the whole result for effectiveness label/emoji
+                    { name: result.reactionType || "Reactive Defense", verb: "reacts", object: "to the attack", element: move.element }, // Pass element for emoji
+                    currentDefender, 
+                    currentAttacker, 
+                    result, 
                     phaseState.currentPhase,
-                    {} // Empty AI log for this dummy display
+                    {} 
                 );
                  turnSpecificEventsForLog.push(reactionMoveLine);
             } else {
@@ -714,7 +728,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (!result.isReactedAction) {
                 modifyMomentum(currentAttacker, result.momentumChange.attacker, `Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
                 modifyMomentum(currentDefender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
-            } // Momentum for reactions is handled by calculateMove
+            }
 
 
             if (result.collateralDamage > 0 && environmentState.damageLevel < 100 && !result.isReactedAction) {
@@ -893,18 +907,18 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     }
 
     terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
-    battleOver = terminalOutcome.battleOver; // Ensure battleOver is set based on final eval
+    battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
 
-    if (!battleOver && turn >= 6) { // If loop finished by turns and not KO/stalemate rule
+    if (!battleOver && turn >= 6) {
         isStalemate = (fighter1.hp === fighter2.hp);
         if (!isStalemate) {
             winnerId = (fighter1.hp > fighter2.hp) ? fighter1.id : fighter2.id;
             loserId = (winnerId === fighter1.id) ? fighter2.id : fighter1.id;
         }
-        battleOver = true; // Battle ends after 6 turns regardless
+        battleOver = true;
     }
 
 
@@ -913,19 +927,67 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
     // Determine the dominant narrative for the summary
     let decisiveEventNarrative = null;
+    let decisiveEventActorId = null; // Store the ID of the actor who performed the decisive event
+
+    // Check for curbstomps first
     const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
-    const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e => e.type === 'move_action_event' && e.isReactedAction && e.reactionSuccess && finalWinnerFull && e.actorId === finalWinnerFull.id && finalLoserFull && finalLoserFull.hp <= 0);
+    if (lastCurbstompEvent && finalLoserFull && charactersMarkedForDefeat.has(finalLoserFull.id)) {
+        // Identify who performed the curbstomp (attacker of the rule)
+        // This requires knowing which curbstomp rule it was and who its 'actualAttacker' was.
+        // For simplicity here, we assume the narrative text contains the winner's name.
+        // A more robust way would be to store the curbstomp rule's actualAttacker ID with the event.
+        // For now, we'll assume the text itself is sufficient or that the curbstomp rule's actor is the winner.
+        // Let's find the rule based on curbstompRuleId in the event
+        let curbstompRuleActor = null;
+        if (lastCurbstompEvent.curbstompRuleId) {
+            // Search universalMechanics
+            let ruleDef = Object.values(universalMechanics).find(r => r.id === lastCurbstompEvent.curbstompRuleId);
+            if (ruleDef) { // Universal rule implies the characterId field is the actor
+                curbstompRuleActor = ruleDef.characterId;
+            } else { // Search location rules
+                const locRules = locationCurbstompRules[locId] || [];
+                ruleDef = locRules.find(r => r.id === lastCurbstompEvent.curbstompRuleId);
+                if (ruleDef) { // Location rule might apply to a pair or character
+                     curbstompRuleActor = ruleDef.actualAttacker?.id || (ruleDef.appliesToPair ? ruleDef.appliesToPair[0] : ruleDef.appliesToCharacter);
+                } else { // Search character rules
+                    for (const charID in characterCurbstompRules) {
+                        ruleDef = characterCurbstompRules[charID].find(r => r.id === lastCurbstompEvent.curbstompRuleId);
+                        if (ruleDef) {
+                            curbstompRuleActor = charID; // The key of characterCurbstompRules is the actor
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (curbstompRuleActor && curbstompRuleActor === winnerId) {
+            decisiveEventNarrative = lastCurbstompEvent.text;
+            decisiveEventActorId = curbstompRuleActor;
+        }
+    }
 
-
-    if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull?.id)) {
-        decisiveEventNarrative = lastCurbstompEvent.text;
-    } else if (lastReactiveKOEvent && charactersMarkedForDefeat.has(finalLoserFull?.id)) {
-        // Find the narrative events associated with this reactive KO
-        const reactionNarratives = battleEventLog.filter(e => e.type === 'dialogue_event' && e.actorId === finalWinnerFull.id && e.text.includes(finalLoserFull.name) && e.text.toLowerCase().includes("redirect"));
-        if (reactionNarratives.length > 0) {
-            decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
-        } else {
-            decisiveEventNarrative = `${finalWinnerFull.name} turned ${finalLoserFull.name}'s own power against them for the win!`;
+    // Check for reactive KOs if no curbstomp KO was the decisive narrative
+    if (!decisiveEventNarrative) {
+        const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e =>
+            e.type === 'move_action_event' &&
+            e.isReactedAction &&
+            e.reactionSuccess &&
+            finalWinnerFull && e.actorId === finalWinnerFull.id && // The winner performed the reaction
+            finalLoserFull && finalLoserFull.hp <= 0 // The loser was KO'd
+        );
+        if (lastReactiveKOEvent && finalWinnerFull.id === lastReactiveKOEvent.actorId) {
+            const reactionNarratives = battleEventLog.filter(
+                e => e.type === 'dialogue_event' &&
+                     e.actorId === finalWinnerFull.id && // Winner (Zuko) is the actor of the dialogue
+                     e.html_content.includes(finalLoserFull.name) && // Dialogue mentions loser (Azula/Ozai)
+                     (e.html_content.toLowerCase().includes("redirect") || e.html_content.toLowerCase().includes("unleashes the redirected energy"))
+            );
+            if (reactionNarratives.length > 0) {
+                decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
+            } else { // Fallback if specific narrative lines aren't found (shouldn't happen ideally)
+                decisiveEventNarrative = `${finalWinnerFull.name} turned ${finalLoserFull.name}'s own power against them for the win!`;
+            }
+            decisiveEventActorId = finalWinnerFull.id;
         }
     }
 
@@ -935,15 +997,20 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) {
-        if (decisiveEventNarrative) {
-            finalWinnerFull.summary = decisiveEventNarrative; // Winner's summary is the decisive event text
-            finalLoserFull.summary = `${finalLoserFull.name} was overcome by ${finalWinnerFull.name}'s decisive action: "${decisiveEventNarrative}"`;
+        // Use decisiveEventNarrative if the winner is the one who performed that event
+        if (decisiveEventNarrative && decisiveEventActorId === finalWinnerFull.id) {
+            finalWinnerFull.summary = decisiveEventNarrative;
+            finalLoserFull.summary = `${finalLoserFull.name} was overcome by ${finalWinnerFull.name}'s decisive action.`;
+             // If the decisive narrative *already is* the curbstomp text, don't add the generic curbstomp "win" line again.
+            // The generateCurbstompNarration already provides good success messages.
         } else {
-            // Fallback to HP-based or turn-based victory if no specific curbstomp/reactive KO narrative
             const isKOByHp = finalLoserFull.hp <= 0;
             const isTimeoutVictoryLoopFinished = turn >= 6;
 
-            if (isKOByHp && !battleEventLog.some(e => e.isKOAction && e.text?.includes(finalLoserFull.name))) {
+            // Check if the battle ended due to a standard KO, and if it wasn't already covered by a curbstomp narrative for the winner
+            const standardKOFlow = isKOByHp && (!lastCurbstompEvent || lastCurbstompEvent.actorId !== finalWinnerFull.id);
+
+            if (standardKOFlow && !battleEventLog.some(e => e.isKOAction && e.html_content?.includes(finalLoserFull.name) && e.actorId === finalWinnerFull.id)) {
                 const finalBlowTextRaw = `${finalWinnerFull.name} lands the finishing blow, defeating ${finalLoserFull.name}!`;
                 const finalBlowTextHtml = phaseTemplates.finalBlow
                     .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
@@ -952,8 +1019,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 finalWinnerFull.summary = finalBlowTextRaw;
                 finalLoserFull.summary = `${finalLoserFull.name} was defeated by a final blow from ${finalWinnerFull.name}.`;
 
-            } else if (isTimeoutVictoryLoopFinished && finalWinnerFull.hp > finalLoserFull.hp && !isKOByHp) {
-                 const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerFull.name} is declared the victor over ${finalLoserFull.name}!`;
+            } else if (isTimeoutVictoryLoopFinished && finalWinnerFull.hp > finalLoserFull.hp && !isKOByHp && (!lastCurbstompEvent || lastCurbstompEvent.actorId !== finalWinnerFull.id)) {
+                const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerFull.name} is declared the victor over ${finalLoserFull.name}!`;
                 const timeoutTextHtml = phaseTemplates.timeOutVictory
                     .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
                     .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
