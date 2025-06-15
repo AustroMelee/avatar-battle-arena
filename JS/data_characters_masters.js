@@ -2,7 +2,6 @@
 'use strict';
 
 // Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
-// If not, and these objects are used directly, you'd need:
 // import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
 
 export const masterCharacters = {
@@ -33,25 +32,23 @@ curbstompRules: [
 personalityTriggers: {
     "underestimated": "(battleState.opponentTauntedAgeOrStrategy) || (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove.power > 50)"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
-escalationState: 'Normal', // Will be ESCALATION_STATES.NORMAL if imported
+escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: { // Bumi's escalation is overwhelming power
+escalationBehavior: {
     'Severely Incapacitated': { // Opponent is Severely Incapacitated
-        signatureMoveBias: { "Rock Avalanche": 2.0, "Terrain Reshape": 1.8, "Boulder Throw": 1.5 },
-        offensiveBias: 1.7,
-        finisherBias: 1.8, // Rock Avalanche is a finisher
-        utilityBias: 0.5, // Less Terrain Reshape unless it's for a direct setup
+        signatureMoveBias: { "Rock Avalanche": 2.5, "Terrain Reshape": 2.0, "Boulder Throw": 1.8 },
+        offensiveBias: 1.9,
+        finisherBias: 2.2,
+        utilityBias: 0.3, // Terrain Reshape for massive damage potential
     },
     'Terminal Collapse': { // Opponent is in Terminal Collapse
-        signatureMoveBias: { "Rock Avalanche": 3.0, "Seismic Slam": 2.5 }, // From Toph's file, assuming Bumi has it or similar
-        offensiveBias: 2.0,
-        finisherBias: 2.5,
-        utilityBias: 0.2,
+        signatureMoveBias: { "Rock Avalanche": 3.5, "Seismic Slam": 3.0 }, // Assuming Seismic Slam is available or similar high-impact
+        offensiveBias: 2.5,
+        finisherBias: 3.0,
+        utilityBias: 0.1, // Just finish it!
     }
 },
-// END NEW FIELDS
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
@@ -123,12 +120,23 @@ curbstompRules: [
 personalityTriggers: {
     "skill_challenged": "(battleState.opponentTauntedSkillOrTradition) || (battleState.opponentAttackedFirstAggressively)"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Pakku uses default AI escalation biases
-// END NEW FIELDS
+escalationBehavior: {
+    'Severely Incapacitated': {
+        signatureMoveBias: { "Octopus Form": 2.0, "Tidal Surge": 1.8, "Ice Spikes": 1.5 },
+        offensiveBias: 1.6,
+        finisherBias: 1.9, // Octopus Form or powerful ice attacks
+        utilityBias: 0.4, // Water Barrier if truly needed
+    },
+    'Terminal Collapse': {
+        signatureMoveBias: { "Octopus Form": 2.5, "Tidal Surge": 2.2 }, // Overwhelming water power
+        offensiveBias: 1.8,
+        finisherBias: 2.3,
+        utilityBias: 0.1,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
@@ -212,12 +220,23 @@ curbstompRules: [
 personalityTriggers: {
     "confident_stance": "(battleState.characterLandedStrongOrCriticalHitLastTurn) || (battleState.allyBuffedSelf)"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Jeong Jeong uses default AI escalation biases (likely defensive even then)
-// END NEW FIELDS
+escalationBehavior: {
+    'Severely Incapacitated': { // Opponent is Severely Incapacitated
+        signatureMoveBias: { "Fire Wall": 1.5, "Controlled Inferno": 1.2 }, // Still defensive, but will use larger moves
+        offensiveBias: 0.8, // Reluctant offense
+        finisherBias: 1.0, // "Reluctant Finale" might be used to end suffering
+        utilityBias: 1.2, // Fire Wall to control
+    },
+    'Terminal Collapse': {
+        signatureMoveBias: { "Reluctant Finale": 1.5, "Controlled Inferno": 1.3 }, // To quickly end it, minimize suffering
+        offensiveBias: 0.7,
+        finisherBias: 1.2,
+        utilityBias: 0.8,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],

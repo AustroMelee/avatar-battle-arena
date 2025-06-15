@@ -2,7 +2,6 @@
 'use strict';
 
 // Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
-// If not, and these objects are used directly, you'd need:
 // import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
 
 export const antagonistCharacters = {
@@ -39,25 +38,23 @@ export const antagonistCharacters = {
             "in_control": "(character.hp > character.maxHp * 0.5) && !(battleState.characterReceivedCriticalHit) && (opponent.mentalState.level === 'stable' || opponent.mentalState.level === 'stressed')",
             "desperate_broken": "(character.hp < character.maxHp * 0.3) || (character.mentalState.level === 'broken')"
         },
-        // NEW FIELDS FOR ESCALATION
         incapacitationScore: 0,
-        escalationState: 'Normal', // Will be ESCALATION_STATES.NORMAL if imported
+        escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: { // Using string keys for states if ESCALATION_STATES not directly imported here
+        escalationBehavior: { // Azula: Psychotic dominance
             'Severely Incapacitated': { // Opponent is Severely Incapacitated
-                signatureMoveBias: { "Lightning Generation": 2.5, "Precision Strike": 1.8 },
-                offensiveBias: 1.5,
-                finisherBias: 2.0, // Lightning Generation is often a finisher
-                utilityBias: 0.2,
+                signatureMoveBias: { "Lightning Generation": 2.8, "Precision Strike": 2.0, "Blue Fire Daggers": 1.5 }, // Higher bias for lightning
+                offensiveBias: 1.7,
+                finisherBias: 2.5,
+                utilityBias: 0.1, // No feints, just destruction
             },
             'Terminal Collapse': { // Opponent is in Terminal Collapse
-                signatureMoveBias: { "Lightning Generation": 3.0, "Blue Fire Daggers": 2.0 }, // Overkill
-                offensiveBias: 2.0,
-                finisherBias: 2.5,
-                utilityBias: 0.1,
+                signatureMoveBias: { "Lightning Generation": 3.5, "Fire Whip": 2.2 }, // Overkill with style
+                offensiveBias: 2.2,
+                finisherBias: 3.0,
+                utilityBias: 0.05,
             }
         },
-        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
@@ -143,25 +140,23 @@ export const antagonistCharacters = {
         personalityTriggers: {
             "authority_challenged": "(battleState.opponentLandedSignificantHits >= 2) || (battleState.opponentUsedTaunt)"
         },
-        // NEW FIELDS FOR ESCALATION
         incapacitationScore: 0,
         escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: { // Ozai's escalation is pure overwhelming power
-            'Severely Incapacitated': { // Opponent is Severely Incapacitated
-                signatureMoveBias: { "Dragon's Roar": 2.0, "Emperor's Wrath": 2.2 },
-                offensiveBias: 1.6,
-                finisherBias: 1.8,
-                utilityBias: 0.1, // No time for subtlety
-            },
-            'Terminal Collapse': { // Opponent is in Terminal Collapse
-                signatureMoveBias: { "Emperor's Wrath": 3.0, "Scorching Blast": 2.5 }, // Utter annihilation
-                offensiveBias: 2.2,
-                finisherBias: 2.5,
+        escalationBehavior: {
+            'Severely Incapacitated': {
+                signatureMoveBias: { "Dragon's Roar": 2.5, "Emperor's Wrath": 2.8, "Scorching Blast": 1.8 },
+                offensiveBias: 1.8,
+                finisherBias: 2.2,
                 utilityBias: 0.05,
+            },
+            'Terminal Collapse': {
+                signatureMoveBias: { "Emperor's Wrath": 4.0, "Dragon's Roar": 3.0 },
+                offensiveBias: 2.5,
+                finisherBias: 3.0,
+                utilityBias: 0.01,
             }
         },
-        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
@@ -230,25 +225,23 @@ export const antagonistCharacters = {
         personalityTriggers: {
             "provoked": "(battleState.opponentLandedCriticalHit) || (battleState.opponentTaunted) || (battleState.allyTargeted && ['ty-lee', 'zuko'].includes(battleState.ally.id))"
         },
-        // NEW FIELDS FOR ESCALATION
         incapacitationScore: 0,
         escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: { // Mai's escalation is about efficient elimination
-            'Severely Incapacitated': { // Opponent is Severely Incapacitated
-                signatureMoveBias: { "Pinning Strike": 2.0, "Precision Strike": 1.8 }, // Setup for the kill
-                offensiveBias: 1.3,
-                finisherBias: 1.0, // Final Pin might not be her first choice if a quicker Precision Strike is available
-                utilityBias: 0.7, // Knife Wall if needed
+        escalationBehavior: {
+            'Severely Incapacitated': {
+                signatureMoveBias: { "Pinning Strike": 2.2, "Precision Strike": 2.0, "Final Pin": 1.5 },
+                offensiveBias: 1.4, // Still prefers precise over barrage
+                finisherBias: 1.7,
+                utilityBias: 0.6, // Knife wall if very threatened
             },
-            'Terminal Collapse': { // Opponent is in Terminal Collapse
-                signatureMoveBias: { "Precision Strike": 3.0, "Final Pin": 2.0 }, // Direct, lethal strikes
-                offensiveBias: 1.9,
-                finisherBias: 1.5,
-                utilityBias: 0.2,
+            'Terminal Collapse': {
+                signatureMoveBias: { "Precision Strike": 3.5, "Final Pin": 2.5 }, // Quick, efficient end
+                offensiveBias: 2.0,
+                finisherBias: 2.0,
+                utilityBias: 0.1,
             }
         },
-        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
@@ -327,27 +320,23 @@ export const antagonistCharacters = {
         personalityTriggers: {
             "serious_fight": "(battleState.ally?.hp < battleState.ally?.maxHp * 0.3) || (battleState.opponentUsedLethalForce)"
         },
-        // NEW FIELDS FOR ESCALATION
         incapacitationScore: 0,
         escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: { // Ty Lee aims to fully disable, then maybe a final "boop"
-            'Severely Incapacitated': { // Opponent is Severely Incapacitated
-                signatureMoveBias: { "Chi-Blocking Flurry": 2.2, "Pressure Point Strike": 1.9 }, // Chain disables
-                offensiveBias: 1.4,
-                finisherBias: 1.6, // Chi-Blocking Flurry can be a finisher
-                utilityBias: 0.8, // Acrobatic Flips to maintain advantage
+        escalationBehavior: {
+            'Severely Incapacitated': {
+                signatureMoveBias: { "Chi-Blocking Flurry": 2.5, "Pressure Point Strike": 2.0 },
+                offensiveBias: 1.5, // More about disabling than raw damage
+                finisherBias: 2.0, // Chi-Blocking Flurry is her finisher
+                utilityBias: 1.0, // Acrobatic Flips still key
             },
-            'Terminal Collapse': { // Opponent is in Terminal Collapse
-                signatureMoveBias: { "Chi-Blocking Flurry": 2.5, "Pressure Point Strike": 2.0 }, // Ensure they stay down
-                offensiveBias: 1.0, // Less raw offense, more targeted disabling
-                finisherBias: 1.8,
-                utilityBias: 0.5,
-                // Ty Lee might not have a "kill" move; her goal is paralysis.
-                // The system could interpret "finisher" for her as "complete incapacitation."
+            'Terminal Collapse': {
+                signatureMoveBias: { "Chi-Blocking Flurry": 3.0, "Pressure Point Strike": 2.2 },
+                offensiveBias: 1.2,
+                finisherBias: 2.5,
+                utilityBias: 0.7,
             }
         },
-        // END NEW FIELDS
         narrative: {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],

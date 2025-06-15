@@ -1,13 +1,12 @@
 // FILE: engine_ai-decision.js
 'use strict';
 
-// Version 8.4: Escalation AI Bias Integration
+// Version 8.5: Escalation Tuning Pass 1.1 - AI Finisher Aggression & Narrative Flagging
 
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
 import { MAX_MOMENTUM, MIN_MOMENTUM } from './engine_momentum.js';
 import { getPhaseAIModifiers } from './engine_battle-phase.js';
-// NEW IMPORT FOR ESCALATION
 import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
@@ -82,7 +81,7 @@ export function attemptManipulation(manipulator, target) {
     const attemptChance = manipTrait * mentalStateModifier * (1 - resilience);
 
     if (Math.random() < attemptChance) {
-        const effect = Math.random() > 0.5 ? 'Exposed' : 'Shaken'; // 'Shaken' can be a tactical state or influence mental state directly
+        const effect = Math.random() > 0.5 ? 'Exposed' : 'Shaken';
         const manipulatorName = manipulator.name || 'Manipulator';
         const manipulatorId = manipulator.id || 'unknown-manipulator';
         const targetName = target.name || 'Target';
@@ -182,7 +181,8 @@ function getDynamicPersonality(actor, currentPhase) {
     });
 
     const baseAggression = baseActorProfile.aggression !== undefined ? baseActorProfile.aggression : DEFAULT_PERSONALITY_PROFILE.aggression;
-    actor.aiLog.push(`[Phase Influence (${currentPhase})]: Base Aggro: ${baseAggression.toFixed(2)}, Phase Modded Aggro: ${(dynamicProfile.aggression || baseAggression).toFixed(2)}`);
+    // Removed the AI log push from here as it was very spammy; AI log now in selectMove
+    // actor.aiLog.push(`[Phase Influence (${currentPhase})]: Base Aggro: ${baseAggression.toFixed(2)}, Phase Modded Aggro: ${(dynamicProfile.aggression || baseAggression).toFixed(2)}`);
 
 
     if (actor.relationalState?.emotionalModifiers) {
@@ -231,35 +231,81 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     const defenderHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
     const healthDiff = actorHp - defenderHp;
 
-    // NEW: Escalation state can influence intent
     const defenderEscalationState = safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState');
+    // TUNING: Increased opportunism threshold and added check for actor's aggression for finisher attempt
     if (defenderEscalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED || defenderEscalationState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
-        if (profile.opportunism > 0.6) return 'FinishingBlowAttempt'; // High priority to finish vulnerable opponent
+        if (profile.opportunism > 0.5 || profile.aggression > 0.7) { // Lowered opportunism, added aggression check
+             actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt due to Opponent Escalation (${defenderEscalationState}) and Actor Opportunism/Aggression.`);
+            return 'FinishingBlowAttempt';
+        }
     }
 
-    if (currentPhase === 'Early' && profile.patience > 0.7 && turn < 2) return 'OpeningMoves';
-    if (currentPhase === 'Late' && actorHp < 30 && profile.riskTolerance > 0.7) return 'DesperateGambit';
-    if (currentPhase === 'Late' && defenderHp < 25 && profile.opportunism > 0.8) return 'FinishingBlowAttempt';
+    if (currentPhase === 'Early' && profile.patience > 0.7 && turn < 2) {
+        actor.aiLog.push(`[Intent Decided]: OpeningMoves due to Early Phase, High Patience, Low Turn.`);
+        return 'OpeningMoves';
+    }
+    if (currentPhase === 'Late' && actorHp < 30 && profile.riskTolerance > 0.6) { // Slightly lowered risk tolerance for late game gambit
+        actor.aiLog.push(`[Intent Decided]: DesperateGambit due to Late Phase, Low HP, High Risk Tolerance.`);
+        return 'DesperateGambit';
+    }
+    // TUNING: Make FinishingBlowAttempt more likely even if defender HP is not extremely low, if they are in high escalation
+    if (currentPhase === 'Late' && (defenderHp < 30 || defenderEscalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED) && profile.opportunism > 0.7) {
+        actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt due to Late Phase, Opponent Low HP/High Escalation, High Opportunism.`);
+        return 'FinishingBlowAttempt';
+    }
 
-    const defenderIsStunned = safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0; // MODIFIED
+
+    const defenderIsStunned = safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0;
     const defenderTacticalState = safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState');
-    if (profile.opportunism > 0.8 && (defenderIsStunned || defenderTacticalState)) return 'CapitalizeOnOpening';
+    if (profile.opportunism > 0.7 && (defenderIsStunned || (defenderTacticalState && !defenderTacticalState.isPositive))) { // Ensure tactical state is negative for opponent
+        actor.aiLog.push(`[Intent Decided]: CapitalizeOnOpening due to Opponent Stun/Negative Tactical State, High Opportunism.`);
+        return 'CapitalizeOnOpening';
+    }
 
-    if (profile.riskTolerance > 0.8 && actorHp < 40) return 'DesperateGambit';
-    if (profile.patience > 0.8 && turn < 2 && currentPhase !== 'Late') return 'CautiousDefense';
-    if (profile.aggression > 0.9 && healthDiff > 20) return 'PressAdvantage';
+
+    if (profile.riskTolerance > 0.7 && actorHp < 45) { // Increased HP threshold for Desperate Gambit
+        actor.aiLog.push(`[Intent Decided]: DesperateGambit due to Actor Low HP, High Risk Tolerance.`);
+        return 'DesperateGambit';
+    }
+    if (profile.patience > 0.8 && turn < 2 && currentPhase !== 'Late') {
+        actor.aiLog.push(`[Intent Decided]: CautiousDefense due to High Patience, Early Turn.`);
+        return 'CautiousDefense';
+    }
+    if (profile.aggression > 0.8 && healthDiff > 15) { // Lowered health diff for Press Advantage
+        actor.aiLog.push(`[Intent Decided]: PressAdvantage due to High Aggression, Health Lead.`);
+        return 'PressAdvantage';
+    }
+
 
     const actorMentalStateLevel = safeGet(actor.mentalState, 'level', 'stable', actor.name, 'mentalState.level');
-    if (actorMentalStateLevel === 'broken') return 'UnfocusedRage';
-    if (actorMentalStateLevel === 'shaken') return 'PanickedDefense';
+    if (actorMentalStateLevel === 'broken') {
+        actor.aiLog.push(`[Intent Decided]: UnfocusedRage due to Broken Mental State.`);
+        return 'UnfocusedRage';
+    }
+    if (actorMentalStateLevel === 'shaken') {
+        actor.aiLog.push(`[Intent Decided]: PanickedDefense due to Shaken Mental State.`);
+        return 'PanickedDefense';
+    }
 
     const opponentIsTurtling = safeGet(actor.aiMemory?.opponentModel, 'isTurtling', false, actor.name, 'aiMemory.opponentModel.isTurtling');
-    if (opponentIsTurtling) return 'BreakTheTurtle';
+    if (opponentIsTurtling && profile.patience < 0.4) { // Only if actor is not patient
+        actor.aiLog.push(`[Intent Decided]: BreakTheTurtle due to Opponent Turtling, Low Patience.`);
+        return 'BreakTheTurtle';
+    }
+
 
     const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
-    if (actorEnergy < 30) return 'ConserveEnergy';
+    if (actorEnergy < 25) { // Lowered energy threshold
+        actor.aiLog.push(`[Intent Decided]: ConserveEnergy due to Low Energy.`);
+        return 'ConserveEnergy';
+    }
 
-    if (turn < 2 && currentPhase === 'Early') return 'OpeningMoves';
+
+    if (turn < 2 && currentPhase === 'Early') {
+        actor.aiLog.push(`[Intent Decided]: OpeningMoves (Default Early Phase).`);
+        return 'OpeningMoves';
+    }
+    actor.aiLog.push(`[Intent Decided]: StandardExchange (Default).`);
     return 'StandardExchange';
 }
 
@@ -273,11 +319,9 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
 
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
     const momentumInfluence = actorMomentum / (MAX_MOMENTUM - MIN_MOMENTUM) * 2;
-    profile.aggression = clamp(profile.aggression + (momentumInfluence * 0.2), 0, 1.0);
-    profile.riskTolerance = clamp(profile.riskTolerance + (momentumInfluence * 0.3), 0, 1.0);
-    profile.defensiveBias = clamp(profile.defensiveBias - (momentumInfluence * 0.2), 0, 1.0);
-    profile.patience = clamp(profile.patience - (momentumInfluence * 0.1), 0, 1.0);
-
+    // Momentum influence already baked into dynamic profile from getDynamicPersonality if needed,
+    // but direct application here could be re-evaluated if further emphasis is desired.
+    // For now, dynamic profile handles momentum's effect on personality traits.
 
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
@@ -285,6 +329,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         }
         let weight = 1.0;
         let reasons = [];
+        let isEscalationFinisherAttempt = false; // For narrative flag
 
         switch (move.type) {
             case 'Offense': weight *= (1 + profile.aggression * 1.5); reasons.push(`Aggro:${profile.aggression.toFixed(2)}`); break;
@@ -296,7 +341,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
                 const defenderHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
                 if (currentPhase === 'Early') weight *= 0.05;
                 else if (currentPhase === 'Mid' && defenderHp > 50) weight *= 0.3;
-                else if (currentPhase === 'Late' || defenderHp <= 30) weight *= 2.5;
+                else if (currentPhase === 'Late' || defenderHp <= 30) weight *= 2.5; // Increased bias late or low HP
                 break;
             default:
                 break;
@@ -309,7 +354,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             if (actorTacticalStateName === 'Exposed' || actorTacticalStateName === 'Off-Balance') {
                 weight *= 3.0; reasons.push('SelfVulnerable');
             }
-            if (safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState')) { // MODIFIED
+            if (safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState')) {
                 weight *= 0.5; reasons.push('OpponentVulnerable_LessReposition');
             }
             const repositionCooldown = safeGet(actor.aiMemory, 'repositionCooldown', 0, actor.name, 'aiMemory.repositionCooldown');
@@ -343,7 +388,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             PressAdvantage: { Offense: 1.5, Defense: 0.6, Utility: 0.9, Finisher: 1.2, precise: 1.4, area_of_effect: 1.3 },
             CapitalizeOnOpening: { Offense: 1.8, Defense: 0.3, Utility: 1.0, Finisher: 1.5, single_target: 1.6, unblockable: 2.0 },
             DesperateGambit: { Offense: 1.2, Defense: 0.4, Utility: 0.7, Finisher: 2.0, highRisk: 2.5, unblockable: 2.2 },
-            FinishingBlowAttempt: { Offense: 0.5, Defense: 0.1, Utility: 0.2, Finisher: 3.0, requires_opening: 2.5, unblockable: 2.8 },
+            FinishingBlowAttempt: { Offense: 0.5, Defense: 0.1, Utility: 0.2, Finisher: 3.5, requires_opening: 2.8, unblockable: 3.0 }, // TUNED: Increased Finisher bias
             UnfocusedRage: { Offense: 1.6, Defense: 0.2, Utility: 0.3, Finisher: 1.0, area_of_effect_large: 1.5, highRisk: 1.8 },
             PanickedDefense: { Offense: 0.3, Defense: 2.5, Utility: 1.5, Finisher: 0.01, defensive_stance: 2.5, evasive: 2.0 },
             BreakTheTurtle: { Offense: 1.4, Defense: 0.7, Utility: 1.1, Finisher: 0.9, environmental_manipulation: 1.8, unblockable_ground: 2.0, bypasses_defense: 1.9 },
@@ -378,18 +423,19 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
              weight *= 0.01;
              reasons.push('MoveCooldown');
         }
-        if (move.moveTags?.includes('requires_opening') && !(safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState'))) weight *= 0.01; // MODIFIED
+        if (move.moveTags?.includes('requires_opening') && !(safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState'))) weight *= 0.01;
 
-        // --- NEW: APPLY ESCALATION AI BIAS ---
-        const escalationWeightMultiplier = getEscalationAIWeights(actor, defender, move); // Pass defender
+        const escalationWeightMultiplier = getEscalationAIWeights(actor, defender, move);
         if (escalationWeightMultiplier !== 1.0) {
             weight *= escalationWeightMultiplier;
             reasons.push(`EscalationBias(x${escalationWeightMultiplier.toFixed(1)})`);
+            if (move.type === 'Finisher' && (defender.escalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED || defender.escalationState === ESCALATION_STATES.TERMINAL_COLLAPSE)) {
+                isEscalationFinisherAttempt = true; // Flag for narrative
+            }
         }
-        // --- END NEW ---
 
-        if (weight < 0.05 && move.name !== "Struggle") return { move, weight: 0, reasons };
-        return { move, weight, reasons };
+        if (weight < 0.05 && move.name !== "Struggle") return { move, weight: 0, reasons, isEscalationFinisherAttempt }; // Pass flag
+        return { move, weight, reasons, isEscalationFinisherAttempt }; // Pass flag
     });
 }
 
@@ -415,7 +461,7 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
         return { ...m, expWeight };
     });
 
-    if (weightExpSum === 0) { // Avoid division by zero if all expWeights are extremely small
+    if (weightExpSum === 0) {
         const numMoves = movesWithExp.length;
         return movesWithExp.map(m => ({ ...m, probability: numMoves > 0 ? 1 / numMoves : 0 }));
     }
@@ -427,7 +473,7 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
 
 function selectFromDistribution(movesWithProbs) {
     if (!movesWithProbs || movesWithProbs.length === 0) {
-        return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackNoProbs'] };
+        return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackNoProbs'], isEscalationFinisherAttempt: false };
     }
     const rand = Math.random();
     let cumulativeProbability = 0;
@@ -438,14 +484,13 @@ function selectFromDistribution(movesWithProbs) {
         cumulativeProbability += moveInfo.probability;
         if (rand < cumulativeProbability) return moveInfo;
     }
-    // Fallback if somehow rand is >= cumulativeProbability (should not happen if probs sum to 1)
-    return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'] };
+    return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'], isEscalationFinisherAttempt: false };
 }
 
 
 export function selectMove(actor, defender, conditions, turn, currentPhase) {
     if (!actor || !defender || !conditions || !actor.aiLog) {
-        return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] } };
+        return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, aiLogEntry: { intent: 'Error', chosenMove: 'Struggle'} };
     }
     actor.personalityProfile = actor.personalityProfile || { ...DEFAULT_PERSONALITY_PROFILE };
     actor.aiMemory = actor.aiMemory || { ...DEFAULT_AI_MEMORY };
@@ -459,11 +504,11 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
 
     if (validMoves.length === 0) {
-        validMoves = [{ move: struggleMove, weight: 1.0, reasons: ['FallbackOnlyStruggle'] }];
+        validMoves = [{ move: struggleMove, weight: 1.0, reasons: ['FallbackOnlyStruggle'], isEscalationFinisherAttempt: false }];
     } else {
         const struggleWeightInfo = weightedMoves.find(m => m.move?.name === "Struggle");
         if (!struggleWeightInfo) {
-            validMoves.push({ move: struggleMove, weight: 0.01, reasons: ['LowProbStruggleDefault'] });
+            validMoves.push({ move: struggleMove, weight: 0.01, reasons: ['LowProbStruggleDefault'], isEscalationFinisherAttempt: false });
         } else if (!validMoves.find(m => m.move?.name === "Struggle")){
              validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) });
         }
@@ -475,8 +520,10 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     const chosenMoveInfo = selectFromDistribution(movesWithProbs);
 
     const chosenMove = chosenMoveInfo?.move || struggleMove;
+    const isEscalationFinisher = chosenMoveInfo?.isEscalationFinisherAttempt || false;
 
-    actor.aiLog.push({
+
+    const aiLogEntry = {
         turn: turn + 1,
         phase: currentPhase,
         intent: intent,
@@ -494,14 +541,16 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
             energy: safeGet(actor, 'energy', 0, actor.name, 'energy'),
             momentum: safeGet(actor, 'momentum', 0, actor.name, 'momentum'),
             mental: safeGet(actor.mentalState, 'level', 'stable', actor.name, 'mentalState.level'),
-            // NEW: Log actor's own escalation state for context
             escalation: safeGet(actor, 'escalationState', ESCALATION_STATES.NORMAL, actor.name, 'escalationState')
         },
-        // NEW: Log defender's escalation state as it influences AI
-        opponentEscalation: safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState')
-    });
+        opponentEscalation: safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState'),
+        isEscalationFinisherAttempt: isEscalationFinisher // Store this flag
+    };
+    actor.aiLog.push(aiLogEntry);
+
 
     return {
-        move: chosenMove
+        move: chosenMove,
+        aiLogEntryFromSelectMove: aiLogEntry // Pass the whole entry for narrative engine
     };
 }

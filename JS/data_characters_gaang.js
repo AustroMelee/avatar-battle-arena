@@ -2,8 +2,8 @@
 'use strict';
 
 // Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
-// If not, and these objects are used directly, you'd need:
-// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
+// For example, if data_characters.js imports ESCALATION_STATES and then these objects.
+// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed for direct use
 
 export const gaangCharacters = {
 'sokka': {
@@ -35,12 +35,10 @@ curbstompRules: [
 personalityTriggers: {
     "meticulous_planning": "(opponent.lastMove?.isHighRisk && opponent.lastMoveEffectiveness === 'Weak') || battleState.locationTags.includes('trap_favorable')"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
-escalationState: 'Normal', // Will be ESCALATION_STATES.NORMAL if imported
+escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Sokka uses default AI escalation biases
-// END NEW FIELDS
+escalationBehavior: {},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, {opponentName} looks tough. Don't panic. Just find an opening. You're the idea guy." }],
@@ -130,12 +128,10 @@ curbstompRules: [
 personalityTriggers: {
     "mortal_danger": "(character.hp < character.maxHp * 0.2) || (battleState.ally?.hp < battleState.ally?.maxHp * 0.05)"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Aang uses default AI escalation biases; Avatar State is a separate curbstomp.
-// END NEW FIELDS
+escalationBehavior: {},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
@@ -203,7 +199,7 @@ personalityProfile: {
         "Water Shield": 1.4,
         "Ice Prison": 1.2,
         "Tidal Wave": 1.1,
-        "Bloodbending": 0.1, // Generally low unless specific conditions
+        "Bloodbending": 0.1,
         "Canteen Water Jet": 1.0,
         "Small Ice Darts": 1.0,
         "Canteen Water Shield": 1.0,
@@ -222,12 +218,10 @@ curbstompRules: [
 personalityTriggers: {
     "desperate_mentally_broken": "(character.hp < character.maxHp * 0.1) || (battleState.ally?.isDowned) || (character.criticalHitsTaken >= 2) || (character.mentalState.level === 'broken')"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Katara uses default AI escalation biases
-// END NEW FIELDS
+escalationBehavior: {},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
@@ -324,12 +318,10 @@ curbstompRules: [
 personalityTriggers: {
     "doubted": "(battleState.opponentTauntedBlindness) || (battleState.opponentLandedBlindHit)"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Toph uses default AI escalation biases
-// END NEW FIELDS
+escalationBehavior: {},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
@@ -408,12 +400,10 @@ curbstompRules: [
 personalityTriggers: {
     "honor_violated": "(battleState.opponentCheated) || (battleState.allyDisarmedUnfairly)"
 },
-// NEW FIELDS FOR ESCALATION
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {}, // Zuko uses default AI escalation biases
-// END NEW FIELDS
+escalationBehavior: {},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],

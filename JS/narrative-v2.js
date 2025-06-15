@@ -1,10 +1,8 @@
 // FILE: js/narrative-v2.js
 // ====================================================================================
-//  Narrative Engine Library (v3.4 - Escalation State Narrative - FULL)
+//  Narrative Engine Library (v3.5 - Escalation Tuning Pass 1.1 - Narrative Clarity)
 // ====================================================================================
-//  - Added `escalationStateChangeTemplates` for HTML structure.
-//  - Added `escalationStateNarratives` for flavor text.
-//  - Restored all previously existing phrase objects.
+//  - Added `EscalationFinisher` category to `introductoryPhrases`.
 // ====================================================================================
 
 export const battlePhases = [
@@ -73,6 +71,14 @@ export const introductoryPhrases = {
     Generic: [
         "With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,",
         "With an air of supreme confidence,", "Taking the offensive,", "Without hesitation,", "With a quick movement,"
+    ],
+    // NEW CATEGORY FOR NARRATIVE CLARITY
+    EscalationFinisher: [
+        "Sensing the end is near for {opponentName},",
+        "Moving in for the final blow against the weakened {opponentName},",
+        "With {opponentName} on the ropes and clearly overwhelmed,",
+        "{actorName} is determined to finish it now!",
+        "Unleashing all remaining power for the decisive strike against {opponentName},"
     ]
 };
 
@@ -267,8 +273,7 @@ export const escalationStateNarratives = {
         "Any moment now, {actorName} is going to fall!",
         "This is the end of the line for {actorName}; {actor.s} can barely stand."
     ],
-    // Character-specific examples (can be expanded)
-    'azula': { // If Azula herself is in these states
+    'azula': {
         PRESSURED: ["Azula's perfect facade shows the barest hint of a crack under the strain."],
         SEVERELY_INCAPACITATED: ["A flicker of genuine fear, quickly suppressed, crosses Azula's face as her control slips."],
         TERMINAL_COLLAPSE: ["Azula lets out a wild, desperate shriek, her blue fire becoming dangerously erratic!"]

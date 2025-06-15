@@ -1,10 +1,9 @@
 'use strict';
 
-import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives } from './narrative-v2.js'; // Added escalationStateNarratives
+import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
-// NEW IMPORT FOR ESCALATION
 import { ESCALATION_STATES } from './engine_escalation.js';
 
 
@@ -104,8 +103,17 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
     const narrativeData = actor.narrative;
     let pool = null;
     const currentPhaseKey = context.currentPhaseKey || 'Generic';
+    const aiLogEntry = context.aiLogEntry || {}; // Get the AI log entry for this move decision
 
     const lookupPaths = [];
+
+    // Prioritize EscalationFinisher intro if applicable
+    if (trigger === 'onIntentSelection' && aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
+        if (introductoryPhrases.EscalationFinisher && introductoryPhrases.EscalationFinisher.length > 0) {
+            return { type: 'action', line: getRandomElement(introductoryPhrases.EscalationFinisher) }; // Return as an action quote
+        }
+    }
+
 
     if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]?.[currentPhaseKey]) {
         lookupPaths.push(() => actor.relationships[opponent.id].narrative[trigger][subTrigger][currentPhaseKey]);
@@ -135,15 +143,12 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
         lookupPaths.push(() => narrativeData[trigger][subTrigger]);
     }
 
-    // NEW: Check for escalation-specific quotes (e.g., a character commenting on opponent's escalation)
-    // This is for reactive quotes, not the primary announcement of state change.
     if (trigger === 'onEscalationStateObserved' && narrativeData[trigger]?.[context.observedStateKey]?.[currentPhaseKey]) {
         lookupPaths.push(() => narrativeData[trigger][context.observedStateKey][currentPhaseKey]);
     }
     if (trigger === 'onEscalationStateObserved' && narrativeData[trigger]?.[context.observedStateKey]?.Generic) {
         lookupPaths.push(() => narrativeData[trigger][context.observedStateKey].Generic);
     }
-    // END NEW
 
     if (narrativeData[trigger]?.general?.[currentPhaseKey]) {
         lookupPaths.push(() => narrativeData[trigger].general[currentPhaseKey]);
@@ -185,8 +190,8 @@ function formatQuoteEvent(quote, actor, opponent, context) {
 
     if (type === 'environmental') {
         htmlContent = `<p class="${narrativeClass}">${formattedLine}</p>`;
-    } else if (type === 'action') {
-        htmlContent = `<p class="${narrativeClass}">${actorSpan} ${formattedLine}</p>`;
+    } else if (type === 'action') { // This type is used by EscalationFinisher intros
+        htmlContent = `<p class="${narrativeClass}">${substituteTokens(line, actor, opponent, context)}</p>`; // Directly use the line for action
     } else {
         const verb = type === 'internal' ? 'thinks' : 'says';
         htmlContent = `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
@@ -197,20 +202,40 @@ function formatQuoteEvent(quote, actor, opponent, context) {
         actorId: actor?.id || null,
         characterName: characterName,
         text: formattedLine,
-        isDialogue: (type === 'spoken' || type === 'internal'),
+        isDialogue: (type === 'spoken' || type === 'internal' || type === 'action'), // Action is now a form of dialogue
         isActionNarrative: (type === 'action'),
         isEnvironmental: (type === 'environmental'),
         html_content: htmlContent,
     };
 }
 
-function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey) {
+function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}) {
     let introPhrase = '';
     let tacticalPrefix = '';
     let tacticalSuffix = '';
 
-    const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
-    introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
+    // TUNING: Use more dramatic intro if it's an escalation finisher attempt from AI log
+    if (aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
+        const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late; // Fallback to Late phase intros
+        introPhrase = getRandomElement(escalationFinisherPool) || "Sensing the end is near,";
+        // Ensure tokens are substituted for this specific intro type
+        introPhrase = substituteTokens(introPhrase, actor, opponent);
+    } else {
+        // Standard intro phrase selection (this logic might be redundant if findNarrativeQuote handles it)
+        const intentForIntro = aiLogEntry.intent || 'StandardExchange';
+        const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry });
+        if (introQuote && introQuote.type === 'action') { // If findNarrativeQuote already gave us an action line
+            introPhrase = substituteTokens(introQuote.line, actor, opponent);
+        } else if (introQuote) { // If it's spoken/internal, it's handled by generateTurnNarrationObjects dialogue loop
+            // Use default if no specific action line was found
+            const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
+            introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
+        } else {
+            const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
+            introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
+        }
+    }
+
 
     if (result.payoff && result.consumedStateName) {
         tacticalPrefix = substituteTokens(`Capitalizing on {opponentName} being ${result.consumedStateName}, `, actor, opponent);
@@ -255,7 +280,14 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     }
     const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent);
 
-    const fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
+    // Check if introPhrase already contains actorName to avoid duplication like "Sensing the end... Sokka throws..."
+    let fullDescText;
+    if (introPhrase.includes(actor.name)) { // Basic check
+        fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
+    } else {
+        fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
+    }
+
 
     const moveLineHtml = phaseTemplates.move
         .replace(/{actorId}/g, actor.id)
@@ -315,14 +347,6 @@ function generateCollateralDamageEvent(move, actor, opponent, environmentState, 
     };
 }
 
-// NEW FUNCTION: Generate Escalation Narrative
-/**
- * Generates a narrative event object for an escalation state change.
- * @param {object} fighter - The fighter whose state changed.
- * @param {string} oldState - The fighter's previous escalation state.
- * @param {string} newState - The fighter's new escalation state.
- * @returns {object|null} A narrative event object or null.
- */
 export function generateEscalationNarrative(fighter, oldState, newState) {
     if (!fighter || !newState || oldState === newState) return null;
 
@@ -330,15 +354,16 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
     if (escalationStateNarratives[fighter.id] && escalationStateNarratives[fighter.id][newState]) {
         flavorTextPool.push(...escalationStateNarratives[fighter.id][newState]);
     }
-    if (escalationStateNarratives[newState]) { // Generic narratives for the state
+    if (escalationStateNarratives[newState] && Array.isArray(escalationStateNarratives[newState])) {
         flavorTextPool.push(...escalationStateNarratives[newState]);
     }
+    const defaultFlavor = `The tide of battle shifts for {actorName}.`;
+    const flavorText = getRandomElement(flavorTextPool) || defaultFlavor;
+    const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
 
-    const flavorText = getRandomElement(flavorTextPool) || `The fight's intensity shifts for ${fighter.name}!`;
-    const substitutedFlavorText = substituteTokens(flavorText, fighter, null); // No opponent context needed for self-state change
 
     let templateKey = 'general';
-    let highlightClass = 'highlight-neutral'; // Default
+    let highlightClass = 'highlight-neutral';
 
     switch (newState) {
         case ESCALATION_STATES.PRESSURED:
@@ -353,24 +378,35 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
             templateKey = 'terminal_collapse';
             highlightClass = 'highlight-terminal';
             break;
-        case ESCALATION_STATES.NORMAL: // For reversion from a higher state
-            if (oldState !== ESCALATION_STATES.NORMAL) { // Only narrate if it's a true reversion
+        case ESCALATION_STATES.NORMAL:
+            if (oldState !== ESCALATION_STATES.NORMAL) {
                 templateKey = 'reverted_to_normal';
-                highlightClass = 'highlight-neutral'; // Or some other class for "calming down"
             } else {
-                return null; // No change if already normal
+                return null;
             }
             break;
         default:
-            return null; // Unknown state
+            const unknownStateText = substituteTokens(`${fighter.name}'s condition has changed to ${newState}. ${substitutedFlavorText}`, fighter, null);
+            return {
+                type: 'escalation_change_event',
+                actorId: fighter.id,
+                characterName: fighter.name,
+                oldState: oldState,
+                newState: newState,
+                text: unknownStateText,
+                html_content: `<p class="narrative-escalation char-${fighter.id || 'unknown'} ${highlightClass}">${unknownStateText}</p>`,
+                isEscalationEvent: true,
+                highlightClass: highlightClass
+            };
     }
 
     const htmlTemplate = phaseTemplates.escalationStateChangeTemplates[templateKey] || phaseTemplates.escalationStateChangeTemplates.general;
+
     const htmlContent = substituteTokens(htmlTemplate, fighter, null, {
         '{escalationFlavorText}': substitutedFlavorText,
-        '{actorId}': fighter.id, // For CSS styling
-        '{actorName}': fighter.name, // For text
+        // actorName is implicitly handled by substituteTokens if fighter is primaryActor
     });
+
 
     return {
         type: 'escalation_change_event',
@@ -378,37 +414,37 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
         characterName: fighter.name,
         oldState: oldState,
         newState: newState,
-        text: `${fighter.name} is now ${newState}! ${substitutedFlavorText}`, // Simple text version
+        text: substituteTokens(`${fighter.name} is now ${newState}! ${substitutedFlavorText}`, fighter, null),
         html_content: htmlContent,
         isEscalationEvent: true,
-        highlightClass: highlightClass // For potential direct styling if needed
+        highlightClass: highlightClass
     };
 }
-// END NEW FUNCTION
 
 
-export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false) {
+export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}) { // Added aiLogEntry
     let turnEventObjects = [];
 
     events.forEach(event => {
-        const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey });
+        // Pass aiLogEntry to findNarrativeQuote for context, especially for onIntentSelection
+        const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry });
         if (quoteEvent) {
             turnEventObjects.push(quoteEvent);
         }
     });
 
     if (!isInitialBanter && move && result) {
-        const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey };
+        const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry }; // Pass aiLogEntry
         const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
         if (moveExecutionQuote) {
-            const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey});
+            const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey, aiLogEntry}); // Pass aiLogEntry
             if(quoteEvent) {
                 quoteEvent.isMoveExecutionQuote = true;
                 turnEventObjects.push(quoteEvent);
             }
         }
-
-        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey);
+        // Pass the aiLogEntry to generateActionDescriptionObject
+        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry);
         turnEventObjects.push(actionEvent);
 
         const collateralEvent = generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData);
@@ -416,10 +452,6 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
             if (actionEvent.html_content) {
                 actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
             }
-            // Don't push collateralEvent separately if its content is merged into actionEvent's html.
-            // If it should be a separate log entry, then push it.
-            // For now, assuming it's integrated:
-            // turnEventObjects.push(collateralEvent);
         } else if (actionEvent.html_content) {
              actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, '');
         }

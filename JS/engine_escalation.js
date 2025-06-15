@@ -2,26 +2,26 @@
 'use strict';
 
 // ====================================================================================
-//  Escalation Engine (v1.0)
+//  Escalation Engine (v1.1 - Tuned Values)
 // ====================================================================================
-//  This module centralizes the logic for the Escalation Combat Overhaul,
-//  including Incapacitation Score calculation, Escalation State determination,
-//  Escalation Damage Modification, and AI behavior biasing during Escalation.
+//  - Increased EDM for 'Pressured' state.
+//  - Increased default AI bias for finishers/high-power offense against highly incapacitated opponents.
+//  - Increased Incapacitation Score weights for 'Exposed' and 'MentalState_Shaken'.
 // ====================================================================================
 
-export const INCAPACITATION_SCORE_VERSION = "1.0";
+export const INCAPACITATION_SCORE_VERSION = "1.1";
 
 export const incapacitationScoreWeights = {
     // Status Effects
     StunnedDuration: 2, // Points per turn of stun duration
     Pinned: 2,          // Tactical state: Pinned
     Outmaneuvered: 1,   // Tactical state: Outmaneuvered
-    Exposed: 1.5,       // Tactical state: Exposed (more severe than Outmaneuvered)
+    Exposed: 2.0,       // Tactical state: Exposed (Increased from 1.5)
     OffBalance: 1,      // Tactical state: Off-Balance (was 'Repositioned (against)')
 
     // Mental States (fighter's own mental state contributing to their incapacitation)
-    MentalState_Stressed: 0.5, // Reduced from 1, as it's common
-    MentalState_Shaken: 1.5,   // Increased slightly
+    MentalState_Stressed: 0.5,
+    MentalState_Shaken: 2.0,   // Increased from 1.5
     MentalState_Broken: 3,
 
     // Health Thresholds
@@ -49,7 +49,7 @@ const ESCALATION_THRESHOLDS = {
 
 const EDM_MULTIPLIERS = { // Escalation Damage Modifiers
     [ESCALATION_STATES.NORMAL]: 1.0,
-    [ESCALATION_STATES.PRESSURED]: 1.1, // Slight increase when opponent is pressured
+    [ESCALATION_STATES.PRESSURED]: 1.15, // Increased from 1.1
     [ESCALATION_STATES.SEVERELY_INCAPACITATED]: 1.3,
     [ESCALATION_STATES.TERMINAL_COLLAPSE]: 1.6
 };
@@ -68,7 +68,6 @@ export function calculateIncapacitationScore(fighter, opponent) {
 
     let score = 0;
 
-    // Status Effects on the fighter
     if (fighter.stunDuration && fighter.stunDuration > 0) {
         score += incapacitationScoreWeights.StunnedDuration * fighter.stunDuration;
     }
@@ -77,10 +76,8 @@ export function calculateIncapacitationScore(fighter, opponent) {
         if (fighter.tacticalState.name === 'Outmaneuvered') score += incapacitationScoreWeights.Outmaneuvered;
         if (fighter.tacticalState.name === 'Exposed') score += incapacitationScoreWeights.Exposed;
         if (fighter.tacticalState.name === 'Off-Balance') score += incapacitationScoreWeights.OffBalance;
-        // Add more tactical states as needed
     }
 
-    // Mental State of the fighter
     if (fighter.mentalState) {
         switch (fighter.mentalState.level) {
             case 'stressed': score += incapacitationScoreWeights.MentalState_Stressed; break;
@@ -89,7 +86,6 @@ export function calculateIncapacitationScore(fighter, opponent) {
         }
     }
 
-    // Health Thresholds of the fighter
     if (fighter.hp !== undefined && fighter.maxHp !== undefined) {
         if (fighter.hp < fighter.maxHp * 0.25) {
             score += incapacitationScoreWeights.HpBelow25;
@@ -98,7 +94,6 @@ export function calculateIncapacitationScore(fighter, opponent) {
         }
     }
 
-    // Momentum Disadvantage for the fighter
     if (fighter.momentum !== undefined && opponent.momentum !== undefined) {
         const momentumDelta = opponent.momentum - fighter.momentum;
         if (momentumDelta >= 5) {
@@ -108,7 +103,7 @@ export function calculateIncapacitationScore(fighter, opponent) {
         }
     }
 
-    return Math.max(0, score); // Ensure score isn't negative
+    return Math.max(0, score);
 }
 
 /**
@@ -160,16 +155,15 @@ export function getEscalationAIWeights(attacker, defender, move) {
     // Default EMB logic based on opponent's vulnerability
     if (opponentState === ESCALATION_STATES.SEVERELY_INCAPACITATED || opponentState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
         if (move.type === 'Finisher' || move.moveTags?.includes('requires_opening')) {
-            multiplier *= 1.6; // From plan: Finishers +60%
-        } else if (move.type === 'Offense' && (move.power || 0) >= 60) { // Assuming high-damage is >60 power
-            multiplier *= 1.4; // From plan: High-damage attacks +40%
-        } else if (move.type === 'Utility' && !move.moveTags?.includes('debuff_disable')) { // Deprioritize non-lethal utility
-            multiplier *= 0.3; // From plan: Control moves deprioritized unless lethal setup
+            multiplier *= 2.0; // Increased from 1.6
+        } else if (move.type === 'Offense' && (move.power || 0) >= 60) {
+            multiplier *= 1.6; // Increased from 1.4
+        } else if (move.type === 'Utility' && !move.moveTags?.includes('debuff_disable') && !move.isRepositionMove) {
+            multiplier *= 0.2; // Further deprioritized from 0.3
         }
     }
 
     // Character-specific EMB overrides
-    // The attacker's escalationBehavior might react to the defender's state
     const attackerEscalationBehavior = attacker.escalationBehavior && attacker.escalationBehavior[opponentState];
     if (attackerEscalationBehavior) {
         if (attackerEscalationBehavior.signatureMoveBias && attackerEscalationBehavior.signatureMoveBias[move.name]) {
@@ -184,19 +178,14 @@ export function getEscalationAIWeights(attacker, defender, move) {
         if (move.type === 'Utility' && attackerEscalationBehavior.utilityBias) {
             multiplier *= attackerEscalationBehavior.utilityBias;
         }
-        // Add more specific biases as needed (e.g., for moveTags)
     }
 
-    // If the attacker themselves is in a high escalation state (e.g., Terminal Collapse),
-    // they might become more reckless or desperate, irrespective of opponent.
-    // This is slightly different from the EMB which is primarily about exploiting opponent weakness.
     const actorOwnState = attacker.escalationState;
     if (actorOwnState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
         if (move.moveTags?.includes('highRisk')) {
-            multiplier *= 1.2; // Slight bias towards risky moves if attacker is collapsing
+            multiplier *= 1.2;
         }
     }
 
-
-    return Math.max(0.1, multiplier); // Ensure it doesn't completely zero out a move unless intended
+    return Math.max(0.1, multiplier);
 }
