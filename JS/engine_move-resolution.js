@@ -4,11 +4,13 @@
 // Version 1.7: Correctly process detailed reactiveResult from checkReactiveDefense
 
 // --- IMPORTS ---
-import { effectivenessLevels } from './narrative-v2.js';
+// --- UPDATED IMPORT ---
+import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
+// --- END UPDATED IMPORT ---
 import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { getMomentumCritModifier, modifyMomentum as applyMomentumChange } from './engine_momentum.js'; // Renamed for clarity
-import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js';
+import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 // --- CONSTANTS ---

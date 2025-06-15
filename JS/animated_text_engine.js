@@ -3,7 +3,9 @@
 
 // Version 1.1: Null-Safety Pass
 
-import { getCharacterImage } from './ui.js'; // ui.js should be robust
+// --- NEW IMPORT ---
+import { characters } from './data_characters.js'; // For getCharacterImage
+// --- END NEW IMPORT ---
 import { focusOnLatestMessage } from './camera_control.js'; // camera_control.js should be robust
 
 const TYPEWRITER_SPEED_MS = 25;
@@ -16,6 +18,15 @@ let animationQueueInternal = [];
 let currentMessageIndex = 0;
 let simulationContainerElement = null;
 let onStepCompleteCallbackInternal = null; // Renamed to avoid conflict
+
+// --- NEW FUNCTION: getCharacterImage ---
+// This function was originally expected from ui.js but wasn't exported.
+// Adding it here for a self-contained fix within animated_text_engine.
+function getCharacterImage(charId) {
+    return characters[charId]?.imageUrl || null;
+}
+// --- END NEW FUNCTION ---
+
 
 export function stopCurrentAnimation() {
     if (currentTimeoutId) {
@@ -32,13 +43,13 @@ export function startAnimationSequence(queue, container, onComplete) {
     onStepCompleteCallbackInternal = typeof onComplete === 'function' ? onComplete : null;
 
     if (!simulationContainerElement) {
-        // console.error("Animated Text Engine: Simulation container is null. Cannot start animation.");
+        console.error("Animated Text Engine: Simulation container is null. Cannot start animation.");
         if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true); // Indicate completion (due to error)
         return;
     }
 
     if (animationQueueInternal.length === 0) {
-        // console.warn("Animated Text Engine: Animation queue is empty.");
+        console.warn("Animated Text Engine: Animation queue is empty.");
         if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true);
         return;
     }
@@ -48,12 +59,12 @@ export function startAnimationSequence(queue, container, onComplete) {
 
 function processNextMessage() {
     if (!simulationContainerElement) {
-        // console.error("Animated Text Engine: Simulation container became null during processing.");
+        console.error("Animated Text Engine: Simulation container became null during processing.");
         if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true); // End due to error
         return;
     }
     if (currentMessageIndex >= animationQueueInternal.length) {
-        // console.log("Animated Text Engine: Animation queue finished.");
+        console.log("Animated Text Engine: Animation queue finished.");
         if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true);
         return;
     }
@@ -62,7 +73,7 @@ function processNextMessage() {
     currentMessageIndex++;
 
     if (!message || typeof message.text !== 'string') { // Basic validation of message object
-        // console.warn("Animated Text Engine: Skipping invalid message object:", message);
+        console.warn("Animated Text Engine: Skipping invalid message object:", message);
         // Schedule next message processing to keep the queue moving
         currentTimeoutId = setTimeout(() => {
             if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(false); // Indicate a step was "processed" (skipped)
@@ -139,7 +150,7 @@ function renderMessage(message) { // message is already validated by processNext
 
 function typeMessage(element, text, onFinished) {
     if (!element || typeof text !== 'string') { // Basic validation
-        // console.warn("Animated Text Engine (typeMessage): Invalid element or text.", { element, text });
+        console.warn("Animated Text Engine (typeMessage): Invalid element or text.", { element, text });
         if (typeof onFinished === 'function') onFinished();
         return;
     }

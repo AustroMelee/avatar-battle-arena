@@ -1,691 +1,234 @@
 // FILE: ui.js
 'use strict';
 
-import { characters } from './data_characters.js';
-import { locations } from './locations.js';
-import { locationConditions } from './location-battle-conditions.js';
-import { resolveArchetypeLabel } from './engine_archetype-engine.js';
-import { renderArchetypeDisplay } from './ui_archetype-display.js';
-import { startSimulation, resetSimulationManager } from './simulation_mode_manager.js';
-import { transformEventsToAnimationQueue, transformEventsToHtmlLog } from './battle_log_transformer.js';
-import { initializeCameraControls } from './camera_control.js';
-// NEW IMPORT FOR ESCALATION
-import { ESCALATION_STATES } from './engine_escalation.js';
+// Orchestrates the main UI components and battle simulation flow.
 
-const DOM = {
-    fighter1Grid: document.getElementById('fighter1-grid'),
-    fighter2Grid: document.getElementById('fighter2-grid'),
-    locationGrid: document.getElementById('location-grid'),
+import { simulateBattle } from './engine_battle-engine-core.js';
+// --- UPDATED IMPORTS ---
+import { showLoadingState, showResultsState } from './ui_loading-states.js'; // Updated import path and name
+import { resetBattleResultsUI } from './ui_battle-results.js'; // Now importing the reset function from here
+import { transformEventsToAnimationQueue } from './battle_log_transformer.js'; // Static import now
+// --- END UPDATED IMPORTS ---
+import { initializeSimulationManagerDOM, setSimulationMode, resetSimulationManager } from './simulation_mode_manager.js';
+import { initializeDevModeUI } from './dev_mode_manager.js';
+import { populateCharacterGrids, handleCharacterCardSelection } from './ui_character-selection.js';
+import { populateLocationGrid, handleLocationCardSelection, updateEnvironmentalSummary } from './ui_location-selection.js';
+import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
+import { renderArchetypeDisplay } from './ui_archetype-display.js';
+import { resolveArchetypeLabel } from './engine_archetype-engine.js';
+import { setupDetailedLogControls } from './ui_battle-results.js';
+import { characters } from './data_characters.js'; // Added import for getCharacterImage
+
+// Centralized DOM references used across UI modules, or for orchestration
+const DOM_SHARED = {
+    fighter1Select: document.getElementById('fighter1-value'),
+    fighter2Select: document.getElementById('fighter2-value'),
+    locationSelect: document.getElementById('location-value'),
+    timeOfDayValue: document.getElementById('time-of-day-value'),
     emotionalModeCheckbox: document.getElementById('emotional-mode'),
+    battleBtn: document.getElementById('battleBtn'),
+    vsDivider: document.getElementById('vsDivider'),
     fighter1NameDisplay: document.getElementById('fighter1-name-display'),
     fighter2NameDisplay: document.getElementById('fighter2-name-display'),
     locationNameDisplay: document.getElementById('location-name-display'),
-    battleBtn: document.getElementById('battleBtn'),
-    resultsSection: document.getElementById('results'),
-    loadingSpinner: document.getElementById('loading'),
-    battleResultsContainer: document.getElementById('battle-results'),
-    vsDivider: document.getElementById('vsDivider'),
-    winnerName: document.getElementById('winner-name'),
-    winProbability: document.getElementById('win-probability'),
-    battleStory: document.getElementById('battle-story'),
-    analysisList: document.getElementById('analysis-list'),
     timeToggleContainer: document.getElementById('time-toggle-container'),
-    timeOfDayValue: document.getElementById('time-of-day-value'),
     timeFeedbackDisplay: document.getElementById('time-feedback'),
-    fighter1Select: document.createElement('input'),
-    fighter2Select: document.createElement('input'),
-    locationSelect: document.createElement('input'),
-    environmentDamageDisplay: document.getElementById('environment-damage-display'),
-    environmentImpactsList: document.getElementById('environment-impacts-list'),
     locationEnvironmentSummary: document.getElementById('location-environment-summary'),
-    fighter1MomentumValue: document.getElementById('fighter1-momentum-value'),
-    fighter2MomentumValue: document.getElementById('fighter2-momentum-value'),
+
+    // Archetype display elements
     archetypeContainer: document.getElementById('archetype-info-container'),
     archetypeHeadline: document.getElementById('archetype-headline'),
     archetypeIntroA: document.getElementById('archetype-intro-a'),
     archetypeIntroB: document.getElementById('archetype-intro-b'),
     archetypeError: document.getElementById('archetype-error'),
+
+    // For simulation manager initialization
     simulationModeContainer: document.getElementById('simulation-mode-container'),
     animatedLogOutput: document.getElementById('animated-log-output'),
     cancelSimulationBtn: document.getElementById('cancel-simulation'),
     zoomInBtn: document.getElementById('zoom-in'),
     zoomOutBtn: document.getElementById('zoom-out'),
-    modeAnimatedRadio: document.getElementById('mode-animated'),
-    modeInstantRadio: document.getElementById('mode-instant'),
+
+    // Character/Location grid containers (used by their respective populate functions)
+    fighter1Grid: document.getElementById('fighter1-grid'),
+    fighter2Grid: document.getElementById('fighter2-grid'),
+    locationGrid: document.getElementById('location-grid'),
+
+    // For battle results UI interaction
+    resultsSection: document.getElementById('results'),
+    battleResultsContainer: document.getElementById('battle-results'),
+    winnerName: document.getElementById('winner-name'),
+    winProbability: document.getElementById('win-probability'),
+    battleStory: document.getElementById('battle-story'),
+    analysisList: document.getElementById('analysis-list'),
+    environmentDamageDisplay: document.getElementById('environment-damage-display'),
+    environmentImpactsList: document.getElementById('environment-impacts-list'),
     detailedBattleLogsContent: document.getElementById('detailed-battle-logs-content'),
-    // NEW DOM elements for Escalation Display (assuming they are in your HTML)
-    fighter1IncapacitationScore: document.getElementById('fighter1-incapacitation-score'),
-    fighter1EscalationState: document.getElementById('fighter1-escalation-state'),
-    fighter2IncapacitationScore: document.getElementById('fighter2-incapacitation-score'),
-    fighter2EscalationState: document.getElementById('fighter2-escalation-state'),
+    toggleDetailedLogsBtn: document.getElementById('toggle-detailed-logs-btn'),
+    copyDetailedLogsBtn: document.getElementById('copy-detailed-logs-btn'),
 };
 
-export const DOM_simulation_references = {
-    simulationContainer: DOM.simulationModeContainer,
-    cancelButton: DOM.cancelSimulationBtn,
-    battleResultsContainer: DOM.battleResultsContainer,
-    winnerNameDisplay: DOM.winnerName,
-    analysisListDisplay: DOM.analysisList,
-    battleStoryDisplay: DOM.battleStory
-};
-
-DOM.fighter1Select.type = 'hidden';
-DOM.fighter1Select.id = 'fighter1-value';
-DOM.fighter2Select.type = 'hidden';
-DOM.fighter2Select.id = 'fighter2-value';
-DOM.locationSelect.type = 'hidden';
-DOM.locationSelect.id = 'location-value';
-if (!document.getElementById('fighter1-value')) document.body.appendChild(DOM.fighter1Select);
-if (!document.getElementById('fighter2-value')) document.body.appendChild(DOM.fighter2Select);
-if (!document.getElementById('location-value')) document.body.appendChild(DOM.locationSelect);
-
-export function getCharacterImage(characterId) {
-    const character = characters[characterId];
-    return character ? character.imageUrl : null;
+/**
+ * Returns the image URL for a given character ID.
+ * This is needed by `animated_text_engine.js`.
+ * @param {string} charId - The ID of the character.
+ * @returns {string|null} The image URL or null if not found.
+ */
+export function getCharacterImageFromUI(charId) { // Renamed to avoid direct conflict with characters.js access
+    return characters[charId]?.imageUrl || null;
 }
 
-function getElementClass(character) {
-    if (!character || !character.techniques || character.techniques.length === 0) {
-        return 'card-nonbender';
-    }
-    const mainElementTechnique = character.techniques.find(t => t.element);
-    const mainElement = mainElementTechnique ? mainElementTechnique.element : 'nonbender';
-    switch (mainElement) {
-        case 'fire': case 'lightning': return 'card-fire';
-        case 'water': case 'ice': return 'card-water';
-        case 'earth': case 'metal': return 'card-earth';
-        case 'air': return 'card-air';
-        case 'special': return 'card-chi';
-        default: return 'card-nonbender';
-    }
-}
-
+// Internal function to update archetype display based on current selections
 function updateArchetypeInfo() {
-    const fighter1Id = DOM.fighter1Select.value || null;
-    const fighter2Id = DOM.fighter2Select.value || null;
-    const locationId = DOM.locationSelect.value || null;
+    const fighter1Id = DOM_SHARED.fighter1Select.value || null;
+    const fighter2Id = DOM_SHARED.fighter2Select.value || null;
+    const locationId = DOM_SHARED.locationSelect.value || null;
     const archetypeData = resolveArchetypeLabel(fighter1Id, fighter2Id, locationId);
     renderArchetypeDisplay(archetypeData, {
-        container: DOM.archetypeContainer,
-        headline: DOM.archetypeHeadline,
-        introA: DOM.archetypeIntroA,
-        introB: DOM.archetypeIntroB,
-        error: DOM.archetypeError
+        container: DOM_SHARED.archetypeContainer,
+        headline: DOM_SHARED.archetypeHeadline,
+        introA: DOM_SHARED.archetypeIntroA,
+        introB: DOM_SHARED.archetypeIntroB,
+        error: DOM_SHARED.archetypeError
     });
 }
 
-function createCharacterCard(character, fighterKey) {
-    const card = document.createElement('div');
-    card.className = 'character-card';
-    if (character) {
-        card.classList.add(getElementClass(character));
-        card.dataset.id = character.id;
-        const image = document.createElement('img');
-        image.src = character.imageUrl;
-        image.alt = character.name;
-        image.loading = 'lazy';
-        card.appendChild(image);
-
-        const name = document.createElement('h3');
-        name.textContent = character.name;
-        card.appendChild(name);
-
-        card.addEventListener('click', () => {
-            handleCardSelection(character, fighterKey, card);
-        });
-    } else {
-        card.textContent = "Error: Char Undefined";
-    }
-    return card;
-}
-
-function handleCardSelection(character, fighterKey, selectedCard) {
-    if (!character) return;
-    const grid = fighterKey === 'fighter1' ? DOM.fighter1Grid : DOM.fighter2Grid;
-    const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
-    const hiddenInput = fighterKey === 'fighter1' ? DOM.fighter1Select : DOM.fighter2Select;
-
-    const otherFighterInput = fighterKey === 'fighter1' ? DOM.fighter2Select : DOM.fighter1Select;
-    if (otherFighterInput.value === character.id) {
-        alert("A fighter cannot battle themselves. Please choose a different opponent.");
-        return;
-    }
-
-    if (grid) grid.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
-    selectedCard.classList.add('selected');
-    if (nameDisplay) nameDisplay.textContent = character.name;
-    if (hiddenInput) hiddenInput.value = character.id;
+// Function passed to character/location selection modules to update archetype display on selection
+function onSelectionChanged() {
     updateArchetypeInfo();
 }
 
-function populateCharacterGrids() {
-    if (!DOM.fighter1Grid || !DOM.fighter2Grid) {
-        console.error("Character grids not found in DOM for population.");
-        return;
-    }
-    DOM.fighter1Grid.innerHTML = '';
-    DOM.fighter2Grid.innerHTML = '';
-    if (typeof characters !== 'object' || characters === null) {
-        console.error("`characters` data is not a valid object.");
-        DOM.fighter1Grid.textContent = "Character data error.";
-        DOM.fighter2Grid.textContent = "Character data error.";
-        return;
-    }
-    const characterList = Object.values(characters);
-
-    const availableCharacters = characterList.filter(c => c && c.id && c.name && c.techniques && c.techniques.length > 0);
-    const sortedCharacters = availableCharacters.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-
-    if (sortedCharacters.length === 0) {
-        console.warn("No available characters with techniques to populate grids.");
-        DOM.fighter1Grid.textContent = "No characters available.";
-        DOM.fighter2Grid.textContent = "No characters available.";
-        return;
-    }
-
-    sortedCharacters.forEach(character => {
-        const card1 = createCharacterCard(character, 'fighter1');
-        const card2 = createCharacterCard(character, 'fighter2');
-        DOM.fighter1Grid.appendChild(card1);
-        DOM.fighter2Grid.appendChild(card2);
-    });
-}
-
-function createLocationCard(locationData, locationId) {
-    const card = document.createElement('div');
-    card.className = 'location-card';
-    if (locationData) {
-        card.dataset.id = locationId;
-        const image = document.createElement('img');
-        image.src = locationData.imageUrl;
-        image.alt = locationData.name;
-        image.loading = 'lazy';
-        card.appendChild(image);
-
-        const name = document.createElement('h3');
-        name.textContent = locationData.name;
-        card.appendChild(name);
-
-        card.addEventListener('click', () => {
-            handleLocationCardSelection(locationData, locationId, card);
-        });
-    } else {
-        card.textContent = "Error: Location Undefined";
-    }
-    return card;
-}
-
-function updateEnvironmentalSummary(locationId) {
-    if (!DOM.locationEnvironmentSummary) return;
-    const locConditions = locationConditions[locationId];
-    if (!locConditions) {
-        DOM.locationEnvironmentSummary.innerHTML = 'Environmental details not available for this location.';
-        return;
-    }
-    let summaryHtml = `This location is characterized by: `;
-    const traits = [];
-    if (locConditions.isUrban) traits.push(`<span>urban</span> setting`);
-    if (locConditions.isDense) traits.push(`<span>dense</span> environment`);
-    if (locConditions.isVertical) traits.push(`<span>vertical</span> terrain`);
-    if (locConditions.isExposed) traits.push(`<span>exposed</span> areas`);
-    if (locConditions.isSlippery) traits.push(`<span>slippery</span> surfaces`);
-    if (locConditions.isHot) traits.push(`<span>intense heat</span>`);
-    if (locConditions.isCold) traits.push(`<span>cold</span> temperatures`);
-    if (locConditions.hasShiftingGround) traits.push(`<span>shifting ground</span>`);
-    if (locConditions.lowVisibility) traits.push(`<span>low visibility</span>`);
-    if (locConditions.isIndustrial) traits.push(`<span>industrial</span> elements`);
-    if (locConditions.isPrecarious) traits.push(`<span>precarious</span> footing`);
-    if (locConditions.isRocky) traits.push(`<span>rocky</span> terrain`);
-    if (locConditions.isCoastal) traits.push(`<span>coastal</span> features`);
-    if (locConditions.isSandy) traits.push(`<span>sandy</span> terrain`);
-    if (locConditions.hasCover) traits.push(`ample <span>cover</span>`);
-    if (locConditions.plantsRich) traits.push(`abundant <span>plant life</span>`);
-    if (locConditions.airRich) traits.push(`rich in <span>air</span>`);
-    if (locConditions.waterRich) traits.push(`rich in <span>water</span>`);
-    if (locConditions.iceRich) traits.push(`rich in <span>ice</span>`);
-    if (locConditions.earthRich) traits.push(`rich in <span>earth</span>`);
-    if (locConditions.metalRich) traits.push(`rich in <span>metal</span>`);
-    summaryHtml += traits.join(', ') || 'a unique atmosphere';
-
-    if (locConditions.environmentalModifiers) {
-        summaryHtml += `<br>Elemental Impact: `;
-        const elementalImpacts = [];
-        for (const element in locConditions.environmentalModifiers) {
-            const mod = locConditions.environmentalModifiers[element];
-            let impactDesc = `<span>${element}</span>: `;
-            let effects = []
-            if (mod.damageMultiplier !== undefined && mod.damageMultiplier !== 1.0) {
-                effects.push(`<span class="${mod.damageMultiplier > 1.0 ? 'positive-impact' : 'negative-impact'}">Dmg ${mod.damageMultiplier > 1.0 ? '+' : ''}${(mod.damageMultiplier * 100 - 100).toFixed(0)}%</span>`);
-            }
-            if (mod.energyCostModifier !== undefined && mod.energyCostModifier !== 1.0) {
-                effects.push(`<span class="${mod.energyCostModifier < 1.0 ? 'positive-impact' : 'negative-impact'}">Energy ${mod.energyCostModifier < 1.0 ? '-' : '+'}${(mod.energyCostModifier * 100 - 100).toFixed(0)}%</span>`);
-            }
-            impactDesc += effects.length > 0 ? effects.join(', ') : `neutral`;
-            if (mod.description) impactDesc += ` <em style="font-size:0.9em; opacity:0.8">(${mod.description})</em>`;
-            elementalImpacts.push(impactDesc);
-        }
-        summaryHtml += elementalImpacts.join('; ') || 'None notable.';
-    }
-    if (locConditions.fragility !== undefined) summaryHtml += `<br>Fragility: <span>${(locConditions.fragility * 100).toFixed(0)}%</span>.`;
-    DOM.locationEnvironmentSummary.innerHTML = summaryHtml;
-}
-
-function handleLocationCardSelection(locationData, locationId, selectedCard) {
-    if (!DOM.locationGrid || !DOM.locationNameDisplay || !DOM.locationSelect) return;
-    DOM.locationGrid.querySelectorAll('.location-card').forEach(card => card.classList.remove('selected'));
-    selectedCard.classList.add('selected');
-    DOM.locationNameDisplay.textContent = locationData ? locationData.name : "Unknown Location";
-    DOM.locationSelect.value = locationId;
-    updateEnvironmentalSummary(locationId);
-    updateArchetypeInfo();
-}
-
-function populateLocationGrid() {
-    if (!DOM.locationGrid) {
-        console.error("Location grid not found in DOM for population.");
-        return;
-    }
-    DOM.locationGrid.innerHTML = '';
-    if (typeof locations !== 'object' || locations === null) {
-        console.error("`locations` data is not a valid object.");
-        DOM.locationGrid.textContent = "Location data error.";
-        return;
-    }
-    const sortedLocations = Object.entries(locations).sort(([, a], [, b]) => (a.name || "").localeCompare(b.name || ""));
-
-    if (sortedLocations.length === 0) {
-        DOM.locationGrid.textContent = "No locations available.";
-        return;
-    }
-
-    for (const [id, locationData] of sortedLocations) {
-        if (locationData && locationData.name && locationData.imageUrl) {
-            const card = createLocationCard(locationData, id);
-            DOM.locationGrid.appendChild(card);
-        } else {
-            console.warn(`Skipping invalid location data for ID: ${id}`);
-        }
-    }
-    if (DOM.locationEnvironmentSummary) {
-        DOM.locationEnvironmentSummary.innerHTML = 'Select a battlefield to see its environmental characteristics.';
-    }
-}
-
+// Initialize time toggle handler
 function initializeTimeToggle() {
-    if (!DOM.timeToggleContainer || !DOM.timeFeedbackDisplay || !DOM.timeOfDayValue) {
-        console.error("Time toggle elements not found in DOM.");
-        return;
-    }
-    const buttons = DOM.timeToggleContainer.querySelectorAll('.time-toggle-btn');
+    const buttons = DOM_SHARED.timeToggleContainer.querySelectorAll('.time-toggle-btn');
     if (buttons.length === 0) {
         console.warn("No time toggle buttons found.");
-        DOM.timeFeedbackDisplay.innerHTML = "Time toggle unavailable.";
+        DOM_SHARED.timeFeedbackDisplay.innerHTML = "Time toggle unavailable.";
         return;
     }
-    DOM.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered.";
+    DOM_SHARED.timeFeedbackDisplay.innerHTML = "It is currently <b>Day</b>. Firebenders are empowered.";
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
             const time = button.dataset.value;
-            DOM.timeOfDayValue.value = time;
-            DOM.timeFeedbackDisplay.innerHTML = `It is now <b>${time.charAt(0).toUpperCase() + time.slice(1)}</b>. ${time === 'day' ? 'Firebenders are empowered.' : 'Waterbenders are empowered.'}`;
+            DOM_SHARED.timeOfDayValue.value = time;
+            DOM_SHARED.timeFeedbackDisplay.innerHTML = `It is now <b>${time.charAt(0).toUpperCase() + time.slice(1)}</b>. ${time === 'day' ? 'Firebenders are empowered.' : 'Waterbenders are empowered.'}`;
         });
     });
 }
 
-function updateMomentumDisplay(fighterKey, momentumValue) {
-    const momentumElement = fighterKey === 'fighter1' ? DOM.fighter1MomentumValue : DOM.fighter2MomentumValue;
-    if (!momentumElement) return;
-    momentumElement.textContent = String(momentumValue);
-    momentumElement.classList.remove('momentum-positive', 'momentum-negative', 'momentum-neutral');
-    if (momentumValue > 0) momentumElement.classList.add('momentum-positive');
-    else if (momentumValue < 0) momentumElement.classList.add('momentum-negative');
-    else momentumElement.classList.add('momentum-neutral');
-}
-
-// NEW FUNCTION: Update Escalation Display for a fighter
-function updateEscalationDisplay(fighterKey, score, state) {
-    const scoreElement = fighterKey === 'fighter1' ? DOM.fighter1IncapacitationScore : DOM.fighter2IncapacitationScore;
-    const stateElement = fighterKey === 'fighter1' ? DOM.fighter1EscalationState : DOM.fighter2EscalationState;
-    if (scoreElement) {
-        scoreElement.textContent = `Incap. Score: ${score !== undefined ? score.toFixed(1) : 'N/A'}`;
-    }
-    if (stateElement) {
-        stateElement.textContent = `Escalation: ${state || 'N/A'}`;
-        stateElement.className = 'escalation-status'; // Reset classes
-        if (state) {
-            switch (state) {
-                case ESCALATION_STATES.PRESSURED:
-                    stateElement.classList.add('escalation-pressured');
-                    break;
-                case ESCALATION_STATES.SEVERELY_INCAPACITATED:
-                    stateElement.classList.add('escalation-severe');
-                    break;
-                case ESCALATION_STATES.TERMINAL_COLLAPSE:
-                    stateElement.classList.add('escalation-terminal');
-                    break;
-                default: // NORMAL
-                    stateElement.classList.add('escalation-normal');
-                    break;
-            }
-        }
-    }
-}
-
-export function populateUI() {
-    populateCharacterGrids();
-    populateLocationGrid();
+// Main populate UI function
+export function populateAllUI() { // Renamed from populateUI
+    // Pass shared DOM elements and update callback to sub-modules
+    populateCharacterGrids(DOM_SHARED.fighter1Grid, DOM_SHARED.fighter2Grid, DOM_SHARED.fighter1NameDisplay, DOM_SHARED.fighter2NameDisplay, DOM_SHARED.fighter1Select, DOM_SHARED.fighter2Select, onSelectionChanged);
+    populateLocationGrid(DOM_SHARED.locationGrid, DOM_SHARED.locationNameDisplay, DOM_SHARED.locationSelect, DOM_SHARED.locationEnvironmentSummary, onSelectionChanged);
     initializeTimeToggle();
+    
+    updateMomentumDisplay('fighter1', 0); // Initialize momentum display
+    updateMomentumDisplay('fighter2', 0); // Initialize momentum display
+    updateEscalationDisplay('fighter1', 0, 'Normal'); // Initialize escalation display
+    updateEscalationDisplay('fighter2', 0, 'Normal'); // Initialize escalation display
+    updateArchetypeInfo(); // Initial archetype display
+}
+
+// Global reset UI function
+export function resetGlobalUI() { // Renamed from resetBattleUI
+    resetBattleResultsUI(); // Calls the centralized reset function in ui_battle-results.js
+    resetSimulationManager(); // Resets simulation manager state
+
     updateMomentumDisplay('fighter1', 0);
     updateMomentumDisplay('fighter2', 0);
-    // NEW: Initialize Escalation display
-    updateEscalationDisplay('fighter1', 0, ESCALATION_STATES.NORMAL);
-    updateEscalationDisplay('fighter2', 0, ESCALATION_STATES.NORMAL);
-    updateArchetypeInfo();
-    if (DOM.animatedLogOutput && DOM.zoomInBtn && DOM.zoomOutBtn) {
-        initializeCameraControls(DOM.animatedLogOutput, DOM.zoomInBtn, DOM.zoomOutBtn);
-    } else {
-        console.warn("Animated log output or zoom buttons not found for camera control initialization.");
-    }
+    updateEscalationDisplay('fighter1', 0, 'Normal');
+    updateEscalationDisplay('fighter2', 0, 'Normal');
 }
 
-export function showLoadingState(simulationMode) {
-    if (simulationMode === "animated") {
-        if (DOM.resultsSection) DOM.resultsSection.style.display = 'none';
-        if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.remove('hidden');
-        if (DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
-    } else {
-        if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
-        if (DOM.resultsSection) {
-            DOM.resultsSection.classList.remove('show');
-            DOM.resultsSection.style.display = 'block';
-        }
-        if (DOM.loadingSpinner) DOM.loadingSpinner.classList.remove('hidden');
-        if (DOM.battleResultsContainer) DOM.battleResultsContainer.classList.add('hidden');
-    }
-    if (DOM.battleBtn) DOM.battleBtn.disabled = true;
-    if (DOM.vsDivider) DOM.vsDivider.classList.add('clash');
-    const targetScrollElement = simulationMode === "animated" ? DOM.simulationModeContainer : DOM.resultsSection;
-    if (targetScrollElement) {
-        targetScrollElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
 
-export function showResultsState(battleResult, simulationMode) {
-    if (!battleResult || !battleResult.finalState) {
-        console.error("Invalid battleResult passed to showResultsState", battleResult);
-        if (DOM.winnerName) DOM.winnerName.textContent = "Error processing results.";
-        if (DOM.battleStory) DOM.battleStory.innerHTML = "<p>An error occurred, and results cannot be displayed.</p>";
-        if (DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden');
-        if (DOM.battleBtn) DOM.battleBtn.disabled = false;
+// Handle battle start button click
+function handleBattleStart() {
+    const f1Id = DOM_SHARED.fighter1Select.value;
+    const f2Id = DOM_SHARED.fighter2Select.value;
+    const locId = DOM_SHARED.locationSelect.value;
+    const timeOfDay = DOM_SHARED.timeOfDayValue.value;
+    const emotionalMode = DOM_SHARED.emotionalModeCheckbox.checked;
+
+    if (!f1Id || !f2Id || !locId) {
+        alert("Please select both fighters and a battlefield.");
         return;
     }
-    if (DOM.vsDivider) DOM.vsDivider.classList.remove('clash');
-    if (DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden');
-
-    const displayFinalResultsPanel = (result) => {
-        if (!DOM.winnerName || !DOM.winProbability || !DOM.battleResultsContainer || !DOM.resultsSection || !DOM.battleBtn) {
-            console.error("One or more critical DOM elements for displaying final results are missing.");
-            return;
-        }
-
-        if (result.isDraw) {
-            DOM.winnerName.textContent = `A Stalemate!`;
-            DOM.winProbability.textContent = `The battle ends in a draw.`;
-        } else if (result.winnerId && characters[result.winnerId]) {
-            DOM.winnerName.textContent = `${characters[result.winnerId].name} Wins!`;
-            DOM.winProbability.textContent = `A decisive victory.`;
-        } else {
-            DOM.winnerName.textContent = `Battle Concluded`;
-            DOM.winProbability.textContent = `Outcome details below.`;
-        }
-
-        const locationId = document.getElementById('location-value')?.value;
-        if (locationId) {
-            displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, locationId);
-        } else {
-            console.error("Location ID not found for final analysis.");
-            if (DOM.analysisList) DOM.analysisList.innerHTML = "<li>Error: Location data missing for analysis.</li>";
-        }
-
-        if (result.finalState?.fighter1) {
-            updateMomentumDisplay('fighter1', result.finalState.fighter1.momentum);
-            // NEW: Update final escalation display
-            updateEscalationDisplay('fighter1', result.finalState.fighter1.incapacitationScore, result.finalState.fighter1.escalationState);
-        }
-        if (result.finalState?.fighter2) {
-            updateMomentumDisplay('fighter2', result.finalState.fighter2.momentum);
-            // NEW: Update final escalation display
-            updateEscalationDisplay('fighter2', result.finalState.fighter2.incapacitationScore, result.finalState.fighter2.escalationState);
-        }
-
-        DOM.battleResultsContainer.classList.remove('hidden');
-        DOM.resultsSection.style.display = 'block';
-        void DOM.resultsSection.offsetWidth;
-        DOM.resultsSection.classList.add('show');
-
-        if (simulationMode === "instant" || (simulationMode === "animated" && DOM.simulationModeContainer?.classList.contains('hidden'))) {
-            DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        DOM.battleBtn.disabled = false;
-    };
-
-    if (simulationMode === "animated") {
-        if (DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = '';
-
-        const animationQueue = transformEventsToAnimationQueue(battleResult.log);
-        startSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
-            if (wasCancelledOrError && DOM.battleStory && finalBattleResult.log) {
-                DOM.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
-            }
-            displayFinalResultsPanel(finalBattleResult);
-            if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
-        });
-    } else {
-        if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
-        if (DOM.battleStory && battleResult.log) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
-        displayFinalResultsPanel(battleResult);
-    }
-}
-
-export function resetBattleUI() {
-    if (DOM.resultsSection) DOM.resultsSection.classList.remove('show');
-    if (DOM.environmentDamageDisplay) {
-        DOM.environmentDamageDisplay.textContent = '';
-        DOM.environmentDamageDisplay.className = 'environmental-damage-level';
-    }
-    if (DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '';
-    if (DOM.battleStory) DOM.battleStory.innerHTML = '';
-    if (DOM.analysisList) DOM.analysisList.innerHTML = '';
-    if (DOM.winnerName) DOM.winnerName.textContent = '';
-    if (DOM.winProbability) DOM.winProbability.textContent = '';
-    if (DOM.detailedBattleLogsContent) {
-        DOM.detailedBattleLogsContent.innerHTML = '';
-        const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
-        if (toggleBtn && !DOM.detailedBattleLogsContent.classList.contains('collapsed')) {
-            DOM.detailedBattleLogsContent.classList.add('collapsed');
-            toggleBtn.setAttribute('aria-expanded', 'false');
-            toggleBtn.textContent = 'Show Detailed Battle Logs ►';
-        }
+    if (f1Id === f2Id) {
+        alert('Please select two different fighters!');
+        return;
     }
 
-    resetSimulationManager();
-
-    updateMomentumDisplay('fighter1', 0);
-    updateMomentumDisplay('fighter2', 0);
-    // NEW: Reset Escalation display
-    updateEscalationDisplay('fighter1', 0, ESCALATION_STATES.NORMAL);
-    updateEscalationDisplay('fighter2', 0, ESCALATION_STATES.NORMAL);
+    resetGlobalUI(); // Reset all UI elements before new battle
+    showLoadingState(currentSimMode); // Show loading UI based on mode
 
     setTimeout(() => {
-        if (DOM.resultsSection && !DOM.resultsSection.classList.contains('show')) {
-            DOM.resultsSection.style.display = 'none';
+        try {
+            const rawBattleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
+            showResultsState(rawBattleResult, currentSimMode); // Display results based on mode
+        } catch (error) {
+            console.error("An error occurred during battle simulation:", error);
+            alert("A critical error occurred. Please check the console and refresh.");
+            // Re-enable button and hide loading on error
+            if (DOM_SHARED.loadingSpinner) DOM_SHARED.loadingSpinner.classList.add('hidden');
+            if (DOM_SHARED.simulationModeContainer) DOM_SHARED.simulationModeContainer.classList.add('hidden');
+            if (DOM_SHARED.battleBtn) DOM_SHARED.battleBtn.disabled = false;
+            resetSimulationManager(); // Ensure manager is reset even on error
         }
-    }, 500);
+    }, 1500);
 }
 
-function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentState, locationId) {
-    if (!DOM.analysisList) {
-        console.error("Analysis list DOM element not found.");
-        return;
-    }
-    DOM.analysisList.innerHTML = '';
-    if (!finalState || !finalState.fighter1 || !finalState.fighter2) {
-        console.error("Final state for analysis is incomplete.");
-        DOM.analysisList.innerHTML = "<li>Error: Analysis data incomplete.</li>";
-        return;
-    }
-    const { fighter1, fighter2 } = finalState;
-    const createListItem = (text, value, valueClass = 'modifier-neutral') => {
-        const li = document.createElement('li');
-        li.className = 'analysis-item';
-        const spanReason = document.createElement('span');
-        spanReason.innerHTML = text;
-        const spanValue = document.createElement('span');
-        spanValue.textContent = String(value);
-        spanValue.className = valueClass;
-        li.appendChild(spanReason);
-        li.appendChild(spanValue);
-        DOM.analysisList.appendChild(li);
-    };
-
-    const createSummaryItem = (text) => {
-        if (!text || typeof text !== 'string') return;
-        const li = document.createElement('li');
-        li.className = 'analysis-summary';
-        li.innerHTML = `<em>${text.trim()}</em>`;
-        DOM.analysisList.appendChild(li);
-    };
-
-    if (!isDraw && winnerId) {
-        const winner = winnerId === fighter1.id ? fighter1 : fighter2;
-        createSummaryItem(winner.summary || `${winner.name} demonstrated superior skill.`);
-    } else {
-        createSummaryItem("The fighters were too evenly matched for a decisive outcome.");
-    }
-
-    const spacer = document.createElement('li');
-    spacer.className = 'analysis-item-spacer';
-    DOM.analysisList.appendChild(spacer.cloneNode()); // Add a spacer
-
-    const f1_status = isDraw ? 'DRAW' : (fighter1.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
-    const f1_class = isDraw ? 'modifier-neutral' : (fighter1.id === winnerId ? 'modifier-plus' : 'modifier-minus');
-    createListItem(`<b>${fighter1.name}'s Final Status:</b>`, f1_status, f1_class);
-    createListItem(`  • Health:`, `${Math.round(fighter1.hp)} / 100 HP`);
-    createListItem(`  • Energy:`, `${Math.round(fighter1.energy)} / 100`);
-    createListItem(`  • Mental State:`, fighter1.mentalState.level.toUpperCase());
-    createListItem(`  • Momentum:`, fighter1.momentum);
-    // NEW: Display final incapacitation score and escalation state for fighter 1
-    createListItem(`  • Incapacitation Score:`, fighter1.incapacitationScore !== undefined ? fighter1.incapacitationScore.toFixed(1) : 'N/A');
-    let f1EscalationClass = 'escalation-normal'; // Default
-    if (fighter1.escalationState) {
-        switch (fighter1.escalationState) {
-            case ESCALATION_STATES.PRESSURED: f1EscalationClass = 'escalation-pressured'; break;
-            case ESCALATION_STATES.SEVERELY_INCAPACITATED: f1EscalationClass = 'escalation-severe'; break;
-            case ESCALATION_STATES.TERMINAL_COLLAPSE: f1EscalationClass = 'escalation-terminal'; break;
-        }
-    }
-    createListItem(`  • Escalation State:`, fighter1.escalationState || 'N/A', f1EscalationClass);
-
-    const f2_status = isDraw ? 'DRAW' : (fighter2.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
-    const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
-    createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
-    createListItem(`  • Health:`, `${Math.round(fighter2.hp)} / 100 HP`);
-    createListItem(`  • Energy:`, `${Math.round(fighter2.energy)} / 100`);
-    createListItem(`  • Mental State:`, fighter2.mentalState.level.toUpperCase());
-    createListItem(`  • Momentum:`, fighter2.momentum);
-    // NEW: Display final incapacitation score and escalation state for fighter 2
-    createListItem(`  • Incapacitation Score:`, fighter2.incapacitationScore !== undefined ? fighter2.incapacitationScore.toFixed(1) : 'N/A');
-    let f2EscalationClass = 'escalation-normal'; // Default
-    if (fighter2.escalationState) {
-        switch (fighter2.escalationState) {
-            case ESCALATION_STATES.PRESSURED: f2EscalationClass = 'escalation-pressured'; break;
-            case ESCALATION_STATES.SEVERELY_INCAPACITATED: f2EscalationClass = 'escalation-severe'; break;
-            case ESCALATION_STATES.TERMINAL_COLLAPSE: f2EscalationClass = 'escalation-terminal'; break;
-        }
-    }
-    createListItem(`  • Escalation State:`, fighter2.escalationState || 'N/A', f2EscalationClass);
-
-    DOM.analysisList.appendChild(spacer.cloneNode());
-
-    const currentLocData = locationConditions[locationId];
-    if (environmentState && DOM.environmentDamageDisplay && DOM.environmentImpactsList && currentLocData && currentLocData.damageThresholds) {
-        DOM.environmentDamageDisplay.textContent = `Environmental Damage: ${environmentState.damageLevel.toFixed(0)}%`;
-        let damageClass = '';
-        if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) damageClass = 'catastrophic-damage';
-        else if (environmentState.damageLevel >= currentLocData.damageThresholds.severe) damageClass = 'high-damage';
-        else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) damageClass = 'medium-damage';
-        else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) damageClass = 'low-damage';
-        DOM.environmentDamageDisplay.className = `environmental-damage-level ${damageClass}`;
-        DOM.environmentImpactsList.innerHTML = '';
-        if (environmentState.specificImpacts && environmentState.specificImpacts.size > 0) {
-            environmentState.specificImpacts.forEach(impact => {
-                if (typeof impact === 'string') {
-                    const li = document.createElement('li');
-                    li.textContent = impact;
-                    DOM.environmentImpactsList.appendChild(li);
-                }
-            });
-        } else {
-            DOM.environmentImpactsList.innerHTML = '<li>The environment sustained minimal noticeable damage.</li>';
-        }
-    } else {
-        if (DOM.environmentDamageDisplay) DOM.environmentDamageDisplay.textContent = 'Environmental Damage: N/A';
-        if (DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '<li>No specific impact data.</li>';
-    }
-
-    if (DOM.detailedBattleLogsContent) {
-        DOM.detailedBattleLogsContent.innerHTML = '';
-
-        let allLogsHtml = "";
-
-        const formatAiLogEntries = (logEntries) => {
-            return logEntries.map(entry => {
-                if (typeof entry === 'object' && entry !== null) {
-                    let parts = [];
-                    if (entry.turn !== undefined) parts.push(`T${entry.turn}`);
-                    if (entry.phase) parts.push(`Phase:${entry.phase}`);
-                    if (entry.intent) parts.push(`Intent:${entry.intent}`);
-                    if (entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
-                    if (entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
-                    if (entry.actorState) {
-                        const as = entry.actorState;
-                        parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum} MS:${as.mental}`);
-                        // NEW: Add escalation state to AI log output
-                        if (as.escalation) parts.push(`ES:${as.escalation}`);
-                    }
-                    if (entry.consideredMoves && Array.isArray(entry.consideredMoves) && entry.consideredMoves.length > 0) {
-                        const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name || 'UnknownMove'}(${m.prob || 'N/A'})`).join(', ');
-                        parts.push(`Considered:[${topConsiderations}]`);
-                    }
-                    // NEW: Add opponent escalation state to AI log if present
-                    if (entry.opponentEscalation) {
-                        parts.push(`OppES:${entry.opponentEscalation}`);
-                    }
-                    if (parts.length === 0) return JSON.stringify(entry);
-                    return parts.join(' | ');
-                }
-                return String(entry).replace(/</g, "<").replace(/>/g, ">");
-            }).join('<br>');
-        };
-
-        if (fighter1.aiLog && fighter1.aiLog.length > 0) {
-            const logTitleF1 = `<strong>${fighter1.name}'s AI Decision Log:</strong><br>`;
-            const logPreF1 = `<pre><code>${formatAiLogEntries(fighter1.aiLog)}</code></pre>`;
-            allLogsHtml += `<div class="ai-log-fighter">${logTitleF1}${logPreF1}</div>`;
-        }
-
-        if (fighter2.aiLog && fighter2.aiLog.length > 0) {
-            const logTitleF2 = `<strong>${fighter2.name}'s AI Decision Log:</strong><br>`;
-            const logPreF2 = `<pre><code>${formatAiLogEntries(fighter2.aiLog)}</code></pre>`;
-            allLogsHtml += `<div class="ai-log-fighter">${logTitleF2}${logPreF2}</div>`;
-        }
-
-        if (allLogsHtml) {
-            DOM.detailedBattleLogsContent.innerHTML = allLogsHtml;
-        } else {
-            DOM.detailedBattleLogsContent.innerHTML = '<p><em>No detailed AI logs available for this battle.</em></p>';
-        }
+// Handle simulation mode radio button change
+let currentSimMode = "animated"; // Default mode
+function handleModeSelectionChange(event) {
+    if (event.target.name === "simulationMode") {
+        currentSimMode = event.target.value;
+        setSimulationMode(currentSimMode);
+        console.log("Simulation mode changed to:", currentSimMode);
     }
 }
+
+// Initial setup on DOMContentLoaded
+function init() {
+    // Populate grids and initial displays
+    populateAllUI();
+
+    // Initialize simulation manager with specific DOM references
+    initializeSimulationManagerDOM({
+        simulationContainer: DOM_SHARED.simulationModeContainer,
+        cancelButton: DOM_SHARED.cancelSimulationBtn,
+        battleResultsContainer: DOM_SHARED.battleResultsContainer,
+        winnerNameDisplay: DOM_SHARED.winnerName,
+        analysisListDisplay: DOM_SHARED.analysisList,
+        battleStoryDisplay: DOM_SHARED.battleStory,
+        animatedLogOutput: DOM_SHARED.animatedLogOutput,
+        zoomInBtn: DOM_SHARED.zoomInBtn,
+        zoomOutBtn: DOM_SHARED.zoomOutBtn,
+    });
+    setSimulationMode(currentSimMode); // Set initial mode in manager
+
+    // Event listeners
+    const modeSelectionContainer = document.querySelector('.mode-selection-section');
+    if (modeSelectionContainer) {
+        modeSelectionContainer.addEventListener('change', handleModeSelectionChange);
+    } else {
+        console.error("Mode selection container not found for event listener setup.");
+    }
+    const defaultModeRadio = document.getElementById(`mode-${currentSimMode}`);
+    if (defaultModeRadio) {
+        defaultModeRadio.checked = true;
+    }
+
+    if (DOM_SHARED.battleBtn) {
+        DOM_SHARED.battleBtn.addEventListener('click', handleBattleStart);
+    } else {
+        console.error("Battle button not found.");
+    }
+
+    setupDetailedLogControls(); // Setup detailed log expand/copy functionality
+    initializeDevModeUI(); // Initialize Dev Mode UI (if enabled)
+}
+
+document.addEventListener('DOMContentLoaded', init);

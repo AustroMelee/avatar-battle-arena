@@ -3,7 +3,9 @@
 
 // Version 1.2: Implemented full redirection success/failure logic with detailed return object.
 
-import { effectivenessLevels } from './narrative-v2.js'; // For narrative flavor consistency
+// --- UPDATED IMPORT ---
+import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
+// --- END UPDATED IMPORT ---
 
 // --- LIGHTNING REDIRECTION CONSTANTS ---
 const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.75; // Zuko is pretty good
@@ -93,7 +95,7 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         };
     } else {
         // Failed Redirection
-        console.log(`[REDIRECTION FAILED]: ${defender.name} failed to redirect. Lightning hit.`);
+        console.log(`[REDIRECTION FAILED]: ${defender.name} fails to fully redirect the lightning.`);
         interactionLog.push(`[REDIRECTION FAIL]: ${defender.name} fails to fully redirect the lightning.`);
         defender.aiLog.push(`[Redirection Result]: FAILED!`);
         attacker.aiLog.push(`[Redirection Result]: ${defender.name} failed to redirect the lightning! Attack proceeds.`);

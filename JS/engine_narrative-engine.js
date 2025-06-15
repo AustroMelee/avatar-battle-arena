@@ -8,7 +8,16 @@
 //  - Added specific `impactPhrases` for these redirection outcomes.
 // ====================================================================================
 
-import { effectivenessLevels, phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives } from './narrative-v2.js';
+// --- UPDATED IMPORTS ---
+import { effectivenessLevels } from './data_narrative_effectiveness.js';
+import { phaseTemplates } from './data_narrative_phases.js';
+import { impactPhrases } from './data_narrative_outcomes.js';
+import { collateralImpactPhrases } from './data_narrative_collateral.js';
+import { introductoryPhrases } from './data_narrative_introductions.js';
+import { postBattleVictoryPhrases } from './data_narrative_postbattle.js';
+import { escalationStateNarratives } from './data_narrative_escalation.js';
+// --- END UPDATED IMPORTS ---
+
 import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
@@ -230,7 +239,7 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
         isEnvironmental: (type === 'environmental'),
         html_content: htmlContent,
     };
-}
+ }
 
 export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}) {
     let introPhrase = '';
@@ -344,7 +353,7 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     let fullDescText;
     // For redirected actions, the introPhrase might already be set by the redirection logic.
     // We want the main "move description" to be the impact sentence.
-    if (result.isRedirectedAction) {
+    if (result.isReactedAction) {
         fullDescText = impactSentence; // The introPhrase is handled by the narrativeEventsToPrepend
     } else if (introPhrase.includes(actor.name)) {
         fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;

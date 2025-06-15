@@ -1,8 +1,10 @@
 // FILE: data_characters_antagonists.js
 'use strict';
 
+// Aggregates Antagonist character data.
+
 // Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
-// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
+// No direct import needed here.
 
 export const antagonistCharacters = {
     'azula': {
@@ -185,7 +187,7 @@ export const antagonistCharacters = {
                 'zuko': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "You were always a failure, Zuko. Weak and ungrateful." }] } } } },
                 'aang-airbending-only': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "So, the Avatar has come to meet his end." }] } } }
             }
-        }, // <-- Missing closing brace for 'narrative' was here
+        },
         techniques: [
             { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
             { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 60, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'], collateralImpact: 'low' },
@@ -281,7 +283,7 @@ export const antagonistCharacters = {
                 'azula': { narrative: { onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } } },
                 'ty-lee': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Ty Lee, can we not do this?" }] } } }
             }
-        }, // <-- Missing closing brace for 'narrative' was here
+        },
         techniques: [
             { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
             { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'], collateralImpact: 'none' },
@@ -371,7 +373,7 @@ export const antagonistCharacters = {
             relationships: {
                 'mai': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Aww, don't be so gloomy, Mai! Let's play!" }] } } }
             }
-        }, // <-- Missing closing brace for 'narrative' was here
+        },
         techniques: [
             { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Distracted', duration: 1, intensity: 1.2 }, collateralImpact: 'none' },
             { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'], collateralImpact: 'none' },
@@ -382,4 +384,4 @@ export const antagonistCharacters = {
         quotes: { postWin: ["Looks like your chi's... on vacation!"], postWin_overwhelming: ["Ta-da! That's how it's done!"], postWin_specific: { 'mai': "Sorry, Mai! Your aura is still a lovely shade of gloomy pink, though!" } },
         relationships: {}
     }
-}; // Correctly closes the antagonistCharacters object
+};

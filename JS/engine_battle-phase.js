@@ -1,6 +1,10 @@
 // FILE: js/engine_battle-phase.js
 'use strict';
 
+// --- UPDATED IMPORT ---
+import { battlePhases as phaseDefinitions } from './data_narrative_phases.js'; // Corrected import path
+// --- END UPDATED IMPORT ---
+
 export const BATTLE_PHASES = {
     EARLY: 'Early', 
     MID: 'Mid',     

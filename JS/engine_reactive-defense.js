@@ -1,6 +1,11 @@
 // FILE: engine_reactive-defense.js
 'use strict';
 
+// Version 1.2: Implemented full redirection success/failure logic with detailed return object.
+
+// --- UPDATED IMPORT ---
+import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
+// --- END UPDATED IMPORT ---
 import { attemptLightningRedirection } from './engine_lightning-redirection.js';
 
 /**

@@ -5,14 +5,20 @@
 
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
-import { phaseTemplates, battlePhases as phaseDefinitions } from './narrative-v2.js';
+// --- UPDATED IMPORTS ---
+import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases. // Corrected import path
+// --- END UPDATED IMPORTS ---
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
-import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens, generateEscalationNarrative, generateActionDescriptionObject } from './engine_narrative-engine.js'; // ADDED generateActionDescriptionObject HERE
+import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens, generateEscalationNarrative, generateActionDescriptionObject } from './engine_narrative-engine.js';
 import { modifyMomentum } from './engine_momentum.js';
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
-import { universalMechanics, locationCurbstompRules, characterCurbstompRules } from './mechanics.js';
+// --- UPDATED IMPORTS for Mechanics ---
+import { universalMechanics } from './data_mechanics_universal.js'; // From new file
+import { locationCurbstompRules } from './data_mechanics_locations.js'; // From new file
+import { characterCurbstompRules } from './data_mechanics_characters.js'; // From new file
+// --- END UPDATED IMPORTS for Mechanics ---
 import { calculateIncapacitationScore, determineEscalationState, ESCALATION_STATES } from './engine_escalation.js';
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 

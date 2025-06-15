@@ -1,8 +1,10 @@
 // FILE: data_characters_masters.js
 'use strict';
 
+// Aggregates Master character data.
+
 // Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
-// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed
+// No direct import needed here.
 
 export const masterCharacters = {
 'bumi': {

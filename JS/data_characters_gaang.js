@@ -1,9 +1,10 @@
 // FILE: data_characters_gaang.js
 'use strict';
 
+// Aggregates Gaang character data.
+
 // Assuming ESCALATION_STATES is globally available or imported where this data is consumed.
-// For example, if data_characters.js imports ESCALATION_STATES and then these objects.
-// import { ESCALATION_STATES } from '../engine/engine_escalation.js'; // Adjust path as needed for direct use
+// No direct import needed here, as it's typically used by logic files (like engine_escalation.js)
 
 export const gaangCharacters = {
     'sokka': {
@@ -286,7 +287,7 @@ export const gaangCharacters = {
             },
             onCollateral: {
                 causingDamage: { Generic: [{ type: 'internal', line: "I have to be careful not to hurt anything else." }, { type: 'spoken', line: "This is getting out of hand! I need to control my power." }] },
-                observingDamage: { Generic: [{ type: 'spoken', line: "Look at what you're doing! Stop this senseless destruction!" }, { type: 'internal', line: "My home... this world... it shouldn't be ravaged like this." }] },
+                observingDamage: { Generic: [{ type: 'spoken', line: "Stop! This isn't what bending is for!" }, { type: 'internal', line: "My home... this world... it shouldn't be ravaged like this." }] },
                 stressedByDamage: { Generic: [{ type: 'internal', line: "This feels wrong... so wrong. I can't think straight." }, { type: 'spoken', line: "All this chaos... it's overwhelming!" }] },
                 thrivingInDamage: []
             },
@@ -519,4 +520,4 @@ export const gaangCharacters = {
         quotes: { postWin: ["I fought for my own path. And I won."], postWin_overwhelming: ["My fire burns hotter because I fight for something real!"], postWin_specific: { 'azula': "It's over, Azula. I've found my own strength." } },
         relationships: { 'azula': { relationshipType: "sibling_rivalry_inferior", stressModifier: 2.0, resilienceModifier: 0.8 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_defiance", stressModifier: 1.8, resilienceModifier: 1.2 }, 'iroh': { relationshipType: "mentor_respect", stressModifier: 0.5, resilienceModifier: 1.5 } }
     }
-}; // Added the missing closing brace and semicolon for the exported object.
+};
