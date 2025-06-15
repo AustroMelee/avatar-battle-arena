@@ -4,8 +4,9 @@
 import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js'; 
-
-const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
+// --- MODIFICATION START: Import getRandomElement from engine_battle-engine-core.js ---
+import { getRandomElement } from './engine_battle-engine-core.js';
+// --- MODIFICATION END ---
 
 function conjugatePresent(verbPhrase) { 
     if (!verbPhrase) return '';
@@ -50,13 +51,9 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
     const actor = primaryActorForContext;
     const opponent = secondaryActorForContext;
 
-    // Prioritize explicitly passed names in additionalContext for roles like Winner, Loser, specific characterName.
-    // Fallback to actor/opponent context if specific role names are not provided.
     const actorNameDisplay = additionalContext.WinnerName || additionalContext.attackerName || additionalContext.characterName || actor?.name || 'A fighter';
     const opponentNameDisplay = additionalContext.LoserName || additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent';
     
-    // Pronouns should still primarily come from the actor/opponent objects.
-    // If a role (like Winner) is filled by 'actor', use actor's pronouns. If by 'opponent', use opponent's.
     const actorPronouns = actor?.pronouns || { s: 'they', p: 'their', o: 'them' };
     const opponentPronouns = opponent?.pronouns || { s: 'they', p: 'their', o: 'them' };
 
@@ -65,17 +62,15 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
 
 
     const replacements = {
-        '{actorName}': additionalContext.attackerName || actor?.name || 'A fighter', // Default to attacker if WinnerName not relevant
-        '{opponentName}': additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent', // Default to target if LoserName not relevant
+        '{actorName}': additionalContext.attackerName || actor?.name || 'A fighter', 
+        '{opponentName}': additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent', 
         
         '{targetName}': additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent', 
         '{attackerName}': additionalContext.attackerName || actor?.name || 'A fighter', 
         
-        '{WinnerName}': additionalContext.WinnerName || actorNameDisplay, // Fallback to actorNameDisplay if WinnerName not explicitly set
-        '{LoserName}': additionalContext.LoserName || opponentNameDisplay, // Fallback to opponentNameDisplay if LoserName not explicitly set
+        '{WinnerName}': additionalContext.WinnerName || actorNameDisplay, 
+        '{LoserName}': additionalContext.LoserName || opponentNameDisplay, 
         
-        // The primary {characterName} token should use the characterName from additionalContext if provided,
-        // otherwise fall back to a sensible default (like actorNameDisplay for general narration).
         '{characterName}': additionalContext.characterName || actorNameDisplay, 
 
         '{actor.s}': actorPronouns.s,
@@ -93,7 +88,7 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
         '{LoserPronounP}': loserPronouns.p,
         '{LoserPronounO}': loserPronouns.o,
 
-        '{possessive}': actorPronouns.p, // This is general, might need specific possessive for Winner/Loser if used
+        '{possessive}': actorPronouns.p, 
         ...additionalContext 
     };
 
@@ -374,7 +369,6 @@ export function getFinalVictoryLine(winner, loser) {
     });
 }
 
-// --- MODIFIED: generateCurbstompNarration to accept explicitContext ---
 export function generateCurbstompNarration(rule, attacker, target, isEscape = false, explicitContext = {}) {
     let textTemplate;
     let htmlClass = "narrative-curbstomp highlight-major"; 
@@ -382,43 +376,35 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
     const attackerName = attacker?.name || "Attacker";
     const targetName = target?.name || "Target";
     
-    // Determine the characterName for the {characterName} token
-    let baseCharacterForToken = attackerName; // Default
+    let baseCharacterForToken;
 
     if (explicitContext.actualVictimName) {
-        // If a specific victim is passed (e.g., for random loss or self-sabotage), use that.
         baseCharacterForToken = explicitContext.actualVictimName;
     } else if (rule.appliesToAll) {
-        // For appliesToAll rules without an explicit victim, default to target if it implies target death/loss
-        if (rule.outcome?.type?.includes("death_target") || (rule.outcome?.type?.includes("loss_character") && rule.appliesToCharacter === target?.id) ) {
+        if (rule.outcome?.type?.includes("loss_random") || rule.outcome?.type?.includes("loss_weighted") || rule.outcome?.type?.includes("death_target")) {
+            baseCharacterForToken = targetName; 
+        } else if (rule.outcome?.type?.includes("loss_character") && rule.appliesToCharacter === target?.id) {
             baseCharacterForToken = targetName;
+        } else {
+            baseCharacterForToken = attackerName; 
         }
-        // Otherwise, for appliesToAll, it defaults to attackerName (as set initially)
     } else if (rule.appliesToCharacter) {
-        // If the rule applies to a specific character ID (not the generic attacker/target passed)
         baseCharacterForToken = characterData[rule.appliesToCharacter]?.name || (rule.appliesToCharacter === attacker?.id ? attackerName : targetName);
+    } else {
+        baseCharacterForToken = attackerName; 
     }
 
 
     if (isEscape) {
         textTemplate = rule.outcome.escapeMessage || `{targetName} narrowly escapes ${attackerName}'s devastating attempt!`;
         htmlClass = "narrative-curbstomp highlight-escape";
-         // For escape messages, the one escaping is the "character" of interest.
-        // If explicitContext.actualVictimName isn't set, it might mean the 'target' (defender) is escaping the 'attacker'.
-        // The substitution will use `baseCharacterForToken` which defaults to attacker if not overridden.
-        // This needs to ensure `targetName` is used in escape message if no explicit victim.
-        // The current `substituteTokens` has a fallback for `{targetName}` which might cover this.
-        // Let's ensure `characterName` in `additionalContextForTokens` is the escaper (target).
-        // If `explicitContext.actualVictimName` (the one who *would have been* victimized) is provided,
-        // and it's an escape, the narrative for `{characterName}` should be about *that* character escaping.
-        if (!explicitContext.actualVictimName) { // If no explicit victim of the curbstomp (because it was escaped)
-             baseCharacterForToken = targetName; // The target is the one escaping the attacker.
+        if (!explicitContext.actualVictimName) { 
+             baseCharacterForToken = targetName; 
         }
 
     } else if (rule.outcome.type === "conditional_instant_kill_or_self_sabotage" && explicitContext.isSelfSabotageOutcome) {
         textTemplate = rule.outcome.selfSabotageMessage || `${attackerName}'s move backfires!`;
         htmlClass = "narrative-curbstomp highlight-neutral";
-        // `baseCharacterForToken` should have been set to `explicitContext.actualVictimName` (which is attackerName)
     } else {
         textTemplate = rule.outcome.successMessage || `${attackerName}'s ${rule.id} overwhelmingly defeats ${targetName}!`;
     }
@@ -426,7 +412,7 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
     let additionalContextForTokens = {
         attackerName: attackerName, 
         targetName: targetName,     
-        characterName: baseCharacterForToken, // This is the crucial change for the {characterName} token
+        characterName: baseCharacterForToken, 
         '{moveName}': explicitContext['{moveName}'] || rule.activatingMoveName || "a devastating maneuver",
     };
     
@@ -441,4 +427,3 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
         isMajorEvent: !isEscape && !(explicitContext.isSelfSabotageOutcome) 
     };
 }
-// --- END MODIFICATION ---
