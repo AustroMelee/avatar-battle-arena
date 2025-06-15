@@ -1,10 +1,9 @@
 // FILE: engine_lightning-redirection.js
 'use strict';
 
-import { effectivenessLevels } from './narrative-v2.js'; // For potential narrative flavor
-import { formatQuoteEvent } from './engine_narrative-engine.js'; // For generating narrative events
+// Version 1.1: Corrected Narrative Event Generation (No direct import of formatQuoteEvent)
 
-// --- LIGHTNING REDIRECTION CONSTANTS --- (Copied from engine_move-resolution, should be centralized if used elsewhere)
+// --- LIGHTNING REDIRECTION CONSTANTS ---
 const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.80;
 const LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW = 30;
 const LIGHTNING_REDIRECTION_HP_THRESHOLD_MID = 60;
@@ -30,7 +29,7 @@ const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.10;
  *          - stunAppliedToAttacker (number): Turns the attacker is stunned (0 if redirection fails).
  *          - momentumChangeDefender (number): Momentum change for the defender.
  *          - momentumChangeAttacker (number): Momentum change for the attacker.
- *          - narrativeEvents (Array<object>): Array of narrative event objects.
+ *          - narrativeEvents (Array<object>): Array of raw narrative event data objects.
  *          - effectivenessLabel (string): Custom label for narrative.
  *          - effectivenessEmoji (string): Custom emoji for narrative.
  */
@@ -72,17 +71,13 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         defender.aiLog.push(`[Redirection Result]: SUCCESS!`);
         attacker.aiLog.push(`[Redirection Result]: Lightning successfully redirected by ${defender.name}!`);
 
-        // Narrative for successful redirection
-        narrativeEvents.push(formatQuoteEvent(
-            { type: 'action', line: `${defender.name} skillfully catches ${attacker.name}'s lightning, channeling its immense power!` },
-            defender,
-            attacker
-        ));
-        narrativeEvents.push(formatQuoteEvent(
-            { type: 'action', line: `With a defiant roar, ${defender.name} unleashes the redirected energy back at a stunned ${attacker.name}!` },
-            defender,
-            attacker
-        ));
+        // Raw narrative event data for successful redirection
+        narrativeEvents.push(
+            { quote: { type: 'action', line: `${defender.name} skillfully catches ${attacker.name}'s lightning, channeling its immense power!` }, actor: defender, isMoveExecutionQuote: false }
+        );
+        narrativeEvents.push(
+            { quote: { type: 'action', line: `With a defiant roar, ${defender.name} unleashes the redirected energy back at a stunned ${attacker.name}!` }, actor: defender, isMoveExecutionQuote: false }
+        );
 
         return {
             attempted: true,
@@ -91,7 +86,7 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
             stunAppliedToAttacker: 1, // Attacker stunned for 1 turn
             momentumChangeDefender: 3,
             momentumChangeAttacker: -2,
-            narrativeEvents,
+            narrativeEvents, // Pass the array of raw event data
             effectivenessLabel: "RedirectedSuccess",
             effectivenessEmoji: "⚡↩️"
         };
@@ -102,17 +97,13 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         attacker.aiLog.push(`[Redirection Result]: ${defender.name} failed to redirect the lightning!`);
 
 
-        // Narrative for failed redirection
-        narrativeEvents.push(formatQuoteEvent(
-            { type: 'action', line: `${defender.name} attempts to intercept the lightning, but its power is overwhelming!` },
-            defender,
-            attacker
-        ));
-        narrativeEvents.push(formatQuoteEvent(
-            { type: 'action', line: `Though some energy is deflected, ${defender.name} is struck by the fierce attack, staggering from the blow!` },
-            defender,
-            attacker
-        ));
+        // Raw narrative event data for failed redirection
+        narrativeEvents.push(
+            { quote: { type: 'action', line: `${defender.name} attempts to intercept the lightning, but its power is overwhelming!` }, actor: defender, isMoveExecutionQuote: false }
+        );
+        narrativeEvents.push(
+            { quote: { type: 'action', line: `Though some energy is deflected, ${defender.name} is struck by the fierce attack, staggering from the blow!` }, actor: defender, isMoveExecutionQuote: false }
+        );
 
         return {
             attempted: true,
@@ -121,7 +112,7 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
             stunAppliedToAttacker: 0,
             momentumChangeDefender: -1,
             momentumChangeAttacker: 1, // Attacker gains some momentum as their attack partially lands
-            narrativeEvents,
+            narrativeEvents, // Pass the array of raw event data
             effectivenessLabel: "RedirectedFail",
             effectivenessEmoji: "⚡🤕"
         };
