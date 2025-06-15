@@ -1,8 +1,9 @@
 // FILE: js/narrative-v2.js
 // ====================================================================================
-//  Narrative Engine Library (v3.5 - Escalation Tuning Pass 1.1 - Narrative Clarity)
+//  Narrative Engine Library (v3.6 - Lightning Redirection Narrative)
 // ====================================================================================
-//  - Added `EscalationFinisher` category to `introductoryPhrases`.
+//  - Added `RedirectedSuccess` and `RedirectedFail` effectiveness levels.
+//  - Added specific `impactPhrases` for these redirection outcomes.
 // ====================================================================================
 
 export const battlePhases = [
@@ -15,7 +16,9 @@ export const effectivenessLevels = {
     WEAK: { label: "Weak", emoji: "💤" },
     NORMAL: { label: "Normal", emoji: "⚔️" },
     STRONG: { label: "Strong", emoji: "🔥" },
-    CRITICAL: { label: "Critical", emoji: "💥" }
+    CRITICAL: { label: "Critical", emoji: "💥" },
+    REDIRECTED_SUCCESS: { label: "RedirectedSuccess", emoji: "⚡↩️" }, // New
+    REDIRECTED_FAIL: { label: "RedirectedFail", emoji: "⚡🤕" }      // New
 };
 
 export const phaseTemplates = {
@@ -72,7 +75,6 @@ export const introductoryPhrases = {
         "With calculated precision,", "Calmly, and with focus,", "Finding a perfect opening,", "Effortlessly,",
         "With an air of supreme confidence,", "Taking the offensive,", "Without hesitation,", "With a quick movement,"
     ],
-    // NEW CATEGORY FOR NARRATIVE CLARITY
     EscalationFinisher: [
         "Sensing the end is near for {opponentName},",
         "Moving in for the final blow against the weakened {opponentName},",
@@ -135,6 +137,16 @@ export const impactPhrases = {
         CRITICAL: [
             "A devastating hit! {targetName} is overwhelmed completely.", "The technique is executed perfectly, leaving {targetName} staggered and vulnerable.", "An incredible strike! {targetName} is knocked to the ground.",
             "The decisive strike connects, leaving no room for recovery.", "A flawless attack! {targetName} has no answer.", "The hit is perfectly placed, causing maximum damage.", "A critical blow that changes the course of the battle."
+        ],
+        REDIRECTEDSUCCESS: [ // New impact phrases for successful redirection
+            "{actorName} catches the lightning, channeling its raw power through {actor.p} body!",
+            "With incredible skill, {actorName} absorbs the lightning, redirecting its fury back at {targetName}!",
+            "The lightning arcs harmlessly around {actorName} as {actor.s} sends it surging towards {targetName}, who is now stunned by the redirected blast!"
+        ],
+        REDIRECTEDFAIL: [ // New impact phrases for failed redirection
+            "{actorName} struggles to control the lightning, {actor.p} body convulsing as some of its power courses through {actor.o}!",
+            "The redirection attempt falters! {actorName} is struck by a portion of the lightning, staggering from the impact!",
+            "Though {actorName} tries to divert it, the lightning proves too powerful, searing {actor.o} despite the effort."
         ]
     },
     DEFENSE: {

@@ -1,4 +1,4 @@
-// FILE: js/data_archetype_zuko.js
+// FILE: data_archetype_zuko.js
 'use strict';
 
 // Archetype data for Zuko vs. all other characters and locations.
@@ -243,116 +243,116 @@ export const zukoArchetypeData = {
     'azula': {
         'eastern-air-temple': {
             label: "Sky-High Sibling Firestorm: Zuko vs. Azula",
-            introA: "Zuko's passionate orange flames clash with Azula's cold blue fire amidst the ancient, windswept platforms of the Eastern Air Temple.",
-            introB: "Azula, with chilling precision and grace, hunts her brother Zuko, their deadly firebending ballet threatening to shatter the sacred site."
+            introA: "Zuko's passionate orange flames clash with Azula's cold blue fire amidst the ancient, windswept platforms of the Eastern Air Temple, a battle of old wounds and new resolve.",
+            introB: "Azula, with chilling precision and grace, hunts her brother Zuko, their deadly firebending ballet threatening to shatter the sacred site and any hope of reconciliation."
         },
         'northern-water-tribe': {
             label: "Frozen Agni Kai: Zuko vs. Azula at World's Edge",
-            introA: "Zuko's desperate fire struggles against the arctic cold and Azula's even colder, more powerful blue flames in their Northern Water Tribe confrontation.",
-            introB: "Azula, her fire burning with terrifying intensity even in the frozen north, aims to extinguish Zuko's defiant spark for good."
+            introA: "Zuko's desperate fire struggles against the arctic cold and Azula's even colder, more powerful blue flames. He knows her tricks, but can he withstand her perfect, chilling assault?",
+            introB: "Azula, her fire burning with terrifying intensity even in the frozen north, aims to extinguish Zuko's defiant spark for good, a cruel smile playing on her lips."
         },
         'ba-sing-se': {
             label: "City of Secrets, Sibling Showdown: Zuko vs. Azula",
-            introA: "Zuko confronts Azula in the shadowed alleys and grand courtyards of Ba Sing Se, their family's dark drama playing out in flashes of fire.",
-            introB: "Azula, mastermind of the city's fall, meets Zuko's challenge with manipulative words and perfectly executed blue fire attacks."
+            introA: "Zuko confronts Azula in the shadowed alleys and grand courtyards of Ba Sing Se, their family's dark drama playing out in flashes of fire and lightning. He must not fall for her manipulations again.",
+            introB: "Azula, mastermind of the city's fall, meets Zuko's challenge with manipulative words and perfectly executed blue fire attacks. She knows his weaknesses all too well."
         },
         'si-wong-desert': {
             label: "Desert Duel of Dragons: Zuko vs. Azula",
-            introA: "Zuko's fire, amplified by the desert sun, meets Azula's equally potent blue flames in a scorching battle across the endless sands.",
-            introB: "Azula, a terrifying mirage of blue fire and lightning, toys with Zuko, her power and cruelty thriving in the desolate wasteland."
+            introA: "Zuko's fire, amplified by the desert sun, meets Azula's equally potent blue flames in a scorching battle across the endless sands. This is a test of endurance as much as skill.",
+            introB: "Azula, a terrifying mirage of blue fire and lightning, toys with Zuko, her power and cruelty thriving in the desolate wasteland. She expects him to break."
         },
         'foggy-swamp': {
             label: "Swamp of Shadows, Sibling Strife: Zuko vs. Azula",
-            introA: "Zuko's troubled fire cuts through the swamp's disorienting mists as he faces Azula, whose own inner demons seem to manifest in her cold flames.",
-            introB: "Azula, her perfect control unwavering even in the eerie swamp, uses the terrain's illusions to enhance her deadly attacks on Zuko."
+            introA: "Zuko's troubled fire cuts through the swamp's disorienting mists as he faces Azula, whose own inner demons seem to manifest in her cold flames and sharp taunts. He must remain focused.",
+            introB: "Azula, her perfect control unwavering even in the eerie swamp, uses the terrain's illusions to enhance her deadly attacks on Zuko. She sees the swamp as another tool."
         },
         'boiling-rock': {
             label: "Volcanic Agni Kai: Zuko vs. Azula at the Prison's Heart",
-            introA: "Zuko and Azula's fiery sibling rivalry erupts in the superheated core of the Boiling Rock, a battle of raw power and fractured sanity.",
-            introB: "Azula, her blue fire burning with chilling intensity, confronts Zuko amidst the molten chaos, their duel threatening to destroy the prison."
+            introA: "Zuko and Azula's fiery sibling rivalry erupts in the superheated core of the Boiling Rock, a battle of raw power and fractured sanity. He knows her lightning is a threat.",
+            introB: "Azula, her blue fire burning with chilling intensity, confronts Zuko amidst the molten chaos, their duel threatening to destroy the prison. She considers using lightning, but waits for the perfect moment."
         },
         'fire-nation-capital': {
             label: "Agni Kai: Destiny of Fire",
-            introA: "Zuko, his path finally clear, confronts his sister Azula in a climactic Agni Kai for the fate of the Fire Nation.",
-            introB: "Azula, her sanity crumbling but her firebending as deadly as ever, faces her brother, Zuko, in a battle of blue and orange flames."
+            introA: "Zuko, his path finally clear, confronts his sister Azula in a climactic Agni Kai for the fate of the Fire Nation. He anticipates her lightning, ready to redirect if necessary.",
+            introB: "Azula, her sanity crumbling but her firebending as deadly as ever, faces her brother, Zuko. She knows he can redirect lightning; she'll only use it if she's certain of success, or desperate."
         },
         'omashu': {
             label: "Omashu's Fall, Siblings' Fire: Zuko vs. Azula",
-            introA: "Zuko, perhaps aiding in Omashu's defense or its conquest alongside Azula, finds their paths crossing in a fiery, inevitable clash.",
-            introB: "Azula, always a step ahead, uses Omashu's complex structures to trap and outmaneuver Zuko, her blue fire a constant threat."
+            introA: "Zuko, perhaps aiding in Omashu's defense, finds his path crossing Azula's in a fiery, inevitable clash. He must be wary of her cunning and lightning.",
+            introB: "Azula, always a step ahead, uses Omashu's complex structures to trap and outmaneuver Zuko, her blue fire a constant threat. She might use lightning if Zuko presents an undeniable opening."
         },
         'great-divide': {
             label: "Canyon of Broken Bonds: Zuko vs. Azula",
-            introA: "Zuko's passionate, uncontrolled fire echoes his turmoil as he battles Azula, whose precise blue flames carve through the canyon rock.",
-            introB: "Azula, with terrifying agility and power, corners Zuko in the Great Divide, their sibling rivalry reaching a precipice."
+            introA: "Zuko's passionate, uncontrolled fire echoes his turmoil as he battles Azula, whose precise blue flames carve through the canyon rock. He must ground himself, or her lightning will find him.",
+            introB: "Azula, with terrifying agility and power, corners Zuko in the Great Divide, their sibling rivalry reaching a precipice. Zuko's instability might offer her the chance for a lightning strike."
         },
         'kyoshi-island': {
             label: "Island Inferno, Royal Rumble: Zuko vs. Azula",
-            introA: "Zuko's invasion (or defense) of Kyoshi Island inevitably leads to a confrontation with Azula, their contrasting fire styles painting the sky.",
-            introB: "Azula, seeing Kyoshi Island as another pawn in her game, meets Zuko's challenge with her signature blue fire and chilling superiority."
+            introA: "Zuko's invasion (or defense) of Kyoshi Island inevitably leads to a confrontation with Azula, their contrasting fire styles painting the sky. He watches her every move for signs of lightning.",
+            introB: "Azula, seeing Kyoshi Island as another pawn in her game, meets Zuko's challenge with her signature blue fire and chilling superiority. She will use lightning if he falters."
         },
         '_DEFAULT_LOCATION_': {
             label: "Brother Against Sister: Zuko vs. Azula",
-            introA: "Zuko, fighting for his honor and redemption, stands against his prodigiously powerful and ruthless sister, Azula.",
-            introB: "Azula, the perfectionist firebending master, aims to crush her brother Zuko and prove her undeniable superiority."
+            introA: "Zuko, fighting for his honor and redemption, stands against his prodigiously powerful and ruthless sister, Azula. He must be prepared for her lightning.",
+            introB: "Azula, the perfectionist firebending master, aims to crush her brother Zuko and prove her undeniable superiority. She is aware of his redirection and will choose her moment carefully for lightning."
         }
     },
     // --- Zuko vs Ozai (ozai-not-comet-enhanced) ---
     'ozai-not-comet-enhanced': {
         'eastern-air-temple': {
             label: "Sky Sanctuary's Judgment: Zuko vs. Fire Lord Ozai",
-            introA: "Zuko, having chosen a new path, confronts his father Ozai amidst the sacred Air Temples, his fire a symbol of defiance.",
-            introB: "Ozai, his power absolute, sees Zuko's rebellion as a final, pathetic insult to be burned away at the ancient site."
+            introA: "Zuko, having chosen a new path, confronts his father Ozai amidst the sacred Air Temples, his fire a symbol of defiance and a challenge to tyranny. He knows Ozai's lightning is a grave danger.",
+            introB: "Ozai, his power absolute, sees Zuko's rebellion as a final, pathetic insult to be burned away. He may unleash lightning to assert his dominance quickly."
         },
         'northern-water-tribe': {
             label: "Frozen Throne, Fiery Reckoning: Zuko vs. Ozai",
-            introA: "Zuko challenges his father's tyrannical rule, their cataclysmic firebending duel threatening to melt the Northern Water Tribe's icy heart.",
-            introB: "Ozai, facing his traitorous son, unleashes an inferno meant to not only defeat Zuko but erase his defiance from the world."
+            introA: "Zuko challenges his father's tyrannical rule, their cataclysmic firebending duel threatening to melt the Northern Water Tribe's icy heart. Ozai's lightning is a constant threat in this desperate battle.",
+            introB: "Ozai, facing his traitorous son, unleashes an inferno meant to not only defeat Zuko but erase his defiance. Lightning is a tool of swift punishment in his eyes."
         },
         'ba-sing-se': {
             label: "City of Ashes, Son's Defiance: Zuko vs. Ozai",
-            introA: "Zuko stands against his father amidst the burning ruins of Ba Sing Se, his fire a desperate shield for the fallen Earth Kingdom.",
-            introB: "Ozai, the Phoenix King triumphant, meets Zuko's challenge with the casual, devastating power that conquered a continent."
+            introA: "Zuko stands against his father amidst the burning ruins of Ba Sing Se, his fire a desperate shield for the fallen Earth Kingdom. He must be ready for Ozai's devastating lightning.",
+            introB: "Ozai, the Phoenix King triumphant, meets Zuko's challenge with casual, devastating power. He might use lightning to make a statement of his absolute control."
         },
         'si-wong-desert': {
             label: "Desert Sun, Father's Scorn: Zuko vs. Ozai",
-            introA: "Zuko, his resolve hardened by the desert's trials, confronts Ozai, whose fire seems to draw power from the very sun.",
-            introB: "Ozai, a god of fire in the desolate desert, aims to teach Zuko a final, scorching lesson in obedience and power."
+            introA: "Zuko, his resolve hardened by the desert's trials, confronts Ozai, whose fire seems to draw power from the very sun. Redirecting lightning here would be incredibly difficult but necessary.",
+            introB: "Ozai, a god of fire in the desolate desert, aims to teach Zuko a final, scorching lesson. His lightning crackles with the sun's intensity."
         },
         'foggy-swamp': {
             label: "Swamp of Lost Souls, Son's Stand: Zuko vs. Ozai",
-            introA: "Zuko, guided by a newfound clarity, faces his father Ozai in the eerie Foggy Swamp, his fire burning with purpose against tyranny.",
-            introB: "Ozai, his dark aura suffocating the swamp's life, sees Zuko's defiance as a sickness to be purged with overwhelming fire."
+            introA: "Zuko, guided by a newfound clarity, faces his father Ozai in the eerie Foggy Swamp, his fire burning with purpose against tyranny. Ozai's lightning could strike from the mists at any moment.",
+            introB: "Ozai, his dark aura suffocating the swamp's life, sees Zuko's defiance as a sickness to be purged. Lightning is a precise tool for such a task, even if Zuko might try to turn it."
         },
         'boiling-rock': {
             label: "Volcano's Heart, Father's Wrath: Zuko vs. Ozai",
-            introA: "Zuko confronts his father Ozai in the heart of the Boiling Rock, their firebending duel a cataclysm mirroring the volcano's fury.",
-            introB: "Ozai, drawing on the raw power of the earth's core, intends to make the volcanic prison Zuko's fiery tomb."
+            introA: "Zuko confronts his father Ozai in the heart of the Boiling Rock, their firebending duel a cataclysm mirroring the volcano's fury. He must be prepared to face Ozai's ultimate weapon: lightning.",
+            introB: "Ozai, drawing on the raw power of the earth's core, intends to make the volcanic prison Zuko's fiery tomb. He will use lightning if he feels Zuko is gaining any ground."
         },
         'fire-nation-capital': {
             label: "Redemption's Fire: Zuko vs. Fire Lord Ozai",
-            introA: "Zuko, having embraced his true destiny, confronts his tyrannical father, Fire Lord Ozai, in a battle to reclaim his honor and save the world.",
-            introB: "Ozai, facing his defiant son, unleashes his terrifying firebending might, intending to extinguish Zuko's rebellion."
+            introA: "Zuko, having embraced his true destiny, confronts his tyrannical father, Fire Lord Ozai. He knows this battle may come down to redirecting Ozai's terrifying lightning.",
+            introB: "Ozai, facing his defiant son in the capital, unleashes his terrifying firebending might. He knows of Zuko's redirection and will be strategic, or overwhelmingly powerful, with his lightning."
         },
         'omashu': {
             label: "Omashu's Liberation, Son's Duty: Zuko vs. Ozai",
-            introA: "Zuko, fighting to free Omashu, confronts his father Ozai, their clash of fire deciding the fate of the great Earth Kingdom city.",
-            introB: "Ozai, his conquest nearly complete, meets Zuko's rebellious fire with the overwhelming power that shattered nations."
+            introA: "Zuko, fighting to free Omashu, confronts his father Ozai, their clash of fire deciding the fate of the great Earth Kingdom city. He must be ready for the killing blow of lightning.",
+            introB: "Ozai, his conquest nearly complete, meets Zuko's rebellious fire with overwhelming power. He might use lightning if Zuko proves too resilient for conventional fire."
         },
         'great-divide': {
             label: "Canyon of Consequence: Zuko's Fire vs. Ozai's Inferno",
-            introA: "Zuko stands against his father Ozai in the vast Great Divide, his fire a desperate gamble against the Fire Lord's world-ending power.",
-            introB: "Ozai, his laughter echoing like thunder, intends to turn the canyon into Zuko's fiery grave, a testament to his absolute rule."
+            introA: "Zuko stands against his father Ozai in the vast Great Divide, his fire a desperate gamble. Ozai's lightning would be devastating here, but Zuko is prepared to try and turn it.",
+            introB: "Ozai, his laughter echoing like thunder, intends to turn the canyon into Zuko's fiery grave. He will use lightning if Zuko shows any sign of resistance he deems worthy of such a display."
         },
         'kyoshi-island': {
             label: "Island Sanctuary, Tyrant's Shadow: Zuko vs. Ozai",
-            introA: "Zuko, protecting the peaceful Kyoshi Island, confronts his father Ozai, his fire a shield against the Fire Lord's consuming ambition.",
-            introB: "Ozai, sparing no symbol of defiance, brings his annihilating fire to Kyoshi, intending to burn away Zuko's last stand."
+            introA: "Zuko, protecting the peaceful Kyoshi Island, confronts his father Ozai, his fire a shield. He knows the fight could escalate to lightning at any moment.",
+            introB: "Ozai, sparing no symbol of defiance, brings his annihilating fire to Kyoshi. He will use lightning against Zuko if he deems it the most efficient way to end his son's interference."
         },
         '_DEFAULT_LOCATION_': {
             label: "Prince's Defiance, Father's Tyranny: Zuko vs. Ozai",
-            introA: "Zuko, no longer seeking his father's approval but his downfall, challenges Fire Lord Ozai with the fire of a changed heart.",
-            introB: "Fire Lord Ozai, the supreme ruler, meets his son's rebellion with overwhelming power, a fiery lesson in obedience."
+            introA: "Zuko, no longer seeking his father's approval but his downfall, challenges Fire Lord Ozai with the fire of a changed heart, ready to face even his lightning.",
+            introB: "Fire Lord Ozai, the supreme ruler, meets his son's rebellion with overwhelming power. He is aware of Zuko's redirection skill and will use lightning strategically or with crushing force."
         }
     },
     // --- Zuko vs Bumi (bumi) ---

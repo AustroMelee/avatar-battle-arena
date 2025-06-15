@@ -1,4 +1,7 @@
+// FILE: engine_narrative-engine.js
 'use strict';
+
+// Version 3.1: Lightning Redirection Narrative Integration
 
 import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
@@ -103,17 +106,15 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
     const narrativeData = actor.narrative;
     let pool = null;
     const currentPhaseKey = context.currentPhaseKey || 'Generic';
-    const aiLogEntry = context.aiLogEntry || {}; // Get the AI log entry for this move decision
+    const aiLogEntry = context.aiLogEntry || {};
 
-    const lookupPaths = [];
-
-    // Prioritize EscalationFinisher intro if applicable
-    if (trigger === 'onIntentSelection' && aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
+    if (trigger === 'onIntentSelection' && aiLogEntry.isEscalationFinisherAttempt && context.move?.type === 'Finisher') {
         if (introductoryPhrases.EscalationFinisher && introductoryPhrases.EscalationFinisher.length > 0) {
-            return { type: 'action', line: getRandomElement(introductoryPhrases.EscalationFinisher) }; // Return as an action quote
+            return { type: 'action', line: getRandomElement(introductoryPhrases.EscalationFinisher) };
         }
     }
 
+    const lookupPaths = [];
 
     if (opponent?.id && actor.relationships?.[opponent.id]?.narrative?.[trigger]?.[subTrigger]?.[currentPhaseKey]) {
         lookupPaths.push(() => actor.relationships[opponent.id].narrative[trigger][subTrigger][currentPhaseKey]);
@@ -190,8 +191,8 @@ function formatQuoteEvent(quote, actor, opponent, context) {
 
     if (type === 'environmental') {
         htmlContent = `<p class="${narrativeClass}">${formattedLine}</p>`;
-    } else if (type === 'action') { // This type is used by EscalationFinisher intros
-        htmlContent = `<p class="${narrativeClass}">${substituteTokens(line, actor, opponent, context)}</p>`; // Directly use the line for action
+    } else if (type === 'action') {
+        htmlContent = `<p class="${narrativeClass}">${substituteTokens(line, actor, opponent, context)}</p>`;
     } else {
         const verb = type === 'internal' ? 'thinks' : 'says';
         htmlContent = `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
@@ -202,7 +203,7 @@ function formatQuoteEvent(quote, actor, opponent, context) {
         actorId: actor?.id || null,
         characterName: characterName,
         text: formattedLine,
-        isDialogue: (type === 'spoken' || type === 'internal' || type === 'action'), // Action is now a form of dialogue
+        isDialogue: (type === 'spoken' || type === 'internal' || type === 'action'),
         isActionNarrative: (type === 'action'),
         isEnvironmental: (type === 'environmental'),
         html_content: htmlContent,
@@ -214,20 +215,47 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     let tacticalPrefix = '';
     let tacticalSuffix = '';
 
-    // TUNING: Use more dramatic intro if it's an escalation finisher attempt from AI log
+    if (result.isRedirected) { // Handle Lightning Redirection narrative first
+        introPhrase = substituteTokens(result.redirectLog, defender, attacker, {
+            '{attackerName}': attacker.name, // Original attacker
+            '{defenderName}': defender.name  // Zuko, who redirected
+        });
+         const moveLineHtml = phaseTemplates.move
+            .replace(/{actorId}/g, defender.id) // Zuko is the "actor" of the redirection
+            .replace(/{actorName}/g, defender.name)
+            .replace(/{moveName}/g, "Lightning Redirection") // Specific name for the reactive move
+            .replace(/{moveEmoji}/g, result.effectiveness.emoji || '⚡↩️')
+            .replace(/{effectivenessLabel}/g, result.effectiveness.label)
+            .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
+            .replace(/{moveDescription}/g, `<p class="move-description">${introPhrase}</p>`)
+            .replace(/{collateralDamageDescription}/g, ''); // Collateral for redirected lightning handled separately or omitted for simplicity
+
+        return {
+            type: 'move_action_event',
+            actorId: defender.id,
+            characterName: defender.name,
+            moveName: "Lightning Redirection",
+            moveType: "lightning", // or 'special'
+            effectivenessLabel: result.effectiveness.label,
+            text: introPhrase,
+            isMoveAction: true,
+            html_content: moveLineHtml,
+            isKOAction: false, // Redirection itself isn't usually a KO, the original attacker might get KO'd by their own move later
+            isRedirectedAction: true // Custom flag
+        };
+    }
+
+
     if (aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
-        const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late; // Fallback to Late phase intros
+        const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late;
         introPhrase = getRandomElement(escalationFinisherPool) || "Sensing the end is near,";
-        // Ensure tokens are substituted for this specific intro type
         introPhrase = substituteTokens(introPhrase, actor, opponent);
     } else {
-        // Standard intro phrase selection (this logic might be redundant if findNarrativeQuote handles it)
         const intentForIntro = aiLogEntry.intent || 'StandardExchange';
-        const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry });
-        if (introQuote && introQuote.type === 'action') { // If findNarrativeQuote already gave us an action line
+        const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move });
+        if (introQuote && introQuote.type === 'action') {
             introPhrase = substituteTokens(introQuote.line, actor, opponent);
-        } else if (introQuote) { // If it's spoken/internal, it's handled by generateTurnNarrationObjects dialogue loop
-            // Use default if no specific action line was found
+        } else if (introQuote) {
             const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
             introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
         } else {
@@ -280,9 +308,8 @@ function generateActionDescriptionObject(move, actor, opponent, result, currentP
     }
     const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent);
 
-    // Check if introPhrase already contains actorName to avoid duplication like "Sensing the end... Sokka throws..."
     let fullDescText;
-    if (introPhrase.includes(actor.name)) { // Basic check
+    if (introPhrase.includes(actor.name)) {
         fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
     } else {
         fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
@@ -404,7 +431,6 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
 
     const htmlContent = substituteTokens(htmlTemplate, fighter, null, {
         '{escalationFlavorText}': substitutedFlavorText,
-        // actorName is implicitly handled by substituteTokens if fighter is primaryActor
     });
 
 
@@ -422,11 +448,10 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
 }
 
 
-export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}) { // Added aiLogEntry
+export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}) {
     let turnEventObjects = [];
 
     events.forEach(event => {
-        // Pass aiLogEntry to findNarrativeQuote for context, especially for onIntentSelection
         const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry });
         if (quoteEvent) {
             turnEventObjects.push(quoteEvent);
@@ -434,16 +459,16 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
     });
 
     if (!isInitialBanter && move && result) {
-        const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry }; // Pass aiLogEntry
+        const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry };
         const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
         if (moveExecutionQuote) {
-            const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey, aiLogEntry}); // Pass aiLogEntry
+            const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, {currentPhaseKey, aiLogEntry});
             if(quoteEvent) {
                 quoteEvent.isMoveExecutionQuote = true;
                 turnEventObjects.push(quoteEvent);
             }
         }
-        // Pass the aiLogEntry to generateActionDescriptionObject
+
         const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry);
         turnEventObjects.push(actionEvent);
 

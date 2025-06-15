@@ -1,14 +1,13 @@
-// FILE: js/engine_move-resolution.js
+// FILE: engine_move-resolution.js
 'use strict';
 
-// Version 1.2: Escalation Damage Modifier and Stun Duration Integration
+// Version 1.3: Lightning Redirection Mechanics & Enhanced Logging
 
 // --- IMPORTS ---
 import { effectivenessLevels } from './narrative-v2.js';
 import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { getMomentumCritModifier } from './engine_momentum.js';
-// NEW IMPORT FOR ESCALATION
 import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js';
 
 // --- CONSTANTS ---
@@ -32,16 +31,27 @@ const DEFAULT_MOVE_PROPERTIES = {
 
 const DEFAULT_EFFECTIVENESS = effectivenessLevels.NORMAL || { label: "Normal", emoji: "⚔️" };
 
+// --- LIGHTNING REDIRECTION CONSTANTS ---
+const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.80; // Base chance for Zuko to successfully redirect
+const LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW = 30; // Zuko's HP below this starts to significantly impact success
+const LIGHTNING_REDIRECTION_HP_THRESHOLD_MID = 60;
+const LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY = {
+    stressed: 0.05,
+    shaken: 0.15,
+    broken: 0.30
+};
+const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.10; // Minimum chance even if very low HP/bad mental state
+
 // --- MAIN MOVE RESOLUTION FUNCTION ---
 export function calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locationId) {
     if (!move || typeof move !== 'object' || !move.name) {
         move = { ...DEFAULT_MOVE_PROPERTIES, name: "ErrorMove", type: 'Offense', power: 5 };
     }
     if (!attacker || typeof attacker !== 'object') {
-        attacker = { id: 'unknown-attacker', name: 'Unknown Attacker', momentum: 0, tacticalState: null, mobility: 0.5, type: 'Unknown', pronouns: {s:'they', p:'their', o:'them'}, escalationState: ESCALATION_STATES.NORMAL };
+        attacker = { id: 'unknown-attacker', name: 'Unknown Attacker', momentum: 0, tacticalState: null, mobility: 0.5, type: 'Unknown', pronouns: {s:'they', p:'their', o:'them'}, escalationState: ESCALATION_STATES.NORMAL, aiLog: [] };
     }
     if (!defender || typeof defender !== 'object') {
-        defender = { id: 'unknown-defender', name: 'Unknown Defender', stunDuration: 0, tacticalState: null, hp: 100, pronouns: {s:'they', p:'their', o:'them'}, escalationState: ESCALATION_STATES.NORMAL };
+        defender = { id: 'unknown-defender', name: 'Unknown Defender', stunDuration: 0, tacticalState: null, hp: 100, pronouns: {s:'they', p:'their', o:'them'}, escalationState: ESCALATION_STATES.NORMAL, specialTraits: {}, aiLog: [] };
     }
     if (!conditions || typeof conditions !== 'object') {
         conditions = { id: 'unknown-location', isDay: true, isNight: false, environmentalModifiers: {} };
@@ -82,8 +92,87 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     }
 
     const moveTags = move.moveTags || [];
+
+    // --- LIGHTNING REDIRECTION CHECK ---
+    if (defender.id === 'zuko' && defender.specialTraits?.canRedirectLightning &&
+        (attacker.id === 'azula' || attacker.id === 'ozai-not-comet-enhanced') &&
+        moveTags.includes('lightning_attack')) {
+
+        interactionLog.push(`${defender.name} attempts to redirect ${attacker.name}'s ${move.name}!`);
+        attacker.aiLog.push(`[Redirection Attempt]: ${defender.name} is attempting to redirect lightning!`);
+        defender.aiLog.push(`[Redirection Attempt]: Attempting to redirect ${attacker.name}'s ${move.name}!`);
+
+
+        let successChance = LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE;
+        if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW) {
+            successChance -= 0.30;
+            defender.aiLog.push(`[Redirection Mod]: HP critically low, success chance reduced by 0.30.`);
+        } else if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_MID) {
+            successChance -= 0.15;
+            defender.aiLog.push(`[Redirection Mod]: HP low, success chance reduced by 0.15.`);
+        }
+
+        const mentalStatePenalty = LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY[defender.mentalState?.level] || 0;
+        successChance -= mentalStatePenalty;
+        if (mentalStatePenalty > 0) {
+            defender.aiLog.push(`[Redirection Mod]: Mental state '${defender.mentalState?.level}', success chance reduced by ${mentalStatePenalty}.`);
+        }
+
+        successChance = Math.max(LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE, successChance);
+        defender.aiLog.push(`[Redirection Chance]: Final success chance: ${successChance.toFixed(2)}`);
+
+
+        if (Math.random() < successChance) {
+            // Successful Redirection
+            interactionLog.push(`Lightning attack intercepted by ${defender.name}'s Lightning Redirection!`);
+            defender.aiLog.push(`[Redirection Success]: Successfully redirected ${attacker.name}'s ${move.name}!`);
+            attacker.aiLog.push(`[Redirection Impact]: ${defender.name} successfully redirected the lightning!`);
+
+
+            attacker.stunDuration = (attacker.stunDuration || 0) + 1; // Attacker is stunned for 1 turn
+            momentumChangeDefender += 3; // Zuko gains significant momentum
+            momentumChangeAttacker -= 2; // Azula/Ozai lose momentum
+
+            return {
+                effectiveness: { label: "RedirectedSuccess", emoji: "⚡↩️" }, // Custom effectiveness label
+                damage: 0, // Zuko takes no damage
+                energyCost: clamp(Math.round(energyCost * 0.5), 4, 100), // Redirection still costs energy
+                wasPunished: false,
+                payoff: true,
+                consumedStateName: null,
+                collateralDamage: Math.round(collateralDamage * 0.3), // Reduced collateral as energy is absorbed/redirected
+                momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender },
+                isRedirected: true,
+                redirectedTargetStun: 1,
+                redirectLog: `${defender.name} successfully redirected ${attacker.name}'s lightning, stunning them!`
+            };
+        } else {
+            // Failed Redirection (Zuko still takes some damage, but less than full)
+            interactionLog.push(`Redirection failed! ${defender.name} is hit by ${attacker.name}'s ${move.name}! (Threshold: ${successChance.toFixed(2)})`);
+            defender.aiLog.push(`[Redirection Fail]: Failed to fully redirect ${attacker.name}'s ${move.name}.`);
+            attacker.aiLog.push(`[Redirection Impact]: ${defender.name} failed to redirect the lightning.`);
+
+            damage = Math.round(basePower * multiplier * 0.6); // Takes 60% of the damage on a failed redirect
+            momentumChangeDefender -= 1; // Loses some momentum for failure
+            // No stun for the attacker here
+            return {
+                effectiveness: { label: "RedirectedFail", emoji: "⚡🤕" }, // Custom effectiveness label
+                damage: clamp(Math.round(damage), 0, 100),
+                energyCost: clamp(Math.round(energyCost * 0.7), 4, 100), // Higher energy cost for failed attempt
+                wasPunished: true, // Counts as a punishment for Zuko
+                payoff: false,
+                consumedStateName: null,
+                collateralDamage: Math.round(collateralDamage * 0.8), // More collateral on failed redirect
+                momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender },
+                isRedirected: false, // Explicitly false
+                redirectLog: `${defender.name} failed to redirect the lightning and took partial damage.`
+            };
+        }
+    }
+    // --- END LIGHTNING REDIRECTION ---
+
+
     if (moveTags.includes('requires_opening')) {
-        // MODIFIED: Check stunDuration instead of isStunned
         const openingExists = defender.stunDuration > 0 || defender.tacticalState;
         if (openingExists) {
             if (defender.tacticalState) {
@@ -93,7 +182,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                 payoff = true;
                 damage += 5;
                 momentumChangeAttacker += 1;
-            } else if (defender.stunDuration > 0) { // Check stunDuration
+            } else if (defender.stunDuration > 0) {
                 multiplier *= 1.3;
                 interactionLog.push(`${attacker.name}'s ${move.name} capitalized on ${defender.name} being stunned.`);
                 payoff = true;
@@ -106,6 +195,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             momentumChangeAttacker -= 1;
             momentumChangeDefender += 1;
             interactionLog.push(`${attacker.name}'s ${move.name} was punished due to lack of opening.`);
+            attacker.aiLog.push(`[Move Punished]: ${move.name} was less effective due to no opening.`);
         }
     }
 
@@ -121,6 +211,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             interactionLog.push(`${attacker.name} successfully repositioned, gaining a tactical advantage.`);
             momentumChangeAttacker += 1;
             effectivenessResult = effectivenessLevels.CRITICAL || DEFAULT_EFFECTIVENESS;
+            attacker.aiLog.push(`[Reposition Success]: Gained 'Repositioned' state.`);
         } else {
             const intensity = 1.0 + ((1 - mobilityFactor) * 0.5);
             if (roll > successChance + (0.5 * (1 - successChance))) {
@@ -130,11 +221,13 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                 momentumChangeDefender += 1;
                 effectivenessResult = effectivenessLevels.WEAK || DEFAULT_EFFECTIVENESS;
                 wasPunished = true;
+                attacker.aiLog.push(`[Reposition Fail]: Became 'Exposed'.`);
             } else {
                 attacker.tacticalState = { name: 'Off-Balance', duration: 1, intensity, isPositive: false };
                 interactionLog.push(`${attacker.name}'s repositioning attempt left them off-balance.`);
                 momentumChangeAttacker -= 1;
                 effectivenessResult = effectivenessLevels.NORMAL || DEFAULT_EFFECTIVENESS;
+                attacker.aiLog.push(`[Reposition Partial Fail]: Became 'Off-Balance'.`);
             }
         }
         return {
@@ -154,11 +247,13 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     energyCost *= envEnergyMod;
     if (logReasons.length > 0) {
         interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${logReasons.join(', ')}.`);
+        attacker.aiLog.push(`[Env Influence]: ${move.name} affected by ${logReasons.join(', ')} (x${envMultiplier.toFixed(2)} power, x${envEnergyMod.toFixed(2)} energy).`);
     }
 
     let critChance = 0.1;
     const attackerMomentum = typeof attacker.momentum === 'number' ? attacker.momentum : 0;
     critChance = clamp(critChance + getMomentumCritModifier({ momentum: attackerMomentum }), 0.01, 0.5);
+    attacker.aiLog.push(`[Crit Chance]: Base 0.1, Momentum Mod ${getMomentumCritModifier({ momentum: attackerMomentum }).toFixed(2)}, Final ${critChance.toFixed(2)} for ${move.name}.`);
 
     const totalEffectivenessValue = basePower * multiplier;
     let effectivenessLevel = DEFAULT_EFFECTIVENESS;
@@ -169,32 +264,35 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         momentumChangeAttacker += 2;
         momentumChangeDefender -= 1;
         interactionLog.push(`Critical Hit! ${attacker.name}'s crit chance was ${Math.round(critChance * 100)}%.`);
+        attacker.aiLog.push(`[Move Result]: ${move.name} was CRITICAL!`);
     } else if (totalEffectivenessValue < basePower * 0.7) {
         effectivenessLevel = effectivenessLevels.WEAK || DEFAULT_EFFECTIVENESS;
         momentumChangeAttacker -= 1;
         momentumChangeDefender += 1;
+        attacker.aiLog.push(`[Move Result]: ${move.name} was WEAK.`);
     } else if (totalEffectivenessValue > basePower * 1.1) {
         effectivenessLevel = effectivenessLevels.STRONG || DEFAULT_EFFECTIVENESS;
         damage += Math.round(totalEffectivenessValue * 0.25);
         momentumChangeAttacker += 1;
+        attacker.aiLog.push(`[Move Result]: ${move.name} was STRONG.`);
     } else {
         effectivenessLevel = effectivenessLevels.NORMAL || DEFAULT_EFFECTIVENESS;
+        attacker.aiLog.push(`[Move Result]: ${move.name} was NORMAL.`);
     }
 
-    // --- Status Effect Chaining Logic (Pinned extending Stun) ---
     if (move.setup?.name === 'Pinned' && effectivenessLevel.label !== 'Weak') {
         if (defender.stunDuration > 0) {
-            defender.stunDuration++; // Extend existing stun
+            defender.stunDuration++;
             interactionLog.push(`${defender.name}'s stun duration was extended by being Pinned! Now ${defender.stunDuration} turn(s).`);
+            defender.aiLog.push(`[Stun Extended]: Stun duration increased to ${defender.stunDuration} by Pinned state.`);
         }
     }
 
-    // --- Apply Stun from Critical Hits ---
     if (effectivenessLevel.label === 'Critical' && move.type !== 'Defense' && !move.isRepositionMove) {
-        defender.stunDuration = (defender.stunDuration || 0) + 1; // Add 1 turn of stun
+        defender.stunDuration = (defender.stunDuration || 0) + 1;
         interactionLog.push(`${defender.name} is stunned for 1 turn from the critical ${move.name}! Stun Duration: ${defender.stunDuration}.`);
+        defender.aiLog.push(`[Stun Applied]: Stunned for 1 turn by critical ${move.name}. Total: ${defender.stunDuration}.`);
     }
-    // --- END Stun Logic ---
 
     const moveType = move.type || DEFAULT_MOVE_PROPERTIES.type;
     if (moveType.includes('Offense') || moveType.includes('Finisher')) {
@@ -208,18 +306,16 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         }
     }
 
-    // --- NEW: Apply Escalation Damage Modifier (EDM) ---
-    // This is applied to the defender, based on *their* escalation state
-    if (damage > 0 && defender.escalationState) { // Ensure defender has escalationState
+    if (damage > 0 && defender.escalationState) {
         const originalDamage = damage;
         damage = applyEscalationDamageModifier(damage, defender.escalationState);
         if (damage > originalDamage) {
             interactionLog.push(`${defender.name} is ${defender.escalationState}, taking increased damage from ${move.name}! (${originalDamage} -> ${damage})`);
-            momentumChangeAttacker += 0.5; // Slight momentum boost for attacker hitting vulnerable target
+            momentumChangeAttacker += 0.5;
             momentumChangeDefender -= 0.5;
+            attacker.aiLog.push(`[EDM Applied]: Damage to ${defender.name} increased from ${originalDamage} to ${damage} due to their escalation state ${defender.escalationState}.`);
         }
     }
-    // --- END EDM ---
 
     return {
         effectiveness: effectivenessLevel,
@@ -270,6 +366,9 @@ export function getAvailableMoves(actor, conditions) {
             if (move.isRepositionMove) return true;
             return false;
         }
+        // Lightning Redirection is reactive, not actively chosen from available moves
+        if (move.name === "Lightning Redirection") return false;
+
         const usageRequirements = move.usageRequirements || {};
         return Object.entries(usageRequirements).every(([key, val]) => conditions[key] === val);
     });

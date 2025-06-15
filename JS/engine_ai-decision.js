@@ -1,7 +1,7 @@
 // FILE: engine_ai-decision.js
 'use strict';
 
-// Version 8.6: Escalation Tuning Pass 1.2 - Integrate scoreBasedReasonsApplied from getEscalationAIWeights
+// Version 8.7: Lightning Redirection AI Awareness & Enhanced Logging
 
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
@@ -316,8 +316,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
     const profile = getDynamicPersonality(actor, currentPhase);
 
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
-    // Momentum influence is now primarily handled via dynamic personality adjustments.
-    // Direct multiplication here could be reinstated if needed, but for now, rely on `getDynamicPersonality`.
+
 
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
@@ -342,6 +341,29 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             default:
                 break;
         }
+
+        // Lightning Redirection AI Logic
+        if (move.moveTags.includes('lightning_attack') && defender.id === 'zuko' && defender.specialTraits?.canRedirectLightning) {
+            let lightningRiskModifier = 1.0;
+            const zukoHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
+            const zukoMentalState = safeGet(defender.mentalState, 'level', 'stable', defender.name, 'mentalState.level');
+            let riskReason = "LightningVsZuko:";
+
+            if (zukoHp > 60 && (zukoMentalState === 'stable' || zukoMentalState === 'stressed')) {
+                lightningRiskModifier = 0.2; // High risk for Azula/Ozai
+                riskReason += "HighRisk(ZukoHealthyStable)";
+            } else if (zukoHp > 30 && (zukoMentalState === 'stable' || zukoMentalState === 'stressed')) {
+                lightningRiskModifier = 0.5; // Medium risk
+                riskReason += "MedRisk(ZukoDamagedStable)";
+            } else if (zukoHp <= 30 || zukoMentalState === 'shaken' || zukoMentalState === 'broken') {
+                lightningRiskModifier = 1.5; // Lower risk for Azula/Ozai (higher chance Zuko fails redirect)
+                riskReason += "LowRisk(ZukoWeakUnstable)";
+            }
+            weight *= lightningRiskModifier;
+            reasons.push(riskReason);
+            actor.aiLog.push(`[Lightning AI]: Considering ${move.name} vs Zuko. HP:${zukoHp}, Mental:${zukoMentalState}. RiskMod: ${lightningRiskModifier.toFixed(2)}.`);
+        }
+
 
         if (move.isRepositionMove) {
             const actorMobility = safeGet(actor, 'mobility', 0.5, actor.name, 'mobility');
@@ -421,19 +443,15 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         }
         if (move.moveTags?.includes('requires_opening') && !(safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0 || safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState'))) weight *= 0.01;
 
-        // --- MODIFIED: Integrate scoreBasedReasonsApplied from getEscalationAIWeights ---
         const escalationInfo = getEscalationAIWeights(actor, defender, move);
         const escalationWeightMultiplier = escalationInfo.finalMultiplier;
 
         if (escalationInfo.scoreBasedReasonsApplied && escalationInfo.scoreBasedReasonsApplied.length > 0) {
             reasons.push(...escalationInfo.scoreBasedReasonsApplied);
         }
-        // Add the generic "EscalationBias" reason *only if* no specific score-based reasons were added AND the multiplier is not 1.0.
-        // This avoids double-logging "EscalationBias" when more specific reasons are already present.
         if (escalationWeightMultiplier !== 1.0 && (!escalationInfo.scoreBasedReasonsApplied || escalationInfo.scoreBasedReasonsApplied.length === 0)) {
             reasons.push(`EscalationBias(x${escalationWeightMultiplier.toFixed(1)})`);
         }
-        // --- END MODIFIED SECTION ---
 
         weight *= escalationWeightMultiplier;
 
@@ -539,7 +557,7 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
             name: m.move?.name || 'N/A',
             baseW: (m.weight || 0).toFixed(3),
             prob: `${((m.probability || 0) * 100).toFixed(1)}%`,
-            reasons: (m.reasons || []).join(', ') // This now includes score-based reasons
+            reasons: (m.reasons || []).join(', ')
         })).sort((a, b) => parseFloat(b.prob) - parseFloat(a.prob)),
         chosenMove: chosenMove.name,
         finalProb: `${((chosenMoveInfo?.probability || 0) * 100).toFixed(1)}%`,
