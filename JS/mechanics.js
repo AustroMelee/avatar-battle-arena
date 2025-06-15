@@ -2,16 +2,15 @@
 'use strict';
 
 // ====================================================================================
-//  Curbstomp Mechanics & Rules Definition (v1.2 - Weighted Logic & Pre-Battle Check)
+//  Curbstomp Mechanics & Rules Definition (v1.3 - Corrected WeightingLogic Context)
 // ====================================================================================
 //  This file centralizes all rules related to instant win/loss conditions,
 //  drastic advantages, and personality-driven mechanic triggers.
 //  The battle engine will refer to this file to evaluate these conditions.
-//  - Added `weightingLogic` to specific rules for more nuanced outcomes.
-//  - Added `canTriggerPreBattle` flag to control rule activation before turn 1.
+//  - Corrected context within weightingLogic for 'appliesToCharacter' rules.
 // ====================================================================================
 
-export const CURBSTOMP_RULES_VERSION = "1.2"; // Updated version
+export const CURBSTOMP_RULES_VERSION = "1.3"; // Updated version
 
 export const universalMechanics = {
     maiKnifeAdvantage: {
@@ -25,7 +24,7 @@ export const universalMechanics = {
         maxChance: 0.85,
         counteredBy: ["fast_defensive_move", "area_denial_projectile"],
         personalityTrigger: "provoked",
-        canTriggerPreBattle: false, // Mai needs to see a slow move first
+        canTriggerPreBattle: false,
         outcome: { type: "instant_kill", successMessage: "{attackerName}'s thrown knife finds a fatal opening due to {targetName}'s slow technique!", failureMessage: "{targetName} narrowly avoids Mai's deadly accurate throw!" }
     },
     tyLeeChiBlocking: {
@@ -58,28 +57,36 @@ export const locationCurbstompRules = {
         {
             id: "si_wong_sokka_heatstroke",
             description: "Sokka's vulnerability to extreme heat and dehydration.",
-            appliesToCharacter: "sokka",
-            triggerChance: 0.75, // Reduced slightly from 0.85 to make it less common pre-weighted
-            canTriggerPreBattle: true, // Heatstroke can happen passively
-            conditionLogic: (sokka, opponent) => opponent.type === "Bender", // Still, more likely if stressed by a bender
+            appliesToCharacter: "sokka", // This rule is for Sokka
+            triggerChance: 0.75,
+            canTriggerPreBattle: true,
+            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Make sure parameters match how they are used
             weightingLogic: ({ attacker, defender, rule, location, situation }) => {
-                // This rule specifically targets Sokka when he's the one 'appliesToCharacter'
-                // The 'defender' in the main engine's call to selectCurbstompVictim will be Sokka if this rule is for Sokka.
-                // So, we need to check if Sokka (the character the rule applies to) is the current character.
-                const targetCharacter = (attacker.id === rule.appliesToCharacter) ? attacker : defender;
-                if (targetCharacter.id === "sokka") {
-                    let sokkaLosesChance = 0.85; // Base high chance
-                    // Sokka is fighting a firebender in the desert? Higher chance.
-                    if (situation.opponentElement === "fire") sokkaLosesChance = 0.95;
-                    // If Sokka is somehow well-prepared (e.g., a very specific trait, not implemented yet)
-                    // if (targetCharacter.specialTraits?.desertSurvivalTraining) sokkaLosesChance *= 0.5;
-                    return { victimId: "sokka", probability: sokkaLosesChance };
+                // 'rule' here is the 'si_wong_sokka_heatstroke' object itself.
+                // 'rule.appliesToCharacter' is "sokka".
+                // We need to identify which of the *current combatants* (attacker, defender) is Sokka.
+                let sokkaCharacter;
+                let opponentOfSokka;
+
+                if (attacker.id === rule.appliesToCharacter) { // rule.appliesToCharacter is "sokka"
+                    sokkaCharacter = attacker;
+                    opponentOfSokka = defender;
+                } else if (defender.id === rule.appliesToCharacter) {
+                    sokkaCharacter = defender;
+                    opponentOfSokka = attacker;
+                } else {
+                    // This should ideally not happen if the rule evaluation is correct up to this point
+                    return null;
                 }
-                return null; // Should not happen if appliesToCharacter is Sokka
+
+                let sokkaLosesChance = 0.85;
+                if (opponentOfSokka.element === "fire" && situation.isDay) sokkaLosesChance = 0.95;
+                // if (sokkaCharacter.specialTraits?.desertSurvivalTraining) sokkaLosesChance *= 0.5;
+                return { victimId: "sokka", probability: sokkaLosesChance };
             },
             escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 70, successChance: 0.10 },
             outcome: {
-                type: "instant_loss_weighted_character", // CHANGED
+                type: "instant_loss_weighted_character",
                 successMessage: "Overcome by the brutal desert heat and {opponentName}'s assault, {actualVictimName} collapses!",
                 failureMessage: "{actualVictimName}'s resilience (and perhaps a lucky find of shade) allows him to fight on!",
                 escapeMessage: "{actualVictimName}'s quick thinking allows him to find a temporary reprieve, narrowly escaping incapacitation!"
@@ -111,27 +118,24 @@ export const locationCurbstompRules = {
             id: "omashu_crushing_hazard",
             description: "Risk of being crushed by shifting earth or out-of-control carts.",
             appliesToAll: true,
-            triggerChance: 0.10, // Reduced base chance
-            canTriggerPreBattle: true, // This can happen before direct combat starts due to general chaos
+            triggerChance: 0.10,
+            canTriggerPreBattle: true,
             weightingLogic: ({ attacker, defender, location, situation }) => {
                 let probAttacker = 0.5;
                 let probDefender = 0.5;
 
                 const adjustProbs = (char) => {
                     let prob = 0.5;
-                    if (char.id === 'bumi') prob *= 0.05; // Bumi very unlikely victim
-                    else if (char.id === 'sokka') prob *= 2.5; // Sokka more likely
+                    if (char.id === 'bumi') prob *= 0.05;
+                    else if (char.id === 'sokka') prob *= 2.5;
                     else if (char.type === 'Nonbender') prob *= 1.8;
-                    else if (char.element === 'earth') prob *= 0.6; // Earthbenders more aware
+                    else if (char.element === 'earth') prob *= 0.6;
 
-                    if (char.mobility > 0.75) prob *= 0.4; // High mobility helps avoid
-                    else if (char.mobility < 0.35) prob *= 1.8; // Low mobility is a disadvantage
+                    if (char.mobility > 0.75) prob *= 0.4;
+                    else if (char.mobility < 0.35) prob *= 1.8;
 
-                    // If environment is already damaged, higher chance for everyone
                     if (situation.environmentState && situation.environmentState.damageLevel > 30) prob *= 1.2;
                     if (situation.environmentState && situation.environmentState.damageLevel > 60) prob *= 1.5;
-
-
                     return prob;
                 };
 
@@ -139,7 +143,7 @@ export const locationCurbstompRules = {
                 probDefender = adjustProbs(defender);
 
                 const totalWeight = probAttacker + probDefender;
-                if (totalWeight === 0) return null;
+                if (totalWeight === 0 || isNaN(totalWeight)) return null;
 
                 return {
                     probabilities: {
@@ -149,7 +153,7 @@ export const locationCurbstompRules = {
                 };
             },
             outcome: {
-                type: "instant_loss_weighted_character", // CHANGED
+                type: "instant_loss_weighted_character",
                 successMessage: "A sudden rockslide (or runaway cabbage cart!) in the Omashu chutes proves fatal for {actualVictimName}!",
                 failureMessage: "Both fighters narrowly avoid a catastrophic accident in the chutes!"
             }
@@ -181,7 +185,7 @@ export const locationCurbstompRules = {
             id: "nwt_firebender_penalty",
             description: "Firebenders suffer reduced power and risk hypothermia.",
             appliesToCharacterElement: "fire",
-            canTriggerPreBattle: true, // Passive environmental effect
+            canTriggerPreBattle: true,
             outcome: { type: "persistent_effect", effect: "power_reduction_50_hypothermia_risk_10_percent_per_turn", message: "The frigid air of the North saps the strength from {characterName}'s fire." }
         }
     ],
@@ -207,7 +211,7 @@ export const locationCurbstompRules = {
             description: "Thick fog and tangled vines reduce ranged accuracy.",
             appliesToMoveType: "ranged_attack",
             triggerChance: 0.50,
-            canTriggerPreBattle: true, // Fog is always present
+            canTriggerPreBattle: true,
             outcome: { type: "accuracy_penalty_50_percent", message: "The dense fog and vegetation make precise ranged attacks difficult." }
         }
     ],
@@ -244,46 +248,29 @@ export const locationCurbstompRules = {
             appliesToAll: true,
             triggerChance: 0.20,
             canTriggerPreBattle: true,
+            // No weightingLogic means selectCurbstompVictim will use its appliesToAll fallback (50/50 if outcome is weighted type)
             outcome: { type: "advantage_random_character_or_debuff_random", effect: "ambush_or_minor_damage_stun", successMessage: "{actualVictimName} stumbles into a hidden Kyoshi trap, creating an opening (or taking damage)!", failureMessage: "The fighters navigate the village carefully, avoiding any obvious traps." }
         },
         {
             id: "kyoshi_narrow_bridges_knockoff",
             description: "Risk of being knocked off narrow bridges or platforms.",
             appliesToAll: true,
-            triggerChance: 0.30, // Reduced from 0.60
-            canTriggerPreBattle: false, // Requires an action (push/maneuver)
+            triggerChance: 0.30,
+            canTriggerPreBattle: false,
             conditionLogic: (character, opponent, battleState) => battleState.nearEdge === true,
             weightingLogic: ({ attacker, defender, situation }) => {
                 let probAttackerFall = 0.5;
                 let probDefenderFall = 0.5;
-
-                // The one who was *just pushed* or *just moved* precariously is more likely
-                // This needs more nuanced battleState info, like 'lastCharacterPushedToEdgeId'
-                // For now, mobility is a key factor.
-                if (attacker.mobility < defender.mobility) { // Attacker less mobile, more likely to fall
-                    probAttackerFall *= 1.5;
-                    probDefenderFall *= 0.5;
-                } else if (defender.mobility < attacker.mobility) {
-                    probDefenderFall *= 1.5;
-                    probAttackerFall *= 0.5;
-                }
-
-                // Benders who can fly/levitate/grapple are less likely
+                if (attacker.mobility < defender.mobility) { probAttackerFall *= 1.5; probDefenderFall *= 0.5;}
+                else if (defender.mobility < attacker.mobility) { probDefenderFall *= 1.5; probAttackerFall *= 0.5;}
                 if (attacker.element === "air" || attacker.specialTraits?.canGrapple) probAttackerFall *= 0.2;
                 if (defender.element === "air" || defender.specialTraits?.canGrapple) probDefenderFall *= 0.2;
-
                 const totalWeight = probAttackerFall + probDefenderFall;
-                if (totalWeight === 0) return null;
-
-                return {
-                    probabilities: {
-                        [attacker.id]: probAttackerFall / totalWeight,
-                        [defender.id]: probDefenderFall / totalWeight
-                    }
-                };
+                if (totalWeight === 0 || isNaN(totalWeight)) return null;
+                return { probabilities: { [attacker.id]: probAttackerFall / totalWeight, [defender.id]: probDefenderFall / totalWeight } };
             },
             outcome: {
-                type: "instant_loss_weighted_character", // CHANGED
+                type: "instant_loss_weighted_character",
                 successMessage: "A powerful blow (or a misstep near the edge!) sends {actualVictimName} tumbling from a narrow bridge into the waters below, out of the fight!",
                 failureMessage: "Both fighters maintain their balance on the precarious platforms despite the close call."
             }
@@ -311,23 +298,22 @@ export const locationCurbstompRules = {
             id: "divide_fall_risk",
             description: "High risk of falling into the chasm.",
             appliesToAll: true,
-            triggerChance: 0.40, // Reduced from 0.60
+            triggerChance: 0.40,
             canTriggerPreBattle: false,
             conditionLogic: (character, opponent, battleState) => battleState.nearEdge === true || battleState.lastMovePushbackStrong === true,
-            weightingLogic: ({ attacker, defender, situation }) => { // Similar to Kyoshi fall
+            weightingLogic: ({ attacker, defender, situation }) => {
                 let probAttackerFall = 0.5;
                 let probDefenderFall = 0.5;
                 if (attacker.mobility < defender.mobility) { probAttackerFall *= 1.5; probDefenderFall *= 0.5;}
                 else if (defender.mobility < attacker.mobility) { probDefenderFall *= 1.5; probAttackerFall *= 0.5;}
                 if (attacker.element === "air" || attacker.specialTraits?.canGrapple) probAttackerFall *= 0.1;
                 if (defender.element === "air" || defender.specialTraits?.canGrapple) probDefenderFall *= 0.1;
-
                 const totalWeight = probAttackerFall + probDefenderFall;
-                if (totalWeight === 0) return null;
+                if (totalWeight === 0 || isNaN(totalWeight)) return null;
                 return { probabilities: { [attacker.id]: probAttackerFall / totalWeight, [defender.id]: probDefenderFall / totalWeight } };
             },
             outcome: {
-                type: "instant_loss_weighted_character", // CHANGED from instant_loss_character_if_fall
+                type: "instant_loss_weighted_character",
                 successMessage: "{actualVictimName} loses their footing and plummets into the Great Divide!",
                 failureMessage: "Both fighters narrowly avoid a fatal fall into the chasm."
             }
@@ -355,7 +341,10 @@ export const locationCurbstompRules = {
             description: "Dense crowds might interfere with combat.",
             appliesToAll: true,
             triggerChance: 0.15,
-            canTriggerPreBattle: true, // Crowds can be an issue from the start
+            canTriggerPreBattle: true,
+            weightingLogic: ({ attacker, defender, location, situation }) => { // Example of a simple random fallback if not specifically targeted
+                return { probabilities: { [attacker.id]: 0.5, [defender.id]: 0.5 } };
+            },
             outcome: { type: "disruption_random_character", effect: "minor_stun_or_misstep", successMessage: "The panicked crowd surges, momentarily disrupting {actualVictimName}'s attack!", failureMessage: "The fighters manage to weave through the throngs of people." }
         },
         {
@@ -363,7 +352,7 @@ export const locationCurbstompRules = {
             description: "Ty Lee's chi-blocking excels in the close quarters.",
             appliesToCharacter: "ty-lee",
             triggerChance: 0.40,
-            canTriggerPreBattle: true, // Location property is always true
+            canTriggerPreBattle: true,
             outcome: { type: "advantage_character", effect: "chi_blocking_effectiveness_increase_40_percent", successMessage: "The tight alleys and rooftops of the Lower Ring are a perfect playground for Ty Lee's acrobatic chi-blocking!", failureMessage: "" }
         }
     ]
@@ -504,7 +493,7 @@ export const characterCurbstompRules = {
             id: "aang_avatar_state_air",
             description: "Aang taps into the Avatar State, unleashing immense air power.",
             triggerChance: 0.85,
-            canTriggerPreBattle: false, // Typically a reactive state
+            canTriggerPreBattle: false,
             personalityTrigger: "mortal_danger",
             outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Aang's eyes glow as he enters the Avatar State, unleashing a cataclysmic storm of air that overwhelms {targetName}!", failureMessage: "Aang struggles to fully control the Avatar State's power, giving {targetName} a fleeting chance!" }
         },
@@ -512,7 +501,7 @@ export const characterCurbstompRules = {
             id: "aang_air_scooter_evasion",
             description: "Aang's masterful use of the air scooter for evasion.",
             triggerChance: 0.60,
-            canTriggerPreBattle: true, // A passive ability he possesses
+            canTriggerPreBattle: true,
             outcome: { type: "evasion_chance_increase_60_percent", message: "Aang zips around on his air scooter, becoming an incredibly difficult target." }
         }
     ],
@@ -539,7 +528,7 @@ export const characterCurbstompRules = {
             id: "sokka_strategy_exploit",
             description: "Sokka devises a clever environmental exploit or trap.",
             triggerChance: 0.30,
-            canTriggerPreBattle: false, // Usually a mid-battle idea
+            canTriggerPreBattle: false,
             personalityTrigger: "meticulous_planning",
             escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 65, successChance: 0.10 },
             outcome: { type: "advantage_attacker_environmental", successMessage: "Sokka's brilliant strategy (perhaps using {moveName}) turns the environment against {targetName}, creating a key advantage!", failureMessage: "Sokka's plan doesn't quite come together this time." }
@@ -547,25 +536,38 @@ export const characterCurbstompRules = {
         {
             id: "sokka_vulnerability_death",
             description: "Sokka's inherent vulnerability as a non-bender.",
-            triggerChance: 0.75, // High base vulnerability for Sokka against benders
-            canTriggerPreBattle: true, // Can be vulnerable from the outset
-            conditionLogic: (sokka, opponent) => opponent.type === "Bender",
+            appliesToCharacter: "sokka", // Explicitly states this rule is about Sokka
+            triggerChance: 0.75,
+            canTriggerPreBattle: true,
+            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Using char names from function signature
             weightingLogic: ({ attacker, defender, rule, location, situation }) => {
-                // If Sokka is the target of this rule:
-                const targetCharacter = (attacker.id === rule.appliesToCharacter) ? attacker : defender;
-                if (targetCharacter.id === "sokka") {
-                    let sokkaLosesChance = 0.75;
-                    if (opponent.powerTier > sokka.powerTier + 2) sokkaLosesChance = 0.90; // Much stronger bender
-                    if (opponent.element === "fire" && situation.isDay) sokkaLosesChance += 0.05;
-                    if (opponent.element === "water" && situation.isNight) sokkaLosesChance += 0.05;
-                    if (location.tags && location.tags.includes("open") && opponent.element !== "earth") sokkaLosesChance += 0.05; // Harder to hide
-                    if (location.tags && location.tags.includes("cover_rich")) sokkaLosesChance -= 0.10; // Can use cover
-                    return { victimId: "sokka", probability: Math.min(1.0, sokkaLosesChance) };
+                // 'rule' is 'sokka_vulnerability_death' object. rule.appliesToCharacter is "sokka".
+                let sokkaUnderThreat;
+                let opponentOfSokka;
+
+                if (attacker.id === "sokka") {
+                    sokkaUnderThreat = attacker;
+                    opponentOfSokka = defender;
+                } else if (defender.id === "sokka") {
+                    sokkaUnderThreat = defender;
+                    opponentOfSokka = attacker;
+                } else {
+                    return null; // Should not happen if rule is correctly targeted
                 }
-                return null;
+
+                let sokkaLosesChance = 0.75;
+                if (opponentOfSokka.powerTier > sokkaUnderThreat.powerTier + 2) sokkaLosesChance = 0.90;
+                if (opponentOfSokka.element === "fire" && situation.isDay) sokkaLosesChance += 0.05;
+                if (opponentOfSokka.element === "water" && situation.isNight) sokkaLosesChance += 0.05;
+                if (location.tags && location.tags.includes("open") && opponentOfSokka.element !== "earth") sokkaLosesChance += 0.05;
+                if (location.tags && location.tags.includes("cover_rich")) sokkaLosesChance -= 0.10;
+
+                // Ensure probability is between 0 and 1
+                sokkaLosesChance = Math.max(0, Math.min(1.0, sokkaLosesChance));
+                return { victimId: "sokka", probability: sokkaLosesChance };
             },
             outcome: {
-                type: "instant_loss_weighted_character", // CHANGED (was instant_death_character)
+                type: "instant_loss_weighted_character",
                 successMessage: "Outmatched by {opponentName}'s bending, {actualVictimName} falls in battle despite his bravery.",
                 failureMessage: "{actualVictimName}'s agility and a bit of luck keep him out of lethal harm's way!"
             }
@@ -618,7 +620,8 @@ export const personalityTriggerMappings = {
     "authority_challenged": "Opponent lands two significant (Strong/Critical) hits on Ozai, or uses a taunt/defiant dialogue line.",
     "underestimated": "Opponent uses a taunt related to Bumi's age or unconventional tactics, or uses a 'Weak' effectiveness move against him.",
     "in_control": "Azula's health > 50% AND Azula has not received a 'Critical' hit this battle AND opponent's mental state is 'stable' or 'stressed'.",
-    "desperate_broken": "Azula's health < 30% OR Azula's mental state is 'broken'. Also for Katara: health < 10%, ally incapacitated, or taken two critical hits.",
+    "desperate_broken": "Azula's health < 30% OR Azula's mental state is 'broken'.",
+    "desperate_mentally_broken": "Katara: health < 10%, ally incapacitated, taken 2+ critical hits, OR mental state 'broken'.",
     "doubted": "Opponent uses a taunt targeting Toph's blindness or skill, or lands a hit that Toph 'didn't see coming'.",
     "mortal_danger": "An ally's health < 5% (if applicable) OR Aang's own health < 20%.",
     "honor_violated": "Opponent uses a move flagged as 'dishonorable' OR an ally is disarmed/incapacitated unfairly.",
