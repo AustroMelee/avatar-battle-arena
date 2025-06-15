@@ -1,18 +1,22 @@
 // FILE: engine_lightning-redirection.js
 'use strict';
 
-// Version 1.1: Corrected Narrative Event Generation (No direct import of formatQuoteEvent)
+// Version 1.2: Implemented full redirection success/failure logic with detailed return object.
+
+import { effectivenessLevels } from './narrative-v2.js'; // For narrative flavor consistency
 
 // --- LIGHTNING REDIRECTION CONSTANTS ---
-const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.80;
+const LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE = 0.75; // Zuko is pretty good
 const LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW = 30;
 const LIGHTNING_REDIRECTION_HP_THRESHOLD_MID = 60;
 const LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY = {
-    stressed: 0.05,
-    shaken: 0.15,
-    broken: 0.30
+    stable: 0,       // No penalty for stable
+    stressed: 0.10,  // Slight penalty
+    shaken: 0.20,    // Moderate penalty
+    broken: 0.40     // Significant penalty
 };
-const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.10;
+const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.05; // Small chance even under worst conditions
+const LIGHTNING_REDIRECTION_MAX_SUCCESS_CHANCE = 0.95; // Not always guaranteed
 
 /**
  * Attempts lightning redirection for a defender (Zuko).
@@ -22,36 +26,28 @@ const LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE = 0.10;
  * @param {object} battleState - Current battle state for context.
  * @param {Array} interactionLog - The battle's interaction log.
  * @returns {object} An object detailing the outcome of the redirection attempt.
- *          Properties:
- *          - attempted (boolean): Always true if this function is called.
- *          - success (boolean): True if redirection was successful, false otherwise.
- *          - damageMitigation (number): Multiplier for damage taken by defender (1.0 for full mitigation, 0.4 for partial on fail).
- *          - stunAppliedToAttacker (number): Turns the attacker is stunned (0 if redirection fails).
- *          - momentumChangeDefender (number): Momentum change for the defender.
- *          - momentumChangeAttacker (number): Momentum change for the attacker.
- *          - narrativeEvents (Array<object>): Array of raw narrative event data objects.
- *          - effectivenessLabel (string): Custom label for narrative.
- *          - effectivenessEmoji (string): Custom emoji for narrative.
  */
 export function attemptLightningRedirection(attacker, defender, move, battleState, interactionLog) {
     const narrativeEvents = [];
-    let logMessage = `[REDIRECTION ATTEMPT]: ${defender.name} attempts to redirect ${attacker.name}'s ${move.name}. `;
-    defender.aiLog.push(`[Reactive Action]: Attempting Lightning Redirection against ${attacker.name}'s ${move.name}.`);
-    attacker.aiLog.push(`[Opponent Reaction]: ${defender.name} is attempting Lightning Redirection!`);
-
-
+    let logMessage = `[REDIRECTION ATTEMPT]: ${defender.name} (HP: ${defender.hp}, Mental: ${defender.mentalState?.level}) attempts to redirect ${attacker.name}'s ${move.name}. `;
+    
+    // Calculate success chance
     let successChance = LIGHTNING_REDIRECTION_BASE_SUCCESS_CHANCE;
 
-    // Apply HP penalties
-    if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW) {
-        successChance -= 0.30;
-        logMessage += `HP critically low (-0.30). `;
-    } else if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_MID) {
+    // HP Factor: Reduce chance proportionally if below mid threshold
+    if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_MID) {
+        const hpFactor = Math.max(0, defender.hp - LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW) / (LIGHTNING_REDIRECTION_HP_THRESHOLD_MID - LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW); // 0 to 1 scale for HP between low and mid
+        const hpPenalty = (1 - hpFactor) * 0.25; // Max 25% penalty from HP
+        successChance -= hpPenalty;
+        logMessage += `HP factor penalty (-${hpPenalty.toFixed(2)}). `;
+    }
+    if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW) { // Additional flat penalty for very low HP
         successChance -= 0.15;
-        logMessage += `HP low (-0.15). `;
+        logMessage += `Critically low HP flat penalty (-0.15). `;
     }
 
-    // Apply mental state penalties
+
+    // Mental State Factor
     const mentalState = defender.mentalState?.level || 'stable';
     const mentalPenalty = LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY[mentalState] || 0;
     if (mentalPenalty > 0) {
@@ -59,19 +55,24 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         logMessage += `Mental state '${mentalState}' (-${mentalPenalty.toFixed(2)}). `;
     }
 
-    successChance = Math.max(LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE, successChance);
-    logMessage += `Final Chance: ${successChance.toFixed(2)}.`;
-    interactionLog.push(logMessage); // Log detailed chance calculation
-    defender.aiLog.push(logMessage);
+    // Clamp chance
+    successChance = Math.max(LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE, Math.min(LIGHTNING_REDIRECTION_MAX_SUCCESS_CHANCE, successChance));
+    
+    const roll = Math.random();
+    logMessage += `Final Chance: ${successChance.toFixed(2)}, Roll: ${roll.toFixed(2)}.`;
+    
+    console.log(`[REDIRECTION ATTEMPT] ${defender.name} vs ${attacker.name}'s ${move.name}. Chance=${(successChance*100).toFixed(1)}% Roll=${(roll*100).toFixed(1)}%`);
+    interactionLog.push(logMessage);
+    defender.aiLog.push(`[Reactive Action]: Attempting Lightning Redirection against ${attacker.name}'s ${move.name}. ${logMessage}`);
+    attacker.aiLog.push(`[Opponent Reaction]: ${defender.name} is attempting Lightning Redirection! Chance: ${successChance.toFixed(2)}, Roll: ${roll.toFixed(2)}.`);
 
-
-    if (Math.random() < successChance) {
+    if (roll < successChance) {
         // Successful Redirection
+        console.log(`[REDIRECTION SUCCESS]: ${defender.name} redirected lightning!`);
         interactionLog.push(`[REDIRECTION SUCCESS]: ${defender.name} successfully redirects the lightning!`);
         defender.aiLog.push(`[Redirection Result]: SUCCESS!`);
         attacker.aiLog.push(`[Redirection Result]: Lightning successfully redirected by ${defender.name}!`);
 
-        // Raw narrative event data for successful redirection
         narrativeEvents.push(
             { quote: { type: 'action', line: `${defender.name} skillfully catches ${attacker.name}'s lightning, channeling its immense power!` }, actor: defender, isMoveExecutionQuote: false }
         );
@@ -86,18 +87,17 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
             stunAppliedToAttacker: 1, // Attacker stunned for 1 turn
             momentumChangeDefender: 3,
             momentumChangeAttacker: -2,
-            narrativeEvents, // Pass the array of raw event data
-            effectivenessLabel: "RedirectedSuccess",
-            effectivenessEmoji: "⚡↩️"
+            narrativeEvents,
+            effectivenessLabel: effectivenessLevels.REDIRECTED_SUCCESS.label, // Using the label from narrative-v2
+            effectivenessEmoji: effectivenessLevels.REDIRECTED_SUCCESS.emoji
         };
     } else {
         // Failed Redirection
+        console.log(`[REDIRECTION FAILED]: ${defender.name} failed to redirect. Lightning hit.`);
         interactionLog.push(`[REDIRECTION FAIL]: ${defender.name} fails to fully redirect the lightning.`);
         defender.aiLog.push(`[Redirection Result]: FAILED!`);
-        attacker.aiLog.push(`[Redirection Result]: ${defender.name} failed to redirect the lightning!`);
+        attacker.aiLog.push(`[Redirection Result]: ${defender.name} failed to redirect the lightning! Attack proceeds.`);
 
-
-        // Raw narrative event data for failed redirection
         narrativeEvents.push(
             { quote: { type: 'action', line: `${defender.name} attempts to intercept the lightning, but its power is overwhelming!` }, actor: defender, isMoveExecutionQuote: false }
         );
@@ -108,13 +108,13 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         return {
             attempted: true,
             success: false,
-            damageMitigation: 0.4, // Defender takes 60% of the damage (1.0 - 0.4 mitigation)
+            damageMitigation: 0.4, // Defender takes 60% of the damage
             stunAppliedToAttacker: 0,
             momentumChangeDefender: -1,
-            momentumChangeAttacker: 1, // Attacker gains some momentum as their attack partially lands
-            narrativeEvents, // Pass the array of raw event data
-            effectivenessLabel: "RedirectedFail",
-            effectivenessEmoji: "⚡🤕"
+            momentumChangeAttacker: 1,
+            narrativeEvents,
+            effectivenessLabel: effectivenessLevels.REDIRECTED_FAIL.label, // Using the label from narrative-v2
+            effectivenessEmoji: effectivenessLevels.REDIRECTED_FAIL.emoji
         };
     }
 }

@@ -2,15 +2,15 @@
 'use strict';
 
 // ====================================================================================
-//  Curbstomp Mechanics & Rules Definition (v1.3 - Corrected WeightingLogic Context)
+//  Curbstomp Mechanics & Rules Definition (v1.4 - Added lightning_attack tag)
 // ====================================================================================
 //  This file centralizes all rules related to instant win/loss conditions,
 //  drastic advantages, and personality-driven mechanic triggers.
 //  The battle engine will refer to this file to evaluate these conditions.
-//  - Corrected context within weightingLogic for 'appliesToCharacter' rules.
+//  - Added "lightning_attack" tag to relevant curbstomp rules.
 // ====================================================================================
 
-export const CURBSTOMP_RULES_VERSION = "1.3"; // Updated version
+export const CURBSTOMP_RULES_VERSION = "1.4"; // Updated version
 
 export const universalMechanics = {
     maiKnifeAdvantage: {
@@ -62,26 +62,21 @@ export const locationCurbstompRules = {
             canTriggerPreBattle: true,
             conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Make sure parameters match how they are used
             weightingLogic: ({ attacker, defender, rule, location, situation }) => {
-                // 'rule' here is the 'si_wong_sokka_heatstroke' object itself.
-                // 'rule.appliesToCharacter' is "sokka".
-                // We need to identify which of the *current combatants* (attacker, defender) is Sokka.
                 let sokkaCharacter;
                 let opponentOfSokka;
 
-                if (attacker.id === rule.appliesToCharacter) { // rule.appliesToCharacter is "sokka"
+                if (attacker.id === rule.appliesToCharacter) {
                     sokkaCharacter = attacker;
                     opponentOfSokka = defender;
                 } else if (defender.id === rule.appliesToCharacter) {
                     sokkaCharacter = defender;
                     opponentOfSokka = attacker;
                 } else {
-                    // This should ideally not happen if the rule evaluation is correct up to this point
                     return null;
                 }
 
                 let sokkaLosesChance = 0.85;
                 if (opponentOfSokka.element === "fire" && situation.isDay) sokkaLosesChance = 0.95;
-                // if (sokkaCharacter.specialTraits?.desertSurvivalTraining) sokkaLosesChance *= 0.5;
                 return { victimId: "sokka", probability: sokkaLosesChance };
             },
             escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 70, successChance: 0.10 },
@@ -248,7 +243,6 @@ export const locationCurbstompRules = {
             appliesToAll: true,
             triggerChance: 0.20,
             canTriggerPreBattle: true,
-            // No weightingLogic means selectCurbstompVictim will use its appliesToAll fallback (50/50 if outcome is weighted type)
             outcome: { type: "advantage_random_character_or_debuff_random", effect: "ambush_or_minor_damage_stun", successMessage: "{actualVictimName} stumbles into a hidden Kyoshi trap, creating an opening (or taking damage)!", failureMessage: "The fighters navigate the village carefully, avoiding any obvious traps." }
         },
         {
@@ -342,7 +336,7 @@ export const locationCurbstompRules = {
             appliesToAll: true,
             triggerChance: 0.15,
             canTriggerPreBattle: true,
-            weightingLogic: ({ attacker, defender, location, situation }) => { // Example of a simple random fallback if not specifically targeted
+            weightingLogic: ({ attacker, defender, location, situation }) => {
                 return { probabilities: { [attacker.id]: 0.5, [defender.id]: 0.5 } };
             },
             outcome: { type: "disruption_random_character", effect: "minor_stun_or_misstep", successMessage: "The panicked crowd surges, momentarily disrupting {actualVictimName}'s attack!", failureMessage: "The fighters manage to weave through the throngs of people." }
@@ -367,6 +361,8 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "authority_challenged",
             activatingMoveName: "Emperor's Wrath",
+            activatingMoveTags: ["fire", "area_of_effect_large", "highRisk", "lightning_attack"], // Added lightning_attack
+            activatingMoveElement: "fire", // Can also be lightning if Emperor's Wrath can be lightning
             outcome: { type: "instant_kill_target", successMessage: "Ozai, his authority challenged, unleashes {moveName} with the devastating force of a comet, instantly incinerating {targetName}!", failureMessage: "{targetName} somehow withstands Ozai's monumental display of power!" }
         },
         {
@@ -375,7 +371,8 @@ export const characterCurbstompRules = {
             triggerChance: 0.70,
             canTriggerPreBattle: false,
             personalityTrigger: "authority_challenged",
-            activatingMoveTags: ["lightning", "ranged_attack"],
+            activatingMoveTags: ["lightning", "ranged_attack", "lightning_attack"], // Added lightning_attack
+            activatingMoveElement: "lightning",
             outcome: { type: "instant_death_target", successMessage: "With {moveName}, Ozai rains down a terrifying storm of lightning, leaving {targetName} no chance of survival!", failureMessage: "{targetName} miraculously dodges or redirects Ozai's relentless lightning barrage!" }
         }
     ],
@@ -387,6 +384,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "underestimated",
             activatingMoveName: "Rock Avalanche",
+            activatingMoveTags: ["earth", "area_of_effect_large", "environmental_manipulation"],
             outcome: { type: "instant_incapacitation_target_bury", successMessage: "With a cackle, Bumi's {moveName} shifts a mountain of earth, burying {targetName} completely!", failureMessage: "{targetName} narrowly escapes being crushed by Bumi's colossal earthbending!" }
         },
         {
@@ -397,6 +395,7 @@ export const characterCurbstompRules = {
             conditionLogic: (bumi, opponent, battleState) => battleState.locationTags.includes("urban") || battleState.locationTags.includes("dense"),
             personalityTrigger: "underestimated",
             activatingMoveName: "Terrain Reshape",
+            activatingMoveTags: ["earth", "environmental_manipulation", "area_of_effect_large"],
             outcome: { type: "instant_kill_target_collapse", successMessage: "King Bumi's {moveName} brings the very structures around them crashing down on {targetName}!", failureMessage: "{targetName} makes a daring escape as the surroundings collapse!" }
         }
     ],
@@ -409,6 +408,8 @@ export const characterCurbstompRules = {
             personalityTrigger: "in_control",
             conditionLogic: (azula) => !azula.isInsane,
             activatingMoveName: "Lightning Generation",
+            activatingMoveTags: ["lightning", "ranged_attack", "single_target", "instantaneous", "lightning_attack"], // Added lightning_attack
+            activatingMoveElement: "lightning",
             outcome: { type: "instant_kill_target", successMessage: "Azula's {moveName} strikes with chilling precision, ending {targetName}'s fight instantly!", failureMessage: "{targetName} anticipates Azula's lightning, managing a desperate dodge!" }
         },
         {
@@ -418,7 +419,8 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "in_control",
             conditionLogic: (azula) => !azula.isInsane,
-            activatingMoveTags: ["fire", "area_of_effect_large"],
+            activatingMoveTags: ["fire", "area_of_effect_large", "channeled"],
+            activatingMoveElement: "fire",
             outcome: { type: "instant_incapacitation_target_burn", successMessage: "Azula conjures a terrifying blue fire tornado with {moveName}, engulfing and incinerating {targetName}!", failureMessage: "{targetName} finds a way to disrupt or escape Azula's fiery vortex!" }
         }
     ],
@@ -431,6 +433,8 @@ export const characterCurbstompRules = {
             selfSabotageChance: 0.40,
             personalityTrigger: "desperate_broken",
             conditionLogic: (azula) => azula.isInsane,
+            activatingMoveTags: ["fire", "area_of_effect_large", "highRisk"], // Could be lightning too
+            activatingMoveElement: "fire", // Could be lightning
             outcome: {
                 type: "conditional_instant_kill_or_self_sabotage",
                 successMessage: "Azula's crazed, unpredictable {moveName} overwhelms {targetName}!",
@@ -464,6 +468,7 @@ export const characterCurbstompRules = {
             conditionLogic: (toph, opponent) => opponent.hasMetalArmor === true,
             personalityTrigger: "doubted",
             activatingMoveName: "Metal Bending",
+            activatingMoveTags: ["metal", "utility_control"],
             outcome: { type: "instant_win_attacker_vs_armor", successMessage: "Toph's {moveName} twists and crushes {targetName}'s armor, leaving them defenseless!", failureMessage: "{targetName}'s armor holds, or they shed it just in time!" }
         }
     ],
@@ -476,6 +481,7 @@ export const characterCurbstompRules = {
             conditionLogic: (katara, opponent, battleState) => battleState.isFullMoon === true,
             personalityTrigger: "desperate_mentally_broken",
             activatingMoveName: "Bloodbending",
+            activatingMoveTags: ["special", "debuff_disable", "unblockable"],
             outcome: { type: "instant_win_attacker_control", successMessage: "Under the light of the full moon and pushed to her absolute limit, Katara's {moveName} seizes control of {targetName}, ending the fight instantly!", failureMessage: "{targetName}'s willpower (or Katara's hesitation) prevents the bloodbending from taking full effect!" }
         },
         {
@@ -485,6 +491,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "desperate_mentally_broken",
             activatingMoveName: "Ice Prison",
+            activatingMoveTags: ["ice", "construct_creation", "debuff_disable"],
             outcome: { type: "instant_kill_target_ice", successMessage: "Katara summons massive ice shards with {moveName}, encasing and fatally wounding {targetName}!", failureMessage: "{targetName} shatters the forming ice prison just in time!" }
         }
     ],
@@ -495,6 +502,7 @@ export const characterCurbstompRules = {
             triggerChance: 0.85,
             canTriggerPreBattle: false,
             personalityTrigger: "mortal_danger",
+            activatingMoveTags: ["air", "area_of_effect_large", "unblockable"], // Conceptual tags
             outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Aang's eyes glow as he enters the Avatar State, unleashing a cataclysmic storm of air that overwhelms {targetName}!", failureMessage: "Aang struggles to fully control the Avatar State's power, giving {targetName} a fleeting chance!" }
         },
         {
@@ -520,6 +528,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "honor_violated",
             activatingMoveName: "Flame Sword",
+            activatingMoveTags: ["fire", "melee_range", "precise"],
             outcome: { type: "instant_kill_target", successMessage: "Zuko's fiery {moveName} dances with deadly precision, delivering a fatal blow to {targetName}!", failureMessage: "{targetName} narrowly parries Zuko's lightning-fast sword assault!" }
         }
     ],
@@ -531,17 +540,17 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "meticulous_planning",
             escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 65, successChance: 0.10 },
+            activatingMoveTags: ["utility", "trap_delayed", "environmental_manipulation"],
             outcome: { type: "advantage_attacker_environmental", successMessage: "Sokka's brilliant strategy (perhaps using {moveName}) turns the environment against {targetName}, creating a key advantage!", failureMessage: "Sokka's plan doesn't quite come together this time." }
         },
         {
             id: "sokka_vulnerability_death",
             description: "Sokka's inherent vulnerability as a non-bender.",
-            appliesToCharacter: "sokka", // Explicitly states this rule is about Sokka
+            appliesToCharacter: "sokka",
             triggerChance: 0.75,
             canTriggerPreBattle: true,
-            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Using char names from function signature
+            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender",
             weightingLogic: ({ attacker, defender, rule, location, situation }) => {
-                // 'rule' is 'sokka_vulnerability_death' object. rule.appliesToCharacter is "sokka".
                 let sokkaUnderThreat;
                 let opponentOfSokka;
 
@@ -552,7 +561,7 @@ export const characterCurbstompRules = {
                     sokkaUnderThreat = defender;
                     opponentOfSokka = attacker;
                 } else {
-                    return null; // Should not happen if rule is correctly targeted
+                    return null;
                 }
 
                 let sokkaLosesChance = 0.75;
@@ -562,7 +571,6 @@ export const characterCurbstompRules = {
                 if (location.tags && location.tags.includes("open") && opponentOfSokka.element !== "earth") sokkaLosesChance += 0.05;
                 if (location.tags && location.tags.includes("cover_rich")) sokkaLosesChance -= 0.10;
 
-                // Ensure probability is between 0 and 1
                 sokkaLosesChance = Math.max(0, Math.min(1.0, sokkaLosesChance));
                 return { victimId: "sokka", probability: sokkaLosesChance };
             },
@@ -581,6 +589,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "confident_stance",
             activatingMoveName: "Flame Whips",
+            activatingMoveTags: ["fire", "ranged_attack_medium", "precise"],
             outcome: { type: "incapacitation_target_disable_limbs", successMessage: "Jeong Jeong's {moveName} lash out with pinpoint accuracy, ensnaring and disabling {targetName}'s limbs!", failureMessage: "{targetName} narrowly evades Jeong Jeong's ensnaring fire whips!" }
         },
         {
@@ -600,6 +609,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: false,
             personalityTrigger: "skill_challenged",
             activatingMoveName: "Octopus Form",
+            activatingMoveTags: ["water", "versatile", "area_of_effect_small"],
             outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Master Pakku unleashes {moveName}, an overwhelming display of waterbending that leaves {targetName} utterly defeated!", failureMessage: "{targetName} manages to weather the initial storm of Pakku's masterful assault!" }
         },
         {
@@ -608,25 +618,9 @@ export const characterCurbstompRules = {
             triggerChance: 0.60,
             canTriggerPreBattle: false,
             personalityTrigger: "skill_challenged",
-            activatingMoveName: "Ice Spikes",
+            activatingMoveName: "Ice Spikes", // Assuming Ice Spikes is the base for daggers
+            activatingMoveTags: ["ice", "projectile", "precise"],
             outcome: { type: "instant_kill_target_ice", successMessage: "With chilling precision, Pakku's {moveName} form into deadly ice daggers, fatally striking {targetName}!", failureMessage: "{targetName} deflects or dodges Pakku's lethal ice projectiles!" }
         }
     ]
-};
-
-export const personalityTriggerMappings = {
-    "provoked": "Opponent lands a critical hit, taunts Mai, or targets Ty Lee/Zuko (if allied).",
-    "serious_fight": "An ally's health drops below 30%, or opponent uses an overtly lethal move.",
-    "authority_challenged": "Opponent lands two significant (Strong/Critical) hits on Ozai, or uses a taunt/defiant dialogue line.",
-    "underestimated": "Opponent uses a taunt related to Bumi's age or unconventional tactics, or uses a 'Weak' effectiveness move against him.",
-    "in_control": "Azula's health > 50% AND Azula has not received a 'Critical' hit this battle AND opponent's mental state is 'stable' or 'stressed'.",
-    "desperate_broken": "Azula's health < 30% OR Azula's mental state is 'broken'.",
-    "desperate_mentally_broken": "Katara: health < 10%, ally incapacitated, taken 2+ critical hits, OR mental state 'broken'.",
-    "doubted": "Opponent uses a taunt targeting Toph's blindness or skill, or lands a hit that Toph 'didn't see coming'.",
-    "mortal_danger": "An ally's health < 5% (if applicable) OR Aang's own health < 20%.",
-    "honor_violated": "Opponent uses a move flagged as 'dishonorable' OR an ally is disarmed/incapacitated unfairly.",
-    "meticulous_planning": "Opponent overcommits with a high-power/high-risk move and misses OR battle terrain strongly favors traps.",
-    "confident_stance": "Jeong Jeong has successfully landed a 'Strong' or 'Critical' hit in the last turn OR an ally has successfully buffed/protected him.",
-    "skill_challenged": "Opponent uses a taunt about Pakku's traditional style or skill OR opponent initiates combat with a direct, aggressive offensive move.",
-    "disrespected": "Generic trigger for characters like Bumi if an opponent mocks their connection to the location or their methods there.",
 };
