@@ -1,9 +1,11 @@
-// FILE: js/engine_ai-decision.js
+// FILE: engine_ai-decision.js
 // FILE: engine_ai-decision.js
 'use strict';
 
 // This is the "AI Brain" module.
-// VERSION 8.2: Refined safeGet for less verbose console warnings on common defaults.
+// VERSION 8.3: No direct changes needed for curbstomp-move association,
+// as selectMove already returns the full move object.
+// The battle engine core will use this selected move for curbstomp checks.
 
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js'; 
@@ -30,7 +32,6 @@ function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor', propertyP
     const value = path.split('.').reduce((acc, part) => acc && acc[part], obj);
 
     if (value === undefined || value === null) {
-        // Specific conditions to suppress warnings for common/expected defaults
         const isTacticalStateNullDefault = (propertyPathName === 'tacticalState' && defaultValue === null);
         const isMoveCooldownZeroDefault = (propertyPathName.startsWith('aiMemory.moveSuccessCooldown') && defaultValue === 0);
         const isSignatureBiasOneDefault = (propertyPathName.startsWith('profile.signatureMoveBias') && defaultValue === 1.0);
@@ -38,12 +39,11 @@ function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor', propertyP
         const suppressWarningForThisDefault = isTacticalStateNullDefault || isMoveCooldownZeroDefault || isSignatureBiasOneDefault;
 
         if (defaultValue !== undefined) {
-            if (!suppressWarningForThisDefault) { // Only warn if not a suppressed default
-                console.warn(`AI Decision: Missing ${propertyPathName} for ${actorName}. Using default: ${defaultValue}.`);
+            if (!suppressWarningForThisDefault) { 
+                // console.warn(`AI Decision: Missing ${propertyPathName} for ${actorName}. Using default: ${defaultValue}.`);
             }
             return defaultValue;
         }
-        // For truly critical data missing without a safe default
         console.error(`AI Decision: CRITICAL data ${propertyPathName} missing for ${actorName}. This WILL cause issues.`);
         return null; 
     }
@@ -180,7 +180,6 @@ function getDynamicPersonality(actor, currentPhase) {
         const traitName = key.replace('Multiplier', '');
         if (dynamicProfile[traitName] !== undefined) {
             dynamicProfile[traitName] = clamp(dynamicProfile[traitName] * phaseMods[key], 0, 1.5);
-        } else {
         }
     });
 
@@ -269,7 +268,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
     const profile = getDynamicPersonality(actor, currentPhase);
 
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
-    const momentumInfluence = actorMomentum / (MAX_MOMENTUM - MIN_MOMENTUM) * 2;
+    const momentumInfluence = actorMomentum / (MAX_MOMENTUM - MIN_MOMENTUM) * 2; // Normalize to -1 to 1 range
     profile.aggression = clamp(profile.aggression + (momentumInfluence * 0.2), 0, 1.0);
     profile.riskTolerance = clamp(profile.riskTolerance + (momentumInfluence * 0.3), 0, 1.0);
     profile.defensiveBias = clamp(profile.defensiveBias - (momentumInfluence * 0.2), 0, 1.0);
@@ -325,8 +324,6 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             }
         }
 
-        // Use safeGet for signatureMoveBias, providing a default of 1.0
-        // The propertyPathName includes the move.name for clearer potential warnings (though Phase 1 should eliminate these)
         const signatureBias = safeGet(profile.signatureMoveBias, move.name, 1.0, actor.name, `profile.signatureMoveBias.${move.name}`);
         if (signatureBias !== 1.0) { weight *= signatureBias; reasons.push(`SigMove`); }
 
@@ -372,9 +369,8 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             reasons.push(`EnergyTooHigh`);
         }
 
-        // Use safeGet for moveSuccessCooldown, providing a default of 0
         const moveCooldown = safeGet(actor.aiMemory?.moveSuccessCooldown, move.name, 0, actor.name, `aiMemory.moveSuccessCooldown.${move.name}`);
-        if (moveCooldown > 0) { // Check if greater than 0, not just truthy
+        if (moveCooldown > 0) { 
              weight *= 0.01; 
              reasons.push('MoveCooldown');
         }
@@ -408,9 +404,6 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
     });
 
     if (weightExpSum === 0) {
-        // This case should ideally not be hit if there are targetMovesForExp.
-        // If it is, it implies all expWeights were 0 (e.g., if all weights were extremely negative or temp is huge)
-        // Distribute probability equally among the moves we attempted to calculate exp for.
         return movesWithExp.map(m => ({ ...m, probability: 1 / movesWithExp.length }));
     }
 
@@ -431,8 +424,6 @@ function selectFromDistribution(movesWithProbs) {
         cumulativeProbability += moveInfo.probability;
         if (rand < cumulativeProbability) return moveInfo;
     }
-    // Fallback: return the last move if something went wrong with probabilities sum (should not happen if probabilities sum to 1)
-    // Or if all probabilities were 0.
     return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'] };
 }
 
@@ -453,16 +444,13 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
 
     if (validMoves.length === 0) {
-        // If no valid moves other than struggle, ensure struggle is the only option.
         validMoves = [{ move: struggleMove, weight: 1.0, reasons: ['FallbackOnlyStruggle'] }];
     } else {
-        // Ensure Struggle is present with a minimal weight if other moves are available,
-        // so it's always a possibility, however small.
         const struggleWeightInfo = weightedMoves.find(m => m.move?.name === "Struggle");
-        if (!struggleWeightInfo) { // if struggle wasn't even in weightedMoves (e.g. filtered out due to 0 weight)
+        if (!struggleWeightInfo) { 
             validMoves.push({ move: struggleMove, weight: 0.01, reasons: ['LowProbStruggleDefault'] });
-        } else if (!validMoves.find(m => m.move?.name === "Struggle")){ // if it was in weighted but filtered by weight > 0
-             validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) }); // ensure positive weight
+        } else if (!validMoves.find(m => m.move?.name === "Struggle")){ 
+             validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) }); 
         }
     }
     
@@ -495,6 +483,6 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     });
 
     return {
-        move: chosenMove
+        move: chosenMove // This returns the full move object
     };
 }
