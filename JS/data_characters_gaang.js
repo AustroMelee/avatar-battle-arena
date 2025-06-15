@@ -38,7 +38,20 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {},
+escalationBehavior: { // Sokka: Opportunistic trap or desperate measure
+    'Severely Incapacitated': { // Opponent is Severely Incapacitated
+        signatureMoveBias: { "Improvised Trap": 1.8, "The Sokka Special": 1.6, "Boomerang Throw": 1.4 },
+        offensiveBias: 1.0, // Less direct offense, more traps
+        finisherBias: 1.5,
+        utilityBias: 1.6, // Higher bias for traps
+    },
+    'Terminal Collapse': { // Opponent is in Terminal Collapse
+        signatureMoveBias: { "The Sokka Special": 2.0, "Boomerang Throw": 1.7 },
+        offensiveBias: 0.8,
+        finisherBias: 1.8,
+        utilityBias: 1.3,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Alright team, let's see what Sokka's got! Time for some strategy!" }, { type: 'internal', line: "Okay, {opponentName} looks tough. Don't panic. Just find an opening. You're the idea guy." }],
@@ -131,7 +144,20 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {},
+escalationBehavior: { // Aang: Evasive and disabling, less directly aggressive finishers
+    'Severely Incapacitated': {
+        signatureMoveBias: { "Tornado Whirl": 1.7, "Air Scooter": 1.5, "Wind Shield": 1.3 },
+        offensiveBias: 0.7, // Prefers utility/control
+        finisherBias: 1.2, // "Sweeping Gust" is more about control
+        utilityBias: 1.8,
+    },
+    'Terminal Collapse': {
+        signatureMoveBias: { "Tornado Whirl": 2.0, "Sweeping Gust": 1.5 },
+        offensiveBias: 0.5,
+        finisherBias: 1.4,
+        utilityBias: 1.5,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
@@ -221,7 +247,20 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {},
+escalationBehavior: { // Katara: Protective and fierce, but resorts to extreme measures only if pushed
+    'Severely Incapacitated': {
+        signatureMoveBias: { "Tidal Wave": 1.8, "Ice Prison": 1.6, "Ice Spears": 1.4 },
+        offensiveBias: 1.5,
+        finisherBias: 1.7, // Tidal Wave or Ice Prison to incapacitate
+        utilityBias: 0.5, // Less shielding, more direct action
+    },
+    'Terminal Collapse': {
+        signatureMoveBias: { "Bloodbending": 0.5, "Tidal Wave": 2.2, "Ice Prison": 1.9 }, // Bloodbending still low unless desperate_mentally_broken trigger
+        offensiveBias: 1.7,
+        finisherBias: 2.0,
+        utilityBias: 0.2,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
@@ -277,7 +316,7 @@ techniquesCanteen: [
 { name: "Canteen Whip", verb: 'lash', object: 'out with a small water whip from her canteen', type: 'Offense', power: 25, element: 'water', moveTags: ['melee_range', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniques: [
+techniques: [ // Defaulting to full techniques
     { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
     { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
     { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
@@ -321,7 +360,20 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {},
+escalationBehavior: { // Toph: Overwhelming power, enjoys showing off
+    'Severely Incapacitated': {
+        signatureMoveBias: { "Seismic Slam": 2.0, "Rock Coffin": 1.8, "Metal Bending": 1.7, "Earth Wave": 1.5 },
+        offensiveBias: 1.8,
+        finisherBias: 2.0,
+        utilityBias: 0.2, // Less armor, more offense
+    },
+    'Terminal Collapse': {
+        signatureMoveBias: { "Seismic Slam": 2.5, "Rock Coffin": 2.2 }, // Big, definitive moves
+        offensiveBias: 2.2,
+        finisherBias: 2.5,
+        utilityBias: 0.1,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
@@ -403,7 +455,20 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {},
+escalationBehavior: { // Zuko: Driven by honor, more direct but less purely "kill" focused than Azula
+    'Severely Incapacitated': {
+        signatureMoveBias: { "Redemption's Fury": 1.9, "Dragon's Breath": 1.7, "Flame Sword": 1.5 },
+        offensiveBias: 1.6,
+        finisherBias: 1.8,
+        utilityBias: 0.3,
+    },
+    'Terminal Collapse': {
+        signatureMoveBias: { "Redemption's Fury": 2.4, "Dragon's Breath": 2.0 },
+        offensiveBias: 1.9,
+        finisherBias: 2.2,
+        utilityBias: 0.1,
+    }
+},
 narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],

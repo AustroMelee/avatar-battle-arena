@@ -2,14 +2,15 @@
 'use strict';
 
 // ====================================================================================
-//  Escalation Engine (v1.1 - Tuned Values)
+//  Escalation Engine (v1.2 - EMB Score-Based AI Weighting)
 // ====================================================================================
-//  - Increased EDM for 'Pressured' state.
-//  - Increased default AI bias for finishers/high-power offense against highly incapacitated opponents.
-//  - Increased Incapacitation Score weights for 'Exposed' and 'MentalState_Shaken'.
+//  - Added logic to getEscalationAIWeights to apply additional biases if
+//    defender's incapacitationScore >= INCAPACITATION_SCORE_ESCALATION_THRESHOLD
+//    and defender is at least 'Pressured'.
+//  - getEscalationAIWeights now returns an object: { finalMultiplier, scoreBasedReasonsApplied }
 // ====================================================================================
 
-export const INCAPACITATION_SCORE_VERSION = "1.1";
+export const INCAPACITATION_SCORE_VERSION = "1.1"; // Matches previous version, no change to score calc itself
 
 export const incapacitationScoreWeights = {
     // Status Effects
@@ -142,24 +143,65 @@ export function applyEscalationDamageModifier(baseDamage, defenderEscalationStat
  * @param {object} attacker - The AI whose move is being chosen.
  * @param {object} defender - The opponent.
  * @param {object} move - The move being considered.
- * @returns {number} A multiplier for the move's weight.
+ * @returns {object} An object { finalMultiplier: number, scoreBasedReasonsApplied: string[] }
  */
 export function getEscalationAIWeights(attacker, defender, move) {
     if (!attacker || !defender || !move || !defender.escalationState || !attacker.personalityProfile) {
-        return 1.0;
+        return { finalMultiplier: 1.0, scoreBasedReasonsApplied: [] };
     }
 
     let multiplier = 1.0;
     const opponentState = defender.escalationState;
+    let scoreBasedReasonsApplied = [];
 
-    // Default EMB logic based on opponent's vulnerability
+    // --- NEW: Score-based Escalation Biasing ---
+    const INCAPACITATION_SCORE_ESCALATION_THRESHOLD = 5;
+    const LOW_IMPACT_POWER_THRESHOLD = 30; // Threshold for deprioritizing weak moves
+
+    if (defender.incapacitationScore !== undefined &&
+        defender.incapacitationScore >= INCAPACITATION_SCORE_ESCALATION_THRESHOLD &&
+        (opponentState === ESCALATION_STATES.PRESSURED ||
+         opponentState === ESCALATION_STATES.SEVERELY_INCAPACITATED ||
+         opponentState === ESCALATION_STATES.TERMINAL_COLLAPSE)) {
+
+        let scoreBasedAdjustmentFactor = 1.0;
+
+        // 1. Signature Move Boost
+        if (attacker.personalityProfile.signatureMoveBias && attacker.personalityProfile.signatureMoveBias[move.name]) {
+            // This doesn't multiply the existing bias, but adds a new multiplier if it's a signature move.
+            // The original signatureMoveBias is applied in calculateMoveWeights. This is an *additional* situational boost.
+            scoreBasedAdjustmentFactor *= 1.5; // e.g., 50% boost for signature moves when opponent is highly incapacitated
+            scoreBasedReasonsApplied.push(`ScoreEscalationBias:SigMove(x1.5)`);
+        }
+
+        // 2. Finisher Boost
+        if (move.type === 'Finisher' || (move.moveTags && move.moveTags.includes('requires_opening'))) {
+            scoreBasedAdjustmentFactor *= 2.5; // e.g., 150% boost for finishers
+             scoreBasedReasonsApplied.push(`ScoreEscalationBias:Finisher(x2.5)`);
+        }
+
+        // 3. Low-Impact Deprioritization
+        if ((move.power || 0) < LOW_IMPACT_POWER_THRESHOLD &&
+            (move.type === 'Offense' ||
+             (move.type === 'Utility' && (!move.moveTags || (!move.moveTags.includes('debuff_disable') && !move.moveTags.includes('setup'))))
+            )
+           ) {
+            scoreBasedAdjustmentFactor *= 0.4; // Reduce weight to 40%
+            scoreBasedReasonsApplied.push(`ScoreEscalationBias:LowImpactDeprio(x0.4)`);
+        }
+        multiplier *= scoreBasedAdjustmentFactor;
+    }
+    // --- END NEW Score-based Biasing ---
+
+
+    // Default EMB logic based on opponent's broad escalation state
     if (opponentState === ESCALATION_STATES.SEVERELY_INCAPACITATED || opponentState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
-        if (move.type === 'Finisher' || move.moveTags?.includes('requires_opening')) {
-            multiplier *= 2.0; // Increased from 1.6
+        if (move.type === 'Finisher' || (move.moveTags && move.moveTags.includes('requires_opening'))) {
+            multiplier *= 2.0;
         } else if (move.type === 'Offense' && (move.power || 0) >= 60) {
-            multiplier *= 1.6; // Increased from 1.4
-        } else if (move.type === 'Utility' && !move.moveTags?.includes('debuff_disable') && !move.isRepositionMove) {
-            multiplier *= 0.2; // Further deprioritized from 0.3
+            multiplier *= 1.6;
+        } else if (move.type === 'Utility' && (!move.moveTags || !move.moveTags.includes('debuff_disable')) && !move.isRepositionMove) {
+            multiplier *= 0.2;
         }
     }
 
@@ -182,10 +224,10 @@ export function getEscalationAIWeights(attacker, defender, move) {
 
     const actorOwnState = attacker.escalationState;
     if (actorOwnState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
-        if (move.moveTags?.includes('highRisk')) {
+        if (move.moveTags && move.moveTags.includes('highRisk')) {
             multiplier *= 1.2;
         }
     }
 
-    return Math.max(0.1, multiplier);
+    return { finalMultiplier: Math.max(0.01, multiplier), scoreBasedReasonsApplied };
 }

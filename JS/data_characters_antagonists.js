@@ -143,7 +143,7 @@ export const antagonistCharacters = {
         incapacitationScore: 0,
         escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: {
+        escalationBehavior: { // Ozai: Utter annihilation
             'Severely Incapacitated': {
                 signatureMoveBias: { "Dragon's Roar": 2.5, "Emperor's Wrath": 2.8, "Scorching Blast": 1.8 },
                 offensiveBias: 1.8,
@@ -228,7 +228,7 @@ export const antagonistCharacters = {
         incapacitationScore: 0,
         escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: {
+        escalationBehavior: { // Mai: Efficient, less flashy finishing
             'Severely Incapacitated': {
                 signatureMoveBias: { "Pinning Strike": 2.2, "Precision Strike": 2.0, "Final Pin": 1.5 },
                 offensiveBias: 1.4, // Still prefers precise over barrage
@@ -323,7 +323,7 @@ export const antagonistCharacters = {
         incapacitationScore: 0,
         escalationState: 'Normal',
         stunDuration: 0,
-        escalationBehavior: {
+        escalationBehavior: { // Ty Lee: Disabling, less about raw damage finishers
             'Severely Incapacitated': {
                 signatureMoveBias: { "Chi-Blocking Flurry": 2.5, "Pressure Point Strike": 2.0 },
                 offensiveBias: 1.5, // More about disabling than raw damage

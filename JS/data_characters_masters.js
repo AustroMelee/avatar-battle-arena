@@ -35,15 +35,15 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {
-    'Severely Incapacitated': { // Opponent is Severely Incapacitated
+escalationBehavior: { // Bumi: Unpredictable, enjoys overwhelming with sheer power and chaos
+    'Severely Incapacitated': {
         signatureMoveBias: { "Rock Avalanche": 2.5, "Terrain Reshape": 2.0, "Boulder Throw": 1.8 },
         offensiveBias: 1.9,
         finisherBias: 2.2,
         utilityBias: 0.3, // Terrain Reshape for massive damage potential
     },
-    'Terminal Collapse': { // Opponent is in Terminal Collapse
-        signatureMoveBias: { "Rock Avalanche": 3.5, "Seismic Slam": 3.0 }, // Assuming Seismic Slam is available or similar high-impact
+    'Terminal Collapse': {
+        signatureMoveBias: { "Rock Avalanche": 3.5, "Terrain Reshape": 3.0 }, // Overwhelming terrain manipulation
         offensiveBias: 2.5,
         finisherBias: 3.0,
         utilityBias: 0.1, // Just finish it!
@@ -123,7 +123,7 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {
+escalationBehavior: { // Pakku: Stern, disciplined, will finish decisively if opponent is weak
     'Severely Incapacitated': {
         signatureMoveBias: { "Octopus Form": 2.0, "Tidal Surge": 1.8, "Ice Spikes": 1.5 },
         offensiveBias: 1.6,
@@ -182,7 +182,7 @@ techniquesCanteen: [
 { name: "Water Pouch Splash", verb: 'splash', object: 'water from his pouch to distract', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'limited_resource'], setup: { name: 'Slightly Distracted', duration: 1, intensity: 1.05 }, collateralImpact: 'none', isCanteenMove: true },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniques: [
+techniques: [ // Defaulting to full techniques
     { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
     { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
     { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
@@ -223,8 +223,8 @@ personalityTriggers: {
 incapacitationScore: 0,
 escalationState: 'Normal',
 stunDuration: 0,
-escalationBehavior: {
-    'Severely Incapacitated': { // Opponent is Severely Incapacitated
+escalationBehavior: { // Jeong Jeong: Prefers control and defense, less likely to aggressively finish
+    'Severely Incapacitated': {
         signatureMoveBias: { "Fire Wall": 1.5, "Controlled Inferno": 1.2 }, // Still defensive, but will use larger moves
         offensiveBias: 0.8, // Reluctant offense
         finisherBias: 1.0, // "Reluctant Finale" might be used to end suffering
