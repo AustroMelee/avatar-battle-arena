@@ -3,10 +3,11 @@
 
 import { simulateBattle } from './engine_battle-engine-core.js';
 import { populateUI, showLoadingState, showResultsState, resetBattleUI, DOM_simulation_references } from './ui.js';
-import { setSimulationMode, initializeSimulationManagerDOM, resetSimulationManager } from './simulation_mode_manager.js'; 
+import { setSimulationMode, initializeSimulationManagerDOM, resetSimulationManager } from './simulation_mode_manager.js';
+import { initializeDevModeUI } from './dev_mode_manager.js'; // NEW: Import Dev Mode Manager
 
 const battleBtn = document.getElementById('battleBtn');
-let currentSimMode = "animated"; 
+let currentSimMode = "animated";
 
 function handleBattleStart() {
     const f1Id = document.getElementById('fighter1-value').value;
@@ -14,7 +15,6 @@ function handleBattleStart() {
     const locId = document.getElementById('location-value').value;
     const timeOfDay = document.getElementById('time-of-day-value').value;
     const emotionalMode = document.getElementById('emotional-mode').checked;
-
     if (!f1Id || !f2Id || !locId) {
         alert("Please select both fighters and a battlefield.");
         return;
@@ -24,8 +24,8 @@ function handleBattleStart() {
         return;
     }
 
-    resetBattleUI(); 
-    showLoadingState(currentSimMode); 
+    resetBattleUI();
+    showLoadingState(currentSimMode);
 
     setTimeout(() => {
         try {
@@ -35,22 +35,22 @@ function handleBattleStart() {
             console.error("An error occurred during battle simulation:", error);
             alert("A critical error occurred. Please check the console and refresh.");
             const loadingSpinner = document.getElementById('loading');
-            if(loadingSpinner) loadingSpinner.classList.add('hidden');
-            
+            if (loadingSpinner) loadingSpinner.classList.add('hidden');
+
             const simModeContainer = document.getElementById('simulation-mode-container');
             if (simModeContainer) {
-                 simModeContainer.classList.add('hidden');
+                simModeContainer.classList.add('hidden');
             }
-            if(battleBtn) battleBtn.disabled = false;
-            resetSimulationManager(); 
+            if (battleBtn) battleBtn.disabled = false;
+            resetSimulationManager();
         }
-    }, 1500); 
+    }, 1500);
 }
 
 function handleModeSelectionChange(event) {
     if (event.target.name === "simulationMode") {
         currentSimMode = event.target.value;
-        setSimulationMode(currentSimMode); 
+        setSimulationMode(currentSimMode);
         console.log("Simulation mode changed to:", currentSimMode);
     }
 }
@@ -59,11 +59,10 @@ function setupDetailedLogControls() {
     const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
     const copyBtn = document.getElementById('copy-detailed-logs-btn');
     const contentDiv = document.getElementById('detailed-battle-logs-content');
-
     if (toggleBtn && contentDiv) {
         toggleBtn.addEventListener('click', () => {
             const isCollapsed = contentDiv.classList.toggle('collapsed');
-            toggleBtn.setAttribute('aria-expanded', String(!isCollapsed)); 
+            toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
             toggleBtn.textContent = isCollapsed ? 'Show Detailed Battle Logs ►' : 'Hide Detailed Battle Logs ▼';
         });
     } else {
@@ -74,7 +73,7 @@ function setupDetailedLogControls() {
     if (copyBtn && contentDiv) {
         copyBtn.addEventListener('click', async () => {
             try {
-                await navigator.clipboard.writeText(contentDiv.textContent || ''); 
+                await navigator.clipboard.writeText(contentDiv.textContent || '');
                 copyBtn.textContent = '📋 Copied!';
                 setTimeout(() => {
                     copyBtn.textContent = '📋 Copy Battle Logs';
@@ -82,7 +81,7 @@ function setupDetailedLogControls() {
             } catch (err) {
                 console.error('Failed to copy detailed logs: ', err);
                 copyBtn.textContent = 'Error Copying';
-                 setTimeout(() => {
+                setTimeout(() => {
                     copyBtn.textContent = '📋 Copy Battle Logs';
                 }, 2000);
             }
@@ -93,10 +92,9 @@ function setupDetailedLogControls() {
 }
 
 function init() {
-    populateUI(); 
-    
+    populateUI();
     initializeSimulationManagerDOM(DOM_simulation_references);
-    setSimulationMode(currentSimMode); 
+    setSimulationMode(currentSimMode);
 
     const modeSelectionContainer = document.querySelector('.mode-selection-section');
     if (modeSelectionContainer) {
@@ -104,7 +102,7 @@ function init() {
     } else {
         console.error("Mode selection container not found for event listener setup.");
     }
-    
+
     const defaultModeRadio = document.getElementById(`mode-${currentSimMode}`);
     if (defaultModeRadio) {
         defaultModeRadio.checked = true;
@@ -115,8 +113,11 @@ function init() {
     } else {
         console.error("Battle button not found.");
     }
-    
+
     setupDetailedLogControls();
+    initializeDevModeUI(); // NEW: Initialize Dev Mode UI
 }
 
+
+// Kick off app initialization on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', init);

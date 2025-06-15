@@ -1,4 +1,4 @@
-// FILE: js/ui.js
+// FILE: ui.js
 'use strict';
 
 import { characters } from './data_characters.js';
@@ -11,7 +11,6 @@ import { transformEventsToAnimationQueue, transformEventsToHtmlLog } from './bat
 import { initializeCameraControls } from './camera_control.js';
 // NEW IMPORT FOR ESCALATION
 import { ESCALATION_STATES } from './engine_escalation.js';
-
 
 const DOM = {
     fighter1Grid: document.getElementById('fighter1-grid'),
@@ -76,7 +75,6 @@ DOM.fighter2Select.type = 'hidden';
 DOM.fighter2Select.id = 'fighter2-value';
 DOM.locationSelect.type = 'hidden';
 DOM.locationSelect.id = 'location-value';
-
 if (!document.getElementById('fighter1-value')) document.body.appendChild(DOM.fighter1Select);
 if (!document.getElementById('fighter2-value')) document.body.appendChild(DOM.fighter2Select);
 if (!document.getElementById('location-value')) document.body.appendChild(DOM.locationSelect);
@@ -92,7 +90,6 @@ function getElementClass(character) {
     }
     const mainElementTechnique = character.techniques.find(t => t.element);
     const mainElement = mainElementTechnique ? mainElementTechnique.element : 'nonbender';
-
     switch (mainElement) {
         case 'fire': case 'lightning': return 'card-fire';
         case 'water': case 'ice': return 'card-water';
@@ -107,7 +104,6 @@ function updateArchetypeInfo() {
     const fighter1Id = DOM.fighter1Select.value || null;
     const fighter2Id = DOM.fighter2Select.value || null;
     const locationId = DOM.locationSelect.value || null;
-
     const archetypeData = resolveArchetypeLabel(fighter1Id, fighter2Id, locationId);
     renderArchetypeDisplay(archetypeData, {
         container: DOM.archetypeContainer,
@@ -124,7 +120,6 @@ function createCharacterCard(character, fighterKey) {
     if (character) {
         card.classList.add(getElementClass(character));
         card.dataset.id = character.id;
-
         const image = document.createElement('img');
         image.src = character.imageUrl;
         image.alt = character.name;
@@ -146,7 +141,6 @@ function createCharacterCard(character, fighterKey) {
 
 function handleCardSelection(character, fighterKey, selectedCard) {
     if (!character) return;
-
     const grid = fighterKey === 'fighter1' ? DOM.fighter1Grid : DOM.fighter2Grid;
     const nameDisplay = fighterKey === 'fighter1' ? DOM.fighter1NameDisplay : DOM.fighter2NameDisplay;
     const hiddenInput = fighterKey === 'fighter1' ? DOM.fighter1Select : DOM.fighter2Select;
@@ -157,10 +151,10 @@ function handleCardSelection(character, fighterKey, selectedCard) {
         return;
     }
 
-    if(grid) grid.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
+    if (grid) grid.querySelectorAll('.character-card').forEach(card => card.classList.remove('selected'));
     selectedCard.classList.add('selected');
-    if(nameDisplay) nameDisplay.textContent = character.name;
-    if(hiddenInput) hiddenInput.value = character.id;
+    if (nameDisplay) nameDisplay.textContent = character.name;
+    if (hiddenInput) hiddenInput.value = character.id;
     updateArchetypeInfo();
 }
 
@@ -171,7 +165,6 @@ function populateCharacterGrids() {
     }
     DOM.fighter1Grid.innerHTML = '';
     DOM.fighter2Grid.innerHTML = '';
-
     if (typeof characters !== 'object' || characters === null) {
         console.error("`characters` data is not a valid object.");
         DOM.fighter1Grid.textContent = "Character data error.";
@@ -203,7 +196,6 @@ function createLocationCard(locationData, locationId) {
     card.className = 'location-card';
     if (locationData) {
         card.dataset.id = locationId;
-
         const image = document.createElement('img');
         image.src = locationData.imageUrl;
         image.alt = locationData.name;
@@ -230,7 +222,6 @@ function updateEnvironmentalSummary(locationId) {
         DOM.locationEnvironmentSummary.innerHTML = 'Environmental details not available for this location.';
         return;
     }
-
     let summaryHtml = `This location is characterized by: `;
     const traits = [];
     if (locConditions.isUrban) traits.push(`<span>urban</span> setting`);
@@ -295,7 +286,6 @@ function populateLocationGrid() {
         return;
     }
     DOM.locationGrid.innerHTML = '';
-
     if (typeof locations !== 'object' || locations === null) {
         console.error("`locations` data is not a valid object.");
         DOM.locationGrid.textContent = "Location data error.";
@@ -358,7 +348,6 @@ function updateMomentumDisplay(fighterKey, momentumValue) {
 function updateEscalationDisplay(fighterKey, score, state) {
     const scoreElement = fighterKey === 'fighter1' ? DOM.fighter1IncapacitationScore : DOM.fighter2IncapacitationScore;
     const stateElement = fighterKey === 'fighter1' ? DOM.fighter1EscalationState : DOM.fighter2EscalationState;
-
     if (scoreElement) {
         scoreElement.textContent = `Incap. Score: ${score !== undefined ? score.toFixed(1) : 'N/A'}`;
     }
@@ -384,7 +373,6 @@ function updateEscalationDisplay(fighterKey, score, state) {
     }
 }
 
-
 export function populateUI() {
     populateCharacterGrids();
     populateLocationGrid();
@@ -404,21 +392,20 @@ export function populateUI() {
 
 export function showLoadingState(simulationMode) {
     if (simulationMode === "animated") {
-        if(DOM.resultsSection) DOM.resultsSection.style.display = 'none';
-        if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.remove('hidden');
-        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
+        if (DOM.resultsSection) DOM.resultsSection.style.display = 'none';
+        if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.remove('hidden');
+        if (DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
     } else {
-        if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
-        if(DOM.resultsSection) {
+        if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
+        if (DOM.resultsSection) {
             DOM.resultsSection.classList.remove('show');
             DOM.resultsSection.style.display = 'block';
         }
-        if(DOM.loadingSpinner) DOM.loadingSpinner.classList.remove('hidden');
-        if(DOM.battleResultsContainer) DOM.battleResultsContainer.classList.add('hidden');
+        if (DOM.loadingSpinner) DOM.loadingSpinner.classList.remove('hidden');
+        if (DOM.battleResultsContainer) DOM.battleResultsContainer.classList.add('hidden');
     }
-    if(DOM.battleBtn) DOM.battleBtn.disabled = true;
-    if(DOM.vsDivider) DOM.vsDivider.classList.add('clash');
-
+    if (DOM.battleBtn) DOM.battleBtn.disabled = true;
+    if (DOM.vsDivider) DOM.vsDivider.classList.add('clash');
     const targetScrollElement = simulationMode === "animated" ? DOM.simulationModeContainer : DOM.resultsSection;
     if (targetScrollElement) {
         targetScrollElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -434,9 +421,8 @@ export function showResultsState(battleResult, simulationMode) {
         if (DOM.battleBtn) DOM.battleBtn.disabled = false;
         return;
     }
-
-    if(DOM.vsDivider) DOM.vsDivider.classList.remove('clash');
-    if(DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden');
+    if (DOM.vsDivider) DOM.vsDivider.classList.remove('clash');
+    if (DOM.loadingSpinner) DOM.loadingSpinner.classList.add('hidden');
 
     const displayFinalResultsPanel = (result) => {
         if (!DOM.winnerName || !DOM.winProbability || !DOM.battleResultsContainer || !DOM.resultsSection || !DOM.battleBtn) {
@@ -460,7 +446,7 @@ export function showResultsState(battleResult, simulationMode) {
             displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, locationId);
         } else {
             console.error("Location ID not found for final analysis.");
-            if(DOM.analysisList) DOM.analysisList.innerHTML = "<li>Error: Location data missing for analysis.</li>";
+            if (DOM.analysisList) DOM.analysisList.innerHTML = "<li>Error: Location data missing for analysis.</li>";
         }
 
         if (result.finalState?.fighter1) {
@@ -480,13 +466,13 @@ export function showResultsState(battleResult, simulationMode) {
         DOM.resultsSection.classList.add('show');
 
         if (simulationMode === "instant" || (simulationMode === "animated" && DOM.simulationModeContainer?.classList.contains('hidden'))) {
-           DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         DOM.battleBtn.disabled = false;
     };
 
     if (simulationMode === "animated") {
-        if(DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = '';
+        if (DOM.animatedLogOutput) DOM.animatedLogOutput.innerHTML = '';
 
         const animationQueue = transformEventsToAnimationQueue(battleResult.log);
         startSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
@@ -494,28 +480,27 @@ export function showResultsState(battleResult, simulationMode) {
                 DOM.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
             }
             displayFinalResultsPanel(finalBattleResult);
-            if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
+            if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
         });
     } else {
-        if(DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
-        if(DOM.battleStory && battleResult.log) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
+        if (DOM.simulationModeContainer) DOM.simulationModeContainer.classList.add('hidden');
+        if (DOM.battleStory && battleResult.log) DOM.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
         displayFinalResultsPanel(battleResult);
     }
 }
 
 export function resetBattleUI() {
-    if(DOM.resultsSection) DOM.resultsSection.classList.remove('show');
-    if(DOM.environmentDamageDisplay) {
+    if (DOM.resultsSection) DOM.resultsSection.classList.remove('show');
+    if (DOM.environmentDamageDisplay) {
         DOM.environmentDamageDisplay.textContent = '';
         DOM.environmentDamageDisplay.className = 'environmental-damage-level';
     }
-    if(DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '';
-    if(DOM.battleStory) DOM.battleStory.innerHTML = '';
-    if(DOM.analysisList) DOM.analysisList.innerHTML = '';
-    if(DOM.winnerName) DOM.winnerName.textContent = '';
-    if(DOM.winProbability) DOM.winProbability.textContent = '';
-
-    if(DOM.detailedBattleLogsContent) {
+    if (DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '';
+    if (DOM.battleStory) DOM.battleStory.innerHTML = '';
+    if (DOM.analysisList) DOM.analysisList.innerHTML = '';
+    if (DOM.winnerName) DOM.winnerName.textContent = '';
+    if (DOM.winProbability) DOM.winProbability.textContent = '';
+    if (DOM.detailedBattleLogsContent) {
         DOM.detailedBattleLogsContent.innerHTML = '';
         const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
         if (toggleBtn && !DOM.detailedBattleLogsContent.classList.contains('collapsed')) {
@@ -552,7 +537,6 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         return;
     }
     const { fighter1, fighter2 } = finalState;
-
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
         const li = document.createElement('li');
         li.className = 'analysis-item';
@@ -604,7 +588,6 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
     }
     createListItem(`  • Escalation State:`, fighter1.escalationState || 'N/A', f1EscalationClass);
 
-
     const f2_status = isDraw ? 'DRAW' : (fighter2.id === winnerId ? 'VICTORIOUS' : 'DEFEATED');
     const f2_class = isDraw ? 'modifier-neutral' : (fighter2.id === winnerId ? 'modifier-plus' : 'modifier-minus');
     createListItem(`<b>${fighter2.name}'s Final Status:</b>`, f2_status, f2_class);
@@ -623,7 +606,6 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
         }
     }
     createListItem(`  • Escalation State:`, fighter2.escalationState || 'N/A', f2EscalationClass);
-
 
     DOM.analysisList.appendChild(spacer.cloneNode());
 
@@ -649,8 +631,8 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
             DOM.environmentImpactsList.innerHTML = '<li>The environment sustained minimal noticeable damage.</li>';
         }
     } else {
-        if(DOM.environmentDamageDisplay) DOM.environmentDamageDisplay.textContent = 'Environmental Damage: N/A';
-        if(DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '<li>No specific impact data.</li>';
+        if (DOM.environmentDamageDisplay) DOM.environmentDamageDisplay.textContent = 'Environmental Damage: N/A';
+        if (DOM.environmentImpactsList) DOM.environmentImpactsList.innerHTML = '<li>No specific impact data.</li>';
     }
 
     if (DOM.detailedBattleLogsContent) {
@@ -662,13 +644,12 @@ function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentS
             return logEntries.map(entry => {
                 if (typeof entry === 'object' && entry !== null) {
                     let parts = [];
-                    if(entry.turn !== undefined) parts.push(`T${entry.turn}`);
-                    if(entry.phase) parts.push(`Phase:${entry.phase}`);
-                    if(entry.intent) parts.push(`Intent:${entry.intent}`);
-                    if(entry.prediction) parts.push(`Pred:${entry.prediction}`);
-                    if(entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
-                    if(entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
-                    if(entry.actorState) {
+                    if (entry.turn !== undefined) parts.push(`T${entry.turn}`);
+                    if (entry.phase) parts.push(`Phase:${entry.phase}`);
+                    if (entry.intent) parts.push(`Intent:${entry.intent}`);
+                    if (entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
+                    if (entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
+                    if (entry.actorState) {
                         const as = entry.actorState;
                         parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum} MS:${as.mental}`);
                         // NEW: Add escalation state to AI log output
