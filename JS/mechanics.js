@@ -61,18 +61,19 @@ export const locationCurbstompRules = {
             triggerChance: 0.75,
             canTriggerPreBattle: true,
             conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Make sure parameters match how they are used
-            weightingLogic: ({ attacker, defender, rule, location, situation }) => {
+            weightingLogic: ({ attacker, defender, location, situation }) => { // Removed 'rule' from destructuring, hardcoding "sokka" for robustness
                 let sokkaCharacter;
                 let opponentOfSokka;
 
-                if (attacker.id === rule.appliesToCharacter) {
+                // Directly identify Sokka and opponent, as this rule is specific to Sokka
+                if (attacker.id === "sokka") {
                     sokkaCharacter = attacker;
                     opponentOfSokka = defender;
-                } else if (defender.id === rule.appliesToCharacter) {
+                } else if (defender.id === "sokka") {
                     sokkaCharacter = defender;
                     opponentOfSokka = attacker;
                 } else {
-                    return null;
+                    return null; // Should not happen if appliesToCharacter is correctly checked upstream
                 }
 
                 let sokkaLosesChance = 0.85;

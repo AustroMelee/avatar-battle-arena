@@ -9,7 +9,7 @@ import { phaseTemplates, battlePhases as phaseDefinitions } from './narrative-v2
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
-import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens, generateEscalationNarrative } from './engine_narrative-engine.js';
+import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens, generateEscalationNarrative, generateActionDescriptionObject } from './engine_narrative-engine.js'; // ADDED generateActionDescriptionObject HERE
 import { modifyMomentum } from './engine_momentum.js';
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
 import { universalMechanics, locationCurbstompRules, characterCurbstompRules } from './mechanics.js';
@@ -23,7 +23,7 @@ let charactersMarkedForDefeat = new Set();
 
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
     if (typeof rule.weightingLogic === 'function') {
-        const weightedOutcome = rule.weightingLogic({ attacker, defender, location: locationData, situation: { ...battleState, environmentState: battleState.environmentState || { damageLevel: 0 } } });
+        const weightedOutcome = rule.weightingLogic({ attacker, defender, rule, location: locationData, situation: { ...battleState, environmentState: battleState.environmentState || { damageLevel: 0 } } });
 
         if (typeof weightedOutcome === 'string') {
             return weightedOutcome;
@@ -45,13 +45,15 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
         }
     }
 
-    if (rule.appliesToAll && (rule.outcome?.type?.includes("loss_weighted_character") || rule.outcome?.type?.includes("loss_random_character"))) {
+    // Default or fallback victim selection if no weightingLogic, or if it doesn't return a victim
+    if (rule.outcome?.type?.includes("loss_weighted_character") || rule.outcome?.type?.includes("loss_random_character")) {
         return Math.random() < 0.5 ? attacker.id : defender.id;
     }
+    // If the rule explicitly applies to a character and dictates their loss (e.g., instant_death_character)
     if (rule.appliesToCharacter && (rule.outcome?.type?.includes("loss_weighted_character") || rule.outcome?.type?.includes("instant_death_character"))) {
         return rule.appliesToCharacter;
     }
-    return null;
+    return null; // No victim determined by this logic
 }
 
 
@@ -386,7 +388,6 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     case "instant_kill_target":
                     case "instant_death_target":
                     case "instant_kill_target_collapse":
-                    case "instant_kill_target_ice":
                     case "instant_win_attacker_vs_armor":
                     case "instant_win_attacker_control":
                     case "instant_win_attacker_overwhelm":
@@ -699,7 +700,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
 
             if (result.isReactedAction) {
-                 const reactionMoveLine = generateActionDescriptionObject(
+                 const reactionMoveLine = generateActionDescriptionObject( // THIS IS THE LINE THAT WAS CAUSING THE ERROR
                     { name: result.reactionType || "Reactive Defense", verb: "reacts", object: "to the attack", element: move.element }, // Pass element for emoji
                     currentDefender, 
                     currentAttacker, 
@@ -935,8 +936,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         // Identify who performed the curbstomp (attacker of the rule)
         // This requires knowing which curbstomp rule it was and who its 'actualAttacker' was.
         // For simplicity here, we assume the narrative text contains the winner's name.
-        // A more robust way would be to store the curbstomp rule's actualAttacker ID with the event.
-        // For now, we'll assume the text itself is sufficient or that the curbstomp rule's actor is the winner.
         // Let's find the rule based on curbstompRuleId in the event
         let curbstompRuleActor = null;
         if (lastCurbstompEvent.curbstompRuleId) {
