@@ -1,9 +1,14 @@
-// FILE: engine_narrative-engine.js
+// FILE: js/engine_narrative-engine.js
 'use strict';
 
-// Version 3.2: Enhanced Lightning Redirection Narrative Output
+// ====================================================================================
+//  Narrative Engine Library (v3.6 - Lightning Redirection Narrative)
+// ====================================================================================
+//  - Added `RedirectedSuccess` and `RedirectedFail` effectiveness levels.
+//  - Added specific `impactPhrases` for these redirection outcomes.
+// ====================================================================================
 
-import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives, effectivenessLevels } from './narrative-v2.js';
+import { effectivenessLevels, phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases, escalationStateNarratives } from './narrative-v2.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
@@ -193,7 +198,7 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
     return null;
 }
 
-function formatQuoteEvent(quote, actor, opponent, context) {
+export function formatQuoteEvent(quote, actor, opponent, context) {
     if (!quote || typeof quote.line !== 'string') return null;
     const { type, line } = quote;
     const characterName = actor?.name || 'Narrator';
@@ -227,7 +232,7 @@ function formatQuoteEvent(quote, actor, opponent, context) {
     };
 }
 
-function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}) {
+export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}) {
     let introPhrase = '';
     let tacticalPrefix = '';
     let tacticalSuffix = '';
