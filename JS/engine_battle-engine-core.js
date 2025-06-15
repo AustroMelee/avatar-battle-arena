@@ -1,4 +1,3 @@
-// FILE: engine_battle-engine-core.js
 'use strict';
 
 import { characters } from './data_characters.js';
@@ -13,9 +12,67 @@ import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } fr
 import { universalMechanics, locationCurbstompRules, characterCurbstompRules } from './mechanics.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
+// --- MODIFICATION: Added export ---
+export const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
+// --- END MODIFICATION ---
 
 let charactersMarkedForDefeat = new Set();
+
+// --- MODIFICATION START: selectCurbstompVictim function ---
+/**
+ * Selects a victim for a curbstomp rule based on weightingLogic or fallback.
+ * @param {object} attacker - The current attacker in the turn.
+ * @param {object} defender - The current defender in the turn.
+ * @param {object} rule - The curbstomp rule being evaluated.
+ * @param {object} locationData - The data for the current location.
+ * @param {object} battleState - The current state of the battle.
+ * @returns {string|null} The ID of the chosen victim, or null if no victim could be determined.
+ */
+function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
+    if (typeof rule.weightingLogic === 'function') {
+        const weightedOutcome = rule.weightingLogic({ attacker, defender, location: locationData, situation: battleState });
+
+        if (typeof weightedOutcome === 'string') { // Directly returns victim ID
+            return weightedOutcome;
+        } else if (weightedOutcome && typeof weightedOutcome.victimId === 'string' && typeof weightedOutcome.probability === 'number') {
+            // Returns a specific victim and their probability of being chosen (e.g., for single-target vulnerabilities)
+            if (Math.random() < weightedOutcome.probability) {
+                return weightedOutcome.victimId;
+            }
+            return null; // Victim avoided based on probability
+        } else if (weightedOutcome && typeof weightedOutcome.probabilities === 'object') {
+            // Returns probabilities for attacker vs defender
+            const rand = Math.random();
+            let cumulativeProb = 0;
+            for (const charId in weightedOutcome.probabilities) {
+                cumulativeProb += weightedOutcome.probabilities[charId];
+                if (rand < cumulativeProb) {
+                    return charId;
+                }
+            }
+            // Fallback if probabilities don't sum to 1 or other issues
+            return Math.random() < 0.5 ? attacker.id : defender.id;
+        }
+    }
+
+    // Fallback for rules like "appliesToAll" that are now "instant_loss_weighted_character" but might not have weightingLogic yet
+    // or if weightingLogic doesn't yield a clear result.
+    // This maintains a semblance of the old "random" for such cases but should be replaced by specific weightingLogic.
+    if (rule.appliesToAll && rule.outcome?.type?.includes("loss_weighted_character")) {
+        return Math.random() < 0.5 ? attacker.id : defender.id;
+    }
+    
+    // If rule targets a specific character (e.g. "sokka_vulnerability_death") but no weighting logic defined on how it might be avoided
+    if (rule.appliesToCharacter && rule.outcome?.type?.includes("loss_weighted_character")) {
+        return rule.appliesToCharacter; // The rule intrinsically targets this character
+    }
+
+
+    // Default fallback if no specific logic handles it (should be rare with good rule design)
+    return null;
+}
+// --- MODIFICATION END ---
+
 
 function initializeFighterState(charId, opponentId, emotionalMode) {
     const characterData = characters[charId];
@@ -130,7 +187,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
     }
     if (characterCurbstompRules[defender.id]) { 
         characterCurbstompRules[defender.id].forEach(rule => {
-            if (rule.outcome.type.includes("loss_character") || rule.outcome.type.includes("self_sabotage") || rule.outcome.type.includes("disadvantage")) {
+            if (rule.outcome.type.includes("loss_character") || rule.outcome.type.includes("self_sabotage") || rule.outcome.type.includes("disadvantage") || rule.outcome.type.includes("loss_weighted_character")) {
                  rulesToCheck.push({ ...rule, source: 'character', forAttacker: false, actualAttacker: attacker, actualTarget: defender });
             }
         });
@@ -184,34 +241,41 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                 }
             }
             
-            // --- MODIFICATION START: Determine actualVictimName for narration ---
-            let actualVictimNameForNarration = null;
-            let mechanicallyDeterminedLoser = null; // To store the loser for mechanical application
+            let actualVictimForNarrationObject = null; 
+            let mechanicallyDeterminedLoserId = null;
 
-            // These rules types imply a specific character (often random) is the victim for the narrative
-            if (rule.outcome?.type?.includes("loss_random_character") || 
-                rule.outcome?.type === "instant_loss_character_if_fall") {
-                // For these rules, the mechanical loser determination happens here for narration,
-                // and will be re-used in the switch case for mechanics.
-                if (rule.outcome?.type === "instant_loss_character_if_fall") {
-                    // Example: If fall risk depends on who is near edge or was pushed, that logic would go here.
-                    // For simplicity, if not specified, we'll make it random like other "loss_random" for now.
-                    // A more sophisticated system might use battleState.nearEdge or lastMovePushbackStrong
-                    // to determine who is *more likely* to fall, rather than pure random.
-                    // For now, let's assume this type also leads to a random choice if not further specified.
-                    mechanicallyDeterminedLoser = Math.random() < 0.5 ? rule.actualAttacker : rule.actualTarget;
-                } else { // For "loss_random_character" and "loss_random_character_if_knocked_off"
-                    mechanicallyDeterminedLoser = Math.random() < 0.5 ? rule.actualAttacker : rule.actualTarget;
+            // --- MODIFICATION START: Use selectCurbstompVictim for weighted rules ---
+            if (rule.outcome?.type === "instant_loss_weighted_character") {
+                mechanicallyDeterminedLoserId = selectCurbstompVictim({ 
+                    attacker: rule.actualAttacker, 
+                    defender: rule.actualTarget, 
+                    rule, 
+                    locationData: battleState.location, 
+                    battleState 
+                });
+                if (mechanicallyDeterminedLoserId) {
+                    actualVictimForNarrationObject = (mechanicallyDeterminedLoserId === rule.actualAttacker.id) ? rule.actualAttacker : rule.actualTarget;
+                } else {
+                    // This implies the weightingLogic decided no one loses this time (e.g., 0% chance for both)
+                    // Or escape condition met (handled above).
+                    // If no victim is chosen, we might skip marking anyone for defeat.
+                    // For now, let's assume if mechanicallyDeterminedLoserId is null, the curbstomp fizzles unless it's an escape.
+                    if (!isEscape) continue; // Skip if no victim and not an escape
                 }
-                actualVictimNameForNarration = mechanicallyDeterminedLoser.name;
             }
             // --- MODIFICATION END ---
 
             const narrationContext = {};
-            if (actualVictimNameForNarration) {
-                narrationContext.actualVictimName = actualVictimNameForNarration;
+            if (actualVictimForNarrationObject) { // If a victim was determined for weighted loss
+                narrationContext.actualVictimName = actualVictimForNarrationObject.name;
+            } else if (rule.outcome?.type?.includes("loss_random_character")) { // Fallback for old random rules if any remain
+                 const randomLoserForNarration = Math.random() < 0.5 ? rule.actualAttacker : rule.actualTarget;
+                 narrationContext.actualVictimName = randomLoserForNarration.name;
+                 mechanicallyDeterminedLoserId = randomLoserForNarration.id; // Ensure this is set for mechanics
             }
-            if (rule.activatingMoveName) { // Pass activating move name if available
+
+
+            if (rule.activatingMoveName) { 
                  narrationContext['{moveName}'] = rule.activatingMoveName;
             }
 
@@ -243,33 +307,41 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                            aDefeatWasMarkedByThisCheck = true;
                         }
                         break;
-                    // --- MODIFICATION START: Use mechanicallyDeterminedLoser ---
-                    case "instant_loss_random_character":
-                    case "instant_loss_character_if_fall":
-                    case "instant_loss_random_character_if_knocked_off":
-                        // Use the loser already determined for narration context if available, otherwise determine now.
-                        const loserToMark = mechanicallyDeterminedLoser || (Math.random() < 0.5 ? rule.actualAttacker : rule.actualTarget);
-                        charactersMarkedForDefeat.add(loserToMark.id);
-                        aDefeatWasMarkedByThisCheck = true;
+                    // --- MODIFICATION START: Use mechanicallyDeterminedLoserId for marking ---
+                    case "instant_loss_weighted_character": // New type
+                    case "instant_loss_random_character": // Old type, handled by selectCurbstompVictim fallback or explicit victim above
+                    case "instant_loss_character_if_fall": // This should also become weighted
+                    case "instant_loss_random_character_if_knocked_off": // This should also become weighted
+                        if (mechanicallyDeterminedLoserId) {
+                            charactersMarkedForDefeat.add(mechanicallyDeterminedLoserId);
+                            aDefeatWasMarkedByThisCheck = true;
+                        } else {
+                            // This implies weightingLogic determined no loser, or rule applied to character who avoided it
+                            // console.warn(`Rule ${rule.id} (type ${outcome.type}) triggered but no mechanical loser determined.`);
+                        }
                         break;
                     // --- MODIFICATION END ---
                     case "conditional_instant_kill_or_self_sabotage":
                         const isSelfSabotageOutcome = Math.random() >= (1 - (rule.selfSabotageChance || 0));
-                        if (!isSelfSabotageOutcome) { // Target is defeated
+                        if (!isSelfSabotageOutcome) { 
                             charactersMarkedForDefeat.add(rule.actualTarget.id);
                             aDefeatWasMarkedByThisCheck = true;
-                        } else { // Self-sabotage
+                        } else { 
                             rule.actualAttacker.hp = clamp(rule.actualAttacker.hp - 15, 0, rule.actualAttacker.maxHp);
                             modifyMomentum(rule.actualAttacker, -2, `${rule.id} backfired on ${rule.actualAttacker.name}`);
                             
                             const selfSabotageOutcomeDetails = {...rule.outcome, successMessage: rule.outcome.selfSabotageMessage || `${rule.actualAttacker.name}'s move backfires!`};
+                            const selfSabotageNarrationContext = { 
+                                isSelfSabotageOutcome: true, 
+                                actualVictimName: rule.actualAttacker.name, // Attacker is the victim of self-sabotage
+                                '{moveName}': rule.activatingMoveName || "their own action"
+                            };
                             const selfSabotageEvent = generateCurbstompNarration(
                                 {...rule, outcome: selfSabotageOutcomeDetails }, 
                                 rule.actualAttacker, 
                                 rule.actualTarget, 
                                 false,
-                                // Pass context that it's self-sabotage and the attacker is the "victim"
-                                { isSelfSabotageOutcome: true, actualVictimName: rule.actualAttacker.name, '{moveName}': rule.activatingMoveName || "their own action" } 
+                                selfSabotageNarrationContext
                             );
                             if(selfSabotageEvent) battleEventLog.push(selfSabotageEvent);
 

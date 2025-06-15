@@ -1,4 +1,3 @@
-// FILE: engine_narrative-engine.js
 'use strict';
 
 import { phaseTemplates, impactPhrases, collateralImpactPhrases, introductoryPhrases, postBattleVictoryPhrases } from './narrative-v2.js';
@@ -7,6 +6,7 @@ import { characters as characterData } from './data_characters.js';
 // --- MODIFICATION START: Import getRandomElement from engine_battle-engine-core.js ---
 import { getRandomElement } from './engine_battle-engine-core.js';
 // --- MODIFICATION END ---
+// Local definition of getRandomElement has been removed.
 
 function conjugatePresent(verbPhrase) { 
     if (!verbPhrase) return '';
