@@ -6,7 +6,7 @@
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
 // --- UPDATED IMPORTS ---
-import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases. // Corrected import path
+import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases.js'; // Corrected import path (now on one line)
 // --- END UPDATED IMPORTS ---
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
@@ -943,31 +943,30 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         // This requires knowing which curbstomp rule it was and who its 'actualAttacker' was.
         // For simplicity here, we assume the narrative text contains the winner's name.
         // Let's find the rule based on curbstompRuleId in the event
-        let curbstompRuleActor = null;
+        let ruleDef = null;
         if (lastCurbstompEvent.curbstompRuleId) {
             // Search universalMechanics
-            let ruleDef = Object.values(universalMechanics).find(r => r.id === lastCurbstompEvent.curbstompRuleId);
+            ruleDef = Object.values(universalMechanics).find(r => r.id === lastCurbstompEvent.curbstompRuleId);
             if (ruleDef) { // Universal rule implies the characterId field is the actor
-                curbstompRuleActor = ruleDef.characterId;
+                decisiveEventActorId = ruleDef.characterId;
             } else { // Search location rules
                 const locRules = locationCurbstompRules[locId] || [];
                 ruleDef = locRules.find(r => r.id === lastCurbstompEvent.curbstompRuleId);
                 if (ruleDef) { // Location rule might apply to a pair or character
-                     curbstompRuleActor = ruleDef.actualAttacker?.id || (ruleDef.appliesToPair ? ruleDef.appliesToPair[0] : ruleDef.appliesToCharacter);
+                     decisiveEventActorId = ruleDef.actualAttacker?.id || (ruleDef.appliesToPair ? ruleDef.appliesToPair[0] : ruleDef.appliesToCharacter);
                 } else { // Search character rules
                     for (const charID in characterCurbstompRules) {
                         ruleDef = characterCurbstompRules[charID].find(r => r.id === lastCurbstompEvent.curbstompRuleId);
                         if (ruleDef) {
-                            curbstompRuleActor = charID; // The key of characterCurbstompRules is the actor
+                            decisiveEventActorId = charID; // The key of characterCurbstompRules is the actor
                             break;
                         }
                     }
                 }
             }
         }
-        if (curbstompRuleActor && curbstompRuleActor === winnerId) {
+        if (decisiveEventActorId && decisiveEventActorId === winnerId) {
             decisiveEventNarrative = lastCurbstompEvent.text;
-            decisiveEventActorId = curbstompRuleActor;
         }
     }
 
@@ -984,8 +983,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const reactionNarratives = battleEventLog.filter(
                 e => e.type === 'dialogue_event' &&
                      e.actorId === finalWinnerFull.id && // Winner (Zuko) is the actor of the dialogue
-                     e.html_content.includes(finalLoserFull.name) && // Dialogue mentions loser (Azula/Ozai)
-                     (e.html_content.toLowerCase().includes("redirect") || e.html_content.toLowerCase().includes("unleashes the redirected energy"))
+                     finalLoserFull && e.html_content?.includes(finalLoserFull.name) && // Dialogue mentions loser (Azula/Ozai)
+                     (e.html_content?.toLowerCase().includes("redirect") || e.html_content?.toLowerCase().includes("unleashes the redirected energy"))
             );
             if (reactionNarratives.length > 0) {
                 decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
