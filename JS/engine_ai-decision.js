@@ -48,6 +48,52 @@ function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor', propertyP
     return value;
 }
 
+// Add validation function at the top of the file
+function validateActorState(actor, functionName) {
+    if (!actor) {
+        throw new Error(`${functionName}: Actor is undefined or null`);
+    }
+    if (!actor.techniques || !Array.isArray(actor.techniques)) {
+        throw new Error(`${functionName}: Actor ${actor.name || 'unknown'} has invalid techniques array`);
+    }
+    if (!actor.personalityProfile) {
+        throw new Error(`${functionName}: Actor ${actor.name || 'unknown'} has no personality profile`);
+    }
+    if (typeof actor.energy !== 'number') {
+        throw new Error(`${functionName}: Actor ${actor.name || 'unknown'} has invalid energy value`);
+    }
+    return true;
+}
+
+// Add error handling wrapper
+function withErrorHandling(fn, errorContext) {
+    return function(...args) {
+        try {
+            return fn.apply(this, args);
+        } catch (error) {
+            console.error(`Error in ${errorContext}:`, error);
+            // Log the error to the actor's AI log if available
+            const actor = args[0];
+            if (actor && actor.aiLog) {
+                actor.aiLog.push(`[ERROR] ${errorContext}: ${error.message}`);
+            }
+            // Return a safe fallback
+            return {
+                move: { 
+                    name: "Struggle", 
+                    verb: 'struggle', 
+                    type: 'Offense', 
+                    power: 10, 
+                    element: 'physical', 
+                    moveTags: [] 
+                },
+                weight: 1,
+                reasons: [`Error: ${error.message}`],
+                isEscalationFinisherAttempt: false
+            };
+        }
+    };
+}
 
 export function adaptPersonality(actor) {
     if (!actor || !actor.moveHistory || !actor.personalityProfile || !actor.aiLog) {
@@ -342,7 +388,10 @@ function calculateEnergyCost(move, conditions) {
     };
 }
 
-function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
+// Update the calculateMoveWeights function
+const calculateMoveWeights = withErrorHandling(function(actor, defender, conditions, intent, prediction, currentPhase) {
+    validateActorState(actor, 'calculateMoveWeights');
+    
     // Initialize all variables at the start
     const profile = actor.personalityProfile;
     const availableMoves = actor.techniques || [];
@@ -353,9 +402,34 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
     const isCriticalEnergy = actorEnergy < 10;
     const energyConservationWeight = isCriticalEnergy ? 2.0 : (isLowEnergy ? 1.5 : 1.0);
     
+    // Validate inputs
+    if (!defender) {
+        throw new Error('calculateMoveWeights: Defender is required');
+    }
+    if (!conditions) {
+        throw new Error('calculateMoveWeights: Conditions are required');
+    }
+    if (!intent) {
+        throw new Error('calculateMoveWeights: Intent is required');
+    }
+    if (!currentPhase) {
+        throw new Error('calculateMoveWeights: Current phase is required');
+    }
+
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
-            return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 0.001, reasons: ["InvalidMoveObjectEncountered"] };
+            return { 
+                move: { 
+                    name: "Struggle", 
+                    verb: 'struggle', 
+                    type: 'Offense', 
+                    power: 10, 
+                    element: 'physical', 
+                    moveTags: [] 
+                }, 
+                weight: 0.001, 
+                reasons: ["InvalidMoveObjectEncountered"] 
+            };
         }
 
         let weight = 1.0;
@@ -579,7 +653,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         if (weight < 0.05 && move.name !== "Struggle") return { move, weight: 0, reasons, isEscalationFinisherAttempt };
         return { move, weight, reasons, isEscalationFinisherAttempt };
     });
-}
+}, 'calculateMoveWeights');
 
 function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
     if (!weightedMoves || weightedMoves.length === 0) {
@@ -627,10 +701,28 @@ export function selectFromDistribution(movesWithProbs) {
     return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'], isEscalationFinisherAttempt: false };
 }
 
-export function selectMove(actor, defender, conditions, turn, currentPhase) {
+// Update the selectMove function
+export const selectMove = withErrorHandling(function(actor, defender, conditions, turn, currentPhase) {
+    validateActorState(actor, 'selectMove');
+    
     if (!actor || !defender || !conditions || !actor.aiLog) {
-        return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, aiLogEntry: { intent: 'Error', chosenMove: 'Struggle'} };
+        return { 
+            move: { 
+                name: "Struggle", 
+                verb: 'struggle', 
+                type: 'Offense', 
+                power: 10, 
+                element: 'physical', 
+                moveTags: [] 
+            }, 
+            aiLogEntry: { 
+                intent: 'Error', 
+                chosenMove: 'Struggle',
+                error: 'Invalid input parameters'
+            } 
+        };
     }
+
     actor.personalityProfile = actor.personalityProfile || { ...DEFAULT_PERSONALITY_PROFILE };
     actor.aiMemory = actor.aiMemory || { ...DEFAULT_AI_MEMORY };
 
@@ -702,4 +794,4 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
         move: chosenMove,
         aiLogEntryFromSelectMove: aiLogEntry
     };
-}
+}, 'selectMove');

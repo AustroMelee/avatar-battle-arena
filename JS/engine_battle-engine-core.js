@@ -620,14 +620,39 @@ function evaluateTerminalState(fighter1, fighter2, isStalemateFlag) {
     return { battleOver, winnerId, loserId, isStalemate };
 }
 
+// Add state validation function at the top of the file
+function validateBattleState(state) {
+    const requiredProperties = [
+        'turn',
+        'currentPhase',
+        'environmentState',
+        'location',
+        'timeOfDay',
+        'emotionalMode'
+    ];
 
-export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
-    // Initialize fighters
-    const fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
-    const fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
+    const missingProperties = requiredProperties.filter(prop => !(prop in state));
+    if (missingProperties.length > 0) {
+        throw new Error(`Invalid battle state: Missing required properties: ${missingProperties.join(', ')}`);
+    }
 
-    // Initialize battle state
-    const currentBattleState = {
+    if (!state.environmentState.specificImpacts || !(state.environmentState.specificImpacts instanceof Set)) {
+        throw new Error('Invalid battle state: environmentState.specificImpacts must be a Set');
+    }
+
+    return true;
+}
+
+// Add state initialization function
+function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
+    const environmentState = {
+        damageLevel: 0,
+        specificImpacts: new Set(),
+        lastImpact: null,
+        damageHistory: []
+    };
+
+    const state = {
         turn: 0,
         currentPhase: null,
         opponentLandedCriticalHit: false,
@@ -640,11 +665,27 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         opponentElement: null,
         fighter1Escalation: null,
         fighter2Escalation: null,
-        environmentState: { damageLevel: 0 },
+        environmentState,
         location: locId,
-        timeOfDay: timeOfDay,
-        emotionalMode: emotionalMode
+        timeOfDay,
+        emotionalMode,
+        lastPhaseTransition: null,
+        phaseHistory: [],
+        errorCount: 0
     };
+
+    validateBattleState(state);
+    return state;
+}
+
+// Update the simulateBattle function to use the new initialization
+export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
+    // Initialize fighters
+    const fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
+    const fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
+
+    // Initialize battle state using the new function
+    const currentBattleState = initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode);
 
     // Set initial opponent references
     fighter1.opponent = fighter2;
@@ -652,8 +693,25 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     currentBattleState.opponent = fighter1;
 
     const locationData = locationConditions[locId];
-    const conditions = { id: locId, timeOfDay, ...locationData };
-    const environmentState = { damageLevel: 0 };
+    if (!locationData) {
+        throw new Error(`Invalid location ID: ${locId}`);
+    }
+
+    const conditions = { 
+        id: locId, 
+        timeOfDay, 
+        ...locationData,
+        environmentalModifiers: locationData.environmentalModifiers || {},
+        damageThresholds: locationData.damageThresholds || {
+            minor: 20,
+            moderate: 40,
+            severe: 60,
+            catastrophic: 80
+        }
+    };
+
+    // Use the environmentState from currentBattleState
+    const { environmentState } = currentBattleState;
     const battleEventLog = [];
     const charactersMarkedForDefeat = new Set();
     const battleContextFiredQuotes = new Set();
@@ -661,9 +719,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     // Initialize phase state using the imported function
     const phaseState = initializeBattlePhaseState();
     
-    // Apply location-specific phase overrides
+    // Apply location-specific phase overrides with validation
     const locationOverrides = locationPhaseOverrides[locId] || {};
     if (locationOverrides.pokingDuration) {
+        if (typeof locationOverrides.pokingDuration !== 'number' || locationOverrides.pokingDuration < 0) {
+            throw new Error(`Invalid poking duration for location ${locId}: ${locationOverrides.pokingDuration}`);
+        }
         phaseState.pokingDuration = locationOverrides.pokingDuration;
         fighter1.aiLog.push(`[Phase Override]: Poking duration set to ${phaseState.pokingDuration} due to location ${locId}.`);
         fighter2.aiLog.push(`[Phase Override]: Poking duration set to ${phaseState.pokingDuration} due to location ${locId}.`);
