@@ -47,41 +47,6 @@ const archetypeDataMap = {
 };
 // --- END ARCHETYPE DATA IMPORTS ---
 
-function conjugatePresent(verbPhrase) {
-    if (!verbPhrase || typeof verbPhrase !== 'string') return ''; // FIX: Added type check for verbPhrase
-    const words = verbPhrase.split(' ');
-    let verb = words[0];
-    const rest = words.slice(1).join(' ');
-
-    const baseFormExceptions = [
-        'erupts', 'lashes', 'assumes', 'controls', 'focuses', 'executes',
-        'blocks', 'throws', 'strikes', 'rides', 'unleashes', 'forms',
-        'creates', 'pushes', 'sweeps', 'sends', 'dons', 'slams',
-        'bends', 'launches', 'entombs', 'pins', 'devises', 'springs',
-        'ignites', 'generates', 'summons', 'propels', 'triggers', 'hurls',
-        'raises', 'conjures', 'inflicts', 'ends'
-    ];
-
-    if (baseFormExceptions.includes(verb)) {
-        return verbPhrase;
-    }
-    if (verb.endsWith('s') && verb !== 'is' && verb !== 'has' && verb !== 'does' && verb !== 'goes') {
-        // Already conjugated (or plural noun used as verb, which is rare in this context)
-    }
-
-    const irregulars = { 'have': 'has', 'do': 'does', 'go': 'goes', 'be': 'is' };
-    if (irregulars[verb]) {
-        verb = irregulars[verb];
-    } else if (/(ss|sh|ch|x|z|o)$/.test(verb)) {
-        verb = verb + 'es';
-    } else if (/[^aeiou]y$/.test(verb)) {
-        verb = verb.slice(0, -1) + 'ies';
-    } else if (!verb.endsWith('s')) {
-        verb = verb + 's';
-    }
-    return rest ? `${verb} ${rest}` : verb;
- }
-
 export function substituteTokens(template, primaryActorForContext, secondaryActorForContext, additionalContext = {}) {
     if (typeof template !== 'string') return '';
     let text = template;
