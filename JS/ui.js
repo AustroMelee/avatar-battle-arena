@@ -11,7 +11,7 @@ import { populateLocationGrid, updateEnvironmentalSummary } from './ui_location-
 import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
 import { renderArchetypeDisplay } from './ui_archetype-display.js';
 import { resolveArchetypeLabel } from './engine_archetype-engine.js';
-import { setupDetailedLogControls } from './ui_battle-results.js';
+import { setupDetailedLogControls, resetBattleResultsUI } from './ui_battle-results.js';
 // The following imports from simulation_mode_manager were missing `initializeSimulationManagerDOM`
 import { startSimulation, setSimulationMode, resetSimulationManager, initializeSimulationManagerDOM } from './simulation_mode_manager.js';
 // Removed: `import { populateAllUI, resetGlobalUI, getCharacterImageFromUI as getCharacterImage } from './ui.js';` (This was the problematic self-import)
