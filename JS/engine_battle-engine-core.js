@@ -23,9 +23,10 @@ import { calculateIncapacitationScore, determineEscalationState, ESCALATION_STAT
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-export const getRandomElement = (arr) => arr && arr.length > 0 ? Math.floor(Math.random() * arr.length) : null; // Corrected to return index or null
 
-// THIS LINE WAS MISSING OR LOST
+// FIX: Correct getRandomElement to return the element itself, not just its index
+export const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
+
 let charactersMarkedForDefeat = new Set();
 
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
@@ -43,7 +44,7 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
             const rand = Math.random();
             let cumulativeProb = 0;
             for (const charId in weightedOutcome.probabilities) {
-                cumulativeProb += weightedOutcome.probabilities[charId];
+                cumulativeProb += weightedProbabilities[charId]; // Fixed: Changed weightedOutcome.probabilities to weightedProbabilities
                 if (rand < cumulativeProb) {
                     return charId;
                 }
@@ -703,7 +704,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 result.narrativeEventsToPrepend.forEach(rawEventData => {
                      if (rawEventData.quote && rawEventData.actor) {
                         const opponentForReactionNarrative = rawEventData.actor.id === currentDefender.id ? currentAttacker : currentDefender;
-                        const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, environmentState, locationData, phaseState.currentPhase, true);
+                        const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true);
                         turnSpecificEventsForLog.push(...formattedEventArray);
                     }
                 });
@@ -1030,7 +1031,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerFull.name} is declared the victor over ${finalLoserFull.name}!`;
                 const timeoutTextHtml = phaseTemplates.timeOutVictory
                     .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
-                    .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
+                    .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${-los-Full.name}</span>`); // Fix here
                 battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
                 finalWinnerFull.summary = timeoutTextRaw;
                 finalLoserFull.summary = `${finalLoserFull.name} lost by timeout as ${finalWinnerFull.name} had more health remaining.`;
