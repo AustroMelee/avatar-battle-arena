@@ -1126,7 +1126,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
 
         if (battleOver) break;
-        [fighter1, fighter2] = [fighter2, fighter1];
+        // Instead of array destructuring, use a temporary variable
+        const tempFighter = fighter1;
+        fighter1 = fighter2;
+        fighter2 = tempFighter;
     }
 
     // NEW: Before final evaluateTerminalState and summary, log the last phase's duration if battle ends mid-phase.
