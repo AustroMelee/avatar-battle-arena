@@ -1,57 +1,93 @@
 // FILE: js/data_characters.js
 'use strict';
 
-// Import individual character data
-import { aangArchetypeData as aangArchetype } from './data_archetype_aang.js';
-import { azulaArchetypeData as azulaArchetype } from './data_archetype_azula.js';
-import { bumiArchetypeData as bumiArchetype } from './data_archetype_bumi.js';
-import { jeongjeongArchetypeData as jeongJeongArchetype } from './data_archetype_jeong-jeong.js';
-import { kataraArchetypeData as kataraArchetype } from './data_archetype_katara.js';
-import { maiArchetypeData as maiArchetype } from './data_archetype_mai.js';
-import { ozaiArchetypeData as ozaiArchetype } from './data_archetype_ozai.js';
-import { pakkuArchetypeData as pakkuArchetype } from './data_archetype_pakku.js';
-import { sokkaArchetypeData as sokkaArchetype } from './data_archetype_sokka.js';
-import { tophArchetypeData as tophArchetype } from './data_archetype_toph.js';
-import { tyleeArchetypeData as tyLeeArchetype } from './data_archetype_ty-lee.js';
-import { zukoArchetypeData as zukoArchetype } from './data_archetype_zuko.js';
+// This file serves as the central assembler for all character data.
+// It imports character objects from modular files and combines them
+// into a single 'characters' object for the rest of the application.
 
-const createCharacter = (archetype, overrides) => {
+import { gaangCharacters } from './data_characters_gaang.js';
+import { masterCharacters } from './data_characters_masters.js';
+import { antagonistCharacters } from './data_characters_antagonists.js';
+
+import { aangArchetypeData } from './data_archetype_aang.js';
+import { azulaArchetypeData } from './data_archetype_azula.js';
+import { bumiArchetypeData } from './data_archetype_bumi.js';
+import { jeongjeongArchetypeData } from './data_archetype_jeong-jeong.js';
+import { kataraArchetypeData } from './data_archetype_katara.js';
+import { maiArchetypeData } from './data_archetype_mai.js';
+import { ozaiArchetypeData } from './data_archetype_ozai.js';
+import { pakkuArchetypeData } from './data_archetype_pakku.js';
+import { sokkaArchetypeData } from './data_archetype_sokka.js';
+import { tophArchetypeData } from './data_archetype_toph.js';
+import { tyleeArchetypeData } from './data_archetype_ty-lee.js';
+import { zukoArchetypeData } from './data_archetype_zuko.js';
+
+// Combine all base character data into one object.
+const baseCharacters = {
+    ...gaangCharacters,
+    ...masterCharacters,
+    ...antagonistCharacters,
+};
+
+// Create a map of archetypes for easy lookup.
+const archetypes = {
+    'aang-airbending-only': aangArchetypeData,
+    'azula': azulaArchetypeData,
+    'bumi': bumiArchetypeData,
+    'jeong-jeong': jeongjeongArchetypeData,
+    'katara': kataraArchetypeData,
+    'mai': maiArchetypeData,
+    'ozai-not-comet-enhanced': ozaiArchetypeData,
+    'pakku': pakkuArchetypeData,
+    'sokka': sokkaArchetypeData,
+    'toph-beifong': tophArchetypeData,
+    'ty-lee': tyleeArchetypeData,
+    'zuko': zukoArchetypeData,
+};
+
+/**
+ * Merges a base character with their corresponding archetype data.
+ * The archetype data (matchup-specific quotes) is spread into the base character object.
+ * @param {object} baseChar - The base character data.
+ * @param {object} archetype - The archetype data for that character.
+ * @returns {object} The fully merged character object.
+ */
+const mergeCharacterData = (baseChar, archetype) => {
+    if (!baseChar) {
+        console.error("Attempted to merge with an undefined base character.");
+        return null;
+    }
+    if (!archetype) {
+        // This is not an error, as some characters might not have archetype data yet.
+        return baseChar;
+    }
+
+    // Combine all technique arrays into one.
     const combinedTechniques = [
-        ...(archetype.techniques || []),
-        ...(archetype.techniquesFull || []),
-        ...(archetype.techniquesCanteen || []),
-        ...(archetype.techniquesEasternAirTemple || []),
-        ...(archetype.techniquesNorthernWaterTribe || []),
-        ...(archetype.techniquesOmashu || []),
-        ...(archetype.techniquesSiWongDesert || []),
-        ...(archetype.techniquesBoilingRock || [])
+        ...(baseChar.techniques || []),
+        ...(baseChar.techniquesFull || []),
+        ...(baseChar.techniquesCanteen || []),
+        ...(baseChar.techniquesEasternAirTemple || []),
+        ...(baseChar.techniquesNorthernWaterTribe || []),
+        ...(baseChar.techniquesOmashu || []),
+        ...(baseChar.techniquesSiWongDesert || []),
+        ...(baseChar.techniquesBoilingRock || [])
     ];
 
-    // Extract the character ID from the archetype's own data, if it exists
-    const id = archetype.id || (overrides.id || 'unknown');
-    // Simple capitalization for the name from the ID
-    const name = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
     return {
-        ...archetype,
-        ...overrides,
-        id: id,
-        name: archetype.name || name,
-        techniques: combinedTechniques,
+        ...baseChar,
+        ...archetype, // Spread archetype data (matchup quotes)
+        techniques: combinedTechniques, // Overwrite with the master list of techniques
     };
 };
 
-export const characters = {
-    "aang": createCharacter(aangArchetype, { id: 'aang', mentalResilience: 1.2 }),
-    "azula": createCharacter(azulaArchetype, { id: 'azula', mentalResilience: 0.7 }),
-    "bumi": createCharacter(bumiArchetype, { id: 'bumi', mentalResilience: 2.5 }),
-    "jeong-jeong": createCharacter(jeongJeongArchetype, { id: 'jeong-jeong', mentalResilience: 1.8 }),
-    "katara": createCharacter(kataraArchetype, { id: 'katara', mentalResilience: 1.1 }),
-    "mai": createCharacter(maiArchetype, { id: 'mai', mentalResilience: 1.5, susceptibilities: ['foggy-swamp'] }),
-    "ozai": createCharacter(ozaiArchetype, { id: 'ozai', mentalResilience: 2.0 }),
-    "pakku": createCharacter(pakkuArchetype, { id: 'pakku', mentalResilience: 1.7 }),
-    "sokka": createCharacter(sokkaArchetype, { id: 'sokka', mentalResilience: 1.3 }),
-    "toph": createCharacter(tophArchetype, { id: 'toph', mentalResilience: 1.9 }),
-    "ty-lee": createCharacter(tyLeeArchetype, { id: 'ty-lee', mentalResilience: 1.4 }),
-    "zuko": createCharacter(zukoArchetype, { id: 'zuko', mentalResilience: 0.9 })
-};
+// Build the final, exported characters object.
+export const characters = Object.keys(baseCharacters).reduce((acc, charId) => {
+    const baseChar = baseCharacters[charId];
+    const archetype = archetypes[charId];
+    const mergedChar = mergeCharacterData(baseChar, archetype);
+    if (mergedChar) {
+        acc[charId] = mergedChar;
+    }
+    return acc;
+}, {});

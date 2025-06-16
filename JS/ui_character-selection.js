@@ -47,6 +47,12 @@ function createCharacterCard(character, fighterKey) {
         card.classList.add(getElementClass(character));
         card.dataset.id = character.id;
 
+        const image = document.createElement('img');
+        image.src = character.imageUrl;
+        image.alt = character.name;
+        image.loading = 'lazy';
+        card.appendChild(image);
+
         const name = document.createElement('h3');
         name.textContent = character.name;
         card.appendChild(name);
@@ -55,7 +61,7 @@ function createCharacterCard(character, fighterKey) {
             handleCardClick(character, fighterKey, card);
         });
     } else {
-        card.textContent = "Error: Char Undefined";
+        card.textContent = 'No character data';
     }
     return card;
 }
