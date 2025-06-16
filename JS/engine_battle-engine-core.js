@@ -17,7 +17,7 @@ import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } fr
 // --- UPDATED IMPORTS for Mechanics ---
 import { universalMechanics } from './data_mechanics_universal.js'; // From new file
 import { locationCurbstompRules } from './data_mechanics_locations.js'; // From new file
-import { characterCurbstompRules } = './data_mechanics_characters.js'; // From new file
+import { characterCurbstompRules } from './data_mechanics_characters.js'; // FIX: Removed '='
 // --- END UPDATED IMPORTS for Mechanics ---
 import { calculateIncapacitationScore, determineEscalationState, ESCALATION_STATES } from './engine_escalation.js';
 import { checkReactiveDefense } from './engine_reactive-defense.js';
@@ -41,7 +41,7 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
         } else if (weightedOutcome && typeof weightedOutcome.probabilities === 'object') {
             const rand = Math.random();
             let cumulativeProb = 0;
-            // FIX: Corrected typo from weightedProbabilities to weightedOutcome.probabilities
+            // FIX: Change weightedProbabilities to weightedOutcome.probabilities
             for (const charId in weightedOutcome.probabilities) {
                 cumulativeProb += weightedOutcome.probabilities[charId];
                 if (rand < cumulativeProb) {
