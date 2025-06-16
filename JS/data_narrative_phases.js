@@ -4,6 +4,8 @@
 // Defines battle phases and their associated HTML templates.
 
 export const battlePhases = [
+    { name: "Pre-Battle Banter", emoji: "💬", key: "PreBanter" },
+    { name: "Probing & Posturing", emoji: "🤔", key: "Poking" },
     { name: "Opening Exchanges", emoji: "⚔️", key: "Early" },
     { name: "Escalating Conflict", emoji: "🔥", key: "Mid" },
     { name: "Decisive Confrontation", emoji: "💥", key: "Late" }
