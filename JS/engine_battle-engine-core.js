@@ -82,6 +82,100 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
     return null; // No victim determined by this logic
 }
 
+function applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog) {
+    const allRules = [
+        ...(characterCurbstompRules[fighter1.id] || []),
+        ...(characterCurbstompRules[fighter2.id] || []),
+        ...(locationCurbstompRules[battleState.locationId] || [])
+    ];
+
+    for (const rule of allRules) {
+        if (Math.random() >= (rule.triggerChance || 1.0)) continue;
+
+        let protagonists = [];
+        let antagonist = null;
+
+        if (rule.appliesToCharacter) {
+            if (fighter1.id === rule.appliesToCharacter) protagonists.push(fighter1);
+            if (fighter2.id === rule.appliesToCharacter) protagonists.push(fighter2);
+        } else if (rule.appliesToPair) {
+            if (rule.appliesToPair.includes(fighter1.id) && rule.appliesToPair.includes(fighter2.id)) {
+                protagonists.push(fighter1, fighter2);
+            }
+        } else if (rule.appliesToElement) {
+            if (fighter1.element === rule.appliesToElement) protagonists.push(fighter1);
+            if (fighter2.element === rule.appliesToElement) protagonists.push(fighter2);
+        } else if (rule.appliesToFaction) {
+            const isNegated = rule.appliesToFaction.startsWith('!');
+            const faction = isNegated ? rule.appliesToFaction.substring(1) : rule.appliesToFaction;
+            if (isNegated) {
+                if (fighter1.faction !== faction) protagonists.push(fighter1);
+                if (fighter2.faction !== faction) protagonists.push(fighter2);
+            } else {
+                if (fighter1.faction === faction) protagonists.push(fighter1);
+                if (fighter2.faction === faction) protagonists.push(fighter2);
+            }
+        } else if (rule.appliesToAll) {
+            protagonists.push(fighter1, fighter2);
+        }
+
+        for (const protagonist of protagonists) {
+            const opponent = (protagonist.id === fighter1.id) ? fighter2 : fighter1;
+            if (rule.conditionLogic && !rule.conditionLogic(protagonist, opponent, battleState)) {
+                continue;
+            }
+
+            // --- Process Outcome ---
+            const outcome = rule.outcome;
+            if (Math.random() < 0.15 && (outcome.type.includes('instant_') || outcome.type.includes('environmental_kill'))) {
+                battleEventLog.push({
+                    type: 'narrative_event',
+                    text: `By some miracle, ${protagonist.name} survives what should have been a fatal blow!`,
+                    html_content: `<p class="narrative-survivor">By some miracle, ${protagonist.name} survives what should have been a fatal blow!</p>`
+                });
+                protagonist.aiLog.push(`[Survivor's Luck]: Miraculously survived rule '${rule.id}'.`);
+                continue; // Skip the rest of the outcome processing
+            }
+
+            let winner, loser;
+            switch (outcome.type) {
+                case 'instant_win':
+                    winner = outcome.winner ? (protagonist.id === outcome.winner ? protagonist : opponent) : protagonist;
+                    loser = (winner.id === protagonist.id) ? opponent : protagonist;
+                    charactersMarkedForDefeat.add(loser.id);
+                    battleEventLog.push({ type: 'curbstomp_event', text: `${winner.name} secured a decisive victory over ${loser.name} due to ${rule.description}.` });
+                    break;
+                case 'instant_loss':
+                    loser = protagonist;
+                    charactersMarkedForDefeat.add(loser.id);
+                    battleEventLog.push({ type: 'curbstomp_event', text: `${loser.name} was decisively defeated due to ${rule.description}.` });
+                    break;
+                case 'environmental_kill':
+                    loser = protagonist;
+                    charactersMarkedForDefeat.add(loser.id);
+                    battleEventLog.push({ type: 'curbstomp_event', text: `The environment itself proved fatal for ${loser.name}.` });
+                    break;
+                case 'buff':
+                    protagonist[outcome.property] = (protagonist[outcome.property] || 0) + outcome.value;
+                    protagonist.aiLog.push(`[Buff]: Rule '${rule.id}' applied: ${outcome.property} modified by ${outcome.value}.`);
+                    break;
+                case 'debuff':
+                    protagonist[outcome.property] = (protagonist[outcome.property] || 0) + outcome.value;
+                    protagonist.aiLog.push(`[Debuff]: Rule '${rule.id}' applied: ${outcome.property} modified by ${outcome.value}.`);
+                    break;
+                 case 'advantage':
+                    antagonist = outcome.target === protagonist.id ? protagonist : opponent;
+                    antagonist.momentum += (outcome.value * 100); // Convert advantage to momentum
+                    antagonist.aiLog.push(`[Advantage]: Rule '${rule.id}' granted significant momentum boost.`);
+                    break;
+                case 'external_intervention':
+                    isStalemate = true;
+                    battleEventLog.push({ type: 'narrative_event', text: 'The fight was interrupted by outside forces, ending in a draw.' });
+                    break;
+            }
+        }
+    }
+}
 
 // Corrected initializeFighterState to be more robust
 function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
@@ -258,9 +352,7 @@ function checkCurbstompConditions(attacker, defender, locId, battleState, battle
         // HP threshold check
         (defender.hp <= attacker.hp * CURBSTOMP_HP_THRESHOLD) &&
         // Momentum threshold check
-        (defender.momentum <= CURBSTOMP_MOMENTUM_THRESHOLD) &&
-        // Phase check - only allow in later phases
-        (currentPhase !== 'EARLY' && currentPhase !== 'POKING')
+        (defender.momentum <= CURBSTOMP_MOMENTUM_THRESHOLD)
     );
 
     if (isCurbstomp) {
@@ -491,17 +583,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         ));
     }
 
-    // Only check for pre-battle curbstomps if explicitly allowed by location
-    if (locationData.allowPreBattleCurbstomp) {
-        if (checkCurbstompConditions(fighter1, fighter2, locId, currentBattleState, battleEventLog, true)) {
-            fighter1.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter1.name} OR ${fighter2.name} triggered or was affected by a curbstomp rule.`);
-        }
-        if (!charactersMarkedForDefeat.has(fighter1.id) && !charactersMarkedForDefeat.has(fighter2.id)) {
-            if (checkCurbstompConditions(fighter2, fighter1, locId, currentBattleState, battleEventLog, true)) {
-                fighter2.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter2.name} OR ${fighter1.name} triggered or was affected by a curbstomp rule.`);
-            }
-        }
-    }
+    // NEW: Apply all pre-battle curbstomp, buff, and debuff rules
+    applyCurbstompRules(fighter1, fighter2, currentBattleState, battleEventLog);
 
     // Evaluate outcome after pre-battle curbstomps
     let terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);

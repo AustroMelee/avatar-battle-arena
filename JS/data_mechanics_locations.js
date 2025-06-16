@@ -1,417 +1,256 @@
 // FILE: data_mechanics_locations.js
 'use strict';
 
-// Location-specific curbstomp rules.
+// Refined Environmental Curb Stomp Mechanics (v2) for Direct Engine Integration
 
 export const locationCurbstompRules = {
     'si-wong-desert': [
         {
-            id: "si_wong_azula_vs_katara",
-            description: "Azula's fire mastery amplified by sun vs. Katara's limited water.",
+            id: "swd_azula_vs_katara",
+            description: "In the desert, the sun amplifies Azula's fire while Katara is severely water-limited.",
+            triggerChance: 0.95,
             appliesToPair: ["azula", "katara"],
-            triggerChance: 0.85,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            activatingMoveTags: ["fire", "ranged_attack"],
-            outcome: { type: "instant_win_attacker", successMessage: "In the searing Si Wong Desert, Azula's sun-amplified {moveName} overwhelms Katara's dwindling water reserves!", failureMessage: "Katara, through sheer willpower and skill, endures Azula's desert inferno!" }
+            outcome: { type: "instant_win", winner: "azula" }
         },
         {
-            id: "si_wong_sokka_heatstroke",
-            description: "Sokka's vulnerability to extreme heat and dehydration.",
-            appliesToCharacter: "sokka", // This rule is for Sokka
-            triggerChance: 0.75,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Make sure parameters match how they are used
-            weightingLogic: ({ attacker, defender, location, situation }) => { // Removed 'rule' from destructuring, hardcoding "sokka" for robustness
-                let sokkaCharacter;
-                let opponentOfSokka;
-
-                // Directly identify Sokka and opponent, as this rule is specific to Sokka
-                if (attacker.id === "sokka") {
-                    sokkaCharacter = attacker;
-                    opponentOfSokka = defender;
-                } else if (defender.id === "sokka") {
-                    sokkaCharacter = defender;
-                    opponentOfSokka = attacker;
-                } else {
-                    return null; // Should not happen if appliesToCharacter is correctly checked upstream
-                }
-
-                let sokkaLosesChance = 0.85;
-                if (opponentOfSokka.element === "fire" && situation.isDay) sokkaLosesChance = 0.95;
-                return { victimId: "sokka", probability: sokkaLosesChance };
-            },
-            escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 70, successChance: 0.10 },
-            outcome: {
-                type: "instant_loss_weighted_character",
-                successMessage: "Overcome by the brutal desert heat and {opponentName}'s assault, {actualVictimName} collapses!",
-                failureMessage: "{actualVictimName}'s resilience (and perhaps a lucky find of shade) allows him to fight on!",
-                escapeMessage: "{actualVictimName}'s quick thinking allows him to find a temporary reprieve, narrowly escaping incapacitation!"
-            }
-        },
-        // Old rules specific to this location
-        {
-            id: "si_wong_azula_vs_aang_heat",
-            description: "Azula's fire amplified by heat vs. Aang's vulnerability to extreme conditions.",
-            appliesToPair: ["azula", "aang-airbending-only"],
-            triggerChance: 0.7,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            outcome: {
-                type: "instant_win_attacker",
-                successMessage: "The oppressive desert heat amplifies Azula's fire, overwhelming {targetName}'s evasive maneuvers!",
-                failureMessage: "{targetName} endures the desert's wrath, finding a way to mitigate Azula's fierce attacks."
-            }
+            id: "swd_azula_vs_aang",
+            description: "Aang is at risk of heat exhaustion against a sun-powered Azula.",
+            triggerChance: 0.70,
+            appliesToPair: ["azula", "aang"],
+            outcome: { type: "advantage", target: "azula", value: 0.7 } // 70% advantage
         },
         {
-            id: "si_wong_toph_disadvantage",
-            description: "Toph's seismic sense is hindered by loose sand.",
-            appliesToCharacter: "toph-beifong",
-            triggerChance: 0.7,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: {
-                type: "disadvantage_character",
-                effect: "reduced_accuracy_defense_30_percent",
-                successMessage: "The shifting sands of the Si Wong Desert severely hinder Toph's seismic sense, making her vulnerable!",
-                failureMessage: "Toph adapts quickly to the shifting sands, managing to maintain her senses remarkably well."
-            }
-        }
-    ],
-    'omashu': [
-        {
-            id: "omashu_bumi_advantage",
-            description: "King Bumi's unparalleled mastery of Omashu's terrain.",
-            appliesToCharacter: "bumi",
-            triggerChance: 0.85,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "disrespected",
-            activatingMoveTags: ["earth", "environmental_manipulation"],
-            outcome: { type: "instant_win_attacker", successMessage: "In his city, King Bumi's {moveName} is an unstoppable force, overwhelming {opponentName} with colossal earthbending!", failureMessage: "{opponentName} navigates Bumi's earth-shattering attacks with surprising skill!" }
+            id: "swd_toph_sand_debuff",
+            description: "Toph's seismic sense is disrupted by the unstable sand.",
+            triggerChance: 1.0,
+            appliesToCharacter: "toph",
+            outcome: { type: "debuff", property: "bendingPrecision", value: -0.40 } // -40% precision
         },
         {
-            id: "omashu_tylee_chiblock",
-            description: "Ty Lee's chi-blocking is extremely effective in the confined chutes.",
-            appliesToCharacter: "ty-lee",
-            triggerChance: 0.85,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            activatingMoveTags: ["melee_range", "debuff_disable"],
-            conditionLogic: (tylee, opponent, battleState) => battleState.locationTags.includes("cramped") && battleState.locationId === 'omashu',
-            outcome: { type: "instant_paralysis_target", duration: 3, successMessage: "Within the chaotic Omashu chutes, Ty Lee's agility allows her {moveName} to instantly disable {opponentName}!", failureMessage: "{opponentName} narrowly avoids Ty Lee's flurry in the confined space!" }
+            id: "swd_sokka_certain_death",
+            description: "Sokka stands no chance against the desert heat and a bender.",
+            triggerChance: 1.0,
+            appliesToCharacter: "sokka",
+            conditionLogic: (sokka, opponent) => opponent.isBender,
+            outcome: { type: "instant_loss" }
         },
         {
-            id: "omashu_crushing_hazard",
-            description: "Risk of being crushed by shifting earth or out-of-control carts.",
-            appliesToAll: true,
-            triggerChance: 0.10,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            weightingLogic: ({ attacker, defender, location, situation }) => {
-                let probAttacker = 0.5;
-                let probDefender = 0.5;
-
-                const adjustProbs = (char) => {
-                    let prob = 0.5;
-                    if (char.id === 'bumi') prob *= 0.05;
-                    else if (char.id === 'sokka') prob *= 2.5;
-                    else if (char.type === "Nonbender") prob *= 1.8;
-                    else if (char.element === "earth") prob *= 0.6;
-
-                    if (char.mobility > 0.75) prob *= 0.4;
-                    else if (char.mobility < 0.35) prob *= 1.8;
-
-                    if (situation.environmentState && situation.environmentState.damageLevel > 30) prob *= 1.2;
-                    if (situation.environmentState && situation.environmentState.damageLevel > 60) prob *= 1.5;
-                    return prob;
-                };
-
-                probAttacker = adjustProbs(attacker);
-                probDefender = adjustProbs(defender);
-
-                const totalWeight = probAttacker + probDefender;
-                if (totalWeight === 0 || isNaN(totalWeight)) return null;
-
-                return {
-                    probabilities: {
-                        [attacker.id]: probAttacker / totalWeight,
-                        [defender.id]: probDefender / totalWeight
-                    }
-                };
-            },
-            outcome: {
-                type: "instant_loss_weighted_character",
-                successMessage: "A sudden rockslide (or runaway cabbage cart!) in the Omashu chutes proves fatal for {actualVictimName}!",
-                failureMessage: "Both fighters narrowly avoid a catastrophic accident in the chutes!"
-            }
+            id: "swd_jeongjeong_powerup",
+            description: "Jeong Jeong's fire mastery is amplified in arid zones.",
+            triggerChance: 1.0,
+            appliesToCharacter: "jeong-jeong",
+            outcome: { type: "buff", property: "power", value: 0.35 }
         }
     ],
     'northern-water-tribe': [
         {
             id: "nwt_katara_vs_firebenders",
-            description: "Katara's mastery with unlimited water vs. weakened firebenders.",
-            appliesToCharacter: "katara",
-            conditionLogic: (katara, opponent) => opponent.element === "fire" || opponent.element === "lightning",
+            description: "Katara has a massive advantage with infinite water against weakened firebenders.",
             triggerChance: 0.80,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            activatingMoveTags: ["water", "ice"],
-            outcome: { type: "advantage_attacker", effect: "opponent_power_reduced_50_hypothermia_10_percent_per_turn", successMessage: "In her element, Katara's {moveName} showcases her waterbending mastery, overwhelming {opponentName}'s fire as the biting cold weakens their flames!", failureMessage: "{opponentName}'s fierce fire manages to keep Katara's water at bay, for now." }
+            appliesToCharacter: "katara",
+            conditionLogic: (katara, opponent) => opponent.element === "fire",
+            outcome: { type: "instant_win" }
         },
         {
-            id: "nwt_pakku_curbstomp",
-            description: "Pakku's unparalleled waterbending mastery in his home city.",
+            id: "nwt_pakku_dominance",
+            description: "Master Pakku is dominant against any non-waterbender in his element.",
+            triggerChance: 0.90,
             appliesToCharacter: "pakku",
-            conditionLogic: (pakku, opponent) => opponent.type !== "Bender" || opponent.element !== "water",
-            triggerChance: 0.85,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "honor_duty_challenged",
-            activatingMoveTags: ["water", "ice", "Finisher"],
-            outcome: { type: "instant_win_attacker", successMessage: "Master Pakku's {moveName} demonstrates the true power of the Northern Water Tribe, decisively defeating {opponentName}!", failureMessage: "{opponentName} surprisingly withstands Master Pakku's initial onslaught!" }
+            conditionLogic: (pakku, opponent) => opponent.element !== "water",
+            outcome: { type: "instant_win" }
         },
         {
-            id: "nwt_firebender_penalty",
-            description: "Firebenders suffer reduced power and risk hypothermia.",
-            appliesToCharacterElement: "fire",
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "persistent_effect", effect: "power_reduction_50_hypothermia_risk_10_percent_per_turn", message: "The frigid air of the North saps the strength from {characterName}'s fire." }
+            id: "nwt_firebender_debuff",
+            description: "Firebenders are severely weakened by the cold.",
+            triggerChance: 1.0,
+            appliesToElement: "fire",
+            outcome: { type: "debuff", property: "bendingEfficiency", value: -0.50 }
         }
     ],
     'foggy-swamp': [
         {
-            id: "swamp_toph_weakness",
-            description: "Toph's seismic sense is impaired by the soft, muddy ground.",
-            appliesToCharacter: "toph-beifong",
-            triggerChance: 0.60,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "disadvantage_character", effect: "reduced_accuracy_defense_20_percent", successMessage: "The murky, soft ground of the Foggy Swamp dulls Toph's seismic sense, making her vulnerable.", failureMessage: "Toph adapts quickly to the shifting sands, managing to maintain her senses remarkably well." }
+            id: "fs_toph_mud_debuff",
+            description: "The mud and vines of the swamp disrupt Toph's seismic sense.",
+            triggerChance: 1.0,
+            appliesToCharacter: "toph",
+            outcome: { type: "debuff", property: "bendingPrecision", value: -0.60 }
         },
         {
-            id: "swamp_katara_buff",
-            description: "Katara draws strength from the swamp's abundant water and plant life.",
+            id: "fs_katara_plant_buff",
+            description: "Katara draws power from the immense moisture in the swamp's plant life.",
+            triggerChance: 1.0,
             appliesToCharacter: "katara",
-            triggerChance: 0.40,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "advantage_character", effect: "power_increase_40_percent", successMessage: "Katara feels the life energy of the Foggy Swamp, her waterbending surging with newfound power!", failureMessage: "The swamp's energy is too chaotic for Katara to fully harness." }
+            outcome: { type: "buff", property: "bendingPower", value: 0.40 }
         },
         {
-            id: "swamp_ranged_accuracy_loss",
-            description: "Thick fog and tangled vines reduce ranged accuracy.",
-            appliesToMoveType: "ranged_attack",
-            triggerChance: 0.50,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "accuracy_penalty_50_percent", message: "The dense fog and vegetation make precise ranged attacks difficult." }
+            id: "fs_visibility_debuff",
+            description: "The thick fog reduces accuracy for all ranged attacks.",
+            triggerChance: 1.0,
+            appliesToMoveType: "ranged",
+            outcome: { type: "debuff", property: "accuracy", value: -0.50 }
+        }
+    ],
+    'boiling-rock': [
+        {
+            id: "br_fire_nation_buff",
+            description: "Fire Nation fighters are empowered by the geothermal heat.",
+            triggerChance: 1.0,
+            appliesToFaction: "Fire Nation",
+            outcome: { type: "buff", property: "overall", value: 0.20 }
+        },
+        {
+            id: "br_sokka_death",
+            description: "With no cover or escape, Sokka is helpless against benders here.",
+            triggerChance: 1.0,
+            appliesToCharacter: "sokka",
+            conditionLogic: (sokka, opponent) => opponent.isBender,
+            outcome: { type: "instant_loss" }
+        },
+        {
+            id: "br_lava_hazard",
+            description: "The surrounding lava is a constant threat.",
+            triggerChance: 0.30,
+            appliesToAll: true,
+            outcome: { type: "environmental_kill" }
+        }
+    ],
+    'eastern-air-temple': [
+        {
+            id: "eat_aang_buff",
+            description: "Aang is spiritually and elementally connected to the temple.",
+            triggerChance: 1.0,
+            appliesToCharacter: "aang",
+            outcome: { type: "buff", property: "bendingStrength", value: 0.60 }
+        },
+        {
+            id: "eat_fall_hazard",
+            description: "The high altitudes pose a constant fall risk.",
+            triggerChance: 0.40,
+            appliesToAll: true,
+            outcome: { type: "environmental_kill" }
+        },
+        {
+            id: "eat_structural_collapse_risk",
+            description: "Heavy earthbending risks collapsing the ancient structures.",
+            triggerChance: 1.0,
+            appliesToElement: "earth",
+            conditionLogic: (bender, opponent, battleState) => bender.lastMove?.power > 70, // Example trigger
+            outcome: { type: "environmental_kill", probability: 0.5 } // 50% chance the bender is also caught
+        }
+    ],
+    'omashu': [ // Covers delivery chutes implicitly
+        {
+            id: "omashu_bumi_dominance",
+            description: "Bumi has absolute control over the city's earth.",
+            triggerChance: 0.95,
+            appliesToCharacter: "bumi",
+            outcome: { type: "instant_win" }
+        },
+        {
+            id: "omashu_tylee_guarantee",
+            description: "The confined spaces of the delivery system guarantee a chi-block.",
+            triggerChance: 1.0,
+            appliesToCharacter: "ty-lee",
+            outcome: { type: "instant_win" }
+        },
+        {
+            id: "omashu_crush_hazard",
+            description: "The industrial machinery of Omashu is a deadly hazard.",
+            triggerChance: 0.25,
+            appliesToAll: true,
+            outcome: { type: "environmental_kill" }
         }
     ],
     'fire-nation-capital': [
         {
-            id: "fn_capital_ozai_azula_buff",
-            description: "Ozai or Azula's power amplified in their seat of power.",
-            appliesToCharacters: ["ozai-not-comet-enhanced", "azula"],
+            id: "fnc_royal_power",
+            description: "Ozai and Azula are at the seat of their power.",
             triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "power_increase_character_50_percent", message: "{characterName} feels invigorated by the heart of the Fire Nation, their flames burning with imperial might!" }
+            appliesToCharacters: ["ozai", "azula"],
+            outcome: { type: "buff", property: "power", value: 0.50 }
         },
-        // REMOVED: fn_capital_open_space_ranged as per plan. Rely on environmentalModifiers.
         {
-            id: "fn_capital_intimidation",
-            description: "Non-Fire Nation combatants feel intimidated.",
-            conditionLogic: (character) => character.faction !== "FireNation",
+            id: "fnc_open_ground",
+            description: "The open plaza provides clear lines of sight for ranged attacks.",
             triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "performance_decrease_character_20_percent", message: "The imposing atmosphere of the Fire Nation Capital weighs heavily on {characterName}, hindering their performance." }
+            appliesToMoveType: "ranged",
+            outcome: { type: "buff", property: "accuracy", value: 0.30 }
+        },
+        {
+            id: "fnc_intimidation",
+            description: "Foreign fighters suffer a morale penalty in the enemy capital.",
+            triggerChance: 1.0,
+            appliesToFaction: "!Fire Nation", // Using '!' to denote 'not'
+            outcome: { type: "debuff", property: "morale", value: -0.20 }
         }
     ],
     'kyoshi-island': [
         {
-            id: "kyoshi_environmental_traps",
-            description: "Kyoshi Warriors' traps or tricky village layout.",
-            appliesToAll: true,
+            id: "ki_kyoshi_warrior_ambush",
+            description: "There's a chance the Kyoshi Warriors intervene to protect their home.",
             triggerChance: 0.20,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "advantage_random_character_or_debuff_random", effect: "ambush_or_minor_damage_stun", successMessage: "{actualVictimName} stumbles into a hidden Kyoshi trap, creating an opening (or taking damage)!", failureMessage: "The fighters navigate the village carefully, avoiding any obvious traps." }
-        },
-        {
-            id: "kyoshi_narrow_bridges_knockoff",
-            description: "Risk of being knocked off narrow bridges or platforms.",
             appliesToAll: true,
-            triggerChance: 0.30,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            conditionLogic: (character, opponent, battleState) => battleState.nearEdge === true,
-            weightingLogic: ({ attacker, defender, situation }) => {
-                let probAttackerFall = 0.5;
-                let probDefenderFall = 0.5;
-                if (attacker.mobility < defender.mobility) { probAttackerFall *= 1.5; probDefenderFall *= 0.5;}
-                else if (defender.mobility < attacker.mobility) { probDefenderFall *= 1.5; probAttackerFall *= 0.5;}
-                if (attacker.element === "air" || attacker.specialTraits?.canGrapple) probAttackerFall *= 0.2;
-                if (defender.element === "air" || defender.specialTraits?.canGrapple) probDefenderFall *= 0.2;
-                const totalWeight = probAttackerFall + probDefenderFall;
-                if (totalWeight === 0 || isNaN(totalWeight)) return null;
-                return { probabilities: { [attacker.id]: probAttackerFall / totalWeight, [defender.id]: probDefenderFall / totalWeight } };
-            },
-            outcome: {
-                type: "instant_loss_weighted_character",
-                successMessage: "A powerful blow (or a misstep near the edge!) sends {actualVictimName} tumbling from a narrow bridge into the waters below, out of the fight!",
-                failureMessage: "Both fighters maintain their balance on the precarious platforms despite the close call."
-            }
+            outcome: { type: "external_intervention" } // Engine will interpret this as a draw/no contest
         },
         {
-            id: "kyoshi_sokka_strategy_escape",
-            description: "Sokka's strategic mind and potential escape.",
+            id: "ki_bridge_knockoff",
+            description: "Heavy or immobile fighters risk being knocked off a bridge.",
+            triggerChance: 1.0,
+            conditionLogic: (char) => char.mobility < 0.4,
+            outcome: { type: "environmental_kill" }
+        },
+        {
+            id: "ki_sokka_familiarity",
+            description: "Sokka's time here gives him a tactical advantage.",
+            triggerChance: 1.0,
             appliesToCharacter: "sokka",
-            triggerChance: 0.10,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 60, successChance: 0.10 },
-            outcome: { type: "escape_character", successMessage: "Sokka, using his knowledge of Kyoshi tactics (and a bit of luck), manages to create an escape route!", failureMessage: "Sokka's escape plan is thwarted!", escapeMessage: "Sokka pulls off a daring escape!" }
+            outcome: { type: "buff", property: "tactics", value: 0.10 }
         }
     ],
     'great-divide': [
         {
-            id: "divide_aang_air_buff",
-            description: "Aang's airbending is amplified by strong canyon updrafts.",
-            appliesToCharacter: "aang-airbending-only",
+            id: "gd_aang_updrafts",
+            description: "The canyon updrafts significantly boost Aang's airbending.",
             triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "power_increase_character_40_percent", message: "The powerful updrafts of the Great Divide significantly enhance Aang's airbending!" }
+            appliesToCharacter: "aang",
+            outcome: { type: "buff", property: "windPower", value: 0.40 }
         },
         {
-            id: "divide_fall_risk",
-            description: "High risk of falling into the chasm.",
+            id: "gd_cliff_death",
+            description: "The precarious cliffs are a major hazard.",
+            triggerChance: 0.60,
             appliesToAll: true,
-            triggerChance: 0.40,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            conditionLogic: (character, opponent, battleState) => battleState.nearEdge === true || battleState.lastMovePushbackStrong === true,
-            weightingLogic: ({ attacker, defender, situation }) => {
-                let probAttackerFall = 0.5;
-                let probDefenderFall = 0.5;
-                if (attacker.mobility < defender.mobility) { probAttackerFall *= 1.5; probDefenderFall *= 0.5;}
-                else if (defender.mobility < attacker.mobility) { probDefenderFall *= 1.5; probAttackerFall *= 0.5;}
-                if (attacker.element === "air" || attacker.specialTraits?.canGrapple) probAttackerFall *= 0.1;
-                if (defender.element === "air" || defender.specialTraits?.canGrapple) probDefenderFall *= 0.1;
-                const totalWeight = probAttackerFall + probDefenderFall;
-                if (totalWeight === 0 || isNaN(totalWeight)) return null;
-                return { probabilities: { [attacker.id]: probAttackerFall / totalWeight, [defender.id]: probDefenderFall / totalWeight } };
-            },
-            outcome: {
-                type: "instant_loss_weighted_character",
-                successMessage: "{actualVictimName} loses their footing and plummets into the Great Divide!",
-                failureMessage: "Both fighters narrowly avoid a fatal fall into the chasm."
-            }
+            outcome: { type: "environmental_kill" }
         },
         {
-            id: "divide_mai_accuracy_buff",
-            description: "Mai's throwing accuracy benefits from clear sightlines.",
+            id: "gd_mai_accuracy",
+            description: "The long, clear sightlines are perfect for a marksman like Mai.",
+            triggerChance: 1.0,
             appliesToCharacter: "mai",
-            triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "accuracy_increase_character_25_percent", message: "The vast, open sightlines of the Great Divide allow Mai to aim her projectiles with uncanny accuracy." }
+            outcome: { type: "buff", property: "throwingAccuracy", value: 0.25 }
         }
     ],
-    'ba-sing-se': [
+    'ba-sing-se-lower-ring': [
         {
-            id: "bs_lower_ring_toph_advantage",
-            description: "Toph's earthbending is amplified in the dense, earthen Lower Ring.",
-            appliesToCharacter: "toph-beifong",
+            id: "bslr_toph_urban_buff",
+            description: "The dense urban terrain is Toph's ideal battlefield.",
             triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "advantage_character", effect: "power_increase_30_percent_defense_increase_20_percent", successMessage: "Toph feels the pulse of Ba Sing Se's earth deep within the Lower Ring, her power surging!", failureMessage: "" }
+            appliesToCharacter: "toph",
+            outcome: { type: "buff", property: "power", value: 0.30 }
         },
         {
-            id: "bs_lower_ring_crowd_interference",
-            description: "Dense crowds might interfere with combat.",
-            appliesToAll: true,
+            id: "bslr_crowd_interference",
+            description: "Civilians might get in the way of the fight.",
             triggerChance: 0.15,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            weightingLogic: ({ attacker, defender, location, situation }) => {
-                return { probabilities: { [attacker.id]: 0.5, [defender.id]: 0.5 } };
-            },
-            outcome: { type: "disruption_random_character", effect: "minor_stun_or_misstep", successMessage: "The panicked crowd surges, momentarily disrupting {actualVictimName}'s attack!", failureMessage: "The fighters manage to weave through the throngs of people." }
+            appliesToAll: true,
+            outcome: { type: "external_intervention" }
         },
         {
-            id: "bs_lower_ring_tylee_chiblock", // NEW CURBSTOMP RULE FOR TY LEE IN BA SING SE
-            description: "Ty Lee corners and disables her opponent in the tight spaces of Ba Sing Se's Lower Ring.",
+            id: "bslr_tylee_alley_buff",
+            description: "Ty Lee is even more effective in the tight alleys.",
+            triggerChance: 1.0,
             appliesToCharacter: "ty-lee",
-            triggerChance: 0.85, // High chance if condition met
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            conditionLogic: (tylee, opponent, battleState) => {
-                const isCrampedOrDense = (battleState.location?.isCramped || false) || (battleState.location?.isDense || false);
-                const isOpponentMobile = opponent.mobility > 0.6; // Less mobile opponents are easier
-                return isCrampedOrDense && !isOpponentMobile;
-            },
-            activatingMoveName: "Chi-Blocking Flurry",
-            activatingMoveTags: ["melee_range", "debuff_disable", "unblockable"],
-            outcome: {
-                type: "instant_paralysis_target", // Incapacitates and applies stun
-                duration: 2, // Stun for 2 turns
-                successMessage: "Ty Lee's acrobatic agility allows her to corner {targetName} in the tight urban labyrinth, unleashing a precise {moveName} that instantly blocks {targetName}'s chi!",
-                failureMessage: "{targetName} narrowly evades Ty Lee's disabling flurry in the cramped confines, but the pressure mounts!"
-            }
-        }
-    ],
-    'eastern-air-temple': [ // NEW: EASTERN AIR TEMPLE SPECIFIC CURBSTOMP
-        {
-            id: "aang_eat_home_turf_domination",
-            description: "Aang's mastery of airbending in his sacred home temple.",
-            appliesToCharacter: "aang-airbending-only",
-            triggerChance: 0.8, // High chance for Aang on his home turf
-            canTriggerPreBattle: false, // Triggers during battle based on performance
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            conditionLogic: (aang, opponent, battleState) => {
-                // Aang is doing well (high HP, low stress) and/or opponent is struggling
-                const aangIsConfident = aang.hp > 80 && aang.mentalState.level === 'stable';
-                const opponentIsStruggling = opponent.hp < 50 || opponent.mentalState.level === 'shaken';
-                return aangIsConfident || opponentIsStruggling;
-            },
-            activatingMoveName: "Tornado Whirl", // Or any powerful air move
-            activatingMoveTags: ["air", "area_of_effect_large", "unblockable"],
-            outcome: {
-                type: "instant_win_attacker_overwhelm",
-                successMessage: "With the full force of the Eastern Air Temple's winds, Aang's {moveName} becomes an unstoppable storm, sweeping {targetName} into utter defeat!",
-                failureMessage: "{targetName} miraculously finds a momentary foothold against Aang's powerful air currents in the hallowed temple."
-            }
+            outcome: { type: "buff", property: "chiBlockingOdds", value: 0.40 }
         }
     ]
 };

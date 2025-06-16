@@ -1,143 +1,113 @@
 // FILE: js/engine_mental-state.js
 'use strict';
 
-// This is the "Psychological Warfare" module. It handles all logic related to
-// stress, mental state changes, and the impact of character relationships
-// on a fighter's resilience and stress accumulation.
+const MENTAL_STATE_THRESHOLDS = {
+    broken: 100,
+    shaken: 75,
+    stressed: 40,
+    stable: 0
+};
 
-import { locationConditions } from './location-battle-conditions.js';
+const STRESS_EVENTS = {
+    // Event: [Base Stress Gain, Description]
+    TAKE_CRITICAL_HIT: [25, "Took a critical hit"],
+    TAKE_STRONG_HIT: [15, "Took a strong hit"],
+    TAKE_NORMAL_HIT: [8, "Took a normal hit"],
+    TAKE_WEAK_HIT: [3, "Took a weak hit"],
+    MOVE_FAILED: [10, "Move failed to execute"],
+    MOVE_DODGED: [8, "Move was dodged"],
+    MOVE_BLOCKED: [5, "Move was blocked"],
+    OPPONENT_INTIMIDATE: [12, "Opponent used an intimidating move"],
+    ENVIRONMENTAL_HAZARD: [10, "Caught in an environmental hazard"],
+    ALLY_DEFEATED: [40, "An ally was defeated"],
+    SELF_LOW_HP: [15, "Self HP is critically low"],
+    OPPONENT_MENTAL_ATTACK: [20, "Hit by a direct mental attack"],
+};
 
-export function updateMentalState(actor, opponent, moveResult, environmentState = { damageLevel: 0 }, locationId) {
-    if (actor.mentalState.level === 'broken') return;
-    let stressThisTurn = 0;
-    
-    // Base stress from move result
-    if (moveResult) {
-        const stressMultiplier = actor.relationalState?.stressModifier || 1.0;
-        if (moveResult.effectiveness.label === 'Critical') stressThisTurn += (20 * stressMultiplier);
-        if (moveResult.effectiveness.label === 'Strong') stressThisTurn += (15 * stressMultiplier);
-        stressThisTurn += moveResult.damage / 2; // Damage itself causes some stress
+// --- NEW: Location-specific and situational stress modifiers ---
+const SITUATIONAL_STRESS = {
+    'foggy-swamp': {
+        susceptibleCharacter: 'mai', // Mai is uniquely affected
+        stressPerTurn: 15,
+        reason: "Mai's phobia of the swamp is overwhelming."
+    },
+    'si-wong-desert': {
+        turnThreshold: 15, // Stress applies after this many turns
+        stressPerTurn: 5,
+        reason: "The endless, scorching desert sun drains morale."
     }
-    
-    // Stress from momentum loss
-    if (actor.momentum < 0) stressThisTurn += Math.abs(actor.momentum) * 2;
-    // Stress from being tactically exposed (old logic, now updated to use tacticalState object)
-    if (actor.tacticalState?.name === 'Exposed' || actor.tacticalState?.name === 'Off-Balance') stressThisTurn += 15;
+};
 
-    // Stress from Collateral Damage
-    if (environmentState && environmentState.damageLevel > 0) {
-        // Ensure collateralTolerance has a default if not explicitly defined on character
-        const collateralTolerance = actor.collateralTolerance !== undefined ? actor.collateralTolerance : 0.5; 
-        const maxEnvironmentalStress = 30; // Max stress from environment per turn
-        const environmentStressFactor = 0.8; // How much environment damage translates to stress
+function applyStress(fighter, eventKey, battleState) {
+    if (!STRESS_EVENTS[eventKey]) return;
 
-        // Higher damage level means more stress. Multiplied by (1 - tolerance)
-        // If tolerance is 1.0, stress is 0. If tolerance is 0.0, stress is max.
-        let environmentalStress = (environmentState.damageLevel / 100) * maxEnvironmentalStress * (1 - collateralTolerance);
-        stressThisTurn += environmentalStress * environmentStressFactor;
+    let [stressGain, reason] = STRESS_EVENTS[eventKey];
 
-        // If the actor caused the damage AND has low tolerance, add a small bonus stress (guilt/regret)
-        if (environmentState.lastDamageSourceId === actor.id && collateralTolerance < 0.3) {
-            stressThisTurn += 5;
+    // --- NEW: Apply character-specific mental resilience ---
+    const resilience = fighter.mentalResilience || 1.0; // Default resilience is 1.0
+    stressGain /= resilience;
+
+    fighter.mentalState.stress += Math.round(stressGain);
+    fighter.aiLog.push(`[Mental Stress]: +${Math.round(stressGain)} stress from: ${reason}. Resilience mod: x${1/resilience}. Total: ${fighter.mentalState.stress}`);
+}
+
+
+export function updateMentalState(fighter, opponent, moveResult, environmentState, locId, battleState) {
+    const originalLevel = fighter.mentalState.level;
+
+    // Apply stress from the move outcome
+    if (moveResult.wasAttacker === false) { // The fighter was the defender
+        switch (moveResult.effectiveness.label) {
+            case 'Critical': applyStress(fighter, 'TAKE_CRITICAL_HIT', battleState); break;
+            case 'Strong': applyStress(fighter, 'TAKE_STRONG_HIT', battleState); break;
+            case 'Normal': applyStress(fighter, 'TAKE_NORMAL_HIT', battleState); break;
+            case 'Weak': applyStress(fighter, 'TAKE_WEAK_HIT', battleState); break;
         }
-
-        // If the actor thrives in damage (high tolerance), slightly reduce overall stress for the turn
-        if (collateralTolerance > 0.7 && environmentState.damageLevel > 10) {
-            stressThisTurn = Math.max(0, stressThisTurn - (environmentalStress * 0.5)); // Reduce by half of the environmental stress
-        }
+        if (moveResult.isDodged) applyStress(fighter, 'MOVE_BLOCKED', battleState);
+    } else { // The fighter was the attacker
+        if (moveResult.effectiveness.label === 'Ineffective') applyStress(fighter, 'MOVE_FAILED', battleState);
+        if (moveResult.isDodged) applyStress(fighter, 'MOVE_DODGED', battleState);
     }
-    // --- END Stress from Collateral Damage ---
 
-    // NEW: Environmental Stamina/Energy Depletion Mechanics
-    const locationData = locationConditions[locationId];
-    if (locationData) {
-        const currentTurn = opponent.currentTurn || 0; // Use opponent.currentTurn to track battle duration globally
-
-        // Cold-Based Stamina Depletion (Northern Water Tribe, Eastern Air Temple, etc.)
-        if (locationData.isCold) {
-            let coldEnergyDrain = 0;
-            const baseDrain = 8; // Base energy drain per turn
-            const progressiveDrain = (currentTurn / 6) * 16; // Increases over battle duration, max 16 by turn 6
-            const damageEffect = (environmentState.damageLevel / 100) * 8; // Additional drain if environment is damaged/harsher
-
-            if (actor.element === 'fire' || actor.element === 'lightning') {
-                coldEnergyDrain = (baseDrain * 2) + progressiveDrain + damageEffect; // Firebenders suffer more
-                actor.aiLog.push(`[Cold Drain]: ${actor.name} (Firebender) losing ${coldEnergyDrain.toFixed(1)} energy due to cold.`);
-            } else if (actor.element === 'earth' || actor.element === 'metal' || actor.type === 'Chi Blocker') {
-                coldEnergyDrain = baseDrain + (progressiveDrain * 0.5) + (damageEffect * 0.5); // Earthbenders/Chi-Blockers suffer moderately
-                actor.aiLog.push(`[Cold Drain]: ${actor.name} (Earth/Chi) losing ${coldEnergyDrain.toFixed(1)} energy due to cold.`);
-            } else {
-                coldEnergyDrain = baseDrain * 0.5 + (progressiveDrain * 0.1); // Others suffer minimal drain
-            }
-            actor.energy = Math.max(0, actor.energy - coldEnergyDrain);
-            actor.aiLog.push(`[Environment Effect]: ${actor.name} lost ${coldEnergyDrain.toFixed(1)} energy due to cold environment.`);
+    // --- NEW: Apply situational stress from location ---
+    const situationalRule = SITUATIONAL_STRESS[locId];
+    if (situationalRule) {
+        let shouldApply = false;
+        // Character-specific susceptibility (e.g., Mai in swamp)
+        if (situationalRule.susceptibleCharacter && fighter.id === situationalRule.susceptibleCharacter) {
+            shouldApply = true;
+        }
+        // Time-based susceptibility (e.g., long desert battle)
+        if (situationalRule.turnThreshold && battleState.turn >= situationalRule.turnThreshold) {
+            shouldApply = true;
         }
 
-        // Heat Exhaustion System (Si Wong Desert)
-        if (locationData.isDesert) {
-            let heatEnergyDrain = 0;
-            const baseDrain = 9; // Base energy drain per turn
-            const progressiveDrain = (currentTurn / 6) * 18; // Increases over battle duration, max 18 by turn 6
-
-            if (actor.element === 'water' || actor.element === 'ice') {
-                heatEnergyDrain = (baseDrain * 2.5) + progressiveDrain; // Waterbenders suffer most
-                actor.aiLog.push(`[Heat Drain]: ${actor.name} (Waterbender) losing ${heatEnergyDrain.toFixed(1)} energy due to heat exhaustion.`);
-            } else if (actor.element === 'earth' || actor.element === 'physical') {
-                heatEnergyDrain = baseDrain + (progressiveDrain * 0.7); // Earthbenders/Physical users suffer moderately
-                actor.aiLog.push(`[Heat Drain]: ${actor.name} (Earth/Physical) losing ${heatEnergyDrain.toFixed(1)} energy due to heat exhaustion.`);
-            } else if (actor.element === 'fire' || actor.element === 'lightning') {
-                heatEnergyDrain = baseDrain * 0.5 + (progressiveDrain * 0.2); // Firebenders suffer least (or even gain effectively if environmental buff is high)
-                actor.aiLog.push(`[Heat Drain]: ${actor.name} (Firebender) losing ${heatEnergyDrain.toFixed(1)} energy due to heat exhaustion.`);
-            } else if (actor.type === 'Chi Blocker') {
-                 heatEnergyDrain = baseDrain + (progressiveDrain * 0.8); // Ty Lee suffers from stamina drain
-                 actor.aiLog.push(`[Heat Drain]: ${actor.name} (Chi Blocker) losing ${heatEnergyDrain.toFixed(1)} energy due to heat exhaustion.`);
-            } else {
-                heatEnergyDrain = baseDrain + progressiveDrain; // Generic drain
-            }
-            actor.energy = Math.max(0, actor.energy - heatEnergyDrain);
-            actor.aiLog.push(`[Environment Effect]: ${actor.name} lost ${heatEnergyDrain.toFixed(1)} energy due to heat exhaustion.`);
-        }
-
-        // NEW: Psychological Impact (e.g., Foggy Swamp discomfort, Mai's phobia)
-        if (locationData.psychologicalImpact) {
-            let psychologicalStress = locationData.psychologicalImpact.stressIncrease || 0;
-            let appliedStress = false;
-
-            // Toph is immune to psychological impact in the swamp
-            if (locationId === 'foggy-swamp' && actor.specialTraits?.swampImmunity) {
-                // Toph is unaffected by the swamp's psychological dampening
-                actor.aiLog.push(`[Psychological Impact]: ${actor.name} (Toph) is immune to the swamp's psychological effects.`);
-                psychologicalStress = 0;
-            } else if (actor.specialTraits?.swampPhobia) {
-                 // Mai has a swamp phobia, increasing stress
-                 psychologicalStress += (locationData.psychologicalImpact.stressIncrease || 0) * 2; // Double base stress
-                 actor.aiLog.push(`[Psychological Impact]: ${actor.name} (Mai) suffers increased stress due to swamp phobia.`);
-            }
-            // General application for others
-            if (psychologicalStress > 0) {
-                 stressThisTurn += psychologicalStress;
-                 appliedStress = true;
-                 actor.aiLog.push(`[Psychological Impact]: ${actor.name} stressed by environment, +${psychologicalStress.toFixed(1)} stress.`);
-            }
-
-            // Note: "Confidence Suppression" is indirectly modeled by increased stress
-            // pushing mentalState.level towards 'stressed'/'shaken'/'broken',
-            // which then impacts personality modifiers (like riskTolerance, aggression) in AI decision.
+        if (shouldApply) {
+            let situationalStress = situationalRule.stressPerTurn;
+            const resilience = fighter.mentalResilience || 1.0;
+            situationalStress /= resilience;
+            fighter.mentalState.stress += Math.round(situationalStress);
+            fighter.aiLog.push(`[Situational Stress]: +${Math.round(situationalStress)} stress from: ${situationalRule.reason}. Total: ${fighter.mentalState.stress}`);
         }
     }
-    // --- END Environmental Stamina/Energy Depletion ---
-    
-    actor.mentalState.stress += stressThisTurn;
-    const resilience = actor.relationalState?.resilienceModifier || 1.0;
-    const thresholds = { stressed: 25 * resilience, shaken: 60 * resilience, broken: 90 * resilience };
-    const oldLevel = actor.mentalState.level;
 
-    if (actor.mentalState.stress > thresholds.broken) actor.mentalState.level = 'broken';
-    else if (actor.mentalState.stress > thresholds.shaken) actor.mentalState.level = 'shaken';
-    else if (actor.mentalState.stress > thresholds.stressed) actor.mentalState.level = 'stressed';
-    
-    if (oldLevel !== actor.mentalState.level) {
-        actor.aiLog.push(`[Mental State Change]: ${actor.name} is now ${actor.mentalState.level.toUpperCase()}. (Stress: ${actor.mentalState.stress.toFixed(0)})`);
-        actor.mentalStateChangedThisTurn = true;
+
+    // Clamp stress to a max value (e.g., 150) to prevent runaway numbers
+    fighter.mentalState.stress = Math.min(fighter.mentalState.stress, 150);
+
+    // Determine new mental state level
+    let newLevel = 'stable';
+    if (fighter.mentalState.stress >= MENTAL_STATE_THRESHOLDS.broken) {
+        newLevel = 'broken';
+    } else if (fighter.mentalState.stress >= MENTAL_STATE_THRESHOLDS.shaken) {
+        newLevel = 'shaken';
+    } else if (fighter.mentalState.stress >= MENTAL_STATE_THRESHOLDS.stressed) {
+        newLevel = 'stressed';
+    }
+
+    if (newLevel !== originalLevel) {
+        fighter.mentalState.level = newLevel;
+        fighter.mentalStateChangedThisTurn = true;
+        fighter.aiLog.push(`[Mental State Change]: ${fighter.name} is now ${newLevel.toUpperCase()}. (Stress: ${fighter.mentalState.stress})`);
     }
 }

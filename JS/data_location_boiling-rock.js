@@ -1,7 +1,4 @@
-// FILE: data_location_boiling-rock.js
 'use strict';
-
-// Environmental conditions for The Boiling Rock.
 
 export const boilingRock = {
     id: 'boiling-rock',
@@ -20,4 +17,4 @@ export const boilingRock = {
     },
     fragility: 20,
     background: 'images/locations/boiling_rock.webp',
-};
+}; 

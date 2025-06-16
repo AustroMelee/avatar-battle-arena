@@ -1,321 +1,335 @@
 // FILE: data_mechanics_characters.js
 'use strict';
 
-// Character-specific curbstomp rules.
+// Refined Curb Stomp Mechanics (v2) for Direct Engine Integration
 
 export const characterCurbstompRules = {
-    'ozai-not-comet-enhanced': [
+    // --- GLOBAL MECHANICS ---
+    'mai': [
         {
-            id: "ozai_fire_comet_mode",
-            description: "Ozai unleashes an overwhelming, comet-like fire assault.",
+            id: "mai_precision_knives",
+            description: "Mai punishes slow, telegraphed moves with a volley of precisely aimed knives.",
             triggerChance: 0.85,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "authority_challenged",
-            activatingMoveName: "Emperor's Wrath",
-            activatingMoveTags: ["fire", "area_of_effect_large", "highRisk", "lightning_attack"], // Added lightning_attack
-            activatingMoveElement: "fire", // Can also be lightning if Emperor's Wrath can be lightning
-            outcome: { type: "instant_kill_target", successMessage: "Ozai, his authority challenged, unleashes {moveName} with the devastating force of a comet, instantly incinerating {targetName}!", failureMessage: "{targetName} somehow withstands Ozai's monumental display of power!" }
+            severity: 'lethal',
+            conditionLogic: (mai, opponent, battleState) => {
+                const telegraphedMoveTags = ["lightning_charge", "boulder_hurl", "water_construct"];
+                return opponent.lastMove && telegraphedMoveTags.some(tag => opponent.lastMove.moveTags.includes(tag));
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "As {targetName} prepares a powerful but slow attack, Mai exploits the opening, ending the fight with a volley of perfectly aimed knives.",
+            }
+        }
+    ],
+    'ty-lee': [
+        {
+            id: "tylee_chi_block_strike",
+            description: "Ty Lee closes the distance with incredible speed, disabling a bender with precise chi-blocking strikes.",
+            triggerChance: 0.60,
+            canTriggerPreBattle: false,
+            severity: 'lethal', // Represents a fight-ending outcome
+            conditionLogic: (tylee, opponent, battleState) => {
+                return opponent.lastMove?.type === 'Bender' && battleState.distance <= 'close';
+            },
+            outcome: { 
+                type: "instant_win", // Effectively a win against a bender
+                successMessage: "In a flash, Ty Lee closes the distance, and a series of precise strikes leaves {targetName}'s bending completely neutralized.",
+            }
+        }
+    ],
+    // --- CHARACTER-SPECIFIC INSTANT WINS ---
+    'ozai': [
+        {
+            id: "ozai_comet_mode",
+            description: "Fueled by Sozin's Comet, Ozai's power becomes absolute, incinerating any non-firebender who stands against him.",
+            triggerChance: 0.90,
+            canTriggerPreBattle: true,
+            severity: 'lethal',
+            conditionLogic: (ozai, opponent, battleState) => {
+                return battleState.isSozinsComet && opponent.element !== 'fire';
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "Under the power of Sozin's Comet, Ozai's fire is absolute. {targetName} is overwhelmed and incinerated in an instant.",
+            }
         },
         {
-            id: "ozai_lightning_spam",
-            description: "Ozai relentlessly spams lightning attacks.",
+            id: "ozai_lightning_barrage",
+            description: "Ozai unleashes a terrifying and overwhelming barrage of lightning.",
             triggerChance: 0.70,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "authority_challenged",
-            activatingMoveTags: ["lightning", "ranged_attack", "lightning_attack"], // Added lightning_attack
-            activatingMoveElement: "lightning",
-            outcome: { type: "instant_death_target", successMessage: "With {moveName}, Ozai rains down a terrifying storm of lightning, leaving {targetName} no chance of survival!", failureMessage: "{targetName} miraculously dodges or redirects Ozai's relentless lightning barrage!" }
+            severity: 'lethal',
+            conditionLogic: (ozai, opponent, battleState) => {
+                // This will be countered by a specific "lightning_redirection" trait/check in the engine
+                return !opponent.specialTraits?.canRedirectLightning;
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "Ozai rains down a storm of lightning, giving {targetName} no chance to escape the lethal barrage.",
+            }
         }
     ],
     'bumi': [
         {
-            id: "bumi_massive_earthbending_bury",
-            description: "Bumi buries opponent under a mountain of earth.",
+            id: "bumi_mass_bury",
+            description: "In an earth-rich environment, Bumi shifts the very landscape to bury his opponent.",
             triggerChance: 0.60,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            personalityTrigger: "underestimated",
-            activatingMoveName: "Rock Avalanche",
-            activatingMoveTags: ["earth", "area_of_effect_large", "environmental_manipulation"],
-            outcome: { type: "instant_incapacitation_target_bury", successMessage: "With a cackle, Bumi's {moveName} shifts a mountain of earth, burying {targetName} completely!", failureMessage: "{targetName} narrowly escapes being crushed by Bumi's colossal earthbending!" }
+            severity: 'lethal',
+            conditionLogic: (bumi, opponent, battleState) => {
+                return ['omashu', 'ba-sing-se', 'great-divide'].includes(battleState.locationId);
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "With a cackle, King Bumi reshapes the battlefield, burying {targetName} under a mountain of earth.",
+            }
         },
         {
             id: "bumi_structural_collapse",
-            description: "Bumi causes a massive structural collapse (e.g., buildings in Omashu).",
+            description: "Bumi turns an urban environment into a weapon, bringing buildings down on his foe.",
             triggerChance: 0.80,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            conditionLogic: (bumi, opponent, battleState) => battleState.locationTags.includes("urban") || battleState.locationTags.includes("dense"),
-            personalityTrigger: "underestimated",
-            activatingMoveName: "Terrain Reshape",
-            activatingMoveTags: ["earth", "environmental_manipulation", "area_of_effect_large"],
-            outcome: { type: "instant_kill_target_collapse", successMessage: "King Bumi's {moveName} brings the very structures around them crashing down on {targetName}!", failureMessage: "{targetName} makes a daring escape as the surroundings collapse!" }
+            severity: 'lethal',
+            conditionLogic: (bumi, opponent, battleState) => {
+                return ['omashu', 'ba-sing-se-lower-ring'].includes(battleState.locationId);
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "The city itself becomes Bumi's weapon. He brings a nearby structure crashing down on {targetName}, ending the fight decisively.",
+            }
         }
     ],
     'azula': [
         {
-            id: "azula_sane_lightning_precision",
-            description: "Azula's perfectly aimed lightning strike.",
+            id: "azula_sane_precision_lightning",
+            description: "A sane Azula's lightning is a tool of chilling precision, especially effective against conductive targets.",
             triggerChance: 0.75,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "in_control",
-            conditionLogic: (azula) => !azula.isInsane,
-            activatingMoveName: "Lightning Generation",
-            activatingMoveTags: ["lightning", "ranged_attack", "single_target", "instantaneous", "lightning_attack"], // Added lightning_attack
-            activatingMoveElement: "lightning",
-            outcome: { type: "instant_kill_target", successMessage: "Azula's {moveName} strikes with chilling precision, ending {targetName}'s fight instantly!", failureMessage: "{targetName} anticipates Azula's lightning, managing a desperate dodge!" }
-        },
-        {
-            id: "azula_sane_fire_tornado",
-            description: "Azula creates a devastating blue fire tornado.",
-            triggerChance: 0.55,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            personalityTrigger: "in_control",
-            conditionLogic: (azula) => !azula.isInsane,
-            activatingMoveTags: ["fire", "area_of_effect_large", "channeled"],
-            activatingMoveElement: "fire",
-            outcome: { type: "instant_incapacitation_target_burn", successMessage: "Azula conjures a terrifying blue fire tornado with {moveName}, engulfing and incinerating {targetName}!", failureMessage: "{targetName} finds a way to disrupt or escape Azula's fiery vortex!" }
-        }
-    ],
-    'azula_insane': [
-        {
-            id: "azula_insane_unpredictable_attacks",
-            description: "Azula's attacks become wild and unpredictable due to mental instability.",
-            triggerChance: 0.60,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            selfSabotageChance: 0.40,
-            personalityTrigger: "desperate_broken",
-            conditionLogic: (azula) => azula.isInsane,
-            activatingMoveTags: ["fire", "area_of_effect_large", "highRisk"], // Could be lightning too
-            activatingMoveElement: "fire", // Could be lightning
-            outcome: {
-                type: "conditional_instant_kill_or_self_sabotage",
-                successMessage: "Azula's crazed, unpredictable {moveName} overwhelms {targetName}!",
-                failureMessage: "{targetName} capitalizes on a wild, unfocused attack from Azula!",
-                selfSabotageMessage: "In her madness, Azula's {moveName} goes awry, hindering herself!"
+            severity: 'lethal',
+            conditionLogic: (azula, opponent, battleState) => {
+                return !azula.mentalState.isInsane && (opponent.specialTraits?.hasMetalArmor || opponent.specialTraits?.isWet);
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "Azula's lightning strikes with surgical precision, using {targetName}'s armor or the water around them as a fatal conductor.",
             }
         },
         {
-            id: "azula_insane_blue_fire_buff",
-            description: "Her blue fire burns hotter and more erratically in her unstable state.",
-            triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            personalityTrigger: "desperate_broken",
-            conditionLogic: (azula) => azula.isInsane,
-            outcome: { type: "damage_increase_character_25_percent", message: "Azula's blue fire rages with terrifying, unstable intensity!" }
-        }
-    ],
-    'toph-beifong': [
-        {
-            id: "toph_seismic_sense_accuracy",
-            description: "Toph's seismic sense grants near-perfect accuracy.",
-            triggerChance: 0.85,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "accuracy_increase_character_85_percent", message: "Toph's seismic sense allows her to 'see' {targetName}'s every move with pinpoint accuracy." }
+            id: "azula_sane_fire_tornado",
+            description: "Azula creates a vortex of blue fire, incinerating anyone caught within.",
+            triggerChance: 0.55,
+            canTriggerPreBattle: false,
+            severity: 'lethal',
+            conditionLogic: (azula, opponent, battleState) => {
+                return !azula.mentalState.isInsane && battleState.isOpenTerrain;
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "Azula conjures a terrifying vortex of blue flame, engulfing and incinerating {targetName}.",
+            }
         },
         {
-            id: "toph_metal_bending_vs_armor",
-            description: "Toph's metalbending instantly crushes or bypasses metal armor.",
-            triggerChance: 0.85,
+            id: "azula_insane_unstable_kill",
+            description: "A mentally unstable Azula attacks with raw, unpredictable power.",
+            triggerChance: 0.60, // 60% chance to be an instant kill
+            selfSabotageChance: 0.40, // 40% chance it backfires
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            personalityTrigger: "doubted",
-            activatingMoveName: "Metal Bending",
-            activatingMoveTags: ["metal", "utility_control"],
-            outcome: { type: "instant_win_attacker_vs_armor", successMessage: "Toph's {moveName} twists and crushes {targetName}'s armor, leaving them defenseless!", failureMessage: "{targetName}'s armor holds, or they shed it just in time!" }
+            severity: 'lethal',
+            conditionLogic: (azula, opponent, battleState) => {
+                return azula.mentalState.level === 'broken'; // simplified from isInsane
+            },
+            outcome: { 
+                type: "conditional_instant_win_or_self_sabotage", 
+                successMessage: "In her madness, Azula unleashes a wild, unpredictable assault that completely overwhelms {targetName}!",
+                selfSabotageMessage: "Azula's attack is powerful but reckless, going awry and leaving her vulnerable."
+            }
+        },
+        {
+            id: "azula_blue_fire_surge",
+            description: "Her iconic blue fire burns hotter, allowing her to cut through defenses.",
+            triggerChance: 1.0,
+            canTriggerPreBattle: true,
+            severity: 'buff',
+            outcome: { 
+                type: "damage_increase_character", 
+                value: 0.25,
+                message: "Azula's blue fire rages with terrifying intensity, burning through standard defenses."
+            }
+        }
+    ],
+    'toph': [
+        {
+            id: "toph_seismic_prediction",
+            description: "Toph's seismic sense allows her to predict and counter attacks before they happen.",
+            triggerChance: 0.85,
+            canTriggerPreBattle: true,
+            severity: 'buff',
+            outcome: { 
+                type: "evasion_increase_character", 
+                value: 0.85, // Represents an 85% counter/evade rate
+                message: "Toph reads the earth, anticipating {targetName}'s every move with unnerving accuracy."
+            }
+        },
+        {
+            id: "toph_metalbending_armor_crush",
+            description: "Toph's metalbending makes short work of any opponent relying on metal armor or weapons.",
+            triggerChance: 1.0, // It's an auto-win, not a chance
+            canTriggerPreBattle: false,
+            severity: 'lethal',
+            conditionLogic: (toph, opponent, battleState) => {
+                return opponent.specialTraits?.hasMetalArmor || opponent.specialTraits?.hasMetalWeapon;
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "With a flick of her wrist, Toph seizes control of {targetName}'s armor and weapon, twisting the metal and leaving them utterly defenseless.",
+            }
         }
     ],
     'katara': [
         {
             id: "katara_bloodbending",
-            description: "Katara resorts to bloodbending under extreme duress (full moon).",
-            triggerChance: 0.85,
+            description: "Under the full moon, a sufficiently pushed Katara can resort to bloodbending, an unstoppable technique.",
+            triggerChance: 1.0,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Late'], // NEW
-            severity: 'lethal', // NEW
-            conditionLogic: (katara, opponent, battleState) => battleState.isFullMoon === true,
-            personalityTrigger: "desperate_mentally_broken",
-            activatingMoveName: "Bloodbending",
-            activatingMoveTags: ["special", "debuff_disable", "unblockable"],
-            outcome: { type: "instant_win_attacker_control", successMessage: "Under the light of the full moon and pushed to her absolute limit, Katara's {moveName} seizes control of {targetName}, ending the fight instantly!", failureMessage: "{targetName}'s willpower (or Katara's hesitation) prevents the bloodbending from taking full effect!" }
+            severity: 'lethal',
+            conditionLogic: (katara, opponent, battleState) => {
+                const isMentallyBroken = katara.mentalState.level === 'broken' || katara.mentalState.level === 'stressed';
+                return battleState.isFullMoon && isMentallyBroken && opponent.id !== 'aang';
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "The full moon empowers Katara. Pushed to her absolute limit, she reaches for a dark power, seizing control of {targetName}'s body and ending the fight instantly.",
+            }
         },
         {
-            id: "katara_ice_prison_kill",
-            description: "Katara encases opponent in a fatal ice prison.",
+            id: "katara_ice_capture",
+            description: "In a cold environment, Katara can generate enough ice to fatally encase an opponent.",
             triggerChance: 0.70,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "desperate_mentally_broken",
-            activatingMoveName: "Ice Prison",
-            activatingMoveTags: ["ice", "construct_creation", "debuff_disable"],
-            outcome: { type: "instant_kill_target_ice", successMessage: "Katara summons massive ice shards with {moveName}, encasing and fatally wounding {targetName}!", failureMessage: "{targetName} shatters the forming ice prison just in time!" }
+            severity: 'lethal',
+            conditionLogic: (katara, opponent, battleState) => {
+                return ['northern-water-tribe', 'eastern-air-temple'].includes(battleState.locationId);
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "Using the ambient cold, Katara summons a massive prison of ice, fatally trapping {targetName}.",
+            }
         }
     ],
-    'aang-airbending-only': [
+    'aang': [
         {
-            id: "aang_avatar_state_air",
-            description: "Aang taps into the Avatar State, unleashing immense air power.",
-            triggerChance: 0.85,
+            id: "aang_avatar_state",
+            description: "When in mortal danger, Aang can enter the Avatar State, wielding unimaginable power.",
+            triggerChance: 0.95,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "mortal_danger",
-            activatingMoveTags: ["air", "area_of_effect_large", "unblockable"], // Conceptual tags
-            outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Aang's eyes glow as he enters the Avatar State, unleashing a cataclysmic storm of air that overwhelms {targetName}!", failureMessage: "Aang struggles to fully control the Avatar State's power, giving {targetName} a fleeting chance!" }
+            severity: 'lethal',
+            conditionLogic: (aang, opponent, battleState) => {
+                return (aang.hp < 20 || aang.mentalState.level === 'broken');
+            },
+            // Special outcome to reflect Aang's reluctance to kill
+            outcome: {
+                type: "conditional_instant_win_or_mercy",
+                mercyChance: 0.20,
+                successMessage: "Aang's eyes glow with the power of a thousand lifetimes. He unleashes the full power of the Avatar State, overwhelming {targetName} completely.",
+                mercyMessage: "The Avatar State gives Aang the power to win, but at the last moment, his own spirit pulls back, incapacitating but not killing {targetName}."
+            }
         },
         {
-            id: "aang_air_scooter_evasion",
-            description: "Aang's masterful use of the air scooter for evasion.",
+            id: "aang_mobility_edge",
+            description: "Aang's mastery of airbending gives him a significant defensive advantage against grounded attacks.",
             triggerChance: 0.60,
             canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "evasion_chance_increase_60_percent", message: "Aang zips around on his air scooter, becoming an incredibly difficult target." }
+            severity: 'buff',
+            outcome: { 
+                type: "evasion_increase_vs_grounded",
+                value: 0.60,
+                message: "Aang zips around on his air scooter, making him an incredibly difficult target for ground-based assaults."
+            }
         }
     ],
     'zuko': [
         {
-            id: "zuko_scar_intimidation",
-            description: "Zuko's scar and intensity can intimidate opponents.",
+            id: "zuko_intimidation",
+            description: "Zuko's fierce presence and scar can be intimidating to his opponents.",
             triggerChance: 1.0,
             canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            outcome: { type: "attack_power_increase_character_15_percent", message: "Zuko's fierce determination and visible scar lend an intimidating edge to his attacks." }
+            severity: 'buff',
+            conditionLogic: (zuko, opponent, battleState) => {
+                return opponent.faction !== 'Fire Nation';
+            },
+            outcome: { 
+                type: "morale_penalty_opponent", 
+                value: 0.15, // Represents a 15% penalty to opponent's 'resolve' or 'effectiveness'
+                message: "Zuko's fierce determination and visible scar are unsettling, putting {targetName} on the back foot."
+            }
         },
         {
-            id: "zuko_dual_dao_kill",
-            description: "Zuko's mastery with his dual dao swords combined with firebending.",
+            id: "zuko_dual_dao_execution",
+            description: "If Zuko disarms his opponent, he can end the fight with his dual dao swords.",
             triggerChance: 0.80,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "honor_violated",
-            activatingMoveName: "Flame Sword",
-            activatingMoveTags: ["fire", "melee_range", "precise"],
-            outcome: { type: "instant_kill_target", successMessage: "Zuko's fiery {moveName} dances with deadly precision, delivering a fatal blow to {targetName}!", failureMessage: "{targetName} narrowly parries Zuko's lightning-fast sword assault!" }
+            severity: 'lethal',
+            conditionLogic: (zuko, opponent, battleState) => {
+                return opponent.specialTraits?.isDisarmed;
+            },
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "His opponent disarmed, Zuko presses the advantage with his dual dao, ending the fight with a swift and deadly strike.",
+            }
         }
     ],
     'sokka': [
         {
-            id: "sokka_strategy_exploit",
-            description: "Sokka devises a clever environmental exploit or trap.",
+            id: "sokka_environmental_exploit",
+            description: "Sokka's quick thinking allows him to use the environment to his advantage.",
             triggerChance: 0.30,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Poking', 'Early', 'Mid'], // NEW
-            severity: 'soft', // NEW
-            personalityTrigger: "meticulous_planning",
-            escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 65, successChance: 0.10 },
-            activatingMoveTags: ["utility", "trap_delayed", "environmental_manipulation"],
-            outcome: { type: "advantage_attacker_environmental", successMessage: "Sokka's brilliant strategy (perhaps using {moveName}) turns the environment against {targetName}, creating a key advantage!", failureMessage: "Sokka's plan doesn't quite come together this time." }
+            severity: 'reversal',
+            outcome: { 
+                type: "advantage_attacker_environmental",
+                successMessage: "Thinking on his feet, Sokka uses the terrain in an unexpected way, turning the tables on {targetName} and creating a massive opening!",
+            }
         },
         {
-            id: "sokka_vulnerability_death",
-            description: "Sokka's inherent vulnerability as a non-bender.",
-            appliesToCharacter: "sokka",
-            triggerChance: 0.75,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Make sure parameters match how they are used
-            weightingLogic: ({ attacker, defender, rule, location, situation }) => { // Removed 'rule' from destructuring, hardcoding "sokka" for robustness
-                let sokkaUnderThreat;
-                let opponentOfSokka;
-
-                // Directly identify Sokka and opponent, as this rule is specific to Sokka
-                if (attacker.id === "sokka") {
-                    sokkaUnderThreat = attacker;
-                    opponentOfSokka = defender;
-                } else if (defender.id === "sokka") {
-                    sokkaUnderThreat = defender;
-                    opponentOfSokka = attacker;
-                } else {
-                    return null;
-                }
-
-                let sokkaLosesChance = 0.75;
-                if (opponentOfSokka.powerTier > sokkaUnderThreat.powerTier + 2) sokkaLosesChance = 0.90;
-                if (opponentOfSokka.element === "fire" && situation.isDay) sokkaLosesChance += 0.05;
-                if (opponentOfSokka.element === "water" && situation.isNight) sokkaLosesChance += 0.05;
-                if (location.tags && location.tags.includes("open") && opponentOfSokka.element !== "earth") sokkaLosesChance += 0.05;
-                if (location.tags && location.tags.includes("cover_rich")) sokkaLosesChance -= 0.10;
-
-                sokkaLosesChance = Math.max(0, Math.min(1.0, sokkaLosesChance));
-                return { victimId: "sokka", probability: sokkaLosesChance };
+            id: "sokka_vulnerability",
+            description: "As a non-bender, Sokka is extremely vulnerable to a direct bending assault.",
+            triggerChance: 0.90,
+            canTriggerPreBattle: false,
+            severity: 'lethal',
+            conditionLogic: (sokka, opponent, battleState) => {
+                return opponent.lastMove?.isBending && opponent.lastMove?.effectiveness > 'Weak';
             },
-            outcome: {
-                type: "instant_loss_weighted_character",
-                successMessage: "Outmatched by {opponentName}'s bending, {actualVictimName} falls in battle despite his bravery.",
-                failureMessage: "{actualVictimName}'s agility and a bit of luck keep him out of lethal harm's way!"
+            outcome: { 
+                type: "instant_loss", 
+                successMessage: "Caught by a direct bending attack from {targetName}, Sokka has no defense. The fight is over.",
             }
         }
     ],
     'jeong-jeong': [
         {
-            id: "jeongjeong_fire_whips_disable",
-            description: "Jeong Jeong uses precise fire whips to disable an opponent.",
+            id: "jeongjeong_fire_whips",
+            description: "Jeong Jeong creates precise whips of fire to disable his opponents.",
             triggerChance: 0.45,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
-            severity: 'crippling', // NEW
-            personalityTrigger: "confident_stance",
-            activatingMoveName: "Flame Whips",
-            activatingMoveTags: ["fire", "ranged_attack_medium", "precise"],
-            outcome: { type: "incapacitation_target_disable_limbs", successMessage: "Jeong Jeong's {moveName} lash out with pinpoint accuracy, ensnaring and disabling {targetName}'s limbs!", failureMessage: "{targetName} narrowly evades Jeong Jeong's ensnaring fire whips!" }
+            severity: 'crippling',
+            outcome: { 
+                type: "instant_incapacitation", 
+                successMessage: "Jeong Jeong's masterful fire whips lash out, severely burning and disabling {targetName}.",
+            }
         },
-        {
-            id: "jeongjeong_desert_advantage",
-            description: "Jeong Jeong's fire control excels in dry, open desert environments.",
-            triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
-            severity: 'soft', // NEW
-            conditionLogic: (jj, o, bs) => bs.locationId === 'si-wong-desert',
-            outcome: { type: "power_increase_character_35_percent", message: "In the desolate expanse of the Si Wong Desert, Jeong Jeong's mastery over fire is amplified." }
-        }
     ],
     'pakku': [
         {
-            id: "pakku_water_mastery_curbstomp",
-            description: "Pakku's overwhelming waterbending mastery.",
-            triggerChance: 0.85,
-            canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "skill_challenged",
-            activatingMoveName: "Octopus Form",
-            activatingMoveTags: ["water", "versatile", "area_of_effect_small"],
-            outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Master Pakku unleashes {moveName}, an overwhelming display of waterbending that leaves {targetName} utterly defeated!", failureMessage: "{targetName} surprisingly withstands Master Pakku's initial onslaught!" }
-        },
-        {
-            id: "pakku_ice_daggers_kill",
-            description: "Pakku forms and launches lethal ice daggers.",
+            id: "pakku_ice_daggers",
+            description: "Pakku launches a volley of deadly ice daggers at his opponent.",
             triggerChance: 0.60,
             canTriggerPreBattle: false,
-            canTriggerInPhase: ['Mid', 'Late'], // NEW
-            severity: 'lethal', // NEW
-            personalityTrigger: "skill_challenged",
-            activatingMoveName: "Ice Spikes", // Assuming Ice Spikes is the base for daggers
-            activatingMoveTags: ["ice", "projectile", "precise"],
-            outcome: { type: "instant_kill_target_ice", successMessage: "With chilling precision, Pakku's {moveName} form into deadly ice daggers, fatally striking {targetName}!", failureMessage: "{targetName} deflects or dodges Pakku's lethal ice projectiles!" }
+            severity: 'lethal',
+            outcome: { 
+                type: "instant_win", 
+                successMessage: "With a flick of his wrists, Pakku sends a volley of razor-sharp ice daggers at {targetName}, leaving no room for escape.",
+            }
         }
     ]
 };

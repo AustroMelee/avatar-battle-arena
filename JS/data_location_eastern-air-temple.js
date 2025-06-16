@@ -1,42 +1,18 @@
 // FILE: data_location_eastern-air-temple.js
 'use strict';
 
-// Environmental conditions for Eastern Air Temple.
-
-export const easternAirTempleConditions = {
+// Represents the battle conditions for the Eastern Air Temple location.
+export const easternAirTemple = {
     id: 'eastern-air-temple',
-    airRich: true,
-    isVertical: true,
-    isExposed: true,
-    wind: 0.3, 
-    fragility: 0.5, 
-    hasCover: true, // NEW: Added for cover opportunities
-    isCramped: true, // NEW: Added for tight spaces within the temple
-    damageThresholds: { 
-        minor: 10, moderate: 25, severe: 50, catastrophic: 75
-    },
-    environmentalImpacts: {
-        minor: [
-            "Dust billows from cracked stone.",
-            "Small sections of the ancient structure begin to crumble.",
-            "Loose rock slides down cliff faces."
-        ],
-        moderate: [
-            "A section of a tiered platform collapses with a groan.",
-            "Ancient carvings are obscured by falling debris.",
-            "The strong winds whip up clouds of shattered stone and dust."
-        ],
-        severe: [
-            "A large section of the temple's foundation gives way, threatening further collapse.",
-            "Whole sections of cliff crumble into the abyss.",
-            "The air currents become unpredictable, swirling with immense debris."
-        ],
-        catastrophic: [
-            "The once serene Eastern Air Temple is scarred by massive fissures and collapsing structures.",
-            "The sacred grounds are reduced to a perilous landscape of falling rock and violent updrafts.",
-            "The very air vibrates with the sound of grinding earth and crumbling masonry."
-        ]
-    },
+    name: 'Eastern Air Temple',
+    description: "This location is characterized by: vertical terrain, exposed areas, ample cover, rich in air",
+    environmentalEffects: [
+        "Strong winds",
+        "Unstable footing",
+        "Sudden updrafts",
+        "Falling rocks"
+    ],
+    // REFACTOR: Store modifiers as raw numbers, not strings.
     environmentalModifiers: {
         air: { 
             damage: 15, 
@@ -84,6 +60,34 @@ export const easternAirTempleConditions = {
             reason: "Cover and verticality hinder clear line of sight for ranged attacks." 
         },
     },
-    disabledElements: ['water', 'ice'], // NEW: Explicitly disable by default, only canteen/specific moves allowed
-    notes: "High altitude and strong winds favor airbenders. Structures are old and somewhat brittle. Lack of water. Agile and evasive movements are highly effective due to verticality and air currents, but ranged attacks are hampered by cover."
+    specialConditions: {
+        description: "The high altitude and strong winds favor airbenders and agile fighters, while hindering others.",
+        effects: [
+            {
+                type: 'elemental_advantage',
+                element: 'air',
+                bonus: 0.15,
+                details: "Airbenders feel at home here, their abilities enhanced by the natural air currents."
+            },
+            {
+                type: 'agility_bonus',
+                bonus: 0.1,
+                details: "The complex terrain rewards agile movements and quick repositions."
+            }
+        ]
+    },
+    interactibles: [
+        {
+            name: "Wind Chutes",
+            description: "Natural wind tunnels that can be used for rapid traversal or to redirect projectiles.",
+            actions: ['propel', 'redirect']
+        },
+        {
+            name: "Unstable Ledges",
+            description: "Precarious rock formations that can be targeted to crumble under an opponent.",
+            actions: ['destabilize', 'collapse']
+        }
+    ],
+    fragility: 50,
+    background: 'images/locations/eastern_air_temple.webp',
 };
