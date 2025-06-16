@@ -27,9 +27,10 @@ const LIGHTNING_REDIRECTION_MAX_SUCCESS_CHANCE = 0.95; // Not always guaranteed
  * @param {object} move - The lightning move object.
  * @param {object} battleState - Current battle state for context.
  * @param {Array} interactionLog - The battle's interaction log.
+ * @param {function} modifyMomentum - The modifyMomentum function from engine_momentum.js. // NEW PARAM
  * @returns {object} An object detailing the outcome of the redirection attempt.
  */
-export function attemptLightningRedirection(attacker, defender, move, battleState, interactionLog) {
+export function attemptLightningRedirection(attacker, defender, move, battleState, interactionLog, modifyMomentum) {
     const narrativeEvents = [];
     let logMessage = `[REDIRECTION ATTEMPT]: ${defender.name} (HP: ${defender.hp}, Mental: ${defender.mentalState?.level}) attempts to redirect ${attacker.name}'s ${move.name}. `;
     
@@ -68,6 +69,9 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
     defender.aiLog.push(`[Reactive Action]: Attempting Lightning Redirection against ${attacker.name}'s ${move.name}. ${logMessage}`);
     attacker.aiLog.push(`[Opponent Reaction]: ${defender.name} is attempting Lightning Redirection! Chance: ${successChance.toFixed(2)}, Roll: ${roll.toFixed(2)}.`);
 
+    let momentumChangeDefender = 0;
+    let momentumChangeAttacker = 0;
+
     if (roll < successChance) {
         // Successful Redirection
         console.log(`[REDIRECTION SUCCESS]: ${defender.name} redirected lightning!`);
@@ -81,14 +85,20 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         narrativeEvents.push(
             { quote: { type: 'action', line: `With a defiant roar, ${defender.name} unleashes the redirected energy back at a stunned ${attacker.name}!` }, actor: defender, isMoveExecutionQuote: false }
         );
+        
+        momentumChangeDefender = 3;
+        momentumChangeAttacker = -2;
+
+        modifyMomentum(defender, momentumChangeDefender, `Successful lightning redirection`);
+        modifyMomentum(attacker, momentumChangeAttacker, `Lightning redirected by ${defender.name}`);
 
         return {
             attempted: true,
             success: true,
             damageMitigation: 1.0, // Full damage mitigation for defender
             stunAppliedToAttacker: 1, // Attacker stunned for 1 turn
-            momentumChangeDefender: 3,
-            momentumChangeAttacker: -2,
+            momentumChangeDefender: momentumChangeDefender,
+            momentumChangeAttacker: momentumChangeAttacker,
             narrativeEvents,
             effectivenessLabel: effectivenessLevels.REDIRECTED_SUCCESS.label, // Using the label from narrative-v2
             effectivenessEmoji: effectivenessLevels.REDIRECTED_SUCCESS.emoji
@@ -107,13 +117,19 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
             { quote: { type: 'action', line: `Though some energy is deflected, ${defender.name} is struck by the fierce attack, staggering from the blow!` }, actor: defender, isMoveExecutionQuote: false }
         );
 
+        momentumChangeDefender = -1;
+        momentumChangeAttacker = 1;
+
+        modifyMomentum(defender, momentumChangeDefender, `Failed lightning redirection`);
+        modifyMomentum(attacker, momentumChangeAttacker, `Lightning not redirected by ${defender.name}`);
+
         return {
             attempted: true,
             success: false,
             damageMitigation: 0.4, // Defender takes 60% of the damage
             stunAppliedToAttacker: 0,
-            momentumChangeDefender: -1,
-            momentumChangeAttacker: 1,
+            momentumChangeDefender: momentumChangeDefender,
+            momentumChangeAttacker: momentumChangeAttacker,
             narrativeEvents,
             effectivenessLabel: effectivenessLevels.REDIRECTED_FAIL.label, // Using the label from narrative-v2
             effectivenessEmoji: effectivenessLevels.REDIRECTED_FAIL.emoji

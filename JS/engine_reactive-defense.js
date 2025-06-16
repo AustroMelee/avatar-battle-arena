@@ -16,11 +16,13 @@ import { attemptLightningRedirection } from './engine_lightning-redirection.js';
  * @param {object} move - The move object being used by the attacker.
  * @param {object} battleState - The current state of the battle (for context, optional).
  * @param {Array} interactionLog - The battle's interaction log array.
+ * @param {function} modifyMomentum - The modifyMomentum function from engine_momentum.js. // NEW PARAM
  * @returns {object} An object indicating if a reaction occurred and its outcome.
  *                   Example: { reacted: true, type: 'lightning_redirection', success: true, stunApplied: true, damageMitigation: 1.0, narrativeEvents: [] }
  *                   Example: { reacted: false }
  */
-export function checkReactiveDefense(attacker, defender, move, battleState = {}, interactionLog = []) {
+// Added modifyMomentum as a parameter
+export function checkReactiveDefense(attacker, defender, move, battleState = {}, interactionLog = [], modifyMomentum) {
     // Ensure essential objects and properties exist
     if (!attacker || !defender || !move || !move.moveTags || !Array.isArray(move.moveTags)) {
         console.error("[Reactive Defense Check]: Invalid attacker, defender, or move object provided.");
@@ -32,7 +34,8 @@ export function checkReactiveDefense(attacker, defender, move, battleState = {},
         defender.specialTraits?.canRedirectLightning &&
         (attacker.id === 'azula' || attacker.id === 'ozai-not-comet-enhanced')) { // Specific to Zuko vs Azula/Ozai
 
-        const redirectionResult = attemptLightningRedirection(attacker, defender, move, battleState, interactionLog);
+        // Pass modifyMomentum to attemptLightningRedirection
+        const redirectionResult = attemptLightningRedirection(attacker, defender, move, battleState, interactionLog, modifyMomentum);
         // redirectionResult will be like:
         // { success: true, stunAppliedToAttacker: 1, damageMitigation: 1.0, momentumChangeDefender: 3, momentumChangeAttacker: -2, narrativeEvents: [...] }
         // or { success: false, damageMitigation: 0.4 (partial), narrativeEvents: [...] }

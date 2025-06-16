@@ -12,7 +12,7 @@ import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } fro
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
 import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens, generateEscalationNarrative, generateActionDescriptionObject } from './engine_narrative-engine.js';
-import { modifyMomentum } from './engine_momentum.js';
+import { modifyMomentum } from './engine_momentum.js'; // Keep this import here, as battle-engine-core also uses it directly
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
 // --- UPDATED IMPORTS for Mechanics ---
 import { universalMechanics } from './data_mechanics_universal.js'; // From new file
@@ -23,9 +23,7 @@ import { calculateIncapacitationScore, determineEscalationState, ESCALATION_STAT
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-export const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
-
-let charactersMarkedForDefeat = new Set();
+export const getRandomElement = (arr) => arr && arr.length > 0 ? Math.floor(Math.random() * arr.length) : null; // Corrected to return index or null
 
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
     if (typeof rule.weightingLogic === 'function') {
@@ -260,7 +258,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                 console.log(`[CURBSTOMP REACTION CHECK]: Rule ${rule.id} (Attacker: ${rule.actualAttacker.name}, Target: ${rule.actualTarget.name}). Checking reactive defense for ${rule.actualTarget.name}.`);
                 // battleState.currentTurn is already set in the main loop
                 // battleState.currentPhase is also set
-                const reactiveCurbstompResult = checkReactiveDefense(rule.actualAttacker, rule.actualTarget, curbstompMoveConcept, battleState, battleEventLog);
+                // Pass modifyMomentum to checkReactiveDefense so it can pass it to attemptLightningRedirection
+                const reactiveCurbstompResult = checkReactiveDefense(rule.actualAttacker, rule.actualTarget, curbstompMoveConcept, battleState, battleEventLog, modifyMomentum);
 
                 if (reactiveCurbstompResult.reacted) {
                     console.log(`[CURBSTOMP REACTION RESULT]: Defender ${rule.actualTarget.name} reacted. Type: ${reactiveCurbstompResult.type}, Success: ${reactiveCurbstompResult.success}`);
@@ -287,8 +286,9 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                                 html_content: `<p class="narrative-action char-${rule.actualAttacker.id}">${rule.actualAttacker.name} is stunned by the redirected force! (Stun: ${reactiveCurbstompResult.stunAppliedToAttacker} turn(s))</p>`
                             });
                         }
-                        if (reactiveCurbstompResult.momentumChangeAttacker) modifyMomentum(rule.actualAttacker, reactiveCurbstompResult.momentumChangeAttacker, `Reactive defense by ${rule.actualTarget.name}`);
-                        if (reactiveCurbstompResult.momentumChangeDefender) modifyMomentum(rule.actualTarget, reactiveCurbstompResult.momentumChangeDefender, `Successful reactive defense`);
+                        // Momentum changes are already applied inside the reactive function (attemptLightningRedirection)
+                        // so we don't need to call modifyMomentum here for the reactive result.
+                        // However, the reactiveResult object needs to store these changes for consistency if needed elsewhere.
 
                         characterForRuleApplication.curbstompRulesAppliedThisBattle.add(appliedRuleKey + "_reacted_override");
                         // If the curbstomp was on the 'attacker' of the rule, and their reaction KOd the 'target' of the rule
@@ -693,7 +693,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const { move, aiLogEntryFromSelectMove } = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, phaseState.currentPhase);
             addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase, aiLogEntry: aiLogEntryFromSelectMove, move: move }), currentAttacker);
 
-            const result = calculateMove(move, currentAttacker, currentDefender, conditions, interactionLog, environmentState, locId);
+            // Pass modifyMomentum to calculateMove
+            const result = calculateMove(move, currentAttacker, currentDefender, conditions, interactionLog, environmentState, locId, modifyMomentum);
             
             if (result.isReactedAction && result.narrativeEventsToPrepend) {
                 result.narrativeEventsToPrepend.forEach(rawEventData => {
@@ -808,8 +809,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) impactTier = 'minor';
 
             if (impactTier && locationData.environmentalImpacts[impactTier] && locationData.environmentalImpacts[impactTier].length > 0) {
-                 const randomImpact = getRandomElement(locationData.environmentalImpacts[impactTier]);
-                 if (randomImpact) environmentState.specificImpacts.add(randomImpact);
+                 const randomIndex = getRandomElement(locationData.environmentalImpacts[impactTier]);
+                 if (randomIndex !== null) environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
             }
         }
         currentBattleState.environmentState = environmentState;
@@ -973,7 +974,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     if (!decisiveEventNarrative) {
         const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e =>
             e.type === 'move_action_event' &&
-            e.isReactedAction &&
+            e.isRedirectedAction && // Changed from isReactedAction to isRedirectedAction for specificity
             e.reactionSuccess &&
             finalWinnerFull && e.actorId === finalWinnerFull.id && // The winner performed the reaction
             finalLoserFull && finalLoserFull.hp <= 0 // The loser was KO'd

@@ -7,19 +7,12 @@
 import { effectivenessLevels } from './data_narrative_effectiveness.js';
 import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js';
-import { getMomentumCritModifier, modifyMomentum as applyMomentumChange } from './engine_momentum.js';
+// import { modifyMomentum as applyMomentumChange } from './engine_momentum.js'; // REMOVED: modifyMomentum is now passed as a parameter
+import { getMomentumCritModifier } from './engine_momentum.js'; // Keep this one for local momentum crit calc
 import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js'; // CORRECTED LINE: Added missing ')'
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-const COLLATERAL_IMPACT_MULTIPLIERS = {
-    'none': 0,
-    'low': 0.05,
-    'medium': 0.15,
-    'high': 0.3,
-    'catastrophic': 0.5
-};
 
 const DEFAULT_MOVE_PROPERTIES = {
     power: 30,
@@ -32,7 +25,8 @@ const DEFAULT_MOVE_PROPERTIES = {
 const DEFAULT_EFFECTIVENESS = effectivenessLevels.NORMAL || { label: "Normal", emoji: "⚔️" };
 
 // --- MAIN MOVE RESOLUTION FUNCTION ---
-export function calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locationId) {
+// Added modifyMomentum as a parameter
+export function calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locationId, modifyMomentum) {
     if (!move || typeof move !== 'object' || !move.name) {
         move = { ...DEFAULT_MOVE_PROPERTIES, name: "ErrorMove", type: 'Offense', power: 5 };
     }
@@ -69,7 +63,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         isNight: conditions.isNight,
         // Add other necessary battleState properties if needed by specific reactive defenses
     };
-    const reactiveResult = checkReactiveDefense(attacker, defender, moveForReactiveCheck, battleStateForReactive, interactionLog);
+    // Pass modifyMomentum to checkReactiveDefense
+    const reactiveResult = checkReactiveDefense(attacker, defender, moveForReactiveCheck, battleStateForReactive, interactionLog, modifyMomentum);
 
     if (reactiveResult.reacted) {
         attacker.aiLog.push(`[Reactive Defense Triggered]: ${defender.name}'s ${reactiveResult.type} against ${move.name}. Success: ${reactiveResult.success}`);
@@ -85,7 +80,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         if (reactiveResult.type === 'lightning_redirection') {
             if (reactiveResult.success) {
                 finalDamageToDefender = 0; // Zuko takes no damage
-                stunAppliedToOriginalAttacker = redirectionResult.stunAppliedToAttacker || 0;
+                stunAppliedToOriginalAttacker = reactiveResult.stunAppliedToAttacker || 0; // Use reactiveResult, not redirectionResult
                 // Attacker (Azula/Ozai) is stunned
                 if (stunAppliedToOriginalAttacker > 0) {
                     attacker.stunDuration = (attacker.stunDuration || 0) + stunAppliedToOriginalAttacker;
@@ -100,9 +95,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
                 defender.aiLog.push(`[Damage Taken]: Took ${finalDamageToDefender} damage from failed lightning redirection.`);
             }
         }
-        // Apply momentum changes from the reaction
-        if (reactiveResult.momentumChangeAttacker) applyMomentumChange(attacker, reactiveResult.momentumChangeAttacker, `Opponent ${reactiveResult.type}`);
-        if (reactiveResult.momentumChangeDefender) modifyMomentum(defender, reactiveResult.momentumChangeDefender, `Successful reactive defense`);
+        // Momentum changes are now handled directly by attemptLightningRedirection
+        // so no need to call modifyMomentum here.
 
         return {
             effectiveness: { label: reactiveResult.effectivenessLabel, emoji: reactiveResult.effectivenessEmoji },
@@ -112,11 +106,11 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             payoff: reactiveResult.success,
             consumedStateName: null, // Reactions generally don't consume states in the same way
             collateralDamage: reactiveResult.collateralDamage !== undefined ? reactiveResult.collateralDamage : 0,
-            momentumChange: { attacker: 0, defender: 0 }, // Momentum already applied via reactiveResult
+            momentumChange: { attacker: reactiveResult.momentumChangeAttacker || 0, defender: reactiveResult.momentumChangeDefender || 0 }, // Momentum from reaction itself
             isReactedAction: true,
             reactionType: reactiveResult.type,
             reactionSuccess: reactiveResult.success,
-            narrativeEventsToPrepend: redirectionResult.narrativeEvents || [] // Key for narrative engine
+            narrativeEventsToPrepend: reactiveResult.narrativeEvents || [] // Key for narrative engine
             // stunAppliedToOriginalAttacker is handled above by modifying attacker.stunDuration directly
         };
     }
@@ -200,7 +194,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             const intensity = 1.1 + (mobilityFactor * 0.3); // More mobile = better positive state
             attacker.tacticalState = { name: 'Repositioned', duration: 1, intensity, isPositive: true };
             interactionLog.push(`${attacker.name} successfully repositioned, gaining a tactical advantage.`);
-            momentumChangeAttacker += 1;
+            modifyMomentum(attacker, 1, `Successful reposition by ${attacker.name}`); // Use passed modifyMomentum
             effectivenessResult = effectivenessLevels.CRITICAL || DEFAULT_EFFECTIVENESS; // Treat as critical for narrative
             attacker.aiLog.push(`[Reposition Success]: Gained 'Repositioned' state.`);
         } else { // Failed or partially failed reposition
@@ -208,15 +202,15 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             if (roll > successChance + (0.5 * (1 - successChance))) { // Critical fail on reposition
                 attacker.tacticalState = { name: 'Exposed', duration: 1, intensity, isPositive: false };
                 interactionLog.push(`${attacker.name} failed to reposition effectively and is now exposed.`);
-                momentumChangeAttacker -= 2;
-                momentumChangeDefender += 1;
+                modifyMomentum(attacker, -2, `Failed reposition by ${attacker.name}`); // Use passed modifyMomentum
+                modifyMomentum(defender, 1, `Opponent failed reposition by ${attacker.name}`); // Use passed modifyMomentum
                 effectivenessResult = effectivenessLevels.WEAK || DEFAULT_EFFECTIVENESS;
                 wasPunished = true;
                 attacker.aiLog.push(`[Reposition Fail]: Became 'Exposed'.`);
             } else { // Normal fail on reposition
                 attacker.tacticalState = { name: 'Off-Balance', duration: 1, intensity, isPositive: false };
                 interactionLog.push(`${attacker.name}'s repositioning attempt left them off-balance.`);
-                momentumChangeAttacker -= 1;
+                modifyMomentum(attacker, -1, `Partial reposition fail by ${attacker.name}`); // Use passed modifyMomentum
                 effectivenessResult = effectivenessLevels.NORMAL || DEFAULT_EFFECTIVENESS;
                 attacker.aiLog.push(`[Reposition Partial Fail]: Became 'Off-Balance'.`);
             }
@@ -229,7 +223,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             payoff: false, // Not a payoff move in the standard sense
             consumedStateName: null,
             collateralDamage: 0, // No direct collateral
-            momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender }
+            momentumChange: { attacker: 0, defender: 0 } // Momentum handled by direct modifyMomentum calls
         };
     }
 
@@ -257,8 +251,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
 
     let critChance = 0.1; // Base crit chance
     const attackerMomentum = typeof attacker.momentum === 'number' ? attacker.momentum : 0;
-    critChance = clamp(critChance + getMomentumCritModifier({ momentum: attackerMomentum }), 0.01, 0.5); // Apply momentum mod, clamp
-    attacker.aiLog.push(`[Crit Chance]: Base 0.1, Momentum Mod ${getMomentumCritModifier({ momentum: attackerMomentum }).toFixed(2)}, Final ${critChance.toFixed(2)} for ${move.name}.`);
+    critChance = clamp(critChance + getMomentumCritModifier(attacker), 0.01, 0.5); // Apply momentum mod, clamp
+    attacker.aiLog.push(`[Crit Chance]: Base 0.1, Momentum Mod ${getMomentumCritModifier(attacker).toFixed(2)}, Final ${critChance.toFixed(2)} for ${move.name}.`);
 
 
     const totalEffectivenessValue = basePower * multiplier;
@@ -282,7 +276,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         momentumChangeAttacker += 1;
         attacker.aiLog.push(`[Move Result]: ${move.name} was STRONG.`);
     } else {
-        effectivenessLevel = effectivenessLevels.NORMAL || DEFAULT_EFFECTIVENESS;
+        effectivenessLevel = DEFAULT_EFFECTIVENESS;
         attacker.aiLog.push(`[Move Result]: ${move.name} was NORMAL.`);
     }
 
@@ -522,7 +516,7 @@ function applyEnvironmentalModifiers(move, attacker, conditions, moveTagsParam) 
                     if (tagMod.description && !logReasons.some(r => r.includes(tagMod.description))) {
                         logReasons.push(`${tagMod.description} (energy cost)`);
                     } else if (!tagMod.description) {
-                        logReasons.push(`Location affects ${tag} move energy cost`);
+                         logReasons.push(`Location affects ${tag} move energy cost`);
                     }
                 }
             }
