@@ -20,6 +20,8 @@ const DOM_ELEMENTS = {
     animatedLogOutput: document.getElementById('animated-log-output'),
     toggleDetailedLogsBtn: document.getElementById('toggle-detailed-logs-btn'),
     copyDetailedLogsBtn: document.getElementById('copy-detailed-logs-btn'),
+    // FIX: Add battleBtn to DOM_ELEMENTS
+    battleBtn: document.getElementById('battleBtn'),
 };
 
 /**
@@ -31,13 +33,10 @@ export function showLoadingState(simulationMode) {
         if (DOM_ELEMENTS.resultsSection) DOM_ELEMENTS.resultsSection.style.display = 'none';
         
         if (DOM_ELEMENTS.animatedLogOutput) {
-            // Corrected: DOM_ELEMENTS.animatedLogOutput (camelCase fix)
             DOM_ELEMENTS.animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
-            // Corrected: DOM_ELEMENTS (typo fix)
             DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.remove('hidden'); 
         }
     } else { // Instant mode
-        // Corrected: DOM_ELEMENTS (typo fix)
         if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden');
         if (DOM_ELEMENTS.resultsSection) {
             DOM_ELEMENTS.resultsSection.classList.remove('show');
@@ -47,8 +46,8 @@ export function showLoadingState(simulationMode) {
         if (DOM_ELEMENTS.battleResultsContainer) DOM_ELEMENTS.battleResultsContainer.classList.add('hidden');
     }
     
-    const battleBtn = document.getElementById('battleBtn'); 
-    if (battleBtn) DOM_ELEMENTS.battleBtn.disabled = true;
+    // FIX: Directly use DOM_ELEMENTS.battleBtn which is now properly initialized
+    if (DOM_ELEMENTS.battleBtn) DOM_ELEMENTS.battleBtn.disabled = true;
 
     if (DOM_ELEMENTS.vsDivider) DOM_ELEMENTS.vsDivider.classList.add('clash');
     const targetScrollElement = simulationMode === "animated" ? (DOM_ELEMENTS.animatedLogOutput?.closest('.simulation-mode-container') || DOM_ELEMENTS.resultsSection) : DOM_ELEMENTS.resultsSection;
@@ -68,8 +67,8 @@ export function showResultsState(battleResult, simulationMode) {
         if (DOM_ELEMENTS.winnerName) DOM_ELEMENTS.winnerName.textContent = "Error processing results.";
         if (DOM_ELEMENTS.battleStory) DOM_ELEMENTS.battleStory.innerHTML = "<p>An error occurred, and results cannot be displayed.</p>";
         if (DOM_ELEMENTS.loadingSpinner) DOM_ELEMENTS.loadingSpinner.classList.add('hidden');
-        const battleBtn = document.getElementById('battleBtn');
-        if (battleBtn) DOM_ELEMENTS.battleBtn.disabled = false;
+        // FIX: Directly use DOM_ELEMENTS.battleBtn which is now properly initialized
+        if (DOM_ELEMENTS.battleBtn) DOM_ELEMENTS.battleBtn.disabled = false;
         return;
     }
 
@@ -118,15 +117,13 @@ export function showResultsState(battleResult, simulationMode) {
         if (simulationMode === "instant" || (simulationMode === "animated" && DOM_ELEMENTS.animatedLogOutput?.closest('.simulation-mode-container')?.classList.contains('hidden'))) {
             DOM_ELEMENTS.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        const battleBtn = document.getElementById('battleBtn');
-        if (battleBtn) battleBtn.disabled = false;
+        // FIX: Directly use DOM_ELEMENTS.battleBtn which is now properly initialized
+        if (DOM_ELEMENTS.battleBtn) DOM_ELEMENTS.battleBtn.disabled = false;
     };
 
     if (simulationMode === "animated") {
         if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENTS.animatedLogOutput.innerHTML = '';
         
-        // Corrected: Removed the redundant and incorrect destructuring here.
-        // `transformEventsToAnimationQueue` is already imported from battle_log_transformer.js
         const animationQueue = transformEventsToAnimationQueue(battleResult.log);
         startAnimationSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
             if (wasCancelledOrError && DOM_ELEMENTS.battleStory && finalBattleResult.log) {
@@ -134,12 +131,10 @@ export function showResultsState(battleResult, simulationMode) {
                 DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
             }
             displayFinalResultsPanel(finalBattleResult);
-            // Corrected: DOM_ELEMENTS.animatedLogOutput (camelCase fix)
             DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); 
         });
 
     } else {
-        // Corrected: DOM_ELEMENTS.animatedLogOutput (camelCase fix)
         DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); 
         if (DOM_ELEMENTS.battleStory && battleResult.log) DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
         displayFinalResultsPanel(battleResult);
