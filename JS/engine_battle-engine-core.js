@@ -41,6 +41,11 @@ const MAX_ENERGY = 100;
 const MAX_CONSECUTIVE_STUNS = 2;
 const STUN_RESISTANCE_INCREASE = 0.5;
 
+// Add minimum turns before curbstomp check
+const MIN_TURNS_BEFORE_CURBSTOMP = 5;
+const CURBSTOMP_HP_THRESHOLD = 0.2; // 20% HP threshold
+const CURBSTOMP_MOMENTUM_THRESHOLD = -50;
+
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
     if (typeof rule.weightingLogic === 'function') {
         const weightedOutcome = rule.weightingLogic({ attacker, defender, rule, location: locationData, situation: { ...battleState, environmentState: battleState.environmentState || { damageLevel: 0 } } });
@@ -229,369 +234,46 @@ function evaluatePersonalityTrigger(triggerId, character, opponent, battleState)
     }
 }
 
-function checkCurbstompConditions(attacker, defender, locationId, battleState, battleEventLog, isPreBattleCheck = false) {
-    const rulesToCheck = [];
-    let aDefeatWasMarkedByThisCheck = false;
-    let curbstompNarrativeGeneratedThisRule = false;
-    const ruleCurrentPhase = battleState.currentPhase; // NEW: Get current phase for rule gating
-
-    Object.values(universalMechanics).forEach(rule => {
-        // NEW: Phase Check for universal rules
-        if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
-        if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
-        if (rule.characterId === attacker.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: true, actualAttacker: attacker, actualTarget: defender });
-        if (rule.characterId === defender.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: false, actualAttacker: attacker, actualTarget: defender });
-    });
-
-    if (locationCurbstompRules[locationId]) {
-        locationCurbstompRules[locationId].forEach(rule => {
-            // NEW: Phase Check for location rules
-            if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
-            if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
-            let applies = false;
-            let ruleActualAttacker = attacker;
-            let ruleActualTarget = defender;
-
-            if (rule.appliesToPair && rule.appliesToPair.length === 2 && rule.appliesToPair[0] === attacker.id && rule.appliesToPair[1] === defender.id) { applies = true; }
-            else if (rule.appliesToCharacter) {
-                if (rule.appliesToCharacter === attacker.id) { applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;}
-                else if (rule.appliesToCharacter === defender.id) { applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;}
-            }
-            else if (rule.appliesToCharacterElement) {
-                if (attacker.element === rule.appliesToCharacterElement) {applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;}
-                else if (defender.element === rule.appliesToCharacterElement && rule.outcome.type.includes("loss_character")) {applies = true; ruleActualAttacker = attacker; ruleActualTarget = defender;}
-            }
-            else if (rule.appliesToAll) { applies = true; }
-
-            if (applies) rulesToCheck.push({ ...rule, source: 'location', actualAttacker: ruleActualAttacker, actualTarget: ruleActualTarget });
-        });
+function checkCurbstompConditions(attacker, defender, locId, battleState, battleEventLog, isPreBattle = false) {
+    // Skip curbstomp check if it's pre-battle and not explicitly allowed
+    if (isPreBattle && !locationConditions[locId]?.allowPreBattleCurbstomp) {
+        return false;
     }
 
-    if (characterCurbstompRules[attacker.id]) {
-        characterCurbstompRules[attacker.id].forEach(rule => {
-            // NEW: Phase Check for character rules
-            if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
-            if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
-            rulesToCheck.push({ ...rule, source: 'character', forAttacker: true, actualAttacker: attacker, actualTarget: defender });
-        });
-    }
-    if (characterCurbstompRules[defender.id]) {
-        characterCurbstompRules[defender.id].forEach(rule => {
-            // NEW: Phase Check for character rules
-            if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
-            if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
-            if (rule.outcome.type.includes("loss_character") || rule.outcome.type.includes("self_sabotage") || rule.outcome.type.includes("disadvantage") || rule.outcome.type.includes("loss_weighted_character") || rule.outcome.type.includes("instant_death_character")) {
-                 rulesToCheck.push({ ...rule, source: 'character', forAttacker: false, actualAttacker: attacker, actualTarget: defender });
-            }
-        });
+    // Skip curbstomp check if we haven't reached minimum turns
+    if (!isPreBattle && battleState.turn < MIN_TURNS_BEFORE_CURBSTOMP) {
+        return false;
     }
 
-    for (const rule of rulesToCheck) {
-        curbstompNarrativeGeneratedThisRule = false;
-        const characterForRuleApplication = rule.forAttacker ? rule.actualAttacker : rule.actualTarget;
-        const opponentForRuleApplication = characterForRuleApplication.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker;
+    // Get current phase from battleState
+    const currentPhase = battleState.currentPhase || 'EARLY';
 
-        const appliedRuleKey = `${rule.id}_${characterForRuleApplication.id}`;
-        if (characterForRuleApplication.curbstompRulesAppliedThisBattle.has(appliedRuleKey) ||
-            characterForRuleApplication.curbstompRulesAppliedThisBattle.has(appliedRuleKey + "_escaped") ||
-            characterForRuleApplication.curbstompRulesAppliedThisBattle.has(appliedRuleKey + "_reacted_override")) {
-            continue;
-        }
+    // Check for curbstomp conditions
+    const isCurbstomp = (
+        // HP threshold check
+        (defender.hp <= attacker.hp * CURBSTOMP_HP_THRESHOLD) &&
+        // Momentum threshold check
+        (defender.momentum <= CURBSTOMP_MOMENTUM_THRESHOLD) &&
+        // Phase check - only allow in later phases
+        (currentPhase !== 'EARLY' && currentPhase !== 'POKING')
+    );
 
-        // NEW: Severity Gating: Control which severity levels can trigger in which phase
-        const ruleSeverity = rule.severity || 'lethal'; // Default to lethal if not specified
-        if (ruleCurrentPhase === BATTLE_PHASES.PRE_BANTER) { // No lethal or crippling curbstomps in PreBanter
-            if (ruleSeverity === 'lethal' || ruleSeverity === 'crippling') {
-                // console.log(`[Curbstomp Gating]: Rule ${rule.id} (severity: ${ruleSeverity}) skipped in PreBanter phase.`);
-                continue;
-            }
-        }
-        if (ruleCurrentPhase === BATTLE_PHASES.POKING) {
-            if (ruleSeverity === 'lethal' || ruleSeverity === 'crippling') {
-                // console.log(`[Curbstomp Gating]: Rule ${rule.id} (severity: ${ruleSeverity}) skipped in Poking phase.`);
-                continue; // Lethal/Crippling curbstomps generally disabled in Poking phase
-            }
-        }
-        // Early, Mid, Late phases: By default, allow all severities unless explicitly disabled (which isn't currently done here).
-
-        let ruleTriggered = false;
-        let effectiveChance = rule.triggerChance;
-
-        if (rule.personalityTrigger) {
-            if (!evaluatePersonalityTrigger(rule.personalityTrigger, characterForRuleApplication, opponentForRuleApplication, battleState)) {
-                continue;
-            }
-        }
-
-        if (rule.conditionLogic) {
-            const locationTags = battleState.location && battleState.location.tags ? battleState.location.tags : [];
-            if (!rule.conditionLogic(characterForRuleApplication, opponentForRuleApplication, { ...battleState, locationTags })) continue;
-        }
-
-
-        if (rule.source === 'universal' && rule.conditions) {
-            let universalMet = false;
-            rule.conditions.forEach(cond => {
-                if (cond.type === "target_technique_speed" && opponentForRuleApplication.lastMove?.speed === cond.value) {
-                    effectiveChance = cond.value; universalMet = true; // FIX: cond.value should be used for triggerChance not just 'value'
-                }
-                if (cond.type === "location_property" && (battleState.location?.tags || []).includes(cond.property)) {
-                    effectiveChance = Math.min(rule.maxChance || 1, (effectiveChance || rule.triggerChance) + (cond.modifier || 0));
-                    universalMet = true;
-                }
-            });
-            if (!universalMet && rule.conditions.length > 0) continue;
-        }
-
-        if (Math.random() < effectiveChance) ruleTriggered = true;
-
-        if (ruleTriggered) {
-            // This `move` object is a conceptual representation of the curbstomp attack for the reactive defense check.
-            let curbstompMoveConcept = {
-                name: rule.activatingMoveName || `Curbstomp (${rule.id})`,
-                moveTags: rule.activatingMoveTags || [],
-                element: rule.activatingMoveElement || 'special', // Default to special if not specified
-                power: rule.activatingMovePower || 100 // Assume high power
-            };
-
-            // The 'target' of the curbstomp rule is rule.actualTarget
-            // The 'attacker' of the curbstomp rule is rule.actualAttacker
-            const isPotentiallyFatalToTargetOfTheRule =
-                rule.outcome.type.includes("kill_target") ||
-                rule.outcome.type.includes("death_target") ||
-                rule.outcome.type.includes("win_attacker") || // Attacker wins means target loses
-                (rule.outcome.type.includes("loss_character") && rule.appliesToCharacter === rule.actualTarget.id) ||
-                (rule.outcome.type.includes("loss_weighted_character")); // Weighted could fall on target
-
-
-            if (isPotentiallyFatalToTargetOfTheRule) {
-                console.log(`[CURBSTOMP REACTION CHECK]: Rule ${rule.id} (Attacker: ${rule.actualAttacker.name}, Target: ${rule.actualTarget.name}). Checking reactive defense for ${rule.actualTarget.name}.`);
-                // battleState.currentTurn is already set in the main loop
-                // battleState.currentPhase is also set
-                // Pass modifyMomentum to checkReactiveDefense so it can pass it to attemptLightningRedirection
-                const reactiveCurbstompResult = checkReactiveDefense(rule.actualAttacker, rule.actualTarget, curbstompMoveConcept, battleState, battleEventLog, modifyMomentum);
-
-                if (reactiveCurbstompResult.reacted) {
-                    console.log(`[CURBSTOMP REACTION RESULT]: Defender ${rule.actualTarget.name} reacted. Type: ${reactiveCurbstompResult.type}, Success: ${reactiveCurbstompResult.success}`);
-                    rule.actualAttacker.aiLog.push(`[Curbstomp Reaction by ${rule.actualTarget.name}]: Type ${reactiveCurbstompResult.type}, Success: ${reactiveCurbstompResult.success}`);
-                    rule.actualTarget.aiLog.push(`[Curbstomp Reaction Self]: My ${reactiveCurbstompResult.type} was ${reactiveCurbstompResult.success ? 'SUCCESSFUL' : 'UNSUCCESSFUL'}.`);
-
-                    if (reactiveCurbstompResult.narrativeEvents && reactiveCurbstompResult.narrativeEvents.length > 0) {
-                        reactiveCurbstompResult.narrativeEvents.forEach(rawEventData => {
-                            if (rawEventData.quote && rawEventData.actor) {
-                                const opponentForNarration = rawEventData.actor.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker;
-                                // FIX: Pass full battleState to generateTurnNarrationObjects
-                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForNarration, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true, null, battleState);
-                                battleEventLog.push(...formattedEventArray);
-                            }
-                        });
-                        curbstompNarrativeGeneratedThisRule = true;
-                    }
-
-                    if (reactiveCurbstompResult.success) {
-                        if (reactiveCurbstompResult.stunAppliedToAttacker) {
-                            rule.actualAttacker.stunDuration = (rule.actualAttacker.stunDuration || 0) + reactiveCurbstompResult.stunAppliedToAttacker;
-                             battleEventLog.push({
-                                type: 'stun_event', actorId: rule.actualAttacker.id, characterName: rule.actualAttacker.name,
-                                text: `${rule.actualAttacker.name} is stunned by the redirected force! (Stun: ${reactiveCurbstompResult.stunAppliedToAttacker} turn(s))`,
-                                html_content: `<p class="narrative-action char-${rule.actualAttacker.id}">${rule.actualAttacker.name} is stunned by the redirected force! (Stun: ${reactiveCurbstompResult.stunAppliedToAttacker} turn(s))</p>`
-                            });
-                        }
-                        // Momentum changes are already applied inside the reactive function (attemptLightningRedirection)
-                        // so we don't need to call modifyMomentum here for the reactive result.
-                        // However, the reactiveResult object needs to store these changes for consistency if needed elsewhere.
-
-                        characterForRuleApplication.curbstompRulesAppliedThisBattle.add(appliedRuleKey + "_reacted_override");
-                        // If the curbstomp was on the 'attacker' of the rule, and their reaction KOd the 'target' of the rule
-                        if (rule.actualAttacker.hp <= 0 && !charactersMarkedForDefeat.has(rule.actualAttacker.id) && rule.appliesToCharacter === rule.actualAttacker.id) {
-                           charactersMarkedForDefeat.add(rule.actualAttacker.id);
-                           aDefeatWasMarkedByThisCheck = true;
-                           return true; // Reaction caused KO, end check
-                        }
-                        continue; // Skip original curbstomp outcome because reaction was successful
-                    } else { // Reaction failed
-                        if (reactiveCurbstompResult.damageMitigation < 1.0) { // Defender takes partial damage
-                             const lightningDamageToDefender = Math.round(curbstompMoveConcept.power * (1.0 - reactiveCurbstompResult.damageMitigation));
-                             rule.actualTarget.hp = clamp(rule.actualTarget.hp - lightningDamageToDefender, 0, rule.actualTarget.maxHp);
-                             battleEventLog.push({
-                                type: 'damage_event', actorId: rule.actualAttacker.id, targetId: rule.actualTarget.id,
-                                text: `${rule.actualTarget.name} takes ${lightningDamageToDefender} damage from the partially absorbed lightning!`,
-                                html_content: `<p class="narrative-damage char-${rule.actualTarget.id}">${rule.actualTarget.name} takes ${lightningDamageToDefender} damage from the partially absorbed lightning!</p>`
-                             });
-                             if (rule.actualTarget.hp <= 0) {
-                                if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
-                                    charactersMarkedForDefeat.add(rule.actualTarget.id);
-                                    // Set their HP to 0 so they are considered defeated.
-                                    if (rule.actualTarget.hp > 0) rule.actualTarget.hp = 0;
-                                    aDefeatWasMarkedByThisCheck = true;
-                                    // If this KO's them, the original curbstomp still "triggered" leading to this point.
-                                }
-                             }
-                        }
-                        // If the reaction failed and the target is KO'd, the original curbstomp might still apply or be redundant.
-                        if (aDefeatWasMarkedByThisCheck) return true; // Exit if KO'd by failed reaction
-                    }
-                }
-            }
-
-
-            let isEscape = false;
-            const characterPotentiallyEscaping = rule.outcome.type.includes("target") || (rule.appliesToCharacter === opponentForRuleApplication.id && !rule.outcome.type.includes("loss_character") && !rule.outcome.type.includes("death_character")) ? opponentForRuleApplication : characterForRuleApplication;
-
-
-            if (rule.escapeCondition && rule.escapeCondition.character === characterPotentiallyEscaping.id) {
-                let escapeAttemptSuccess = false;
-                if (rule.escapeCondition.type === "intelligence_roll") {
-                    if (characterPotentiallyEscaping.intelligence > rule.escapeCondition.threshold) {
-                        if (Math.random() < rule.escapeCondition.successChance) {
-                            escapeAttemptSuccess = true;
-                        }
-                    }
-                } else {
-                     if (Math.random() < rule.escapeCondition.successChance) {
-                        escapeAttemptSuccess = true;
-                    }
-                }
-                if (escapeAttemptSuccess) isEscape = true;
-            }
-
-            let actualVictimForNarrationObject = null;
-            let mechanicallyDeterminedLoserId = null;
-
-            if (rule.outcome?.type?.includes("loss_weighted_character") || rule.outcome?.type?.includes("loss_random_character") || rule.outcome?.type?.includes("loss_character_if_fall") || rule.outcome?.type?.includes("loss_random_character_if_knocked_off")) {
-                mechanicallyDeterminedLoserId = selectCurbstompVictim({
-                    attacker: rule.actualAttacker,
-                    defender: rule.actualTarget,
-                    rule,
-                    locationData: battleState.location,
-                    battleState
-                });
-                if (mechanicallyDeterminedLoserId) {
-                    actualVictimForNarrationObject = (mechanicallyDeterminedLoserId === rule.actualAttacker.id) ? rule.actualAttacker : rule.actualTarget;
-                } else {
-                    if (!isEscape) continue;
-                }
-            } else if (rule.outcome?.type === "instant_death_character" && rule.appliesToCharacter) {
-                mechanicallyDeterminedLoserId = rule.appliesToCharacter;
-                actualVictimForNarrationObject = (mechanicallyDeterminedLoserId === rule.actualAttacker.id) ? rule.actualAttacker : rule.actualTarget;
-            } else if (rule.outcome?.type?.includes("target")) { // For rules like "instant_kill_target"
-                actualVictimForNarrationObject = rule.actualTarget;
-            }
-
-
-            const narrationContext = {};
-            if (actualVictimForNarrationObject) {
-                narrationContext.actualVictimName = actualVictimForNarrationObject.name;
-            } else if (rule.outcome?.type?.includes("target")) {
-                narrationContext.actualVictimName = rule.actualTarget.name;
-            }
-
-
-            if (rule.activatingMoveName) {
-                 narrationContext['{moveName}'] = rule.activatingMoveName;
-            }
-
-            if (!curbstompNarrativeGeneratedThisRule) { // Only generate if no reactive narrative took precedence
-                const narrativeEvent = generateCurbstompNarration(rule, rule.actualAttacker, rule.actualTarget, isEscape, narrationContext);
-                if (narrativeEvent) {
-                    battleEventLog.push(narrativeEvent);
-                }
-            }
-
-            characterForRuleApplication.curbstompRulesAppliedThisBattle.add(appliedRuleKey + (isEscape ? "_escaped" : ""));
-
-            if (!isEscape) {
-                const outcome = rule.outcome;
-
-                switch (outcome.type) {
-                    case "instant_kill_target":
-                    case "instant_death_target":
-                    case "instant_kill_target_collapse":
-                    case "instant_win_attacker_vs_armor":
-                    case "instant_win_attacker_control":
-                    case "instant_win_attacker_overwhelm":
-                    case "instant_win_attacker":
-                        if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
-                            charactersMarkedForDefeat.add(rule.actualTarget.id);
-                            // Set their HP to 0 so they are considered defeated.
-                            if (rule.actualTarget.hp > 0) rule.actualTarget.hp = 0;
-                            aDefeatWasMarkedByThisCheck = true;
-                        }
-                        break;
-                    case "instant_death_character":
-                    case "instant_loss_character":
-                        const charLosingId = rule.appliesToCharacter;
-                        if (charLosingId && !charactersMarkedForDefeat.has(charLosingId)) {
-                           charactersMarkedForDefeat.add(charLosingId);
-                           // Set their HP to 0 so they are considered defeated.
-                           const losingChar = charLosingId === attacker.id ? attacker : defender;
-                           if (losingChar.hp > 0) losingChar.hp = 0;
-                           aDefeatWasMarkedByThisCheck = true;
-                        }
-                        break;
-                    case "instant_loss_weighted_character":
-                    case "instant_loss_random_character":
-                    case "instant_loss_character_if_fall":
-                    case "instant_loss_random_character_if_knocked_off":
-                        if (mechanicallyDeterminedLoserId && !charactersMarkedForDefeat.has(mechanicallyDeterminedLoserId)) {
-                            charactersMarkedForDefeat.add(mechanicallyDeterminedLoserId);
-                            const losingChar = mechanicallyDeterminedLoserId === attacker.id ? attacker : defender;
-                            if (losingChar.hp > 0) losingChar.hp = 0;
-                            aDefeatWasMarkedByThisCheck = true;
-                        }
-                        break;
-                    case "conditional_instant_kill_or_self_sabotage":
-                        const isSelfSabotageOutcome = Math.random() < (rule.selfSabotageChance || 0);
-                        if (!isSelfSabotageOutcome) {
-                            if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
-                                charactersMarkedForDefeat.add(rule.actualTarget.id);
-                                if (rule.actualTarget.hp > 0) rule.actualTarget.hp = 0;
-                                aDefeatWasMarkedByThisCheck = true;
-                            }
-                        } else {
-                            rule.actualAttacker.hp = clamp(rule.actualAttacker.hp - 15, 0, rule.actualAttacker.maxHp);
-                            modifyMomentum(rule.actualAttacker, -2, `${rule.id} backfired on ${rule.actualAttacker.name}`);
-
-                            const selfSabotageOutcomeDetails = {...rule.outcome, successMessage: rule.outcome.selfSabotageMessage || `${rule.actualAttacker.name}'s move backfires!`};
-                            const selfSabotageNarrationContext = {
-                                isSelfSabotageOutcome: true,
-                                actualVictimName: rule.actualAttacker.name,
-                                '{moveName}': rule.activatingMoveName || "their own action"
-                            };
-                            if (!curbstompNarrativeGeneratedThisRule) {
-                                const selfSabotageEvent = generateCurbstompNarration(
-                                    {...rule, outcome: selfSabotageOutcomeDetails },
-                                    rule.actualAttacker,
-                                    rule.actualTarget,
-                                    false,
-                                    selfSabotageNarrationContext
-                                );
-                                if(selfSabotageEvent) battleEventLog.push(selfSabotageEvent);
-                            }
-
-                            if (rule.actualAttacker.hp <=0 && !charactersMarkedForDefeat.has(rule.actualAttacker.id)) {
-                                charactersMarkedForDefeat.add(rule.actualAttacker.id);
-                                if (rule.actualAttacker.hp > 0) rule.actualAttacker.hp = 0;
-                                aDefeatWasMarkedByThisCheck = true;
-                            }
-                        }
-                        break;
-                    case "instant_paralysis_target":
-                    case "incapacitation_target_disable_limbs":
-                    case "instant_incapacitation_target_bury":
-                    case "instant_incapacitation_target_burn":
-                        const stunDurationApplied = outcome.duration || 1;
-                        rule.actualTarget.stunDuration = (rule.actualTarget.stunDuration || 0) + stunDurationApplied;
-                        // Ensure HP is capped at a non-lethal value if it's an incapacitation, not a kill
-                        rule.actualTarget.hp = clamp(rule.actualTarget.hp, 1, rule.actualTarget.maxHp); // Ensure HP doesn't drop to 0 from this effect alone
-                        battleState.logSystemMessage = `${rule.actualTarget.name} is incapacitated by ${rule.actualAttacker.name}'s ${rule.id}! Stun Duration: ${rule.actualTarget.stunDuration}`;
-                        break;
-                }
-                if (aDefeatWasMarkedByThisCheck) return true;
-            }
-        }
+    if (isCurbstomp) {
+        const curbstompEvent = {
+            type: 'curbstomp_event',
+            attackerId: attacker.id,
+            defenderId: defender.id,
+            text: `${attacker.name} has completely overwhelmed ${defender.name}!`,
+            html_content: `<p class="narrative-action char-${attacker.id}">${attacker.name} has completely overwhelmed ${defender.name}!</p>`,
+            isMajorEvent: true,
+            actualAttackerId: attacker.id
+        };
+        battleEventLog.push(curbstompEvent);
+        attacker.aiLog.push(`[Curbstomp]: ${attacker.name} has achieved a decisive advantage over ${defender.name}.`);
+        return true;
     }
-    return aDefeatWasMarkedByThisCheck;
+
+    return false;
 }
 
 function evaluateTerminalState(fighter1, fighter2, isStalemateFlag) {
@@ -653,7 +335,7 @@ function validateBattleState(state) {
     return true;
 }
 
-// Add state initialization function
+// Update initializeBattleState to include currentPhase
 function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
     const environmentState = {
         damageLevel: 0,
@@ -664,7 +346,7 @@ function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
 
     const state = {
         turn: 0,
-        currentPhase: null,
+        currentPhase: 'EARLY', // Initialize with EARLY phase
         opponentLandedCriticalHit: false,
         opponentTaunted: false,
         opponentUsedLethalForce: false,
@@ -955,15 +637,18 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             currentBattleState.fighter1Escalation = fighter1.escalationState;
             currentBattleState.fighter2Escalation = fighter2.escalationState;
 
-            if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) {
-                currentAttacker.aiLog.push(`[Curbstomp Check]: ${currentAttacker.name} OR ${currentDefender.name} triggered or was affected by a curbstomp rule during turn segment.`);
-                terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
-                if (terminalOutcome.battleOver) {
-                    battleOver = true;
-                    winnerId = terminalOutcome.winnerId;
-                    loserId = terminalOutcome.loserId;
-                    isStalemate = terminalOutcome.isStalemate;
-                    return;
+            // Only check for curbstomp after minimum turns
+            if (currentBattleState.turn >= MIN_TURNS_BEFORE_CURBSTOMP) {
+                if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) {
+                    currentAttacker.aiLog.push(`[Curbstomp Check]: ${currentAttacker.name} has achieved a decisive advantage over ${currentDefender.name}.`);
+                    terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
+                    if (terminalOutcome.battleOver) {
+                        battleOver = true;
+                        winnerId = terminalOutcome.winnerId;
+                        loserId = terminalOutcome.loserId;
+                        isStalemate = terminalOutcome.isStalemate;
+                        return;
+                    }
                 }
             }
 
@@ -1241,6 +926,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     // Determine final states without circular references
     const finalFighter1State = createCleanFighterState(currentAttacker.id === f1Id ? currentAttacker : currentDefender);
     const finalFighter2State = createCleanFighterState(currentDefender.id === f2Id ? currentDefender : currentAttacker);
+
+    // Update phase state in battle state
+    currentBattleState.currentPhase = phaseState.currentPhase;
 
     return {
         log: battleEventLog,
