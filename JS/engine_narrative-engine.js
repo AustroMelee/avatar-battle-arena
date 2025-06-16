@@ -28,7 +28,7 @@ import { ESCALATION_STATES } from './engine_escalation.js';
 import { aangArchetypeData } from './data_archetype_aang.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
 import { bumiArchetypeData } from './data_archetype_bumi.js';
-import { jeongJeongArchetypeData } from './data_archetype_jeongjeong.js';
+import { jeongjeongArchetypeData } from './data_archetype_jeongjeong.js';
 import { kataraArchetypeData } from './data_archetype_katara.js';
 import { maiArchetypeData } from './data_archetype_mai.js';
 import { ozaiArchetypeData } from './data_archetype_ozai.js';
@@ -42,7 +42,7 @@ const archetypeDataMap = {
     'aang': aangArchetypeData,
     'azula': azulaArchetypeData,
     'bumi': bumiArchetypeData,
-    'jeong-jeong': jeongJeongArchetypeData,
+    'jeong-jeong': jeongjeongArchetypeData,
     'katara': kataraArchetypeData,
     'mai': maiArchetypeData,
     'ozai': ozaiArchetypeData,
