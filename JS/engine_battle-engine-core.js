@@ -1074,8 +1074,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
         }
 
-        // Update battle state with environment changes
-        Object.assign(currentBattleState.environmentState, environmentState);
+        // Update battle state with environment changes by mutating the existing object
+        Object.assign(currentBattleState.environmentState, {
+            damageLevel: environmentState.damageLevel,
+            specificImpacts: new Set(environmentState.specificImpacts),
+            lastImpact: environmentState.lastImpact,
+            damageHistory: [...environmentState.damageHistory]
+        });
 
         if (!isNarrativeOnlyTurn) { // Only update for combat turns
             currentBattleState.characterLandedStrongOrCriticalHitLastTurn = fighter1.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || fighter1.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
