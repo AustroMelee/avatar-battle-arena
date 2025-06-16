@@ -1,9 +1,9 @@
 // FILE: engine_battle-engine-core.js
 'use strict';
 
-// Version 1.5: Stalemate-Safe Summary Logic
-// Moved the "decisive event" narrative logic to only execute when a winner/loser pair is confirmed,
-// preventing crashes on draw/stalemate scenarios.
+// Version 1.6: Robust End-of-Battle Logic
+// - Removed a redundant and conflicting draw-condition check that could cause logical errors.
+// - Consolidated the end-of-battle summary logic to be more robust against edge cases like timeouts and stalemates.
 
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
@@ -1048,8 +1048,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     isStalemate = terminalOutcome.isStalemate;
 
     if (!battleOver && turn >= MAX_TOTAL_TURNS) { // Changed to MAX_TOTAL_TURNS
-        isStalemate = (fighter1.hp === fighter2.hp);
-        if (!isStalemate) {
+        if (fighter1.hp === fighter2.hp) {
+            isStalemate = true;
+        } else {
             winnerId = (fighter1.hp > fighter2.hp) ? fighter1.id : fighter2.id;
             loserId = (winnerId === fighter1.id) ? fighter2.id : fighter1.id;
         }
@@ -1065,7 +1066,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) {
-        // ================== MOVED BLOCK STARTS HERE ==================
+        // --- START OF FIX ---
+        // Determine the dominant narrative for the summary
         let decisiveEventNarrative = null;
         let decisiveEventActorId = null; // Store the ID of the actor who performed the decisive event
 
@@ -1080,19 +1082,27 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
         // Check for reactive KOs if no curbstomp KO was the decisive narrative
         if (!decisiveEventNarrative) {
-            const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e =>
-                e.type === 'move_action_event' &&
-                e.isReactedAction && // Corrected property
-                e.reactionSuccess &&
-                e.actorId === finalWinnerFull.id &&
-                finalLoserFull.hp <= 0
-            );
+            const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e => {
+                // Add a guard to ensure finalWinnerFull and finalLoserFull are not null
+                if (!finalWinnerFull || !finalLoserFull) return false;
+                
+                return e.type === 'move_action_event' &&
+                    e.isReactedAction &&
+                    e.reactionSuccess &&
+                    e.actorId === finalWinnerFull.id &&
+                    finalLoserFull.hp <= 0;
+            });
+
             if (lastReactiveKOEvent) {
                 const reactionNarratives = battleEventLog.filter(
-                    e => e.type === 'dialogue_event' &&
-                         e.actorId === finalWinnerFull.id &&
-                         e.html_content?.includes(finalLoserFull.name) &&
-                         (e.html_content?.toLowerCase().includes("redirect") || e.html_content?.toLowerCase().includes("unleashes the redirected energy"))
+                    e => {
+                        // Guard against finalLoserFull being null inside the filter callback
+                        if (!finalLoserFull) return false;
+                        return e.type === 'dialogue_event' &&
+                             e.actorId === finalWinnerFull.id &&
+                             e.html_content?.includes(finalLoserFull.name) &&
+                             (e.html_content?.toLowerCase().includes("redirect") || e.html_content?.toLowerCase().includes("unleashes the redirected energy"))
+                    }
                 );
                 if (reactionNarratives.length > 0) {
                     decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
@@ -1102,7 +1112,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 decisiveEventActorId = finalWinnerFull.id;
             }
         }
-        // ================== MOVED BLOCK ENDS HERE ==================
+        // --- END OF MOVED/FIXED BLOCK ---
 
         // Use decisiveEventNarrative if the winner is the one who performed that event
         if (decisiveEventNarrative && decisiveEventActorId === finalWinnerFull.id) {
@@ -1136,12 +1146,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                  finalLoserFull.summary = substituteTokens("{LoserName} fought bravely but was ultimately overcome.", finalLoserFull, finalWinnerFull, { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name });
             }
         }
-
-    } else if (fighter1.hp === fighter2.hp && turn >= MAX_TOTAL_TURNS && !winnerId && !loserId) { // Changed to MAX_TOTAL_TURNS
-        isStalemate = true;
-        battleEventLog.push({ type: 'draw_result_event', text: "The battle is a DRAW!", html_content: phaseTemplates.drawResult });
-        fighter1.summary = "The battle ended in a perfect draw, neither giving an inch.";
-        fighter2.summary = "The battle ended in a perfect draw, neither giving an inch.";
     }
 
 
