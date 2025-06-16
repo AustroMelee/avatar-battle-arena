@@ -67,6 +67,13 @@ export const punishableMoves = {
     },
 };
 
+export const effectivenessLevels = {
+    WEAK:       { label: 'Weak',       emoji: '🛡️', value: 0.5 },
+    NORMAL:     { label: 'Normal',     emoji: '⚔️', value: 1.0 },
+    STRONG:     { label: 'Strong',     emoji: '🔥', value: 1.5 },
+    CRITICAL:   { label: 'Critical',   emoji: '💥', value: 2.0 }
+};
+
 
 export const moveInteractionMatrix = {
 
