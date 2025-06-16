@@ -1,22 +1,14 @@
 // FILE: engine_narrative-engine.js
 'use strict';
 
-// ====================================================================================
-//  Narrative Engine Library (v3.6 - Lightning Redirection Narrative)
-// ====================================================================================
-//  - Added `RedirectedSuccess` and `RedirectedFail` effectiveness levels.
-//  - Added specific `impactPhrases` for these redirection outcomes.
-// ====================================================================================
+// Version 1.3: Centralized and Simplified Narrative Generation
+// - Overhauled generateActionDescriptionObject for clarity and consistency.
+// - Simplified generateTurnNarrationObjects to focus on its core role.
 
-// --- UPDATED IMPORTS ---
-import { effectivenessLevels } from './data_narrative_effectiveness.js';
-import { phaseTemplates } from './data_narrative_phases.js';
-import { BATTLE_PHASES } from './engine_battle-phase.js'; // NEW: Correct import for BATTLE_PHASES
-import { impactPhrases } from './data_narrative_outcomes.js';
-import { collateralImpactPhrases } from './data_narrative_collateral.js';
-import { introductoryPhrases } from './data_narrative_introductions.js';
-import { postBattleVictoryPhrases } from './data_narrative_postbattle.js';
+import { introductoryPhrases, impactPhrases, genericLines, conjugatePresent } from './data_narrative_flavor.js';
+import { effectivenessLevels } from './move-interaction-matrix.js';
 import { escalationStateNarratives } from './data_narrative_escalation.js';
+import { phaseTemplates } from './data_narrative_phases.js';
 // --- END UPDATED IMPORTS ---
 
 import { locationConditions } from './location-battle-conditions.js';
