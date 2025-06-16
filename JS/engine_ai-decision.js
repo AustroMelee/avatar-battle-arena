@@ -344,29 +344,14 @@ function calculateEnergyCost(move, conditions, actorEnergy) {
 }
 
 function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
-    if (!actor || !defender || !conditions) {
-        return [{ move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1.0, reasons: ["ErrorInCalculateMoveWeights"] }];
-    }
-
-    const availableMoves = getAvailableMoves(actor, conditions, currentPhase);
-    const profile = getDynamicPersonality(actor, currentPhase);
-    const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
-    const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
-    const locationData = locationConditions[conditions.id];
+    const profile = actor.personalityProfile;
+    const availableMoves = actor.techniques || [];
+    const locationData = conditions;
     const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
 
-    // Early energy check to prevent 0-energy loop
-    if (actorEnergy <= 0) {
-        return [{ 
-            move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, 
-            weight: 1.0, 
-            reasons: ["OutOfEnergy_ForcedStruggle"],
-            isEscalationFinisherAttempt: false 
-        }];
-    }
-
-    // Energy management logic
-    const isLowEnergy = actorEnergy < 25;
+    // Initialize energy-related variables at the start
+    const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
+    const isLowEnergy = actorEnergy < 30;
     const isCriticalEnergy = actorEnergy < 10;
     const energyConservationWeight = isCriticalEnergy ? 2.0 : (isLowEnergy ? 1.5 : 1.0);
     
