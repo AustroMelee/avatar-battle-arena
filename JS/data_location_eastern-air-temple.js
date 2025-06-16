@@ -5,7 +5,7 @@
 export const easternAirTemple = {
     id: 'eastern-air-temple',
     name: 'Eastern Air Temple',
-    description: "This location is characterized by: vertical terrain, exposed areas, ample cover, rich in air",
+    description: "A serene temple on a remote mountain peak, with open courtyards and strong winds.",
     environmentalEffects: [
         "Strong winds",
         "Unstable footing",

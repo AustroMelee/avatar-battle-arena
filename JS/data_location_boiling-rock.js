@@ -3,7 +3,7 @@
 export const boilingRock = {
     id: 'boiling-rock',
     name: 'The Boiling Rock',
-    description: "A high-security Fire Nation prison in the middle of a boiling lake, offering no escape.",
+    description: "A high-security prison in the middle of a boiling lake, with metal structures and oppressive heat.",
     environmentalModifiers: {
         air: { damage: -10, energy: 5, reason: "The hot, heavy air slightly hinders airbending." },
         fire: { damage: 15, energy: -10, reason: "The intense heat empowers firebending." },
