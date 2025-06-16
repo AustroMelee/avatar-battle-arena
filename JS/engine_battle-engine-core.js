@@ -1056,7 +1056,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
         } else {
             // Log a message for narrative-only turns, but only once per narrative turn
-            if (fighter1.id === f1Id) { // Only log once per full turn (when initiator is F1)
+            if (currentAttacker.id === f1Id) { // Only log once per full turn (when initiator is F1)
                 battleEventLog.push({ type: 'narrative_turn_marker', text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`, html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>` });
             }
         }
@@ -1087,7 +1087,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         });
 
         if (!isNarrativeOnlyTurn) { // Only update for combat turns
-            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = fighter1.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || fighter1.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
+            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
         }
 
 
@@ -1111,29 +1111,27 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
 
         if (!battleOver && currentBattleState.turn >= 2) {
-            if (fighter1.consecutiveDefensiveTurns >= 3 && fighter2.consecutiveDefensiveTurns >= 3 &&
-                Math.abs(fighter1.hp - fighter2.hp) < 15 &&
+            if (currentAttacker.consecutiveDefensiveTurns >= 3 && currentDefender.consecutiveDefensiveTurns >= 3 &&
+                Math.abs(currentAttacker.hp - currentDefender.hp) < 15 &&
                 phaseState.currentPhase !== BATTLE_PHASES.EARLY) {
 
-                if (fighter1.hp > 0) charactersMarkedForDefeat.add(fighter1.id);
-                if (fighter2.hp > 0) charactersMarkedForDefeat.add(fighter2.id);
+                if (currentAttacker.hp > 0) charactersMarkedForDefeat.add(currentAttacker.id);
+                if (currentDefender.hp > 0) charactersMarkedForDefeat.add(currentDefender.id);
 
-                terminalOutcome = evaluateTerminalState(fighter1, fighter2, true);
+                terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, true);
                 battleOver = true;
                 winnerId = terminalOutcome.winnerId;
                 loserId = terminalOutcome.loserId;
                 isStalemate = terminalOutcome.isStalemate;
-                fighter1.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
-                fighter2.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
+                currentAttacker.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
+                currentDefender.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
             }
         }
 
 
         if (battleOver) break;
-        // Instead of array destructuring, use a temporary variable
-        const tempFighter = fighter1;
-        fighter1 = fighter2;
-        fighter2 = tempFighter;
+        // Swap the current attacker and defender references
+        [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
     }
 
     // NEW: Before final evaluateTerminalState and summary, log the last phase's duration if battle ends mid-phase.
@@ -1220,8 +1218,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     fighter1.phaseLog = [...phaseState.phaseLog];
     fighter2.phaseLog = [...phaseState.phaseLog];
 
-    const finalFighter1State = fighter1.id === f1Id ? fighter1 : fighter2;
-    const finalFighter2State = fighter2.id === f2Id ? fighter2 : fighter1;
+    const finalFighter1State = currentAttacker.id === f1Id ? currentAttacker : currentDefender;
+    const finalFighter2State = currentDefender.id === f2Id ? currentDefender : currentAttacker;
 
     return {
         log: battleEventLog,
