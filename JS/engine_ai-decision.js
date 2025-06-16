@@ -647,10 +647,11 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase);
 
     // Filter moves based on energy costs
+    const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
     weightedMoves = weightedMoves.filter(moveInfo => {
         if (!moveInfo.move) return false;
         const energyCosts = calculateEnergyCost(moveInfo.move, conditions);
-        return energyCosts.estimatedEnergyCostWithEnv <= actor.energy;
+        return energyCosts.estimatedEnergyCostWithEnv <= actorEnergy || moveInfo.move.name === "Struggle";
     });
 
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
