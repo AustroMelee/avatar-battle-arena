@@ -4,13 +4,12 @@
 // Manages the display of battle results, analysis, and detailed logs.
 
 import { characters } from './data_characters.js';
-// --- UPDATED IMPORT ---
-import { phaseTemplates } from './data_narrative_phases.js'; // Corrected import path
-// --- END UPDATED IMPORT ---
+import { locationConditions } from './location-battle-conditions.js'; // <-- ADDED THIS IMPORT
+import { phaseTemplates } from './data_narrative_phases.js';
 import { transformEventsToHtmlLog } from './battle_log_transformer.js';
 import { startSimulation } from './simulation_mode_manager.js';
-import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js'; // New import for centralized display updates
-import { ESCALATION_STATES } from './engine_escalation.js'; // For escalation state classes
+import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
+import { ESCALATION_STATES } from './engine_escalation.js';
 
 let resultsSection = null;
 let environmentDamageDisplay = null;
@@ -132,7 +131,7 @@ export function displayFinalAnalysis(finalState, winnerId, isDraw = false, envir
 
     analysisList.appendChild(spacer.cloneNode());
 
-    const currentLocData = locationConditions[locationId];
+    const currentLocData = locationConditions[locationId]; // <-- This was the missing part
     if (environmentState && environmentDamageDisplay && environmentImpactsList && currentLocData && currentLocData.damageThresholds) {
         environmentDamageDisplay.textContent = `Environmental Damage: ${environmentState.damageLevel.toFixed(0)}%`;
         let damageClass = '';
@@ -180,15 +179,23 @@ export function displayFinalAnalysis(finalState, winnerId, isDraw = false, envir
                     if (entry.opponentEscalation) {
                         parts.push(`OppES:${entry.opponentEscalation}`);
                     }
+                    if (entry.prediction) {
+                        parts.push(`Pred:${entry.prediction}`);
+                    }
                     if (entry.consideredMoves && Array.isArray(entry.consideredMoves) && entry.consideredMoves.length > 0) {
                         const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name || 'UnknownMove'}(${m.prob || 'N/A'})`).join(', ');
-                        parts.push(`Considered:[${topConsiderations}]`);
+                        if (topConsiderations) parts.push(`Considered:[${topConsiderations}]`);
                     }
-                    if (parts.length === 0) return JSON.stringify(entry);
-                    return parts.join(' | ');
+                    if (entry.reasons) {
+                        parts.push(`Reasons:[${entry.reasons}]`);
+                    }
+                    if (entry.isEscalationFinisherAttempt) {
+                        parts.push(`(Escalation Finisher Attempt!)`);
+                    }
+                    return `- ${parts.join(' | ')}`;
                 }
-                return String(entry).replace(/</g, "<").replace(/>/g, ">");
-            }).join('<br>');
+                return `- ${String(entry).replace(/</g, "<").replace(/>/g, ">")}`; // Sanitize HTML
+            }).join('\n') + '\n';
         };
 
         if (fighter1.aiLog && fighter1.aiLog.length > 0) {
@@ -262,7 +269,6 @@ export function setupDetailedLogControls() {
  * Resets the display elements related to battle results.
  * This function is used by ui_loading-states.js before starting a new battle.
  */
-// --- ADDED EXPORT AND CENTRALIZED HERE ---
 export function resetBattleResultsUI() {
     initializeDOMElements(); // Ensure elements are initialized
 
@@ -289,7 +295,12 @@ export function resetBattleResultsUI() {
         }
     }
 
-    // Hide the results section visually after a slight delay for transition
+    // Reset momentum and escalation displays via their dedicated functions
+    updateMomentumDisplay('fighter1', 0);
+    updateMomentumDisplay('fighter2', 0);
+    updateEscalationDisplay('fighter1', 0, 'Normal');
+    updateEscalationDisplay('fighter2', 0, 'Normal');
+
     setTimeout(() => {
         if (resultsSection && !resultsSection.classList.contains('show')) {
             resultsSection.style.display = 'none';
