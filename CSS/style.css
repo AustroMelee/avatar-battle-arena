@@ -314,41 +314,8 @@ body {
     font-size: 5rem;
     font-weight: 900;
     color: #ffdf00;
-    text-shadow: 0 0 15px #ff6600, 0 0 35px #ff6600, 2px 2px 8px #d10000;
+    text-shadow: 2px 2px 8px #d10000;
     transition: all 0.3s ease-out;
-    /* Pulsing animation removed */
-}
-
-.vs-divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, var(--mk-gold), transparent);
-    z-index: -1;
-}
-
-.vs-divider::after {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    top: 50%;
-    left: 50%;
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle, rgba(255,107,107,0.35) 0%, rgba(78,205,196,0.25) 30%, rgba(183,164,118,0.2) 60%, rgba(138,255,138,0.15) 80%, transparent 100%);
-    border-radius: 50%;
-    animation: vsGlow 4s linear infinite;
-    transform-origin: center center;
-}
-
-@keyframes vsGlow {
-    0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.7; }
-    50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0.7; }
 }
 
 .vs-divider.clash {

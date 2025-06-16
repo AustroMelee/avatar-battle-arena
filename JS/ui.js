@@ -11,8 +11,8 @@ import { transformEventsToAnimationQueue } from './battle_log_transformer.js'; /
 // --- END UPDATED IMPORTS ---
 import { initializeSimulationManagerDOM, setSimulationMode, resetSimulationManager } from './simulation_mode_manager.js';
 import { initializeDevModeUI } from './dev_mode_manager.js';
-import { populateCharacterGrids, handleCharacterCardSelection } from './ui_character-selection.js';
-import { populateLocationGrid, handleLocationCardSelection, updateEnvironmentalSummary } from './ui_location-selection.js';
+import { populateCharacterGrids } from './ui_character-selection.js'; // Removed handleCharacterCardSelection
+import { populateLocationGrid, updateEnvironmentalSummary } from './ui_location-selection.js'; // Removed handleLocationCardSelection
 import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
 import { renderArchetypeDisplay } from './ui_archetype-display.js';
 import { resolveArchetypeLabel } from './engine_archetype-engine.js';
@@ -209,7 +209,6 @@ function init() {
     });
     setSimulationMode(currentSimMode); // Set initial mode in manager
 
-    // Event listeners
     const modeSelectionContainer = document.querySelector('.mode-selection-section');
     if (modeSelectionContainer) {
         modeSelectionContainer.addEventListener('change', handleModeSelectionChange);
