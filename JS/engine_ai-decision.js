@@ -327,27 +327,75 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     return 'StandardExchange';
 }
 
-function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) { // Added currentPhase
+function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
     if (!actor || !defender || !conditions) {
         return [{ move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1.0, reasons: ["ErrorInCalculateMoveWeights"] }];
     }
 
-    // NEW: Pass currentPhase to getAvailableMoves
     const availableMoves = getAvailableMoves(actor, conditions, currentPhase);
     const profile = getDynamicPersonality(actor, currentPhase);
-
+    const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
-
     const locationData = locationConditions[conditions.id];
     const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
 
+    // NEW: Early energy check to prevent 0-energy loop
+    if (actorEnergy <= 0) {
+        // If completely out of energy, only allow Struggle with high weight
+        return [{ 
+            move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, 
+            weight: 1.0, 
+            reasons: ["OutOfEnergy_ForcedStruggle"],
+            isEscalationFinisherAttempt: false 
+        }];
+    }
+
+    // NEW: Energy management logic
+    const isLowEnergy = actorEnergy < 25;
+    const isCriticalEnergy = actorEnergy < 10;
+    
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
             return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 0.001, reasons: ["InvalidMoveObjectEncountered"] };
         }
+
         let weight = 1.0;
         let reasons = [];
         let isEscalationFinisherAttempt = false;
+
+        // NEW: Energy cost calculation and management
+        const energyCostEstimate = Math.round((move.power || 0) * 0.22) + 4;
+        const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
+        const energyCostModifier = envModForElement.energyCostModifier || 1.0;
+        const estimatedEnergyCostWithEnv = energyCostEstimate * energyCostModifier;
+
+        // NEW: Energy-based move filtering
+        if (estimatedEnergyCostWithEnv > actorEnergy) {
+            if (move.name === "Struggle") {
+                weight = 1.0;
+                reasons.push("LowEnergy_StruggleOnly");
+            } else {
+                weight = 0;
+                reasons.push("EnergyTooHigh");
+            }
+            return { move, weight, reasons, isEscalationFinisherAttempt };
+        }
+
+        // NEW: Energy conservation logic
+        if (isCriticalEnergy) {
+            if (move.moveTags.includes('low_cost') || move.type === 'Defense') {
+                weight *= 2.0;
+                reasons.push("CriticalEnergy_LowCostPreference");
+            } else {
+                weight *= 0.5;
+                reasons.push("CriticalEnergy_HighCostPenalty");
+            }
+        } else if (isLowEnergy) {
+            if (move.moveTags.includes('low_cost')) {
+                weight *= 1.5;
+                reasons.push("LowEnergy_LowCostPreference");
+            }
+        }
 
         switch (move.type) {
             case 'Offense': weight *= (1 + profile.aggression * 1.5); reasons.push(`Aggro:${profile.aggression.toFixed(2)}`); break;
@@ -570,10 +618,8 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
         return movesWithExp.map(m => ({ ...m, probability: numMoves > 0 ? 1 / numMoves : 0 }));
     }
 
-
     return movesWithExp.map(m => ({ ...m, probability: m.expWeight / weightExpSum }));
 }
-
 
 export function selectFromDistribution(movesWithProbs) {
     if (!movesWithProbs || movesWithProbs.length === 0) {
@@ -591,27 +637,22 @@ export function selectFromDistribution(movesWithProbs) {
     return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'], isEscalationFinisherAttempt: false };
 }
 
-
-export function selectMove(actor, defender, conditions, turn, currentPhase) { // Added currentPhase
+export function selectMove(actor, defender, conditions, turn, currentPhase) {
     if (!actor || !defender || !conditions || !actor.aiLog) {
         return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, aiLogEntry: { intent: 'Error', chosenMove: 'Struggle'} };
     }
     actor.personalityProfile = actor.personalityProfile || { ...DEFAULT_PERSONALITY_PROFILE };
     actor.aiMemory = actor.aiMemory || { ...DEFAULT_AI_MEMORY };
 
-
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
     const intent = determineStrategicIntent(actor, defender, turn, currentPhase);
     
-    // NEW: Handle the NarrativeOnly intent
     if (intent === 'NarrativeOnly') {
-         // No actual move is selected, this turn is for narrative only.
-         // Return a null move and log that it's a narrative turn.
          return { move: null, aiLogEntryFromSelectMove: { turn: turn + 1, phase: currentPhase, intent, chosenMove: 'None (Narrative Turn)', actorState: { /* ... */ }, opponentEscalation: defender.escalationState } };
     }
 
     const prediction = predictOpponentNextMove(actor, defender);
-    let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase); // Pass currentPhase
+    let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase);
 
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
 
@@ -633,7 +674,6 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) { //
 
     const chosenMove = chosenMoveInfo?.move || struggleMove;
     const isEscalationFinisher = chosenMoveInfo?.isEscalationFinisherAttempt || false;
-
 
     const aiLogEntry = {
         turn: turn + 1,
@@ -659,7 +699,6 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) { //
         isEscalationFinisherAttempt: isEscalationFinisher
     };
     actor.aiLog.push(aiLogEntry);
-
 
     return {
         move: chosenMove,

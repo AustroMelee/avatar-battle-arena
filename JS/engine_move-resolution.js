@@ -292,17 +292,33 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     // Status Effect Chaining Logic (Pinned extending Stun)
     if (move.setup?.name === 'Pinned' && effectivenessLevel.label !== 'Weak') {
         if (defender.stunDuration > 0) {
-            defender.stunDuration++; // Extend existing stun
-            interactionLog.push(`${defender.name}'s stun duration was extended by being Pinned! Now ${defender.stunDuration} turn(s).`);
-            defender.aiLog.push(`[Stun Extended]: Stun duration increased to ${defender.stunDuration} by Pinned state.`);
+            // NEW: Add stun resistance based on current stun duration
+            const stunResistance = Math.min(0.8, defender.stunDuration * 0.2); // Max 80% resistance
+            if (Math.random() > stunResistance) {
+                defender.stunDuration++; // Extend existing stun
+                interactionLog.push(`${defender.name}'s stun duration was extended by being Pinned! Now ${defender.stunDuration} turn(s).`);
+                defender.aiLog.push(`[Stun Extended]: Stun duration increased to ${defender.stunDuration} by Pinned state.`);
+            } else {
+                interactionLog.push(`${defender.name} resisted the stun extension due to building resistance!`);
+                defender.aiLog.push(`[Stun Resisted]: Resisted stun extension with ${(stunResistance * 100).toFixed(0)}% resistance.`);
+            }
         }
     }
 
     // Apply Stun from Critical Hits (if not a defensive move)
     if (effectivenessLevel.label === 'Critical' && move.type !== 'Defense' && !move.isRepositionMove) {
-        defender.stunDuration = (defender.stunDuration || 0) + 1; // Add 1 turn of stun
-        interactionLog.push(`${defender.name} is stunned for 1 turn from the critical ${move.name}! Stun Duration: ${defender.stunDuration}.`);
-        defender.aiLog.push(`[Stun Applied]: Stunned for 1 turn by critical ${move.name}. Total: ${defender.stunDuration}.`);
+        // NEW: Add stun resistance based on current stun duration
+        const stunResistance = Math.min(0.8, defender.stunDuration * 0.2); // Max 80% resistance
+        if (Math.random() > stunResistance) {
+            // NEW: Cap maximum stun duration at 3 turns
+            const newStunDuration = Math.min(3, (defender.stunDuration || 0) + 1);
+            defender.stunDuration = newStunDuration;
+            interactionLog.push(`${defender.name} is stunned for 1 turn from the critical ${move.name}! Stun Duration: ${defender.stunDuration}.`);
+            defender.aiLog.push(`[Stun Applied]: Stunned for 1 turn by critical ${move.name}. Total: ${defender.stunDuration}.`);
+        } else {
+            interactionLog.push(`${defender.name} resisted the stun effect due to building resistance!`);
+            defender.aiLog.push(`[Stun Resisted]: Resisted stun with ${(stunResistance * 100).toFixed(0)}% resistance.`);
+        }
     }
 
     const moveType = move.type || DEFAULT_MOVE_PROPERTIES.type;
