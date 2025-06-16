@@ -4,10 +4,10 @@
 // Manages the display and hiding of loading spinners and results panels.
 
 import { characters } from './data_characters.js';
-import { transformEventsToHtmlLog } from './battle_log_transformer.js'; // Ensure this is correct
-import { startSimulation as startAnimationSimulation } from './simulation_mode_manager.js'; // Renamed import for clarity
-import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js'; // Correct import path
-import { setupDetailedLogControls, displayFinalAnalysis, resetBattleResultsUI } from './ui_battle-results.js'; // Corrected import path and now importing resetBattleResultsUI from here
+import { transformEventsToHtmlLog } from './battle_log_transformer.js';
+import { startSimulation as startAnimationSimulation } from './simulation_mode_manager.js';
+import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
+import { setupDetailedLogControls, displayFinalAnalysis, resetBattleResultsUI } from './ui_battle-results.js';
 
 const DOM_ELEMENTS = {
     resultsSection: document.getElementById('results'),
@@ -18,8 +18,8 @@ const DOM_ELEMENTS = {
     winProbability: document.getElementById('win-probability'),
     battleStory: document.getElementById('battle-story'),
     animatedLogOutput: document.getElementById('animated-log-output'),
-    toggleDetailedLogsBtn: document.getElementById('toggle-detailed-logs-btn'), // Added this line to retrieve the button
-    copyDetailedLogsBtn: document.getElementById('copy-detailed-logs-btn'),     // Added this line to retrieve the button
+    toggleDetailedLogsBtn: document.getElementById('toggle-detailed-logs-btn'),
+    copyDetailedLogsBtn: document.getElementById('copy-detailed-logs-btn'),
 };
 
 /**
@@ -29,14 +29,16 @@ const DOM_ELEMENTS = {
 export function showLoadingState(simulationMode) {
     if (simulationMode === "animated") {
         if (DOM_ELEMENTS.resultsSection) DOM_ELEMENTS.resultsSection.style.display = 'none';
-        // Assuming simulationModeContainer is managed by simulation_mode_manager or ui.js for overall display
-        // For now, let's directly interact with the animated output container
+        
         if (DOM_ELEMENTS.animatedLogOutput) {
+            // Corrected: DOM_ELEMENTS.animatedLogOutput (camelCase fix)
             DOM_ELEMENTS.animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
-            DOM_ELEMENT_E.animatedLogOutput.closest('.simulation-mode-container')?.classList.remove('hidden'); // Show parent container
+            // Corrected: DOM_ELEMENTS (typo fix)
+            DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.remove('hidden'); 
         }
     } else { // Instant mode
-        if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENT_E.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden');
+        // Corrected: DOM_ELEMENTS (typo fix)
+        if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden');
         if (DOM_ELEMENTS.resultsSection) {
             DOM_ELEMENTS.resultsSection.classList.remove('show');
             DOM_ELEMENTS.resultsSection.style.display = 'block';
@@ -44,10 +46,8 @@ export function showLoadingState(simulationMode) {
         if (DOM_ELEMENTS.loadingSpinner) DOM_ELEMENTS.loadingSpinner.classList.remove('hidden');
         if (DOM_ELEMENTS.battleResultsContainer) DOM_ELEMENTS.battleResultsContainer.classList.add('hidden');
     }
-    // Access battleBtn from the main UI module, or ensure it's passed/managed appropriately.
-    // For now, assuming it's available globally via DOM_ELEMENTS if this is a shared helper,
-    // or handled by the calling ui.js
-    const battleBtn = document.getElementById('battleBtn'); // Direct access as it's not in DOM_ELEMENTS yet.
+    
+    const battleBtn = document.getElementById('battleBtn'); 
     if (battleBtn) DOM_ELEMENTS.battleBtn.disabled = true;
 
     if (DOM_ELEMENTS.vsDivider) DOM_ELEMENTS.vsDivider.classList.add('clash');
@@ -69,7 +69,7 @@ export function showResultsState(battleResult, simulationMode) {
         if (DOM_ELEMENTS.battleStory) DOM_ELEMENTS.battleStory.innerHTML = "<p>An error occurred, and results cannot be displayed.</p>";
         if (DOM_ELEMENTS.loadingSpinner) DOM_ELEMENTS.loadingSpinner.classList.add('hidden');
         const battleBtn = document.getElementById('battleBtn');
-        if (battleBtn) battleBtn.disabled = false;
+        if (battleBtn) DOM_ELEMENTS.battleBtn.disabled = false;
         return;
     }
 
@@ -93,12 +93,12 @@ export function showResultsState(battleResult, simulationMode) {
             DOM_ELEMENTS.winProbability.textContent = `Outcome details below.`;
         }
 
-        const locationId = document.getElementById('location-value')?.value; // Still relies on a hidden input
+        const locationId = document.getElementById('location-value')?.value;
         if (locationId) {
             displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, locationId);
         } else {
             console.error("Location ID not found for final analysis.");
-            document.getElementById('analysis-list').innerHTML = "<li>Error: Location data missing for analysis.</li>"; // Direct DOM manipulation as fallback
+            document.getElementById('analysis-list').innerHTML = "<li>Error: Location data missing for analysis.</li>"; 
         }
 
         if (result.finalState?.fighter1) {
@@ -112,7 +112,7 @@ export function showResultsState(battleResult, simulationMode) {
 
         DOM_ELEMENTS.battleResultsContainer.classList.remove('hidden');
         DOM_ELEMENTS.resultsSection.style.display = 'block';
-        void DOM_ELEMENTS.resultsSection.offsetWidth; // Trigger reflow to ensure animation
+        void DOM_ELEMENTS.resultsSection.offsetWidth; 
         DOM_ELEMENTS.resultsSection.classList.add('show');
 
         if (simulationMode === "instant" || (simulationMode === "animated" && DOM_ELEMENTS.animatedLogOutput?.closest('.simulation-mode-container')?.classList.contains('hidden'))) {
@@ -124,75 +124,24 @@ export function showResultsState(battleResult, simulationMode) {
 
     if (simulationMode === "animated") {
         if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENTS.animatedLogOutput.innerHTML = '';
-        // Dynamic import here (as in your original, to avoid circular deps)
-        const { transformEventsToAnimationQueue } = transformEventsToAnimationQueue; // This line needs to be an import from battle_log_transformer.js
-        // Corrected dynamic import:
-        import('./battle_log_transformer.js').then(module => {
-            const animationQueue = module.transformEventsToAnimationQueue(battleResult.log);
-            startAnimationSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
-                if (wasCancelledOrError && DOM_ELEMENTS.battleStory && finalBattleResult.log) {
-                    // If cancelled, show the full log in the battle story section
-                    DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
-                }
-                displayFinalResultsPanel(finalBattleResult);
-                DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); // Hide parent container
-            });
-        }).catch(err => {
-            console.error("Failed to load battle_log_transformer for animation:", err);
-            // Fallback to instant mode if animation setup fails
-            if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden');
-            if (DOM_ELEMENTS.battleStory && battleResult.log) DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
-            displayFinalResultsPanel(battleResult);
+        
+        // Corrected: Removed the redundant and incorrect destructuring here.
+        // `transformEventsToAnimationQueue` is already imported from battle_log_transformer.js
+        const animationQueue = transformEventsToAnimationQueue(battleResult.log);
+        startAnimationSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
+            if (wasCancelledOrError && DOM_ELEMENTS.battleStory && finalBattleResult.log) {
+                // If cancelled, show the full log in the battle story section
+                DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
+            }
+            displayFinalResultsPanel(finalBattleResult);
+            // Corrected: DOM_ELEMENTS.animatedLogOutput (camelCase fix)
+            DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); 
         });
 
     } else {
-        DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); // Ensure hidden in instant mode
+        // Corrected: DOM_ELEMENTS.animatedLogOutput (camelCase fix)
+        DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); 
         if (DOM_ELEMENTS.battleStory && battleResult.log) DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
         displayFinalResultsPanel(battleResult);
     }
 }
-
-/**
- * Resets the battle results UI elements to their initial state.
- * This function is used by ui_loading-states.js before starting a new battle.
- */
-/* MOVED TO ui_battle-results.js
-export function resetBattleResultsUI() {
-    initializeDOMElements(); // Ensure elements are initialized
-
-    if (resultsSection) resultsSection.classList.remove('show');
-    if (environmentDamageDisplay) {
-        environmentDamageDisplay.textContent = '';
-        environmentDamageDisplay.className = 'environmental-damage-level'; // Reset class
-    }
-    if (environmentImpactsList) environmentImpactsList.innerHTML = '';
-    if (battleStory) battleStory.innerHTML = '';
-    if (analysisList) analysisList.innerHTML = '';
-    if (winnerName) winnerName.textContent = '';
-    if (winProbability) winProbability.textContent = '';
-    
-    // Ensure detailed logs are collapsed and cleared
-    if (detailedBattleLogsContent) {
-        detailedBattleLogsContent.innerHTML = '';
-        if (!detailedBattleLogsContent.classList.contains('collapsed')) {
-            detailedBattleLogsContent.classList.add('collapsed');
-            if (toggleDetailedLogsBtn) {
-                toggleDetailedLogsBtn.setAttribute('aria-expanded', 'false');
-                toggleDetailedLogsBtn.textContent = 'Show Detailed Battle Logs ►';
-            }
-        }
-    }
-
-    // Reset momentum and escalation displays via their dedicated functions
-    updateMomentumDisplay('fighter1', 0);
-    updateMomentumDisplay('fighter2', 0);
-    updateEscalationDisplay('fighter1', 0, 'Normal');
-    updateEscalationDisplay('fighter2', 0, 'Normal');
-
-    setTimeout(() => {
-        if (resultsSection && !resultsSection.classList.contains('show')) {
-            resultsSection.style.display = 'none';
-        }
-    }, 500);
-}
-*/
