@@ -343,12 +343,11 @@ function calculateEnergyCost(move, conditions) {
 }
 
 function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
+    // Initialize all variables at the start
     const profile = actor.personalityProfile;
     const availableMoves = actor.techniques || [];
     const locationData = conditions;
     const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
-
-    // Initialize energy-related variables at the start
     const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
     const isLowEnergy = actorEnergy < 30;
     const isCriticalEnergy = actorEnergy < 10;
