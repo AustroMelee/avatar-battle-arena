@@ -10,6 +10,8 @@ export const characterCurbstompRules = {
             description: "Ozai unleashes an overwhelming, comet-like fire assault.",
             triggerChance: 0.85,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "authority_challenged",
             activatingMoveName: "Emperor's Wrath",
             activatingMoveTags: ["fire", "area_of_effect_large", "highRisk", "lightning_attack"], // Added lightning_attack
@@ -21,6 +23,8 @@ export const characterCurbstompRules = {
             description: "Ozai relentlessly spams lightning attacks.",
             triggerChance: 0.70,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "authority_challenged",
             activatingMoveTags: ["lightning", "ranged_attack", "lightning_attack"], // Added lightning_attack
             activatingMoveElement: "lightning",
@@ -33,6 +37,8 @@ export const characterCurbstompRules = {
             description: "Bumi buries opponent under a mountain of earth.",
             triggerChance: 0.60,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'crippling', // NEW
             personalityTrigger: "underestimated",
             activatingMoveName: "Rock Avalanche",
             activatingMoveTags: ["earth", "area_of_effect_large", "environmental_manipulation"],
@@ -43,6 +49,8 @@ export const characterCurbstompRules = {
             description: "Bumi causes a massive structural collapse (e.g., buildings in Omashu).",
             triggerChance: 0.80,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             conditionLogic: (bumi, opponent, battleState) => battleState.locationTags.includes("urban") || battleState.locationTags.includes("dense"),
             personalityTrigger: "underestimated",
             activatingMoveName: "Terrain Reshape",
@@ -56,6 +64,8 @@ export const characterCurbstompRules = {
             description: "Azula's perfectly aimed lightning strike.",
             triggerChance: 0.75,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "in_control",
             conditionLogic: (azula) => !azula.isInsane,
             activatingMoveName: "Lightning Generation",
@@ -68,6 +78,8 @@ export const characterCurbstompRules = {
             description: "Azula creates a devastating blue fire tornado.",
             triggerChance: 0.55,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'crippling', // NEW
             personalityTrigger: "in_control",
             conditionLogic: (azula) => !azula.isInsane,
             activatingMoveTags: ["fire", "area_of_effect_large", "channeled"],
@@ -81,6 +93,8 @@ export const characterCurbstompRules = {
             description: "Azula's attacks become wild and unpredictable due to mental instability.",
             triggerChance: 0.60,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             selfSabotageChance: 0.40,
             personalityTrigger: "desperate_broken",
             conditionLogic: (azula) => azula.isInsane,
@@ -98,6 +112,8 @@ export const characterCurbstompRules = {
             description: "Her blue fire burns hotter and more erratically in her unstable state.",
             triggerChance: 1.0,
             canTriggerPreBattle: true,
+            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
+            severity: 'soft', // NEW
             personalityTrigger: "desperate_broken",
             conditionLogic: (azula) => azula.isInsane,
             outcome: { type: "damage_increase_character_25_percent", message: "Azula's blue fire rages with terrifying, unstable intensity!" }
@@ -109,6 +125,8 @@ export const characterCurbstompRules = {
             description: "Toph's seismic sense grants near-perfect accuracy.",
             triggerChance: 0.85,
             canTriggerPreBattle: true,
+            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
+            severity: 'soft', // NEW
             outcome: { type: "accuracy_increase_character_85_percent", message: "Toph's seismic sense allows her to 'see' {targetName}'s every move with pinpoint accuracy." }
         },
         {
@@ -116,6 +134,8 @@ export const characterCurbstompRules = {
             description: "Toph's metalbending instantly crushes or bypasses metal armor.",
             triggerChance: 0.85,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'crippling', // NEW
             personalityTrigger: "doubted",
             activatingMoveName: "Metal Bending",
             activatingMoveTags: ["metal", "utility_control"],
@@ -128,6 +148,8 @@ export const characterCurbstompRules = {
             description: "Katara resorts to bloodbending under extreme duress (full moon).",
             triggerChance: 0.85,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Late'], // NEW
+            severity: 'lethal', // NEW
             conditionLogic: (katara, opponent, battleState) => battleState.isFullMoon === true,
             personalityTrigger: "desperate_mentally_broken",
             activatingMoveName: "Bloodbending",
@@ -139,6 +161,8 @@ export const characterCurbstompRules = {
             description: "Katara encases opponent in a fatal ice prison.",
             triggerChance: 0.70,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "desperate_mentally_broken",
             activatingMoveName: "Ice Prison",
             activatingMoveTags: ["ice", "construct_creation", "debuff_disable"],
@@ -151,6 +175,8 @@ export const characterCurbstompRules = {
             description: "Aang taps into the Avatar State, unleashing immense air power.",
             triggerChance: 0.85,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "mortal_danger",
             activatingMoveTags: ["air", "area_of_effect_large", "unblockable"], // Conceptual tags
             outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Aang's eyes glow as he enters the Avatar State, unleashing a cataclysmic storm of air that overwhelms {targetName}!", failureMessage: "Aang struggles to fully control the Avatar State's power, giving {targetName} a fleeting chance!" }
@@ -160,6 +186,8 @@ export const characterCurbstompRules = {
             description: "Aang's masterful use of the air scooter for evasion.",
             triggerChance: 0.60,
             canTriggerPreBattle: true,
+            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
+            severity: 'soft', // NEW
             outcome: { type: "evasion_chance_increase_60_percent", message: "Aang zips around on his air scooter, becoming an incredibly difficult target." }
         }
     ],
@@ -169,6 +197,8 @@ export const characterCurbstompRules = {
             description: "Zuko's scar and intensity can intimidate opponents.",
             triggerChance: 1.0,
             canTriggerPreBattle: true,
+            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
+            severity: 'soft', // NEW
             outcome: { type: "attack_power_increase_character_15_percent", message: "Zuko's fierce determination and visible scar lend an intimidating edge to his attacks." }
         },
         {
@@ -176,6 +206,8 @@ export const characterCurbstompRules = {
             description: "Zuko's mastery with his dual dao swords combined with firebending.",
             triggerChance: 0.80,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "honor_violated",
             activatingMoveName: "Flame Sword",
             activatingMoveTags: ["fire", "melee_range", "precise"],
@@ -188,6 +220,8 @@ export const characterCurbstompRules = {
             description: "Sokka devises a clever environmental exploit or trap.",
             triggerChance: 0.30,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Poking', 'Early', 'Mid'], // NEW
+            severity: 'soft', // NEW
             personalityTrigger: "meticulous_planning",
             escapeCondition: { type: "intelligence_roll", character: "sokka", threshold: 65, successChance: 0.10 },
             activatingMoveTags: ["utility", "trap_delayed", "environmental_manipulation"],
@@ -199,11 +233,14 @@ export const characterCurbstompRules = {
             appliesToCharacter: "sokka",
             triggerChance: 0.75,
             canTriggerPreBattle: true,
-            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender",
-            weightingLogic: ({ attacker, defender, rule, location, situation }) => {
+            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
+            severity: 'crippling', // NEW
+            conditionLogic: (sokkaChar, opponentChar) => opponentChar.type === "Bender", // Make sure parameters match how they are used
+            weightingLogic: ({ attacker, defender, rule, location, situation }) => { // Removed 'rule' from destructuring, hardcoding "sokka" for robustness
                 let sokkaUnderThreat;
                 let opponentOfSokka;
 
+                // Directly identify Sokka and opponent, as this rule is specific to Sokka
                 if (attacker.id === "sokka") {
                     sokkaUnderThreat = attacker;
                     opponentOfSokka = defender;
@@ -237,6 +274,8 @@ export const characterCurbstompRules = {
             description: "Jeong Jeong uses precise fire whips to disable an opponent.",
             triggerChance: 0.45,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Early', 'Mid', 'Late'], // NEW
+            severity: 'crippling', // NEW
             personalityTrigger: "confident_stance",
             activatingMoveName: "Flame Whips",
             activatingMoveTags: ["fire", "ranged_attack_medium", "precise"],
@@ -247,6 +286,8 @@ export const characterCurbstompRules = {
             description: "Jeong Jeong's fire control excels in dry, open desert environments.",
             triggerChance: 1.0,
             canTriggerPreBattle: true,
+            canTriggerInPhase: ['PreBanter', 'Poking', 'Early', 'Mid', 'Late'], // NEW
+            severity: 'soft', // NEW
             conditionLogic: (jj, o, bs) => bs.locationId === 'si-wong-desert',
             outcome: { type: "power_increase_character_35_percent", message: "In the desolate expanse of the Si Wong Desert, Jeong Jeong's mastery over fire is amplified." }
         }
@@ -257,16 +298,20 @@ export const characterCurbstompRules = {
             description: "Pakku's overwhelming waterbending mastery.",
             triggerChance: 0.85,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "skill_challenged",
             activatingMoveName: "Octopus Form",
             activatingMoveTags: ["water", "versatile", "area_of_effect_small"],
-            outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Master Pakku unleashes {moveName}, an overwhelming display of waterbending that leaves {targetName} utterly defeated!", failureMessage: "{targetName} manages to weather the initial storm of Pakku's masterful assault!" }
+            outcome: { type: "instant_win_attacker_overwhelm", successMessage: "Master Pakku unleashes {moveName}, an overwhelming display of waterbending that leaves {targetName} utterly defeated!", failureMessage: "{targetName} surprisingly withstands Master Pakku's initial onslaught!" }
         },
         {
             id: "pakku_ice_daggers_kill",
             description: "Pakku forms and launches lethal ice daggers.",
             triggerChance: 0.60,
             canTriggerPreBattle: false,
+            canTriggerInPhase: ['Mid', 'Late'], // NEW
+            severity: 'lethal', // NEW
             personalityTrigger: "skill_challenged",
             activatingMoveName: "Ice Spikes", // Assuming Ice Spikes is the base for daggers
             activatingMoveTags: ["ice", "projectile", "precise"],

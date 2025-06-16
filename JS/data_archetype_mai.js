@@ -262,97 +262,97 @@ export const maiArchetypeData = {
             introB: "Zuko's fire blazes in the desert heat, but Mai's focus remains unbroken, her daggers flying true despite the oppressive conditions."
         },
         'foggy-swamp': {
-            label: "Misty Menace, Fiery Frustration: Mai vs. Zuko",
-            introA: "Mai uses the swamp's eerie silence and poor visibility to her advantage, her daggers whistling unseen towards the Fire Prince.",
-            introB: "Zuko's fire struggles to illuminate Mai's shadowy movements in the disorienting Foggy Swamp, her knives appearing from nowhere."
+            label: "Misty Menace, Fiery Frustration: Zuko vs. Mai",
+            introA: "Zuko's fire struggles to illuminate Mai's shadowy movements in the disorienting Foggy Swamp, her knives appearing from nowhere.",
+            introB: "Mai uses the swamp's eerie silence and poor visibility to her advantage, her daggers whistling unseen towards the Fire Prince."
         },
         'boiling-rock': {
-            label: "Prison Blades, Royal Flames: Mai vs. Zuko",
-            introA: "Mai, ever the stoic guard (or is her loyalty shifting?), meets Zuko's fire with a relentless barrage of knives at the Boiling Rock.",
-            introB: "Zuko, perhaps an inmate or an inspector, finds his authority (or escape) challenged by Mai's deadly, duty-bound projectiles."
+            label: "Prison Blades, Royal Flames: Zuko vs. Mai",
+            introA: "Zuko, perhaps an inmate or an inspector, finds his authority (or escape) challenged by Mai's deadly, duty-bound projectiles.",
+            introB: "Mai, ever the stoic guard, meets Zuko's fire with a relentless barrage of knives, her loyalty unwavering."
         },
         'fire-nation-capital': {
-            label: "Courtly Conflict: Mai's Daggers vs. Zuko's Fire in the Palace",
-            introA: "Mai, her allegiance perhaps torn, confronts Zuko with her signature cool detachment and deadly precision in the Fire Nation capital.",
-            introB: "Zuko, navigating the treacherous politics of the court, finds Mai's loyalty (and her knives) a dangerous variable."
+            label: "Courtly Conflict: Zuko's Fire vs. Mai's Daggers in the Palace",
+            introA: "Zuko, navigating the treacherous politics of the Fire Nation court, finds Mai's loyalty (and her knives) a dangerous variable.",
+            introB: "Mai, her allegiance perhaps torn, confronts Zuko with her signature cool detachment and deadly precision in the capital."
         },
         'omashu': {
-            label: "Omashu's Defense, Silent Striker vs. Fire Prince: Mai vs. Zuko",
-            introA: "Mai, using Omashu's varied levels for cover, unleashes pinpoint volleys, her daggers a constant harassment to Zuko's fiery assault.",
-            introB: "Zuko's fiery attack on Omashu is met by Mai's surprisingly effective ranged attacks from the city's stone ramparts."
+            label: "Omashu's Defense, Fire Prince vs. Silent Striker: Zuko vs. Mai",
+            introA: "Zuko's fiery assault on Omashu is met by Mai's surprisingly effective ranged attacks from the city's stone ramparts.",
+            introB: "Mai, using Omashu's varied levels for cover, unleashes pinpoint volleys, her daggers a constant harassment to Zuko."
         },
         'great-divide': {
-            label: "Canyon Volley: Mai's Precision Throws vs. Zuko's Fireballs",
-            introA: "Mai uses the canyon's vastness for long-range attacks, her unerring aim a deadly counter to Zuko's powerful firebending.",
-            introB: "Zuko's explosive fire blasts echo through the Great Divide, but Mai's silent, precise daggers find their mark from afar."
+            label: "Canyon Volley: Zuko's Fireballs vs. Mai's Precision Throws",
+            introA: "Zuko's explosive fire blasts echo through the Great Divide, but Mai's silent, precise daggers find their mark from afar.",
+            introB: "Mai uses the canyon's vastness for long-range attacks, her unerring aim a deadly counter to Zuko's powerful firebending."
         },
         'kyoshi-island': {
-            label: "Island Standoff: Mai's Unseen Threat vs. Zuko's Flames",
-            introA: "Mai, perhaps protecting her friends (or Zuko from himself), uses Kyoshi Island's cover to her advantage, her knives a silent warning to the Fire Prince.",
-            introB: "Zuko's attempt to assert dominance on Kyoshi Island is met by Mai's stealthy and dangerously accurate projectile assault."
+            label: "Island Standoff: Zuko's Flames vs. Mai's Unseen Threat",
+            introA: "Zuko's attempt to assert dominance on Kyoshi Island is met by Mai's stealthy and dangerously accurate projectile assault.",
+            introB: "Mai, perhaps protecting her friends (or Zuko from himself), uses the island's cover to her advantage, her knives a silent warning."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Stoic Assassin vs. The Brooding Prince: Mai vs. Zuko",
-            introA: "Mai, with her arsenal of hidden knives and unerring aim, meets Zuko's fiery passion with cool, deadly efficiency.",
-            introB: "Zuko, his fire fueled by inner conflict, faces Mai, whose emotionless precision makes her a uniquely dangerous foe."
+            label: "The Brooding Prince vs. The Stoic Assassin: Zuko vs. Mai",
+            introA: "Zuko, his fire fueled by inner conflict, faces Mai, whose emotionless precision makes her a uniquely dangerous foe.",
+            introB: "Mai, with her arsenal of hidden knives and unerring aim, meets Zuko's fiery passion with cool, deadly efficiency."
         }
     },
     // --- Mai vs Azula (azula) ---
     'azula': {
         'eastern-air-temple': {
-            label: "Sky-High Precision: Mai's Daggers vs. Azula's Fire",
-            introA: "Mai, her expression unreadable, expertly aims her daggers through Azula's blue fire, her calm a stark contrast to the princess's intensity at the Air Temple.",
-            introB: "Azula's blue flames dance around Mai's unerringly accurate projectiles amidst the windy platforms of the Eastern Air Temple."
+            label: "Sky-High Precision: Azula's Fire vs. Mai's Daggers",
+            introA: "Azula's blue flames dance around Mai's unerringly accurate projectiles amidst the windy platforms of the Eastern Air Temple.",
+            introB: "Mai, her expression unreadable, expertly aims her daggers through Azula's fire, her calm a stark contrast to the princess's intensity."
         },
         'northern-water-tribe': {
-            label: "Frozen Fire, Icy Accuracy: Mai vs. Azula",
-            introA: "Mai, unfazed by Azula's terrifying power, uses the icy terrain for ricochets, her daggers a silent, deadly threat against the Fire Princess.",
-            introB: "Azula's cold fire meets Mai's chillingly precise knife throws in the arctic landscape of the Northern Water Tribe."
+            label: "Frozen Fire, Icy Accuracy: Azula vs. Mai",
+            introA: "Azula's cold fire meets Mai's chillingly precise knife throws in the arctic landscape of the Northern Water Tribe.",
+            introB: "Mai, unfazed by Azula's terrifying power, uses the icy terrain for ricochets, her daggers a silent, deadly threat."
         },
         'ba-sing-se': {
             label: "City of Shadows, Dance of Daggers and Blue Fire: Mai vs. Azula",
-            introA: "Mai, perhaps testing her own limits or Azula's patience, confronts the princess in the labyrinthine city, her knives a silent promise of swift efficiency.",
-            introB: "Azula, perhaps testing Mai's loyalty or skill, engages her in a deadly ballet of fire and steel within Ba Sing Se's walls."
+            introA: "Azula, perhaps testing Mai's loyalty or skill, engages her in a deadly ballet of fire and steel within Ba Sing Se's walls.",
+            introB: "Mai, ever the stoic subordinate (or rival?), confronts Azula in the labyrinthine city, her knives a silent promise of swift efficiency."
         },
         'si-wong-desert': {
             label: "Desert Heat, Stoic Steel: Mai's Aim vs. Azula's Fire",
-            introA: "Mai, finding Azula's dramatic displays tiresome, hopes her precise throws will quickly end their desert confrontation under the blazing sun.",
-            introB: "Azula's blue fire blazes under the desert sun, but Mai's focus remains unbroken, her daggers flying true despite the heat."
+            introA: "Azula's blue fire blazes under the desert sun, but Mai's focus remains unbroken, her daggers flying true despite the heat.",
+            introB: "Mai, finding Azula's dramatic displays tiresome, hopes her precise throws will quickly end their desert confrontation."
         },
         'foggy-swamp': {
-            label: "Misty Menace, Fiery Focus: Mai vs. Azula",
-            introA: "Mai uses the swamp's eerie silence and poor visibility to her advantage, her daggers whistling unseen towards the Fire Princess.",
-            introB: "Azula's fire cuts through the swamp's disorienting fog, trying to pin down Mai, whose shadowy movements make her an elusive target."
+            label: "Misty Menace, Fiery Focus: Azula vs. Mai",
+            introA: "Azula's fire cuts through the swamp's disorienting fog, trying to pin down Mai, whose shadowy movements make her an elusive target.",
+            introB: "Mai uses the swamp's eerie silence and poor visibility to her advantage, her daggers whistling unseen towards the Fire Princess."
         },
         'boiling-rock': {
-            label: "Prison Blades, Royal Flames: Mai vs. Azula",
-            introA: "Mai, ever the stoic guard (or is her loyalty wavering?), meets Azula's fire with a relentless barrage of knives at the Boiling Rock.",
-            introB: "Azula, inspecting the Boiling Rock (or perhaps an inmate herself!), finds Mai's deadly, duty-bound projectiles a noteworthy challenge."
+            label: "Prison Blades, Royal Flames: Azula vs. Mai",
+            introA: "Azula, inspecting the Boiling Rock (or perhaps an inmate herself!), finds Mai's deadly, duty-bound projectiles a noteworthy challenge.",
+            introB: "Mai, ever the stoic guard (or is she?), meets Azula's fire with a relentless barrage of knives, her loyalty perhaps tested."
         },
         'fire-nation-capital': {
-            label: "Courtly Conflict: Mai's Daggers vs. Azula's Fire in the Palace",
-            introA: "Mai, her allegiance perhaps truly tested, confronts Azula with her signature cool detachment and deadly precision in the Fire Nation capital.",
-            introB: "Azula, navigating the treacherous politics of the court, tests Mai's loyalty and her deadly skills with a fiery 'spar'."
+            label: "Courtly Conflict: Azula's Fire vs. Mai's Daggers in the Palace",
+            introA: "Azula, navigating the treacherous politics of the Fire Nation court, tests Mai's loyalty and her deadly skills with a fiery 'spar'.",
+            introB: "Mai, her allegiance perhaps torn, confronts Azula with her signature cool detachment and deadly precision in the capital."
         },
         'omashu': {
-            label: "Omashu's Defense, Silent Striker vs. Princess: Mai vs. Azula",
-            introA: "Mai, using Omashu's varied levels for cover, unleashes pinpoint volleys, her daggers a constant harassment to Azula's fiery assault.",
-            introB: "Azula's fiery conquest of Omashu is met by Mai's surprisingly effective ranged attacks from the city's stone ramparts."
+            label: "Omashu's Defense, Princess vs. Silent Striker: Azula vs. Mai",
+            introA: "Azula's fiery conquest of Omashu is met by Mai's surprisingly effective ranged attacks from the city's stone ramparts.",
+            introB: "Mai, using Omashu's varied levels for cover, unleashes pinpoint volleys, her daggers a constant harassment to Azula."
         },
         'great-divide': {
-            label: "Canyon Volley: Mai's Precision Throws vs. Azula's Fireballs",
-            introA: "Mai uses the canyon's vastness for long-range attacks, her unerring aim a deadly counter to Azula's powerful blue firebending.",
-            introB: "Azula's explosive blue fire blasts echo through the Great Divide, but Mai's silent, precise daggers find their mark from afar."
+            label: "Canyon Volley: Azula's Fireballs vs. Mai's Precision Throws",
+            introA: "Azula's explosive blue fire blasts echo through the Great Divide, but Mai's silent, precise daggers find their mark from afar.",
+            introB: "Mai uses the canyon's vastness for long-range attacks, her unerring aim a deadly counter to Azula's powerful firebending."
         },
         'kyoshi-island': {
-            label: "Island Standoff: Mai's Unseen Threat vs. Azula's Flames",
-            introA: "Mai, perhaps reconsidering her allegiances, uses Kyoshi Island's cover to her advantage, her knives a silent challenge to the Fire Princess.",
-            introB: "Azula's attempt to assert dominance on Kyoshi Island is met by Mai's stealthy and dangerously accurate projectile assault."
+            label: "Island Standoff: Azula's Flames vs. Mai's Unseen Threat",
+            introA: "Azula's attempt to assert dominance on Kyoshi Island is met by Mai's stealthy and dangerously accurate projectile assault.",
+            introB: "Mai, perhaps protecting her friends (or Zuko from Azula), uses the island's cover to her advantage, her knives a silent warning."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Stoic Assassin vs. The Fire Princess: Mai vs. Azula",
-            introA: "Mai, with her arsenal of hidden knives and unerring aim, meets Azula's fiery power with cool, deadly efficiency.",
-            introB: "Azula, with her perfect technique and ruthless ambition, faces Mai, whose emotionless precision makes her a uniquely dangerous foe."
+            label: "The Fire Princess vs. The Stoic Assassin: Azula vs. Mai",
+            introA: "Azula, with her perfect technique and ruthless ambition, faces Mai, whose emotionless precision makes her a uniquely dangerous foe.",
+            introB: "Mai, with her arsenal of hidden knives and unerring aim, meets Azula's fiery power with cool, deadly efficiency."
         }
     },
     // --- Mai vs Ozai (ozai-not-comet-enhanced) ---
@@ -403,14 +403,14 @@ export const maiArchetypeData = {
             introB: "Ozai, his laughter a prelude to destruction, prepares to engulf Mai in a fiery abyss, a testament to his absolute power."
         },
         'kyoshi-island': {
-            label: "Island of Silence, Tyrant's Roar: Mai vs. Ozai",
+            label: "Island of Silence, Tyrant's Roar: Ozai vs. Mai",
             introA: "Mai fights to protect the peaceful Kyoshi Island from Fire Lord Ozai's devastating invasion, her silent daggers a surprising defense.",
             introB: "Ozai, intending to leave no sanctuary untouched, brings his fiery wrath to Kyoshi Island, with Mai as its stoic, deadly guardian."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Stoic's Gamble vs. The Phoenix King's Fire: Mai vs. Ozai",
-            introA: "Mai, with her deadly precision and unwavering nerve, stands against the tyrannical Fire Lord Ozai, a battle of skill versus overwhelming power.",
-            introB: "Ozai, embodiment of absolute fire and destruction, prepares to crush the audacious non-bender who dares challenge his reign."
+            label: "The Phoenix King's Fire vs. The Stoic's Gamble: Ozai vs. Mai",
+            introA: "Ozai, embodiment of absolute fire and destruction, prepares to crush the audacious non-bender who dares challenge his reign.",
+            introB: "Mai, with her deadly precision and unwavering nerve, stands against the tyrannical Fire Lord Ozai, a battle of skill versus overwhelming power."
         }
     },
     // --- Mai vs Bumi (bumi) ---
@@ -702,5 +702,92 @@ export const maiArchetypeData = {
             introA: "Mai sighs, facing an identical expression of utter disinterest. This is going to be an exceptionally tedious exchange of projectiles.",
             introB: "Mai looks at Mai. 'Ugh. Can we just... not?'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "This is a waste of my time." },
+                { type: 'internal', line: "Can we just skip to the part where I win?" }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just standing around? Fine. Let's get this over with." },
+                { type: 'internal', line: "Why are we still here? This is boring. Just poke them until they get serious." }
+            ],
+            Early: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
+            Mid: [{ type: 'spoken', line: "Are you done yet? This is boring." }],
+            Late: [{ type: 'internal', line: "Fine. I guess I'll try a little harder." }],
+            'eastern-air-temple': [{ type: 'spoken', line: "The wind's annoying. Just hold still so I can finish this." }, { type: 'internal', line: "Too many places to hide here. This is inefficient." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "Just another day at the office." }, { type: 'internal', line: "So many places for targets to hide. This is going to be tedious." }],
+            'kyoshi-island': [{ type: 'spoken', line: "Great. More trees to block my view." }, { type: 'internal', line: "So many places for them to evade. This is going to be annoying." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "This is cold. And annoying. Why is nothing standing still?" }, { type: 'internal', line: "Too many moving targets, too many ice pillars. This is not my ideal battlefield." }],
+            'omashu': [{ type: 'spoken', line: "Another city. Another maze. This is going to be slow." }, { type: 'internal', line: "So many distractions. Hard to get a clean shot." }],
+            'si-wong-desert': [{ type: 'spoken', line: "At least there's no trees to block my view. Now, hold still." }, { type: 'internal', line: "Perfect visibility. Nowhere for them to hide." }],
+            'foggy-swamp': [{ type: 'spoken', line: "Ugh, this place is disgusting. Just hold still so I can end it." }, { type: 'internal', line: "The fog... the mud... this is truly wretched. Focus, Mai, just focus." }],
+            'boiling-rock': [{ type: 'spoken', line: "All this heat... and the clanking. Just try to stay in one place." }, { type: 'internal', line: "So many wires and gondolas. More ways for them to move. Annoying." }],
+            'great-divide': [{ type: 'spoken', line: "Too many rocks. Not enough clear lines of fire. This is tedious." }, { type: 'internal', line: "The echoes are annoying. And getting a clear shot is a nightmare. I hate this place." }] // UPDATED for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Are we doing this or not? Let's just finish it." },
+                { type: 'internal', line: "Finally moving. This better not take all day." }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "Enough messing around. You're going down." },
+                { type: 'internal', line: "Now they're serious. Good. Less waiting around." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "This is taking too long. Time to actually try." },
+                { type: 'internal', line: "The battle's intensifying. Still boring, but at least it's faster." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "Just surrender. It'll save us both some time." },
+                { type: 'internal', line: "This is the final stretch. Don't miss. I want to go home." }
+            ],
+        },
+        onIntentSelection: {
+            OpeningMoves: { Early: [{ type: 'internal', line: "Let's see how long it takes before {opponent.s} gets bored and makes a mistake." }] },
+            PressAdvantage: { Mid: [{ type: 'spoken', line: "If you’re going to surrender, now’s your chance." }] },
+            DesperateGambit: { Late: [{ type: 'spoken', line: "Guess I have to try now. Great." }] }
+        },
+        onMoveExecution: {
+            'Pinning Strike': { Critical: { Generic: [{ type: 'spoken', line: "Stay put." }] } },
+            'Tactical Reposition': {
+                Critical: { Generic: [{ type: 'spoken', line: "Barely worth the effort." }] },
+                Weak: { Generic: [{ type: 'internal', line: "This is getting annoying." }] }
+            }
+        },
+        onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }] } },
+        onPrediction: {
+            correct: { Generic: [{ type: 'spoken', line: "Predictable. I could have thrown that with my eyes closed." }] },
+            wrong: { Generic: [{ type: 'internal', line: "Alright, that was actually clever. Doesn’t mean I care." }] }
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "Now this is actually annoying." }] },
+            shaken: { Late: [{ type: 'internal', line: "Just breathe. None of this really matters anyway." }] },
+            broken: { Late: [{ type: 'spoken', line: "You win. Happy now?" }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "Another broken window. This is getting messy." }, { type: 'spoken', line: "Can you try not to ruin everything? Some of us prefer order." }] },
+            observingDamage: { Generic: [{ type: 'internal', line: "Ugh. Now there's debris everywhere. This is a hassle." }, { type: 'spoken', line: "Are you done making a scene? Some of us have plans." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "This is getting out of hand. I need to end this quickly." }, { type: 'spoken', line: "You're really going to pay for this mess." }] },
+            thrivingInDamage: []
+        },
+        onVictory: { Default: { Generic: [{ line: "That's it. Are we done now?" }] } },
+        relationships: {
+            'azula': { narrative: { onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } } },
+            'ty-lee': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Ty Lee, can we not do this?" }] } } }
+        }
+    },
+    techniques: [
+        { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
+        { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'], collateralImpact: 'none' },
+        { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, requiresArticle: true, element: 'physical', moveTags: ['defensive_stance', 'utility_block', 'trap_delayed'], collateralImpact: 'none' },
+        { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise', 'humiliation'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 }, collateralImpact: 'low' },
+        { name: "Ricochet Shot", verb: 'launch', object: 'ricochet shot', type: 'Offense', power: 55, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'unpredictable', 'bypasses_defense'], collateralImpact: 'low' },
+        { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'area_of_effect', 'requires_opening'], collateralImpact: 'medium' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["That's it. Are we done now?"], postWin_overwhelming: ["You were never a threat. Just... annoying."], postWin_specific: { 'ty-lee': "Try to flip your way out of that one." } },
+    relationships: {}
 };

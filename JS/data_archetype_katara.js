@@ -16,7 +16,7 @@ export const kataraArchetypeData = {
         },
         'northern-water-tribe': {
             label: "Home Ice Advantage: Katara Teaches Sokka a Lesson",
-            introA: "Katara, in her element, patiently (or not-so-patiently) demonstrates superior waterbending to her overconfident brother.",
+            introA: "Katara, in her element, patiently (or not-so- patiently) demonstrates superior waterbending to her overconfident brother.",
             introB: "Sokka, convinced his latest 'tactic' will work, braces for his sister's inevitable icy counter-attack."
         },
         'ba-sing-se': {
@@ -146,7 +146,7 @@ export const kataraArchetypeData = {
             introB: "Toph, feeling Katara's desperation for water, uses the shifting sands to trap and disorient her waterbending opponent."
         },
         'foggy-swamp': {
-            label: "Murky Mayhem: Katara's Plantbending vs. Toph's Mud Surfing",
+            label: "Mudslide Mayhem: Katara's Plantbending vs. Toph's Mud Surfing",
             introA: "Katara, tapping into the swamp's unique energies, manipulates vines and water against Toph's earth-shaking power.",
             introB: "Toph, gleefully surfing on waves of mud, turns the soggy swamp into her personal playground, challenging Katara's control."
         },
@@ -702,5 +702,105 @@ export const kataraArchetypeData = {
             introA: "Katara faces her own image, a duel of water whips, ice shards, and profound elemental understanding.",
             introB: "Katara sees Katara. 'Alright, let's see whose waterbending is truly superior! Hope I don't get my hair wet.'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "Alright, no holding back! Let's do this!" },
+                { type: 'internal', line: "Deep breaths, Katara. You're a waterbender, you've got this." }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just testing the waters... literally!" },
+                { type: 'internal', line: "Don't go all in yet. Observe. Flow like water, be patient." }
+            ],
+            Early: [{ type: 'spoken', line: "You want a fight? You've got one." }, { type: 'internal', line: "Remember your training. Use their aggression against them. Be like the moon." }],
+            Mid: [{ type: 'spoken', line: "I'm not just a healer. I'm a warrior!" }],
+            Late: [{ type: 'action', line: "summons a massive wave, her eyes blazing with determination." }],
+            'eastern-air-temple': [{ type: 'spoken', line: "There may not be much water, but I'll make do with what I have!" }, { type: 'internal', line: "The air is thin, but I can feel moisture here. Just enough to fight." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "This is for the world! For all the people you've hurt!" }, { type: 'internal', line: "So much fire... I have to stay focused. Water will find a way." }],
+            'kyoshi-island': [{ type: 'spoken', line: "The ocean's strength is with me! You won't harm this peaceful island!" }, { type: 'internal', line: "Kyoshi's spirit fills me. I will protect this sanctuary." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "You're in our home now. Prepare to face the power of the North!" }, { type: 'internal', line: "With so much water, I am unstoppable here." }],
+            'omashu': [{ type: 'spoken', line: "Omashu's citizens need me! I have to find water, fast!" }, { type: 'internal', line: "This city is so dry... I'll have to conserve every drop." }],
+            'si-wong-desert': [{ type: 'spoken', line: "The heat is unbearable... But I won't give up! I'll find water somewhere!" }, { type: 'internal', line: "This is a nightmare. Barely any water. I have to be smart, I can't just fight." }],
+            'foggy-swamp': [{ type: 'spoken', line: "I can feel the swamp's pulse... it's like a living thing. I will use its power, but gently." }, { type: 'internal', line: "So much life here. I must protect it, even as I fight." }],
+            'boiling-rock': [{ type: 'spoken', line: "Boiling water... I can use this, but... I must be careful!" }, { type: 'internal', line: "This place is a cauldron. I can manipulate the steam, but not without a cost." }],
+            'great-divide': [{ type: 'spoken', line: "So little water here... I'll have to make every drop count against you!" }, { type: 'internal', line: "It's so dry. I'll need to be incredibly precise, and use my canteen." }] // NEW for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Alright, warm-up's done. Let's see what you've really got!" },
+                { type: 'internal', line: "The probing begins. I need to be fluid, find their weaknesses." }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "The real fight begins now! You won't get past me!" },
+                { type: 'internal', line: "Okay, the stakes are rising. Time to push back with everything I've learned." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "Things are really heating up! You ready for this, {opponentName}?" },
+                { type: 'internal', line: "The battle's intensifying. I need to remain calm, like still water, to see my opening." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "It's all or nothing! I won't let you win!" },
+                { type: 'internal', line: "Last chance. I'll fight until my last breath for what's right!" }
+            ],
+        },
+        onIntentSelection: {
+            PressAdvantage: { Mid: [{ type: 'internal', line: "They're on the defensive. Now's my chance to press the attack." }] },
+            DesperateGambit: { Late: [{ type: 'spoken', line: "I'm ending this. Right now." }] },
+            BreakTheTurtle: { Generic: [{ type: 'internal', line: "They think they can just hide? I'll tear that wall down." }] }
+        },
+        onMoveExecution: {
+            'Bloodbending': { Critical: { Late: [{ type: 'spoken', line: "I'm sorry it had to be this way." }] } },
+            'Tactical Reposition': {
+                Critical: { Generic: [{ type: 'spoken', line: "I'll control the flow of this fight!" }] },
+                Weak: { Generic: [{ type: 'internal', line: "Too slow. Need to be more fluid." }] }
+            }
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "Can't get sloppy. My family is counting on me." }] },
+            shaken: { Mid: [{ type: 'internal', line: "His face... No, don't think about Jet. Focus on the now!" }] },
+            broken: { Late: [{ type: 'spoken', line: "You won't... take anyone else from me!" }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "I have to be careful not to hurt anything else." }, { type: 'spoken', line: "This is getting out of hand! I need to control my power!" }] },
+            observingDamage: { Generic: [{ type: 'spoken', line: "Stop! This isn't what bending is for!" }, { type: 'internal', line: "My home... this world... it shouldn't be ravaged like this." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "This feels wrong... so wrong. I can't think straight!" }, { type: 'spoken', line: "All this chaos... it's overwhelming!" }] },
+            thrivingInDamage: []
+        },
+        onVictory: {
+            Finisher: { Generic: [{ line: "It's over. You're beaten." }] },
+            Humiliation: { Generic: [{ line: "That's what happens when you underestimate a waterbender from the Southern Water Tribe." }] },
+            Default: { Generic: [{ line: "That's how you do it, for my family, for my tribe!" }] }
+        },
+        relationships: {
+            'azula': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }] } } }
+        }
+    },
+    techniquesFull: [
+        { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
+        { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
+        { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
+        { name: "Ice Prison", verb: 'create', object: 'ice prison', type: 'Utility', power: 60, requiresArticle: true, element: 'ice', moveTags: ['utility_control', 'debuff_disable', 'construct_creation', 'single_target'], setup: { name: 'Immobilized', duration: 2, intensity: 1.4 }, collateralImpact: 'low' },
+        { name: "Tidal Wave", verb: 'summon', object: 'massive tidal wave', type: 'Finisher', power: 90, requiresArticle: true, element: 'water', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'channeled', 'requires_opening'], collateralImpact: 'high' },
+        { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'], collateralImpact: 'none' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    techniquesCanteen: [
+        { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from her canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
+        { name: "Small Ice Darts", verb: 'form', object: 'small ice darts from her canteen', type: 'Offense', power: 35, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'limited_resource', 'precise'], collateralImpact: 'none', isCanteenMove: true },
+        { name: "Canteen Water Shield", verb: 'create', object: 'a small water shield from her canteen', type: 'Defense', power: 25, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
+        { name: "Slippery Puddle", verb: 'spill', object: 'water to create a slippery puddle', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
+        { name: "Canteen Whip", verb: 'lash', object: 'out with a small water whip from her canteen', type: 'Offense', power: 25, element: 'water', moveTags: ['melee_range', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    techniquesEasternAirTemple: [
+        { name: "Air Moisture Whip", verb: 'form', object: 'a whip from condensed air moisture', type: 'Offense', power: 35, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'limited_resource'], collateralImpact: 'none' },
+        { name: "Condensed Mist Shield", verb: 'gather', object: 'mist into a dense shield', type: 'Defense', power: 30, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none' },
+        { name: "Ground Moisture Trip", verb: 'extract', object: 'moisture to create a slippery patch', type: 'Utility', power: 25, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
+        { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from her canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"], postWin_specific: { 'azula': "You're beaten. It's over." } },
+    relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1.0, resilienceModifier: 1.1 }, 'azula': { relationshipType: "bitter_rivalry", stressModifier: 1.5, resilienceModifier: 1.0 } }
 };

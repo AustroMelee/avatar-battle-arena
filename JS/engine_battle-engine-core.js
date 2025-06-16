@@ -7,6 +7,7 @@ import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
 // --- UPDATED IMPORTS ---
 import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases.js'; // Corrected import path (now on one line)
+import { locations } from './locations.js'; // NEW: Import locations for locationPhaseOverrides
 // --- END UPDATED IMPORTS ---
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
@@ -26,6 +27,8 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 export const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
 let charactersMarkedForDefeat = new Set();
+// NEW: Define a higher total turn limit for the battle
+const MAX_TOTAL_TURNS = 25;
 
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
     if (typeof rule.weightingLogic === 'function') {
@@ -152,8 +155,11 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
     const rulesToCheck = [];
     let aDefeatWasMarkedByThisCheck = false;
     let curbstompNarrativeGeneratedThisRule = false;
+    const ruleCurrentPhase = battleState.currentPhase; // NEW: Get current phase for rule gating
 
     Object.values(universalMechanics).forEach(rule => {
+        // NEW: Phase Check for universal rules
+        if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
         if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
         if (rule.characterId === attacker.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: true, actualAttacker: attacker, actualTarget: defender });
         if (rule.characterId === defender.id) rulesToCheck.push({ ...rule, source: 'universal', forAttacker: false, actualAttacker: attacker, actualTarget: defender });
@@ -161,6 +167,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
 
     if (locationCurbstompRules[locationId]) {
         locationCurbstompRules[locationId].forEach(rule => {
+            // NEW: Phase Check for location rules
+            if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
             if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
             let applies = false;
             let ruleActualAttacker = attacker;
@@ -183,12 +191,16 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
 
     if (characterCurbstompRules[attacker.id]) {
         characterCurbstompRules[attacker.id].forEach(rule => {
+            // NEW: Phase Check for character rules
+            if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
             if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
             rulesToCheck.push({ ...rule, source: 'character', forAttacker: true, actualAttacker: attacker, actualTarget: defender });
         });
     }
     if (characterCurbstompRules[defender.id]) {
         characterCurbstompRules[defender.id].forEach(rule => {
+            // NEW: Phase Check for character rules
+            if (rule.canTriggerInPhase && !rule.canTriggerInPhase.includes(ruleCurrentPhase)) return;
             if (isPreBattleCheck && !rule.canTriggerPreBattle) return;
             if (rule.outcome.type.includes("loss_character") || rule.outcome.type.includes("self_sabotage") || rule.outcome.type.includes("disadvantage") || rule.outcome.type.includes("loss_weighted_character") || rule.outcome.type.includes("instant_death_character")) {
                  rulesToCheck.push({ ...rule, source: 'character', forAttacker: false, actualAttacker: attacker, actualTarget: defender });
@@ -207,6 +219,22 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
             characterForRuleApplication.curbstompRulesAppliedThisBattle.has(appliedRuleKey + "_reacted_override")) {
             continue;
         }
+
+        // NEW: Severity Gating: Control which severity levels can trigger in which phase
+        const ruleSeverity = rule.severity || 'lethal'; // Default to lethal if not specified
+        if (ruleCurrentPhase === BATTLE_PHASES.PRE_BANTER) { // No lethal or crippling curbstomps in PreBanter
+            if (ruleSeverity === 'lethal' || ruleSeverity === 'crippling') {
+                // console.log(`[Curbstomp Gating]: Rule ${rule.id} (severity: ${ruleSeverity}) skipped in PreBanter phase.`);
+                continue;
+            }
+        }
+        if (ruleCurrentPhase === BATTLE_PHASES.POKING) {
+            if (ruleSeverity === 'lethal' || ruleSeverity === 'crippling') {
+                // console.log(`[Curbstomp Gating]: Rule ${rule.id} (severity: ${ruleSeverity}) skipped in Poking phase.`);
+                continue; // Lethal/Crippling curbstomps generally disabled in Poking phase
+            }
+        }
+        // Early, Mid, Late phases: By default, allow all severities unless explicitly disabled (which isn't currently done here).
 
         let ruleTriggered = false;
         let effectiveChance = rule.triggerChance;
@@ -227,7 +255,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
             let universalMet = false;
             rule.conditions.forEach(cond => {
                 if (cond.type === "target_technique_speed" && opponentForRuleApplication.lastMove?.speed === cond.value) {
-                    effectiveChance = cond.triggerChance; universalMet = true;
+                    effectiveChance = cond.value; universalMet = true; // FIX: cond.value should be used for triggerChance not just 'value'
                 }
                 if (cond.type === "location_property" && (battleState.location?.tags || []).includes(cond.property)) {
                     effectiveChance = Math.min(rule.maxChance || 1, (effectiveChance || rule.triggerChance) + (cond.modifier || 0));
@@ -534,10 +562,18 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     let loserId = null;
     let turn = 0;
 
+    // Initialization: Initialize phase controller state
     let phaseState = initializeBattlePhaseState();
-    fighter1.aiLog.push(...phaseState.phaseLog);
-    fighter2.aiLog.push(...phaseState.phaseLog);
-
+    // NEW: Apply location-specific phase overrides at battle start
+    const locationOverrides = locations[locId]?.phaseOverrides;
+    if (locationOverrides) {
+        if (locationOverrides.pokingDuration !== undefined) {
+            phaseState.pokingDuration = locationOverrides.pokingDuration;
+            fighter1.aiLog.push(`[Phase Override]: Poking duration set to ${phaseState.pokingDuration} due to location ${locId}.`);
+            fighter2.aiLog.push(`[Phase Override]: Poking duration set to ${phaseState.pokingDuration} due to location ${locId}.`);
+        }
+        // Future: Other phase overrides could go here
+    }
     let environmentState = { damageLevel: 0, lastDamageSourceId: null, specificImpacts: new Set() };
     const locationData = locationConditions[locId];
 
@@ -546,7 +582,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         location: locationData,
         locationTags: locationData?.tags || [],
         turn: 0,
-        currentPhase: phaseState.currentPhase,
+        currentPhase: phaseState.currentPhase, // Set initial phase in battle state
         isDay: timeOfDay === 'day',
         isNight: timeOfDay === 'night',
         isFullMoon: conditions.isNight && Math.random() < 0.25,
@@ -561,24 +597,28 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         fighter1Escalation: fighter1.escalationState,
         fighter2Escalation: fighter2.escalationState
     };
+    fighter1.aiLog.push(`Battle started in ${phaseState.currentPhase} Phase.`);
+    fighter2.aiLog.push(`Battle started in ${phaseState.currentPhase} Phase.`);
 
-    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase, locationId: locId }); // Pass locationId
-    // OLD: if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null));
-    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState)); // FIX: Pass battleState
 
-    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase, locationId: locId }); // Pass locationId
-    // OLD: if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, fighter1.environmentState, locationData, phaseState.currentPhase, true, null));
-    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, fighter1.environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState)); // FIX: Pass battleState
+    // --- Pre-Battle Narrative (PRE_BANTER Phase) ---
+    // Fetch and log initial dialogue/introductions for PreBanter
+    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: currentBattleState });
+    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
 
+    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: currentBattleState });
+    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
+
+    // Initial curbstomp check for rules allowed pre-battle
     if (checkCurbstompConditions(initiator, responder, locId, currentBattleState, battleEventLog, true)) {
         initiator.aiLog.push(`[Pre-Battle Curbstomp Check]: ${initiator.name} OR ${responder.name} triggered or was affected by a curbstomp rule.`);
     }
-    if (!charactersMarkedForDefeat.has(initiator.id) && !charactersMarkedForDefeat.has(responder.id)) {
+    if (!charactersMarkedForDefeat.has(initiator.id) && !charactersMarkedForDefeat.has(responder.id)) { // Only check defender if initiator wasn't KO'd
       if (checkCurbstompConditions(responder, initiator, locId, currentBattleState, battleEventLog, true)) {
         responder.aiLog.push(`[Pre-Battle Curbstomp Check]: ${responder.name} OR ${initiator.name} triggered or was affected by a curbstomp rule.`);
       }
     }
-
+    // Evaluate outcome after pre-battle curbstomps
     let terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
     battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
@@ -586,7 +626,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     isStalemate = terminalOutcome.isStalemate;
 
 
-    for (turn = 0; turn < 6 && !battleOver; turn++) {
+    for (turn = 0; turn < MAX_TOTAL_TURNS && !battleOver; turn++) {
         currentBattleState.turn = turn;
         initiator.currentTurn = turn;
         responder.currentTurn = turn;
@@ -599,21 +639,32 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         currentBattleState.characterReceivedCriticalHit = false;
         currentBattleState.characterLandedStrongOrCriticalHitLastTurn = false;
 
-
-        const phaseChanged = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn);
+        // At the start of each turn, check for phase transitions
+        const phaseChanged = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn, locId); // Pass locId
         if (phaseChanged) {
+            // Log the end of the previous phase in the summary
+            if (phaseState.phaseSummaryLog.length > 0) { // Should always have something if a new phase starts
+                const lastSummaryEntry = phaseState.phaseSummaryLog[phaseState.phaseSummaryLog.length - 1];
+                fighter1.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
+                fighter2.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
+            }
+        
             fighter1.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
             fighter2.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
             currentBattleState.currentPhase = phaseState.currentPhase;
-            const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase) || phaseDefinitions[0];
+            // Add phase header event to battleEventLog
+            const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
             battleEventLog.push({
                 type: 'phase_header_event',
                 phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji,
                 phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`,
-                html_content: phaseTemplates.header
-                    .replace('{phaseDisplayName}', currentPhaseInfo.name)
-                    .replace('{phaseEmoji}', currentPhaseInfo.emoji)
+                html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji)
             });
+            // NEW: Inject narrative for phase transition (e.g., "The air thickens...")
+            const phaseTransitionQuote1 = findNarrativeQuote(fighter1, fighter2, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+            if (phaseTransitionQuote1) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
+            const phaseTransitionQuote2 = findNarrativeQuote(fighter2, fighter1, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+            if (phaseTransitionQuote2) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
         }
 
         let turnSpecificEventsForLog = [];
@@ -648,8 +699,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             currentBattleState.fighter1Escalation = fighter1.escalationState;
             currentBattleState.fighter2Escalation = fighter2.escalationState;
 
-
-            if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) {
+            // NEW: In-turn curbstomp check, passes current phase
+            // This now relies on `checkCurbstompConditions` filtering by `canTriggerInPhase`
+            if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) { // false for not pre-battle
                 currentAttacker.aiLog.push(`[Curbstomp Check]: ${currentAttacker.name} OR ${currentDefender.name} triggered or was affected by a curbstomp rule during turn segment.`);
                 terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
                 if (terminalOutcome.battleOver) { battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate; return; }
@@ -828,6 +880,21 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
         };
 
+        const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER); // PRE_BANTER is purely narrative
+
+        if (!isNarrativeOnlyTurn) {
+            processTurnSegment(initiator, responder);
+            if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
+            processTurnSegment(responder, initiator);
+            if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
+        } else {
+            // Log a message for narrative-only turns, but only once per narrative turn
+            if (initiator.id === fighter1.id) { // Only log once per full turn (when initiator is F1)
+                battleEventLog.push({ type: 'narrative_turn_marker', text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`, html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>`});
+            }
+        }
+        // ... rest of turn loop: environment state, escalation updates, etc. ...
+
         environmentState.specificImpacts.clear();
         const currentLocData = locationConditions[locId];
         if (currentLocData && currentLocData.damageThresholds && environmentState.damageLevel > 0) {
@@ -844,16 +911,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
         currentBattleState.environmentState = environmentState;
 
-        currentBattleState.characterLandedStrongOrCriticalHitLastTurn = initiator.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || initiator.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
-        processTurnSegment(initiator, responder);
-
-        if (battleOver) {
-             battleEventLog.push(...turnSpecificEventsForLog);
-             break;
+        if (!isNarrativeOnlyTurn) { // Only update for combat turns
+            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = initiator.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || initiator.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
         }
-
-        currentBattleState.characterLandedStrongOrCriticalHitLastTurn = responder.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || responder.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
-        processTurnSegment(responder, initiator);
 
 
         if (environmentState.damageLevel > 0 && environmentState.specificImpacts.size > 0) {
@@ -943,13 +1003,19 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         [initiator, responder] = [responder, initiator];
     }
 
+    // NEW: Before final evaluateTerminalState and summary, log the last phase's duration if battle ends mid-phase.
+    if (phaseState.phaseSummaryLog.length === 0 || phaseState.phaseSummaryLog[phaseState.phaseSummaryLog.length - 1].phase !== phaseState.currentPhase) {
+        // Only add if the current phase hasn't already been summarized (e.g., if battle ends mid-phase)
+        phaseState.phaseSummaryLog.push({ phase: phaseState.currentPhase, turns: phaseState.turnInCurrentPhase });
+    }
+
     terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
     battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
 
-    if (!battleOver && turn >= 6) {
+    if (!battleOver && turn >= MAX_TOTAL_TURNS) { // Changed to MAX_TOTAL_TURNS
         isStalemate = (fighter1.hp === fighter2.hp);
         if (!isStalemate) {
             winnerId = (fighter1.hp > fighter2.hp) ? fighter1.id : fighter2.id;
@@ -1039,7 +1105,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             // The generateCurbstompNarration already provides good success messages.
         } else {
             const isKOByHp = finalLoserFull.hp <= 0;
-            const isTimeoutVictoryLoopFinished = turn >= 6;
+            const isTimeoutVictoryLoopFinished = turn >= MAX_TOTAL_TURNS; // Changed to MAX_TOTAL_TURNS
 
             // Check if the battle ended due to a standard KO, and if it wasn't already covered by a curbstomp narrative for the winner
             const standardKOFlow = isKOByHp && (!lastCurbstompEvent || lastCurbstompEvent.actorId !== finalWinnerFull.id);
@@ -1067,7 +1133,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
         }
 
-    } else if (fighter1.hp === fighter2.hp && turn >= 6 && !winnerId && !loserId) {
+    } else if (fighter1.hp === fighter2.hp && turn >= MAX_TOTAL_TURNS && !winnerId && !loserId) { // Changed to MAX_TOTAL_TURNS
         isStalemate = true;
         battleEventLog.push({ type: 'draw_result_event', text: "The battle is a DRAW!", html_content: phaseTemplates.drawResult });
         fighter1.summary = "The battle ended in a perfect draw, neither giving an inch.";
@@ -1101,6 +1167,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         loserId: loserId,
         isDraw: isStalemate,
         finalState: { fighter1: finalFighter1State, fighter2: finalFighter2State },
-        environmentState
+        environmentState,
+        phaseSummary: phaseState.phaseSummaryLog // NEW
     };
 }

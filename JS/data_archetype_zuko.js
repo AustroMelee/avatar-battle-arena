@@ -118,9 +118,9 @@ export const zukoArchetypeData = {
             introB: "Aang, channeling Kyoshi's spirit of defiance, uses his airbending to defend the island from Zuko's relentless attacks."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Hunted and The Hunter: Zuko vs. Aang",
-            introA: "Prince Zuko, driven by his quest to capture the Avatar, unleashes his powerful and aggressive firebending.",
-            introB: "Aang, the young Avatar relying solely on airbending, uses his incredible agility and speed to evade Zuko's fiery pursuit."
+            label: "Wind and Flame: A Fateful Encounter",
+            introA: "Zuko, the hunted and the hunter, unleashes his firebending, a raw display of power.",
+            introB: "Aang, the young Avatar, relies on his airbending agility to evade Zuko's fiery pursuit."
         }
     },
     // --- Zuko vs Katara (katara) ---
@@ -162,7 +162,7 @@ export const zukoArchetypeData = {
         },
         'omashu': {
             label: "City of Stone, Clash of Elements: Zuko vs. Katara",
-            introA: "Zuko's fire rages against Omashu's ancient stone as he relentlessly pursues Katara through the labyrinthine city.",
+            introA: "Zuko, his fire raging against Omashu's ancient stone, relentlessly pursues Katara through the labyrinthine city.",
             introB: "Katara uses Omashu's waterways and structures to her advantage, her water a stark contrast to Zuko's consuming fire."
         },
         'great-divide': {
@@ -172,7 +172,7 @@ export const zukoArchetypeData = {
         },
         'kyoshi-island': {
             label: "Island Ablaze, Ocean's Fury: Zuko vs. Katara",
-            introA: "Zuko, his pursuit of honor (or the Avatar) leading him to Kyoshi, finds Katara a formidable, watery obstacle.",
+            introA: "Zuko, his pursuit of the Avatar (and his own honor) leading him to Kyoshi, finds Katara a formidable, watery obstacle.",
             introB: "Katara, defending the peaceful island, calls upon the ocean's might to quench Zuko's invading flames."
         },
         '_DEFAULT_LOCATION_': {
@@ -332,7 +332,7 @@ export const zukoArchetypeData = {
         'fire-nation-capital': {
             label: "Redemption's Fire: Zuko vs. Fire Lord Ozai",
             introA: "Zuko, having embraced his true destiny, confronts his tyrannical father, Fire Lord Ozai. He knows this battle may come down to redirecting Ozai's terrifying lightning.",
-            introB: "Ozai, facing his defiant son in the capital, unleashes his terrifying firebending might. He knows of Zuko's redirection and will be strategic, or overwhelmingly powerful, with his lightning."
+            introB: "Ozai, facing his defiant son in the capital, unleashes his terrifying firebending might. He is aware of Zuko's redirection skill and will be strategic, or overwhelmingly powerful, with his lightning."
         },
         'omashu': {
             label: "Omashu's Liberation, Son's Duty: Zuko vs. Ozai",
@@ -702,5 +702,89 @@ export const zukoArchetypeData = {
             introA: "Zuko confronts his own conflicted self, a battle of past shame against future hope, fire against fire.",
             introB: "Zuko sees Zuko. 'Is this what honor feels like? Or just more confusion? Let's find out!'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "My honor demands this fight! Prepare yourself!" },
+                { type: 'internal', line: "Show no hesitation. This is my path." }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just testing your defenses! Don't think I'm going easy on you!" },
+                { type: 'internal', line: "Patience, Zuko. Observe. Find an opening before committing." }
+            ],
+            Early: [{ type: 'spoken', line: "I must restore my honor!" }, { type: 'internal', line: "Uncle's training... breathe. The dragon's breath comes from the spirit." }],
+            Mid: [{ type: 'spoken', line: "I won't let you win! I fight for something more now!" }],
+            Late: [{ type: 'action', line: "unleashes a desperate, roaring flame, his eyes filled with resolve." }],
+            'eastern-air-temple': [{ type: 'spoken', line: "This temple is a sacred place. I won't let my fire defile it!" }, { type: 'internal', line: "The winds here... they make my flames wild. Focus, Zuko!" }],
+            'fire-nation-capital': [{ type: 'spoken', line: "This is my home. I will defend it!" }, { type: 'internal', line: "The honor of my nation... it rests on this." }],
+            'kyoshi-island': [{ type: 'spoken', line: "My path leads here. I will complete my mission." }, { type: 'internal', line: "Peaceful island... I must be careful not to cause too much disruption." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "The cold... it reminds me of my past failures. No more!" }, { type: 'internal', line: "My fire feels weak here. I need to be smarter, not just hotter." }],
+            'omashu': [{ type: 'spoken', line: "I will not let this city fall to ruin, not by my hands." }, { type: 'internal', line: "These chutes offer a chance to corner them, but I must be careful with my fire." }],
+            'si-wong-desert': [{ type: 'spoken', line: "This heat... it amplifies my rage. Come and face me!" }, { type: 'internal', line: "The sun burns. My fire burns hotter. I will not fail here." }],
+            'foggy-swamp': [{ type: 'spoken', line: "This place is... disorienting. But my fire will cut through the illusions!" }, { type: 'internal', line: "The dampness is irritating, but I will not let it extinguish my resolve." }],
+            'boiling-rock': [{ type: 'spoken', line: "This prison holds too much pain. I will not add to it with needless destruction." }, { type: 'internal', line: "Steam and metal. I can use this. Focus, Zuko, focus." }],
+            'great-divide': [{ type: 'spoken', line: "My fire will burn through this chasm and leave you nowhere to hide!" }, { type: 'internal', line: "The sheer cliffs offer no escape. My fire can reach anywhere here." }] // NEW for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Alright, the time for pleasantries is over! Let's get to it!" },
+                { type: 'internal', line: "This is merely the first step. Test their limits, but save your strength." }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "Now the real fight begins! You won't escape my flames!" },
+                { type: 'internal', line: "The battle has escalated. I must be precise and decisive." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "This is getting intense! Don't hold back now!" },
+                { type: 'internal', line: "The fight is reaching its peak. My resolve must burn brighter than ever!" }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "It's all or nothing! This ends now!" },
+                { type: 'internal', line: "This is the final push. I will not falter. My honor demands victory!" }
+            ],
+        },
+        onIntentSelection: {
+            PressAdvantage: { Mid: [{ type: 'internal', line: "Now. Push hard while they're off balance." }] },
+            CautiousDefense: { Generic: [{ type: 'internal', line: "I can't be reckless. I need to wait for the right moment." }] }
+        },
+        onManipulation: {
+            asVictim: { Generic: [{ type: 'internal', line: "Is {opponent.s} right? Am I weak? No! I choose my own destiny!" }] },
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "Why can't I land a clean hit? Am I not strong enough?" }] },
+            shaken: { Late: [{ type: 'internal', line: "{opponent.p} voice... sounds just like Azula's. Get it together!" }] },
+            broken: { Late: [{ type: 'spoken', line: "I'm... so confused..." }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "I have to be careful. I don't want to cause unnecessary destruction." }, { type: 'spoken', line: "This isn't about burning everything down. It's about victory." }] },
+            observingDamage: { Generic: [{ type: 'internal', line: "This destruction... it reminds me of my past. I hate it." }, { type: 'spoken', line: "What is the point of this senseless tearing down?" }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "All this wreckage... it's like a mirror of my own turmoil!" }, { type: 'spoken', line: "I can't stand this! It's too much like... back then!" }] },
+            thrivingInDamage: []
+        },
+        onVictory: { Default: { Generic: [{ line: "I fought for my own path. And I won." }] }, postWin_specific: { 'azula': "It's over, Azula. I've found my own strength." } },
+        onMoveExecution: {
+            'Tactical Reposition': {
+                Critical: { Generic: [{ type: 'spoken', line: "My training pays off!" }] },
+                Weak: { Generic: [{ type: 'internal', line: "Sloppy. I need more focus." }] }
+            }
+        },
+        relationships: {
+            'azula': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } } },
+            'ozai-not-comet-enhanced': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "I'm not afraid of you anymore, Father." }] } } }
+        }
+    },
+    techniques: [
+        { name: "Fire Daggers", verb: 'throw', object: 'volley of fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
+        { name: "Flame Sword", verb: 'ignite', object: 'his dual dao swords', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'channeled', 'precise'], collateralImpact: 'none' },
+        { name: "Fire Shield", verb: 'create', object: 'swirling fire shield', type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense'], collateralImpact: 'none' },
+        { name: "Dragon's Breath", verb: 'unleash', object: 'sustained stream of fire', type: 'Offense', power: 70, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect', 'channeled'], collateralImpact: 'medium' },
+        { name: "Fire Whip", verb: 'lash', object: 'out with a whip of fire', type: 'Offense', power: 60, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
+        { name: "Redemption's Fury", verb: 'overwhelm', object: 'his opponent with a flurry of attacks', type: 'Finisher', power: 85, element: 'fire', moveTags: ['melee_range', 'area_of_effect_small', 'versatile', 'requires_opening'], collateralImpact: 'medium' },
+        { name: "Lightning Redirection", verb: 'redirect', object: 'the incoming lightning', type: 'ReactiveDefense', power: 0, element: 'lightning', description: "Zuko can attempt to redirect incoming lightning attacks.", moveTags: ['reactive', 'lightning_redirection', 'single_target_defense'], collateralImpact: 'low' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'fire', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["I fought for my own path. And I won."], postWin_overwhelming: ["My fire burns hotter because I fight for something real!"], postWin_specific: { 'azula': "It's over, Azula. I've found my own strength." } },
+    relationships: { 'azula': { relationshipType: "sibling_rivalry_inferior", stressModifier: 2.0, resilienceModifier: 0.8 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_defiance", stressModifier: 1.8, resilienceModifier: 1.2 }, 'iroh': { relationshipType: "mentor_respect", stressModifier: 0.5, resilienceModifier: 1.5 } }
 };

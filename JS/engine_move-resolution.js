@@ -10,6 +10,7 @@ import { locationConditions } from './location-battle-conditions.js';
 import { getMomentumCritModifier } from './engine_momentum.js';
 import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js';
 import { checkReactiveDefense } from './engine_reactive-defense.js';
+import { BATTLE_PHASES } from './engine_battle-phase.js'; // NEW: Import BATTLE_PHASES
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -341,7 +342,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     };
 }
 
-export function getAvailableMoves(actor, conditions) {
+export function getAvailableMoves(actor, conditions, currentPhase) { // Add currentPhase param
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
     if (!actor || typeof actor !== 'object' || !actor.id) {
         return [struggleMove];
@@ -432,8 +433,20 @@ export function getAvailableMoves(actor, conditions) {
         return Object.entries(usageRequirements).every(([key, val]) => conditions[key] === val);
     });
 
+    // NEW: Poking Phase restrictions
+    if (currentPhase === BATTLE_PHASES.POKING) {
+        available = available.filter(move => {
+            // Only allow low-power offense, utility, defensive, and repositioning moves
+            if (move.type === 'Offense' && (move.power || 0) > 40) return false; // Max power 40 for probing offense
+            if (move.type === 'Finisher') return false; // No finishers in poking phase
+            if (move.moveTags.includes('highRisk')) return false; // No high-risk moves
+            // Allow Utility and Defense moves without power restriction
+            return true;
+        });
+    }
+    
     if (available.length === 0) {
-        available.push(struggleMove);
+        available.push(struggleMove); // Fallback to struggle if all moves restricted
     }
     return available;
 }

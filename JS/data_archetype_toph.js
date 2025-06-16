@@ -30,9 +30,9 @@ export const tophArchetypeData = {
             introB: "Sokka, already regretting not bringing more water, is further dismayed as Toph manipulates the very desert beneath him."
         },
         'foggy-swamp': {
-            label: "Muck Monster Mash: Toph's Earth vs. Sokka's 'Strategy'",
+            label: "Muck & Mayhem: Toph's 'Stealth' vs. Toph's Ground Truth",
             introA: "Toph, unimpressed by the swamp's spooky ambiance, uses mudslides and vine-trips to counter Sokka's 'stealthy' approach.",
-            introB: "Sokka, convinced Toph is some kind of earth-controlling swamp monster, bravely (and foolishly) attacks with his boomerang."
+            introB: "Sokka attempts to sneak through the murky swamp, convinced the soft ground and fog will hide him from Toph."
         },
         'boiling-rock': {
             label: "Rock-Solid Breakout (or Beatdown): Toph vs. Sokka",
@@ -60,9 +60,9 @@ export const tophArchetypeData = {
             introB: "Sokka tries to stand firm against Toph's earthbending, but it's like trying to argue with a landslide (which Toph then creates)."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Blind Bandit vs. The Meat and Sarcasm Guy",
+            label: "Meat vs. Metal (and Mud!): Sokka vs. Toph",
             introA: "Toph, sensing Sokka's clumsy approach, prepares to give him an earth-shattering reminder of who's boss.",
-            introB: "Sokka, hoping his latest invention (or joke) will distract Toph, bravely faces the pint-sized powerhouse."
+            introB: "Sokka, armed with his boomerang and 'brilliant' ideas, faces the pint-sized powerhouse."
         }
     },
     // --- Toph vs Aang (aang-airbending-only) ---
@@ -83,18 +83,18 @@ export const tophArchetypeData = {
             introB: "Aang, light and evasive, tries to stay one step (or gust) ahead of Toph's ground-shaking power in Ba Sing Se."
         },
         'si-wong-desert': {
-            label: "Sandstorm Showdown: Toph's Earth Sense vs. Aang's Air Agility",
+            label: "Sandstorm Showdown: Toph's Seismic Sense vs. Aang's Air Agility",
             introA: "Toph manipulates vast quantities of sand, creating traps and projectiles, her senses surprisingly sharp in the shifting desert against Aang.",
             introB: "Aang uses powerful air currents to create sandstorms for cover, his agility his best defense against Toph's overwhelming earth power."
         },
         'foggy-swamp': {
-            label: "Murky Mayhem, Earthly Power: Toph vs. Aang",
+            label: "Murky Mayhem: Toph's Ground Sense vs. Aang's Evasion",
             introA: "Toph, though the soft swamp mud dampens vibrations, still unleashes powerful earth and mud attacks at the hard-to-pin-down Aang.",
-            introB: "Aang uses the swamp's vines and mist for cover, his airbending a subtle counter to Toph's raw elemental force."
+            introB: "Aang uses the swamp's thick fog and soft earth to his advantage, trying to confuse Toph's seismic senses."
         },
         'boiling-rock': {
-            label: "Metal Menace vs. Air Avatar: Toph vs. Aang at the Prison",
-            introA: "Toph, excited to test her metalbending, sees the prison's structure and Aang as prime targets for her new skills.",
+            label: "Metal & Air: Toph's Newfound Power vs. Aang's Agility",
+            introA: "Toph, eager to practice her metalbending, sees the prison's structure (and Aang) as excellent targets.",
             introB: "Aang, amazed by Toph's metalbending, uses his air agility to dodge twisted girders and flying prison bars."
         },
         'fire-nation-capital': {
@@ -118,9 +118,9 @@ export const tophArchetypeData = {
             introB: "Aang, enjoying the spar, uses gentle but firm air currents to deflect Toph's rock projectiles, a dance of earth and air."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Blind Bandit vs. Twinkle-Toes: Toph vs. Aang",
-            introA: "Toph Beifong, the greatest earthbender in the world, is ready to prove that even an Avatar can't escape her seismic sense.",
-            introB: "Aang, relying on his airbending agility, tries to stay one step ahead of Toph's ground-shaking power and unerring perception."
+            label: "Air vs. Earth: Aang vs. Toph",
+            introA: "Toph Beifong senses Aang's movements through the earth, ready to prove that nothing escapes her seismic perception.",
+            introB: "Aang, the master of air, faces Toph's unyielding earthbending, a classic elemental confrontation."
         }
     },
     // --- Toph vs Katara (katara) ---
@@ -171,7 +171,7 @@ export const tophArchetypeData = {
             introB: "Katara, finding scarce water, creates razor-sharp ice projectiles, her precision a stark contrast to Toph's raw force."
         },
         'kyoshi-island': {
-            label: "Island Quake vs. Ocean's Fury: Toph vs. Katara",
+            label: "Island Rumble: Toph's Earthquakes vs. Katara's Waves",
             introA: "Toph's earthbending shakes Kyoshi Island to its core, challenging Katara's ability to draw power from the tumultuous sea.",
             introB: "Katara unleashes massive waves and powerful water vortexes, the ocean's might meeting Toph's terrestrial dominance head-on."
         },
@@ -244,7 +244,7 @@ export const tophArchetypeData = {
         'eastern-air-temple': {
             label: "Sky-High Showdown: Toph's Earth vs. Azula's Lightning",
             introA: "Toph erects massive stone shields, trying to withstand Azula's terrifyingly precise blue fire and lightning at the Air Temple.",
-            introB: "Azula, with chilling grace, dances around Toph's earth attacks, her lightning bolts seeking any fissure in the stone."
+            introB: "Azula, with chilling grace, dances around Toph's earth attacks on the Air Temple platforms, her lightning bolts seeking any fissure in the stone."
         },
         'northern-water-tribe': {
             label: "Frozen Earth, Cold Fire: Toph vs. Azula in the Arctic",
@@ -592,7 +592,7 @@ export const tophArchetypeData = {
         'eastern-air-temple': {
             label: "Stone vs. Cinder at Sky Temple: Toph vs. Jeong Jeong",
             introA: "Toph raises stone shields against Jeong Jeong's controlled fire walls, her earth sense picking up his cautious movements.",
-            introB: "Jeong Jeong, with reluctant precision, uses his flames defensively, trying to contain Toph's aggressive earthbending at the sacred temple."
+            introB: "Jeong Jeong, with reluctant precision, uses his flames defensively, trying to contain Toph's aggressive earthbending at the sacred Eastern Air Temple."
         },
         'northern-water-tribe': {
             label: "Frozen Earth, Contained Fire: Toph vs. Jeong Jeong",
@@ -601,23 +601,23 @@ export const tophArchetypeData = {
         },
         'ba-sing-se': {
             label: "Urban Upheaval vs. Fire's Restraint: Toph vs. Jeong Jeong",
-            introA: "Toph reshapes Ba Sing Se's streets into an earthbending battleground, forcing Jeong Jeong to use his fire more offensively than he'd like.",
+            introA: "Toph reshapes the city streets into an earthbending battleground, forcing Jeong Jeong to use his fire more offensively than he'd like.",
             introB: "Jeong Jeong, with immense control, tries to minimize collateral damage, his fire lines a precise counter to Toph's city-wide assault."
         },
         'si-wong-desert': {
             label: "Desert Quake, Reluctant Flame: Toph vs. Jeong Jeong",
             introA: "Toph turns the desert into a weapon, her sandstorms and earth attacks challenging Jeong Jeong's careful control of his fire.",
-            introB: "Jeong Jeong, burdened by fire's destructive potential in the arid desert, uses his flames sparingly but effectively against Toph."
+            introB: "Jeong Jeong, burdened by fire's destructive potential in the arid Si Wong Desert, uses his flames sparingly but effectively against Toph's power."
         },
         'foggy-swamp': {
             label: "Murky Ground, Cautious Embers: Toph vs. Jeong Jeong",
             introA: "Toph uses the swamp's treacherous mud and roots, her earthbending a primal challenge to Jeong Jeong's disciplined fire.",
-            introB: "Jeong Jeong, wary of igniting the swamp, uses focused bursts of flame and defensive walls against Toph's unpredictable earth attacks."
+            introB: "Jeong Jeong, wary of igniting the Foggy Swamp, uses focused bursts of flame and defensive walls against Toph's unpredictable earth attacks."
         },
         'boiling-rock': {
             label: "Metal & Magma vs. Fire's Discipline: Toph vs. Jeong Jeong",
             introA: "Toph's metalbending twists the prison into a chaotic weapon, forcing Jeong Jeong to unleash more of his fire power than he's comfortable with.",
-            introB: "Jeong Jeong, with grim control, uses the Boiling Rock's heat to his advantage, his fire a precise shield against Toph's raw fury."
+            introB: "Jeong Jeong, with grim control, uses the Boiling Rock's intense heat to his advantage, his fire a precise shield against Toph's raw fury."
         },
         'fire-nation-capital': {
             label: "Earth's Rebellion, Fire's Reluctance: Toph vs. Jeong Jeong",
@@ -627,11 +627,11 @@ export const tophArchetypeData = {
         'omashu': {
             label: "Omashu's Might vs. Fire's Burden: Toph vs. Jeong Jeong",
             introA: "Toph, embodying Omashu's unyielding spirit, challenges Jeong Jeong, whose fire seems almost sorrowful in its precision.",
-            introB: "Jeong Jeong, with masterful control, uses fire to deflect and redirect Toph's colossal earth attacks, a dance of power and restraint."
+            introB: "Jeong Jeong, with masterful control, uses fire to deflect and redirect Toph's colossal earth attacks in Omashu, a dance of power and restraint."
         },
         'great-divide': {
             label: "Canyon Crumble, Controlled Conflagration: Toph vs. Jeong Jeong",
-            introA: "Toph threatens to bring down the Great Divide with her earth-shattering power, forcing Jeong Jeong to use larger, more defensive fire walls.",
+            introA: "Toph threatens to bring down the canyon with her earth-shattering power, forcing Jeong Jeong to use larger, more defensive fire walls.",
             introB: "Jeong Jeong, with profound control, channels his fire to create barriers and diversions against Toph's overwhelming earthbending."
         },
         'kyoshi-island': {
@@ -683,9 +683,9 @@ export const tophArchetypeData = {
             introB: "Toph cracks her neck. 'So, another earthbender thinks they can shake things up in the Fire Nation? Let's see it!'"
         },
         'omashu': {
-            label: "Omashu's Identical Earth Shakers: Toph vs. Toph!",
-            introA: "Toph prepares to send a building flying, only to see another Toph with the same idea. 'Great minds think alike... or ARE alike!'",
-            introB: "Toph grins mischievously. 'King Bumi would love this! Two Tophs making Omashu even MORE chaotic!'"
+            label: "Omashu's True King vs... Omashu's Other True King?! Toph vs. Toph!",
+            introA: "The citizens of Omashu are very confused as two Tophs claim the throne and proceed to earthbend-duel for it across the entire city.",
+            introB: "Toph challenges Toph to a game of 'throw the city at each other'. The city, somehow, seems to enjoy it."
         },
         'great-divide': {
             label: "Canyon Carver Duplicates: Toph vs. Toph!",
@@ -693,14 +693,112 @@ export const tophArchetypeData = {
             introB: "Toph feels the familiar tremor of powerful earthbending. 'Only one Toph can make the Great Divide this messy! And it's me! Both of me!'"
         },
         'kyoshi-island': {
-            label: "Double Trouble on Kyoshi: Toph vs. Toph!",
-            introA: "Toph gives the ground a mighty stomp, and feels an equally mighty stomp answer back. 'Alright, who's the echo?'",
-            introB: "Toph laughs heartily. 'Kyoshi Island's about to get a double dose of the greatest earthbender EVER!'"
+            label: "Island of Identical Upheaval: Toph vs. Toph!",
+            introA: "On peaceful Kyoshi Island, two Tophs engage in an earth-shattering display of power that has the Unagi very concerned.",
+            introB: "Toph creates a giant rock statue of herself. The other Toph creates an identical one, but wearing a funnier hat."
         },
         '_DEFAULT_LOCATION_': {
             label: "Tremor Twins: Toph vs. Toph",
             introA: "Toph feels an identical earthshaking presence... herself! Time to see who's the REAL Blind Bandit.",
             introB: "Toph cracks her knuckles. 'Alright, other me, let's see if your earthbending is as good as mine! Which it isn't!'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "Alright, Twinkle Toes, let's get this over with. I've got places to be." },
+                { type: 'internal', line: "I can feel their every tremor. This should be easy." }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just a little poke! Feeling them out. Don't want to overdo it." },
+                { type: 'internal', line: "Okay, they're testing me. I'll play along for a bit. My patience won't last long." }
+            ],
+            Early: [{ type: 'spoken', line: "Alright, let's get this over with. I've got rocks to sleep on." }, { type: 'internal', line: "I can feel their footsteps. Anxious. Good." }],
+            Mid: [{ type: 'spoken', line: "Getting tired yet, Snoozles?" }],
+            Late: [{ type: 'spoken', line: "Time to end this! You're going down!" }],
+            'eastern-air-temple': [{ type: 'spoken', line: "Ugh, this place is too... airy. Come down here and fight me!" }, { type: 'internal', line: "This stone is too brittle to really cut loose. Gotta be careful." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "Fire Nation's pride, huh? Let's see how well it stands up to real earthbending!" }, { type: 'internal', line: "So much stone. So much to play with. This is gonna be fun!" }],
+            'kyoshi-island': [{ type: 'spoken', line: "Nice solid ground here. Too bad I can't tear it up like I want to." }, { type: 'internal', line: "These houses are too flimsy to throw. Gotta find open space." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "Ice? Ha! Just really hard water. I can work with this!" }, { type: 'internal', line: "My feet are getting cold. Better end this quick before I freeze solid." }],
+            'omashu': [{ type: 'spoken', line: "Finally, some real stone to play with! Come on, rock-brains!" }, { type: 'internal', line: "Bumi would be proud of me trashing his city. Or mad. Probably proud." }],
+            'si-wong-desert': [{ type: 'spoken', line: "Sand? This is gonna be annoying. Can't see a thing!" }, { type: 'internal', line: "Hard to feel anything in this loose sand. Gotta adapt, fast." }],
+            'foggy-swamp': [{ type: 'spoken', line: "Mud. Roots. I can work with this! You can't hide from me in the muck, Twinkle Toes!" }, { type: 'internal', line: "Soft ground, but I can still feel everything. This place won't stop me." }],
+            'boiling-rock': [{ type: 'spoken', line: "So much metal! And the ground is solid enough. This should be fun!" }, { type: 'internal', line: "Gondolas and wires everywhere... gotta be careful I don't fall off." }],
+            'great-divide': [{ type: 'spoken', line: "The whole canyon is my weapon! Come on, try to move me now!" }, { type: 'internal', line: "So much rock! And it all answers to me. This is going to be a blast!" }] // NEW for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Alright, stop standing around! Let's get moving!" },
+                { type: 'internal', line: "Time to feel them out. Can't let them think I'm easy." }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "No more games. This is where the real fun begins!" },
+                { type: 'internal', line: "They're getting serious. Good. Now I can actually fight." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "Things are getting interesting now! Let's turn up the heat... or the earth!" },
+                { type: 'internal', line: "The battle's intensifying. Time to show them why I'm the greatest earthbender." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "This is it! You're going down, Twinkle Toes!" },
+                { type: 'internal', line: "The final stretch. I'm going to finish this with a bang!" }
+            ],
+        },
+        onIntentSelection: {
+            PressAdvantage: { Mid: [{ type: 'spoken', line: "Feeling the pressure, Twinkle Toes?" }] },
+            BreakTheTurtle: { Generic: [{ type: 'spoken', line: "You can't hide from me! I AM the ground you stand on!" }] },
+            CapitalizeOnOpening: { Generic: [{ type: 'spoken', line: "You left your feet! Big mistake!" }] }
+        },
+        onManipulation: {
+            asVictim: { Generic: [{ type: 'spoken', line: "Is that supposed to hurt my feelings? I can't see your face, but I'm guessing it's real ugly." }] }
+        },
+        onPrediction: {
+            correct: { Generic: [{ type: 'spoken', line: "HA! I could feel you winding up for that from a mile away!" }] },
+            wrong: { Generic: [{ type: 'internal', line: "Huh. They're lighter on their feet than I thought." }] }
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "They're tougher than they look. Time to get serious." }] },
+            shaken: { Late: [{ type: 'spoken', line: "Okay, that one actually hurt. You're gonna pay for that!" }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'spoken', line: "Oops, my bad. Didn't see that building there. Kinda blind, you know?" }, { type: 'internal', line: "If they build it out of earth, it's fair game. That's just how it works." }] },
+            observingDamage: { Generic: [{ type: 'spoken', line: "Hey! Easy on the ground! That's my turf you're messing with!" }, { type: 'internal', line: "Senseless destruction. What a waste of good earth." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "This ground is getting too unstable. Can't feel anything properly!" }, { type: 'spoken', line: "Stop tearing up my world! I can't fight like this!" }] },
+            thrivingInDamage: { Generic: [{ type: 'internal', line: "More rubble, more raw material for me. This is getting fun!" }, { type: 'spoken', line: "Yeah, break it all down! Then I'll show you how to really move the earth!" }] }
+        },
+        onVictory: { Default: { Generic: [{ line: "Told you I was the best. The greatest earthbender in the world!" }] } }
+    },
+    techniques: [
+        { name: "Earth Wave", verb: 'send', object: 'powerful wave of earth', type: 'Offense', power: 60, element: 'earth', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
+        { name: "Rock Armor", verb: 'don', object: 'suit of rock armor', type: 'Defense', power: 75, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_armor', 'construct_creation', 'requires_opening'], collateralImpact: 'none' },
+        { name: "Seismic Slam", verb: 'slam', object: 'her fists to the ground', type: 'Offense', power: 70, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'unblockable_ground'], collateralImpact: 'high' },
+        { name: "Metal Bending", verb: 'bend', object: 'the metal in the environment', type: 'Offense', power: 80, element: 'metal', moveTags: ['environmental_manipulation', 'utility_control', 'versatile'], collateralImpact: 'medium' },
+        { name: "Boulder Throw", verb: 'launch', object: 'volley of rock projectiles', type: 'Offense', power: 65, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
+        { name: "Rock Coffin", verb: 'entomb', object: 'her foe in a prison of rock', type: 'Finisher', power: 95, element: 'earth', moveTags: ['debuff_disable', 'single_target', 'construct_creation', 'requires_opening'], collateralImpact: 'low' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    techniquesNorthernWaterTribe: [ // NEW MOVESET for Northern Water Tribe
+        { name: "Iceberg Punch", verb: 'punch', object: 'a chunk of ice towards', type: 'Offense', power: 55, element: 'ice', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'environmental_manipulation'], collateralImpact: 'low' },
+        { name: "Frozen Earth Shield", verb: 'raise', object: 'a shield of compacted ice and frozen earth', type: 'Defense', power: 65, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_block', 'construct_creation'], collateralImpact: 'none' },
+        { name: "Glacial Spike", verb: 'erupt with', object: 'a sharp glacial spike from the ground', type: 'Offense', power: 70, requiresArticle: true, element: 'ice', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'unblockable_ground', 'environmental_manipulation'], collateralImpact: 'medium' },
+        { name: "Ice Bridge Creation", verb: 'create', object: 'a temporary ice bridge or platform', type: 'Utility', power: 40, requiresArticle: true, element: 'ice', moveTags: ['utility_reposition', 'environmental_manipulation'], collateralImpact: 'none' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'physical', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    techniquesOmashu: [ // NEW MOVESET for Omashu (adapted from existing earth moves)
+        { name: "Stone Spire", verb: 'erupt with', object: 'a spire of rock from the ground', type: 'Offense', power: 50, requiresArticle: true, element: 'earth', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'unblockable_ground'], collateralImpact: 'low' },
+        { name: "Chute Collapse", verb: 'cause', object: 'a chute to collapse', type: 'Offense', power: 65, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
+        { name: "Omashu Barrier", verb: 'raise', object: 'a massive Omashu stone barrier', type: 'Defense', power: 70, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_block', 'construct_creation'], collateralImpact: 'low' },
+        { name: "Boulder Barrage (Omashu)", verb: 'launch', object: 'a volley of Omashu boulders', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation'], collateralImpact: 'medium' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    techniquesSiWongDesert: [ // NEW MOVESET for Si Wong Desert
+        { name: "Sand Funnel", verb: 'create', object: 'a swirling sand funnel', type: 'Offense', power: 50, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'debuff_disable', 'environmental_manipulation'], collateralImpact: 'low' },
+        { name: "Quicksand Trap", verb: 'form', object: 'a quicksand trap', type: 'Utility', power: 45, requiresArticle: true, element: 'earth', moveTags: ['trap_delayed', 'utility_control', 'environmental_manipulation'], setup: { name: 'Immobilized', duration: 2, intensity: 1.3 }, collateralImpact: 'none' },
+        { name: "Glass Shard Barrage", verb: 'launch', object: 'a barrage of scorching glass shards', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation'], collateralImpact: 'medium' },
+        { name: "Desert Tremor", verb: 'send', object: 'a localized tremor through the sand', type: 'Offense', power: 55, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'unblockable_ground'], collateralImpact: 'low' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["Told you I was the best. The greatest earthbender in the world!"], postWin_overwhelming: ["HA! That's what happens when you fight the greatest earthbender in the world!"], postWin_specific: { 'bumi': "Looks like I'm still the champ, Bumi!" } },
+    relationships: {}
 };

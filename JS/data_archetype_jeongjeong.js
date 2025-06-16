@@ -47,7 +47,7 @@ export const jeongjeongArchetypeData = {
         'omashu': {
             label: "Stone Walls, Fire Barriers: Jeong Jeong vs. Sokka in Omashu",
             introA: "Jeong Jeong, with immense focus, shapes his fire around Omashu's structures, his defense a testament to his control against Sokka's tactics.",
-            introB: "Sokka tries to use Omashu's massive structures for defense against Jeong Jeong's fiery attacks, finding him a formidable, strategic opponent."
+            introB: "Sokka maneuvers through Omashu's massive structures, trying to use them for defense against Jeong Jeong's fiery attacks, finding him a formidable, strategic opponent."
         },
         'great-divide': {
             label: "Canyon of Controlled Fire: Jeong Jeong vs. Sokka",
@@ -132,7 +132,7 @@ export const jeongjeongArchetypeData = {
         },
         'northern-water-tribe': {
             label: "Frozen Fortress, Disciplined Fire: Jeong Jeong vs. Katara",
-            introA: "Jeong Jeong, demonstrating immense control, maintains his defensive fire even against Katara's overwhelming arctic assault in the North.",
+            introA: "Jeong Jeong, demonstrating immense control, maintains his defensive fire even against Katara's overwhelming arctic assault in the icy North.",
             introB: "Katara, in her icy element, unleashes powerful blizzards and ice ramparts against Jeong Jeong's carefully contained flames."
         },
         'ba-sing-se': {
@@ -702,5 +702,78 @@ export const jeongjeongArchetypeData = {
             introA: "Jeong Jeong confronts his own weary soul, a battle of fire controlled by wisdom against fire burdened by regret.",
             introB: "Jeong Jeong sees Jeong Jeong. 'Fire is a destructive power. We must both remember this, even in conflict.'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "Another conflict. Fire is a burden, not a tool for aggression." },
+                { type: 'internal', line: "Perhaps a display of control will prevent further escalation." }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Observe. Do not commit unnecessary flame." },
+                { type: 'internal', line: "A light probe. A warning. This is not about winning, but controlling." }
+            ],
+            Early: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],
+            Mid: [{type: 'spoken', line: "Control is paramount. Without it, fire consumes all."}],
+            Late: [{type: 'internal', line: "This battle is a lesson... a harsh one, perhaps."}],
+            'eastern-air-temple': [{ type: 'spoken', line: "To wield fire here is a great responsibility. I will not let it scorch these sacred grounds." }, { type: 'internal', line: "The wind... it tugs at my flames. It is a constant test of my discipline." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "This place demands precision. No unnecessary flame." }, { type: 'internal', line: "To fight here... it is to face the very essence of what I abandoned." }],
+            'kyoshi-island': [{ type: 'spoken', line: "This peaceful island... I will protect it from unnecessary flame." }, { type: 'internal', line: "The cost of fire in such a place is too high. I must be precise." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "The ice tries to extinguish my flame. It will not succeed." }, { type: 'internal', line: "To maintain control here... a true test of discipline. And patience." }],
+            'omashu': [{ type: 'spoken', line: "This ancient city must not be reduced to ash. I will fight with care." }, { type: 'internal', line: "Every flame must be controlled. Especially here." }],
+            'si-wong-desert': [{ type: 'spoken', line: "My flame burns with purpose, even in this wasteland. I will not let it consume." }, { type: 'internal', line: "The desert amplifies fire's destructive nature. I must be ever so careful." }],
+            'foggy-swamp': [{ type: 'spoken', line: "I despise this place, but if I must use my fire, it will be with utmost control." }, { type: 'internal', line: "The dampness, the gases... every flame must be a calculated risk. I must not lose control." }],
+            'boiling-rock': [{ type: 'spoken', line: "This chaotic environment is a test of true control. I must master it." }, { type: 'internal', line: "Fire must not be unleashed recklessly here. Too much potential for widespread destruction." }],
+            'great-divide': [{ type: 'spoken', line: "This canyon is a stark reminder of fire's power. I must control it perfectly." }, { type: 'internal', line: "To wield fire here means absolute discipline. One errant flame could consume everything." }] // UPDATED for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "The moment of truth approaches. Proceed with utmost discipline." },
+                { type: 'internal', line: "I must demonstrate the true nature of fire: control, not destruction." }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "The true test begins. May this fire serve a purpose beyond mere conflict." },
+                { type: 'internal', line: "The battle escalates. I must stand firm, a wall of disciplined flame." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "The intensity grows. A fragile balance, easily broken." },
+                { type: 'internal', line: "This is regrettable. But I will maintain control, even as chaos mounts." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "The culmination. May this end swiftly, with minimal suffering." },
+                { type: 'internal', line: "The final moments approach. My resolve must be absolute. Control, above all." }
+            ],
+        },
+        onIntentSelection: {
+            CautiousDefense: { Generic: [{ type: 'internal', line: "Control. Fire must be controlled, contained. I will not let it rage." }] },
+        },
+        onManipulation: {
+            asVictim: { Generic: [{ type: 'internal', line: "Words are wind. The flame within me is steady." }] }
+        },
+        onMoveExecution: {
+            'Fire Wall': { Critical: { Generic: [{ type: 'internal', line: "This is what I warned of... the terrible power..." }] } },
+            'Tactical Reposition': {
+                Critical: { Generic: [{ type: 'spoken', line: "The flame is where I direct it." }] },
+                Weak: { Generic: [{ type: 'internal', line: "A lapse in control. Unacceptable." }] }
+            }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "No! This is exactly what I wish to avoid. Control the flame!" }, { type: 'spoken', line: "Fire is not meant for such senseless devastation!" }] },
+            observingDamage: { Generic: [{ type: 'spoken', line: "This is a perversion of bending! A demonstration of pure chaos!" }, { type: 'internal', line: "The fire rages out of control. My worst fears realized." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "The inferno grows... I cannot let it consume everything!" }, { type: 'spoken', line: "This is a nightmare! I must stop it!" }] },
+            thrivingInDamage: []
+        },
+        onVictory: { Default: { Generic: [{ line: "The destructive path of fire has been averted, for now." }] } }
+    },
+    techniques: [
+        { name: "Controlled Inferno", verb: 'create', object: 'controlled inferno', type: 'Offense', power: 80, requiresArticle: true, element: 'fire', moveTags: ['area_of_effect', 'channeled'], collateralImpact: 'high' },
+        { name: "Fire Wall", verb: 'raise', object: 'impenetrable wall of fire', type: 'Defense', power: 85, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'area_of_effect_large'], setup: { name: 'Cornered', duration: 2, intensity: 1.2 }, collateralImpact: 'medium' },
+        { name: "Flame Whips", verb: 'conjure', object: 'precise flame whips', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'precise'], collateralImpact: 'low' },
+        { name: "Precision Burn", verb: 'inflict', object: 'surgical burn', type: 'Offense', power: 45, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'single_target', 'precise'], collateralImpact: 'none' },
+        { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, element: 'fire', moveTags: ['area_of_effect_large', 'pushback', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'fire', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["The destructive path of fire has been averted, for now."], postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."] },
+    relationships: {}
 };

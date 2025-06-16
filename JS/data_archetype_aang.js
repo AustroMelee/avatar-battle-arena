@@ -93,7 +93,7 @@ export const aangArchetypeData = {
             introB: "Katara, her waterbending amplified by the swamp's moisture, engages in a graceful, elemental dance with Aang."
         },
         'boiling-rock': {
-            label: "Steam and Wind: Aang's Evasion vs. Katara's Boiling Point",
+            label: "Steam & Zephyr: Aang's Evasion vs. Katara's Boiling Point",
             introA: "Aang uses air currents to navigate the scalding steam as Katara skillfully manipulates the superheated water of the Boiling Rock.",
             introB: "Katara, protecting her friends, uses the prison's volatile environment to create powerful steam attacks, testing Aang's evasiveness."
         },
@@ -103,9 +103,9 @@ export const aangArchetypeData = {
             introB: "Katara, a beacon of defiance, draws water from unexpected places to fight alongside Aang, their teamwork seamless even under pressure."
         },
         'omashu': {
-            label: "Stone City Serenade: Aang's Air Dance, Katara's Water Song",
+            label: "Stone City Streams, Sky-High Scooters: Aang vs. Katara",
             introA: "Aang leaps and glides through Omashu's vertical landscape, his airbending a playful challenge to Katara's grounded power.",
-            introB: "Katara uses Omashu's aqueducts and fountains to create flowing water attacks, her skill a match for Aang's aerial grace."
+            introB: "Katara uses Omashu's aqueducts and water channels for dynamic attacks, challenging Aang's aerial acrobatics."
         },
         'great-divide': {
             label: "Canyon Ballet: Aang's Updrafts, Katara's Precision Streams",
@@ -113,7 +113,7 @@ export const aangArchetypeData = {
             introB: "Katara, finding scarce water in the dry canyon, uses it with utmost control, aiming precise strikes at the ever-moving Aang."
         },
         'kyoshi-island': {
-            label: "Seaside Spar: Aang's Gentle Gales, Katara's Ocean Might",
+            label: "Ocean's Embrace, Island's Breeze: Aang vs. Katara",
             introA: "Aang's air currents playfully dance with the ocean spray as Katara draws upon the sea's power for their friendly bout.",
             introB: "Katara, with the vast ocean as her ally, unleashes impressive water forms, challenging Aang's mastery of air by the shore."
         },
@@ -189,49 +189,49 @@ export const aangArchetypeData = {
             introB: "Zuko, driven by his relentless hunt, brings his fiery assault to the serene heights of the Eastern Air Temple."
         },
         'northern-water-tribe': {
-            label: "Frozen Fury, Fiery Resolve: Aang vs. Zuko at the North Pole",
-            introA: "Aang, channeling the spirits of the North, uses frigid gales against Zuko's desperate siege.",
-            introB: "Zuko, his fire a stark contrast to the icy landscape, pushes through the blizzard to capture the Avatar."
+            label: "Frozen Siege, Fiery Nemesis: Aang vs. Zuko at the North Pole",
+            introA: "Aang, channeling the resilience of the Water Tribe, uses powerful air currents to counter Zuko's desperate, fiery onslaught.",
+            introB: "Zuko, his obsession reaching a fever pitch, battles Aang amidst the icy defenses of the Northern Water Tribe, fire against frigid air."
         },
         'ba-sing-se': {
-            label: "City of Walls, Clash of Destinies: Aang vs. Zuko",
+            label: "City of Walls, Fated Encounter: Aang vs. Zuko",
             introA: "Aang, seeking refuge in Ba Sing Se, finds his path crossed by Zuko, their fated conflict erupting in the Earth Kingdom capital.",
             introB: "Zuko, disguised but still burning with ambition, confronts Aang amidst the imposing walls of Ba Sing Se."
         },
         'si-wong-desert': {
-            label: "Desert Heat, Burning Chase: Aang vs. Zuko",
+            label: "Desert Inferno, Avatar's Evasion: Aang vs. Zuko",
             introA: "Aang, using air to navigate the scorching desert, is relentlessly pursued by the heat-resistant Fire Prince Zuko.",
             introB: "Zuko, his firebending thriving in the arid heat, tracks Aang across the endless dunes, a predator closing in."
         },
         'foggy-swamp': {
-            label: "Illusory Battle: Aang's Air vs. Zuko's Fire in the Swamp",
-            introA: "Aang uses the swamp's disorienting mists and his own airbending to create illusions, confusing the determined Zuko.",
-            introB: "Zuko, cutting through vines and fog with his fire, is frustrated by Aang's evasiveness in the mystical swamp."
+            label: "Mystic Mists, Burning Determination: Aang vs. Zuko",
+            introA: "Aang, guided by the swamp's spiritual energy, uses its illusions and his airbending to elude the fiercely focused Zuko.",
+            introB: "Zuko's fire cuts through the disorienting fog of the swamp, his determination to capture Aang unclouded by the strange visions."
         },
         'boiling-rock': {
-            label: "Volcanic Vortex: Aang's Air Escape vs. Zuko's Fiery Blockade",
-            introA: "Aang uses powerful air blasts to aid the escape from Boiling Rock, only to be confronted by Zuko's intense fire.",
-            introB: "Zuko, guarding the prison's exit, meets Aang's air with a wall of flame, their conflict reaching a boiling point."
+            label: "Volcanic Duel: Aang's Air vs. Zuko's Fire at the Prison",
+            introA: "Aang uses powerful air blasts and his agility to navigate the treacherous prison, dodging Zuko's explosive fire attacks.",
+            introB: "Zuko confronts Aang amidst the superheated steam and molten rock of the Boiling Rock, their battle a fiery spectacle of raw power."
         },
         'fire-nation-capital': {
-            label: "Heart of the Inferno: Aang's Evasion vs. Zuko's Fury",
-            introA: "Aang, a whirlwind of defiance in the enemy capital, uses his airbending to evade Zuko's desperate, powerful flames.",
-            introB: "Zuko, his honor and nation on the line, unleashes the full might of his firebending against the ever-slippery Avatar."
+            label: "Heart of the Fire Nation, Clash of Ideals: Aang vs. Zuko",
+            introA: "Aang brings his message of peace and balance to the heart of the Fire Nation, his airbending a stark contrast to Zuko's royal fire.",
+            introB: "Zuko, perhaps as the new Fire Lord or a conflicted prince, faces Aang in a pivotal confrontation within the capital itself."
         },
         'omashu': {
-            label: "Omashu Offensive: Aang's Air Defense vs. Zuko's Siege",
-            introA: "Aang defends the quirky city of Omashu with creative airbending against Zuko's relentless fiery assault.",
-            introB: "Zuko, determined to conquer Omashu for the Fire Nation, finds the Avatar's air mastery a formidable obstacle."
+            label: "City of Earth, Test of Fire and Air: Aang vs. Zuko",
+            introA: "Aang defends the quirky ingenuity of Omashu with creative air shields and evasive maneuvers against Zuko's siege.",
+            introB: "Zuko's fiery assault on Omashu is met by Aang's protective airbending, their battle shaking the foundations of the ancient city."
         },
         'great-divide': {
-            label: "Canyon Winds vs. Dragon Fire: Aang vs. Zuko",
-            introA: "Aang uses the updrafts and narrow passages of the Great Divide to his advantage, frustrating Zuko's fiery assaults.",
-            introB: "Zuko, his agility tested by the treacherous terrain, tries to corner Aang with blasts of dragon-like fire."
+            label: "Canyon of Fire, Winds of Change: Aang vs. Zuko",
+            introA: "Aang uses the canyon's updrafts and narrow passages for daring escapes, his airbending a whirlwind against Zuko's fiery onslaught.",
+            introB: "Zuko's fireballs light up the Great Divide as he corners Aang, his agility pushed to the limits by the treacherous terrain."
         },
         'kyoshi-island': {
-            label: "Island Under Fire: Aang's Protection vs. Zuko's Pursuit",
-            introA: "Aang uses his airbending to shield Kyoshi Island from Zuko's invading forces, a protector of peace.",
-            introB: "Zuko, his hunt for the Avatar leading him to Kyoshi Island, unleashes his firebending, disrupting the island's serenity."
+            label: "Island Ablaze, Avatar's Defense: Aang vs. Zuko",
+            introA: "Aang, channeling Kyoshi's spirit of defiance, uses his airbending to defend the island from Zuko's relentless attacks.",
+            introB: "Zuko's pursuit of the Avatar leads him to Kyoshi Island, where his firebending clashes with Aang's protective air shield over the peaceful village."
         },
         '_DEFAULT_LOCATION_': {
             label: "Wind and Flame: A Fateful Encounter",
@@ -252,7 +252,7 @@ export const aangArchetypeData = {
             introB: "Azula's cold fire cuts through the snow, her relentless pursuit of Aang threatening to shatter the icy defenses."
         },
         'ba-sing-se': {
-            label: "Conquest's Shadow: Avatar vs. Prodigy",
+            label: "Conquest's Shadow, Avatar's Light: Azula vs. Aang",
             introA: "Aang, burdened by the fate of the world, confronts Azula's relentless fire, his airbending a dance of defense and defiance.",
             introB: "Azula, cloaked in an aura of chilling perfection, seeks to extinguish the Avatar's hope within the very walls she once conquered."
         },
@@ -267,29 +267,29 @@ export const aangArchetypeData = {
             introB: "Azula, unfazed by the swamp's tricks, cuts through the fog with her blue fire, determined to expose and eliminate the Avatar."
         },
         'boiling-rock': {
-            label: "Inferno's Edge: Azula's Pursuit",
-            introA: "Aang, using his agility to evade Azula's terrifying blue flames, searches for an escape from the inescapable prison.",
-            introB: "Azula, relentless and precise, corners the Avatar amidst the scalding steam and precarious walkways of the Boiling Rock."
+            label: "Inferno's Edge, Avatar's Evasion: Azula vs. Aang",
+            introA: "Azula, relentless and precise, corners the Avatar amidst the scalding steam and precarious walkways of the Boiling Rock.",
+            introB: "Aang, using his agility to evade Azula's terrifying blue flames, searches for an escape from the inescapable prison."
         },
         'fire-nation-capital': {
-            label: "Royal Rumble: Avatar's Air vs. Princess's Perfection",
-            introA: "Aang confronts Azula in her own seat of power, his airbending a desperate whirlwind against her flawless, deadly fire.",
-            introB: "Azula, the favored princess, aims to definitively crush the Avatar in the Fire Nation capital, showcasing her absolute superiority."
+            label: "Royal Rumble: Princess's Perfection vs. Avatar's Air",
+            introA: "Azula, the favored princess, aims to definitively crush the Avatar in the Fire Nation capital, showcasing her absolute superiority.",
+            introB: "Aang confronts Azula in her own seat of power, his airbending a desperate whirlwind against her flawless, deadly fire."
         },
         'omashu': {
-            label: "Stone Labyrinth, Azure Onslaught: Aang vs. Azula",
-            introA: "Aang utilizes Omashu's complex structures for evasion as Azula's blue fire methodically seeks him out.",
-            introB: "Azula, systematically dismantling Omashu's defenses, views Aang as the final, frustrating obstacle to her complete control."
+            label: "Stone Labyrinth, Azure Onslaught: Azula vs. Aang",
+            introA: "Azula, systematically dismantling Omashu's defenses, views Aang as the final, frustrating obstacle to her complete control.",
+            introB: "Aang utilizes Omashu's complex structures for evasion as Azula's blue fire methodically seeks him out."
         },
         'great-divide': {
-            label: "Canyon of Cold Fire: Aang's Evasion vs. Azula's Hunt",
-            introA: "Aang uses the vastness and treacherous paths of the Great Divide to evade Azula's relentless and chillingly precise attacks.",
-            introB: "Azula, a patient predator, expertly navigates the canyon, her blue flames licking at Aang's heels."
+            label: "Canyon of Cold Fire: Azula's Hunt vs. Aang's Evasion",
+            introA: "Azula, a patient predator, expertly navigates the canyon, her blue flames licking at Aang's heels.",
+            introB: "Aang uses the vastness and treacherous paths of the Great Divide to evade Azula's relentless and chillingly precise attacks."
         },
         'kyoshi-island': {
-            label: "Island Under Siege: Aang's Air Shield vs. Azula's Blue Flames",
-            introA: "Aang defends the peaceful Kyoshi Island with powerful air shields against Azula's terrifying and destructive blue fire.",
-            introB: "Azula, aiming to break the Avatar's spirit by destroying what he protects, unleashes her full might on Kyoshi Island."
+            label: "Island Under Azure Siege: Azula's Blue Flames vs. Aang's Air Shield",
+            introA: "Azula, aiming to break the Avatar's spirit by destroying what he protects, unleashes her full might on Kyoshi Island.",
+            introB: "Aang defends the peaceful Kyoshi Island with powerful air shields against Azula's terrifying and destructive blue fire."
         },
         '_DEFAULT_LOCATION_': {
             label: "Lightning and Wind: A Fateful Duel",
@@ -393,7 +393,7 @@ export const aangArchetypeData = {
             introB: "Bumi, having decided the Fire Nation needed 'more earth', cheerfully rearranges a plaza, with Aang caught in the middle."
         },
         'omashu': {
-            label: "Old Friends, New Tricks: Aang vs. King Bumi",
+            label: "Old Friends, New Tricks: King Bumi vs. Aang",
             introA: "Aang, delighted and bewildered by his old friend's power, uses his airbending to navigate Bumi's earth-shattering games.",
             introB: "King Bumi, cackling with mad genius, tests Aang's skills with colossal earthbending feats in his beloved city of Omashu."
         },
@@ -441,9 +441,9 @@ export const aangArchetypeData = {
             introB: "Mai, relying on sound and instinct, launches her daggers into the mist, her aim still unnervingly accurate against the Avatar."
         },
         'boiling-rock': {
-            label: "Prison Pins: Aang's Air Escape vs. Mai's Lockdown",
-            introA: "Aang's attempts to create an airy escape from the Boiling Rock are met by Mai's perfectly aimed pinning strikes.",
-            introB: "Mai, the stoic guard, ensures the Avatar remains grounded, her knives and shuriken a constant threat on the metal walkways."
+            label: "Prison Pins: Mai's Lockdown vs. Aang's Air Escape",
+            introA: "Mai, the stoic guard, ensures the Avatar remains grounded, her knives and shuriken a constant threat on the metal walkways.",
+            introB: "Aang's attempts to create an airy escape from the Boiling Rock are met by Mai's perfectly aimed pinning strikes."
         },
         'fire-nation-capital': {
             label: "Silent Threat in the Capital: Aang vs. Mai",
@@ -466,9 +466,9 @@ export const aangArchetypeData = {
             introB: "Mai, finding Aang's evasiveness tiresome, aims her daggers with chilling accuracy, hoping to end the 'dance' quickly."
         },
         '_DEFAULT_LOCATION_': {
-            label: "Evasion vs. Precision: Aang vs. Mai",
-            introA: "Aang's airbending agility is pitted against Mai's unerring aim and deadly arsenal of knives.",
-            introB: "Mai, with her usual stoic demeanor, tracks Aang's movements, waiting for the perfect moment to strike."
+            label: "Precision vs. Evasion: Mai vs. Aang",
+            introA: "Mai, with her unerring aim and arsenal of hidden knives, tracks Aang's swift, air-powered movements.",
+            introB: "Aang's airbending agility is pitted against Mai's deadly projectiles and stoic determination."
         }
     },
     // --- Aang vs Ty Lee (ty-lee) ---
@@ -479,54 +479,54 @@ export const aangArchetypeData = {
             introB: "Ty Lee, her chi-blocking strikes blurring with her acrobatic grace, aims to ground the airborne Avatar."
         },
         'northern-water-tribe': {
-            label: "Frozen Flips, Icy Aura: Aang vs. Ty Lee",
-            introA: "Aang uses gusts of wind to try and unbalance Ty Lee on the slippery ice, but she tumbles and recovers with ease.",
-            introB: "Ty Lee, giggling, finds the icy terrain a fun challenge, her chi-blocking jabs seeking Aang amidst flurries of snow."
+            label: "Frozen Flips, Icy Aura Chase: Ty Lee vs. Aang",
+            introA: "Ty Lee, giggling, finds the icy terrain a fun challenge, her chi-blocking jabs seeking Aang amidst flurries of snow and wind.",
+            introB: "Aang uses gusts of wind to try and unbalance Ty Lee on the slippery ice, but she tumbles and recovers with astounding ease."
         },
         'ba-sing-se': {
-            label: "City Parkour: Aang's Air Agility vs. Ty Lee's Tumbling",
-            introA: "Aang and Ty Lee turn the rooftops and walls of Ba Sing Se into their personal obstacle course, a dazzling display of agility.",
-            introB: "Ty Lee, with impossible grace, matches Aang's air-powered leaps, always seeking an opening for a chi-blocking strike."
+            label: "City Parkour Pandemonium: Ty Lee's Tumbles vs. Aang's Air Agility",
+            introA: "Ty Lee uses Ba Sing Se's rooftops and walls for a dazzling display of parkour, always seeking an opening for a chi-blocking strike on Aang.",
+            introB: "Aang and Ty Lee turn the Earth Kingdom capital into their personal obstacle course, a breathtaking display of agility versus agility."
         },
         'si-wong-desert': {
-            label: "Desert Mirage Dance: Aang's Evasion vs. Ty Lee's Acrobatic Assault",
-            introA: "Aang creates shimmering heat mirages and dust devils to confuse Ty Lee, whose acrobatic attacks are relentless even in the desert.",
-            introB: "Ty Lee, a blur of pink against the sand, uses her incredible agility to close the distance on Aang, her chi-blocking intent clear."
+            label: "Desert Mirage Dance: Ty Lee's Acrobatic Assault vs. Aang's Evasion",
+            introA: "Ty Lee, a blur of pink against the sand, uses her incredible agility to close the distance on Aang, her chi-blocking intent clear despite the heat.",
+            introB: "Aang creates shimmering heat mirages and dust devils to confuse Ty Lee, whose acrobatic attacks are relentless even in the desert."
         },
         'foggy-swamp': {
-            label: "Swampy Somersaults & Air Dodges: Aang vs. Ty Lee",
+            label: "Swampy Somersaults & Air Dodges: Ty Lee vs. Aang",
             introA: "Aang uses the swamp's murky terrain and his airbending to evade Ty Lee's surprisingly swift and accurate chi-blocking attempts.",
-            introB: "Ty Lee, unfazed by the mud and vines, cheerfully tumbles through the swamp, her pressure point strikes aimed at the elusive Avatar."
+            introB: "Ty Lee, unfazed by the mud and vines, cheerfully tumbles through the swamp, her pressure point strikes aimed at the elusive Avatar Aang."
         },
         'boiling-rock': {
-            label: "Acrobatic Escape: Aang's Air Lifts vs. Ty Lee's Disabling Touch",
-            introA: "Aang uses his airbending to create paths and lift obstacles, all while dodging Ty Lee's attempts to block his chi during the prison break.",
-            introB: "Ty Lee, a surprisingly effective guard, uses her acrobatic skills to navigate the prison's structure and intercept Aang."
+            label: "Acrobatic Interception: Ty Lee's Disabling Touch vs. Aang's Air Lifts",
+            introA: "Ty Lee, a surprisingly effective guard, uses her acrobatic skills to navigate the prison's structure and intercept Aang's escape attempts.",
+            introB: "Aang uses his airbending to create paths and lift obstacles, all while dodging Ty Lee's attempts to block his chi during the prison break."
         },
         'fire-nation-capital': {
-            label: "Circus in the Capital: Aang's Agility vs. Ty Lee's Acrobatics",
-            introA: "Aang finds a kindred spirit in Ty Lee's acrobatic grace, though her chi-blocking intentions are far from playful.",
-            introB: "Ty Lee, with a cheerful giggle, flips and tumbles through the Fire Nation capital, aiming to disrupt Aang's 'aura'."
+            label: "Circus in the Capital: Ty Lee's Acrobatics vs. Aang's Agility",
+            introA: "Aang finds a kindred spirit in Ty Lee's acrobatic grace, though her chi-blocking intentions are far from playful in enemy territory.",
+            introB: "Ty Lee, with a cheerful giggle, flips and tumbles through the Fire Nation capital, aiming to disrupt Aang's 'aura' and his bending."
         },
         'omashu': {
-            label: "Omashu's Obstacle Challenge: Aang's Air vs. Ty Lee's Flips",
-            introA: "Aang and Ty Lee engage in a breathtaking acrobatic duel across Omashu's ramps, chutes, and rooftops.",
-            introB: "Ty Lee, treating Omashu like a giant jungle gym, gracefully pursues Aang, her chi-blocking strikes a constant threat."
+            label: "Omashu's Obstacle Challenge: Ty Lee's Flips vs. Aang's Air",
+            introA: "Aang and Ty Lee engage in a breathtaking acrobatic duel across Omashu's ramps, chutes, and rooftops, air versus agility.",
+            introB: "Ty Lee gracefully navigates Toph's shifting earthworks and Aang's air currents, her chi-blocking strikes a constant threat."
         },
         'great-divide': {
-            label: "Canyon Cartwheels & Air Currents: Aang vs. Ty Lee",
-            introA: "Aang uses the canyon's updrafts for daring aerial maneuvers, but Ty Lee's acrobatic skill allows her to keep pace.",
-            introB: "Ty Lee, with incredible balance and agility, traverses the treacherous canyon walls, always a step behind (or above) Aang."
+            label: "Canyon Cartwheels & Air Currents: Ty Lee vs. Aang",
+            introA: "Aang uses the canyon's updrafts for daring aerial maneuvers, but Ty Lee's acrobatic skill allows her to keep surprising pace.",
+            introB: "Ty Lee, with incredible balance and agility, traverses the treacherous canyon walls, always a step behind (or above) the airborne Aang."
         },
         'kyoshi-island': {
-            label: "Island Gymnastics: Aang's Air Evades Ty Lee's Chi Blocks",
-            introA: "Aang and Ty Lee engage in a playful yet dangerous acrobatic display on Kyoshi Island, a dance of air and agility.",
-            introB: "Ty Lee, her bright aura matching the island's cheer, challenges Aang to a 'game' of tag, where 'it' means a blocked chi point."
+            label: "Island Gymnastics: Ty Lee's Chi Blocks vs. Aang's Air Evades",
+            introA: "Ty Lee, her bright aura matching the island's cheer, challenges Aang to a 'game' of tag, where 'it' means a blocked chi point for the Avatar.",
+            introB: "Aang and Ty Lee engage in a playful yet dangerous acrobatic display on Kyoshi Island, a dance of pure agility and elemental air."
         },
         '_DEFAULT_LOCATION_': {
-            label: "Aura Blocking vs. Airbending: Aang vs. Ty Lee",
-            introA: "Aang, master of evasion, faces Ty Lee's unique ability to immobilize benders with her precise strikes.",
-            introB: "Ty Lee, all smiles and somersaults, aims to 'turn off' Aang's bending with her uncanny chi-blocking skills."
+            label: "Chi-Blocking Grace vs. Airbending Freedom: Ty Lee vs. Aang",
+            introA: "Ty Lee, all smiles and somersaults, aims to 'turn off' Aang's bending with her uncanny chi-blocking skills.",
+            introB: "Aang, master of evasion, faces Ty Lee's unique ability to immobilize benders with her precise and acrobatic strikes."
         }
     },
     // --- Aang vs Pakku (pakku) ---
@@ -582,7 +582,7 @@ export const aangArchetypeData = {
             introB: "Pakku, drawing strength from the ocean, unleashes formidable tidal attacks, testing Aang's ability to remain grounded (or airborne)."
         },
         '_DEFAULT_LOCATION_': {
-            label: "Avatar's Air vs. Water Master's Discipline: Aang vs. Pakku",
+            label: "Water Master's Discipline vs. Avatar's Air: Aang vs. Pakku",
             introA: "Aang, representing the freedom of air, spars with Master Pakku, whose waterbending embodies tradition and control.",
             introB: "Master Pakku, with decades of experience, presents a formidable challenge to Aang's airbending with his precise water techniques."
         }
@@ -702,5 +702,84 @@ export const aangArchetypeData = {
             introA: "Aang confronts a reflection of his own airy agility, a whirlwind duel of pure airbending prowess.",
             introB: "Aang faces Aang! 'This is... confusing! Who's supposed to be the good guy here?'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "I hope we don't have to fight, but I will if I have to protect my friends." },
+                { type: 'internal', line: "Maybe {opponentName} will just give up if I stand here looking very calm?" }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just a gentle breeze. No need to get too serious, right?" },
+                { type: 'internal', line: "Okay, just testing the air. Need to be gentle. Very, very gentle." }
+            ],
+            Early: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
+            Mid: [{ type: 'spoken', line: "This is getting serious. I have to find a way to end this peacefully!" }],
+            Late: [{ type: 'action', line: "summons a massive wave, her eyes blazing with determination." }],
+            'eastern-air-temple': [{ type: 'spoken', line: "It's good to be home. The air feels so alive here!" }, { type: 'internal', line: "I can feel the presence of the monks... I must protect this place." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "I hope we don't have to break too much... This is a lot of history." }, { type: 'internal', line: "So much pride here. It feels... heavy." }],
+            'kyoshi-island': [{ type: 'spoken', line: "Kyoshi's island... I must respect this place, and its people." }, { type: 'internal', line: "The air here is gentle, like its people. I must be gentle too." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "So much ice! This is amazing, but also... really cold." }, { type: 'internal', line: "I have to be careful with my airbending here, for the structures and the people." }],
+            'omashu': [{ type: 'spoken', line: "Whee! Omashu is so fun! Let's play!" }, { type: 'internal', line: "I love these chutes! So many ways to get around." }],
+            'si-wong-desert': [{ type: 'spoken', line: "So hot... but the air is free! I can do this!" }, { type: 'internal', line: "No solid ground for some benders. That's my advantage!" }],
+            'foggy-swamp': [{ type: 'spoken', line: "This place is so peaceful, but also... a little sad. I must be careful not to disturb its spirit." }, { type: 'internal', line: "I can feel the life energy of the swamp. I must use my bending gently here." }],
+            'boiling-rock': [{ type: 'spoken', line: "So many ways to move around here! Let's get to it!" }, { type: 'internal', line: "This is a Fire Nation prison... I should be careful, but I can use its own structure against them." }],
+            'great-divide': [{ type: 'spoken', line: "The air currents here are incredible! So many ways to move!" }, { type: 'internal', line: "Such an open space. I can use the wind to my full advantage without harming anything." }] // NEW for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Okay, looks like we're past introductions. Let's keep it light, though!" },
+                { type: 'internal', line: "Alright, they're feeling me out. I need to be evasive, like a leaf on the wind!" }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "Uh oh, things are getting serious! Please, let's not hurt anyone too badly!" },
+                { type: 'internal', line: "The real battle's beginning. I need to balance my defense with decisive action." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "Whoa, the intensity is really picking up! I've got to focus!" },
+                { type: 'internal', line: "The stakes are rising. I can feel the weight of my responsibility now." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "It's all coming down to this! I have to end it, now, peacefully if I can!" },
+                { type: 'internal', line: "This is the final push. The balance of the world depends on this moment!" }
+            ],
+        },
+        onIntentSelection: {
+            OpeningMoves: { Early: [{ type: 'internal', line: "Maybe if I'm evasive enough, {opponent.s} will just get tired and stop?" }] },
+            CautiousDefense: { Generic: [{ type: 'spoken', line: "Let's just calm down for a second, okay?" }] },
+            CapitalizeOnOpening: { Mid: [{ type: 'internal', line: "There's an opening! A quick puff of air should do it." }] }
+        },
+        onManipulation: {
+            asVictim: { Generic: [{ type: 'internal', line: "{opponent.p} words are... heavy. But I can't let them stop me." }] },
+        },
+        onPrediction: {
+            correct: { Generic: [{ type: 'internal', line: "I felt the shift in the air. I knew that was coming." }] },
+            wrong: { Generic: [{ type: 'internal', line: "Whoa, that was fast. Gotta be quicker." }] }
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "This is getting too violent. I have to end it without anyone getting seriously hurt." }] },
+            shaken: { Late: [{ type: 'spoken', line: "Please, stop! This isn't the way!" }] },
+            broken: { Late: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "No! I have to be careful not to hurt anything else." }, { type: 'spoken', line: "Watch out! We don't have to destroy everything!" }] },
+            observingDamage: { Generic: [{ type: 'spoken', line: "Stop! This isn't what bending is for!" }, { type: 'internal', line: "The balance is being broken. I have to restore it." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "The world... it's hurting. I can't let this continue." }, { type: 'spoken', line: "This isn't what Gyatso taught me! I have to find a way out!" }] },
+            thrivingInDamage: []
+        },
+        onVictory: { Default: { Generic: [{ line: "Phew! Nobody got hurt, right? Mostly." }] } },
+        relationships: { 'ozai-not-comet-enhanced': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "I will not let you destroy this world, Fire Lord." }] } } } }
+    },
+    techniques: [
+        { name: "Air Scooter", verb: 'ride', object: 'his air scooter', type: 'Utility', power: 20, element: 'air', moveTags: ['utility_reposition', 'evasive', 'channeled'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.15 }, collateralImpact: 'none' },
+        { name: "Air Blast", verb: 'unleash', object: 'focused blast of air', type: 'Offense', power: 40, requiresArticle: true, element: 'air', moveTags: ['ranged_attack', 'area_of_effect_small', 'pushback'], collateralImpact: 'low' },
+        { name: "Wind Shield", verb: 'form', object: 'swirling shield of wind', type: 'Defense', power: 50, requiresArticle: true, element: 'air', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense'], collateralImpact: 'none' },
+        { name: "Tornado Whirl", verb: 'create', object: 'disorienting tornado', type: 'Offense', power: 65, requiresArticle: true, element: 'air', moveTags: ['area_of_effect', 'channeled', 'utility_control'], collateralImpact: 'medium' },
+        { name: "Gust Push", verb: 'push', object: 'with a sudden gust of wind', type: 'Offense', power: 30, element: 'air', moveTags: ['ranged_attack', 'single_target', 'pushback'], collateralImpact: 'none' },
+        { name: "Sweeping Gust", verb: 'sweep', object: 'his foe off their feet', type: 'Finisher', power: 80, element: 'air', moveTags: ['area_of_effect', 'debuff_disable', 'pushback', 'requires_opening'], collateralImpact: 'low' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'air', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["Phew! Nobody got hurt, right? Mostly."], postWin_overwhelming: ["Whoa, that was a lot of air! Are you okay?"], postWin_specific: { 'ozai-not-comet-enhanced': "It's over. This world doesn't need any more destruction." } },
+    relationships: { 'ozai-not-comet-enhanced': { relationshipType: "fated_adversary", stressModifier: 1.4, resilienceModifier: 1.3 }, 'azula': { relationshipType: "nonlethal_pacifism", stressModifier: 1.2, resilienceModifier: 1.2 } }
 };

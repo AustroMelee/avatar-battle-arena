@@ -10,57 +10,57 @@ export const sokkaArchetypeData = {
     // --- Sokka vs Aang (aang-airbending-only) ---
     'aang-airbending-only': {
         'eastern-air-temple': {
-            label: "Friendly Spar at Sky-High Sanctuary",
-            introA: "Sokka, slightly winded by the altitude, devises a strategy to ground the evasive Avatar.",
-            introB: "Aang, feeling playful in his element, dances on the wind currents, challenging Sokka's ingenuity."
+            label: "Playful Puffs at the Peak: Aang vs. Sokka",
+            introA: "Aang, light as a feather in his home temple, easily dodges Sokka's earnest but earthbound attacks.",
+            introB: "Sokka, huffing and puffing at the high altitude, tries to ground the elusive Avatar with a well-aimed boomerang."
         },
         'northern-water-tribe': {
-            label: "Icy Antics: Sokka's Boomerang vs. Aang's Gusts",
-            introA: "Sokka bundles up and tries to corner Aang on the slippery ice, his boomerang arcing through the frosty air.",
-            introB: "Aang, using air currents to skate across the ice, playfully evades Sokka's attacks in the heart of the Water Tribe."
+            label: "Icy Whirlwinds: Aang's Air vs. Sokka's Strategy",
+            introA: "Aang uses gusts of wind to glide over the icy canals, playfully evading Sokka's attempts to strategize a win.",
+            introB: "Sokka, bundled against the cold, finds his plans literally blown away by Aang's mastery of air."
         },
         'ba-sing-se': {
-            label: "City Chase: Sokka's Plans vs. Aang's Agility",
-            introA: "Sokka sets up elaborate (and likely flawed) traps for Aang in the alleyways of Ba Sing Se.",
-            introB: "Aang, with a mischievous grin, leaps and gusts his way through the city, easily avoiding Sokka's machinations."
+            label: "City Evasion: Aang's Agility vs. Sokka's Schemes",
+            introA: "Aang, a blur of motion, navigates the rooftops and alleys of Ba Sing Se, always a step ahead of Sokka's traps.",
+            introB: "Sokka, muttering about 'slippery airbenders,' tries to corner Aang with a new, 'foolproof' invention in the Earth Kingdom capital."
         },
         'si-wong-desert': {
-            label: "Desert Games: Sokka's Endurance vs. Aang's Evasion",
-            introA: "Sokka, determined despite the heat, tries to wear down the ever-mobile Aang with relentless (if clumsy) pursuit.",
-            introB: "Aang, using air currents to stay cool, leads Sokka on a merry chase across the dunes, always just out of reach."
+            label: "Desert Dance: Aang's Air Currents vs. Sokka's Endurance",
+            introA: "Aang uses his airbending to create cool breezes and dust devils, playfully disorienting Sokka in the vast desert.",
+            introB: "Sokka, wiping sweat from his brow, throws his boomerang with hopeful accuracy, only to see it veer off in Aang's wind."
         },
         'foggy-swamp': {
-            label: "Swamp Shenanigans: Sokka vs. Aang",
-            introA: "Sokka, convinced a swamp monster is involved, cautiously proceeds, boomerang ready for anything Aang (or the swamp) throws at him.",
-            introB: "Aang, attuned to the swamp's spirits, uses the fog and strange sounds to playfully disorient his friend Sokka."
+            label: "Mystic Winds & Boomerangs: Aang vs. Sokka in the Swamp",
+            introA: "Aang, feeling the swamp's strange energy, uses gentle air currents to guide Sokka away from real danger (and into funny mud puddles).",
+            introB: "Sokka, convinced every vine is a monster, relies on his boomerang and Aang's (sometimes unhelpful) air gusts for protection."
         },
         'boiling-rock': {
-            label: "Hot Air: Sokka's Escape vs. Aang's Distraction",
-            introA: "Sokka, focused on a 'brilliant' escape plan, enlists Aang's help, which probably involves a lot of wind.",
-            introB: "Aang, creating updrafts and diversions, helps Sokka navigate the perilous prison, making light of the danger."
+            label: "Heated Hijinks: Aang's Air Assists Sokka's Escape",
+            introA: "Aang uses powerful updrafts to help Sokka clear gaps and create diversions during their daring escape from the Boiling Rock.",
+            introB: "Sokka, grateful for Aang's air support (even if it makes his hair messy), focuses on the 'plan' amidst the volcanic chaos."
         },
         'fire-nation-capital': {
-            label: "Stealth Mission: Sokka's Infiltration, Aang's Cover",
-            introA: "Sokka, in his best (worst) Fire Nation disguise, tries to blend in, while Aang provides airy distractions.",
-            introB: "Aang, a whisper on the wind, helps Sokka move unseen through the enemy capital, his airbending a subtle shield."
+            label: "Whispers on the Wind: Aang & Sokka's Covert Clash",
+            introA: "Aang, a silent gust in the enemy capital, uses his airbending to subtly misdirect guards while Sokka attempts 'stealth'.",
+            introB: "Sokka, trying to be inconspicuous (and failing), appreciates Aang's ability to create timely distractions with blasts of air."
         },
         'omashu': {
-            label: "Mail Mayhem: Sokka vs. Aang in Omashu",
-            introA: "Sokka, convinced he can ride the mail system better than Aang, challenges him to a 'race' (that's actually a fight).",
-            introB: "Aang, with a joyful laugh, air-scooters through Omashu's chutes, easily outmaneuvering Sokka's attempts to 'win'."
+            label: "Air Scooter Antics: Aang Zooms Past Sokka in Omashu",
+            introA: "Aang, on his air scooter, zips through Omashu's delivery chutes, laughing as Sokka tries to keep up.",
+            introB: "Sokka, clinging precariously to a mail cart, yells for Aang to 'slow down, twinkle-toes!' as they race through the stone city."
         },
         'great-divide': {
-            label: "Canyon Capers: Sokka's Echoes vs. Aang's Whirlwinds",
-            introA: "Sokka shouts challenges that echo comically, while his boomerang gets caught in Aang's miniature tornadoes.",
-            introB: "Aang uses the canyon's updrafts for spectacular aerial maneuvers, running rings around a frustrated Sokka."
+            label: "Canyon Breezes & Boomerang Blues: Aang vs. Sokka",
+            introA: "Aang uses the canyon's updrafts to perform amazing aerial feats, easily evading Sokka's boomerang throws.",
+            introB: "Sokka watches his boomerang get caught in Aang's air currents, sighing, 'Some days, it just doesn't come back... easily.'"
         },
         'kyoshi-island': {
-            label: "Island Fun: Sokka's Warrior Pose vs. Aang's Air Ball",
-            introA: "Sokka attempts a 'fierce warrior stance', only for Aang to gently knock him over with a puff of air.",
-            introB: "Aang, enjoying the peaceful island, engages Sokka in a lighthearted spar, his movements fluid and joyful."
+            label: "Island Zephyrs & Warrior's Wit: Aang vs. Sokka",
+            introA: "Aang, enjoying the island's peace, engages Sokka in a lighthearted spar, his airbending like a gentle but uncatchable breeze.",
+            introB: "Sokka, trying to impress the Kyoshi warriors, finds his 'fierce' attacks effortlessly deflected by Aang's playful air shields."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Idea Guy vs. The Avatar (Air Only)",
+            label: "The Avatar (Air Only) vs. The Idea Guy",
             introA: "Sokka brings his strategic mind and trusty boomerang against the master of air.",
             introB: "Aang, with only his airbending, relies on agility and misdirection against his clever friend."
         }
@@ -289,7 +289,7 @@ export const sokkaArchetypeData = {
         'kyoshi-island': {
             label: "Island Invasion: Sokka's Defense vs. Azula's Blue Inferno",
             introA: "Sokka, alongside the Kyoshi Warriors, bravely defends the peaceful island from Azula's fiery onslaught.",
-            introB: "Azula, viewing Kyoshi Island as another stepping stone, unleashes her devastating blue fire, intending to crush all resistance."
+            introB: "Azula, viewing Kyoshi Island as another stepping stone to domination, unleashes her devastating blue fire, intending to crush all resistance."
         },
         '_DEFAULT_LOCATION_': {
             label: "The Strategist vs. The Prodigy: Sokka vs. Azula",
@@ -489,44 +489,44 @@ export const sokkaArchetypeData = {
             introB: "Ty Lee turns the streets of Ba Sing Se into her personal gymnasium, somersaulting past Sokka's defenses to deliver paralyzing jabs."
         },
         'si-wong-desert': {
-            label: "Desert Acrobatics: Sokka's Stamina vs. Ty Lee's Sparkle",
+            label: "Desert Acrobatics, Warrior's Worry: Ty Lee vs. Sokka",
             introA: "Sokka, already tired from the heat, finds Ty Lee's boundless energy and agile attacks overwhelming in the Si Wong Desert.",
             introB: "Ty Lee, remarkably unfazed by the desert sun, cartwheels across the sand, her chi-blocking strikes finding Sokka with ease."
         },
         'foggy-swamp': {
-            label: "Swampy Somersaults: Sokka's Confusion vs. Ty Lee's Cheer",
+            label: "Swampy Somersaults, Sokka's Surprise: Ty Lee vs. Sokka",
             introA: "Sokka, lost and confused in the Foggy Swamp, is an easy target for Ty Lee's surprisingly effective, cheerful assaults.",
             introB: "Ty Lee, her bright personality a stark contrast to the gloomy swamp, bounces through the muck to playfully disable Sokka."
         },
         'boiling-rock': {
-            label: "Pressure Cooker: Sokka's Plan vs. Ty Lee's Points",
-            introA: "Sokka's escape from the Boiling Rock is complicated by Ty Lee's ability to appear from nowhere and block his chi.",
-            introB: "Ty Lee, with a cheerful 'Oops, did I block your chi again?', systematically dismantles Sokka's attempts to fight back."
+            label: "Pressure Point Panic: Ty Lee's Precision vs. Sokka's Plan",
+            introA: "Ty Lee, with a cheerful 'Oops, did I block your chi again?', systematically dismantles Sokka's attempts to fight back at the Boiling Rock.",
+            introB: "Sokka's escape from the Boiling Rock is complicated by Ty Lee's ability to appear from nowhere and block his chi with a smile."
         },
         'fire-nation-capital': {
-            label: "Capital Calisthenics: Sokka's Stand vs. Ty Lee's Strikes",
-            introA: "Sokka tries to use his warrior skills against Ty Lee, but finds her acrobatic chi-blocking impossible to predict in the Fire Nation Capital.",
-            introB: "Ty Lee, part of Azula's elite guard, playfully but effectively neutralizes Sokka's attempts at rebellion with precise jabs."
+            label: "Capital Calisthenics, Warrior's Woe: Ty Lee vs. Sokka",
+            introA: "Ty Lee, part of Azula's elite guard, playfully but effectively neutralizes Sokka's attempts at rebellion with precise jabs in the capital.",
+            introB: "Sokka tries to use his warrior skills against Ty Lee, but finds her acrobatic chi-blocking impossible to predict."
         },
         'omashu': {
-            label: "Omashu Obstacle Course: Sokka vs. Ty Lee",
-            introA: "Sokka attempts to use Omashu's varied levels to his advantage, but Ty Lee's agility makes her a difficult target.",
-            introB: "Ty Lee navigates Omashu's ramps and chutes with ease, gracefully closing the distance to Sokka for a chi-blocking attack."
+            label: "Omashu Obstacle Course: Ty Lee's Agility vs. Sokka's Antics",
+            introA: "Ty Lee navigates Omashu's ramps and chutes with ease, gracefully closing the distance to Sokka for a chi-blocking attack.",
+            introB: "Sokka attempts to use Omashu's varied levels to his advantage, but Ty Lee's agility makes her a difficult, giggling target."
         },
         'great-divide': {
-            label: "Canyon Cartwheels: Sokka's Reach vs. Ty Lee's Grace",
-            introA: "Sokka's boomerang struggles to find its mark as Ty Lee tumbles and leaps across the treacherous Great Divide.",
-            introB: "Ty Lee uses the canyon's uneven terrain to launch surprising acrobatic attacks, leaving Sokka immobilized and bewildered."
+            label: "Canyon Cartwheels, Warrior's Wondering: Ty Lee vs. Sokka",
+            introA: "Ty Lee uses the canyon's uneven terrain to launch surprising acrobatic attacks, leaving Sokka immobilized and bewildered.",
+            introB: "Sokka's boomerang struggles to find its mark as Ty Lee tumbles and leaps across the treacherous Great Divide."
         },
         'kyoshi-island': {
-            label: "Island Imbalance: Sokka's Stance vs. Ty Lee's Touch",
-            introA: "Sokka's attempts at a strong warrior stance are hilariously undone by Ty Lee's light, chi-blocking touches.",
-            introB: "Ty Lee, enjoying the island's cheerful atmosphere, engages Sokka in a 'game' of disabling his limbs one by one."
+            label: "Island Imbalance, Sokka's Stumble: Ty Lee vs. Sokka",
+            introA: "Ty Lee, enjoying the island's cheerful atmosphere, engages Sokka in a 'game' of disabling his limbs one by one.",
+            introB: "Sokka's attempts at a strong warrior stance are hilariously undone by Ty Lee's light, chi-blocking touches."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Planner vs. The Acrobat: Sokka vs. Ty Lee",
-            introA: "Sokka braces himself for Ty Lee's disorienting acrobatic assault, hoping his boomerang can find an opening.",
-            introB: "Ty Lee, with a giggle and a flip, aims to disrupt Sokka's chi and his plans with her unique fighting style."
+            label: "The Acrobat vs. The Planner: Ty Lee vs. Sokka",
+            introA: "Ty Lee, with a giggle and a flip, aims to disrupt Sokka's chi and his plans with her unique fighting style.",
+            introB: "Sokka braces himself for Ty Lee's disorienting acrobatic assault, hoping his boomerang can find an opening."
         }
     },
     // --- Sokka vs Pakku (pakku) ---

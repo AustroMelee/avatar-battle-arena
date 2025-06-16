@@ -10,7 +10,7 @@
 
 // --- UPDATED IMPORTS ---
 import { effectivenessLevels } from './data_narrative_effectiveness.js';
-import { phaseTemplates } from './data_narrative_phases.js';
+import { phaseTemplates, BATTLE_PHASES } from './data_narrative_phases.js'; // Corrected import path, added BATTLE_PHASES
 import { impactPhrases } from './data_narrative_outcomes.js';
 import { collateralImpactPhrases } from './data_narrative_collateral.js';
 import { introductoryPhrases } from './data_narrative_introductions.js';
@@ -208,6 +208,18 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
             }
             return null; // Fallback if element is not string or expected object format
         }
+    }
+
+    // Fallback for specific triggers if no quote found (e.g., if a new phase has no intro defined)
+    if (trigger === 'battleStart') {
+         if (currentPhaseKey === BATTLE_PHASES.PRE_BANTER) return { type: 'spoken', line: `{actorName} prepares for battle, sensing the tension in the air.` };
+         if (currentPhaseKey === BATTLE_PHASES.POKING) return { type: 'spoken', line: `{actorName} begins to probe {opponentName}'s defenses cautiously.` };
+    }
+    if (trigger === 'phaseTransition') {
+         if (subTrigger === BATTLE_PHASES.POKING) return { type: 'action', line: `The silence breaks, and the probing begins for {actorName}!` };
+         if (subTrigger === BATTLE_PHASES.EARLY) return { type: 'action', line: `The battle intensifies! The true fight begins for {actorName}!` };
+         if (subTrigger === BATTLE_PHASES.MID) return { type: 'action', line: `The conflict reaches a new height. The stakes are rising for {actorName}!` };
+         if (subTrigger === BATTLE_PHASES.LATE) return { type: 'action', line: `The end is in sight. {actorName} prepares for a decisive confrontation!` };
     }
 
     if (trigger === 'onCollateral' && subTrigger === 'general' && context.impactText) {
@@ -543,7 +555,8 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
         }
     });
 
-    if (!isInitialBanter && move && result) {
+    // Only generate action descriptions and collateral if a `move` object exists (i.e., not a NarrativeOnly turn)
+    if (move && result) { // Check for move object
         // Generate the main action description, which could be a standard move or the "move line" part of a reacted action
         const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry, battleState); // FIX: Pass battleState
         turnEventObjects.push(actionEvent); // This actionEvent will now be simpler for reacted actions
@@ -574,6 +587,11 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
             }
         } else if (actionEvent.html_content) {
              actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, '');
+        }
+    } else if (currentPhaseKey === BATTLE_PHASES.PRE_BANTER) { // NEW: Handle narrative-only turns
+        // For PreBanter, we might add a subtle hint that no combat occurred yet
+        if (turnEventObjects.length === 0) { // If no actual banter was found for this character
+            turnEventObjects.push({ type: 'narrative_info', text: `(${actor.name} observes their opponent in silence.)`, html_content: `<p class="narrative-info char-${actor.id}">(${actor.name} observes their opponent in silence.)</p>` });
         }
     }
     return turnEventObjects;

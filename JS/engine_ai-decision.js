@@ -6,7 +6,7 @@
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
 import { MAX_MOMENTUM, MIN_MOMENTUM } from './engine_momentum.js';
-import { getPhaseAIModifiers } from './engine_battle-phase.js'; // CORRECTED LINE
+import { getPhaseAIModifiers, BATTLE_PHASES } from './engine_battle-phase.js'; // CORRECTED LINE & ADDED BATTLE_PHASES
 import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
 import { locationConditions } from './location-battle-conditions.js'; // NEW: Import locationConditions
 
@@ -233,26 +233,33 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     const healthDiff = actorHp - defenderHp;
 
     const defenderEscalationState = safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState');
+    
+    // --- Phase-specific Intent Priorities ---
+    if (currentPhase === BATTLE_PHASES.PRE_BANTER) {
+        actor.aiLog.push(`[Intent Decided]: NarrativeOnly due to ${BATTLE_PHASES.PRE_BANTER} Phase.`);
+        return 'NarrativeOnly'; // Purely narrative, no combat actions
+    }
+    if (currentPhase === BATTLE_PHASES.POKING) {
+        // Poking Phase: Encourage low-risk, probing moves, repositioning
+        if (actor.aiMemory.repositionCooldown === 0 && actor.mobility > 0.4 && Math.random() < 0.7) {
+             actor.aiLog.push(`[Intent Decided]: OpeningMoves (Poking Phase Reposition)`);
+             return 'OpeningMoves'; // Prioritize repositioning
+        }
+        if (profile.patience > 0.6 || actor.energy > 70) { // Cautious probing if patient or high energy
+             actor.aiLog.push(`[Intent Decided]: CautiousDefense (Poking Phase)`);
+             return 'CautiousDefense';
+        }
+        actor.aiLog.push(`[Intent Decided]: PokingPhaseTactics (Default Poking)`);
+        return 'PokingPhaseTactics'; // General probing
+    }
+    
+    // --- Core Intent Logic (Prioritized by specific situations) ---
     if (defenderEscalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED || defenderEscalationState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
         if (profile.opportunism > 0.5 || profile.aggression > 0.7) {
-             actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt due to Opponent Escalation (${defenderEscalationState}) and Actor Opportunism/Aggression.`);
+            actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt due to Opponent Escalation (${defenderEscalationState}) and Actor Opportunism/Aggression.`);
             return 'FinishingBlowAttempt';
         }
     }
-
-    if (currentPhase === 'Early' && profile.patience > 0.7 && turn < 2) {
-        actor.aiLog.push(`[Intent Decided]: OpeningMoves due to Early Phase, High Patience, Low Turn.`);
-        return 'OpeningMoves';
-    }
-    if (currentPhase === 'Late' && actorHp < 30 && profile.riskTolerance > 0.6) {
-        actor.aiLog.push(`[Intent Decided]: DesperateGambit due to Late Phase, Low HP, High Risk Tolerance.`);
-        return 'DesperateGambit';
-    }
-    if (currentPhase === 'Late' && (defenderHp < 30 || defenderEscalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED) && profile.opportunism > 0.7) {
-        actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt due to Late Phase, Opponent Low HP/High Escalation, High Opportunism.`);
-        return 'FinishingBlowAttempt';
-    }
-
 
     const defenderIsStunned = safeGet(defender, 'stunDuration', 0, defender.name, 'stunDuration') > 0;
     const defenderTacticalState = safeGet(defender, 'tacticalState', null, defender.name, 'tacticalState');
@@ -261,21 +268,11 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
         return 'CapitalizeOnOpening';
     }
 
-
-    if (profile.riskTolerance > 0.7 && actorHp < 45) {
+    if (actorHp < 45 && profile.riskTolerance > 0.7) {
         actor.aiLog.push(`[Intent Decided]: DesperateGambit due to Actor Low HP, High Risk Tolerance.`);
         return 'DesperateGambit';
     }
-    if (profile.patience > 0.8 && turn < 2 && currentPhase !== 'Late') {
-        actor.aiLog.push(`[Intent Decided]: CautiousDefense due to High Patience, Early Turn.`);
-        return 'CautiousDefense';
-    }
-    if (profile.aggression > 0.8 && healthDiff > 15) {
-        actor.aiLog.push(`[Intent Decided]: PressAdvantage due to High Aggression, Health Lead.`);
-        return 'PressAdvantage';
-    }
-
-
+    
     const actorMentalStateLevel = safeGet(actor.mentalState, 'level', 'stable', actor.name, 'mentalState.level');
     if (actorMentalStateLevel === 'broken') {
         actor.aiLog.push(`[Intent Decided]: UnfocusedRage due to Broken Mental State.`);
@@ -292,28 +289,51 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
         return 'BreakTheTurtle';
     }
 
-
     const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
     if (actorEnergy < 25) {
         actor.aiLog.push(`[Intent Decided]: ConserveEnergy due to Low Energy.`);
         return 'ConserveEnergy';
     }
-
-
-    if (turn < 2 && currentPhase === 'Early') {
-        actor.aiLog.push(`[Intent Decided]: OpeningMoves (Default Early Phase).`);
-        return 'OpeningMoves';
+    
+    // --- REVISED: Defaulting Logic based on Phase (⚠️ SAFER FALLBACK) ---
+    if (currentPhase === BATTLE_PHASES.EARLY) {
+         if (profile.patience > 0.8 && turn < 2) { // Allow for a very cautious start
+             actor.aiLog.push(`[Intent Decided]: CautiousDefense (Default Early Phase Cautious).`);
+             return 'CautiousDefense';
+         }
+         actor.aiLog.push(`[Intent Decided]: OpeningMoves (Default Early Phase Aggro).`);
+         return 'OpeningMoves';
     }
-    actor.aiLog.push(`[Intent Decided]: StandardExchange (Default).`);
+    if (currentPhase === BATTLE_PHASES.MID) {
+         if (profile.aggression > 0.8 && healthDiff > 15) {
+            actor.aiLog.push(`[Intent Decided]: PressAdvantage (Default Mid Phase Aggro).`);
+            return 'PressAdvantage';
+         }
+         actor.aiLog.push(`[Intent Decided]: StandardExchange (Default Mid Phase).`);
+         return 'StandardExchange';
+    }
+    if (currentPhase === BATTLE_PHASES.LATE) {
+         // Even in late, if not in a finishing blow scenario, try to press or fall back to standard
+         if (profile.aggression > 0.7 && healthDiff > 0) {
+             actor.aiLog.push(`[Intent Decided]: PressAdvantage (Default Late Phase Aggro).`);
+             return 'PressAdvantage';
+         }
+         actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt (Default Late Phase).`); // Push towards finisher
+         return 'FinishingBlowAttempt';
+    }
+    
+    // Should theoretically not be reached if phase logic is complete, but as ultimate fallback
+    actor.aiLog.push(`[Intent Decided]: StandardExchange (Ultimate Fallback).`);
     return 'StandardExchange';
 }
 
-function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
+function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) { // Added currentPhase
     if (!actor || !defender || !conditions) {
         return [{ move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1.0, reasons: ["ErrorInCalculateMoveWeights"] }];
     }
 
-    const availableMoves = getAvailableMoves(actor, conditions);
+    // NEW: Pass currentPhase to getAvailableMoves
+    const availableMoves = getAvailableMoves(actor, conditions, currentPhase);
     const profile = getDynamicPersonality(actor, currentPhase);
 
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
@@ -337,9 +357,10 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
                 weight *= (1 + profile.riskTolerance * 2.0);
                 reasons.push(`Risk:${profile.riskTolerance.toFixed(2)}`);
                 const defenderHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
-                if (currentPhase === 'Early') weight *= 0.05;
-                else if (currentPhase === 'Mid' && defenderHp > 50) weight *= 0.3;
-                else if (currentPhase === 'Late' || defenderHp <= 30) weight *= 2.5;
+                if (currentPhase === BATTLE_PHASES.EARLY) weight *= 0.05; // Finisher penalty in Early phase
+                else if (currentPhase === BATTLE_PHASES.POKING) weight *= 0.001; // Effectively disable in Poking
+                else if (currentPhase === BATTLE_PHASES.MID && defenderHp > 50) weight *= 0.3;
+                else if (currentPhase === BATTLE_PHASES.LATE || defenderHp <= 30) weight *= 2.5;
                 break;
             default:
                 break;
@@ -453,6 +474,7 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         if (move.moveTags?.includes('evasive') && profile.patience > 0.6) { weight *= (1.0 + profile.patience); reasons.push('EvasiveTag'); }
         if (move.moveTags?.includes('highRisk') && profile.riskTolerance > 0.5) { weight *= (1.0 + profile.riskTolerance * 1.2); reasons.push('HighRiskTag'); }
 
+        // NEW: Update intentMultipliers to include new phase intents
         const intentMultipliers = {
             StandardExchange: { Offense: 1.2, Defense: 1.0, Utility: 1.0, Finisher: 0.8 },
             OpeningMoves: { Offense: 0.8, Defense: 1.2, Utility: 1.3, Finisher: 0.1, low_cost: 1.5, evasive: 1.3 },
@@ -464,7 +486,10 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             UnfocusedRage: { Offense: 1.6, Defense: 0.2, Utility: 0.3, Finisher: 1.0, area_of_effect_large: 1.5, highRisk: 1.8 },
             PanickedDefense: { Offense: 0.3, Defense: 2.5, Utility: 1.5, Finisher: 0.01, defensive_stance: 2.5, evasive: 2.0 },
             BreakTheTurtle: { Offense: 1.4, Defense: 0.7, Utility: 1.1, Finisher: 0.9, environmental_manipulation: 1.8, unblockable_ground: 2.0, bypasses_defense: 1.9 },
-            ConserveEnergy: { Offense: 0.7, Defense: 1.1, Utility: 1.4, Finisher: 0.2, low_cost: 3.0, utility_reposition: 1.5 }
+            ConserveEnergy: { Offense: 0.7, Defense: 1.1, Utility: 1.4, Finisher: 0.2, low_cost: 3.0, utility_reposition: 1.5 },
+            // --- NEW Phase-Specific Intents ---
+            NarrativeOnly: { Offense: 0.001, Defense: 0.001, Utility: 0.001, Finisher: 0.001 }, // Effectively disable combat moves
+            PokingPhaseTactics: { Offense: 0.7, Defense: 1.5, Utility: 2.0, Finisher: 0.01, low_cost: 2.0, evasive: 1.8, utility_control: 1.5, ranged_attack: 1.0 } // Favor probing attacks, defensive, utility
         };
         const multipliers = intentMultipliers[intent] || {};
         if (multipliers[move.type]) { weight *= multipliers[move.type]; reasons.push(`Intent:${intent}`); }
@@ -567,7 +592,7 @@ function selectFromDistribution(movesWithProbs) {
 }
 
 
-export function selectMove(actor, defender, conditions, turn, currentPhase) {
+export function selectMove(actor, defender, conditions, turn, currentPhase) { // Added currentPhase
     if (!actor || !defender || !conditions || !actor.aiLog) {
         return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, aiLogEntry: { intent: 'Error', chosenMove: 'Struggle'} };
     }
@@ -577,8 +602,16 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
 
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
     const intent = determineStrategicIntent(actor, defender, turn, currentPhase);
+    
+    // NEW: Handle the NarrativeOnly intent
+    if (intent === 'NarrativeOnly') {
+         // No actual move is selected, this turn is for narrative only.
+         // Return a null move and log that it's a narrative turn.
+         return { move: null, aiLogEntryFromSelectMove: { turn: turn + 1, phase: currentPhase, intent, chosenMove: 'None (Narrative Turn)', actorState: { /* ... */ }, opponentEscalation: defender.escalationState } };
+    }
+
     const prediction = predictOpponentNextMove(actor, defender);
-    let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase);
+    let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase); // Pass currentPhase
 
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
 

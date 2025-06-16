@@ -60,45 +60,6 @@ function handleModeSelectionChange(event) {
     }
 }
 
-/*
-// Removed this local function as it's now centralized and exported from ui_battle-results.js
-function setupDetailedLogControls() {
-    const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
-    const copyBtn = document.getElementById('copy-detailed-logs-btn');
-    const contentDiv = document.getElementById('detailed-battle-logs-content');
-    if (toggleBtn && contentDiv) {
-        toggleBtn.addEventListener('click', () => {
-            const isCollapsed = contentDiv.classList.toggle('collapsed');
-            toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
-            toggleBtn.textContent = isCollapsed ? 'Show Detailed Battle Logs ►' : 'Hide Detailed Battle Logs ▼';
-        });
-    } else {
-        if (!toggleBtn) console.warn("Toggle detailed logs button not found.");
-        if (!contentDiv) console.warn("Detailed battle logs content div not found.");
-    }
-
-    if (copyBtn && contentDiv) {
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(contentDiv.textContent || '');
-                copyBtn.textContent = '📋 Copied!';
-                setTimeout(() => {
-                    copyBtn.textContent = '📋 Copy Battle Logs';
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy detailed logs: ', err);
-                copyBtn.textContent = 'Error Copying';
-                setTimeout(() => {
-                    copyBtn.textContent = '📋 Copy Battle Logs';
-                }, 2000);
-            }
-        });
-    } else {
-        if (!copyBtn) console.warn("Copy detailed logs button not found.");
-    }
-}
-*/
-
 function init() {
     populateAllUI(); // Use the global populate UI function
 

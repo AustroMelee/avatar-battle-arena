@@ -118,7 +118,7 @@ export const azulaArchetypeData = {
             introB: "Aang defends the peaceful Kyoshi Island with powerful air shields against Azula's terrifying and destructive blue fire."
         },
         '_DEFAULT_LOCATION_': {
-            label: "Perfection vs. Pacifism: Azula vs. Aang",
+            label: "Lightning and Wind: A Fateful Duel",
             introA: "Azula's blue fire burns with cold precision, a prodigy eager to prove her absolute superiority against the Avatar.",
             introB: "Aang, embodying the evasive spirit of air, seeks to avoid Azula's deadly assault and find a path to peace."
         }
@@ -254,7 +254,7 @@ export const azulaArchetypeData = {
         'ba-sing-se': {
             label: "City of Secrets, Sibling Showdown: Azula vs. Zuko",
             introA: "Azula, mastermind of the city's fall, meets Zuko's challenge with manipulative words and perfectly executed blue fire attacks.",
-            introB: "Zuko confronts Azula in the shadowed alleys and grand courtyards of Ba Sing Se, their family's dark drama playing out in flashes of fire."
+            introB: "Zuko confronts Azula in the shadowed alleys and grand courtyards of Ba Sing Se, their family's dark drama playing out in flashes of fire and lightning."
         },
         'si-wong-desert': {
             label: "Desert Duel of Dragons: Azula vs. Zuko",
@@ -305,7 +305,7 @@ export const azulaArchetypeData = {
             introB: "Ozai, amused by his daughter's ambition, meets her challenge with the overwhelming power of the Phoenix King, even without the Comet."
         },
         'northern-water-tribe': {
-            label: "Frozen Throne, Fiery Legacy: Azula vs. Ozai",
+            label: "Frozen Throne, Fiery Legacy: Ozai vs. Azula",
             introA: "Azula's cold, precise fire clashes with Ozai's all-consuming blaze in the heart of the Northern Water Tribe, a battle for dynastic supremacy.",
             introB: "Ozai, his power undiminished by the arctic cold, intends to show Azula the true meaning of absolute firebending authority."
         },
@@ -484,17 +484,17 @@ export const azulaArchetypeData = {
             introB: "Ty Lee, unfazed by Azula's terrifying fire, uses the icy terrain to her advantage, playfully disabling the princess's limbs."
         },
         'ba-sing-se': {
-            label: "Urban Parkour, Royal Pursuit: Azula vs. Ty Lee in Ba Sing Se",
+            label: "Urban Parkour, Princess's Pursuit: Azula vs. Ty Lee in Ba Sing Se",
             introA: "Azula relentlessly pursues Ty Lee through Ba Sing Se's crowded streets, her blue fire a stark contrast to Ty Lee's light-hearted evasions.",
             introB: "Ty Lee turns the Earth Kingdom capital into her personal playground, her acrobatic skill keeping her just out of Azula's fiery reach."
         },
         'si-wong-desert': {
-            label: "Desert Heat, Acrobatic Dance: Azula vs. Ty Lee",
+            label: "Desert Heat, Acrobatic Dare: Ty Lee vs. Azula",
             introA: "Azula's fire blazes in the desert heat, but Ty Lee's boundless energy and agility make her a dizzying, hard-to-hit target.",
             introB: "Ty Lee, surprisingly resilient in the desert sun, uses her acrobatic prowess to dodge Azula's flames and deliver precise chi blocks."
         },
         'foggy-swamp': {
-            label: "Misty Mayhem, Fiery Focus: Azula vs. Ty Lee",
+            label: "Misty Mayhem, Fiery Perfection: Ty Lee vs. Azula",
             introA: "Azula's fire cuts through the swamp's fog, trying to pin down Ty Lee, whose acrobatic movements are made even more unpredictable by the terrain.",
             introB: "Ty Lee, using the swamp's strange atmosphere to her advantage, appears and disappears like a cheerful phantom, her chi-blocking strikes swift."
         },
@@ -702,5 +702,97 @@ export const azulaArchetypeData = {
             introA: "Azula faces her own flawless reflection, a chilling duel of blue fire, cunning, and unraveling sanity.",
             introB: "Azula smirks at Azula. 'Only one of us can be perfect. And it will be me.'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "Don't bother, I already know how this ends. With my victory." },
+                { type: 'internal', line: "Such pathetic defiance. It's almost... adorable." }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just testing the waters. Don't disappoint me too quickly." },
+                { type: 'internal', line: "I'll allow them a few moments of futile struggle before I unleash my full power." }
+            ],
+            Early: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
+            Mid: [{ type: 'spoken', line: "Is this the best you can do? Pathetic." }],
+            Late: [{ type: 'spoken', line: "You will fall. Everyone does." }],
+            'eastern-air-temple': [{ type: 'spoken', line: "These dusty ruins will serve as a fitting graveyard for your hopes." }, { type: 'internal', line: "Such wasted space. This temple will burn beautifully." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "Welcome to my stage. Prepare to be extinguished." }, { type: 'internal', line: "This is my domain. No one is safe from my fire here." }],
+            'kyoshi-island': [{ type: 'spoken', line: "This quaint little island will make a delightful bonfire." }, { type: 'internal', line: "Peaceful places are so easily corrupted. And burned." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "The cold will only make your defeat more exquisite." }, { type: 'internal', line: "This ice is brittle. I shall shatter it, and their hope, with my flames." }],
+            'omashu': [{ type: 'spoken', line: "These old stones will crumble beautifully under my flames." }, { type: 'internal', line: "So many levels, so many angles to exploit. This is amusing." }],
+            'si-wong-desert': [{ type: 'spoken', line: "The sun lends its power to my fury. You will melt!" }, { type: 'internal', line: "This heat amplifies my precision. Nowhere to hide." }],
+            'foggy-swamp': [{ type: 'spoken', line: "This wretched place cannot hide you from my perfect fire. Come out and face your end." }, { type: 'internal', line: "Mud and fog. Annoying, but easily burned away. I will find them." }],
+            'boiling-rock': [{ type: 'spoken', line: "This prison will be your tomb. No one escapes me." }, { type: 'internal', line: "The perfect stage for a display of overwhelming force." }],
+            'great-divide': [{ type: 'spoken', line: "The canyon will amplify my power. There's no escaping my lightning here!" }, { type: 'internal', line: "So much open space. Perfect for hunting. And nowhere for them to hide from my flames." }] // UPDATED for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Let's begin, shall we? Don't make it tedious." },
+                { type: 'internal', line: "I'll let them play for a moment. This phase will reveal their weaknesses." }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "The games are over. Prepare for true power." },
+                { type: 'internal', line: "My patience wears thin. Now, the real demonstration of perfection begins." }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "Is that all? This battle is far from over." },
+                { type: 'internal', line: "The intensity increases. Good. More opportunities to prove my superiority." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "It ends now. You never stood a chance." },
+                { type: 'internal', line: "The finale. All that remains is to crush their spirit completely." }
+            ],
+        },
+        onIntentSelection: {
+            CapitalizeOnOpening: { Generic: [{ type: 'spoken', line: "There! An opening. This ends now." }] },
+            PressAdvantage: { Mid: [{ type: 'internal', line: "They're faltering. A sustained assault will break them completely." }] },
+            DesperateGambit: { Late: [{ type: 'internal', line: "Unacceptable! I am not losing to this... peasant!" }] }
+        },
+        onManipulation: {
+            asAttacker: { Generic: [{ type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." }, { type: 'spoken', line: "Still trying so hard? You'll always be second best." }] },
+            asVictim: { Generic: [{ type: 'internal', line: "Insolent worm. {opponent.s} will pay for that." }] }
+        },
+        onPrediction: {
+            correct: { Generic: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }] },
+            wrong: { Generic: [{ type: 'internal', line: "A deviation from the expected pattern. Unlikely to happen again." }] }
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "Why isn't this working? I should have won already." }] },
+            shaken: { Late: [{ type: 'internal', line: "My hair... it's not perfect... stay calm... CALM!" }] },
+            broken: { Late: [{ type: 'spoken', line: "No... you all fear me! You have to!" }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "Let the weak will always be swept away. This is merely an extension of my will." }] },
+            observingDamage: { Generic: [{ type: 'internal', line: "Amateurish destruction. But effective enough." }, { type: 'spoken', line: "Good. Let the world burn around you. It's only fitting." }] },
+            stressedByDamage: [],
+            thrivingInDamage: { Generic: [{ type: 'spoken', line: "This is where true power is forged: in the ashes." }, { type: 'internal', line: "The destruction enhances my focus. There is no escape here." }] }
+        },
+        onVictory: {
+            Finisher: { Generic: [{ line: "Almost a shame to have to snuff out such a pathetic flame." }] },
+            Humiliation: { Generic: [{ line: "You were beaten before you even began. Remember that." }] },
+            Default: { Generic: [{ line: "Flawless. As expected." }] }
+        },
+        onMoveExecution: {
+            'Tactical Reposition': {
+                Critical: { Generic: [{ type: 'spoken', line: "Perfectly executed, as always." }] },
+                Weak: { Generic: [{ type: 'internal', line: "A momentary lapse. Unacceptable." }] }
+            }
+        },
+        relationships: {
+            'zuko': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } } }
+        }
+    },
+    techniques: [
+        { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], collateralImpact: 'none' },
+        { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'], collateralImpact: 'low' },
+        { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
+        { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', type: 'Finisher', power: 100, requiresArticle: true, element: 'lightning', moveTags: ['ranged_attack', 'instantaneous', 'single_target', 'unblockable_standard', 'requires_opening', 'highRisk', 'lightning_attack'], collateralImpact: 'medium' },
+        { name: "Flame Burst", verb: 'erupt with', object: 'burst of blue flame', type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'area_of_effect_small', 'pushback', 'counter'], collateralImpact: 'low' },
+        { name: "Precision Strike", verb: 'strike', object: 'with a focused fire blast', type: 'Offense', power: 70, element: 'fire', moveTags: ['ranged_attack', 'single_target', 'precise'], collateralImpact: 'low' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["Flawless. As expected."], postWin_overwhelming: ["My power is absolute. You are beneath me."], postWin_specific: { 'zuko': "You were always weak, Zuzu. That's why you'll always lose." } },
+    relationships: { 'zuko': { relationshipType: "sibling_rivalry_dominant", stressModifier: 1.5, resilienceModifier: 0.9 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_fear", stressModifier: 2.5, resilienceModifier: 0.7 }, 'iroh': { relationshipType: "contemptuous_underestimation", stressModifier: 0.8, resilienceModifier: 1.1 } }
 };

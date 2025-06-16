@@ -186,7 +186,7 @@ export const tyleeArchetypeData = {
         'eastern-air-temple': {
             label: "Stone vs. Agility at Sky Heights: Ty Lee vs. Toph",
             introA: "Ty Lee, her acrobatic leaps making her a frustratingly difficult target, aims her chi-blocking strikes at Toph on the Air Temple platforms.",
-            introB: "Toph sends rock pillars to intercept Ty Lee, her earth sense struggling with the acrobat's light-footed movements at high altitude."
+            introB: "Toph sends rock pillars shooting upwards, trying to disrupt Ty Lee, whose agility is astounding even at high altitude."
         },
         'northern-water-tribe': {
             label: "Frozen Earth, Acrobatic Flurry: Ty Lee vs. Toph",
@@ -200,7 +200,7 @@ export const tyleeArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Dance of Agility and Earth: Ty Lee vs. Toph",
-            introA: "Ty Lee, a blur of pink in the desert, somersaults over Toph's attacks, her chi-blocking strikes swift and unerring against the earthbender.",
+            introA: "Ty Lee, a blur of pink against the sand, somersaults over Toph's attacks, her chi-blocking strikes swift and unerring against the earthbender.",
             introB: "Toph creates sinking sandpits and rock traps, but Ty Lee's incredible agility allows her to dance around most dangers."
         },
         'foggy-swamp': {
@@ -373,27 +373,27 @@ export const tyleeArchetypeData = {
             introB: "Ozai, the Phoenix King triumphant, sees Ty Lee as insignificant dust to be swept away by his fiery conquest."
         },
         'si-wong-desert': {
-            label: "Desert Mirage, Fire God's Wrath: Ty Lee vs. Ozai",
+            label: "Desert Mirage, Fire God's Wrath: Ozai vs. Ty Lee",
             introA: "Ty Lee's speed is tested as Ozai turns the Si Wong Desert into a sea of fire, her acrobatic skill her only hope.",
             introB: "Ozai, his power seemingly limitless under the desert sun, hunts Ty Lee with the terrifying force of a natural disaster."
         },
         'foggy-swamp': {
-            label: "Swamp of Shadows, Fire Lord's Scorch: Ty Lee vs. Ozai",
+            label: "Swamp of Shadows, Fire Lord's Scorch: Ozai vs. Ty Lee",
             introA: "Ty Lee uses the swamp's disorienting fog and tangled vines for cover, desperately trying to avoid Ozai's life-consuming fire.",
             introB: "Ozai, his dark aura withering the swamp, intends to burn away all life, including the acrobatic Ty Lee."
         },
         'boiling-rock': {
-            label: "Volcanic Agility, Tyrant's Inferno: Ty Lee vs. Ozai",
+            label: "Volcanic Agility, Tyrant's Inferno: Ozai vs. Ty Lee",
             introA: "Ty Lee, trapped in the Boiling Rock, uses every acrobatic trick to dodge Ozai's cataclysmic fire, a dance on the edge of a volcano.",
             introB: "Ozai, his power echoing the prison's volcanic fury, aims to make Ty Lee an example of the futility of resistance."
         },
         'fire-nation-capital': {
-            label: "Throne Room Tumult: Ty Lee's Defiance vs. Ozai's Reign",
+            label: "Throne Room Tumult: Ozai's Reign vs. Ty Lee's Defiance",
             introA: "Ty Lee, in a display of incredible bravery (or foolishness), confronts Fire Lord Ozai himself, her chi-blocking a desperate gamble.",
             introB: "Ozai, on his throne of fire, meets Ty Lee's challenge with amused contempt before unleashing his world-ending power."
         },
         'omashu': {
-            label: "Omashu's Last Acrobat: Ty Lee vs. Ozai's Destructive Might",
+            label: "Omashu's Last Acrobat: Ozai's Destructive Might vs. Ty Lee",
             introA: "Ty Lee uses Omashu's crumbling structures for daring escapes as Ozai's fire reduces the great city to rubble.",
             introB: "Ozai, his conquest absolute, turns his annihilating fire upon Ty Lee, a final, fleeting spark of defiance."
         },
@@ -403,14 +403,14 @@ export const tyleeArchetypeData = {
             introB: "Ozai, his laughter like thunder, intends to bury Ty Lee under an avalanche of fire and rock, a display of ultimate power."
         },
         'kyoshi-island': {
-            label: "Island Sanctuary Ablaze: Ty Lee's Evasion vs. Ozai's Firestorm",
+            label: "Island Sanctuary Ablaze: Ozai's Firestorm vs. Ty Lee's Evasion",
             introA: "Ty Lee uses her agility to protect the innocent on Kyoshi Island as Ozai unleashes an apocalyptic firestorm upon it.",
             introB: "Ozai, intent on erasing all symbols of hope, brings his fiery judgment to Kyoshi, with Ty Lee a desperate, acrobatic defender."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Acrobat's Gamble vs. The Phoenix King's Fire: Ty Lee vs. Ozai",
-            introA: "Ty Lee, with her incredible agility and chi-blocking skills, faces the overwhelming and terrifying power of Fire Lord Ozai.",
-            introB: "Ozai, the embodiment of absolute fiery destruction, prepares to incinerate the audacious acrobat who dares to flip in his presence."
+            label: "The Phoenix King's Fire vs. The Acrobat's Gamble: Ozai vs. Ty Lee",
+            introA: "Ozai, the embodiment of absolute fiery destruction, prepares to incinerate the audacious acrobat who dares to flip in his presence.",
+            introB: "Ty Lee, with her incredible agility and chi-blocking skills, faces the overwhelming and terrifying power of Fire Lord Ozai."
         }
     },
     // --- Ty Lee vs Bumi (bumi) ---
@@ -457,7 +457,7 @@ export const tyleeArchetypeData = {
         },
         'great-divide': {
             label: "Canyon Cartwheels, Mountainous Mirth: Ty Lee vs. Bumi",
-            introA: "Ty Lee's death-defying leaps across the Great Divide are met by King Bumi casually tossing boulders for her to dodge.",
+            introA: "Ty Lee's death-defying leaps across the chasm are met by King Bumi casually tossing boulders for her to dodge.",
             introB: "Bumi, his laughter causing small rockslides, turns the Great Divide into an epic acrobatic challenge for the agile Ty Lee."
         },
         'kyoshi-island': {
@@ -479,12 +479,12 @@ export const tyleeArchetypeData = {
             introB: "Mai, finding Ty Lee's energy exhausting, aims her projectiles with chilling precision, hoping to ground the acrobat quickly."
         },
         'northern-water-tribe': {
-            label: "Frozen Flips, Icy Daggers: Ty Lee vs. Mai",
+            label: "Frozen Precision, Acrobatic Flurry: Ty Lee vs. Mai",
             introA: "Ty Lee uses the slippery ice for surprising acrobatic attacks, but Mai's daggers find their mark even in the frozen North.",
             introB: "Mai, unfazed by Ty Lee's cheerful aura, uses the icy reflections to her advantage, her knife throws swift and silent."
         },
         'ba-sing-se': {
-            label: "Urban Parkour vs. Alleyway Ambush: Ty Lee vs. Mai",
+            label: "Urban Stealth vs. Chi-Blocking Circus: Ty Lee vs. Mai",
             introA: "Ty Lee turns Ba Sing Se's rooftops into her stage, narrowly dodging Mai's precisely aimed projectiles from the shadows below.",
             introB: "Mai, a silent hunter in the Earth Kingdom capital, tracks Ty Lee's acrobatic movements, her daggers ready to strike."
         },
@@ -499,7 +499,7 @@ export const tyleeArchetypeData = {
             introB: "Mai, relying on sound and subtle movements, throws her daggers through the mist, her precision a deadly threat to Ty Lee."
         },
         'boiling-rock': {
-            label: "Acrobatic Escape vs. Prison Lockdown: Ty Lee vs. Mai",
+            label: "Steel Traps vs. Acrobatic Escape: Ty Lee vs. Mai",
             introA: "Ty Lee's attempts to flip and tumble her way out of the Boiling Rock are met by Mai's relentless and accurate pinning strikes.",
             introB: "Mai, the impassive guard, systematically counters Ty Lee's acrobatic evasions, her daggers ensuring the prisoner stays put."
         },
@@ -516,17 +516,17 @@ export const tyleeArchetypeData = {
         'great-divide': {
             label: "Canyon Cartwheels vs. Cliffside Sniper: Ty Lee vs. Mai",
             introA: "Ty Lee's death-defying leaps across the chasm are met by Mai's patiently aimed, long-range projectile attacks.",
-            introB: "Mai, using the canyon's vastness, turns it into a shooting gallery, her daggers whistling towards the acrobatic Ty Lee."
+            introB: "Mai, using the canyon walls and precarious ledges for daring acrobatic feats, always staying one step ahead of Mai's sharp steel."
         },
         'kyoshi-island': {
-            label: "Island Flips vs. Silent Daggers: Ty Lee vs. Mai",
+            label: "Island Impasse: Ty Lee's Daggers vs. Mai's Agility",
             introA: "Ty Lee's joyful tumbles on Kyoshi Island are a stark contrast to Mai's grim determination and flying knives.",
             introB: "Mai, finding Ty Lee's cheerfulness grating, aims to end their island confrontation swiftly and silently."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Acrobat vs. The Assassin: Ty Lee vs. Mai",
-            introA: "Ty Lee, with her dazzling agility and chi-blocking skills, faces her stoic and deadly friend (or foe?), Mai.",
-            introB: "Mai, with her unerring aim and an arsenal of hidden knives, meets Ty Lee's acrobatic assault with cool, deadly precision."
+            label: "Knives vs. Kips: Mai vs. Ty Lee",
+            introA: "Mai, with her usual air of boredom, expertly throws her daggers, trying to pin down the ever-bouncing Ty Lee.",
+            introB: "Ty Lee, with a cheerful 'Hi Mai!', flips and cartwheels, aiming to disable her gloomy friend with a playful chi block."
         }
     },
     // --- Ty Lee vs Pakku (pakku) ---
@@ -702,5 +702,85 @@ export const tyleeArchetypeData = {
             introA: "Ty Lee giggles as she faces herself, a whirlwind of pink and positive energy (and disabling jabs).",
             introB: "Ty Lee beams at Ty Lee! 'Wow, your aura is just like mine! Let's see who can block whose chi first!'"
         }
-    }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "Ooh, your aura is so interesting! Let's have some fun!" },
+                { type: 'internal', line: "So many exciting pressure points to discover!" }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Just a quick touch! See how you like it!" },
+                { type: 'internal', line: "Poking is just, like, a friendly way to say 'prepare to get chi-blocked!'" }
+            ],
+            Early: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],
+            Mid: [{ type: 'spoken', line: "This is fun! You're pretty good at this not-getting-hit thing!" }],
+            Late: [{ type: 'spoken', line: "Okay, time to really turn on the charm... and the chi-blocking!" }],
+            'eastern-air-temple': [{ type: 'spoken', line: "This place has so many fun ledges to flip off of!" }, { type: 'internal', line: "Okay, keep them guessing. Lots of places to pop out!" }],
+            'fire-nation-capital': [{ type: 'spoken', line: "Ooh, so many tall buildings to bounce off of!" }, { type: 'internal', line: "This is a big playground! Lots of new friends to tag!" }],
+            'kyoshi-island': [{ type: 'spoken', line: "This island has such a good aura! Let's keep it fun!" }, { type: 'internal', line: "Plenty of places to hide and surprise! Perfect!" }],
+            'northern-water-tribe': [{ type: 'spoken', line: "So much slippery ice! This is going to be a fun challenge!" }, { type: 'internal', line: "It's cold, but bouncing around will keep me warm. And them guessing!" }],
+            'omashu': [{ type: 'spoken', line: "So many chutes! This is like a giant amusement park!" }, { type: 'internal', line: "Lots of tight spaces to dart in and out of! Perfect for chi-blocking!" }],
+            'si-wong-desert': [{ type: 'spoken', line: "So much open space for gymnastics! Let's chase them down!" }, { type: 'internal', line: "It's hot, but I'll just keep moving! They can't hide from me here." }],
+            'foggy-swamp': [{ type: 'spoken', line: "Ooh, this place has a super unique aura! Like, earthy but also watery!" }, { type: 'internal', line: "So much to bounce off! And hide in! This is going to be a fun game of tag!" }],
+            'boiling-rock': [{ type: 'spoken', line: "Whee! So many wires and gondolas! This is going to be so much fun!" }, { type: 'internal', line: "This place is a giant jungle gym! They'll never catch me!" }],
+            'great-divide': [{ type: 'spoken', line: "So many walls to flip off! This is going to be amazing parkour!" }, { type: 'internal', line: "The air here is so clear! I can spot them from anywhere. Time to play chase!" }] // UPDATED for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "Alright, let the fun begin! Are you ready to play?" },
+                { type: 'internal', line: "Time to warm up the aura. Gentle touches first!" }
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "Things are getting really exciting now! Let's really dance!" },
+                { type: 'internal', line: "Okay, the game just got serious. Time for some real chi-blocking!" }
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "Wow, this is getting intense! I hope no one gets too hurt... but it's so thrilling!" },
+                { type: 'internal', line: "The energy is wild! I need to use this to my advantage, with precise strikes." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "It's all coming down to this! My aura is, like, tingling with anticipation!" },
+                { type: 'internal', line: "The finale! Time to use everything I've got for the perfect disabling strike!" }
+            ],
+        },
+        onIntentSelection: {
+            CapitalizeOnOpening: { Mid: [{ type: 'spoken', line: "Ooh, you're off-balance! Perfect time for a poke!" }] },
+            PressAdvantage: { Generic: [{ type: 'spoken', line: "Come on, let's dance!" }] },
+        },
+        onManipulation: {
+            asVictim: { Generic: [{ type: 'spoken', line: "Hey, that's not very nice! My aura is turning a gloomy gray now." }] }
+        },
+        onStateChange: {
+            stressed: { Mid: [{ type: 'internal', line: "This isn't as fun as I thought it would be." }] },
+            shaken: { Late: [{ type: 'spoken', line: "Maybe we should just stop and talk about our feelings?" }] }
+        },
+        onMoveExecution: {
+            'Chi-Blocking Flurry': { Critical: { Generic: [{ type: 'spoken', line: "Boop! Your bending is gone!" }] } },
+            'Tactical Reposition': {
+                Critical: { Generic: [{ type: 'spoken', line: "Whee! Catch me if you can!" }] },
+                Weak: { Generic: [{ type: 'internal', line: "Ugh, almost bumped into something. Needs more grace." }] }
+            }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "Oops! Did I do that? I hope no one got hurt..." }, { type: 'spoken', line: "Watch out! Don't damage the pretty flowers!" }] },
+            observingDamage: { Generic: [{ type: 'spoken', line: "Wow, that's a lot of broken stuff! Can we clean it up later?" }, { type: 'internal', line: "All this destruction... it's making my aura feel all crumby." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "My chi is getting all tangled with all this bad energy around!" }, { type: 'spoken', line: "Please, stop destroying things! It's so unharmonious!" }] },
+            thrivingInDamage: []
+        },
+        onVictory: { Default: { Generic: [{ line: "Ta-da! That's how it's done!" }] } },
+        relationships: {
+            'mai': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Aww, don't be so gloomy, Mai! Let's play!" }] } } }
+        }
+    },
+    techniques: [
+        { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
+        { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'], collateralImpact: 'none' },
+        { name: "Graceful Dodge", verb: 'dodge', object: 'incoming attack', type: 'Defense', power: 40, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
+        { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'flurry of chi-blocking strikes', type: 'Finisher', power: 85, requiresArticle: true, element: 'special', moveTags: ['melee_range', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening'], collateralImpact: 'none' },
+        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+    ],
+    quotes: { postWin: ["Looks like your chi's... on vacation!"], postWin_overwhelming: ["Ta-da! That's how it's done!"], postWin_specific: { 'mai': "Sorry, Mai! Your aura is still a lovely shade of gloomy pink, though!" } },
+    relationships: {}
 };
