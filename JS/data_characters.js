@@ -2,18 +2,18 @@
 'use strict';
 
 // Import individual character data
-import { aangArchetype } from './data_archetype_aang.js';
-import { azulaArchetype } from './data_archetype_azula.js';
-import { bumiArchetype } from './data_archetype_bumi.js';
-import { jeongJeongArchetype } from './data_archetype_jeong-jeong.js';
-import { kataraArchetype } from './data_archetype_katara.js';
-import { maiArchetype } from './data_archetype_mai.js';
-import { ozaiArchetype } from './data_archetype_ozai.js';
-import { pakkuArchetype } from './data_archetype_pakku.js';
-import { sokkaArchetype } from './data_archetype_sokka.js';
-import { tophArchetype } from './data_archetype_toph.js';
-import { tyLeeArchetype } from './data_archetype_ty-lee.js';
-import { zukoArchetype } from './data_archetype_zuko.js';
+import { aangArchetypeData as aangArchetype } from './data_archetype_aang.js';
+import { azulaArchetypeData as azulaArchetype } from './data_archetype_azula.js';
+import { bumiArchetypeData as bumiArchetype } from './data_archetype_bumi.js';
+import { jeongjeongArchetypeData as jeongJeongArchetype } from './data_archetype_jeong-jeong.js';
+import { kataraArchetypeData as kataraArchetype } from './data_archetype_katara.js';
+import { maiArchetypeData as maiArchetype } from './data_archetype_mai.js';
+import { ozaiArchetypeData as ozaiArchetype } from './data_archetype_ozai.js';
+import { pakkuArchetypeData as pakkuArchetype } from './data_archetype_pakku.js';
+import { sokkaArchetypeData as sokkaArchetype } from './data_archetype_sokka.js';
+import { tophArchetypeData as tophArchetype } from './data_archetype_toph.js';
+import { tyleeArchetypeData as tyLeeArchetype } from './data_archetype_ty-lee.js';
+import { zukoArchetypeData as zukoArchetype } from './data_archetype_zuko.js';
 
 export const characters = {
     "aang": {
