@@ -1,4 +1,4 @@
-// FILE: js/data_archetype_jeongjeong.js
+// FILE: js/data_archetype_jeong-jeong.js
 'use strict';
 
 // Archetype data for Jeong Jeong vs. all other characters and locations.

@@ -1,4 +1,4 @@
-// FILE: js/data_archetype_tylee.js
+// FILE: js/data_archetype_ty-lee.js
 'use strict';
 
 // Archetype data for Ty Lee vs. all other characters and locations.

@@ -21,14 +21,14 @@ import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { aangArchetypeData } from './data_archetype_aang.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
 import { bumiArchetypeData } from './data_archetype_bumi.js';
-import { jeongjeongArchetypeData } from './data_archetype_jeongjeong.js';
+import { jeongjeongArchetypeData } from './data_archetype_jeong-jeong.js';
 import { kataraArchetypeData } from './data_archetype_katara.js';
 import { maiArchetypeData } from './data_archetype_mai.js';
 import { ozaiArchetypeData } from './data_archetype_ozai.js';
 import { pakkuArchetypeData } from './data_archetype_pakku.js';
 import { sokkaArchetypeData } from './data_archetype_sokka.js';
 import { tophArchetypeData } from './data_archetype_toph.js';
-import { tyleeArchetypeData } from './data_archetype_tylee.js';
+import { tyleeArchetypeData } from './data_archetype_ty-lee.js';
 import { zukoArchetypeData } from './data_archetype_zuko.js';
 
 const archetypeDataMap = {
