@@ -67,17 +67,65 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
 }
 
 
+// Corrected initializeFighterState to be more robust
 function initializeFighterState(charId, opponentId, emotionalMode) {
     const characterData = characters[charId];
-    if (!characterData) throw new Error(`Character with ID ${charId} not found.`);
+
+    // If characterData is not found, return a minimal, safe fallback object.
+    // This prevents errors later when trying to access properties like 'name'
+    // on an undefined character object if it somehow got through.
+    if (!characterData) {
+        console.error(`Character with ID "${charId}" not found during initialization. Returning fallback data.`);
+        return {
+            id: charId,
+            name: `[Missing Data: ${charId}]`, // Safe fallback name
+            hp: 0, maxHp: 100, // Treat as defeated for safety
+            energy: 0, momentum: 0, stunDuration: 0,
+            tacticalState: null, moveHistory: [], moveFailureHistory: [],
+            consecutiveDefensiveTurns: 0, aiLog: [`ERROR: Character data for "${charId}" not loaded/found.`],
+            relationalState: null,
+            mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, // Mark as broken
+            contextualState: {},
+            collateralTolerance: 0.0, // Treat as highly sensitive to collateral
+            mobility: 0.0, // No mobility
+            personalityProfile: { aggression: 0, patience: 0, riskTolerance: 0, opportunism: 0, creativity: 0, defensiveBias: 0, antiRepeater: 0, signatureMoveBias: {}, predictability: 1 },
+            aiMemory: {},
+            curbstompRulesAppliedThisBattle: new Set(),
+            faction: 'Error',
+            element: 'error',
+            specialTraits: {},
+            criticalHitsTaken: 0,
+            intelligence: 0,
+            hasMetalArmor: false,
+            incapacitationScore: 100, // Mark as fully incapacitated
+            escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, // Mark as terminal collapse
+            summary: `(ERROR: Character data for ${charId} missing or corrupted.)` // Add a summary for dev logs
+        };
+    }
+
+    // Ensure characterData.name exists before using it
+    const characterName = characterData.name || charId; // Fallback to ID if name is missing
 
     const personalityProfile = characterData.personalityProfile || {
         aggression: 0.5, patience: 0.5, riskTolerance: 0.5, opportunism: 0.5,
         creativity: 0.5, defensiveBias: 0.5, antiRepeater: 0.5, signatureMoveBias: {}
     };
 
+    // Deep copy, but handle potential issues with JSON.parse/stringify if characterData is very complex or contains circular references (unlikely here)
+    let copiedCharacterData;
+    try {
+        copiedCharacterData = JSON.parse(JSON.stringify(characterData));
+    } catch (e) {
+        console.error(`Error deep copying character data for ${charId}:`, e);
+        // Fallback to shallow copy or minimal properties if deep copy fails
+        copiedCharacterData = { ...characterData };
+    }
+
+
     return {
-        id: charId, name: characterData.name, ...JSON.parse(JSON.stringify(characterData)),
+        id: charId,
+        name: characterName,
+        ...copiedCharacterData, // Spread the copied data
         hp: 100, maxHp: 100,
         energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         stunDuration: 0,
@@ -730,7 +778,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const addNarrativeEvent = (quote, actorForQuote) => {
                 if (quote && !battleContextFiredQuotes.has(`${actorForQuote.id}-${quote.line}`)) {
                     const opponentForQuote = actorForQuote.id === currentAttacker.id ? currentDefender : currentAttacker;
-                    // FIX: Pass currentBattleState as context to findNarrativeQuote
+                    // OLD: addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase }), currentAttacker);
                     narrativeEventsForAction.push({ quote, actor: actorForQuote, opponent: opponentForQuote, context: currentBattleState });
                     battleContextFiredQuotes.add(`${actorForQuote.id}-${quote.line}`);
                 }
