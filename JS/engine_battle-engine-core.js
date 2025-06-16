@@ -1122,7 +1122,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     if (!decisiveEventNarrative) {
         const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e =>
             e.type === 'move_action_event' &&
-            e.isRedirectedAction && // Changed from isReactedAction to isRedirectedAction for specificity
+            e.isReactedAction && // Correct property to check for any reactive action
             e.reactionSuccess &&
             finalWinnerFull && e.actorId === finalWinnerFull.id && // The winner performed the reaction
             finalLoserFull && finalLoserFull.hp <= 0 // The loser was KO'd
