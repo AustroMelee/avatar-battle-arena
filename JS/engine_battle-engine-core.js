@@ -825,8 +825,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             text: "The battle ends in a STALEMATE!",
             html_content: phaseTemplates.stalemateResult
         });
-        finalWinnerFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
-        finalLoserFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
+        if (finalWinnerFull) {
+            finalWinnerFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
+        }
+        if (finalLoserFull) {
+            finalLoserFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
+        }
     } else if (finalWinnerFull && finalLoserFull) {
         const isKOByHp = finalLoserFull.hp <= 0;
         const isTimeoutVictory = turn >= MAX_TOTAL_TURNS && !isKOByHp;
