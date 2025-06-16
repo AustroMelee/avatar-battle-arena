@@ -684,6 +684,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
     const fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
 
+    // Create mutable references to track current attacker and defender
+    let currentAttacker = fighter1;
+    let currentDefender = fighter2;
+
     // Initialize battle state using the new function
     const currentBattleState = initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode);
 
@@ -767,8 +771,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
     for (turn = 0; turn < MAX_TOTAL_TURNS && !battleOver; turn++) {
         currentBattleState.turn = turn;
-        fighter1.currentTurn = turn;
-        fighter2.currentTurn = turn;
+        currentAttacker.currentTurn = turn;
+        currentDefender.currentTurn = turn;
         currentBattleState.currentPhase = phaseState.currentPhase;
 
         currentBattleState.opponentLandedCriticalHit = false;
@@ -779,7 +783,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         currentBattleState.characterLandedStrongOrCriticalHitLastTurn = false;
 
         // At the start of each turn, check for phase transitions
-        const phaseChanged = checkAndTransitionPhase(phaseState, fighter1, fighter2, turn, locId); // Pass locId
+        const phaseChanged = checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, locId); // Pass locId
         if (phaseChanged) {
             // Log the end of the previous phase in the summary
             if (phaseState.phaseSummaryLog.length > 0) { // Should always have something if a new phase starts
@@ -835,8 +839,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             currentBattleState.opponentUsedLethalForce = currentDefender.lastMoveForPersonalityCheck?.isHighRisk || false;
             currentBattleState.characterReceivedCriticalHit = false;
             currentBattleState.opponentElement = currentDefender.element;
-            currentBattleState.fighter1Escalation = fighter1.escalationState;
-            currentBattleState.fighter2Escalation = fighter2.escalationState;
+            currentBattleState.fighter1Escalation = currentAttacker.escalationState;
+            currentBattleState.fighter2Escalation = currentDefender.escalationState;
 
             // NEW: In-turn curbstomp check, passes current phase
             // This now relies on `checkCurbstompConditions` filtering by `canTriggerInPhase`
@@ -1046,9 +1050,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER); // PRE_BANTER is purely narrative
 
         if (!isNarrativeOnlyTurn) {
-            processTurnSegment(fighter1, fighter2);
+            processTurnSegment(currentAttacker, currentDefender);
             if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
-            processTurnSegment(fighter2, fighter1);
+            processTurnSegment(currentDefender, currentAttacker);
             if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
         } else {
             // Log a message for narrative-only turns, but only once per narrative turn
