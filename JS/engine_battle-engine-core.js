@@ -1,9 +1,9 @@
 // FILE: engine_battle-engine-core.js
 'use strict';
 
-// Version 1.6: Robust End-of-Battle Logic
-// - Removed a redundant and conflicting draw-condition check that could cause logical errors.
-// - Consolidated the end-of-battle summary logic to be more robust against edge cases like timeouts and stalemates.
+// Version 1.7: Simplified & Robust Summary Logic
+// - Replaced the complex "decisive event" search with a simplified and more robust
+//   end-of-battle summary block to prevent crashes in timeout/stalemate scenarios.
 
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
@@ -1066,86 +1066,36 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) {
-        // --- START OF FIX ---
-        // Determine the dominant narrative for the summary
-        let decisiveEventNarrative = null;
-        let decisiveEventActorId = null; // Store the ID of the actor who performed the decisive event
-
-        // Check for curbstomps first
+        // --- START OF SIMPLIFIED SUMMARY LOGIC ---
+        const isKOByHp = finalLoserFull.hp <= 0;
+        const isTimeoutVictory = turn >= MAX_TOTAL_TURNS && !isKOByHp;
         const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
-        if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull.id)) {
-            decisiveEventActorId = lastCurbstompEvent.actualAttackerId;
-            if (decisiveEventActorId && decisiveEventActorId === winnerId) {
-                decisiveEventNarrative = lastCurbstompEvent.text;
-            }
-        }
 
-        // Check for reactive KOs if no curbstomp KO was the decisive narrative
-        if (!decisiveEventNarrative) {
-            const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e => {
-                // Add a guard to ensure finalWinnerFull and finalLoserFull are not null
-                if (!finalWinnerFull || !finalLoserFull) return false;
-                
-                return e.type === 'move_action_event' &&
-                    e.isReactedAction &&
-                    e.reactionSuccess &&
-                    e.actorId === finalWinnerFull.id &&
-                    finalLoserFull.hp <= 0;
-            });
-
-            if (lastReactiveKOEvent) {
-                const reactionNarratives = battleEventLog.filter(
-                    e => {
-                        // Guard against finalLoserFull being null inside the filter callback
-                        if (!finalLoserFull) return false;
-                        return e.type === 'dialogue_event' &&
-                             e.actorId === finalWinnerFull.id &&
-                             e.html_content?.includes(finalLoserFull.name) &&
-                             (e.html_content?.toLowerCase().includes("redirect") || e.html_content?.toLowerCase().includes("unleashes the redirected energy"))
-                    }
-                );
-                if (reactionNarratives.length > 0) {
-                    decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
-                } else {
-                    decisiveEventNarrative = `${finalWinnerFull.name} turned ${finalLoserFull.name}'s own power against them for the win!`;
-                }
-                decisiveEventActorId = finalWinnerFull.id;
-            }
-        }
-        // --- END OF MOVED/FIXED BLOCK ---
-
-        // Use decisiveEventNarrative if the winner is the one who performed that event
-        if (decisiveEventNarrative && decisiveEventActorId === finalWinnerFull.id) {
-            finalWinnerFull.summary = decisiveEventNarrative;
+        // Prioritize curbstomp narrative if it led to the KO
+        if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull.id) && lastCurbstompEvent.actualAttackerId === finalWinnerFull.id) {
+            finalWinnerFull.summary = lastCurbstompEvent.text;
             finalLoserFull.summary = `${finalLoserFull.name} was overcome by ${finalWinnerFull.name}'s decisive action.`;
-        } else {
-            const isKOByHp = finalLoserFull.hp <= 0;
-            const isTimeoutVictoryLoopFinished = turn >= MAX_TOTAL_TURNS;
-
-            const standardKOFlow = isKOByHp && (!lastCurbstompEvent || lastCurbstompEvent.actorId !== finalWinnerFull.id);
-
-            if (standardKOFlow && !battleEventLog.some(e => e.isKOAction && e.html_content?.includes(finalLoserFull.name) && e.actorId === finalWinnerFull.id)) {
-                const finalBlowTextRaw = `${finalWinnerFull.name} lands the finishing blow, defeating ${finalLoserFull.name}!`;
-                const finalBlowTextHtml = phaseTemplates.finalBlow
-                    .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
-                    .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
-                battleEventLog.push({ type: 'final_blow_event', text: finalBlowTextRaw, html_content: finalBlowTextHtml, isKOAction: true });
-                finalWinnerFull.summary = finalBlowTextRaw;
-                finalLoserFull.summary = `${finalLoserFull.name} was defeated by a final blow from ${finalWinnerFull.name}.`;
-
-            } else if (isTimeoutVictoryLoopFinished && finalWinnerFull.hp > finalLoserFull.hp && !isKOByHp && (!lastCurbstompEvent || lastCurbstompEvent.actorId !== finalWinnerFull.id)) {
-                const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerFull.name} is declared the victor over ${finalLoserFull.name}!`;
-                const timeoutTextHtml = phaseTemplates.timeOutVictory
-                    .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
-                    .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
-                battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
-                finalWinnerFull.summary = timeoutTextRaw;
-                finalLoserFull.summary = `${finalLoserFull.name} lost by timeout as ${finalWinnerFull.name} had more health remaining.`;
-            } else if (!decisiveEventNarrative) { // Generic fallback if no specific event was logged as decisive
-                 finalWinnerFull.summary = substituteTokens("{WinnerName}'s victory was sealed by their superior strategy and power.", finalWinnerFull, finalLoserFull, { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name });
-                 finalLoserFull.summary = substituteTokens("{LoserName} fought bravely but was ultimately overcome.", finalLoserFull, finalWinnerFull, { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name });
-            }
+        } else if (isKOByHp) {
+            const finalBlowTextRaw = `${finalWinnerFull.name} lands the finishing blow, defeating ${finalLoserFull.name}!`;
+            const finalBlowTextHtml = phaseTemplates.finalBlow
+                .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
+                .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
+            battleEventLog.push({ type: 'final_blow_event', text: finalBlowTextRaw, html_content: finalBlowTextHtml, isKOAction: true });
+            finalWinnerFull.summary = finalBlowTextRaw;
+            finalLoserFull.summary = `${finalLoserFull.name} was defeated by a final blow from ${finalWinnerFull.name}.`;
+        } else if (isTimeoutVictory) {
+            const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerFull.name} is declared the victor over ${finalLoserFull.name}!`;
+            const timeoutTextHtml = phaseTemplates.timeOutVictory
+                .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
+                .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
+            battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
+            finalWinnerFull.summary = timeoutTextRaw;
+            finalLoserFull.summary = `${finalLoserFull.name} lost by timeout as ${finalWinnerFull.name} had more health remaining.`;
+        } else { // Generic fallback for other win conditions
+            finalWinnerFull.summary = substituteTokens("{WinnerName}'s victory was sealed by their superior strategy and power.", finalWinnerFull, finalLoserFull, { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name });
+            finalLoserFull.summary = substituteTokens("{LoserName} fought bravely but was ultimately overcome.", finalLoserFull, finalWinnerFull, { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name });
         }
+        // --- END OF SIMPLIFIED SUMMARY LOGIC ---
     }
 
 
