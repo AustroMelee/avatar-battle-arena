@@ -4,20 +4,18 @@
 // Orchestrates the main UI components and battle simulation flow.
 
 import { simulateBattle } from './engine_battle-engine-core.js';
-// --- UPDATED IMPORTS ---
-import { showLoadingState, showResultsState } from './ui_loading-states.js'; // Updated import path and name
-import { resetBattleResultsUI } from './ui_battle-results.js'; // Now importing the reset function from here
-import { transformEventsToAnimationQueue } from './battle_log_transformer.js'; // Static import now
-// --- END UPDATED IMPORTS ---
+import { showLoadingState, showResultsState } from './ui_loading-states.js';
+import { resetBattleResultsUI } from './ui_battle-results.js';
+import { transformEventsToAnimationQueue } from './battle_log_transformer.js';
 import { initializeSimulationManagerDOM, setSimulationMode, resetSimulationManager } from './simulation_mode_manager.js';
 import { initializeDevModeUI } from './dev_mode_manager.js';
-import { populateCharacterGrids } from './ui_character-selection.js'; // Removed handleCharacterCardSelection
-import { populateLocationGrid, updateEnvironmentalSummary } from './ui_location-selection.js'; // Removed handleLocationCardSelection
+import { populateCharacterGrids } from './ui_character-selection.js';
+import { populateLocationGrid, updateEnvironmentalSummary } from './ui_location-selection.js';
 import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
 import { renderArchetypeDisplay } from './ui_archetype-display.js';
 import { resolveArchetypeLabel } from './engine_archetype-engine.js';
 import { setupDetailedLogControls } from './ui_battle-results.js';
-import { characters } from './data_characters.js'; // Added import for getCharacterImage
+import { characters } from './data_characters.js';
 
 // Centralized DOM references used across UI modules, or for orchestration
 const DOM_SHARED = {
@@ -80,9 +78,11 @@ export function getCharacterImageFromUI(charId) { // Renamed to avoid direct con
 
 // Internal function to update archetype display based on current selections
 function updateArchetypeInfo() {
-    const fighter1Id = DOM_SHARED.fighter1Select.value || null;
-    const fighter2Id = DOM_SHARED.fighter2Select.value || null;
-    const locationId = DOM_SHARED.locationSelect.value || null;
+    // Added null checks here before attempting to read .value
+    const fighter1Id = DOM_SHARED.fighter1Select?.value || null;
+    const fighter2Id = DOM_SHARED.fighter2Select?.value || null;
+    const locationId = DOM_SHARED.locationSelect?.value || null;
+    
     const archetypeData = resolveArchetypeLabel(fighter1Id, fighter2Id, locationId);
     renderArchetypeDisplay(archetypeData, {
         container: DOM_SHARED.archetypeContainer,

@@ -217,7 +217,7 @@ body {
 
 .character-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 1rem;
     padding: 10px;
 }
@@ -237,10 +237,11 @@ body {
 
 .character-card img, .location-card img {
     width: 100%;
-    height: 110px;
+    height: 120px;
     object-fit: cover;
     display: block;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .location-card img {
@@ -251,16 +252,22 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.5em;
-    line-height: 1.25;
-    font-size: 0.75rem;
+    min-height: 5.2em;
+    line-height: 1.3;
+    font-size: 0.78rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
-    padding: 0.4rem;
+    padding: 0.7rem;
     background-color: rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
     text-transform: uppercase;
+    word-wrap: break-word;
+    hyphens: auto;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    font-family: var(--font-body);
 }
 
 .location-card h3 {
@@ -476,7 +483,7 @@ body {
 .battle-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: var(--text-secondary); /* Assuming var(--text-secondary) exists */
+    background: var(--text-secondary);
     box-shadow: none;
     border-style: inset;
 }
@@ -1086,7 +1093,7 @@ body {
         grid-template-columns: 1fr;
     }
     .character-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     }
     .location-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1109,7 +1116,7 @@ body {
     .simulation-controls { padding: 0.3rem 0.5rem; margin: -1rem -1rem 0.75rem -1rem; top: -1rem; flex-wrap: wrap; gap: 0.5rem;}
     .simulation-cancel-btn, .simulation-zoom-btn, .simulation-log-toggle-btn, .simulation-copy-btn { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
     .animated-log-output { font-size: 0.95rem; }
-    .character-grid { grid-template-columns: repeat(3, 1fr); }
+    .character-grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
     .location-grid { grid-template-columns: repeat(2, 1fr); }
     .archetype-headline { font-size: 1.5rem; }
     .archetype-intro { font-size: 0.9rem; }
@@ -1130,7 +1137,7 @@ body {
 @media (max-width: 480px) {
     .title { font-size: 2rem; letter-spacing: 2px; }
     .vs-divider { font-size: 2.5rem; }
-    .character-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .character-grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
     .location-grid { grid-template-columns: 1fr; }
     .archetype-headline { font-size: 1.3rem; }
     .simulation-mode-container { font-size: 0.9rem; }
