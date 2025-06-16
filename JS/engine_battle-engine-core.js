@@ -622,32 +622,34 @@ function evaluateTerminalState(fighter1, fighter2, isStalemateFlag) {
 
 
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
-    // Initialize battle state object
-    const battleState = {
-        turn: 0,
-        phase: BATTLE_PHASES.PRE_BANTER,
-        environmentState: { damageLevel: 0 },
-        characterLandedStrongOrCriticalHitLastTurn: false,
-        characterReceivedCriticalHit: false,
-        opponentTauntedSkillOrTradition: false,
-        opponentTauntedBlindness: false,
-        opponentLandedBlindHit: false,
-        opponentCheated: false,
-        allyDisarmedUnfairly: false,
-        opponentAttackedFirstAggressively: false,
-        opponentUsedLethalForce: false,
-        allyBuffedSelf: false,
-        ally: null,
-        opponent: null,
-        logSystemMessage: ''
-    };
-
+    // Initialize fighters
     const fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
     const fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
-    
-    // Set ally references in battle state
-    battleState.ally = fighter2;
-    battleState.opponent = fighter1;
+
+    // Initialize battle state
+    const currentBattleState = {
+        turn: 0,
+        currentPhase: null,
+        opponentLandedCriticalHit: false,
+        opponentTaunted: false,
+        opponentUsedLethalForce: false,
+        opponentLandedSignificantHits: 0,
+        characterReceivedCriticalHit: false,
+        characterLandedStrongOrCriticalHitLastTurn: false,
+        attackerIsStunned: false,
+        opponentElement: null,
+        fighter1Escalation: null,
+        fighter2Escalation: null,
+        environmentState: { damageLevel: 0 },
+        location: locId,
+        timeOfDay: timeOfDay,
+        emotionalMode: emotionalMode
+    };
+
+    // Set initial opponent references
+    fighter1.opponent = fighter2;
+    fighter2.opponent = fighter1;
+    currentBattleState.opponent = fighter1;
 
     const locationData = locationConditions[locId];
     const conditions = { id: locId, timeOfDay, ...locationData };
@@ -679,18 +681,18 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
     // --- Pre-Battle Narrative (PRE_BANTER Phase) ---
     // Fetch and log initial dialogue/introductions for PreBanter
-    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: battleState });
-    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, battleState));
+    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: currentBattleState });
+    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
 
-    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: battleState });
-    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, battleState));
+    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: currentBattleState });
+    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
 
     // Initial curbstomp check for rules allowed pre-battle
-    if (checkCurbstompConditions(fighter1, fighter2, locId, battleState, battleEventLog, true)) {
+    if (checkCurbstompConditions(fighter1, fighter2, locId, currentBattleState, battleEventLog, true)) {
         fighter1.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter1.name} OR ${fighter2.name} triggered or was affected by a curbstomp rule.`);
     }
     if (!charactersMarkedForDefeat.has(fighter1.id) && !charactersMarkedForDefeat.has(fighter2.id)) { // Only check defender if initiator wasn't KO'd
-      if (checkCurbstompConditions(fighter2, fighter1, locId, battleState, battleEventLog, true)) {
+      if (checkCurbstompConditions(fighter2, fighter1, locId, currentBattleState, battleEventLog, true)) {
         fighter2.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter2.name} OR ${fighter1.name} triggered or was affected by a curbstomp rule.`);
       }
     }
@@ -737,10 +739,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji)
             });
             // NEW: Inject narrative for phase transition (e.g., "The air thickens...")
-            const phaseTransitionQuote1 = findNarrativeQuote(fighter1, fighter2, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: battleState });
-            if (phaseTransitionQuote1) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, battleState));
-            const phaseTransitionQuote2 = findNarrativeQuote(fighter2, fighter1, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: battleState });
-            if (phaseTransitionQuote2) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, battleState));
+            const phaseTransitionQuote1 = findNarrativeQuote(fighter1, fighter2, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+            if (phaseTransitionQuote1) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
+            const phaseTransitionQuote2 = findNarrativeQuote(fighter2, fighter1, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+            if (phaseTransitionQuote2) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
         }
 
         let turnSpecificEventsForLog = [];
