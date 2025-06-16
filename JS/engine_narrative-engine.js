@@ -327,8 +327,7 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
         }
     }
 
-    // The line `if (introPhrase.includes(actor.name))` now has `introPhrase` guaranteed to be a string
-    // after the above safe extractions or default assignments.
+    // The line `if (introPhrase.includes(actor.name))` now uses a guaranteed string for introPhrase
 
 
     if (result.payoff && result.consumedStateName) {
@@ -357,7 +356,9 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
         impactSentencePool = impactPhrases.REPOSITION?.[impactSentenceKey];
     } else if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = opponent?.lastMove?.type === 'Offense';
-        impactSentencePool = impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE;
+        // The error is here: You have an unbound ternary operator that is not part of an assignment.
+        // It should be `isReactive ? impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE`
+        impactSentencePool = isReactive ? impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE; // FIX
     } else {
         impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
