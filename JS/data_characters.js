@@ -27,24 +27,31 @@ const createCharacter = (archetype, overrides) => {
         ...(archetype.techniquesBoilingRock || [])
     ];
 
+    // Extract the character ID from the archetype's own data, if it exists
+    const id = archetype.id || (overrides.id || 'unknown');
+    // Simple capitalization for the name from the ID
+    const name = id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
     return {
         ...archetype,
         ...overrides,
+        id: id,
+        name: archetype.name || name,
         techniques: combinedTechniques,
     };
 };
 
 export const characters = {
-    "aang": createCharacter(aangArchetype, { mentalResilience: 1.2 }),
-    "azula": createCharacter(azulaArchetype, { mentalResilience: 0.7 }),
-    "bumi": createCharacter(bumiArchetype, { mentalResilience: 2.5 }),
-    "jeong-jeong": createCharacter(jeongJeongArchetype, { mentalResilience: 1.8 }),
-    "katara": createCharacter(kataraArchetype, { mentalResilience: 1.1 }),
-    "mai": createCharacter(maiArchetype, { mentalResilience: 1.5, susceptibilities: ['foggy-swamp'] }),
-    "ozai": createCharacter(ozaiArchetype, { mentalResilience: 2.0 }),
-    "pakku": createCharacter(pakkuArchetype, { mentalResilience: 1.7 }),
-    "sokka": createCharacter(sokkaArchetype, { mentalResilience: 1.3 }),
-    "toph": createCharacter(tophArchetype, { mentalResilience: 1.9 }),
-    "ty-lee": createCharacter(tyLeeArchetype, { mentalResilience: 1.4 }),
-    "zuko": createCharacter(zukoArchetype, { mentalResilience: 0.9 })
+    "aang": createCharacter(aangArchetype, { id: 'aang', mentalResilience: 1.2 }),
+    "azula": createCharacter(azulaArchetype, { id: 'azula', mentalResilience: 0.7 }),
+    "bumi": createCharacter(bumiArchetype, { id: 'bumi', mentalResilience: 2.5 }),
+    "jeong-jeong": createCharacter(jeongJeongArchetype, { id: 'jeong-jeong', mentalResilience: 1.8 }),
+    "katara": createCharacter(kataraArchetype, { id: 'katara', mentalResilience: 1.1 }),
+    "mai": createCharacter(maiArchetype, { id: 'mai', mentalResilience: 1.5, susceptibilities: ['foggy-swamp'] }),
+    "ozai": createCharacter(ozaiArchetype, { id: 'ozai', mentalResilience: 2.0 }),
+    "pakku": createCharacter(pakkuArchetype, { id: 'pakku', mentalResilience: 1.7 }),
+    "sokka": createCharacter(sokkaArchetype, { id: 'sokka', mentalResilience: 1.3 }),
+    "toph": createCharacter(tophArchetype, { id: 'toph', mentalResilience: 1.9 }),
+    "ty-lee": createCharacter(tyLeeArchetype, { id: 'ty-lee', mentalResilience: 1.4 }),
+    "zuko": createCharacter(zukoArchetype, { id: 'zuko', mentalResilience: 0.9 })
 };
