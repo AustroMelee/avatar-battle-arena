@@ -548,7 +548,6 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
         const energyCostModifier = envModForElement.energyCostModifier || 1.0;
         const estimatedEnergyCostWithEnv = energyCostEstimate * energyCostModifier;
-        const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
         if (actorEnergy < estimatedEnergyCostWithEnv) {
             weight = 0;
             reasons.push(`EnergyTooHigh`);
