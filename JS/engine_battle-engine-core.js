@@ -23,8 +23,6 @@ import { calculateIncapacitationScore, determineEscalationState, ESCALATION_STAT
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-// FIX: Correct getRandomElement to return the element itself, not just its index
 export const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
 let charactersMarkedForDefeat = new Set();
@@ -43,8 +41,9 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
         } else if (weightedOutcome && typeof weightedOutcome.probabilities === 'object') {
             const rand = Math.random();
             let cumulativeProb = 0;
+            // FIX: Change weightedProbabilities to weightedOutcome.probabilities
             for (const charId in weightedOutcome.probabilities) {
-                cumulativeProb += weightedProbabilities[charId]; // Fixed: Changed weightedOutcome.probabilities to weightedProbabilities
+                cumulativeProb += weightedOutcome.probabilities[charId];
                 if (rand < cumulativeProb) {
                     return charId;
                 }
@@ -837,9 +836,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             let allImpactTexts = [];
             environmentState.specificImpacts.forEach(impact => {
                  const formattedImpactText = findNarrativeQuote(initiator, responder, 'onCollateral', 'general', { impactText: impact, currentPhaseKey: phaseState.currentPhase })?.line || impact;
-                 environmentalSummaryHtml += `<p class="environmental-impact-text">${formattedImpactText}</p>`;
                  allImpactTexts.push(formattedImpactText);
             });
+             environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join(''); // Fix: use map to join HTML tags
             environmentalSummaryHtml += `</div>`;
             turnSpecificEventsForLog.push({
                 type: 'environmental_summary_event',
@@ -1031,7 +1030,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 const timeoutTextRaw = `The battle timer expires! With more health remaining, ${finalWinnerFull.name} is declared the victor over ${finalLoserFull.name}!`;
                 const timeoutTextHtml = phaseTemplates.timeOutVictory
                     .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
-                    .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${-los-Full.name}</span>`); // Fix here
+                    .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
                 battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
                 finalWinnerFull.summary = timeoutTextRaw;
                 finalLoserFull.summary = `${finalLoserFull.name} lost by timeout as ${finalWinnerFull.name} had more health remaining.`;

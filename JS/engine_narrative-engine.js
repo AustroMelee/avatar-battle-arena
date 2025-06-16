@@ -284,8 +284,9 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     // Standard move narrative generation
     if (aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
         const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late;
-        introPhrase = getRandomElement(escalationFinisherPool) || "Sensing the end is near,";
-        introPhrase = substituteTokens(introPhrase, actor, opponent);
+        const selectedPhrase = getRandomElement(escalationFinisherPool);
+        // FIX: Ensure selectedPhrase is not null before calling .line
+        introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line, actor, opponent) : "Sensing the end is near,";
     } else {
         const intentForIntro = aiLogEntry.intent || 'StandardExchange';
         const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move });
@@ -293,8 +294,15 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
             introPhrase = substituteTokens(introQuote.line, actor, opponent);
         } else { // If introQuote is dialogue or null, use default phase/generic intro
             const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
-            introPhrase = getRandomElement(phaseSpecificIntroPool) || "Responding,";
+            const selectedPhrase = getRandomElement(phaseSpecificIntroPool);
+            // FIX: Ensure selectedPhrase is not null
+            introPhrase = selectedPhrase ? substituteTokens(selectedPhrase, actor, opponent) : "Responding,";
         }
+    }
+
+    // FIX: Ensure introPhrase is a string before calling .includes()
+    if (typeof introPhrase !== 'string') {
+        introPhrase = String(introPhrase); // Coerce to string to prevent error
     }
 
 
@@ -325,16 +333,12 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
         impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
 
-    const impactSentenceTemplate = getRandomElement(impactSentencePool) || "The move unfolds.";
-    // For redirection, the "actor" of the impact phrase is the one who *attempted* redirection (Zuko).
-    // The "target" is the original attacker (Azula/Ozai).
-    const impactActor = (result.effectiveness.label === "RedirectedSuccess" || result.effectiveness.label === "RedirectedFail") ? actor : actor; // Correct actor for impact phrase context
-    const impactTarget = (result.effectiveness.label === "RedirectedSuccess" || result.effectiveness.label === "RedirectedFail") ? opponent : opponent;
-
-    const impactSentence = substituteTokens(impactSentenceTemplate, impactActor, impactTarget, {
-        '{targetName}': impactTarget?.name || 'the opponent',
-        '{actorName}': impactActor?.name || 'The attacker'
-    });
+    const impactSentenceTemplate = getRandomElement(impactSentencePool); // FIX: Get the actual element
+    // FIX: Ensure impactSentenceTemplate is not null before using it
+    const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate, actor, opponent, { // Pass actor and opponent as context
+        '{targetName}': opponent?.name || 'the opponent',
+        '{actorName}': actor?.name || 'The attacker'
+    }) : "The move unfolds.";
 
 
     let baseActionTextTemplate;
@@ -386,7 +390,7 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     };
 }
 
-function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData) {
+export function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData) {
     if (!move.collateralImpact || move.collateralImpact === 'none' || environmentState.damageLevel === 0) {
         return null;
     }
@@ -394,9 +398,8 @@ function generateCollateralDamageEvent(move, actor, opponent, environmentState, 
     if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) return null;
 
     const collateralPhraseTemplate = getRandomElement(collateralImpactPhrases[impactLevel]);
-    if (!collateralPhraseTemplate) return null;
-
-    const collateralPhrase = substituteTokens(collateralPhraseTemplate, actor, opponent);
+    // FIX: Ensure collateralPhraseTemplate is not null before using it
+    const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate, actor, opponent) : '';
 
     let description = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`;
     let specificImpactPhrase = '';
@@ -431,7 +434,9 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
         flavorTextPool.push(...escalationStateNarratives[newState]);
     }
     const defaultFlavor = `The tide of battle shifts for {actorName}.`;
-    const flavorText = getRandomElement(flavorTextPool) || defaultFlavor;
+    const selectedFlavorTextTemplate = getRandomElement(flavorTextPool); // FIX: Get the actual element
+    // FIX: Ensure selectedFlavorTextTemplate is not null
+    const flavorText = selectedFlavorTextTemplate ? substituteTokens(selectedFlavorTextTemplate, fighter, null) : defaultFlavor;
     const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
 
 
