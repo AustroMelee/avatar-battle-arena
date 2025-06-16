@@ -161,9 +161,8 @@ export function populateLocationGrid(locGridElement, locNameDisplayElement, locS
     }
 
     for (const [id, locData] of sortedLocations) {
-        const locationInfo = locData.location;
-        if (locationInfo && locationInfo.name && locationInfo.imageUrl) {
-            const card = createLocationCard(locationInfo, id);
+        if (locData && locData.name && locData.imageUrl) {
+            const card = createLocationCard(locData, id);
             locationGrid.appendChild(card);
         } else {
             console.warn(`Skipping invalid location data for ID: ${id}`);
