@@ -25,6 +25,9 @@ import { checkReactiveDefense } from './engine_reactive-defense.js';
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 export const getRandomElement = (arr) => arr && arr.length > 0 ? Math.floor(Math.random() * arr.length) : null; // Corrected to return index or null
 
+// THIS LINE WAS MISSING OR LOST
+let charactersMarkedForDefeat = new Set();
+
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
     if (typeof rule.weightingLogic === 'function') {
         const weightedOutcome = rule.weightingLogic({ attacker, defender, rule, location: locationData, situation: { ...battleState, environmentState: battleState.environmentState || { damageLevel: 0 } } });
