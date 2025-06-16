@@ -24,6 +24,36 @@ import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
 
+// --- ARCHETYPE DATA IMPORTS ---
+import { aangArchetypeData } from './data_archetype_aang.js';
+import { azulaArchetypeData } from './data_archetype_azula.js';
+import { bumiArchetypeData } from './data_archetype_bumi.js';
+import { jeongJeongArchetypeData } from './data_archetype_jeongjeong.js';
+import { kataraArchetypeData } from './data_archetype_katara.js';
+import { maiArchetypeData } from './data_archetype_mai.js';
+import { ozaiArchetypeData } from './data_archetype_ozai.js';
+import { pakkuArchetypeData } from './data_archetype_pakku.js';
+import { sokkaArchetypeData } from './data_archetype_sokka.js';
+import { tophArchetypeData } from './data_archetype_toph.js';
+import { tyLeeArchetypeData } from './data_archetype_tylee.js';
+import { zukoArchetypeData } from './data_archetype_zuko.js';
+
+const archetypeDataMap = {
+    'aang': aangArchetypeData,
+    'azula': azulaArchetypeData,
+    'bumi': bumiArchetypeData,
+    'jeong-jeong': jeongJeongArchetypeData,
+    'katara': kataraArchetypeData,
+    'mai': maiArchetypeData,
+    'ozai': ozaiArchetypeData,
+    'pakku': pakkuArchetypeData,
+    'sokka': sokkaArchetypeData,
+    'toph-beifong': tophArchetypeData,
+    'ty-lee': tyLeeArchetypeData,
+    'zuko': zukoArchetypeData,
+    // Add other character IDs and their archetype data here
+};
+// --- END ARCHETYPE DATA IMPORTS ---
 
 function conjugatePresent(verbPhrase) {
     if (!verbPhrase || typeof verbPhrase !== 'string') return ''; // FIX: Added type check for verbPhrase
@@ -118,7 +148,7 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
 
 export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
     if (!actor) return null;
-    const actorArchetypeData = characterData[actor.id]?.archetypeData || {}; // Get archetype data for actor
+    const actorArchetypeData = archetypeDataMap[actor.id] || {}; // Get archetype data for actor
     const narrativeData = actorArchetypeData.narrative || {}; // Access narrative from archetype data
 
     let pool = null;

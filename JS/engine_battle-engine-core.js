@@ -707,7 +707,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
 
             // --- AI Action Selection ---
-            const move = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, currentBattleState.currentPhase);
+            const aiDecision = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, currentBattleState.currentPhase);
+            const move = aiDecision.move;
             if (!move) {
                 currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
                 // Potentially add a "hesitation" narrative event here
