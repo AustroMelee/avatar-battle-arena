@@ -15,6 +15,7 @@ import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
+import { BATTLE_PHASES } from './engine_battle-phase.js';
 
 // --- ARCHETYPE DATA IMPORTS ---
 import { aangArchetypeData } from './data_archetype_aang.js';
