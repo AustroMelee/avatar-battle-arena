@@ -182,3 +182,28 @@ export function conjugatePresent(verbPhrase) {
     }
     return rest ? `${verb} ${rest}` : verb;
 }
+
+export function getEmojiForMoveType(moveType, effectivenessLabel) {
+    if (typeof effectivenessLabel === 'string') {
+        if (effectivenessLabel.toLowerCase() === 'critical') return '💥';
+        if (effectivenessLabel.toLowerCase() === 'strong') return '🔥';
+    }
+
+    if (!moveType || typeof moveType !== 'string') return '➡️';
+
+    switch (moveType.toLowerCase()) {
+        case 'fire': return '🔥';
+        case 'water': return '💧';
+        case 'ice': return '❄️';
+        case 'earth': return '🪨';
+        case 'metal': return '⚙️';
+        case 'air': return '💨';
+        case 'lightning': return '⚡';
+        case 'physical': return '⚔️';
+        case 'utility': return '🛠️';
+        case 'special': return '✨';
+        case 'offense': return '⚔️';
+        case 'defense': return '🛡️';
+        default: return '➡️';
+    }
+}
