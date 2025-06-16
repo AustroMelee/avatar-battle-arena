@@ -327,6 +327,22 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     return 'StandardExchange';
 }
 
+// Helper function to calculate energy costs
+function calculateEnergyCost(move, conditions, actorEnergy) {
+    const energyCostEstimate = Math.round((move.power || 0) * 0.22) + 4;
+    const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
+    const energyCostModifier = envModForElement.energyCostModifier || 1.0;
+    const estimatedEnergyCostWithEnv = energyCostEstimate * energyCostModifier;
+    
+    return {
+        energyCostEstimate,
+        envModForElement,
+        energyCostModifier,
+        estimatedEnergyCostWithEnv,
+        isAffordable: estimatedEnergyCostWithEnv <= actorEnergy
+    };
+}
+
 function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
     if (!actor || !defender || !conditions) {
         return [{ move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1.0, reasons: ["ErrorInCalculateMoveWeights"] }];
@@ -339,9 +355,8 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
     const locationData = locationConditions[conditions.id];
     const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
 
-    // NEW: Early energy check to prevent 0-energy loop
+    // Early energy check to prevent 0-energy loop
     if (actorEnergy <= 0) {
-        // If completely out of energy, only allow Struggle with high weight
         return [{ 
             move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, 
             weight: 1.0, 
@@ -350,9 +365,10 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         }];
     }
 
-    // NEW: Energy management logic
+    // Energy management logic
     const isLowEnergy = actorEnergy < 25;
     const isCriticalEnergy = actorEnergy < 10;
+    const energyConservationWeight = isCriticalEnergy ? 2.0 : (isLowEnergy ? 1.5 : 1.0);
     
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
@@ -363,37 +379,28 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         let reasons = [];
         let isEscalationFinisherAttempt = false;
 
-        // NEW: Energy cost calculation and management
-        const energyCostEstimate = Math.round((move.power || 0) * 0.22) + 4;
-        const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
-        const energyCostModifier = envModForElement.energyCostModifier || 1.0;
-        const estimatedEnergyCostWithEnv = energyCostEstimate * energyCostModifier;
+        // Calculate energy costs
+        const energyCosts = calculateEnergyCost(move, conditions, actorEnergy);
 
-        // NEW: Energy-based move filtering
-        if (estimatedEnergyCostWithEnv > actorEnergy) {
+        // Energy-based move filtering
+        if (!energyCosts.isAffordable) {
             if (move.name === "Struggle") {
-                weight = 1.0;
-                reasons.push("LowEnergy_StruggleOnly");
+                weight = 1.0; // Always allow Struggle
             } else {
-                weight = 0;
-                reasons.push("EnergyTooHigh");
+                return { move, weight: 0 }; // Skip unaffordable moves
             }
-            return { move, weight, reasons, isEscalationFinisherAttempt };
         }
 
-        // NEW: Energy conservation logic
+        // Energy conservation logic
         if (isCriticalEnergy) {
             if (move.moveTags.includes('low_cost') || move.type === 'Defense') {
-                weight *= 2.0;
-                reasons.push("CriticalEnergy_LowCostPreference");
+                weight *= energyConservationWeight;
             } else {
-                weight *= 0.5;
-                reasons.push("CriticalEnergy_HighCostPenalty");
+                weight *= 0.5; // Reduce weight of expensive moves
             }
         } else if (isLowEnergy) {
             if (move.moveTags.includes('low_cost')) {
-                weight *= 1.5;
-                reasons.push("LowEnergy_LowCostPreference");
+                weight *= energyConservationWeight;
             }
         }
 
@@ -648,11 +655,18 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     const intent = determineStrategicIntent(actor, defender, turn, currentPhase);
     
     if (intent === 'NarrativeOnly') {
-         return { move: null, aiLogEntryFromSelectMove: { turn: turn + 1, phase: currentPhase, intent, chosenMove: 'None (Narrative Turn)', actorState: { /* ... */ }, opponentEscalation: defender.escalationState } };
+        return { move: null, aiLogEntryFromSelectMove: { turn: turn + 1, phase: currentPhase, intent, chosenMove: 'None (Narrative Turn)', actorState: { /* ... */ }, opponentEscalation: defender.escalationState } };
     }
 
     const prediction = predictOpponentNextMove(actor, defender);
     let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase);
+
+    // Filter moves based on energy costs
+    weightedMoves = weightedMoves.filter(moveInfo => {
+        if (!moveInfo.move) return false;
+        const energyCosts = calculateEnergyCost(moveInfo.move, conditions, actor.energy);
+        return energyCosts.isAffordable || moveInfo.move.name === "Struggle";
+    });
 
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
 
@@ -663,7 +677,7 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
         if (!struggleWeightInfo) {
             validMoves.push({ move: struggleMove, weight: 0.01, reasons: ['LowProbStruggleDefault'], isEscalationFinisherAttempt: false });
         } else if (!validMoves.find(m => m.move?.name === "Struggle")){
-             validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) });
+            validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) });
         }
     }
 
@@ -699,8 +713,8 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
         isEscalationFinisherAttempt: isEscalationFinisher
     };
     actor.aiLog.push(aiLogEntry);
-
-    return {
+    
+    return { 
         move: chosenMove,
         aiLogEntryFromSelectMove: aiLogEntry
     };
