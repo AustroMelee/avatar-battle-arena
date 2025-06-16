@@ -7,12 +7,20 @@
 import { effectivenessLevels } from './data_narrative_effectiveness.js';
 import { punishableMoves } from './move-interaction-matrix.js';
 import { locationConditions } from './location-battle-conditions.js';
-// import { modifyMomentum as applyMomentumChange } from './engine_momentum.js'; // REMOVED: modifyMomentum is now passed as a parameter
-import { getMomentumCritModifier } from './engine_momentum.js'; // Keep this one for local momentum crit calc
-import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js'; // CORRECTED LINE: Added missing ')'
+import { getMomentumCritModifier } from './engine_momentum.js';
+import { applyEscalationDamageModifier, ESCALATION_STATES } from './engine_escalation.js';
 import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+// MOVED TO TOP-LEVEL SCOPE
+const COLLATERAL_IMPACT_MULTIPLIERS = {
+    'none': 0,
+    'low': 0.05,
+    'medium': 0.15,
+    'high': 0.3,
+    'catastrophic': 0.5
+};
 
 const DEFAULT_MOVE_PROPERTIES = {
     power: 30,
