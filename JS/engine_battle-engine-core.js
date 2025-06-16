@@ -1058,6 +1058,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
         // ... rest of turn loop: environment state, escalation updates, etc. ...
 
+        // Clear and update environment state
         environmentState.specificImpacts.clear();
         const currentLocData = locationConditions[locId];
         if (currentLocData && currentLocData.damageThresholds && environmentState.damageLevel > 0) {
@@ -1072,7 +1073,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                  if (randomIndex !== null) environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
             }
         }
-        currentBattleState.environmentState = environmentState;
+
+        // Update battle state with environment changes
+        Object.assign(currentBattleState.environmentState, environmentState);
 
         if (!isNarrativeOnlyTurn) { // Only update for combat turns
             currentBattleState.characterLandedStrongOrCriticalHitLastTurn = fighter1.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || fighter1.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
