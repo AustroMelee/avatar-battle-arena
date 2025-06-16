@@ -1,7 +1,9 @@
 // FILE: engine_battle-engine-core.js
 'use strict';
 
-// Version 1.4: decisiveSummaryPatch v1.1 - Corrected summary binding for curbstomp/reactive endings
+// Version 1.5: Stalemate-Safe Summary Logic
+// Moved the "decisive event" narrative logic to only execute when a winner/loser pair is confirmed,
+// preventing crashes on draw/stalemate scenarios.
 
 import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
@@ -369,7 +371,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                             if (rawEventData.quote && rawEventData.actor) {
                                 const opponentForNarration = rawEventData.actor.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker;
                                 // FIX: Pass full battleState to generateTurnNarrationObjects
-                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForNarration, null, battleState.environmentState, battleState.location, battleState.currentPhase, true, null, battleState);
+                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForNarration, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true, null, battleState);
                                 battleEventLog.push(...formattedEventArray);
                             }
                         });
@@ -965,7 +967,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         } else {
             // Log a message for narrative-only turns, but only once per narrative turn
             if (initiator.id === fighter1.id) { // Only log once per full turn (when initiator is F1)
-                battleEventLog.push({ type: 'narrative_turn_marker', text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`, html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>`});
+                battleEventLog.push({ type: 'narrative_turn_marker', text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`, html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>` });
             }
         }
         // ... rest of turn loop: environment state, escalation updates, etc. ...
@@ -1009,51 +1011,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 isEnvironmental: true
             });
         }
-
-        if (!battleOver) {
-            const score1 = calculateIncapacitationScore(fighter1, fighter2);
-            const score2 = calculateIncapacitationScore(fighter2, fighter1);
-            fighter1.incapacitationScore = score1;
-            fighter2.incapacitationScore = score2;
-
-            const oldEscalationState1 = fighter1.escalationState;
-            const newEscalationState1 = determineEscalationState(score1);
-            const oldEscalationState2 = fighter2.escalationState;
-            const newEscalationState2 = determineEscalationState(score2);
-
-            if ((newEscalationState1 === ESCALATION_STATES.SEVERELY_INCAPACITATED || newEscalationState1 === ESCALATION_STATES.TERMINAL_COLLAPSE) &&
-                (newEscalationState2 === ESCALATION_STATES.SEVERELY_INCAPACITATED || newEscalationState2 === ESCALATION_STATES.TERMINAL_COLLAPSE)) {
-                fighter1.escalationState = ESCALATION_STATES.NORMAL;
-                fighter2.escalationState = ESCALATION_STATES.NORMAL;
-                const revertLogMsg = `[Escalation Reverted]: Both fighters critically incapacitated. Battle intensity reset to Normal. F1 Score: ${score1.toFixed(1)}, F2 Score: ${score2.toFixed(1)}`;
-                fighter1.aiLog.push(revertLogMsg);
-                fighter2.aiLog.push(revertLogMsg);
-                const specificRevertEvent = generateEscalationNarrative(fighter1, oldEscalationState1, ESCALATION_STATES.NORMAL);
-                if (specificRevertEvent) {
-                     turnSpecificEventsForLog.push(specificRevertEvent);
-                } else {
-                     turnSpecificEventsForLog.push({ type: 'escalation_change_event', text: "The overwhelming pressure on both fighters momentarily resets, the air still thick with tension, but the immediate crisis point defers!", html_content: `<p class="narrative-escalation highlight-neutral">The overwhelming pressure on both fighters momentarily resets, the air still thick with tension, but the immediate crisis point defers!</p>`, isEscalationEvent: true });
-                }
-
-            } else {
-                if (oldEscalationState1 !== newEscalationState1) {
-                    fighter1.escalationState = newEscalationState1;
-                    fighter1.aiLog.push(`[Escalation State Change]: ${fighter1.name} is now ${newEscalationState1}. Score: ${score1.toFixed(1)}`);
-                    const narrativeEvent1 = generateEscalationNarrative(fighter1, oldEscalationState1, newEscalationState1);
-                    if (narrativeEvent1) turnSpecificEventsForLog.push(narrativeEvent1);
-                }
-                if (oldEscalationState2 !== newEscalationState2) {
-                    fighter2.escalationState = newEscalationState2;
-                    fighter2.aiLog.push(`[Escalation State Change]: ${fighter2.name} is now ${newEscalationState2}. Score: ${score2.toFixed(1)}`);
-                    const narrativeEvent2 = generateEscalationNarrative(fighter2, oldEscalationState2, newEscalationState2);
-                    if (narrativeEvent2) turnSpecificEventsForLog.push(narrativeEvent2);
-                }
-            }
-            currentBattleState.fighter1Escalation = fighter1.escalationState;
-            currentBattleState.fighter2Escalation = fighter2.escalationState;
-        }
-
-        battleEventLog.push(...turnSpecificEventsForLog);
 
         if (!battleOver && currentBattleState.turn >= 2) {
             if (fighter1.consecutiveDefensiveTurns >= 3 && fighter2.consecutiveDefensiveTurns >= 3 &&
@@ -1103,63 +1060,58 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const finalWinnerFull = winnerId ? (fighter1.id === winnerId ? fighter1 : fighter2) : null;
     const finalLoserFull = loserId ? (fighter1.id === loserId ? fighter1 : fighter2) : null;
 
-    // Determine the dominant narrative for the summary
-    let decisiveEventNarrative = null;
-    let decisiveEventActorId = null; // Store the ID of the actor who performed the decisive event
-
-    // Check for curbstomps first
-    const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
-    if (lastCurbstompEvent && finalLoserFull && charactersMarkedForDefeat.has(finalLoserFull.id)) {
-        // Identify who performed the curbstomp (attacker of the rule)
-        decisiveEventActorId = lastCurbstompEvent.actualAttackerId; 
-
-        if (decisiveEventActorId && decisiveEventActorId === winnerId) {
-            decisiveEventNarrative = lastCurbstompEvent.text;
-        }
-    }
-
-    // Check for reactive KOs if no curbstomp KO was the decisive narrative
-    if (!decisiveEventNarrative) {
-        const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e =>
-            e.type === 'move_action_event' &&
-            e.isReactedAction && // Correct property to check for any reactive action
-            e.reactionSuccess &&
-            finalWinnerFull && e.actorId === finalWinnerFull.id && // The winner performed the reaction
-            finalLoserFull && finalLoserFull.hp <= 0 // The loser was KO'd
-        );
-        if (lastReactiveKOEvent && finalWinnerFull.id === lastReactiveKOEvent.actorId) {
-            const reactionNarratives = battleEventLog.filter(
-                e => e.type === 'dialogue_event' &&
-                     e.actorId === finalWinnerFull.id && // Winner (Zuko) is the actor of the dialogue
-                     finalLoserFull && e.html_content?.includes(finalLoserFull.name) && // Dialogue mentions loser (Azula/Ozai)
-                     (e.html_content?.toLowerCase().includes("redirect") || e.html_content?.toLowerCase().includes("unleashes the redirected energy"))
-            );
-            if (reactionNarratives.length > 0) {
-                decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
-            } else { // Fallback if specific narrative lines aren't found (shouldn't happen ideally)
-                decisiveEventNarrative = `${finalWinnerFull.name} turned ${finalLoserFull.name}'s own power against them for the win!`;
-            }
-            decisiveEventActorId = finalWinnerFull.id;
-        }
-    }
-
-
     if (isStalemate) {
         battleEventLog.push({ type: 'stalemate_result_event', text: "The battle ends in a STALEMATE!", html_content: phaseTemplates.stalemateResult });
         fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
         fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) {
+        // ================== MOVED BLOCK STARTS HERE ==================
+        let decisiveEventNarrative = null;
+        let decisiveEventActorId = null; // Store the ID of the actor who performed the decisive event
+
+        // Check for curbstomps first
+        const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
+        if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull.id)) {
+            decisiveEventActorId = lastCurbstompEvent.actualAttackerId;
+            if (decisiveEventActorId && decisiveEventActorId === winnerId) {
+                decisiveEventNarrative = lastCurbstompEvent.text;
+            }
+        }
+
+        // Check for reactive KOs if no curbstomp KO was the decisive narrative
+        if (!decisiveEventNarrative) {
+            const lastReactiveKOEvent = battleEventLog.slice().reverse().find(e =>
+                e.type === 'move_action_event' &&
+                e.isReactedAction && // Corrected property
+                e.reactionSuccess &&
+                e.actorId === finalWinnerFull.id &&
+                finalLoserFull.hp <= 0
+            );
+            if (lastReactiveKOEvent) {
+                const reactionNarratives = battleEventLog.filter(
+                    e => e.type === 'dialogue_event' &&
+                         e.actorId === finalWinnerFull.id &&
+                         e.html_content?.includes(finalLoserFull.name) &&
+                         (e.html_content?.toLowerCase().includes("redirect") || e.html_content?.toLowerCase().includes("unleashes the redirected energy"))
+                );
+                if (reactionNarratives.length > 0) {
+                    decisiveEventNarrative = reactionNarratives.map(rn => rn.text).join(" ");
+                } else {
+                    decisiveEventNarrative = `${finalWinnerFull.name} turned ${finalLoserFull.name}'s own power against them for the win!`;
+                }
+                decisiveEventActorId = finalWinnerFull.id;
+            }
+        }
+        // ================== MOVED BLOCK ENDS HERE ==================
+
         // Use decisiveEventNarrative if the winner is the one who performed that event
         if (decisiveEventNarrative && decisiveEventActorId === finalWinnerFull.id) {
             finalWinnerFull.summary = decisiveEventNarrative;
             finalLoserFull.summary = `${finalLoserFull.name} was overcome by ${finalWinnerFull.name}'s decisive action.`;
-             // If the decisive narrative *already is* the curbstomp text, don't add the generic curbstomp "win" line again.
-            // The generateCurbstompNarration already provides good success messages.
         } else {
             const isKOByHp = finalLoserFull.hp <= 0;
-            const isTimeoutVictoryLoopFinished = turn >= MAX_TOTAL_TURNS; // Changed to MAX_TOTAL_TURNS
+            const isTimeoutVictoryLoopFinished = turn >= MAX_TOTAL_TURNS;
 
-            // Check if the battle ended due to a standard KO, and if it wasn't already covered by a curbstomp narrative for the winner
             const standardKOFlow = isKOByHp && (!lastCurbstompEvent || lastCurbstompEvent.actorId !== finalWinnerFull.id);
 
             if (standardKOFlow && !battleEventLog.some(e => e.isKOAction && e.html_content?.includes(finalLoserFull.name) && e.actorId === finalWinnerFull.id)) {
