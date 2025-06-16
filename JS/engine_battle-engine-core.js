@@ -861,29 +861,26 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             finalWinnerFull.summary = timeoutTextRaw;
             finalLoserFull.summary = `${finalLoserFull.name} lost by timeout as ${finalWinnerFull.name} had more health remaining.`;
         } else {
-            const winnerContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
-            const loserContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
-            
-            finalWinnerFull.summary = substituteTokens(
-                "{WinnerName}'s victory was sealed by their superior strategy and power.",
-                finalWinnerFull,
-                finalLoserFull,
-                winnerContext
-            );
-            finalLoserFull.summary = substituteTokens(
-                "{LoserName} fought bravely but was ultimately overcome.",
-                finalLoserFull,
-                finalWinnerFull,
-                loserContext
-            );
+            finalWinnerFull.summary = `${finalWinnerFull.name}'s victory was sealed by their superior strategy and power.`;
+            finalLoserFull.summary = `${finalLoserFull.name} fought bravely but was ultimately overcome.`;
+        }
+    } else {
+        // Handle cases where we don't have valid fighter states
+        const defaultSummary = "The battle ended in an unexpected state.";
+        if (finalWinnerFull) {
+            finalWinnerFull.summary = defaultSummary;
+        }
+        if (finalLoserFull) {
+            finalLoserFull.summary = defaultSummary;
         }
     }
 
-    if (!isStalemate && finalWinnerFull) {
+    // Add conclusion event
+    if (!isStalemate && finalWinnerFull && finalLoserFull) {
         const finalWords = getFinalVictoryLine(finalWinnerFull, finalLoserFull);
         const conclusionContext = {
             WinnerName: finalWinnerFull.name,
-            LoserName: finalLoserFull?.name || "their opponent"
+            LoserName: finalLoserFull.name
         };
         const conclusionTextRaw = substituteTokens(
             `${finalWinnerFull.name} stands victorious. "${finalWords}"`,
@@ -907,14 +904,24 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     }
 
     // Update logs without creating circular references
-    fighter1.interactionLog = [...battleEventLog];
-    fighter2.interactionLog = [...battleEventLog];
-    fighter1.phaseLog = [...phaseState.phaseLog];
-    fighter2.phaseLog = [...phaseState.phaseLog];
+    if (fighter1) fighter1.interactionLog = [...battleEventLog];
+    if (fighter2) fighter2.interactionLog = [...battleEventLog];
+    if (fighter1) fighter1.phaseLog = [...phaseState.phaseLog];
+    if (fighter2) fighter2.phaseLog = [...phaseState.phaseLog];
 
     // Create clean copies of final states without circular references
     const createCleanFighterState = (fighter) => {
-        if (!fighter) return null;
+        if (!fighter) {
+            return {
+                id: 'unknown',
+                name: 'Unknown Fighter',
+                hp: 0,
+                energy: 0,
+                momentum: 0,
+                summary: 'The fighter\'s state could not be determined.',
+                aiLog: ['Error: Fighter state was null or undefined.']
+            };
+        }
         const cleanState = { ...fighter };
         // Remove circular references
         delete cleanState.opponent;
