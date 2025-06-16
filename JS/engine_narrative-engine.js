@@ -35,7 +35,7 @@ import { ozaiArchetypeData } from './data_archetype_ozai.js';
 import { pakkuArchetypeData } from './data_archetype_pakku.js';
 import { sokkaArchetypeData } from './data_archetype_sokka.js';
 import { tophArchetypeData } from './data_archetype_toph.js';
-import { tyLeeArchetypeData } from './data_archetype_tylee.js';
+import { tyleeArchetypeData } from './data_archetype_tylee.js';
 import { zukoArchetypeData } from './data_archetype_zuko.js';
 
 const archetypeDataMap = {
@@ -49,7 +49,7 @@ const archetypeDataMap = {
     'pakku': pakkuArchetypeData,
     'sokka': sokkaArchetypeData,
     'toph-beifong': tophArchetypeData,
-    'ty-lee': tyLeeArchetypeData,
+    'ty-lee': tyleeArchetypeData,
     'zuko': zukoArchetypeData,
     // Add other character IDs and their archetype data here
 };
