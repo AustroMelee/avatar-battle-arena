@@ -4,7 +4,7 @@
 // Manages the display and hiding of loading spinners and results panels.
 
 import { characters } from './data_characters.js';
-import { transformEventsToHtmlLog } from './battle_log_transformer.js';
+import { transformEventsToHtmlLog, transformEventsToAnimationQueue } from './battle_log_transformer.js';
 import { startSimulation as startAnimationSimulation } from './simulation_mode_manager.js';
 import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-escalation-display.js';
 import { setupDetailedLogControls, displayFinalAnalysis, resetBattleResultsUI } from './ui_battle-results.js';
