@@ -15,11 +15,11 @@ import { tophArchetypeData } from './data_archetype_toph.js';
 import { zukoArchetypeData } from './data_archetype_zuko.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
 import { maiArchetypeData } from './data_archetype_mai.js';
-import { tyleeArchetypeData } from './data_archetype_tylee.js';
+import { tyleeArchetypeData } from './data_archetype_ty-lee.js';
 import { ozaiArchetypeData } from './data_archetype_ozai.js';
 import { pakkuArchetypeData } from './data_archetype_pakku.js';
 import { bumiArchetypeData } from './data_archetype_bumi.js';
-import { jeongjeongArchetypeData } from './data_archetype_jeongjeong.js';
+import { jeongjeongArchetypeData } from './data_archetype_jeong-jeong.js';
 
 
 // Combine all imported archetype data into a single map.
