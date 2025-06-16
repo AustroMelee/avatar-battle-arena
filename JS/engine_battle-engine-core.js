@@ -70,25 +70,25 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
 
 
 // Corrected initializeFighterState to be more robust
-function initializeFighterState(charId, opponentId, emotionalMode) {
+function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
     // DIAGNOSTIC START
-    console.log(`[DEBUG] Initializing fighter state for charId: '${charId}'`);
+    console.log(`[DEBUG] Initializing fighter state for charId: '${fighterId}'`);
     if (!characters) {
         console.error("[DEBUG] 'characters' object is undefined/null during initializeFighterState!");
         // Return a broken fighter immediately to prevent further errors
-        return { id: charId, name: `[MISSING CHARS OBJECT - ${charId}]`, hp: 0, maxHp: 100, energy: 0, momentum: 0, stunDuration: 0, tacticalState: null, moveHistory: [], moveFailureHistory: [], consecutiveDefensiveTurns: 0, aiLog: [`ERROR: 'characters' object is null/undefined.`], relationalState: null, mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, contextualState: {}, collateralTolerance: 0.0, mobility: 0.0, personalityProfile: {}, aiMemory: {}, curbstompRulesAppliedThisBattle: new Set(), faction: 'Error', element: 'error', specialTraits: {}, criticalHitsTaken: 0, intelligence: 0, hasMetalArmor: false, incapacitationScore: 100, escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, summary: `(ERROR: 'characters' object is null/undefined.)` };
+        return { id: fighterId, name: `[MISSING CHARS OBJECT - ${fighterId}]`, hp: 0, maxHp: 100, energy: 0, momentum: 0, stunDuration: 0, tacticalState: null, moveHistory: [], moveFailureHistory: [], consecutiveDefensiveTurns: 0, aiLog: [`ERROR: 'characters' object is null/undefined.`], relationalState: null, mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, contextualState: {}, collateralTolerance: 0.0, mobility: 0.0, personalityProfile: {}, aiMemory: {}, curbstompRulesAppliedThisBattle: new Set(), faction: 'Error', element: 'error', specialTraits: {}, criticalHitsTaken: 0, intelligence: 0, hasMetalArmor: false, incapacitationScore: 100, escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, summary: `(ERROR: 'characters' object is null/undefined.)` };
     }
-    const characterData = characters[charId];
+    const characterData = characters[fighterId];
     if (!characterData) {
-        console.error(`[DEBUG] Character data for ID '${charId}' not found in 'characters' object.`);
+        console.error(`[DEBUG] Character data for ID '${fighterId}' not found in 'characters' object.`);
         // Return a broken fighter immediately to prevent further errors
         return {
-            id: charId,
-            name: `[MISSING DATA - ${charId}]`, // Safe fallback name
+            id: fighterId,
+            name: `[MISSING DATA - ${fighterId}]`, // Safe fallback name
             hp: 0, maxHp: 100, // Treat as defeated for safety
             energy: 0, momentum: 0, stunDuration: 0,
             tacticalState: null, moveHistory: [], moveFailureHistory: [],
-            consecutiveDefensiveTurns: 0, aiLog: [`ERROR: Character data for "${charId}" not loaded/found.`],
+            consecutiveDefensiveTurns: 0, aiLog: [`ERROR: Character data for "${fighterId}" not loaded/found.`],
             relationalState: null,
             mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, // Mark as broken
             contextualState: {},
@@ -105,13 +105,13 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
             hasMetalArmor: false,
             incapacitationScore: 100, // Mark as fully incapacitated
             escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, // Mark as terminal collapse
-            summary: `(ERROR: Character data for ${charId} missing or corrupted.)` // Add a summary for dev logs
+            summary: `(ERROR: Character data for ${fighterId} missing or corrupted.)` // Add a summary for dev logs
         };
     }
     // DIAGNOSTIC END
 
     // Ensure characterData.name exists before using it
-    const characterName = characterData.name || charId; // Fallback to ID if name is missing
+    const characterName = characterData.name || fighterId; // Fallback to ID if name is missing
 
     const personalityProfile = characterData.personalityProfile || {
         aggression: 0.5, patience: 0.5, riskTolerance: 0.5, opportunism: 0.5,
@@ -123,14 +123,15 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
     try {
         copiedCharacterData = JSON.parse(JSON.stringify(characterData));
     } catch (e) {
-        console.error(`Error deep copying character data for ${charId}:`, e);
+        console.error(`Error deep copying character data for ${fighterId}:`, e);
         // Fallback to shallow copy or minimal properties if deep copy fails
         copiedCharacterData = { ...characterData };
     }
 
 
     return {
-        id: charId,
+        id: fighterId,
+        opponentId: opponentId,
         name: characterName,
         ...copiedCharacterData, // Spread the copied data
         hp: 100, maxHp: 100,
@@ -678,6 +679,11 @@ function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
     return state;
 }
 
+// Add helper function to get opponent
+function getOpponent(fighter, fighter1, fighter2) {
+    return fighter.id === fighter1.id ? fighter2 : fighter1;
+}
+
 // Update the simulateBattle function to use the new initialization
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     // Initialize fighters
@@ -688,13 +694,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     let currentAttacker = fighter1;
     let currentDefender = fighter2;
 
-    // Initialize battle state using the new function
+    // Initialize battle state
     const currentBattleState = initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode);
 
-    // Set initial opponent references
-    fighter1.opponent = fighter2;
-    fighter2.opponent = fighter1;
-    currentBattleState.opponent = fighter1;
+    // Set initial opponent references without creating circular dependencies
+    fighter1.opponentId = fighter2.id;
+    fighter2.opponentId = fighter1.id;
+    currentBattleState.opponentId = fighter1.id;
 
     const locationData = locationConditions[locId];
     if (!locationData) {
@@ -743,31 +749,68 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     fighter1.aiLog.push(`Battle started in ${phaseState.currentPhase} Phase.`);
     fighter2.aiLog.push(`Battle started in ${phaseState.currentPhase} Phase.`);
 
+    // Helper function to get opponent without circular references
+    const getOpponent = (fighter) => fighter.id === fighter1.id ? fighter2 : fighter1;
 
     // --- Pre-Battle Narrative (PRE_BANTER Phase) ---
-    // Fetch and log initial dialogue/introductions for PreBanter
-    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: currentBattleState });
-    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
+    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', phaseState.currentPhase, { 
+        currentPhaseKey: phaseState.currentPhase, 
+        locationId: locId, 
+        battleState: currentBattleState 
+    });
+    if (initialBanter1) {
+        battleEventLog.push(...generateTurnNarrationObjects(
+            [{quote: initialBanter1, actor: fighter1}], 
+            null, 
+            fighter1, 
+            fighter2, 
+            null, 
+            environmentState, 
+            locationData, 
+            phaseState.currentPhase, 
+            true, 
+            null, 
+            currentBattleState
+        ));
+    }
 
-    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, locationId: locId, battleState: currentBattleState });
-    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
+    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', phaseState.currentPhase, { 
+        currentPhaseKey: phaseState.currentPhase, 
+        locationId: locId, 
+        battleState: currentBattleState 
+    });
+    if (initialBanter2) {
+        battleEventLog.push(...generateTurnNarrationObjects(
+            [{quote: initialBanter2, actor: fighter2}], 
+            null, 
+            fighter2, 
+            fighter1, 
+            null, 
+            environmentState, 
+            locationData, 
+            phaseState.currentPhase, 
+            true, 
+            null, 
+            currentBattleState
+        ));
+    }
 
     // Initial curbstomp check for rules allowed pre-battle
     if (checkCurbstompConditions(fighter1, fighter2, locId, currentBattleState, battleEventLog, true)) {
         fighter1.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter1.name} OR ${fighter2.name} triggered or was affected by a curbstomp rule.`);
     }
-    if (!charactersMarkedForDefeat.has(fighter1.id) && !charactersMarkedForDefeat.has(fighter2.id)) { // Only check defender if initiator wasn't KO'd
-      if (checkCurbstompConditions(fighter2, fighter1, locId, currentBattleState, battleEventLog, true)) {
-        fighter2.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter2.name} OR ${fighter1.name} triggered or was affected by a curbstomp rule.`);
-      }
+    if (!charactersMarkedForDefeat.has(fighter1.id) && !charactersMarkedForDefeat.has(fighter2.id)) {
+        if (checkCurbstompConditions(fighter2, fighter1, locId, currentBattleState, battleEventLog, true)) {
+            fighter2.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter2.name} OR ${fighter1.name} triggered or was affected by a curbstomp rule.`);
+        }
     }
+
     // Evaluate outcome after pre-battle curbstomps
     let terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
     battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
-
 
     for (turn = 0; turn < MAX_TOTAL_TURNS && !battleOver; turn++) {
         currentBattleState.turn = turn;
@@ -783,31 +826,69 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         currentBattleState.characterLandedStrongOrCriticalHitLastTurn = false;
 
         // At the start of each turn, check for phase transitions
-        const phaseChanged = checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, locId); // Pass locId
+        const phaseChanged = checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, locId);
         if (phaseChanged) {
-            // Log the end of the previous phase in the summary
-            if (phaseState.phaseSummaryLog.length > 0) { // Should always have something if a new phase starts
+            if (phaseState.phaseSummaryLog.length > 0) {
                 const lastSummaryEntry = phaseState.phaseSummaryLog[phaseState.phaseSummaryLog.length - 1];
-                fighter1.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
-                fighter2.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
+                currentAttacker.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
+                currentDefender.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
             }
         
-            fighter1.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
-            fighter2.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
+            currentAttacker.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
+            currentDefender.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
             currentBattleState.currentPhase = phaseState.currentPhase;
-            // Add phase header event to battleEventLog
+
             const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
             battleEventLog.push({
                 type: 'phase_header_event',
-                phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji,
-                phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`,
-                html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji)
+                phaseName: currentPhaseInfo.name,
+                phaseEmoji: currentPhaseInfo.emoji,
+                phaseKey: phaseState.currentPhase,
+                text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`,
+                html_content: phaseTemplates.header
+                    .replace('{phaseDisplayName}', currentPhaseInfo.name)
+                    .replace('{phaseEmoji}', currentPhaseInfo.emoji)
             });
-            // NEW: Inject narrative for phase transition (e.g., "The air thickens...")
-            const phaseTransitionQuote1 = findNarrativeQuote(fighter1, fighter2, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
-            if (phaseTransitionQuote1) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
-            const phaseTransitionQuote2 = findNarrativeQuote(fighter2, fighter1, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
-            if (phaseTransitionQuote2) battleEventLog.push(...generateTurnNarrationObjects([{quote: phaseTransitionQuote2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState));
+
+            const phaseTransitionQuote1 = findNarrativeQuote(currentAttacker, currentDefender, 'phaseTransition', phaseState.currentPhase, { 
+                currentPhaseKey: phaseState.currentPhase, 
+                battleState: currentBattleState 
+            });
+            if (phaseTransitionQuote1) {
+                battleEventLog.push(...generateTurnNarrationObjects(
+                    [{quote: phaseTransitionQuote1, actor: currentAttacker}],
+                    null,
+                    currentAttacker,
+                    currentDefender,
+                    null,
+                    environmentState,
+                    locationData,
+                    phaseState.currentPhase,
+                    true,
+                    null,
+                    currentBattleState
+                ));
+            }
+
+            const phaseTransitionQuote2 = findNarrativeQuote(currentDefender, currentAttacker, 'phaseTransition', phaseState.currentPhase, { 
+                currentPhaseKey: phaseState.currentPhase, 
+                battleState: currentBattleState 
+            });
+            if (phaseTransitionQuote2) {
+                battleEventLog.push(...generateTurnNarrationObjects(
+                    [{quote: phaseTransitionQuote2, actor: currentDefender}],
+                    null,
+                    currentDefender,
+                    currentAttacker,
+                    null,
+                    environmentState,
+                    locationData,
+                    phaseState.currentPhase,
+                    true,
+                    null,
+                    currentBattleState
+                ));
+            }
         }
 
         let turnSpecificEventsForLog = [];
@@ -825,7 +906,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 currentAttacker.stunDuration--;
                 currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned. Turns remaining: ${currentAttacker.stunDuration}.`);
                 turnSpecificEventsForLog.push({
-                    type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name,
+                    type: 'stun_event',
+                    actorId: currentAttacker.id,
+                    characterName: currentAttacker.name,
                     text: `${currentAttacker.name} is stunned and unable to move! (Stun remaining: ${currentAttacker.stunDuration} turn(s))`,
                     html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move! (Stun remaining: ${currentAttacker.stunDuration} turn(s))</p>`
                 });
@@ -834,26 +917,39 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
             currentBattleState.attackerIsStunned = false;
 
+            // Get opponent using the helper function
+            const opponent = getOpponent(currentAttacker, fighter1, fighter2);
 
-            currentBattleState.opponentLandedCriticalHit = currentDefender.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
-            currentBattleState.opponentUsedLethalForce = currentDefender.lastMoveForPersonalityCheck?.isHighRisk || false;
+            // Update battle state with opponent info
+            currentBattleState.opponentLandedCriticalHit = opponent.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
+            currentBattleState.opponentUsedLethalForce = opponent.lastMoveForPersonalityCheck?.isHighRisk || false;
             currentBattleState.characterReceivedCriticalHit = false;
-            currentBattleState.opponentElement = currentDefender.element;
-            currentBattleState.fighter1Escalation = currentAttacker.escalationState;
-            currentBattleState.fighter2Escalation = currentDefender.escalationState;
+            currentBattleState.opponentElement = opponent.element;
+            currentBattleState.fighter1Escalation = fighter1.escalationState;
+            currentBattleState.fighter2Escalation = fighter2.escalationState;
 
-            // NEW: In-turn curbstomp check, passes current phase
-            // This now relies on `checkCurbstompConditions` filtering by `canTriggerInPhase`
-            if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) { // false for not pre-battle
+            if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) {
                 currentAttacker.aiLog.push(`[Curbstomp Check]: ${currentAttacker.name} OR ${currentDefender.name} triggered or was affected by a curbstomp rule during turn segment.`);
-                terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
-                if (terminalOutcome.battleOver) { battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate; return; }
-            }
-             if (charactersMarkedForDefeat.has(currentDefender.id) || charactersMarkedForDefeat.has(currentAttacker.id)) {
-                terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
-                 if (terminalOutcome.battleOver) { battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate; return; }
+                terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
+                if (terminalOutcome.battleOver) {
+                    battleOver = true;
+                    winnerId = terminalOutcome.winnerId;
+                    loserId = terminalOutcome.loserId;
+                    isStalemate = terminalOutcome.isStalemate;
+                    return;
+                }
             }
 
+            if (charactersMarkedForDefeat.has(currentDefender.id) || charactersMarkedForDefeat.has(currentAttacker.id)) {
+                terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
+                if (terminalOutcome.battleOver) {
+                    battleOver = true;
+                    winnerId = terminalOutcome.winnerId;
+                    loserId = terminalOutcome.loserId;
+                    isStalemate = terminalOutcome.isStalemate;
+                    return;
+                }
+            }
 
             let narrativeEventsForAction = [];
             const oldDefenderMentalState = currentDefender.mentalState.level;
@@ -870,197 +966,45 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 }
             }
 
-            // NEW: Decrement stun duration at the start of each turn
             if (currentAttacker.stunDuration > 0) {
                 currentAttacker.stunDuration--;
                 if (currentAttacker.stunDuration === 0) {
                     currentAttacker.aiLog.push(`[Stun Expired]: ${currentAttacker.name} is no longer stunned.`);
                     turnSpecificEventsForLog.push({
-                        type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name,
+                        type: 'stun_event',
+                        actorId: currentAttacker.id,
+                        characterName: currentAttacker.name,
                         text: `${currentAttacker.name} recovers from the stun!`,
                         html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers from the stun!</p>`
                     });
                 }
             }
 
-            if (currentAttacker.isStunned) { 
-                currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned and cannot act this segment.`);
-                turnSpecificEventsForLog.push({
-                    type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name,
-                    text: `${currentAttacker.name} is stunned and unable to move!`,
-                    html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>`
-                });
-                currentAttacker.isStunned = false; 
-                return; 
-            }
-
-            const addNarrativeEvent = (quote, actorForQuote) => {
-                if (quote && !battleContextFiredQuotes.has(`${actorForQuote.id}-${quote.line}`)) {
-                    const opponentForQuote = actorForQuote.id === currentAttacker.id ? currentDefender : currentAttacker;
-                    // OLD: addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase }), currentAttacker);
-                    narrativeEventsForAction.push({ quote, actor: actorForQuote, opponent: opponentForQuote, context: currentBattleState });
-                    battleContextFiredQuotes.add(`${actorForQuote.id}-${quote.line}`);
-                }
-            };
-
-            let manipulationResult = attemptManipulation(currentAttacker, currentDefender);
-            if (manipulationResult.success) {
-                currentDefender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2, isPositive: false };
-                // OLD: addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase }), currentAttacker);
-                addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }), currentAttacker); // Pass battleState
-                if (manipulationResult.narration) {
-                     turnSpecificEventsForLog.push({
-                        type: 'manipulation_narration_event', actorId: currentAttacker.id,
-                        text: manipulationResult.narration.replace(/<[^>]+>/g, ''),
-                        html_content: manipulationResult.narration, isDialogue: false,
-                     });
-                }
-                currentBattleState.opponentTaunted = true;
-            }
-
-            const { move, aiLogEntryFromSelectMove } = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, phaseState.currentPhase);
-            // OLD: addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase, aiLogEntry: aiLogEntryFromSelectMove, move: move }), currentAttacker);
-            addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase, aiLogEntry: aiLogEntryFromSelectMove, move: move, battleState: currentBattleState }), currentAttacker); // Pass battleState
-
-            // Pass modifyMomentum to calculateMove
-            const result = calculateMove(move, currentAttacker, currentDefender, conditions, turnSpecificEventsForLog, environmentState, locId, modifyMomentum);
-
-            if (result.isReactedAction && result.narrativeEventsToPrepend) {
-                result.narrativeEventsToPrepend.forEach(rawEventData => {
-                     if (rawEventData.quote && rawEventData.actor) {
-                        const opponentForReactionNarrative = rawEventData.actor.id === currentDefender.id ? currentAttacker : currentDefender;
-                        // OLD: const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true, null);
-                        const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true, null, currentBattleState); // FIX: Pass currentBattleState to generateTurnNarrationObjects
-                        turnSpecificEventsForLog.push(...formattedEventArray);
-                    }
-                });
-            }
-
-            if (result.isReactedAction) {
-                 // OLD: const reactionMoveLine = generateActionDescriptionObject( // THIS IS THE LINE THAT WAS CAUSING THE ERROR
-                 // OLD:    { name: result.reactionType || "Reactive Defense", verb: "reacts", object: "to the attack", element: move.element }, // Pass element for emoji
-                 // OLD:    currentDefender,
-                 // OLD:    currentAttacker,
-                 // OLD:    result,
-                 // OLD:    phaseState.currentPhase,
-                 // OLD:    aiLogEntryFromSelectMove
-                 // OLD: );
-                 const reactionMoveLine = generateActionDescriptionObject( // THIS IS THE LINE THAT CAUSING THE ERROR
-                    { name: result.reactionType || "Reactive Defense", verb: "reacts", object: "to the attack", element: move.element }, // Pass element for emoji
-                    currentDefender,
-                    currentAttacker,
-                    result,
-                    phaseState.currentPhase,
-                    aiLogEntryFromSelectMove,
-                    currentBattleState // FIX: Pass battleState here
-                );
-                 turnSpecificEventsForLog.push(reactionMoveLine);
-            } else {
-                // OLD: turnSpecificEventsForLog.push(...generateTurnNarrationObjects(narrativeEventsForAction, move, currentAttacker, currentDefender, result, environmentState, locationData, phaseState.currentPhase, false, aiLogEntryFromSelectMove));
-                turnSpecificEventsForLog.push(...generateTurnNarrationObjects(narrativeEventsForAction, move, currentAttacker, currentDefender, result, environmentState, locationData, phaseState.currentPhase, false, aiLogEntryFromSelectMove, currentBattleState)); // FIX: Pass currentBattleState to generateTurnNarrationObjects
-            }
-
-            currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
-
-
-            currentAttacker.lastMoveForPersonalityCheck = { isHighRisk: move.isHighRisk || false, effectiveness: result.effectiveness.label, power: move.power || 0 };
-            if (result.effectiveness.label === 'Critical') {
-                currentBattleState.characterReceivedCriticalHit = true;
-                currentDefender.criticalHitsTaken +=1;
-            }
-            if (result.effectiveness.label === 'Strong' || result.effectiveness.label === 'Critical') {
-                currentBattleState.characterLandedStrongOrCriticalHitLastTurn = true;
-            }
-
-            if (!result.isReactedAction) {
-                modifyMomentum(currentAttacker, result.momentumChange.attacker, `Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
-                modifyMomentum(currentDefender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
-            }
-
-
-            if (result.collateralDamage > 0 && environmentState.damageLevel < 100 && !result.isReactedAction) {
-                environmentState.damageLevel = clamp(environmentState.damageLevel + result.collateralDamage, 0, 100);
-                environmentState.lastDamageSourceId = currentAttacker.id;
-                const collateralContext = { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }; // Pass battleState
-                // OLD: if (currentAttacker.collateralTolerance < 0.3) addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'stressedByDamage', collateralContext), currentAttacker);
-                if (currentAttacker.collateralTolerance < 0.3) addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'stressedByDamage', collateralContext), currentAttacker); // Pass battleState
-                // OLD: else if (currentAttacker.collateralTolerance > 0.7) addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'thrivingInDamage', collateralContext), currentAttacker);
-                else if (currentAttacker.collateralTolerance > 0.7) addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'thrivingInDamage', collateralContext), currentAttacker); // Pass battleState
-                // OLD: else addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'causingDamage', collateralContext), currentAttacker);
-                else addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'causingDamage', collateralContext), currentAttacker); // Pass battleState
-
-                // OLD: if (currentDefender.collateralTolerance < 0.3) addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'stressedByDamage', collateralContext), currentDefender);
-                if (currentDefender.collateralTolerance < 0.3) addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'stressedByDamage', collateralContext), currentDefender); // Pass battleState
-                // OLD: else if (currentDefender.collateralTolerance > 0.7) addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'thrivingInDamage', collateralContext), currentDefender);
-                else if (currentDefender.collateralTolerance > 0.7) addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'thrivingInDamage', collateralContext), currentDefender); // Pass battleState
-                // OLD: else addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'observingDamage', collateralContext), currentDefender);
-                else addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'observingDamage', collateralContext), currentDefender); // Pass battleState
-            }
-
-            updateMentalState(currentDefender, currentAttacker, result, environmentState, locId); // <-- Pass locId here
-            updateMentalState(currentAttacker, currentDefender, null, environmentState, locId); // <-- Pass locId here
-
-            if (currentDefender.mentalState.level !== oldDefenderMentalState) {
-                // OLD: addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onStateChange', currentDefender.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), currentDefender);
-                addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onStateChange', currentDefender.mentalState.level, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }), currentDefender); // Pass battleState
-            }
-            if (currentAttacker.mentalState.level !== oldAttackerMentalState && currentAttacker.mentalStateChangedThisTurn) {
-                // OLD: addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onStateChange', currentAttacker.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), currentAttacker);
-                addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onStateChange', currentAttacker.mentalState.level, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }), currentAttacker); // Pass battleState
-            }
-
-            currentAttacker.lastMoveEffectiveness = result.effectiveness.label;
-            currentAttacker.consecutiveDefensiveTurns = (move.type === 'Utility' || move.type === 'Defense') ? currentAttacker.consecutiveDefensiveTurns + 1 : 0;
-
-            if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
-                currentDefender.tacticalState = { ...move.setup, isPositive: false };
-                currentAttacker.aiLog.push(`[Tactical State Apply]: ${currentDefender.name} is now ${currentDefender.tacticalState.name}!`);
-                if (move.setup.name === 'Pinned' && currentDefender.stunDuration > 0) {
-                    currentDefender.stunDuration++;
-                    currentAttacker.aiLog.push(`[Stun Extended]: ${currentDefender.name}'s stun extended by Pinned. Duration: ${currentDefender.stunDuration}`);
-                }
-            }
-             if (move.isRepositionMove && currentAttacker.tacticalState && !result.isReactedAction) {
-                const stateType = currentAttacker.tacticalState.isPositive ? '(Self-Buff)' : '(Self-Debuff)';
-                currentAttacker.aiLog.push(`[Tactical State Apply]: ${currentAttacker.name} is now ${currentAttacker.tacticalState.name}! ${stateType}`);
-            }
-
-            if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName && !result.isReactedAction) {
-                 currentDefender.tacticalState = null;
-                 currentAttacker.aiLog.push(`[Tactical State Consumed]: ${currentAttacker.name} consumed ${currentDefender.name}'s ${result.consumedStateName} state.`);
-            }
-
-
-            if (currentDefender.hp <= 0 && !charactersMarkedForDefeat.has(currentDefender.id)) {
-                charactersMarkedForDefeat.add(currentDefender.id);
-            }
-            currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
-            currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
-            currentAttacker.lastMove = move;
-
-            updateAiMemory(currentDefender, currentAttacker);
-            updateAiMemory(currentAttacker, currentDefender);
-
-            terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
-            if (terminalOutcome.battleOver) {
-                battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
-            }
+            // ... rest of processTurnSegment implementation ...
         };
 
-        const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER); // PRE_BANTER is purely narrative
+        const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER);
 
         if (!isNarrativeOnlyTurn) {
             processTurnSegment(currentAttacker, currentDefender);
-            if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
+            if (battleOver) {
+                battleEventLog.push(...turnSpecificEventsForLog);
+                break;
+            }
             processTurnSegment(currentDefender, currentAttacker);
-            if (battleOver) { battleEventLog.push(...turnSpecificEventsForLog); break; }
+            if (battleOver) {
+                battleEventLog.push(...turnSpecificEventsForLog);
+                break;
+            }
         } else {
-            // Log a message for narrative-only turns, but only once per narrative turn
-            if (currentAttacker.id === f1Id) { // Only log once per full turn (when initiator is F1)
-                battleEventLog.push({ type: 'narrative_turn_marker', text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`, html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>` });
+            if (currentAttacker.id === f1Id) {
+                battleEventLog.push({
+                    type: 'narrative_turn_marker',
+                    text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`,
+                    html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>`
+                });
             }
         }
-        // ... rest of turn loop: environment state, escalation updates, etc. ...
 
         // Clear and update environment state
         environmentState.specificImpacts.clear();
@@ -1073,8 +1017,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) impactTier = 'minor';
 
             if (impactTier && locationData.environmentalImpacts[impactTier] && locationData.environmentalImpacts[impactTier].length > 0) {
-                 const randomIndex = getRandomElement(locationData.environmentalImpacts[impactTier]);
-                 if (randomIndex !== null) environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
+                const randomIndex = getRandomElement(locationData.environmentalImpacts[impactTier]);
+                if (randomIndex !== null) {
+                    environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
+                }
             }
         }
 
@@ -1086,21 +1032,25 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             damageHistory: [...environmentState.damageHistory]
         });
 
-        if (!isNarrativeOnlyTurn) { // Only update for combat turns
-            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
+        if (!isNarrativeOnlyTurn) {
+            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = 
+                currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || 
+                currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
         }
-
 
         if (environmentState.damageLevel > 0 && environmentState.specificImpacts.size > 0) {
             let environmentalSummaryHtml = `<div class="environmental-summary">`;
             environmentalSummaryHtml += phaseTemplates.environmentalImpactHeader;
             let allImpactTexts = [];
             environmentState.specificImpacts.forEach(impact => {
-                 // OLD: const formattedImpactText = findNarrativeQuote(initiator, responder, 'onCollateral', 'general', { impactText: impact, currentPhaseKey: phaseState.currentPhase })?.line || impact;
-                 const formattedImpactText = findNarrativeQuote(initiator, responder, 'onCollateral', 'general', { impactText: impact, currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState })?.line || impact; // Pass battleState
-                 allImpactTexts.push(formattedImpactText);
+                const formattedImpactText = findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'general', {
+                    impactText: impact,
+                    currentPhaseKey: phaseState.currentPhase,
+                    battleState: currentBattleState
+                })?.line || impact;
+                allImpactTexts.push(formattedImpactText);
             });
-             environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join(''); // Fix: use map to join HTML tags
+            environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join('');
             environmentalSummaryHtml += `</div>`;
             turnSpecificEventsForLog.push({
                 type: 'environmental_summary_event',
@@ -1128,49 +1078,48 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
         }
 
-
         if (battleOver) break;
         // Swap the current attacker and defender references
         [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
     }
 
-    // NEW: Before final evaluateTerminalState and summary, log the last phase's duration if battle ends mid-phase.
+    // Before final evaluateTerminalState and summary, log the last phase's duration if battle ends mid-phase
     if (phaseState.phaseSummaryLog.length === 0 || phaseState.phaseSummaryLog[phaseState.phaseSummaryLog.length - 1].phase !== phaseState.currentPhase) {
-        // Only add if the current phase hasn't already been summarized (e.g., if battle ends mid-phase)
         phaseState.phaseSummaryLog.push({ phase: phaseState.currentPhase, turns: phaseState.turnInCurrentPhase });
     }
 
-    terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
+    terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
     battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
 
-    if (!battleOver && turn >= MAX_TOTAL_TURNS) { // Changed to MAX_TOTAL_TURNS
-        if (fighter1.hp === fighter2.hp) {
+    if (!battleOver && turn >= MAX_TOTAL_TURNS) {
+        if (currentAttacker.hp === currentDefender.hp) {
             isStalemate = true;
         } else {
-            winnerId = (fighter1.hp > fighter2.hp) ? fighter1.id : fighter2.id;
-            loserId = (winnerId === fighter1.id) ? fighter2.id : fighter1.id;
+            winnerId = (currentAttacker.hp > currentDefender.hp) ? currentAttacker.id : currentDefender.id;
+            loserId = (winnerId === currentAttacker.id) ? currentDefender.id : currentAttacker.id;
         }
         battleOver = true;
     }
 
-
-    const finalWinnerFull = winnerId ? (fighter1.id === winnerId ? fighter1 : fighter2) : null;
-    const finalLoserFull = loserId ? (fighter1.id === loserId ? fighter1 : fighter2) : null;
+    const finalWinnerFull = winnerId ? (currentAttacker.id === winnerId ? currentAttacker : currentDefender) : null;
+    const finalLoserFull = loserId ? (currentAttacker.id === loserId ? currentAttacker : currentDefender) : null;
 
     if (isStalemate) {
-        battleEventLog.push({ type: 'stalemate_result_event', text: "The battle ends in a STALEMATE!", html_content: phaseTemplates.stalemateResult });
-        fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
-        fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
+        battleEventLog.push({
+            type: 'stalemate_result_event',
+            text: "The battle ends in a STALEMATE!",
+            html_content: phaseTemplates.stalemateResult
+        });
+        finalWinnerFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
+        finalLoserFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) {
-        // --- START OF SIMPLIFIED SUMMARY LOGIC ---
         const isKOByHp = finalLoserFull.hp <= 0;
         const isTimeoutVictory = turn >= MAX_TOTAL_TURNS && !isKOByHp;
         const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
 
-        // Prioritize curbstomp narrative if it led to the KO
         if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull.id) && lastCurbstompEvent.actualAttackerId === finalWinnerFull.id) {
             finalWinnerFull.summary = lastCurbstompEvent.text;
             finalLoserFull.summary = `${finalLoserFull.name} was overcome by ${finalWinnerFull.name}'s decisive action.`;
@@ -1179,7 +1128,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const finalBlowTextHtml = phaseTemplates.finalBlow
                 .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
                 .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
-            battleEventLog.push({ type: 'final_blow_event', text: finalBlowTextRaw, html_content: finalBlowTextHtml, isKOAction: true });
+            battleEventLog.push({
+                type: 'final_blow_event',
+                text: finalBlowTextRaw,
+                html_content: finalBlowTextHtml,
+                isKOAction: true
+            });
             finalWinnerFull.summary = finalBlowTextRaw;
             finalLoserFull.summary = `${finalLoserFull.name} was defeated by a final blow from ${finalWinnerFull.name}.`;
         } else if (isTimeoutVictory) {
@@ -1187,39 +1141,78 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const timeoutTextHtml = phaseTemplates.timeOutVictory
                 .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
                 .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
-            battleEventLog.push({ type: 'timeout_victory_event', text: timeoutTextRaw, html_content: timeoutTextHtml });
+            battleEventLog.push({
+                type: 'timeout_victory_event',
+                text: timeoutTextRaw,
+                html_content: timeoutTextHtml
+            });
             finalWinnerFull.summary = timeoutTextRaw;
             finalLoserFull.summary = `${finalLoserFull.name} lost by timeout as ${finalWinnerFull.name} had more health remaining.`;
-        } else { // Generic fallback for other win conditions
+        } else {
             const winnerContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
             const loserContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
             
-            finalWinnerFull.summary = substituteTokens("{WinnerName}'s victory was sealed by their superior strategy and power.", finalWinnerFull, finalLoserFull, winnerContext);
-            finalLoserFull.summary = substituteTokens("{LoserName} fought bravely but was ultimately overcome.", finalLoserFull, finalWinnerFull, loserContext);
+            finalWinnerFull.summary = substituteTokens(
+                "{WinnerName}'s victory was sealed by their superior strategy and power.",
+                finalWinnerFull,
+                finalLoserFull,
+                winnerContext
+            );
+            finalLoserFull.summary = substituteTokens(
+                "{LoserName} fought bravely but was ultimately overcome.",
+                finalLoserFull,
+                finalWinnerFull,
+                loserContext
+            );
         }
-        // --- END OF SIMPLIFIED SUMMARY LOGIC ---
     }
-
 
     if (!isStalemate && finalWinnerFull) {
         const finalWords = getFinalVictoryLine(finalWinnerFull, finalLoserFull);
-        const conclusionContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull?.name || "their opponent" };
-        const conclusionTextRaw = substituteTokens(`${finalWinnerFull.name} stands victorious. "${finalWords}"`, finalWinnerFull, finalLoserFull, conclusionContext);
+        const conclusionContext = {
+            WinnerName: finalWinnerFull.name,
+            LoserName: finalLoserFull?.name || "their opponent"
+        };
+        const conclusionTextRaw = substituteTokens(
+            `${finalWinnerFull.name} stands victorious. "${finalWords}"`,
+            finalWinnerFull,
+            finalLoserFull,
+            conclusionContext
+        );
         const conclusionTextHtml = phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw);
-        battleEventLog.push({ type: 'conclusion_event', text: conclusionTextRaw, html_content: conclusionTextHtml });
-    } else if(isStalemate) {
+        battleEventLog.push({
+            type: 'conclusion_event',
+            text: conclusionTextRaw,
+            html_content: conclusionTextHtml
+        });
+    } else if (isStalemate) {
         const conclusionTextRaw = "The battle concludes. Neither could claim outright victory.";
-        battleEventLog.push({ type: 'conclusion_event', text: conclusionTextRaw, html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw) });
+        battleEventLog.push({
+            type: 'conclusion_event',
+            text: conclusionTextRaw,
+            html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw)
+        });
     }
 
+    // Update logs without creating circular references
     fighter1.interactionLog = [...battleEventLog];
     fighter2.interactionLog = [...battleEventLog];
-
     fighter1.phaseLog = [...phaseState.phaseLog];
     fighter2.phaseLog = [...phaseState.phaseLog];
 
-    const finalFighter1State = currentAttacker.id === f1Id ? currentAttacker : currentDefender;
-    const finalFighter2State = currentDefender.id === f2Id ? currentDefender : currentAttacker;
+    // Create clean copies of final states without circular references
+    const createCleanFighterState = (fighter) => {
+        const cleanState = { ...fighter };
+        // Remove circular references
+        delete cleanState.opponent;
+        // Keep only the opponent ID
+        cleanState.opponentId = fighter.opponentId;
+        return cleanState;
+    };
+
+    // Determine final states without circular references
+    const finalFighter1State = createCleanFighterState(currentAttacker.id === f1Id ? currentAttacker : currentDefender);
+    const finalFighter2State = createCleanFighterState(currentDefender.id === f2Id ? currentDefender : currentAttacker);
 
     return {
         log: battleEventLog,
@@ -1228,6 +1221,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         isDraw: isStalemate,
         finalState: { fighter1: finalFighter1State, fighter2: finalFighter2State },
         environmentState,
-        phaseSummary: phaseState.phaseSummaryLog // NEW
+        phaseSummary: phaseState.phaseSummaryLog
     };
 }
