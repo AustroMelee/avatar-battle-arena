@@ -518,7 +518,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     charactersMarkedForDefeat.clear();
 
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
-    let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
+    let fighter2 = initializeF2Id, f1Id, emotionalMode);
 
     const conditions = { ...locationConditions[locId], id: locId, isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
     let battleEventLog = [];
@@ -674,7 +674,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             const addNarrativeEvent = (quote, actorForQuote) => {
                 if (quote && !battleContextFiredQuotes.has(`${actorForQuote.id}-${quote.line}`)) {
                     const opponentForQuote = actorForQuote.id === currentAttacker.id ? currentDefender : currentAttacker;
-                    narrativeEventsForAction.push({ quote, actor: actorForQuote, opponent: opponentForQuote }); // Pass opponent
+                    // FIX: Pass currentBattleState as context to findNarrativeQuote
+                    narrativeEventsForAction.push({ quote, actor: actorForQuote, opponent: opponentForQuote, context: currentBattleState }); 
                     battleContextFiredQuotes.add(`${actorForQuote.id}-${quote.line}`);
                 }
             };
@@ -682,7 +683,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             let manipulationResult = attemptManipulation(currentAttacker, currentDefender);
             if (manipulationResult.success) {
                 currentDefender.tacticalState = { name: manipulationResult.effect, duration: 1, intensity: 1.2, isPositive: false };
-                addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase }), currentAttacker);
+                addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onManipulation', 'asAttacker', { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }), currentAttacker); // Pass battleState
                 if (manipulationResult.narration) {
                      turnSpecificEventsForLog.push({
                         type: 'manipulation_narration_event', actorId: currentAttacker.id,
@@ -694,7 +695,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
 
             const { move, aiLogEntryFromSelectMove } = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, phaseState.currentPhase);
-            addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase, aiLogEntry: aiLogEntryFromSelectMove, move: move }), currentAttacker);
+            addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onIntentSelection', aiLogEntryFromSelectMove?.intent || 'StandardExchange', { currentPhaseKey: phaseState.currentPhase, aiLogEntry: aiLogEntryFromSelectMove, move: move, battleState: currentBattleState }), currentAttacker); // Pass battleState
 
             // Pass modifyMomentum to calculateMove
             const result = calculateMove(move, currentAttacker, currentDefender, conditions, interactionLog, environmentState, locId, modifyMomentum);
@@ -703,7 +704,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 result.narrativeEventsToPrepend.forEach(rawEventData => {
                      if (rawEventData.quote && rawEventData.actor) {
                         const opponentForReactionNarrative = rawEventData.actor.id === currentDefender.id ? currentAttacker : currentDefender;
-                        const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true);
+                        // FIX: Pass currentBattleState to generateTurnNarrationObjects
+                        const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForReactionNarrative, null, battleState.environmentState, battleState.location, phaseState.currentPhase, true, null, currentBattleState);
                         turnSpecificEventsForLog.push(...formattedEventArray);
                     }
                 });
@@ -720,7 +722,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 );
                  turnSpecificEventsForLog.push(reactionMoveLine);
             } else {
-                turnSpecificEventsForLog.push(...generateTurnNarrationObjects(narrativeEventsForAction, move, currentAttacker, currentDefender, result, environmentState, locationData, phaseState.currentPhase, false, aiLogEntryFromSelectMove));
+                // FIX: Pass currentBattleState to generateTurnNarrationObjects
+                turnSpecificEventsForLog.push(...generateTurnNarrationObjects(narrativeEventsForAction, move, currentAttacker, currentDefender, result, environmentState, locationData, phaseState.currentPhase, false, aiLogEntryFromSelectMove, currentBattleState));
             }
             
             currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
@@ -744,7 +747,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             if (result.collateralDamage > 0 && environmentState.damageLevel < 100 && !result.isReactedAction) {
                 environmentState.damageLevel = clamp(environmentState.damageLevel + result.collateralDamage, 0, 100);
                 environmentState.lastDamageSourceId = currentAttacker.id;
-                const collateralContext = { currentPhaseKey: phaseState.currentPhase };
+                const collateralContext = { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }; // Pass battleState
                 if (currentAttacker.collateralTolerance < 0.3) addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'stressedByDamage', collateralContext), currentAttacker);
                 else if (currentAttacker.collateralTolerance > 0.7) addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'thrivingInDamage', collateralContext), currentAttacker);
                 else addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'causingDamage', collateralContext), currentAttacker);
@@ -758,10 +761,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             updateMentalState(currentAttacker, currentDefender, null, environmentState, locId); // <-- Pass locId here
 
             if (currentDefender.mentalState.level !== oldDefenderMentalState) {
-                addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onStateChange', currentDefender.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), currentDefender);
+                addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onStateChange', currentDefender.mentalState.level, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }), currentDefender); // Pass battleState
             }
             if (currentAttacker.mentalState.level !== oldAttackerMentalState && currentAttacker.mentalStateChangedThisTurn) {
-                addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onStateChange', currentAttacker.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), currentAttacker);
+                addNarrativeEvent(findNarrativeQuote(currentAttacker, currentDefender, 'onStateChange', currentAttacker.mentalState.level, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState }), currentAttacker); // Pass battleState
             }
 
             currentAttacker.lastMoveEffectiveness = result.effectiveness.label;
@@ -835,7 +838,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             environmentalSummaryHtml += phaseTemplates.environmentalImpactHeader;
             let allImpactTexts = [];
             environmentState.specificImpacts.forEach(impact => {
-                 const formattedImpactText = findNarrativeQuote(initiator, responder, 'onCollateral', 'general', { impactText: impact, currentPhaseKey: phaseState.currentPhase })?.line || impact;
+                 const formattedImpactText = findNarrativeQuote(initiator, responder, 'onCollateral', 'general', { impactText: impact, currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState })?.line || impact; // Pass battleState
                  allImpactTexts.push(formattedImpactText);
             });
              environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join(''); // Fix: use map to join HTML tags
