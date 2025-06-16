@@ -46,11 +46,6 @@ function createCharacterCard(character, fighterKey) {
     if (character) {
         card.classList.add(getElementClass(character));
         card.dataset.id = character.id;
-        const image = document.createElement('img');
-        image.src = character.imageUrl;
-        image.alt = character.name;
-        image.loading = 'lazy';
-        card.appendChild(image);
 
         const name = document.createElement('h3');
         name.textContent = character.name;

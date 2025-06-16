@@ -31,7 +31,7 @@ function createLocationCard(locationData, locationId) {
     if (locationData) {
         card.dataset.id = locationId;
         const image = document.createElement('img');
-        image.src = locationData.imageUrl;
+        image.src = locationData.background;
         image.alt = locationData.name;
         image.loading = 'lazy';
         card.appendChild(image);
@@ -161,7 +161,7 @@ export function populateLocationGrid(locGridElement, locNameDisplayElement, locS
     }
 
     for (const [id, locData] of sortedLocations) {
-        if (locData && locData.name && locData.imageUrl) {
+        if (locData && locData.name && locData.background) {
             const card = createLocationCard(locData, id);
             locationGrid.appendChild(card);
         } else {
