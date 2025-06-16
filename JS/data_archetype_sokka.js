@@ -1,4 +1,4 @@
-// FILE: js/data_archetype_sokka.js
+// FILE: data_archetype_sokka.js
 'use strict';
 
 // Archetype data for Sokka vs. all other characters and locations.
@@ -330,7 +330,7 @@ export const sokkaArchetypeData = {
             introB: "Ozai, ensuring all threats are neutralized, confronts Sokka in the heart of his most brutal prison."
         },
         'fire-nation-capital': {
-            label: "Throne Room Tussle: Sokka's Courage vs. Ozai's Supremacy",
+            label: "Throne Room Judgment: Sokka's Courage vs. Ozai's Supremacy",
             introA: "Sokka, in a desperate act of defiance, confronts Fire Lord Ozai in his own throne room, armed only with his wits and boomerang.",
             introB: "Ozai, seated upon his throne of fire, regards Sokka with utter contempt before rising to end his insolence."
         },
@@ -359,8 +359,8 @@ export const sokkaArchetypeData = {
     'bumi': {
         'eastern-air-temple': {
             label: "Madcap Mountain Match: Sokka vs. King Bumi",
-            introA: "Sokka, already dealing with high winds, now faces the unpredictable earthbending of King Bumi at the Air Temple.",
-            introB: "Bumi, cackling with glee, finds the Air Temple's structure a delightful playground for his chaotic earthbending, Sokka included."
+            introA: "Bumi, cackling with glee, finds the Air Temple's structure a delightful playground for his chaotic earthbending, with Sokka as an amusing target.",
+            introB: "Sokka, already dealing with high winds, now faces the unpredictable earthbending of King Bumi at the ancient temple."
         },
         'northern-water-tribe': {
             label: "Frozen Follies: Sokka's Plan vs. Bumi's Earth (and Ice?)",
@@ -703,4 +703,5 @@ export const sokkaArchetypeData = {
             introB: "Sokka stares at... Sokka? 'Alright, genius, let's see which one of us has the better plan this time!'"
         }
     }
+    // REMOVED: narrative, techniques, quotes, relationships
 };

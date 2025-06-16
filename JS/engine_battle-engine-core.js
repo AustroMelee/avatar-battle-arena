@@ -136,6 +136,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         stunDuration: 0,
         tacticalState: null, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
+        // Access relationships from characterData directly
         relationalState: (emotionalMode && characterData.relationships?.[opponentId]) || null,
         mentalState: { level: 'stable', stress: 0, mentalStateChangedThisTurn: false },
         contextualState: {},
@@ -156,6 +157,18 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
         hasMetalArmor: characterData.specialTraits?.hasMetalArmor || false,
         incapacitationScore: 0,
         escalationState: characterData.escalationState || ESCALATION_STATES.NORMAL,
+        // Make sure techniques are copied from characterData here, if they are meant to be character-wide.
+        // If techniques can vary by location, they will be selected later by getAvailableMoves.
+        // For now, assume a 'techniques' array is available on the base character object.
+        techniques: characterData.techniques || [],
+        techniquesFull: characterData.techniquesFull || [],
+        techniquesCanteen: characterData.techniquesCanteen || [],
+        techniquesEasternAirTemple: characterData.techniquesEasternAirTemple || [],
+        techniquesNorthernWaterTribe: characterData.techniquesNorthernWaterTribe || [],
+        techniquesOmashu: characterData.techniquesOmashu || [],
+        techniquesSiWongDesert: characterData.techniquesSiWongDesert || [],
+        techniquesBoilingRock: characterData.techniquesBoilingRock || [],
+        quotes: characterData.quotes || {}, // Ensure quotes are copied
     };
 }
 

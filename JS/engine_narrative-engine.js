@@ -117,8 +117,10 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
  }
 
 export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context = {}) {
-    if (!actor || !actor.narrative) return null;
-    const narrativeData = actor.narrative;
+    if (!actor) return null;
+    const actorArchetypeData = characterData[actor.id]?.archetypeData || {}; // Get archetype data for actor
+    const narrativeData = actorArchetypeData.narrative || {}; // Access narrative from archetype data
+
     let pool = null;
     const currentPhaseKey = context.currentPhaseKey || 'Generic';
     const aiLogEntry = context.aiLogEntry || {};
@@ -133,7 +135,7 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
 
     const lookupPaths = [];
 
-    // Relationship-specific narrative first
+    // Relationship-specific narrative first (from base character data, not archetype data)
     if (opponent?.id && actor.relationships?.[opponent.id]?.narrative) {
         const relNarrative = actor.relationships[opponent.id].narrative;
         if (relNarrative[trigger]?.[subTrigger]?.[currentPhaseKey]) {
@@ -156,25 +158,44 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
         }
     }
 
-    // Character's general narrative
-    if (narrativeData[trigger]?.[subTrigger]?.[currentPhaseKey]) {
-        lookupPaths.push(() => narrativeData[trigger][subTrigger][currentPhaseKey]);
+    // Character's general narrative (from archetype data)
+    // For general character intros/phase transitions, check `archetypeData[locationId]` or `archetypeData['_DEFAULT_LOCATION_']`
+    // For turn-based narratives like `onIntentSelection`, `onMoveExecution`, `onStateChange`, `onCollateral`, `onVictory`,
+    // these should be structured directly under `archetypeData.narrative`.
+    if (trigger === 'battleStart' && context.locationId) {
+        if (actorArchetypeData[opponent.id] && actorArchetypeData[opponent.id][context.locationId] && actorArchetypeData[opponent.id][context.locationId].narrative && actorArchetypeData[opponent.id][context.locationId].narrative.battleStart && actorArchetypeData[opponent.id][context.locationId].narrative.battleStart[currentPhaseKey]) {
+            lookupPaths.push(() => actorArchetypeData[opponent.id][context.locationId].narrative.battleStart[currentPhaseKey]);
+        }
+        else if (actorArchetypeData[opponent.id] && actorArchetypeData[opponent.id]._DEFAULT_LOCATION_ && actorArchetypeData[opponent.id]._DEFAULT_LOCATION_.narrative && actorArchetypeData[opponent.id]._DEFAULT_LOCATION_.narrative.battleStart && actorArchetypeData[opponent.id]._DEFAULT_LOCATION_.narrative.battleStart[currentPhaseKey]) {
+            lookupPaths.push(() => actorArchetypeData[opponent.id]._DEFAULT_LOCATION_.narrative.battleStart[currentPhaseKey]);
+        }
+        else if (narrativeData[trigger]?.[context.locationId]?.[currentPhaseKey]) { // Fallback if narrative is directly under location in archetype
+            lookupPaths.push(() => narrativeData[trigger][context.locationId][currentPhaseKey]);
+        }
+        else if (narrativeData[trigger]?.[currentPhaseKey]) { // General phase-based intro for battleStart
+            lookupPaths.push(() => narrativeData[trigger][currentPhaseKey]);
+        }
+    } else { // For all other triggers (onIntentSelection, onMoveExecution, etc.)
+        if (narrativeData[trigger]?.[subTrigger]?.[currentPhaseKey]) {
+            lookupPaths.push(() => narrativeData[trigger][subTrigger][currentPhaseKey]);
+        }
+        if (narrativeData[trigger]?.[subTrigger]?.Generic) {
+            lookupPaths.push(() => narrativeData[trigger][subTrigger].Generic);
+        }
+        if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]?.[currentPhaseKey]) {
+            lookupPaths.push(() => narrativeData[trigger][subTrigger][context.result][currentPhaseKey]);
+        }
+        if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]?.Generic) {
+            lookupPaths.push(() => narrativeData[trigger][subTrigger][context.result].Generic);
+        }
+        if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result] && Array.isArray(narrativeData[trigger]?.[subTrigger]?.[context.result])) {
+            lookupPaths.push(() => narrativeData[trigger][subTrigger][context.result]);
+        }
+        if (narrativeData[trigger]?.[subTrigger] && Array.isArray(narrativeData[trigger]?.[subTrigger])) {
+            lookupPaths.push(() => narrativeData[trigger][subTrigger]);
+        }
     }
-    if (narrativeData[trigger]?.[subTrigger]?.Generic) {
-        lookupPaths.push(() => narrativeData[trigger][subTrigger].Generic);
-    }
-    if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]?.[currentPhaseKey]) {
-        lookupPaths.push(() => narrativeData[trigger][subTrigger][context.result][currentPhaseKey]);
-    }
-    if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result]?.Generic) {
-        lookupPaths.push(() => narrativeData[trigger][subTrigger][context.result].Generic);
-    }
-    if (trigger === 'onMoveExecution' && narrativeData[trigger]?.[subTrigger]?.[context.result] && Array.isArray(narrativeData[trigger]?.[subTrigger]?.[context.result])) {
-        lookupPaths.push(() => narrativeData[trigger][subTrigger][context.result]);
-    }
-    if (narrativeData[trigger]?.[subTrigger] && Array.isArray(narrativeData[trigger]?.[subTrigger])) {
-        lookupPaths.push(() => narrativeData[trigger][subTrigger]);
-    }
+
 
     // Escalation state observed
     if (trigger === 'onEscalationStateObserved' && narrativeData[trigger]?.[context.observedStateKey]?.[currentPhaseKey]) {
@@ -461,12 +482,14 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
 
 export function generateEscalationNarrative(fighter, oldState, newState) {
     if (!fighter || !newState || oldState === newState) return null;
+    const actorArchetypeData = characterData[fighter.id]?.archetypeData || {}; // Get archetype data for actor
+    const narrativeData = actorArchetypeData.narrative || {}; // Access narrative from archetype data
 
     let flavorTextPool = [];
-    if (escalationStateNarratives[fighter.id] && escalationStateNarratives[fighter.id][newState]) {
-        flavorTextPool.push(...escalationStateNarratives[fighter.id][newState]);
+    if (narrativeData.onEscalationStateChange && narrativeData.onEscalationStateChange[newState]) { // Check character-specific first
+        flavorTextPool.push(...narrativeData.onEscalationStateChange[newState]);
     }
-    if (escalationStateNarratives[newState] && Array.isArray(escalationStateNarratives[newState])) {
+    if (escalationStateNarratives[newState] && Array.isArray(escalationStateNarratives[newState])) { // Then generic
         flavorTextPool.push(...escalationStateNarratives[newState]);
     }
     const defaultFlavor = `The tide of battle shifts for {actorName}.`;
@@ -602,6 +625,8 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
 
 export function getFinalVictoryLine(winner, loser) {
     if (!winner) return "The battle ends.";
+    const winnerArchetypeData = characterData[winner.id]?.archetypeData || {};
+    const winnerQuotes = winnerArchetypeData.quotes || {};
 
     const safeLoser = loser || { name: "their opponent", pronouns: { s: 'they', p: 'their', o: 'them' } };
 
@@ -615,11 +640,20 @@ export function getFinalVictoryLine(winner, loser) {
 
     const winnerVictoryStyle = winner.victoryStyle || 'default';
     const victoryPhrasesPool = postBattleVictoryPhrases[winnerVictoryStyle] || postBattleVictoryPhrases.default;
-    const outcomeType = (winner.hp !== undefined && loser.hp !== undefined && winner.hp > (loser.hp + 20)) ? 'dominant' : 'narrow';
-    let phraseTemplate = getRandomElement(victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant); // FIX: Get random element
+    const outcomeType = (winner.hp !== undefined && safeLoser.hp !== undefined && winner.hp > (safeLoser.hp + 20)) ? 'dominant' : 'narrow';
+    let phraseTemplate = getRandomElement(victoryPhrasesPool[outcomeType]);
+
+    // Check for character-specific post-win quotes first
+    if (winnerQuotes.postWin_specific && winnerQuotes.postWin_specific[safeLoser.id]) {
+        phraseTemplate = { line: winnerQuotes.postWin_specific[safeLoser.id] };
+    } else if (winnerQuotes.postWin_overwhelming && outcomeType === 'dominant') {
+        phraseTemplate = { line: winnerQuotes.postWin_overwhelming };
+    } else if (winnerQuotes.postWin) {
+        phraseTemplate = { line: getRandomElement(winnerQuotes.postWin) };
+    }
 
     // FIX: Safely extract line or use the string directly if phraseTemplate is a string
-    const finalPhrase = phraseTemplate ? (phraseTemplate.line || phraseTemplate) : (victoryPhrasesPool.default.dominant.line || victoryPhrasesPool.default.dominant);
+    const finalPhrase = phraseTemplate ? (phraseTemplate.line || phraseTemplate) : (victoryPhrasesPool.default.dominant[0].line || victoryPhrasesPool.default.dominant[0]); // Ensure default is an array
 
 
     const winnerPronounP = winner.pronouns?.p || 'their';

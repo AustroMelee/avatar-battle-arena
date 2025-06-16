@@ -262,7 +262,7 @@ export const jeongjeongArchetypeData = {
             introB: "Zuko's fire rages under the desert sun, a stark contrast to Jeong Jeong, who uses his flames with sorrowful precision and control."
         },
         'foggy-swamp': {
-            label: "Swamp Fire's Fury, Master's Guard: Jeong Jeong vs. Zuko",
+            label: "Swamp Fire's Fury, Master's Guard: Zuko vs. Jeong Jeong",
             introA: "Jeong Jeong, wary of the Foggy Swamp's flammable nature, uses his fire with extreme prejudice, creating shields and diversions against Zuko.",
             introB: "Zuko's fire cuts through the eerie swamp fog, challenging Jeong Jeong, whose own flames seem to respect the mystical environment."
         },
@@ -272,7 +272,7 @@ export const jeongjeongArchetypeData = {
             introB: "Zuko's explosive firebending echoes the prison's fury, a stark contrast to Jeong Jeong's contained but equally potent flames."
         },
         'fire-nation-capital': {
-            label: "Deserter's Wisdom vs. Fire Lord's Path: Jeong Jeong vs. Zuko",
+            label: "Fire Lord's Path vs. Deserter's Wisdom: Jeong Jeong vs. Zuko",
             introA: "Jeong Jeong, the reluctant fire sage, meets Zuko's challenge with profound sadness and formidable control, a lesson in fire's true nature.",
             introB: "Zuko, perhaps as Fire Lord, confronts Jeong Jeong, the master who abandoned the army, their duel a clash of ideologies written in fire."
         },
@@ -287,7 +287,7 @@ export const jeongjeongArchetypeData = {
             introB: "Zuko's widespread fire attacks scorch the Great Divide, forcing Jeong Jeong to use massive fire barriers to protect the canyon itself."
         },
         'kyoshi-island': {
-            label: "Island Ablaze, Fire Sage's Intervention: Jeong Jeong vs. Zuko",
+            label: "Island Ablaze, Fire Sage's Intervention: Zuko vs. Jeong Jeong",
             introA: "Jeong Jeong, respecting Kyoshi Island's peace, uses his fire with surgical precision to neutralize Zuko's attacks and protect the innocent.",
             introB: "Zuko's fiery temper threatens to engulf the island, but Jeong Jeong steps in, his controlled flames a shield against recklessness."
         },
@@ -330,7 +330,7 @@ export const jeongjeongArchetypeData = {
             introB: "Azula's explosive blue firebending echoes the prison's fury, a stark contrast to Jeong Jeong's contained but equally potent flames."
         },
         'fire-nation-capital': {
-            label: "Deserter's Wisdom vs. Fire Lord's Heir: Jeong Jeong vs. Azula",
+            label: "Fire Lord's Heir vs. Deserter's Wisdom: Jeong Jeong vs. Azula",
             introA: "Jeong Jeong, the reluctant fire sage, meets Azula's challenge with profound sadness and formidable control, a lesson in fire's true nature.",
             introB: "Azula, perhaps as Fire Lord apparent, confronts Jeong Jeong, the master who abandoned the army, their duel a clash of ideologies written in fire."
         },
@@ -345,14 +345,14 @@ export const jeongjeongArchetypeData = {
             introB: "Azula's widespread blue fire attacks scorch the Great Divide, forcing Jeong Jeong to use massive fire barriers to protect the canyon itself."
         },
         'kyoshi-island': {
-            label: "Island Ablaze, Fire Sage's Intervention: Jeong Jeong vs. Azula",
-            introA: "Jeong Jeong, respecting Kyoshi Island's peace, uses his fire with surgical precision to neutralize Azula's attacks and protect the innocent.",
-            introB: "Azula's fiery temper threatens to engulf the island, but Jeong Jeong steps in, his controlled flames a shield against recklessness."
+            label: "Island Ablaze, Fire Sage's Intervention: Azula vs. Jeong Jeong",
+            introA: "Azula's fiery temper threatens to engulf Kyoshi Island, but Jeong Jeong steps in, his controlled flames a shield against recklessness.",
+            introB: "Jeong Jeong, respecting the island's peace, uses his fire with surgical precision to neutralize Azula's attacks and protect the innocent."
         },
         '_DEFAULT_LOCATION_': {
             label: "The Master's Restraint vs. The Princess's Rage: Jeong Jeong vs. Azula",
-            introA: "Jeong Jeong, the firebending ascetic, meets Azula's aggressive onslaught with disciplined control, a battle of raw power versus tempered mastery.",
-            introB: "Azula, her blue fire fueled by passion and turmoil, confronts Jeong Jeong, a master who wields his flames with profound wisdom and reluctance."
+            introA: "Azula, her blue fire fueled by passion and turmoil, confronts Jeong Jeong, a master who wields his flames with profound wisdom and reluctance.",
+            introB: "Jeong Jeong, the firebending ascetic, meets Azula's aggressive onslaught with disciplined control, a battle of raw power versus tempered mastery."
         }
     },
     // --- Jeong Jeong vs Ozai (ozai-not-comet-enhanced) ---
@@ -533,58 +533,58 @@ export const jeongjeongArchetypeData = {
     'ty-lee': {
         'eastern-air-temple': {
             label: "Sky-High Flips vs. Fire's Restraint: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, with reluctant mastery, uses his flames defensively, trying to contain Ty Lee's energetic chi-blocking attempts at the Eastern Air Temple.",
-            introB: "Ty Lee's acrobatic grace is tested by Jeong Jeong's controlled fire walls and precise bursts on the windy Air Temple platforms."
+            introA: "Ty Lee's acrobatic grace is tested by Jeong Jeong's controlled fire walls and precise bursts on the windy Air Temple platforms.",
+            introB: "Jeong Jeong, with reluctant mastery, uses his flames defensively, trying to contain Ty Lee's energetic chi-blocking attempts."
         },
         'northern-water-tribe': {
             label: "Frozen Acrobatics, Contained Fire: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong creates walls of fire that hiss against the ice, a reluctant but effective defense against Ty Lee's acrobatic assault in the North.",
-            introB: "Ty Lee uses the icy terrain for surprising agility, her chi-blocking strikes aimed at Jeong Jeong, who maintains his fire with immense discipline."
+            introA: "Ty Lee uses the icy terrain for surprising agility, her chi-blocking strikes aimed at Jeong Jeong, who maintains his fire with immense discipline.",
+            introB: "Jeong Jeong creates walls of fire that hiss against the ice, a reluctant but effective defense against Ty Lee's acrobatic assault."
         },
         'ba-sing-se': {
             label: "Urban Parkour vs. Fire's Discipline: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, with surgical precision, creates strategic fire lines in Ba Sing Se, trying to channel Ty Lee's movements without incinerating the city.",
-            introB: "Ty Lee turns the city streets into an obstacle course, but Jeong Jeong's disciplined fire barriers prove challenging."
+            introA: "Ty Lee turns Ba Sing Se's streets into an obstacle course, but Jeong Jeong's strategic fire lines attempt to channel her movements.",
+            introB: "Jeong Jeong, with surgical precision, creates firebreaks, trying to temper Ty Lee's chaotic energy without incinerating the city."
         },
         'si-wong-desert': {
-            label: "Desert Dance vs. Reluctant Embers: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, burdened by fire's destructive potential in the arid Si Wong Desert, uses his flames sparingly but effectively against Ty Lee's agile assault.",
-            introB: "Ty Lee's boundless energy meets Jeong Jeong, whose controlled fire seems almost sorrowful in its precision under the desert sun."
+            label: "Desert Dance vs. Reluctant Embers: Ty Lee vs. Jeong Jeong",
+            introA: "Ty Lee's boundless energy meets Jeong Jeong, whose controlled fire seems almost sorrowful in its precision under the desert sun.",
+            introB: "Jeong Jeong, burdened by fire's destructive potential, uses his flames sparingly but effectively against Ty Lee's agile assault."
         },
         'foggy-swamp': {
-            label: "Misty Tumbles vs. Cautious Flames: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, his fire casting eerie glows in the Foggy Swamp's mist, creates only necessary bursts to deflect Ty Lee's unseen chi-blocking attacks.",
-            introB: "Ty Lee's cheerful acrobatics are met by Jeong Jeong, who uses his fire with extreme prejudice to avoid igniting the volatile swamp."
+            label: "Misty Tumbles vs. Cautious Flames: Ty Lee vs. Jeong Jeong",
+            introA: "Ty Lee's cheerful acrobatics are met by Jeong Jeong, who uses his fire with extreme prejudice to avoid igniting the volatile swamp.",
+            introB: "Jeong Jeong, his fire casting eerie glows in the mist, creates only necessary bursts to deflect Ty Lee's unseen chi-blocking attacks."
         },
         'boiling-rock': {
             label: "Steel & Steam vs. Acrobat & Fire Sage: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, with grim control, uses the Boiling Rock's intense heat to his advantage, his fire a precise shield against Ty Lee's agility.",
-            introB: "Ty Lee uses the prison's structure for daring leaps, her chi-blocking strikes aimed at Jeong Jeong, whose fire control is absolute."
+            introA: "Ty Lee uses the prison's structure for daring leaps, her chi-blocking strikes aimed at Jeong Jeong, whose fire control is absolute.",
+            introB: "Jeong Jeong, with grim control, uses the Boiling Rock's intense heat to his advantage, his fire a precise shield against Ty Lee's agility."
         },
         'fire-nation-capital': {
-            label: "Acrobatic Intrusion vs. Fire Sage's Stand: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, a figure of quiet defiance in the Fire Nation capital, meets Ty Lee's energetic assault with reluctant but masterful fire control.",
-            introB: "Ty Lee's stealthy (and acrobatic) approach is unexpectedly met by the formidable Master Jeong Jeong."
+            label: "Acrobatic Intrusion vs. Fire Sage's Stand: Ty Lee vs. Jeong Jeong",
+            introA: "Ty Lee's stealthy (and acrobatic) approach in the Fire Nation capital is unexpectedly met by the formidable Master Jeong Jeong.",
+            introB: "Jeong Jeong, a figure of quiet defiance, meets Ty Lee's energetic assault with reluctant but masterful fire control."
         },
         'omashu': {
-            label: "Omashu's Obstacle Course vs. Fire's Reluctance: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, unfazed by Omashu's chaotic design, creates precise fire lines to counter Ty Lee's flighty, chi-blocking maneuvers.",
-            introB: "Ty Lee utilizes Omashu's unconventional structures for acrobatic advantages, but Jeong Jeong's disciplined fire barriers prove challenging."
+            label: "Omashu's Obstacle Course vs. Fire's Reluctance: Ty Lee vs. Jeong Jeong",
+            introA: "Ty Lee utilizes Omashu's unconventional structures for acrobatic advantages, but Jeong Jeong's disciplined fire barriers prove challenging.",
+            introB: "Jeong Jeong, unfazed by Omashu's chaotic design, creates precise fire lines to counter Ty Lee's flighty, chi-blocking maneuvers."
         },
         'great-divide': {
-            label: "Canyon Cartwheels vs. Controlled Conflagration: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, demonstrating profound fire control even in the vast Great Divide, challenges Ty Lee's aerial dominance with strategic flames.",
-            introB: "Ty Lee's death-defying leaps across the chasm are met by Jeong Jeong's towering walls of precisely controlled fire."
+            label: "Canyon Cartwheels vs. Controlled Conflagration: Ty Lee vs. Jeong Jeong",
+            introA: "Ty Lee's death-defying leaps across the chasm are met by Jeong Jeong's towering walls of precisely controlled fire.",
+            introB: "Jeong Jeong, demonstrating profound fire control even in the vast Great Divide, challenges Ty Lee's aerial dominance with strategic flames."
         },
         'kyoshi-island': {
-            label: "Island Agility vs. Fire's Respect: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, respecting Kyoshi's legacy, uses his fire with surgical precision, a defensive art against Ty Lee's acrobatic assault on the island.",
-            introB: "Ty Lee's joyful tumbles are met by Jeong Jeong, whose fire seems reluctant to harm the peaceful land of Kyoshi."
+            label: "Island Agility vs. Fire's Respect: Ty Lee vs. Jeong Jeong",
+            introA: "Ty Lee's joyful tumbles are met by Jeong Jeong, whose fire seems reluctant to harm the peaceful land of Kyoshi.",
+            introB: "Jeong Jeong, respecting Kyoshi's legacy, uses his fire with surgical precision, a defensive art against Ty Lee's acrobatic assault."
         },
         '_DEFAULT_LOCATION_': {
             label: "The Firebending Sage vs. The Chi-Blocking Acrobat: Jeong Jeong vs. Ty Lee",
-            introA: "Jeong Jeong, the firebending master who fears his own element, meets Ty Lee's energetic assault with disciplined restraint and profound wisdom.",
-            introB: "Ty Lee, with her dazzling agility and ability to neutralize bending, challenges Jeong Jeong, the master of controlled, defensive fire."
+            introA: "Ty Lee, with her dazzling agility and ability to neutralize bending, challenges Jeong Jeong, the master of controlled, defensive fire.",
+            introB: "Jeong Jeong, the firebending master who fears his own element, meets Ty Lee's energetic assault with disciplined restraint and profound wisdom."
         }
     },
     // --- Jeong Jeong vs Pakku (pakku) ---
@@ -612,11 +612,11 @@ export const jeongjeongArchetypeData = {
         'foggy-swamp': {
             label: "Swamp Steam, Reluctant Embers: Jeong Jeong vs. Pakku",
             introA: "Jeong Jeong, wary of the flammable swamp gases, uses his fire with extreme prejudice, focusing on defense against Pakku's watery assaults.",
-            introB: "Pakku uses the Foggy Swamp's abundant moisture to create thick steam, obscuring Jeong Jeong's vision and dousing his cautious flames."
+            introB: "Pakku uses the swamp's abundant moisture to create thick steam, obscuring Jeong Jeong's vision and dousing his cautious flames."
         },
         'boiling-rock': {
             label: "Volcanic Vapors, Contained Inferno: Jeong Jeong vs. Pakku",
-            introA: "Jeong Jeong, with grim determination, uses his fire to create barriers against Pakku's attacks and the Boiling Rock's chaotic energy.",
+            introA: "Jeong Jeong, with grim determination, uses his fire to create barriers against Pakku's attacks and the prison's chaotic energy.",
             introB: "Pakku manipulates the scalding steam of the prison against Jeong Jeong, whose fire control is tested by the volatile environment."
         },
         'fire-nation-capital': {
@@ -679,7 +679,7 @@ export const jeongjeongArchetypeData = {
         },
         'fire-nation-capital': {
             label: "Throne of Wisdom (or Warning): Jeong Jeong vs. Jeong Jeong",
-            introA: "In the heart of the Fire Nation, Jeong Jeong confronts his own reflection, a battle to uphold the true, responsible path of firebending.",
+            introA: "In the heart of the Fire Nation, Jeong Jeong confronts his own reflection, a battle for the right to uphold the true, responsible path of firebending.",
             introB: "Jeong Jeong, perhaps as a teacher, faces the Jeong Jeong who was once a general. 'Power must always be tempered by wisdom.'"
         },
         'omashu': {
@@ -716,7 +716,7 @@ export const jeongjeongArchetypeData = {
             ],
             Early: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],
             Mid: [{type: 'spoken', line: "Control is paramount. Without it, fire consumes all."}],
-            Late: [{type: 'internal', line: "This battle is a lesson... a harsh one, perhaps."}],
+            Late: [{type: 'action', line: "This battle is a lesson... a harsh one, perhaps."}], // Changed to action
             'eastern-air-temple': [{ type: 'spoken', line: "To wield fire here is a great responsibility. I will not let it scorch these sacred grounds." }, { type: 'internal', line: "The wind... it tugs at my flames. It is a constant test of my discipline." }],
             'fire-nation-capital': [{ type: 'spoken', line: "This place demands precision. No unnecessary flame." }, { type: 'internal', line: "To fight here... it is to face the very essence of what I abandoned." }],
             'kyoshi-island': [{ type: 'spoken', line: "This peaceful island... I will protect it from unnecessary flame." }, { type: 'internal', line: "The cost of fire in such a place is too high. I must be precise." }],
@@ -765,15 +765,6 @@ export const jeongjeongArchetypeData = {
             thrivingInDamage: []
         },
         onVictory: { Default: { Generic: [{ line: "The destructive path of fire has been averted, for now." }] } }
-    },
-    techniques: [
-        { name: "Controlled Inferno", verb: 'create', object: 'controlled inferno', type: 'Offense', power: 80, requiresArticle: true, element: 'fire', moveTags: ['area_of_effect', 'channeled'], collateralImpact: 'high' },
-        { name: "Fire Wall", verb: 'raise', object: 'impenetrable wall of fire', type: 'Defense', power: 85, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'area_of_effect_large'], setup: { name: 'Cornered', duration: 2, intensity: 1.2 }, collateralImpact: 'medium' },
-        { name: "Flame Whips", verb: 'conjure', object: 'precise flame whips', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'precise'], collateralImpact: 'low' },
-        { name: "Precision Burn", verb: 'inflict', object: 'surgical burn', type: 'Offense', power: 45, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'single_target', 'precise'], collateralImpact: 'none' },
-        { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, element: 'fire', moveTags: ['area_of_effect_large', 'pushback', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'fire', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["The destructive path of fire has been averted, for now."], postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."] },
-    relationships: {}
+    }
+    // REMOVED: techniques, quotes, relationships
 };

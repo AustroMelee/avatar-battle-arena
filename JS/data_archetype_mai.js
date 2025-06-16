@@ -84,13 +84,13 @@ export const maiArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Daggers, Whirling Winds: Mai vs. Aang",
-            introA: "Mai, her eyes narrowed against the sun and sand, maintains her deadly focus, her knives cutting through Aang's air defenses.",
-            introB: "Aang creates mini-sandstorms to obscure Mai's vision as she unleashes volleys of projectiles in the scorching desert heat."
+            introA: "Aang creates mini-sandstorms to obscure Mai's vision as she unleashes volleys of projectiles in the scorching desert heat.",
+            introB: "Mai, her eyes narrowed against the sun and sand, maintains her deadly focus, her knives cutting through Aang's air defenses."
         },
         'foggy-swamp': {
             label: "Misty Menace: Mai's Unseen Strikes vs. Aang's Evasion",
-            introA: "Mai, relying on sound and instinct, launches her daggers into the mist, her aim still unnervingly accurate against the Avatar.",
-            introB: "Aang uses the swamp's thick fog and his own air currents to become an almost invisible target for Mai's deadly throws."
+            introA: "Aang uses the swamp's thick fog and his own air currents to become an almost invisible target for Mai's deadly throws.",
+            introB: "Mai, relying on sound and instinct, launches her daggers into the mist, her aim still unnervingly accurate against the Avatar."
         },
         'boiling-rock': {
             label: "Prison Pins: Mai's Lockdown vs. Aang's Air Escape",
@@ -99,23 +99,23 @@ export const maiArchetypeData = {
         },
         'fire-nation-capital': {
             label: "Silent Threat in the Capital: Mai vs. Aang",
-            introA: "Mai, ever vigilant, spots the Avatar's subtle disturbances in the Fire Nation Capital, ready to neutralize him with a swift, silent attack.",
-            introB: "Aang, moving like a phantom through the enemy city, finds his path blocked by the deadly, deadpan Mai."
+            introA: "Aang, moving like a phantom through the Fire Nation Capital, finds his path blocked by the deadly, deadpan Mai.",
+            introB: "Mai, ever vigilant, spots the Avatar's subtle disturbances, ready to neutralize him with a swift, silent attack."
         },
         'omashu': {
             label: "Omashu's Arrow vs. Air's Agility: Mai vs. Aang",
-            introA: "Mai, perched high on Omashu's ramparts, unleashes a rain of daggers, her aim true despite Aang's aerial maneuvers.",
-            introB: "Aang uses Omashu's verticality and winding paths to dodge Mai's lightning-fast projectiles."
+            introA: "Aang uses Omashu's verticality and winding paths to dodge Mai's lightning-fast projectiles.",
+            introB: "Mai, perched high on Omashu's ramparts, unleashes a rain of daggers, her aim true despite Aang's aerial maneuvers."
         },
         'great-divide': {
-            label: "Canyon Ricochet: Mai's Tricky Shots vs. Aang's Air Dodges",
-            introA: "Mai, a master of ranged combat, turns the Great Divide into a deadly pinball machine with Aang as the target.",
-            introB: "Aang's airbending is pushed to its limits as Mai uses the canyon walls to bounce her projectiles at unpredictable angles."
+            label: "Canyon Ricochet: Aang's Air Dodges Mai's Tricky Shots",
+            introA: "Aang's airbending is pushed to its limits as Mai uses the canyon walls to bounce her projectiles at unpredictable angles.",
+            introB: "Mai, a master of ranged combat, turns the Great Divide into a deadly pinball machine with Aang as the target."
         },
         'kyoshi-island': {
-            label: "Peace Disturbed: Mai's Knives vs. Aang's Air",
-            introA: "Mai, finding Aang's evasiveness tiresome on the peaceful Kyoshi Island, aims her daggers with chilling accuracy, hoping to end the 'dance' quickly.",
-            introB: "Aang, trying to maintain the island's tranquility, uses gentle air currents to deflect Mai's sharp, precise projectiles."
+            label: "Peace Disturbed: Aang's Air vs. Mai's Knives",
+            introA: "Aang, trying to maintain the island's tranquility, uses gentle air currents to deflect Mai's sharp, precise projectiles.",
+            introB: "Mai, finding Aang's evasiveness tiresome, aims her daggers with chilling accuracy, hoping to end the 'dance' quickly."
         },
         '_DEFAULT_LOCATION_': {
             label: "Precision vs. Evasion: Mai vs. Aang",
@@ -247,7 +247,7 @@ export const maiArchetypeData = {
             introB: "Zuko's fiery attacks are met by Mai's coolly precise projectiles amidst the windy, precarious platforms of the Eastern Air Temple."
         },
         'northern-water-tribe': {
-            label: "Frozen Fire, Icy Precision: Mai vs. Zuko",
+            label: "Frozen Fire, Icy Precision: Zuko vs. Mai",
             introA: "Mai, unfazed by Zuko's emotional fire, uses the icy terrain for ricochets, her daggers a silent, deadly threat in the frozen North.",
             introB: "Zuko's flames hiss against the arctic cold as Mai's chillingly accurate knives seek openings in his fiery defense."
         },
@@ -257,7 +257,7 @@ export const maiArchetypeData = {
             introB: "Zuko's search for honor (or the Avatar) in Ba Sing Se is complicated by Mai's deadly, emotionless efficiency."
         },
         'si-wong-desert': {
-            label: "Desert Heat, Stoic Steel: Mai's Aim vs. Zuko's Fire",
+            label: "Desert Heat, Stoic Steel: Zuko's Fire vs. Mai's Aim",
             introA: "Mai, finding Zuko's passionate outbursts tiresome, hopes her precise throws will quickly end their desert confrontation under the blazing sun.",
             introB: "Zuko's fire blazes in the desert heat, but Mai's focus remains unbroken, her daggers flying true despite the oppressive conditions."
         },
@@ -310,12 +310,12 @@ export const maiArchetypeData = {
             introB: "Mai, unfazed by Azula's terrifying power, uses the icy terrain for ricochets, her daggers a silent, deadly threat."
         },
         'ba-sing-se': {
-            label: "City of Shadows, Dance of Daggers and Blue Fire: Mai vs. Azula",
+            label: "City of Shadows, Dance of Daggers and Blue Fire: Azula vs. Mai",
             introA: "Azula, perhaps testing Mai's loyalty or skill, engages her in a deadly ballet of fire and steel within Ba Sing Se's walls.",
             introB: "Mai, ever the stoic subordinate (or rival?), confronts Azula in the labyrinthine city, her knives a silent promise of swift efficiency."
         },
         'si-wong-desert': {
-            label: "Desert Heat, Stoic Steel: Mai's Aim vs. Azula's Fire",
+            label: "Desert Heat, Stoic Steel: Azula's Fire vs. Mai's Aim",
             introA: "Azula's blue fire blazes under the desert sun, but Mai's focus remains unbroken, her daggers flying true despite the heat.",
             introB: "Mai, finding Azula's dramatic displays tiresome, hopes her precise throws will quickly end their desert confrontation."
         },
@@ -358,32 +358,32 @@ export const maiArchetypeData = {
     // --- Mai vs Ozai (ozai-not-comet-enhanced) ---
     'ozai-not-comet-enhanced': {
         'eastern-air-temple': {
-            label: "Silent Daggers vs. Phoenix King's Roar: Mai vs. Ozai",
+            label: "Silent Daggers vs. Phoenix King's Roar: Ozai vs. Mai",
             introA: "Mai, with audacious calm, faces Fire Lord Ozai at the Eastern Air Temple, her precisely aimed daggers a stark contrast to his overwhelming fire.",
             introB: "Ozai, amused by the non-bender's challenge, prepares to demonstrate the futility of steel against the inferno of a god-king."
         },
         'northern-water-tribe': {
-            label: "Frozen Fortitude, Tyrant's Fire: Mai vs. Ozai",
+            label: "Frozen Fortitude, Tyrant's Fire: Ozai vs. Mai",
             introA: "Mai's chilling precision and icy nerve are tested as she confronts Fire Lord Ozai amidst the frozen wastes of the North.",
             introB: "Ozai, his fire melting glaciers, sees Mai as an insignificant speck to be vaporized in his conquest of the Water Tribe."
         },
         'ba-sing-se': {
-            label: "City of Silence, Emperor of Ash: Mai vs. Ozai",
+            label: "City of Silence, Emperor of Ash: Ozai vs. Mai",
             introA: "Mai, a lone figure of defiance in the conquered Ba Sing Se, uses her deadly skills against the all-powerful Fire Lord Ozai.",
             introB: "Ozai, draped in the glory of a fallen kingdom, regards Mai's resistance with disdain before unleashing his city-leveling fire."
         },
         'si-wong-desert': {
-            label: "Desert Mirage, Phoenix Inferno: Mai vs. Ozai",
+            label: "Desert Mirage, Phoenix Inferno: Ozai vs. Mai",
             introA: "Mai's unerring aim is tested by the shimmering heat and Ozai's sun-fueled fire, a desperate battle of precision against raw power.",
             introB: "Ozai, a fiery god in the desert, views Mai's daggers as mere annoyances to be swatted away by his consuming flames."
         },
         'foggy-swamp': {
-            label: "Swamp Shadows, Fire Lord's Light: Mai vs. Ozai",
+            label: "Swamp Shadows, Fire Lord's Light: Ozai vs. Mai",
             introA: "Mai uses the swamp's disorienting fog for stealth, her silent daggers seeking a weakness in Ozai's oppressive fiery aura.",
             introB: "Ozai, his fire burning away the swamp's illusions, hunts Mai with the terrifying certainty of an apex predator."
         },
         'boiling-rock': {
-            label: "Prison of Steel, King of Fire: Mai vs. Ozai",
+            label: "Prison of Steel, King of Fire: Ozai vs. Mai",
             introA: "Mai, perhaps a prisoner or a very brave guard, confronts Fire Lord Ozai, her daggers a final, desperate gamble in the volcanic prison.",
             introB: "Ozai, his power echoing the volcano's fury, intends to make Mai an example of the fate of those who defy the Phoenix King."
         },
@@ -393,12 +393,12 @@ export const maiArchetypeData = {
             introB: "Ozai, his authority absolute, meets Mai's challenge with the full, terrifying might of his imperial fire, promising swift judgment."
         },
         'omashu': {
-            label: "Omashu's Last Arrow: Mai's Precision vs. Ozai's Scorch",
+            label: "Omashu's Last Arrow: Ozai's Scorch vs. Mai's Precision",
             introA: "Mai, defending the besieged city of Omashu, uses her deadly accuracy against Fire Lord Ozai's overwhelming destructive power.",
             introB: "Ozai, his conquest of Omashu nearly complete, turns his annihilating fire upon Mai, a final, defiant obstacle."
         },
         'great-divide': {
-            label: "Canyon of Despair, Daggers of Defiance: Mai vs. Ozai",
+            label: "Canyon of Despair, Daggers of Defiance: Ozai vs. Mai",
             introA: "Mai, trapped in the Great Divide, makes a desperate last stand with her knives against Fire Lord Ozai's world-ending inferno.",
             introB: "Ozai, his laughter a prelude to destruction, prepares to engulf Mai in a fiery abyss, a testament to his absolute power."
         },
@@ -441,32 +441,32 @@ export const maiArchetypeData = {
             introB: "Bumi, his laughter echoing through the mists, unleashes unpredictable earth attacks, turning the swamp into a chaotic playground for Mai."
         },
         'boiling-rock': {
-            label: "Volcanic Precision, Rock Solid Defense (and Offense!): Mai vs. Bumi",
+            label: "Volcanic Precision, Rock Solid Defense (and Offense!): Bumi vs. Mai",
             introA: "Mai's explosive shuriken meet King Bumi's equally explosive (and joyful) earth manipulation at the Boiling Rock.",
             introB: "Bumi, finding the volcanic rock 'wonderfully volatile,' gleefully 'renovates' the prison, using it as a weapon against Mai."
         },
         'fire-nation-capital': {
-            label: "Stoic Assassin vs. Earth King in the Capital: Mai vs. Bumi",
+            label: "Earth King vs. Stoic Assassin in the Capital: Bumi vs. Mai",
             introA: "Mai confronts the unexpected and chaotic earthbending of King Bumi, who has decided the Fire Nation capital needs 'more character'.",
             introB: "Bumi, with a hearty laugh, reshapes a city plaza, his earthbending a surprising challenge to Mai in her own homeland."
         },
         'omashu': {
-            label: "Omashu's Deadly Accuracy vs. its Mad King: Mai vs. Bumi",
+            label: "Omashu's Deadly Accuracy vs. its Mad King: Bumi vs. Mai",
             introA: "Mai brings her pinpoint precision to Omashu, challenging its legendary King Bumi in a spectacular clash of skill vs. raw power.",
             introB: "Bumi, delighted by Mai's sharp attacks, welcomes her with a city-wide earthbending obstacle course of epic proportions."
         },
         'great-divide': {
-            label: "Canyon Volley, Mountainous Might: Mai vs. Bumi",
+            label: "Canyon Volley, Mountainous Might: Bumi vs. Mai",
             introA: "Mai's daggers ricochet through the canyon as King Bumi hurls boulders and triggers avalanches with casual, joyful power.",
             introB: "Bumi, treating the Great Divide as his personal quarry, meets Mai's precise throws with an overwhelming and playful display of earth mastery."
         },
         'kyoshi-island': {
-            label: "Island Pinpoint, Earth Awakened: Mai vs. Bumi",
+            label: "Island Pinpoint, Earth Awakened: Bumi vs. Mai",
             introA: "Mai's deadly accuracy is met by King Bumi's unexpected and earth-shattering arrival on Kyoshi Island, turning the tide.",
             introB: "Bumi, deciding Kyoshi Island needs more 'oomph', challenges Mai with powerful, joyful earthbending that shakes the very ground."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Stoic's Steel vs. The Mad King's Stone: Mai vs. Bumi",
+            label: "The Mad King's Stone vs. The Stoic's Steel: Bumi vs. Mai",
             introA: "Mai, with her unerring aim and collection of sharp objects, faces the ancient, unpredictable, and overwhelmingly powerful King Bumi.",
             introB: "King Bumi, the mad genius of earthbending, is ready to show Mai that even the sharpest knives cannot pin down a mountain (or a laughing king)."
         }
@@ -480,7 +480,7 @@ export const maiArchetypeData = {
         },
         'northern-water-tribe': {
             label: "Frozen Precision, Acrobatic Flurry: Mai vs. Ty Lee",
-            introA: "Mai uses the icy terrain for ricochets, her daggers seeking Ty Lee, whose agility is astounding even on slippery surfaces.",
+            introA: "Mai uses the slippery ice for ricochets, her daggers seeking Ty Lee, whose agility is astounding even on slippery surfaces.",
             introB: "Ty Lee, treating the icy landscape like a bouncy castle, flips and tumbles around Mai's attacks, seeking to block her chi."
         },
         'ba-sing-se': {
@@ -504,7 +504,7 @@ export const maiArchetypeData = {
             introB: "Ty Lee, with a playful taunt, uses the prison's structure to launch herself at Mai, her chi-blocking jabs relentless."
         },
         'fire-nation-capital': {
-            label: "Assassin's Aim vs. Chi's Flight: Mai vs. Ty Lee in the Capital",
+            label: "Courtly Acrobatics vs. Assassin's Precision: Mai vs. Ty Lee",
             introA: "Mai's deadly projectiles meet Ty Lee's acrobatic evasions in the Fire Nation capital, a frustrating challenge for the stoic assassin.",
             introB: "Ty Lee, part of Azula's elite, uses her cheerful demeanor and deadly chi-blocking to try and subdue her often-gloomy friend."
         },
@@ -519,7 +519,7 @@ export const maiArchetypeData = {
             introB: "Ty Lee uses the canyon walls and precarious ledges for daring acrobatic feats, always staying one step ahead of Mai's sharp steel."
         },
         'kyoshi-island': {
-            label: "Island Impasse: Mai's Daggers vs. Ty Lee's Agility",
+            label: "Island Impasse: Mai's Daggers vs. Mai's Agility",
             introA: "Mai's attempts at a decisive strike are hilariously undone by Ty Lee's light, chi-blocking touches and acrobatic dodges.",
             introB: "Ty Lee, enjoying the island's cheerful atmosphere, turns her fight with Mai into an acrobatic spectacle, much to Mai's annoyance."
         },
@@ -626,7 +626,7 @@ export const maiArchetypeData = {
         },
         'omashu': {
             label: "Omashu's Perch, Fire's Reluctance: Mai vs. Jeong Jeong",
-            introA: "Mai utilizes Omashu's high ramparts for sniper-like attacks, her daggers challenging Jeong Jeong's ability to maintain precise fire control.",
+            introA: "Mai utilizes Omashu's high ramparts for sniper-like attacks, her daggers raining down on Master Jeong Jeong's fluid water defenses.", // Corrected to Jeong Jeong
             introB: "Jeong Jeong, with immense focus, shapes his fire around Omashu's structures, his defense a testament to his control against Mai's volleys."
         },
         'great-divide': {
@@ -773,21 +773,7 @@ export const maiArchetypeData = {
             stressedByDamage: { Generic: [{ type: 'internal', line: "This is getting out of hand. I need to end this quickly." }, { type: 'spoken', line: "You're really going to pay for this mess." }] },
             thrivingInDamage: []
         },
-        onVictory: { Default: { Generic: [{ line: "That's it. Are we done now?" }] } },
-        relationships: {
-            'azula': { narrative: { onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } } },
-            'ty-lee': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Ty Lee, can we not do this?" }] } } }
-        }
-    },
-    techniques: [
-        { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
-        { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'], collateralImpact: 'none' },
-        { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, requiresArticle: true, element: 'physical', moveTags: ['defensive_stance', 'utility_block', 'trap_delayed'], collateralImpact: 'none' },
-        { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise', 'humiliation'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 }, collateralImpact: 'low' },
-        { name: "Ricochet Shot", verb: 'launch', object: 'ricochet shot', type: 'Offense', power: 55, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'unpredictable', 'bypasses_defense'], collateralImpact: 'low' },
-        { name: "Final Pin", verb: 'unleash', object: 'final volley to trap her opponent', type: 'Finisher', power: 80, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'area_of_effect', 'requires_opening'], collateralImpact: 'medium' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["That's it. Are we done now?"], postWin_overwhelming: ["You were never a threat. Just... annoying."], postWin_specific: { 'ty-lee': "Try to flip your way out of that one." } },
-    relationships: {}
+        onVictory: { Default: { Generic: [{ line: "That's it. Are we done now?" }] } }
+    }
+    // REMOVED: techniques, quotes, relationships
 };

@@ -219,19 +219,19 @@ export const aangArchetypeData = {
             introB: "Zuko, perhaps as the new Fire Lord or a conflicted prince, faces Aang in a pivotal confrontation within the capital itself."
         },
         'omashu': {
-            label: "City of Earth, Test of Fire and Air: Aang vs. Zuko",
-            introA: "Aang defends the quirky ingenuity of Omashu with creative air shields and evasive maneuvers against Zuko's siege.",
-            introB: "Zuko's fiery assault on Omashu is met by Aang's protective airbending, their battle shaking the foundations of the ancient city."
+            label: "City of Earth, Test of Fire and Air: Zuko vs. Aang",
+            introA: "Zuko's fiery assault on Omashu is met by Aang's protective airbending, their battle shaking the foundations of the ancient city.",
+            introB: "Aang defends the quirky ingenuity of Omashu with creative air shields and evasive maneuvers against Zuko's siege."
         },
         'great-divide': {
-            label: "Canyon of Fire, Winds of Change: Aang vs. Zuko",
-            introA: "Aang uses the canyon's updrafts and narrow passages for daring escapes, his airbending a whirlwind against Zuko's fiery onslaught.",
-            introB: "Zuko's fireballs light up the Great Divide as he corners Aang, his agility pushed to the limits by the treacherous terrain."
+            label: "Canyon of Fire, Winds of Change: Zuko vs. Aang",
+            introA: "Zuko's fireballs light up the Great Divide as he corners Aang, his agility pushed to the limits by the treacherous terrain.",
+            introB: "Aang uses the canyon's updrafts and narrow passages for daring escapes, his airbending a whirlwind against Zuko's fiery onslaught."
         },
         'kyoshi-island': {
-            label: "Island Ablaze, Avatar's Defense: Aang vs. Zuko",
-            introA: "Aang, channeling Kyoshi's spirit of defiance, uses his airbending to defend the island from Zuko's relentless attacks.",
-            introB: "Zuko's pursuit of the Avatar leads him to Kyoshi Island, where his firebending clashes with Aang's protective air shield over the peaceful village."
+            label: "Island Ablaze, Avatar's Defense: Zuko vs. Aang",
+            introA: "Zuko's pursuit of the Avatar leads him to Kyoshi Island, where his firebending clashes with Aang's protective air shield over the peaceful village.",
+            introB: "Aang, channeling Kyoshi's spirit of defiance, uses his airbending to defend the island from Zuko's relentless attacks."
         },
         '_DEFAULT_LOCATION_': {
             label: "Wind and Flame: A Fateful Encounter",
@@ -293,8 +293,8 @@ export const aangArchetypeData = {
         },
         '_DEFAULT_LOCATION_': {
             label: "Lightning and Wind: A Fateful Duel",
-            introA: "Aang, embodying the evasive spirit of air, seeks to avoid Azula's deadly assault and find a path to peace.",
-            introB: "Azula's blue fire burns with cold precision, a prodigy eager to prove her absolute superiority."
+            introA: "Azula's blue fire burns with cold precision, a prodigy eager to prove her absolute superiority against the Avatar.",
+            introB: "Aang, embodying the evasive spirit of air, seeks to avoid Azula's deadly assault and find a path to peace."
         }
     },
     // --- Aang vs Ozai (ozai-not-comet-enhanced) ---
@@ -549,7 +549,7 @@ export const aangArchetypeData = {
         'si-wong-desert': {
             label: "Desert Mirage, Water Master's Will: Aang vs. Pakku",
             introA: "Aang uses air currents to create disorienting dust storms, but Pakku's disciplined water sense remains sharp even in the desert.",
-            introB: "Pakku, conserving every drop from his water skin, unleashes surprisingly potent attacks against Aang, proving mastery transcends environment."
+            introB: "Pakku, conserving every precious drop from his water skin, unleashes surprisingly potent attacks against Aang, proving mastery transcends environment."
         },
         'foggy-swamp': {
             label: "Mystic Waters, Ancient Air: Aang vs. Pakku in the Fog",
@@ -716,7 +716,7 @@ export const aangArchetypeData = {
             ],
             Early: [{ type: 'spoken', line: "I don't want to fight, but I will if I have to protect my friends." }, { type: 'internal', line: "Be like the leaf. Flow with the wind. Don't let them pin you down." }],
             Mid: [{ type: 'spoken', line: "This is getting serious. I have to find a way to end this peacefully!" }],
-            Late: [{ type: 'action', line: "summons a massive wave, her eyes blazing with determination." }],
+            Late: [{ type: 'action', line: "Aang channels the very air around him, preparing for a decisive move." }], // Changed to action
             'eastern-air-temple': [{ type: 'spoken', line: "It's good to be home. The air feels so alive here!" }, { type: 'internal', line: "I can feel the presence of the monks... I must protect this place." }],
             'fire-nation-capital': [{ type: 'spoken', line: "I hope we don't have to break too much... This is a lot of history." }, { type: 'internal', line: "So much pride here. It feels... heavy." }],
             'kyoshi-island': [{ type: 'spoken', line: "Kyoshi's island... I must respect this place, and its people." }, { type: 'internal', line: "The air here is gentle, like its people. I must be gentle too." }],
@@ -768,18 +768,7 @@ export const aangArchetypeData = {
             stressedByDamage: { Generic: [{ type: 'internal', line: "The world... it's hurting. I can't let this continue." }, { type: 'spoken', line: "This isn't what Gyatso taught me! I have to find a way out!" }] },
             thrivingInDamage: []
         },
-        onVictory: { Default: { Generic: [{ line: "Phew! Nobody got hurt, right? Mostly." }] } },
-        relationships: { 'ozai-not-comet-enhanced': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "I will not let you destroy this world, Fire Lord." }] } } } }
-    },
-    techniques: [
-        { name: "Air Scooter", verb: 'ride', object: 'his air scooter', type: 'Utility', power: 20, element: 'air', moveTags: ['utility_reposition', 'evasive', 'channeled'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.15 }, collateralImpact: 'none' },
-        { name: "Air Blast", verb: 'unleash', object: 'focused blast of air', type: 'Offense', power: 40, requiresArticle: true, element: 'air', moveTags: ['ranged_attack', 'area_of_effect_small', 'pushback'], collateralImpact: 'low' },
-        { name: "Wind Shield", verb: 'form', object: 'swirling shield of wind', type: 'Defense', power: 50, requiresArticle: true, element: 'air', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense'], collateralImpact: 'none' },
-        { name: "Tornado Whirl", verb: 'create', object: 'disorienting tornado', type: 'Offense', power: 65, requiresArticle: true, element: 'air', moveTags: ['area_of_effect', 'channeled', 'utility_control'], collateralImpact: 'medium' },
-        { name: "Gust Push", verb: 'push', object: 'with a sudden gust of wind', type: 'Offense', power: 30, element: 'air', moveTags: ['ranged_attack', 'single_target', 'pushback'], collateralImpact: 'none' },
-        { name: "Sweeping Gust", verb: 'sweep', object: 'his foe off their feet', type: 'Finisher', power: 80, element: 'air', moveTags: ['area_of_effect', 'debuff_disable', 'pushback', 'requires_opening'], collateralImpact: 'low' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'air', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["Phew! Nobody got hurt, right? Mostly."], postWin_overwhelming: ["Whoa, that was a lot of air! Are you okay?"], postWin_specific: { 'ozai-not-comet-enhanced': "It's over. This world doesn't need any more destruction." } },
-    relationships: { 'ozai-not-comet-enhanced': { relationshipType: "fated_adversary", stressModifier: 1.4, resilienceModifier: 1.3 }, 'azula': { relationshipType: "nonlethal_pacifism", stressModifier: 1.2, resilienceModifier: 1.2 } }
+        onVictory: { Default: { Generic: [{ line: "Phew! Nobody got hurt, right? Mostly." }] } }
+    }
+    // REMOVED: techniques, quotes, relationships
 };

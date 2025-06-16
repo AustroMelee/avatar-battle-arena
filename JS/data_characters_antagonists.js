@@ -57,60 +57,7 @@ export const antagonistCharacters = {
                 utilityBias: 0.05,
             }
         },
-        narrative: {
-            battleStart: {
-                Early: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
-                Mid: [{ type: 'spoken', line: "Is this the best you can do? Pathetic." }],
-                Late: [{ type: 'spoken', line: "You will fall. Everyone does." }],
-                'eastern-air-temple': [{ type: 'spoken', line: "These dusty ruins will serve as a fitting graveyard for your hopes." }, { type: 'internal', line: "Such wasted space. This temple will burn beautifully." }],
-                'fire-nation-capital': [{ type: 'spoken', line: "Welcome to my stage. Prepare to be extinguished." }, { type: 'internal', line: "This is my domain. No one is safe from my fire here." }],
-                'kyoshi-island': [{ type: 'spoken', line: "This quaint little island will make a delightful bonfire." }, { type: 'internal', line: "Peaceful places are so easily corrupted. And burned." }],
-                'northern-water-tribe': [{ type: 'spoken', line: "The cold will only make your defeat more exquisite." }, { type: 'internal', line: "This ice is brittle. I shall shatter it, and their hope, with my flames." }],
-                'omashu': [{ type: 'spoken', line: "These old stones will crumble beautifully under my flames." }, { type: 'internal', line: "So many levels, so many angles to exploit. This is amusing." }],
-                'si-wong-desert': [{ type: 'spoken', line: "The sun lends its power to my fury. You will melt!" }, { type: 'internal', line: "This heat amplifies my precision. Nowhere to hide." }],
-                'foggy-swamp': [{ type: 'spoken', line: "This wretched place cannot hide you from my perfect fire. Come out and face your end." }, { type: 'internal', line: "Mud and fog. Annoying, but easily burned away. I will find them." }],
-                'boiling-rock': [{ type: 'spoken', line: "This prison will be your tomb. No one escapes me." }, { type: 'internal', line: "The perfect stage for a display of overwhelming force." }],
-                'great-divide': [{ type: 'spoken', line: "The canyon will amplify my power. There's no escaping my lightning here!" }, { type: 'internal', line: "So much open space. Perfect for hunting. And nowhere for them to hide from my flames." }] // UPDATED for Great Divide
-            },
-            onIntentSelection: {
-                CapitalizeOnOpening: { Generic: [{ type: 'spoken', line: "There! An opening. This ends now." }] },
-                PressAdvantage: { Mid: [{ type: 'internal', line: "They're faltering. A sustained assault will break them completely." }] },
-                DesperateGambit: { Late: [{ type: 'internal', line: "Unacceptable! I am not losing to this... peasant!" }] }
-            },
-            onManipulation: {
-                asAttacker: { Generic: [{ type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." }, { type: 'spoken', line: "Still trying so hard? You'll always be second best." }] },
-                asVictim: { Generic: [{ type: 'internal', line: "Insolent worm. {opponent.s} will pay for that." }] }
-            },
-            onPrediction: {
-                correct: { Generic: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }] },
-                wrong: { Generic: [{ type: 'internal', line: "A deviation from the expected pattern. Unlikely to happen again." }] }
-            },
-            onStateChange: {
-                stressed: { Mid: [{ type: 'internal', line: "Why isn't this working? I should have won already." }] },
-                shaken: { Late: [{ type: 'internal', line: "My hair... it's not perfect... stay calm... CALM!" }] },
-                broken: { Late: [{ type: 'spoken', line: "No... you all fear me! You have to!" }] }
-            },
-            onCollateral: {
-                causingDamage: { Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "Let the weak will always be swept away. This is merely an extension of my will." }] },
-                observingDamage: { Generic: [{ type: 'internal', line: "Amateurish destruction. But effective enough." }, { type: 'spoken', line: "Good. Let the world burn around you. It's only fitting." }] },
-                stressedByDamage: [],
-                thrivingInDamage: { Generic: [{ type: 'spoken', line: "This is where true power is forged: in the ashes." }, { type: 'internal', line: "The destruction enhances my focus. There is no escape here." }] }
-            },
-            onVictory: {
-                Finisher: { Generic: [{ line: "Almost a shame to have to snuff out such a pathetic flame." }] },
-                Humiliation: { Generic: [{ line: "You were beaten before you even began. Remember that." }] },
-                Default: { Generic: [{ line: "Flawless. As expected." }] }
-            },
-            onMoveExecution: {
-                'Tactical Reposition': {
-                    Critical: { Generic: [{ type: 'spoken', line: "Perfectly executed, as always." }] },
-                    Weak: { Generic: [{ type: 'internal', line: "A momentary lapse. Unacceptable." }] }
-                }
-            },
-            relationships: {
-                'zuko': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } } }
-            }
-        },
+        // REMOVED: narrative property
         techniques: [
             { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], collateralImpact: 'none' },
             { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'], collateralImpact: 'low' },
@@ -168,44 +115,7 @@ export const antagonistCharacters = {
                 utilityBias: 0.01,
             }
         },
-        narrative: {
-            battleStart: {
-                Early: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
-                Mid: [{ type: 'spoken', line: "Feel the power of the Fire Lord! Your struggle is meaningless!" }],
-                Late: [{ type: 'action', line: "roars, unleashing a torrent of flame that consumes the battlefield." }],
-                'eastern-air-temple': [{ type: 'spoken', line: "This temple will serve as a monument to my power, once it is reduced to ash." }, { type: 'internal', line: "A fitting place to display true dominion. These winds merely fuel my rage." }],
-                'fire-nation-capital': [{ type: 'spoken', line: "This is my throne room. Your pathetic defiance ends here!" }, { type: 'internal', line: "Let the very stones of my city reinforce my power." }],
-                'kyoshi-island': [{ type: 'spoken', line: "This symbol of the old world will burn first." }, { type: 'internal', line: "Kyoshi's pathetic legacy ends with fire." }],
-                'northern-water-tribe': [{ type: 'spoken', line: "This frozen wasteland will feel my wrath. Nothing can withstand my fire!" }, { type: 'internal', line: "The cold merely tests my resolve. They will witness true power." }],
-                'omashu': [{ type: 'spoken', line: "Another conquered city. Another display of my absolute power." }, { type: 'internal', line: "These structures are a mere inconvenience. They will bend or break." }],
-                'si-wong-desert': [{ type: 'spoken', line: "The sun is my ally here. You will be incinerated!" }, { type: 'internal', line: "This barren land mirrors my soul. Total annihilation awaits." }],
-                'foggy-swamp': [{ type: 'spoken', line: "This putrid swamp will burn, and you with it. Nothing will defy the Phoenix King!" }, { type: 'internal', line: "The stench and illusion are minor annoyances. My flames will purify this place." }],
-                'boiling-rock': [{ type: 'spoken', line: "No one escapes my dominion. This prison is a monument to my power." }, { type: 'internal', line: "The heat here suits me. Their despair will fuel my flames." }],
-                'great-divide': [{ type: 'spoken', line: "This chasm will be your grave. Feel the fire of your Phoenix King!" }, { type: 'internal', line: "The canyon's vastness is merely a stage for my absolute power. Nowhere to hide from my flames." }] // UPDATED for Great Divide
-            },
-            onIntentSelection: { PressAdvantage: { Mid: [{ type: 'spoken', line: "There is no escape. Your world is ending." }] } },
-            onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Your friends cannot help you. Your hope is an illusion." }] } },
-            onStateChange: {
-                stressed: { Mid: [{ type: 'internal', line: "This insect is more resilient than expected. I will simply apply more pressure." }] }
-            },
-            onCollateral: {
-                causingDamage: { Generic: [{ type: 'spoken', line: "Witness the true might of the Fire Nation! All will burn!" }, { type: 'internal', line: "Let the world tremble. Their structures are as flimsy as their hope." }] },
-                observingDamage: { Generic: [{ type: 'spoken', line: "Good. Now you understand the scope of destruction." }, { type: 'internal', line: "Such weakness, to struggle within the very chaos I embrace." }] },
-                stressedByDamage: [],
-                thrivingInDamage: { Generic: [{ type: 'spoken', line: "The world groans under my feet! This is exhilarating!" }, { type: 'internal', line: "Absolute power manifests as absolute destruction. I am unstoppable." }] }
-            },
-            onVictory: { Default: { Generic: [{ line: "The Fire Nation is supreme! My power is absolute!" }] } },
-            onMoveExecution: {
-                'Tactical Reposition': {
-                    Critical: { Generic: [{ type: 'spoken', line: "My will shapes the battlefield." }] },
-                    Weak: { Generic: [{ type: 'internal', line: "Insignificant. I shall simply burn through." }] }
-                }
-            },
-            relationships: {
-                'zuko': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "You were always a failure, Zuko. Weak and ungrateful." }] } } } },
-                'aang-airbending-only': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "So, the Avatar has come to meet his end." }] } } }
-            }
-        },
+        // REMOVED: narrative property
         techniques: [
             { name: "Jet Propulsion", verb: 'propel himself', object: 'forward with a burst of flame', type: 'Utility', power: 30, element: 'fire', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
             { name: "Scorching Blast", verb: 'unleash', object: 'scorching blast of fire', type: 'Offense', power: 60, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect_small'], collateralImpact: 'low' },
@@ -262,55 +172,7 @@ export const antagonistCharacters = {
                 utilityBias: 0.1,
             }
         },
-        narrative: {
-            battleStart: {
-                Early: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
-                Mid: [{ type: 'spoken', line: "Are you done yet? This is boring." }],
-                Late: [{ type: 'internal', line: "Fine. I guess I'll try a little harder." }],
-                'eastern-air-temple': [{ type: 'spoken', line: "The wind's annoying. Just hold still so I can finish this." }, { type: 'internal', line: "Too many places to hide here. This is inefficient." }],
-                'fire-nation-capital': [{ type: 'spoken', line: "Just another day at the office." }, { type: 'internal', line: "So many places for targets to hide. This is going to be tedious." }],
-                'kyoshi-island': [{ type: 'spoken', line: "Great. More trees to block my view." }, { type: 'internal', line: "So many places for them to evade. This is going to be annoying." }],
-                'northern-water-tribe': [{ type: 'spoken', line: "This is cold. And annoying. Why is nothing standing still?" }, { type: 'internal', line: "Too many moving targets, too many ice pillars. This is not my ideal battlefield." }],
-                'omashu': [{ type: 'spoken', line: "Another city. Another maze. This is going to be slow." }, { type: 'internal', line: "So many distractions. Hard to get a clean shot." }],
-                'si-wong-desert': [{ type: 'spoken', line: "At least there's no trees to block my view. Now, hold still." }, { type: 'internal', line: "Perfect visibility. Nowhere for them to hide." }],
-                'foggy-swamp': [{ type: 'spoken', line: "Ugh, this place is disgusting. Just hold still so I can end it." }, { type: 'internal', line: "The fog... the mud... this is truly wretched. Focus, Mai, just focus." }],
-                'boiling-rock': [{ type: 'spoken', line: "All this heat... and the clanking. Just try to stay in one place." }, { type: 'internal', line: "So many wires and gondolas. More ways for them to move. Annoying." }],
-                'great-divide': [{ type: 'spoken', line: "Too many rocks. Not enough clear lines of fire. This is tedious." }, { type: 'internal', line: "The echoes are annoying. And getting a clear shot is a nightmare. I hate this place." }] // UPDATED for Great Divide
-            },
-            onIntentSelection: {
-                OpeningMoves: { Early: [{ type: 'internal', line: "Let's see how long it takes before {opponent.s} gets bored and makes a mistake." }] },
-                PressAdvantage: { Mid: [{ type: 'spoken', line: "If you’re going to surrender, now’s your chance." }] },
-                DesperateGambit: { Late: [{ type: 'spoken', line: "Guess I have to try now. Great." }] }
-            },
-            onMoveExecution: {
-                'Pinning Strike': { Critical: { Generic: [{ type: 'spoken', line: "Stay put." }] } },
-                'Tactical Reposition': {
-                    Critical: { Generic: [{ type: 'spoken', line: "Barely worth the effort." }] },
-                    Weak: { Generic: [{ type: 'internal', line: "This is getting annoying." }] }
-                }
-            },
-            onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }] } },
-            onPrediction: {
-                correct: { Generic: [{ type: 'spoken', line: "Predictable. I could have thrown that with my eyes closed." }] },
-                wrong: { Generic: [{ type: 'internal', line: "Alright, that was actually clever. Doesn’t mean I care." }] }
-            },
-            onStateChange: {
-                stressed: { Mid: [{ type: 'internal', line: "Now this is actually annoying." }] },
-                shaken: { Late: [{ type: 'internal', line: "Just breathe. None of this really matters anyway." }] },
-                broken: { Late: [{ type: 'spoken', line: "You win. Happy now?" }] }
-            },
-            onCollateral: {
-                causingDamage: { Generic: [{ type: 'internal', line: "Another broken window. This is getting messy." }, { type: 'spoken', line: "Can you try not to ruin everything? Some of us prefer order." }] },
-                observingDamage: { Generic: [{ type: 'internal', line: "Ugh. Now there's debris everywhere. This is a hassle." }, { type: 'spoken', line: "Are you done making a scene? Some of us have plans." }] },
-                stressedByDamage: { Generic: [{ type: 'internal', line: "This is getting out of hand. I need to end this quickly." }, { type: 'spoken', line: "You're really going to pay for this mess." }] },
-                thrivingInDamage: []
-            },
-            onVictory: { Default: { Generic: [{ line: "That's it. Are we done now?" }] } },
-            relationships: {
-                'azula': { narrative: { onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Azula’s trying too hard. As usual." }] } } } },
-                'ty-lee': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Ty Lee, can we not do this?" }] } } }
-            }
-        },
+        // REMOVED: narrative property
         techniques: [
             { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
             { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'], collateralImpact: 'none' },
@@ -366,50 +228,7 @@ export const antagonistCharacters = {
                 utilityBias: 0.7,
             }
         },
-        narrative: {
-            battleStart: {
-                Early: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],
-                Mid: [{ type: 'spoken', line: "This is fun! You're pretty good at this not-getting-hit thing!" }],
-                Late: [{ type: 'spoken', line: "Okay, time to really turn on the charm... and the chi-blocking!" }],
-                'eastern-air-temple': [{ type: 'spoken', line: "This place has so many fun ledges to flip off of!" }, { type: 'internal', line: "Okay, keep them guessing. Lots of places to pop out!" }],
-                'fire-nation-capital': [{ type: 'spoken', line: "Ooh, so many tall buildings to bounce off of!" }, { type: 'internal', line: "This is a big playground! Lots of new friends to tag!" }],
-                'kyoshi-island': [{ type: 'spoken', line: "This island has such a good aura! Let's keep it fun!" }, { type: 'internal', line: "Plenty of places to hide and surprise! Perfect!" }],
-                'northern-water-tribe': [{ type: 'spoken', line: "So much slippery ice! This is going to be a fun challenge!" }, { type: 'internal', line: "It's cold, but bouncing around will keep me warm. And them guessing!" }],
-                'omashu': [{ type: 'spoken', line: "So many chutes! This is like a giant amusement park!" }, { type: 'internal', line: "Lots of tight spaces to dart in and out of! Perfect for chi-blocking!" }],
-                'si-wong-desert': [{ type: 'spoken', line: "So much open space for gymnastics! Let's chase them down!" }, { type: 'internal', line: "It's hot, but I'll just keep moving! They can't hide from me here." }],
-                'foggy-swamp': [{ type: 'spoken', line: "Ooh, this place has a super unique aura! Like, earthy but also watery!" }, { type: 'internal', line: "So much to bounce off! And hide in! This is going to be a fun game of tag!" }],
-                'boiling-rock': [{ type: 'spoken', line: "Whee! So many wires and gondolas! This is going to be so much fun!" }, { type: 'internal', line: "This place is a giant jungle gym! They'll never catch me!" }],
-                'great-divide': [{ type: 'spoken', line: "So many walls to flip off! This is going to be amazing parkour!" }, { type: 'internal', line: "The air here is so clear! I can spot them from anywhere. Time to play chase!" }] // UPDATED for Great Divide
-            },
-            onIntentSelection: {
-                CapitalizeOnOpening: { Mid: [{ type: 'spoken', line: "Ooh, you're off-balance! Perfect time for a poke!" }] },
-                PressAdvantage: { Generic: [{ type: 'spoken', line: "Come on, let's dance!" }] },
-            },
-            onManipulation: {
-                asVictim: { Generic: [{ type: 'spoken', line: "Hey, that's not very nice! My aura is turning a gloomy gray now." }] }
-            },
-            onStateChange: {
-                stressed: { Mid: [{ type: 'internal', line: "This isn't as fun as I thought it would be." }] },
-                shaken: { Late: [{ type: 'spoken', line: "Maybe we should just stop and talk about our feelings?" }] }
-            },
-            onMoveExecution: {
-                'Chi-Blocking Flurry': { Critical: { Generic: [{ type: 'spoken', line: "Boop! Your bending is gone!" }] } },
-                'Tactical Reposition': {
-                    Critical: { Generic: [{ type: 'spoken', line: "Whee! Catch me if you can!" }] },
-                    Weak: { Generic: [{ type: 'internal', line: "Ugh, almost bumped into something. Needs more grace." }] }
-                }
-            },
-            onCollateral: {
-                causingDamage: { Generic: [{ type: 'internal', line: "Oops! Did I do that? I hope no one got hurt..." }, { type: 'spoken', line: "Watch out! Don't damage the pretty flowers!" }] },
-                observingDamage: { Generic: [{ type: 'spoken', line: "Wow, that's a lot of broken stuff! Can we clean it up later?" }, { type: 'internal', line: "All this destruction... it's making my aura feel all crumby." }] },
-                stressedByDamage: { Generic: [{ type: 'internal', line: "My chi is getting all tangled with all this bad energy around!" }, { type: 'spoken', line: "Please, stop destroying things! It's so unharmonious!" }] },
-                thrivingInDamage: []
-            },
-            onVictory: { Default: { Generic: [{ line: "Ta-da! That's how it's done!" }] } },
-            relationships: {
-                'mai': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Aww, don't be so gloomy, Mai! Let's play!" }] } } }
-            }
-        },
+        // REMOVED: narrative property
         techniques: [
             { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
             { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'], collateralImpact: 'none' },

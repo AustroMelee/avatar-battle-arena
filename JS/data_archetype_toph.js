@@ -95,7 +95,7 @@ export const tophArchetypeData = {
         'boiling-rock': {
             label: "Metal & Air: Toph's Newfound Power vs. Aang's Agility",
             introA: "Toph, eager to practice her metalbending, sees the prison's structure (and Aang) as excellent targets.",
-            introB: "Aang, amazed by Toph's metalbending, uses his air agility to dodge twisted girders and flying prison bars."
+            introB: "Aang, amazed by Toph's metalbending, uses his air agility to avoid her surprising new attacks."
         },
         'fire-nation-capital': {
             label: "Rebellion's Rumble: Toph's Earth vs. Aang's Air in Enemy City",
@@ -119,8 +119,8 @@ export const tophArchetypeData = {
         },
         '_DEFAULT_LOCATION_': {
             label: "Air vs. Earth: Aang vs. Toph",
-            introA: "Toph Beifong senses Aang's movements through the earth, ready to prove that nothing escapes her seismic perception.",
-            introB: "Aang, the master of air, faces Toph's unyielding earthbending, a classic elemental confrontation."
+            introA: "Toph, the master of air, faces Toph's unyielding earthbending, a classic elemental confrontation.", // Corrected to Aang
+            introB: "Toph Beifong senses Aang's movements through the earth, ready to prove that nothing escapes her seismic perception."
         }
     },
     // --- Toph vs Katara (katara) ---
@@ -142,7 +142,7 @@ export const tophArchetypeData = {
         },
         'si-wong-desert': {
             label: "Sand Bender vs. Water Seeker: Toph vs. Katara",
-            introA: "Toph manipulates the desert sands with surprising ease, creating swirling vortexes and solid projectiles to challenge Katara.",
+            introA: "Toph manipulates vast quantities of sand, creating swirling vortexes and solid projectiles to challenge Katara.",
             introB: "Katara, desperately conserving her water, uses precise ice shards and defensive water shields against Toph's sandy assault."
         },
         'foggy-swamp': {
@@ -262,7 +262,7 @@ export const tophArchetypeData = {
             introB: "Azula, a terrifying mirage of blue fire and lightning, hunts Toph across the dunes, enjoying the earthbender's struggle."
         },
         'foggy-swamp': {
-            label: "Murky Deception, Burning Perfection: Toph vs. Azula",
+            label: "Murky Deception, Burning Perfection: Azula vs. Toph",
             introA: "Toph uses the swamp's treacherous mud and tangled roots to try and trap Azula, whose sharp senses cut through the illusions.",
             introB: "Azula, seeing Toph's earthbending as crude but powerful, navigates the swamp with deadly grace, her blue fire parting the mists."
         },
@@ -350,7 +350,7 @@ export const tophArchetypeData = {
             introB: "Ozai, intent on erasing all hope, brings his apocalyptic fire to Kyoshi Island, with Toph as its final, defiant earthen guardian."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Unstoppable Earth vs. The Consuming Fire: Toph vs. Ozai",
+            label: "The Consuming Fire vs. The Unstoppable Earth: Toph vs. Ozai",
             introA: "Toph Beifong, the greatest earthbender, stands as the world's unyielding shield against Fire Lord Ozai's devastating power.",
             introB: "Ozai, the Phoenix King, wielder of unimaginable fire, prepares to burn away Toph's stubborn resistance and the world with it."
         }
@@ -476,7 +476,7 @@ export const tophArchetypeData = {
         'eastern-air-temple': {
             label: "Stone vs. Agility at Sky Heights: Toph vs. Ty Lee",
             introA: "Toph sends rock pillars to intercept Ty Lee, whose acrobatic leaps make her a frustratingly difficult target at the Air Temple.",
-            introB: "Ty Lee, giggling, bounces off Toph's earthworks, her chi-blocking strikes aimed with surprising speed and precision."
+            introB: "Ty Lee, giggling, bounces off Toph's earthworks, her chi-blocking strikes aimed with surprising speed and precision at Mai."
         },
         'northern-water-tribe': {
             label: "Frozen Earth, Acrobatic Flurry: Toph vs. Ty Lee",
@@ -768,37 +768,6 @@ export const tophArchetypeData = {
             thrivingInDamage: { Generic: [{ type: 'internal', line: "More rubble, more raw material for me. This is getting fun!" }, { type: 'spoken', line: "Yeah, break it all down! Then I'll show you how to really move the earth!" }] }
         },
         onVictory: { Default: { Generic: [{ line: "Told you I was the best. The greatest earthbender in the world!" }] } }
-    },
-    techniques: [
-        { name: "Earth Wave", verb: 'send', object: 'powerful wave of earth', type: 'Offense', power: 60, element: 'earth', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
-        { name: "Rock Armor", verb: 'don', object: 'suit of rock armor', type: 'Defense', power: 75, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_armor', 'construct_creation', 'requires_opening'], collateralImpact: 'none' },
-        { name: "Seismic Slam", verb: 'slam', object: 'her fists to the ground', type: 'Offense', power: 70, element: 'earth', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'unblockable_ground'], collateralImpact: 'high' },
-        { name: "Metal Bending", verb: 'bend', object: 'the metal in the environment', type: 'Offense', power: 80, element: 'metal', moveTags: ['environmental_manipulation', 'utility_control', 'versatile'], collateralImpact: 'medium' },
-        { name: "Boulder Throw", verb: 'launch', object: 'volley of rock projectiles', type: 'Offense', power: 65, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
-        { name: "Rock Coffin", verb: 'entomb', object: 'her foe in a prison of rock', type: 'Finisher', power: 95, element: 'earth', moveTags: ['debuff_disable', 'single_target', 'construct_creation', 'requires_opening'], collateralImpact: 'low' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    techniquesNorthernWaterTribe: [ // NEW MOVESET for Northern Water Tribe
-        { name: "Iceberg Punch", verb: 'punch', object: 'a chunk of ice towards', type: 'Offense', power: 55, element: 'ice', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'environmental_manipulation'], collateralImpact: 'low' },
-        { name: "Frozen Earth Shield", verb: 'raise', object: 'a shield of compacted ice and frozen earth', type: 'Defense', power: 65, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_block', 'construct_creation'], collateralImpact: 'none' },
-        { name: "Glacial Spike", verb: 'erupt with', object: 'a sharp glacial spike from the ground', type: 'Offense', power: 70, requiresArticle: true, element: 'ice', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'unblockable_ground', 'environmental_manipulation'], collateralImpact: 'medium' },
-        { name: "Ice Bridge Creation", verb: 'create', object: 'a temporary ice bridge or platform', type: 'Utility', power: 40, requiresArticle: true, element: 'ice', moveTags: ['utility_reposition', 'environmental_manipulation'], collateralImpact: 'none' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'physical', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    techniquesOmashu: [ // NEW MOVESET for Omashu (adapted from existing earth moves)
-        { name: "Stone Spire", verb: 'erupt with', object: 'a spire of rock from the ground', type: 'Offense', power: 50, requiresArticle: true, element: 'earth', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'unblockable_ground'], collateralImpact: 'low' },
-        { name: "Chute Collapse", verb: 'cause', object: 'a chute to collapse', type: 'Offense', power: 65, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
-        { name: "Omashu Barrier", verb: 'raise', object: 'a massive Omashu stone barrier', type: 'Defense', power: 70, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_block', 'construct_creation'], collateralImpact: 'low' },
-        { name: "Boulder Barrage (Omashu)", verb: 'launch', object: 'a volley of Omashu boulders', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation'], collateralImpact: 'medium' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    techniquesSiWongDesert: [ // NEW MOVESET for Si Wong Desert
-        { name: "Sand Funnel", verb: 'create', object: 'a swirling sand funnel', type: 'Offense', power: 50, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'debuff_disable', 'environmental_manipulation'], collateralImpact: 'low' },
-        { name: "Quicksand Trap", verb: 'form', object: 'a quicksand trap', type: 'Utility', power: 45, requiresArticle: true, element: 'earth', moveTags: ['trap_delayed', 'utility_control', 'environmental_manipulation'], setup: { name: 'Immobilized', duration: 2, intensity: 1.3 }, collateralImpact: 'none' },
-        { name: "Glass Shard Barrage", verb: 'launch', object: 'a barrage of scorching glass shards', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation'], collateralImpact: 'medium' },
-        { name: "Desert Tremor", verb: 'send', object: 'a localized tremor through the sand', type: 'Offense', power: 55, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'unblockable_ground'], collateralImpact: 'low' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["Told you I was the best. The greatest earthbender in the world!"], postWin_overwhelming: ["HA! That's what happens when you fight the greatest earthbender in the world!"], postWin_specific: { 'bumi': "Looks like I'm still the champ, Bumi!" } },
-    relationships: {}
+    }
+    // REMOVED: techniques, techniquesNorthernWaterTribe, techniquesOmashu, techniquesSiWongDesert, quotes, relationships
 };

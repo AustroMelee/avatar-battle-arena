@@ -221,7 +221,7 @@ export const azulaArchetypeData = {
         'omashu': {
             label: "Omashu's Champion vs. Fire Nation's Prodigy: Azula vs. Toph",
             introA: "Azula, systematically dismantling Omashu's defenses, sees Toph as a stubborn, powerful obstacle to be elegantly removed.",
-            introB: "Toph, feeling the pulse of Omashu's stone, defends the city with all her might against Azula's destructive and cunning siege."
+            introB: "Toph, feeling the pulse of Omashu's stone, defends the city with all her might against Azula's insidious takeover."
         },
         'great-divide': {
             label: "Canyon Cataclysm: Azula's Lightning vs. Toph's Earth",
@@ -347,7 +347,7 @@ export const azulaArchetypeData = {
         'kyoshi-island': {
             label: "Island of Ashes, Royal Rumble: Azula vs. Ozai",
             introA: "Azula's ambition leads her to challenge Ozai even on the historically defiant Kyoshi Island, their family feud threatening to incinerate it.",
-            introB: "Ozai, sparing no place from his fiery judgment, confronts Azula, their clashing flames a terrifying spectacle for any onlookers."
+            introB: "Ozai, sparing no place from his fiery judgment, confronts Azula, their clashing flames a terrifying spectacle of familial power struggle."
         },
         '_DEFAULT_LOCATION_': {
             label: "The Princess's Gambit vs. The Phoenix King's Ire: Azula vs. Ozai",
@@ -549,7 +549,7 @@ export const azulaArchetypeData = {
         'si-wong-desert': {
             label: "Desert Flames, Master's Oasis (of Skill): Azula vs. Pakku",
             introA: "Azula's blue fire blazes in the desert heat, but Master Pakku's ability to find and control even scarce water presents a unique challenge.",
-            introB: "Pakku, demonstrating ultimate water conservation, uses precise ice attacks to combat Azula's sun-fueled fire."
+            introB: "Pakku, demonstrating ultimate water conservation, uses precise ice attacks to combat Azula's sun-fueled blue fire."
         },
         'foggy-swamp': {
             label: "Swamp Fire, Watery Wisdom: Azula vs. Pakku",
@@ -567,9 +567,9 @@ export const azulaArchetypeData = {
             introB: "Pakku, representing the strength and tradition of the Water Tribes, confronts Azula's blue fire with unwavering aquatic mastery."
         },
         'omashu': {
-            label: "Omashu's Siege, Fire vs. Water's Ancient Might: Azula vs. Pakku",
+            label: "Omashu's Siege, Water vs. Blue Fire's Might: Azula vs. Pakku",
             introA: "Azula's fiery assault on Omashu is challenged by Master Pakku, whose waterbending adapts surprisingly well to the stone city's defenses.",
-            introB: "Pakku, using Omashu's aqueducts and cisterns, creates powerful water torrents to quench Azula's invading flames."
+            introB: "Pakku, using Omashu's aqueducts and cisterns, creates powerful water torrents to quench Azula's invading blue flames."
         },
         'great-divide': {
             label: "Canyon Conflagration, Water's Carving Power: Azula vs. Pakku",
@@ -607,7 +607,7 @@ export const azulaArchetypeData = {
         'si-wong-desert': {
             label: "Desert Blaze, Master's Burden: Azula vs. Jeong Jeong",
             introA: "Azula's blue fire rages under the desert sun, a stark contrast to Jeong Jeong, who uses his flames with sorrowful precision and control.",
-            introB: "Jeong Jeong, burdened by fire's destructive potential in the arid desert, meets Azula's aggression with reluctant but masterful defense."
+            introB: "Jeong Jeong, burdened by fire's destructive potential, uses his flames sparingly but effectively against Azula's aggression."
         },
         'foggy-swamp': {
             label: "Swamp Fire's Fury, Master's Guard: Azula vs. Jeong Jeong",
@@ -616,8 +616,8 @@ export const azulaArchetypeData = {
         },
         'boiling-rock': {
             label: "Volcanic Firestorm, Disciplined Inferno: Azula vs. Jeong Jeong",
-            introA: "Azula's explosive blue firebending echoes the Boiling Rock's fury, a stark contrast to Jeong Jeong's contained but equally potent flames.",
-            introB: "Jeong Jeong, with grim control, uses the prison's intense heat to his advantage, his fire a precise and deadly counter to Azula's rage."
+            introA: "Azula's explosive blue firebending echoes the prison's fury, a stark contrast to Jeong Jeong's contained but equally potent flames.",
+            introB: "Jeong Jeong, with grim control, uses the Boiling Rock's intense heat to his advantage, his fire a precise and deadly counter to Azula's rage."
         },
         'fire-nation-capital': {
             label: "Fire Lord's Heir vs. Deserter's Wisdom: Azula vs. Jeong Jeong",
@@ -685,7 +685,7 @@ export const azulaArchetypeData = {
         'omashu': {
             label: "Omashu's Mirrored Conquest: Azula vs. Azula",
             introA: "The stone city of Omashu becomes a battleground for two Azulas, their identical blue firebending a confusing, terrifying spectacle of precision.",
-            introB: "Azula uses a lightning strike, and so does the other Azula. 'Predictable. Almost as if I knew what I was going to do.'"
+            introB: "Azula uses a lightning strike, and the other Azula creates an even better one. 'Predictable. Almost as if I knew what I was going to do.'"
         },
         'great-divide': {
             label: "Canyon of Inner Conflict (and Impeccable Firebending): Azula vs. Azula",
@@ -773,26 +773,7 @@ export const azulaArchetypeData = {
             Finisher: { Generic: [{ line: "Almost a shame to have to snuff out such a pathetic flame." }] },
             Humiliation: { Generic: [{ line: "You were beaten before you even began. Remember that." }] },
             Default: { Generic: [{ line: "Flawless. As expected." }] }
-        },
-        onMoveExecution: {
-            'Tactical Reposition': {
-                Critical: { Generic: [{ type: 'spoken', line: "Perfectly executed, as always." }] },
-                Weak: { Generic: [{ type: 'internal', line: "A momentary lapse. Unacceptable." }] }
-            }
-        },
-        relationships: {
-            'zuko': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } } }
         }
-    },
-    techniques: [
-        { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], collateralImpact: 'none' },
-        { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'], collateralImpact: 'low' },
-        { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
-        { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', type: 'Finisher', power: 100, requiresArticle: true, element: 'lightning', moveTags: ['ranged_attack', 'instantaneous', 'single_target', 'unblockable_standard', 'requires_opening', 'highRisk', 'lightning_attack'], collateralImpact: 'medium' },
-        { name: "Flame Burst", verb: 'erupt with', object: 'burst of blue flame', type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'area_of_effect_small', 'pushback', 'counter'], collateralImpact: 'low' },
-        { name: "Precision Strike", verb: 'strike', object: 'with a focused fire blast', type: 'Offense', power: 70, element: 'fire', moveTags: ['ranged_attack', 'single_target', 'precise'], collateralImpact: 'low' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["Flawless. As expected."], postWin_overwhelming: ["My power is absolute. You are beneath me."], postWin_specific: { 'zuko': "You were always weak, Zuzu. That's why you'll always lose." } },
-    relationships: { 'zuko': { relationshipType: "sibling_rivalry_dominant", stressModifier: 1.5, resilienceModifier: 0.9 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_fear", stressModifier: 2.5, resilienceModifier: 0.7 }, 'iroh': { relationshipType: "contemptuous_underestimation", stressModifier: 0.8, resilienceModifier: 1.1 } }
+    }
+    // REMOVED: techniques, quotes, relationships
 };

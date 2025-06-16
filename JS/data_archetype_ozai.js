@@ -78,9 +78,9 @@ export const ozaiArchetypeData = {
             introB: "Aang calls upon the fury of the northern winds and blizzards to combat Ozai's overwhelming fire at the besieged Water Tribe city."
         },
         'ba-sing-se': {
-            label: "Fall of the Earthly Order: Ozai's Reign vs. Aang's Last Stand in Ba Sing Se",
-            introA: "Ozai, reveling in the destruction of the Earth Kingdom capital, turns his devastating fire upon the lone Avatar, Aang.",
-            introB: "Aang, amidst the smoking ruins of Ba Sing Se, confronts Ozai, his airbending a desperate shield against the Fire Lord's city-leveling power."
+            label: "Fall of the Earthly Order: Aang's Last Stand vs. Ozai in Ba Sing Se",
+            introA: "Aang, amidst the smoking ruins of Ba Sing Se, confronts Ozai, his airbending a desperate shield against the Fire Lord's city-leveling power.",
+            introB: "Ozai, reveling in the destruction of the Earth Kingdom capital, turns his devastating fire upon the lone Avatar."
         },
         'si-wong-desert': {
             label: "Desert Firestorm: Ozai's All-Consuming Blaze vs. Aang's Evasion",
@@ -89,13 +89,13 @@ export const ozaiArchetypeData = {
         },
         'foggy-swamp': {
             label: "Swamp of Shadows and Fire: Ozai's Dominion vs. Aang's Spirit",
-            introA: "Ozai, his dark aura withering the swamp's ancient life, seeks to crush Aang and the very spirit of the world beneath his heel.",
-            introB: "Aang, drawing on the swamp's spiritual energy, uses its illusions and terrain to evade Ozai's oppressive, life-scorching fire."
+            introA: "Aang, drawing on the swamp's spiritual energy, uses its illusions and terrain to evade Ozai's oppressive, life-scorching fire.",
+            introB: "Ozai, his dark aura withering the swamp's ancient life, seeks to crush Aang and the very spirit of the world beneath his heel."
         },
         'boiling-rock': {
             label: "Volcano's Heart, World's Fate: Ozai vs. Aang",
-            introA: "Ozai, using the volcano's raw power to fuel his own, aims to make the Boiling Rock the Avatar's fiery tomb.",
-            introB: "Aang, amidst the erupting fury of the Boiling Rock, confronts Ozai, their battle a cataclysm of air and fire mirroring the earth's turmoil."
+            introA: "Aang, amidst the erupting fury of the Boiling Rock, confronts Ozai, their battle a cataclysm of air and fire mirroring the earth's turmoil.",
+            introB: "Ozai, using the volcano's raw power to fuel his own, aims to make the Boiling Rock the Avatar's fiery tomb."
         },
         'fire-nation-capital': {
             label: "Phoenix King's Fury, Avatar's Final Battle: Ozai vs. Aang",
@@ -114,7 +114,7 @@ export const ozaiArchetypeData = {
         },
         'kyoshi-island': {
             label: "Sanctuary Under Siege: Ozai's Scorch vs. Aang's Protection",
-            introA: "Ozai, sparing no symbol of peace, brings his annihilating fire to Kyoshi Island, intending to burn away all hope personified by the Avatar.",
+            introA: "Ozai, intent on erasing all symbols of peace, brings his annihilating fire to Kyoshi Island, intending to burn away all hope personified by the Avatar.",
             introB: "Aang stands as Kyoshi Island's last line of defense, his airbending a desperate shield against Ozai's world-ending flames."
         },
         '_DEFAULT_LOCATION_': {
@@ -171,9 +171,9 @@ export const ozaiArchetypeData = {
             introB: "Katara, finding water in the most unlikely crevices, battles Ozai as he threatens to burn even the Great Divide to cinders."
         },
         'kyoshi-island': {
-            label: "Island Inferno, Ocean's Tears: Ozai vs. Katara",
-            introA: "Ozai, intent on erasing all symbols of past Avatars, brings his fiery judgment to Kyoshi Island, with Katara as its defiant protector.",
-            introB: "Katara, channeling the spirit of Kyoshi and the power of the ocean, defends the sacred island from Ozai's apocalyptic flames."
+            label: "Island Inferno, Ocean's Tears: Katara vs. Ozai",
+            introA: "Katara, channeling the spirit of Kyoshi and the power of the ocean, defends the sacred island from Ozai's apocalyptic flames.",
+            introB: "Ozai, intent on erasing all symbols of past Avatars, brings his fiery judgment to Kyoshi Island, with Katara as its defiant protector."
         },
         '_DEFAULT_LOCATION_': {
             label: "Fire's Tyranny vs. Water's Hope: Ozai vs. Katara",
@@ -346,8 +346,8 @@ export const ozaiArchetypeData = {
         },
         'kyoshi-island': {
             label: "Island of Ashes, Royal Ambition: Ozai vs. Azula",
-            introA: "Ozai, sparing no place from his fiery judgment, confronts Azula on Kyoshi Island, their clashing flames a terrifying spectacle of familial power struggle.",
-            introB: "Azula's ambition leads her to challenge Ozai even on the historically defiant Kyoshi Island, their family feud threatening to incinerate it."
+            introA: "Azula's ambition leads her to challenge Ozai even on the historically defiant Kyoshi Island, their family feud threatening to incinerate it.",
+            introB: "Ozai, sparing no place from his fiery judgment, confronts Azula, their clashing flames a terrifying spectacle of familial power struggle."
         },
         '_DEFAULT_LOCATION_': {
             label: "The Phoenix King's Ire vs. The Princess's Gambit: Ozai vs. Azula",
@@ -573,7 +573,7 @@ export const ozaiArchetypeData = {
         },
         'great-divide': {
             label: "Canyon of Conflagration, Water's Echo: Ozai vs. Pakku",
-            introA: "Ozai's fire reshapes the Great Divide into a molten abyss, but Pakku finds hidden springs, his water a surprising challenge to the Fire Lord.",
+            introA: "Ozai, his fire reshapes the Great Divide into a molten abyss, but Pakku finds hidden springs, his water a surprising challenge to the Fire Lord.",
             introB: "Pakku's powerful water jets score the canyon walls, a desperate attempt to divert Ozai's world-ending inferno."
         },
         'kyoshi-island': {
@@ -616,7 +616,7 @@ export const ozaiArchetypeData = {
         },
         'boiling-rock': {
             label: "Volcanic Firestorm, Disciplined Inferno's Last Stand: Ozai vs. Jeong Jeong",
-            introA: "Ozai's explosive firebending echoes the Boiling Rock's fury, a horrifying display for Jeong Jeong's philosophy of control.",
+            introA: "Ozai's explosive firebending echoes the prison's fury, a horrifying display for Jeong Jeong's philosophy of control.",
             introB: "Jeong Jeong, with grim control, uses the prison's intense heat to his advantage, his fire a precise and desperate counter to Ozai's rage."
         },
         'fire-nation-capital': {
@@ -703,4 +703,5 @@ export const ozaiArchetypeData = {
             introB: "Ozai sees Ozai. 'There is only one Phoenix King. And soon, there will be only one Ozai!'"
         }
     }
+    // REMOVED: techniques, quotes, relationships
 };

@@ -1,4 +1,4 @@
-// FILE: js/data_archetype_pakku.js
+// FILE: data_archetype_pakku.js
 'use strict';
 
 // Archetype data for Pakku vs. all other characters and locations.
@@ -110,7 +110,7 @@ export const pakkuArchetypeData = {
         'great-divide': {
             label: "Canyon Echoes of Water and Wind: Pakku vs. Aang",
             introA: "Pakku, demonstrating ultimate water control, extracts moisture from the very air of the canyon to challenge Aang's aerial dominance.",
-            introB: "Aang's air currents whip through the Great Divide, met by Master Pakku's precisely aimed water jets that defy the arid surroundings."
+            introB: "Aang's air currents whip through the Great Divide, met by Master Pakku's precise water jets that defy the arid surroundings."
         },
         'kyoshi-island': {
             label: "Coastal Currents, Island Breezes: Pakku vs. Aang",
@@ -132,7 +132,7 @@ export const pakkuArchetypeData = {
         },
         'northern-water-tribe': {
             label: "Master and Apprentice: Pakku vs. Katara in the North",
-            introA: "Pakku, proud of Katara's growth, meets her challenge with the full depth of his traditional waterbending mastery in their shared home.",
+            introA: "Pakku, proud of Katara's growth, meets her challenge with the full depth of his traditional waterbending mastery in their shared icy home.",
             introB: "Katara, now a master in her own right, respectfully challenges Pakku, a duel of generations and skill in the icy domain."
         },
         'ba-sing-se': {
@@ -263,8 +263,8 @@ export const pakkuArchetypeData = {
         },
         'foggy-swamp': {
             label: "Swamp Fire, Watery Wisdom: Pakku vs. Zuko",
-            introA: "Pakku, unfazed by the Foggy Swamp's illusions, uses its murky waters and his own disciplined forms to counter Zuko's fiery impatience.",
-            introB: "Zuko's flames pierce the eerie swamp fog, seeking Master Pakku, whose waterbending seems to draw power from the mystical environment."
+            introA: "Zuko's flames pierce the eerie swamp fog, seeking Master Pakku, whose waterbending seems to draw power from the mystical environment.",
+            introB: "Pakku, unfazed by the swamp's illusions, uses its murky waters and his own disciplined forms to counter Zuko's fiery impatience."
         },
         'boiling-rock': {
             label: "Volcanic Fire, Masterful Steam: Pakku vs. Zuko at the Prison",
@@ -272,29 +272,29 @@ export const pakkuArchetypeData = {
             introB: "Zuko's explosive firebending is met by Master Pakku's skillful manipulation of steam and superheated water."
         },
         'fire-nation-capital': {
-            label: "Fire Lord's Court, Water Master's Stand: Pakku vs. Zuko",
-            introA: "Pakku, representing the strength and tradition of the Water Tribes, confronts Zuko's fire with unwavering aquatic mastery in the Fire Nation capital.",
-            introB: "Zuko, perhaps as Fire Lord, faces a diplomatic (or defiant) Master Pakku, their elemental clash a symbol of clashing nations."
+            label: "Fire Lord's Court, Water Master's Stand: Zuko vs. Pakku",
+            introA: "Zuko, perhaps as Fire Lord, faces a diplomatic (or defiant) Master Pakku, their elemental clash a symbol of clashing nations.",
+            introB: "Pakku, representing the strength and tradition of the Water Tribes, confronts Zuko's fire with unwavering aquatic mastery."
         },
         'omashu': {
-            label: "Omashu's Siege, Water vs. Fire's Ancient Might: Pakku vs. Zuko",
-            introA: "Pakku, using Omashu's aqueducts and cisterns, creates powerful water torrents to quench Zuko's invading flames.",
-            introB: "Zuko's fiery assault on Omashu is challenged by Master Pakku, whose waterbending adapts surprisingly well to the stone city's defenses."
+            label: "Omashu's Siege, Water vs. Fire's Ancient Might: Zuko vs. Pakku",
+            introA: "Zuko's fiery assault on Omashu is challenged by Master Pakku, whose waterbending adapts surprisingly well to the stone city's defenses.",
+            introB: "Pakku, using Omashu's aqueducts and cisterns, creates powerful water torrents to quench Zuko's invading flames."
         },
         'great-divide': {
-            label: "Canyon Conflagration, Water's Carving Power: Pakku vs. Zuko",
-            introA: "Pakku, demonstrating profound water control, extracts moisture from the arid canyon air to battle Zuko's fiery onslaught.",
-            introB: "Zuko's fire echoes through the Great Divide, met by Master Pakku's precise water jets that find purchase even on dry rock."
+            label: "Canyon Conflagration, Water's Carving Power: Zuko vs. Pakku",
+            introA: "Zuko's fire echoes through the Great Divide, met by Master Pakku's precise water jets that find purchase even on dry rock.",
+            introB: "Pakku, demonstrating profound water control, extracts moisture from the arid canyon air to battle Zuko's fiery onslaught."
         },
         'kyoshi-island': {
-            label: "Island Inferno, Ocean's Guardian: Pakku vs. Zuko",
-            introA: "Pakku, defending Kyoshi Island's peace, uses the ocean itself as a weapon against Zuko's aggressive firebending.",
-            introB: "Zuko's fiery landing on Kyoshi Island is met by Master Pakku, who commands the coastal waves with formidable power."
+            label: "Island Inferno, Ocean's Guardian: Zuko vs. Pakku",
+            introA: "Zuko's fiery landing on Kyoshi Island is met by Master Pakku, who commands the coastal waves with formidable power.",
+            introB: "Pakku, defending the island's peace, uses the ocean itself as a weapon against Zuko's aggressive firebending."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Master's Water vs. The Prince's Fire: Pakku vs. Zuko",
-            introA: "Master Pakku, a paragon of traditional waterbending, meets Zuko's fiery onslaught with decades of experience and flawless technique.",
-            introB: "Zuko, with his passionate and aggressive firebending, challenges the stern and disciplined Waterbending Master Pakku."
+            label: "The Prince's Fire vs. The Master's Water: Zuko vs. Pakku",
+            introA: "Zuko, with his passionate and aggressive firebending, challenges the stern and disciplined Waterbending Master Pakku.",
+            introB: "Master Pakku, a paragon of traditional waterbending, meets Zuko's fiery onslaught with decades of experience and flawless technique."
         }
     },
     // --- Pakku vs Azula (azula) ---
@@ -321,8 +321,8 @@ export const pakkuArchetypeData = {
         },
         'foggy-swamp': {
             label: "Swamp Fire, Watery Wisdom: Pakku vs. Azula",
-            introA: "Pakku, unfazed by the Foggy Swamp's illusions, uses its murky waters and his own disciplined forms to counter Azula's fiery impatience.",
-            introB: "Azula's flames pierce the eerie swamp fog, seeking Master Pakku, whose waterbending seems to draw power from the mystical environment."
+            introA: "Azula's flames pierce the eerie swamp fog, seeking Master Pakku, whose waterbending seems to draw power from the mystical environment.",
+            introB: "Pakku, unfazed by the swamp's illusions, uses its murky waters and his own disciplined forms to counter Azula's fiery impatience."
         },
         'boiling-rock': {
             label: "Volcanic Fire, Masterful Steam: Pakku vs. Azula at the Prison",
@@ -330,24 +330,24 @@ export const pakkuArchetypeData = {
             introB: "Azula's explosive blue firebending is met by Master Pakku's skillful manipulation of steam and superheated water."
         },
         'fire-nation-capital': {
-            label: "Fire Lord's Court, Water Master's Stand: Pakku vs. Azula",
-            introA: "Pakku, representing the strength and tradition of the Water Tribes, confronts Azula's blue fire with unwavering aquatic mastery in the Fire Nation capital.",
-            introB: "Azula, perhaps as Fire Lord apparent, faces a diplomatic (or defiant) Master Pakku, their elemental clash a symbol of clashing nations."
+            label: "Fire Lord's Court, Water Master's Stand: Azula vs. Pakku",
+            introA: "Azula, perhaps as Fire Lord in waiting, faces a diplomatic (or defiant) Master Pakku, their elemental clash a symbol of clashing nations.",
+            introB: "Pakku, representing the strength and tradition of the Water Tribes, confronts Azula's blue fire with unwavering aquatic mastery."
         },
         'omashu': {
-            label: "Omashu's Siege, Water vs. Blue Fire's Might: Pakku vs. Azula",
-            introA: "Pakku, using Omashu's aqueducts and cisterns, creates powerful water torrents to quench Azula's invading blue flames.",
-            introB: "Azula's fiery assault on Omashu is challenged by Master Pakku, whose waterbending adapts surprisingly well to the stone city's defenses."
+            label: "Omashu's Siege, Water vs. Blue Fire's Might: Azula vs. Pakku",
+            introA: "Azula's fiery assault on Omashu is challenged by Master Pakku, whose waterbending adapts surprisingly well to the stone city's defenses.",
+            introB: "Pakku, using Omashu's aqueducts and cisterns, creates powerful water torrents to quench Azula's invading blue flames."
         },
         'great-divide': {
-            label: "Canyon Conflagration, Water's Carving Power: Pakku vs. Azula",
-            introA: "Pakku, demonstrating profound water control, extracts moisture from the arid canyon air to battle Azula's fiery onslaught.",
-            introB: "Azula's blue fire echoes through the Great Divide, met by Master Pakku's precise water jets that find purchase even on dry rock."
+            label: "Canyon Conflagration, Water's Carving Power: Azula vs. Pakku",
+            introA: "Azula's blue fire echoes through the Great Divide, met by Master Pakku's precise water jets that find purchase even on dry rock.",
+            introB: "Pakku, demonstrating profound water control, extracts moisture from the arid canyon air to battle Azula's fiery onslaught."
         },
         'kyoshi-island': {
-            label: "Island Inferno, Ocean's Guardian: Pakku vs. Azula",
-            introA: "Pakku, defending Kyoshi Island's peace, uses the ocean itself as a weapon against Azula's aggressive blue firebending.",
-            introB: "Azula's fiery landing on Kyoshi Island is met by Master Pakku, who commands the coastal waves with formidable power."
+            label: "Island Inferno, Ocean's Guardian: Azula vs. Pakku",
+            introA: "Azula's fiery landing on Kyoshi Island is met by Master Pakku, who commands the coastal waves with formidable power.",
+            introB: "Pakku, defending the island's peace, uses the ocean itself as a weapon against Azula's aggressive firebending."
         },
         '_DEFAULT_LOCATION_': {
             label: "The Master's Water vs. The Princess's Blue Fire: Pakku vs. Azula",
@@ -375,42 +375,42 @@ export const pakkuArchetypeData = {
         'si-wong-desert': {
             label: "Desert Firestorm, Water Master's Unyielding Will: Pakku vs. Ozai",
             introA: "Pakku, demonstrating unparalleled water discipline in the Si Wong Desert, uses every last drop with deadly precision against Ozai's overwhelming inferno.",
-            introB: "Ozai transforms the desert into a sea of glass and fire, his power absolute against Pakku's dwindling water reserves."
+            introB: "Ozai transforms the Si Wong Desert into a sea of glass and fire, his power absolute against Pakku's dwindling water reserves."
         },
         'foggy-swamp': {
-            label: "Swamp's Desecration, Water's Primal Spirit: Pakku vs. Ozai",
+            label: "Swamp's Desecration, Water's Spirit: Ozai vs. Pakku",
             introA: "Pakku, his waterbending imbued with the Foggy Swamp's strange energies, attempts to ensnare Ozai in a watery grave, a defense of the natural order.",
             introB: "Ozai's corrupting fire withers the ancient swamp, but Master Pakku draws on its primal waters to resist the Fire Lord's tyranny."
         },
         'boiling-rock': {
-            label: "Volcanic Fury, Water's Enduring Crucible: Pakku vs. Ozai",
+            label: "Volcanic Fury, Water's Crucible: Ozai vs. Pakku",
             introA: "Pakku, turning the Boiling Rock's steam and geysers into potent weapons, meets Ozai's fiery apocalypse with water's enduring strength.",
             introB: "Ozai, drawing power from the earth's molten heart, unleashes an unstoppable torrent of fire against Pakku in the volcanic prison."
         },
         'fire-nation-capital': {
-            label: "Throne of Flames, Ocean's Deep Defiance: Pakku vs. Ozai",
-            introA: "Pakku, an ambassador of watery justice, brings the might of the oceans to the Fire Nation's heart, his duel with Ozai shaking the palace.",
-            introB: "Ozai, the supreme Fire Lord, is confronted in his own capital by Master Pakku, whose waterbending is a bold challenge to his fiery reign."
+            label: "Throne of Flames, Ocean's Defiance: Ozai vs. Pakku",
+            introA: "Ozai, the supreme Fire Lord, is confronted in his own capital by Master Pakku, whose waterbending is a bold challenge to his fiery reign.",
+            introB: "Pakku, an ambassador of watery justice, brings the might of the oceans to the Fire Nation's heart, his duel with Ozai shaking the foundations of the palace."
         },
         'omashu': {
-            label: "Omashu's Scorching, Water's Final Stand: Pakku vs. Ozai",
+            label: "Omashu's Scorching, Water's Last Stand: Ozai vs. Pakku",
             introA: "Pakku, using Omashu's ancient aqueducts, unleashes flash floods and ice ramparts against Ozai's city-destroying flames.",
             introB: "Ozai's fiery conquest of Omashu is met by Master Pakku, whose waterbending carves through stone and fire alike in a desperate defense."
         },
         'great-divide': {
-            label: "Canyon of Conflagration, Water's Resounding Echo: Pakku vs. Ozai",
-            introA: "Pakku's powerful water jets score the canyon walls, a desperate attempt to divert Ozai's world-ending inferno in the Great Divide.",
-            introB: "Ozai's fire reshapes the Great Divide into a molten abyss, but Pakku finds hidden springs, his water a surprising challenge to the Fire Lord."
+            label: "Canyon of Conflagration, Water's Echo: Ozai vs. Pakku",
+            introA: "Ozai's fire reshapes the Great Divide into a molten abyss, but Pakku finds hidden springs, his water a surprising challenge to the Fire Lord.",
+            introB: "Pakku's powerful water jets score the canyon walls, a desperate attempt to divert Ozai's world-ending inferno."
         },
         'kyoshi-island': {
-            label: "Island Inferno, Ocean's Righteous Wrath: Pakku vs. Ozai",
+            label: "Island Inferno, Ocean's Wrath: Ozai vs. Pakku",
             introA: "Pakku, channeling the ocean's fury, creates colossal tsunamis and water vortexes to defend Kyoshi Island from Ozai's fiery devastation.",
             introB: "Ozai, intent on erasing Kyoshi's legacy, brings his apocalyptic fire to the island, only to be met by Master Pakku's command of the sea."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Water Master's Tides vs. The Phoenix King's Fire: Pakku vs. Ozai",
-            introA: "Master Pakku, with decades of experience and control over water in all its forms, stands as a formidable bastion against Ozai's tyranny.",
-            introB: "Fire Lord Ozai, wielder of devastating and absolute fire, confronts the venerable Waterbending Master Pakku."
+            label: "The Phoenix King's Fire vs. The Water Master's Tides: Ozai vs. Pakku",
+            introA: "Fire Lord Ozai, wielder of devastating and absolute fire, confronts the venerable Waterbending Master Pakku.",
+            introB: "Master Pakku, with decades of experience and control over water in all its forms, stands as a formidable bastion against Ozai's tyranny."
         }
     },
     // --- Pakku vs Bumi (bumi) ---
@@ -505,21 +505,21 @@ export const pakkuArchetypeData = {
         },
         'fire-nation-capital': {
             label: "Assassin's Duty vs. Water Master's Stand: Pakku vs. Mai",
-            introA: "Pakku, a symbol of Water Tribe resilience in the Fire Nation capital, demonstrates that true mastery transcends location against Mai.",
+            introA: "Pakku, a symbol of Water Tribe resilience in the Fire Nation capital, demonstrates that true mastery transcends location, even against Mai.",
             introB: "Mai, perhaps under orders, confronts Master Pakku, her silent daggers a threat to the Water Tribe elder."
         },
         'omashu': {
-            label: "Omashu's Perch, Water's Flow: Pakku vs. Mai",
+            label: "Omashu's Perch, Water's Flow: Mai vs. Pakku",
             introA: "Pakku, adapting his style to the stone city of Omashu, draws water from hidden sources to create powerful, flowing counters to Mai's volleys.",
             introB: "Mai utilizes Omashu's high ramparts for sniper-like attacks, her daggers raining down on Master Pakku's fluid water defenses."
         },
         'great-divide': {
-            label: "Canyon Volley, Water's Carve: Pakku vs. Mai",
+            label: "Canyon Volley, Water's Carve: Mai vs. Pakku",
             introA: "Pakku, with disciplined water whips that crack like thunder, deflects Mai's projectiles and shapes the scarce water into potent attacks in the Great Divide.",
             introB: "Mai's daggers ricochet off canyon walls, a deadly game of angles against Master Pakku, who finds water even in the arid chasm."
         },
         'kyoshi-island': {
-            label: "Island Daggers, Ocean's Master: Pakku vs. Mai",
+            label: "Island Daggers, Ocean's Master: Mai vs. Pakku",
             introA: "Pakku, drawing upon the ocean's might around Kyoshi Island, creates formidable water shields and tidal surges against Mai's deadly ranged assault.",
             introB: "Mai's silent, precise attacks from the island's cover meet Master Pakku's commanding control over the coastal waves."
         },
@@ -548,8 +548,8 @@ export const pakkuArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Acrobatics vs. Master's Resilience: Pakku vs. Ty Lee",
-            introA: "Pakku, demonstrating incredible water conservation and experience in the Si Wong Desert, uses minimal moisture with maximum effect against Ty Lee's agile assault.",
-            introB: "Ty Lee's boundless energy is tested against Master Pakku, whose ability to find and control scarce water is remarkable."
+            introA: "Ty Lee's boundless energy is tested against Master Pakku, whose ability to find and control scarce water is remarkable.",
+            introB: "Pakku, demonstrating incredible water conservation and experience, uses minimal moisture with maximum effect against Ty Lee's agile assault."
         },
         'foggy-swamp': {
             label: "Misty Tumbles vs. Watery Wisdom: Pakku vs. Ty Lee",
@@ -583,7 +583,7 @@ export const pakkuArchetypeData = {
         },
         '_DEFAULT_LOCATION_': {
             label: "The Waterbending Sage vs. The Chi-Blocking Acrobat: Pakku vs. Ty Lee",
-            introA: "Master Pakku, a paragon of waterbending discipline and power, meets Ty Lee's unorthodox assault with decades of experience and flawless technique.",
+            introA: "Pakku, a paragon of waterbending discipline and power, meets Ty Lee's unorthodox assault with decades of experience and flawless technique.",
             introB: "Ty Lee, with her dazzling agility and ability to neutralize bending, challenges the stern and traditional Master Pakku."
         }
     },
@@ -616,7 +616,7 @@ export const pakkuArchetypeData = {
         },
         'boiling-rock': {
             label: "Volcanic Vapors, Contained Inferno: Pakku vs. Jeong Jeong",
-            introA: "Pakku manipulates the scalding steam of the Boiling Rock against Jeong Jeong, whose fire control is tested by the volatile environment.",
+            introA: "Pakku manipulates the scalding steam of the prison against Jeong Jeong, whose fire control is tested by the volatile environment.",
             introB: "Jeong Jeong, with grim determination, uses his fire to create barriers against Pakku's attacks and the prison's chaotic energy."
         },
         'fire-nation-capital': {
@@ -702,5 +702,67 @@ export const pakkuArchetypeData = {
             introA: "Master Pakku faces his own stern reflection, a contest of flawless waterbending form and unyielding tradition.",
             introB: "Pakku observes Pakku. 'Discipline. Form. Tradition. Only one can be the true master of these tenets.'"
         }
+    },
+    // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
+    narrative: {
+        battleStart: {
+            PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
+                { type: 'spoken', line: "Let us see if you have learned anything about discipline." }, // Changed to spoken
+                { type: 'internal', line: "Perhaps a display of control will prevent further escalation." }
+            ],
+            Poking: [ // NEW: For the probing phase (actual combat turns, but restricted moves)
+                { type: 'spoken', line: "Observe. Do not commit unnecessary force." }, // Changed to spoken
+                { type: 'internal', line: "A light probe. A warning. This is not about winning, but controlling." }
+            ],
+            Early: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }], // Changed to spoken
+            Mid: [{type: 'spoken', line: "Your form is sloppy. You rely too much on brute force!"}],
+            Late: [{type: 'internal', line: "The traditions of the North will prevail."}],
+            'eastern-air-temple': [{ type: 'spoken', line: "Limited water is no excuse for lack of discipline. I shall make do." }, { type: 'internal', line: "The air here is crisp. I can feel the moisture within it." }],
+            'fire-nation-capital': [{ type: 'spoken', line: "This land reeks of fire. It is time for water to assert its balance." }, { type: 'internal', line: "Such insolence, to challenge the water tribes in their own capital. Oh, wait, it's *their* capital." }],
+            'kyoshi-island': [{ type: 'spoken', line: "The ocean answers my call! Let them face the true power of water!" }, { type: 'internal', line: "Here, my bending is at its peak. This island is truly a bastion of water." }],
+            'northern-water-tribe': [{ type: 'spoken', line: "This is my home. The Northern Water Tribe will not fall!" }, { type: 'internal', line: "My power is absolute here. No one can stand against me in this domain." }],
+            'omashu': [{ type: 'spoken', line: "A city of stone. A test of adaptability. Water will find its way." }, { type: 'internal', line: "These limited water sources require immense discipline to wield effectively." }],
+            'si-wong-desert': [{ type: 'spoken', line: "Foolishness! There is no water here. But I shall find moisture wherever I can." }, { type: 'internal', line: "To face a battle here... a true test of one's inner reserves. And my pouch." }],
+            'foggy-swamp': [{ type: 'spoken', line: "The swamp's chaos is a test of true discipline. Water will find order in this mire." }, { type: 'internal', line: "The water here is abundant, but its quality demands precise control. And patience." }],
+            'boiling-rock': [{ type: 'spoken', line: "This boiling water... I must use it with precision, for justice, not cruelty." }, { type: 'internal', line: "The heat is intense. I must control the steam, not be consumed by it." }],
+            'great-divide': [{ type: 'spoken', line: "This chasm offers no comfort for water. I must rely on perfect form and discipline to find any moisture." }, { type: 'internal', line: "Every drop, every move, must be precise. This is a true test of a master." }] // UPDATED for Great Divide
+        },
+        phaseTransition: { // NEW: Top-level property for phase transition quotes
+            Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
+                { type: 'spoken', line: "The moment of truth approaches. Proceed with utmost discipline." },
+                { type: 'internal', line: "I must demonstrate the true nature of water: control, not destruction." } // Changed internal thought
+            ],
+            Early: [ // Quote when transitioning TO Early phase (from Poking)
+                { type: 'spoken', line: "The true test begins. May this water serve a purpose beyond mere conflict." }, // Changed spoken
+                { type: 'internal', line: "The battle escalates. I must stand firm, a wall of disciplined water." } // Changed internal thought
+            ],
+            Mid: [ // Quote when transitioning TO Mid phase (from Early)
+                { type: 'spoken', line: "The intensity grows. A fragile balance, easily broken." },
+                { type: 'internal', line: "This is regrettable. But I will maintain control, even as chaos mounts." }
+            ],
+            Late: [ // Quote when transitioning TO Late phase (from Mid)
+                { type: 'spoken', line: "The culmination. May this end swiftly, with minimal suffering." },
+                { type: 'internal', line: "The final moments approach. My resolve must be absolute. Control, above all." }
+            ],
+        },
+        onIntentSelection: {
+            CautiousDefense: { Early: [{ type: 'internal', line: "A flawless defense is the foundation of victory. Let them waste their energy." }] },
+            OpeningMoves: { Early: [{ type: 'internal', line: "Observe their form. Find the weakness in their style." }] }
+        },
+        onManipulation: {
+            asVictim: { Generic: [{ type: 'spoken', line: "Your pathetic attempts at mind games are as formless as your technique." }] }
+        },
+        onPrediction: {
+            correct: { Generic: [{ type: 'internal', line: "An undisciplined attack. As expected." }] },
+            wrong: { Generic: [{ type: 'internal', line: "A surprising lack of form. It will not work a second time." }] }
+        },
+        onCollateral: {
+            causingDamage: { Generic: [{ type: 'internal', line: "A necessary disruption. Control the water, control the chaos." }, { type: 'spoken', line: "Such an unruly display. This is not the way of water." }] },
+            observingDamage: { Generic: [{ type: 'spoken', line: "Senseless. Such a waste of resources." }, { type: 'internal', line: "Their lack of control is evident in their wake of destruction." }] },
+            stressedByDamage: { Generic: [{ type: 'internal', line: "The environment is becoming too volatile. I must reassert control." }, { type: 'spoken', line: "This chaos is intolerable!" }] },
+            thrivingInDamage: []
+        },
+        onVictory: { Default: { Generic: [{ line: "Discipline prevails." }] } }
     }
+    // REMOVED: techniquesFull, techniquesCanteen, techniquesEasternAirTemple, quotes, relationships
 };

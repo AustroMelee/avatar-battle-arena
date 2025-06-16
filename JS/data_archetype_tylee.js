@@ -262,7 +262,7 @@ export const tyleeArchetypeData = {
             introB: "Zuko's fire blazes in the desert heat, but Ty Lee's boundless energy and agility make her a dizzying, hard-to-hit target."
         },
         'foggy-swamp': {
-            label: "Misty Mayhem, Fiery Focus: Ty Lee vs. Zuko",
+            label: "Misty Mayhem, Fiery Focus: Zuko vs. Ty Lee",
             introA: "Ty Lee, using the swamp's strange atmosphere to her advantage, appears and disappears like a cheerful phantom, her chi-blocking strikes swift against Zuko.",
             introB: "Zuko's fire cuts through the swamp's fog, trying to pin down Ty Lee, whose acrobatic movements are made even more unpredictable by the terrain."
         },
@@ -272,7 +272,7 @@ export const tyleeArchetypeData = {
             introB: "Zuko's explosive fire is met by Ty Lee's equally explosive (in a different way) chi-blocking assault."
         },
         'fire-nation-capital': {
-            label: "Courtly Calisthenics, Prince's Ire: Ty Lee vs. Zuko",
+            label: "Courtly Calisthenics, Prince's Ire: Zuko vs. Ty Lee",
             introA: "Ty Lee, loyal to Azula, playfully but decisively neutralizes Zuko's fiery attempts to assert his authority in the Fire Nation capital.",
             introB: "Zuko finds Ty Lee's acrobatic chi-blocking style infuriatingly effective, even in the heart of his homeland."
         },
@@ -287,7 +287,7 @@ export const tyleeArchetypeData = {
             introB: "Zuko's powerful fire blasts are expertly dodged by Ty Lee, who uses the canyon's treacherous terrain for incredible acrobatic feats."
         },
         'kyoshi-island': {
-            label: "Island Imbalance: Ty Lee's Disabling Touch vs. Zuko's Fire",
+            label: "Island Imbalance: Zuko's Fire vs. Ty Lee's Disabling Touch",
             introA: "Ty Lee, enjoying the island's positive aura, playfully engages Zuko, her acrobatic grace and chi-blocking making her a formidable foe.",
             introB: "Zuko's fiery temper is no match for Ty Lee's cheerful disposition and her uncanny ability to block his chi on Kyoshi Island."
         },
@@ -433,12 +433,12 @@ export const tyleeArchetypeData = {
         'si-wong-desert': {
             label: "Desert Acrobatics, Earthly Jest: Ty Lee vs. Bumi",
             introA: "Ty Lee's agile dodges are tested as King Bumi creates quicksand traps and launches massive sand fists in the Si Wong Desert.",
-            introB: "Bumi, finding the desert sand 'delightfully squishy,' engages Ty Lee in a colossal, sandy game of cat and mouse."
+            introB: "Bumi, finding the desert's malleable earth 'delightfully squishy,' engages Ty Lee in a colossal, sandy game of cat and mouse."
         },
         'foggy-swamp': {
             label: "Swampy Somersaults, Earthen Surprises: Ty Lee vs. Bumi",
             introA: "Ty Lee's cheerful acrobatics are met by King Bumi's equally cheerful (and far more destructive) manipulation of swamp mud and roots.",
-            introB: "Bumi, his laughter echoing through the mist, uses the swamp's treacherous terrain to launch unexpected earth attacks at Ty Lee."
+            introB: "Bumi, his laughter echoing through the mist, unleashes unpredictable earth attacks, turning the swamp into a chaotic playground for Ty Lee."
         },
         'boiling-rock': {
             label: "Volcanic Parkour, Rock-Solid Fun: Ty Lee vs. Bumi",
@@ -568,7 +568,7 @@ export const tyleeArchetypeData = {
         },
         'omashu': {
             label: "Omashu's Obstacle Course vs. Water's Flow: Ty Lee vs. Pakku",
-            introA: "Ty Lee uses Omashu's unconventional structures for acrobatic advantages, but Master Pakku adapts his waterbending with surprising versatility.",
+            introA: "Ty Lee utilizes Omashu's unconventional structures for acrobatic advantages, but Master Pakku adapts his waterbending with surprising versatility.",
             introB: "Pakku, unfazed by Omashu's chaotic design, draws water from hidden cisterns to counter Ty Lee's flighty, chi-blocking maneuvers."
         },
         'great-divide': {
@@ -640,7 +640,7 @@ export const tyleeArchetypeData = {
             introB: "Jeong Jeong, respecting Kyoshi's legacy, uses his fire with surgical precision, a defensive art against Ty Lee's acrobatic assault."
         },
         '_DEFAULT_LOCATION_': {
-            label: "The Chi-Blocking Acrobat vs. The Firebending Sage: Ty Lee vs. Jeong Jeong",
+            label: "The Firebending Sage vs. The Chi-Blocking Acrobat: Ty Lee vs. Jeong Jeong",
             introA: "Ty Lee, with her dazzling agility and ability to neutralize bending, challenges Jeong Jeong, the master of controlled, defensive fire.",
             introB: "Jeong Jeong, the firebending master who fears his own element, meets Ty Lee's energetic assault with disciplined restraint and profound wisdom."
         }
@@ -769,18 +769,7 @@ export const tyleeArchetypeData = {
             stressedByDamage: { Generic: [{ type: 'internal', line: "My chi is getting all tangled with all this bad energy around!" }, { type: 'spoken', line: "Please, stop destroying things! It's so unharmonious!" }] },
             thrivingInDamage: []
         },
-        onVictory: { Default: { Generic: [{ line: "Ta-da! That's how it's done!" }] } },
-        relationships: {
-            'mai': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "Aww, don't be so gloomy, Mai! Let's play!" }] } } }
-        }
-    },
-    techniques: [
-        { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
-        { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'], collateralImpact: 'none' },
-        { name: "Graceful Dodge", verb: 'dodge', object: 'incoming attack', type: 'Defense', power: 40, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
-        { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'flurry of chi-blocking strikes', type: 'Finisher', power: 85, requiresArticle: true, element: 'special', moveTags: ['melee_range', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening'], collateralImpact: 'none' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["Looks like your chi's... on vacation!"], postWin_overwhelming: ["Ta-da! That's how it's done!"], postWin_specific: { 'mai': "Sorry, Mai! Your aura is still a lovely shade of gloomy pink, though!" } },
-    relationships: {}
+        onVictory: { Default: { Generic: [{ line: "Ta-da! That's how it's done!" }] } }
+    }
+    // REMOVED: techniques, quotes, relationships
 };

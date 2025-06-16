@@ -364,7 +364,7 @@ export const kataraArchetypeData = {
         },
         'northern-water-tribe': {
             label: "Frozen Fortress vs. Mad King's Might: Katara vs. Bumi",
-            introA: "Katara, in her icy domain, creates formidable water and ice defenses against King Bumi's surprisingly powerful earth (and ice) assaults.",
+            introA: "Katara, in her icy domain, creates formidable water and ice defenses against King Bumi's surprisingly effective earth (and ice) assaults.",
             introB: "Bumi, finding the Northern Water Tribe's architecture 'interestingly breakable', joyfully hurls icebergs at Katara."
         },
         'ba-sing-se': {
@@ -385,7 +385,7 @@ export const kataraArchetypeData = {
         'boiling-rock': {
             label: "Scalding Streams vs. Rock Solid Riot: Katara vs. Bumi",
             introA: "Katara turns the Boiling Rock's steam and hot water into weapons, her fury matching Bumi's chaotic earthbending.",
-            introB: "Bumi, finding the volcanic rock delightful, starts 'improving' the prison's structure, much to Katara's alarm."
+            introB: "Sokka, focused on escape, finds his sister Katara an unexpectedly powerful ally (or sparring partner) in the volcanic prison."
         },
         'fire-nation-capital': {
             label: "Water's Defiance, Earth's Uproar: Katara & Bumi in Enemy City",
@@ -453,7 +453,7 @@ export const kataraArchetypeData = {
         'omashu': {
             label: "Omashu's Flow vs. Pinpoint Accuracy: Katara vs. Mai",
             introA: "Katara uses Omashu's varied levels and water sources for dynamic attacks, but Mai's aim is unerring.",
-            introB: "Mai, finding strategic perches in Omashu's stone city, unleashes volleys of knives, testing Katara's watery defenses."
+            introB: "Sokka, trying to use the mail system for a 'tactical advantage', mostly just gets soaked by Katara's waterbending."
         },
         'great-divide': {
             label: "Canyon Currents vs. Cliffside Caltrops: Katara vs. Mai",
@@ -495,7 +495,7 @@ export const kataraArchetypeData = {
         },
         'foggy-swamp': {
             label: "Misty Misdirection, Acrobatic Assault: Katara vs. Ty Lee",
-            introA: "Katara uses the swamp's murky waters and vines to try and hinder Ty Lee, whose agility allows her to navigate the treacherous terrain with ease.",
+            introA: "Katara uses the swamp's murky waters and tangled vines to try and hinder Ty Lee, whose agility allows her to navigate the treacherous terrain with ease.",
             introB: "Ty Lee, her cheerful aura contrasting with the gloomy swamp, bounces through the muck, her chi-blocking jabs finding Katara through the fog."
         },
         'boiling-rock': {
@@ -776,31 +776,6 @@ export const kataraArchetypeData = {
         relationships: {
             'azula': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "This time, Azula, you're not getting away." }] } } }
         }
-    },
-    techniquesFull: [
-        { name: "Water Whip", verb: 'lash', object: 'out with a water whip', type: 'Offense', power: 45, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
-        { name: "Ice Spears", verb: 'launch', object: 'volley of ice spears', type: 'Offense', power: 55, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
-        { name: "Water Shield", verb: 'raise', object: 'shield of water', type: 'Defense', power: 50, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense', 'construct_creation'], collateralImpact: 'none' },
-        { name: "Ice Prison", verb: 'create', object: 'ice prison', type: 'Utility', power: 60, requiresArticle: true, element: 'ice', moveTags: ['utility_control', 'debuff_disable', 'construct_creation', 'single_target'], setup: { name: 'Immobilized', duration: 2, intensity: 1.4 }, collateralImpact: 'low' },
-        { name: "Tidal Wave", verb: 'summon', object: 'massive tidal wave', type: 'Finisher', power: 90, requiresArticle: true, element: 'water', moveTags: ['area_of_effect_large', 'environmental_manipulation', 'channeled', 'requires_opening'], collateralImpact: 'high' },
-        { name: "Bloodbending", verb: 'control', object: "her opponent's body", type: 'Finisher', power: 100, element: 'special', moveTags: ['channeled', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening', 'highRisk', 'humiliation'], collateralImpact: 'none' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    techniquesCanteen: [
-        { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from her canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
-        { name: "Small Ice Darts", verb: 'form', object: 'small ice darts from her canteen', type: 'Offense', power: 35, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'limited_resource', 'precise'], collateralImpact: 'none', isCanteenMove: true },
-        { name: "Canteen Water Shield", verb: 'create', object: 'a small water shield from her canteen', type: 'Defense', power: 25, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
-        { name: "Slippery Puddle", verb: 'spill', object: 'water to create a slippery puddle', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
-        { name: "Canteen Whip", verb: 'lash', object: 'out with a small water whip from her canteen', type: 'Offense', power: 25, element: 'water', moveTags: ['melee_range', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    techniquesEasternAirTemple: [
-        { name: "Air Moisture Whip", verb: 'form', object: 'a whip from condensed air moisture', type: 'Offense', power: 35, element: 'water', moveTags: ['melee_range', 'ranged_attack_medium', 'limited_resource'], collateralImpact: 'none' },
-        { name: "Condensed Mist Shield", verb: 'gather', object: 'mist into a dense shield', type: 'Defense', power: 30, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none' },
-        { name: "Ground Moisture Trip", verb: 'extract', object: 'moisture to create a slippery patch', type: 'Utility', power: 25, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
-        { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from her canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["That's how you do it, for my family, for my tribe!"], postWin_overwhelming: ["That's what happens when you underestimate a waterbender!"], postWin_specific: { 'azula': "You're beaten. It's over." } },
-    relationships: { 'zuko': { relationshipType: "tense_alliance", stressModifier: 1.0, resilienceModifier: 1.1 }, 'azula': { relationshipType: "bitter_rivalry", stressModifier: 1.5, resilienceModifier: 1.0 } }
+    }
+    // REMOVED: techniquesFull, techniquesCanteen, techniquesEasternAirTemple, quotes, relationships
 };

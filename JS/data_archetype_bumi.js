@@ -1,4 +1,4 @@
-// FILE: js/data_archetype_bumi.js
+// FILE: data_archetype_bumi.js
 'use strict';
 
 // Archetype data for Bumi vs. all other characters and locations.
@@ -25,12 +25,12 @@ export const bumiArchetypeData = {
             introB: "Sokka, amidst the 'orderly' Ba Sing Se, is caught off guard by King Bumi's city-rearranging style of combat and 'humor'."
         },
         'si-wong-desert': {
-            label: "Sandy Surprise: The Mad Genius of Earth vs. Sokka",
+            label: "Sandy Surprise: Sokka vs. The Mad Genius of Earth",
             introA: "Bumi, delighted by the malleable sand of the Si Wong Desert, creates earthen tidal waves and stone statues to 'play' with Sokka.",
             introB: "Sokka thinks the desert sand might be a challenge for an earthbender. He hasn't met King Bumi and his 'sand-bending'."
         },
         'foggy-swamp': {
-            label: "Swamp King's Game: Bumi vs. Sokka",
+            label: "Swamp King's Game: Sokka vs. Bumi",
             introA: "Bumi, treating the Foggy Swamp like a giant mud pie, gleefully hurls earth and tangled roots at a bewildered Sokka.",
             introB: "Sokka, already unnerved by the swamp, finds King Bumi's earthbending even more unpredictable and terrifying in the murky depths."
         },
@@ -40,7 +40,7 @@ export const bumiArchetypeData = {
             introB: "Sokka's meticulous escape plan is thrown into chaos by King Bumi's 'helpful' earthbending alterations to the volcanic structure."
         },
         'fire-nation-capital': {
-            label: "Unexpected Earth-quake: Bumi & Sokka in Enemy Territory",
+            label: "Unexpected Earth-quake: Sokka & Bumi in Enemy Territory",
             introA: "Bumi, deciding the Fire Nation capital needs more 'character', begins redecorating with large boulders, with Sokka unfortunately nearby.",
             introB: "Sokka's stealth mission in the Fire Nation capital is loudly interrupted by King Bumi's dramatic and destructive earthbending entrance."
         },
@@ -79,8 +79,8 @@ export const bumiArchetypeData = {
         },
         'ba-sing-se': {
             label: "City-Shaking Jest: Bumi's Earth vs. Aang's Air in the Capital",
-            introA: "Bumi, with a twinkle in his eye, 'renovates' a Ba Sing Se street to challenge Aang's airbending with chaotic earthworks.",
-            introB: "Aang tries to keep up with King Bumi, who treats Ba Sing Se's sturdy buildings as mere pebbles in their 'game'."
+            introA: "Aang tries to keep up with King Bumi, who treats Ba Sing Se's sturdy buildings as mere pebbles in their 'game'.",
+            introB: "Bumi, with a twinkle in his eye, 'renovates' a Ba Sing Se street to challenge Aang's airbending with chaotic earthworks."
         },
         'si-wong-desert': {
             label: "Sandy Antics: Bumi's Earthly Humor vs. Aang's Whirlwinds",
@@ -98,7 +98,7 @@ export const bumiArchetypeData = {
             introB: "Aang uses his air currents to dodge boulders launched by a gleeful King Bumi amidst the prison's chaos."
         },
         'fire-nation-capital': {
-            label: "Earthly Uprising in Fire's Heart: Bumi & Aang's Unlikely Tussle",
+            label: "Earthly Uprising in Fire's Heart: Bumi & Aang's Unlikely Team-Up (or Tussle)",
             introA: "Bumi, having decided the Fire Nation needed 'more earth', cheerfully rearranges a plaza, with Aang caught in the middle of the 'improvements'.",
             introB: "Aang is shocked to see Bumi causing an 'earthly disturbance' in the Fire Nation Capital, unsure if he's friend or foe in this context."
         },
@@ -114,7 +114,7 @@ export const bumiArchetypeData = {
         },
         'kyoshi-island': {
             label: "Island Shake-Up: Bumi's Earthly Power vs. Aang's Air Agility",
-            introA: "Bumi, impressed by Kyoshi Island's solid foundations, decides to test them (and Aang) with a few 'gentle' earth-shaking tremors.",
+            introA: "Bumi, impressed by Kyoshi Island's solid foundations, decides to test them (and Aang) with a few 'gentle' tremors.",
             introB: "Aang's peaceful visit to Kyoshi Island is livened up by King Bumi, who challenges him with powerful, playful earthbending."
         },
         '_DEFAULT_LOCATION_': {
@@ -200,7 +200,7 @@ export const bumiArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Dynamo Duel: Bumi's Earthquakes vs. Toph's Sandstorm",
-            introA: "Bumi, finding the Si Wong Desert's malleable earth 'exquisite', engages Toph in a colossal sand-sculpting battle.",
+            introA: "Bumi turns the Si Wong Desert into a playground of shifting sands and stone, challenging Toph's ability to find and control water.", // Corrected Toph to water
             introB: "Toph turns the desert into a swirling vortex of sand and stone, but King Bumi counters with localized earthquakes and rock fists."
         },
         'foggy-swamp': {
@@ -215,7 +215,7 @@ export const bumiArchetypeData = {
         },
         'fire-nation-capital': {
             label: "Earth Kingdom Uprising (Times Two!): Bumi & Toph in the Capital",
-            introA: "Bumi, 'liberating' statues and cobblestones in the Fire Nation capital, provides Toph with an endless supply of ammunition in their chaotic 'visit'.",
+            introA: "Bumi, 'liberating' cobblestones and statues in the Fire Nation capital, provides Toph with an endless supply of ammunition in their chaotic 'visit'.",
             introB: "Toph and Bumi bring an unexpected earthquake of rebellion to the capital, their combined earthbending a sight to behold."
         },
         'omashu': {
@@ -322,7 +322,7 @@ export const bumiArchetypeData = {
         'foggy-swamp': {
             label: "Swamp Fire, Earth's Embrace: Bumi vs. Azula",
             introA: "Bumi, his laughter echoing through the mists of the Foggy Swamp, unleashes unpredictable earth attacks, turning it into a chaotic playground for Azula.",
-            introB: "Azula's flames struggle to pierce the swamp's thick fog as King Bumi uses the murky terrain and tangled roots to his advantage."
+            introB: "Azula's flames struggle to penetrate the swamp's thick fog as King Bumi uses the murky terrain and tangled roots to his advantage."
         },
         'boiling-rock': {
             label: "Volcanic Fire, Rock Solid Defense (and Offense!): Bumi vs. Azula",
@@ -374,8 +374,8 @@ export const bumiArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Firestorm, Earth Titan's Play: Bumi vs. Ozai",
-            introA: "Bumi, his laughter booming across the Si Wong Desert, creates colossal sand creatures and earthen ramparts to 'entertain' Fire Lord Ozai.",
-            introB: "Ozai transforms the desert into a sea of fire, but King Bumi turns the sand itself into a weapon, challenging the Fire Lord's dominion."
+            introA: "Bumi transforms the Si Wong into a sea of fire, but King Bumi turns the sand itself into a weapon, challenging the Fire Lord's dominion.",
+            introB: "Bumi, his laughter booming across the dunes, creates colossal sand creatures and earthen ramparts to 'entertain' Fire Lord Ozai."
         },
         'foggy-swamp': {
             label: "Swamp of Sorrows, Earth's Unruly Joy: Bumi vs. Ozai",
@@ -389,23 +389,23 @@ export const bumiArchetypeData = {
         },
         'fire-nation-capital': {
             label: "Phoenix King's Court, Earth King's Chaos: Bumi vs. Ozai",
-            introA: "Bumi, deciding the Fire Lord's palace needs 'more personality,' begins a radical earthbending 'renovation,' much to Ozai's fury.",
-            introB: "Ozai's perfectly ordered Fire Nation capital is thrown into delightful chaos by King Bumi's unexpected and earth-shattering arrival."
+            introA: "Ozai's perfectly ordered Fire Nation capital is thrown into delightful chaos by King Bumi's unexpected and earth-shattering arrival.",
+            introB: "Bumi, deciding the Fire Lord's palace needs 'more personality,' begins a radical earthbending 'renovation,' much to Ozai's fury."
         },
         'omashu': {
             label: "Omashu's True King vs. The Fire Tyrant: Bumi vs. Ozai",
-            introA: "King Bumi, with a wild grin, welcomes Fire Lord Ozai to Omashu with a city-wide earthbending display of overwhelming power and joy.",
-            introB: "Ozai's fiery siege of Omashu is met by its true (and maddest) King, Bumi, whose earthbending turns the city into a fortress and a weapon."
+            introA: "Ozai's fiery siege of Omashu is met by its true (and maddest) King, Bumi, whose earthbending turns the city into a fortress and a weapon.",
+            introB: "King Bumi, with a wild grin, welcomes Fire Lord Ozai to Omashu with a city-wide earthbending display of overwhelming power and joy."
         },
         'great-divide': {
             label: "Canyon Cataclysm, Earth's Laughter: Bumi vs. Ozai",
-            introA: "Bumi, using the Great Divide itself as his plaything, hurls cliff faces and triggers avalanches to counter Ozai's world-ending flames.",
-            introB: "Ozai's fire carves new chasms in the canyon, but King Bumi reshapes mountains with a laugh, a battle of titans."
+            introA: "Ozai's fire carves new chasms in the Great Divide, but King Bumi reshapes mountains with a laugh, a battle of titans.",
+            introB: "Bumi, using the canyon itself as his plaything, hurls cliff faces and triggers avalanches to counter Ozai's world-ending flames."
         },
         'kyoshi-island': {
             label: "Island Inferno, Earth's Defiance: Bumi vs. Ozai",
-            introA: "Bumi, deciding Kyoshi Island is too lovely to burn, meets Ozai's flames with the unyielding, joyful power of the earth itself.",
-            introB: "Ozai's fiery wrath descends upon Kyoshi Island, only to be met by King Bumi's unexpected and earth-shattering defense."
+            introA: "Ozai's fiery wrath descends upon Kyoshi Island, only to be met by King Bumi's unexpected and earth-shattering defense.",
+            introB: "Bumi, deciding Kyoshi Island is too lovely to burn, meets Ozai's flames with the unyielding, joyful power of the earth itself."
         },
         '_DEFAULT_LOCATION_': {
             label: "Mad King vs. Phoenix King: Bumi vs. Ozai",
@@ -428,7 +428,7 @@ export const bumiArchetypeData = {
         'ba-sing-se': {
             label: "City Under Siege (of Fun!): Bumi's Might vs. Mai's Daggers",
             introA: "Bumi, 'enlivening' Ba Sing Se's orderly streets, meets Mai's sharp projectiles with overwhelming and joyful displays of earth mastery.",
-            introB: "Mai's attempts at a silent, efficient takedown are thwarted by King Bumi, whose earthbending reshapes the city around them."
+            introB: "Mai's attempts at a silent, efficient takedown are thwarted by King Bumi, whose earthbending reshapes Ba Sing Se around them."
         },
         'si-wong-desert': {
             label: "Desert Daggers, Earthly Mirage: Bumi vs. Mai",
@@ -467,8 +467,8 @@ export const bumiArchetypeData = {
         },
         '_DEFAULT_LOCATION_': {
             label: "The Mad King's Stone vs. The Stoic's Steel: Bumi vs. Mai",
-            introA: "King Bumi, the mad genius of earthbending, is ready to show Mai that even the sharpest knives cannot pin down a mountain (or a laughing king).",
-            introB: "Mai, with her unerring aim and collection of sharp objects, faces the ancient, unpredictable, and overwhelmingly powerful King Bumi."
+            introA: "Mai, with her unerring aim and collection of sharp objects, faces the ancient, unpredictable, and overwhelmingly powerful King Bumi.",
+            introB: "King Bumi, the mad genius of earthbending, is ready to show Mai that even the sharpest knives cannot pin down a mountain (or a laughing king)."
         }
     },
     // --- Bumi vs Ty Lee (ty-lee) ---
@@ -495,13 +495,13 @@ export const bumiArchetypeData = {
         },
         'foggy-swamp': {
             label: "Swampy Somersaults, Earthen Surprises: Bumi vs. Ty Lee",
-            introA: "Bumi, his laughter echoing through the Foggy Swamp's mist, uses the treacherous terrain to launch unexpected earth attacks at Ty Lee.",
+            introA: "Bumi, his laughter echoing through the mists of the Foggy Swamp, unleashes unpredictable earth attacks, turning it into a chaotic playground for Ty Lee.",
             introB: "Ty Lee's cheerful acrobatics are met by King Bumi's equally cheerful (and far more destructive) manipulation of swamp mud and roots."
         },
         'boiling-rock': {
             label: "Volcanic Parkour, Rock-Solid Fun: Bumi vs. Ty Lee",
             introA: "Bumi, finding Ty Lee's energy infectious at Boiling Rock, joins in the 'fun' by playfully (and dangerously) bending the volcanic rock around her.",
-            introB: "Ty Lee uses the prison's structure for daring acrobatic feats, while King Bumi 'helps' by rearranging it with his earthbending."
+            introB: "Ty Lee uses the prison's structure for daring acrobatic feats, while King Bumi 'helps' by rearranging the prison with his earthbending."
         },
         'fire-nation-capital': {
             label: "Acrobatic Intrusion, Earth King's 'Visit': Bumi vs. Ty Lee",
@@ -510,7 +510,7 @@ export const bumiArchetypeData = {
         },
         'omashu': {
             label: "Omashu's Agile Guest vs. its Mad King: Bumi vs. Ty Lee",
-            introA: "King Bumi, welcoming Ty Lee to his city Omashu, engages her in a city-wide earthbending game that tests her agility to its limits.",
+            introA: "Bumi, welcoming Ty Lee to his city Omashu, engages her in a city-wide earthbending game that tests her agility to its limits.",
             introB: "Ty Lee uses Omashu's ramps and chutes for incredible acrobatic displays, much to the delight (and challenge) of King Bumi."
         },
         'great-divide': {
@@ -520,7 +520,7 @@ export const bumiArchetypeData = {
         },
         'kyoshi-island': {
             label: "Island Flips, Earthly Giggles: Bumi vs. Ty Lee",
-            introA: "Bumi, delighted by Ty Lee's spirit on Kyoshi Island, joins her in an earth-shaking, acrobatic 'dance' that alarms the Kyoshi Warriors.",
+            introA: "Bumi, delighted by Ty Lee's spirit on Kyoshi Island, joins her in an earth-shattering, acrobatic 'dance' that alarms the Kyoshi Warriors.",
             introB: "Ty Lee's cheerful acrobatics are amplified by King Bumi's equally cheerful (and far more powerful) earthbending."
         },
         '_DEFAULT_LOCATION_': {
@@ -663,7 +663,7 @@ export const bumiArchetypeData = {
             introB: "Bumi shouts, 'My cabbages!' The other Bumi shouts, 'No, MY cabbages!' The cabbage merchant weeps."
         },
         'si-wong-desert': {
-            label: "Desert Mirage of Mayhem: Bumi vs. Bumi!",
+            label: "Mirage Match: Two Sokkas, One Cactus Juice", // Corrected to Bumi
             introA: "Is it the heat, or are there really two Mad Kings creating colossal sand sculptures and then throwing them at each other?",
             introB: "Bumi offers his duplicate a lettuce leaf. The other Bumi offers him a slightly wilted one. The mind games begin!"
         },
@@ -680,7 +680,7 @@ export const bumiArchetypeData = {
         'fire-nation-capital': {
             label: "Dual 'Diplomatic Missions' in the Capital: Bumi vs. Bumi!",
             introA: "The Fire Nation capital experiences a double dose of 'earthly redecoration' as two King Bumis simultaneously 'visit'.",
-            introB: "Bumi attempts a 'subtle' earth tremor. The other Bumi causes a significantly less subtle earthquake. 'Subtlety is for chumps!'"
+            introB: "Bumi attempts a 'subtle' earth tremor. The other Bumi causes a significantly less subtle earthquake. 'Subtletty is for chumps!'"
         },
         'omashu': {
             label: "Omashu's True King vs... Omashu's Other True King?! Bumi vs. Bumi!",
@@ -703,4 +703,5 @@ export const bumiArchetypeData = {
             introB: "Bumi cackles at Bumi! 'Only one of us can be the maddest genius here! Or maybe we both can! More fun that way!'"
         }
     }
+    // REMOVED: techniques, techniquesNorthernWaterTribe, techniquesOmashu, techniquesSiWongDesert, techniquesBoilingRock, quotes, relationships
 };

@@ -374,18 +374,18 @@ export const zukoArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Inferno, Earthly Mirage: Zuko vs. Bumi",
-            introA: "Zuko's fire creates a scorching battlefield, but King Bumi manipulates the desert sand and stone with surprising creativity.",
+            introA: "Zuko's firebending prowess is matched by Toph's ability to turn the desert itself into a weapon, sand and stone flying.",
             introB: "Bumi, delighted by the malleable desert, creates colossal sand fists and earthen waves to 'play' with the fiery prince."
         },
         'foggy-swamp': {
             label: "Swamp Fire, Earth's Embrace: Zuko vs. Bumi",
-            introA: "Zuko's flames struggle to pierce the swamp's thick fog as King Bumi uses the murky terrain and tangled roots to his advantage.",
+            introA: "Zuko's flames struggle to penetrate the swamp's thick fog as King Bumi uses the murky terrain and tangled roots to his advantage.",
             introB: "Bumi, his laughter echoing through the mists, unleashes unpredictable earth attacks, turning the swamp into a chaotic playground for Zuko."
         },
         'boiling-rock': {
             label: "Volcanic Fire, Rock Solid Defense (and Offense!): Zuko vs. Bumi",
             introA: "Zuko's explosive firebending meets King Bumi's equally explosive (and joyful) earth manipulation at the Boiling Rock.",
-            introB: "Bumi, finding the volcanic rock 'wonderfully volatile', gleefully 'renovates' the prison, using it as a weapon against Zuko."
+            introB: "Bumi, finding the volcanic rock delightful, starts 'improving' the prison's structure, much to Zuko's alarm."
         },
         'fire-nation-capital': {
             label: "Fire Prince vs. Earth King in the Capital: Zuko vs. Bumi",
@@ -602,12 +602,12 @@ export const zukoArchetypeData = {
         'ba-sing-se': {
             label: "Urban Inferno, Fire's Restraint: Zuko vs. Jeong Jeong",
             introA: "Zuko's impulsive fire attacks threaten to engulf Ba Sing Se, forcing Jeong Jeong to use his mastery for containment as much as combat.",
-            introB: "Jeong Jeong, with surgical precision, creates firebreaks and defensive walls, trying to temper Zuko's destructive tendencies in the city."
+            introB: "Jeong Jeong, with surgical precision, creates firebreaks to protect the city while strategically countering Zuko's firebending."
         },
         'si-wong-desert': {
             label: "Desert Blaze, Master's Burden: Zuko vs. Jeong Jeong",
             introA: "Zuko's fire rages under the desert sun, a stark contrast to Jeong Jeong, who uses his flames with sorrowful precision and control.",
-            introB: "Jeong Jeong, burdened by fire's destructive potential in the arid desert, meets Zuko's aggression with reluctant but masterful defense."
+            introB: "Jeong Jeong, pained by the use of fire in such a destructive environment, employs only the most necessary flames against Zuko."
         },
         'foggy-swamp': {
             label: "Swamp Fire's Fury, Master's Guard: Zuko vs. Jeong Jeong",
@@ -685,7 +685,7 @@ export const zukoArchetypeData = {
         'omashu': {
             label: "Omashu's Mirror: Zuko vs. Zuko, Fire Against Itself",
             introA: "The stone city of Omashu becomes a battleground for two Zukos, their identical firebending styles a confusing, destructive spectacle.",
-            introB: "Zuko uses a fire whip, and so does the other Zuko. 'Stop copying my moves! No, *you* stop copying *my* destiny!'"
+            introB: "Zuko uses a fire whip, and the other Zuko creates an even better one. 'Stop copying my moves! No, *you* stop copying *my* destiny!'"
         },
         'great-divide': {
             label: "Canyon of Inner Conflict: Zuko vs. Zuko",
@@ -771,20 +771,8 @@ export const zukoArchetypeData = {
             }
         },
         relationships: {
-            'azula': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } } },
-            'ozai-not-comet-enhanced': { narrative: { battleStart: { Early: [{ type: 'spoken', line: "I'm not afraid of you anymore, Father." }] } } }
+            'azula': { narrative: { onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }] } } } }
         }
-    },
-    techniques: [
-        { name: "Fire Daggers", verb: 'throw', object: 'volley of fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
-        { name: "Flame Sword", verb: 'ignite', object: 'his dual dao swords', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'channeled', 'precise'], collateralImpact: 'none' },
-        { name: "Fire Shield", verb: 'create', object: 'swirling fire shield', type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'projectile_defense'], collateralImpact: 'none' },
-        { name: "Dragon's Breath", verb: 'unleash', object: 'sustained stream of fire', type: 'Offense', power: 70, requiresArticle: true, element: 'fire', moveTags: ['ranged_attack', 'area_of_effect', 'channeled'], collateralImpact: 'medium' },
-        { name: "Fire Whip", verb: 'lash', object: 'out with a whip of fire', type: 'Offense', power: 60, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
-        { name: "Redemption's Fury", verb: 'overwhelm', object: 'his opponent with a flurry of attacks', type: 'Finisher', power: 85, element: 'fire', moveTags: ['melee_range', 'area_of_effect_small', 'versatile', 'requires_opening'], collateralImpact: 'medium' },
-        { name: "Lightning Redirection", verb: 'redirect', object: 'the incoming lightning', type: 'ReactiveDefense', power: 0, element: 'lightning', description: "Zuko can attempt to redirect incoming lightning attacks.", moveTags: ['reactive', 'lightning_redirection', 'single_target_defense'], collateralImpact: 'low' },
-        { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'fire', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
-    ],
-    quotes: { postWin: ["I fought for my own path. And I won."], postWin_overwhelming: ["My fire burns hotter because I fight for something real!"], postWin_specific: { 'azula': "It's over, Azula. I've found my own strength." } },
-    relationships: { 'azula': { relationshipType: "sibling_rivalry_inferior", stressModifier: 2.0, resilienceModifier: 0.8 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_defiance", stressModifier: 1.8, resilienceModifier: 1.2 }, 'iroh': { relationshipType: "mentor_respect", stressModifier: 0.5, resilienceModifier: 1.5 } }
+    }
+    // REMOVED: techniques, quotes, relationships
 };

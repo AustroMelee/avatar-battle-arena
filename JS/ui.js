@@ -7,7 +7,7 @@ import { simulateBattle } from './engine_battle-engine-core.js';
 import { showLoadingState, showResultsState } from './ui_loading-states.js';
 import { resetBattleResultsUI } from './ui_battle-results.js';
 import { transformEventsToAnimationQueue } from './battle_log_transformer.js';
-import { initializeSimulationManagerDOM, setSimulationMode, resetSimulationManager } from './simulation_mode_manager.js';
+import { startSimulation, setSimulationMode, resetSimulationManager } from './simulation_mode_manager.js';
 import { initializeDevModeUI } from './dev_mode_manager.js';
 import { populateCharacterGrids } from './ui_character-selection.js';
 import { populateLocationGrid, updateEnvironmentalSummary } from './ui_location-selection.js';
@@ -15,7 +15,7 @@ import { updateMomentumDisplay, updateEscalationDisplay } from './ui_momentum-es
 import { renderArchetypeDisplay } from './ui_archetype-display.js';
 import { resolveArchetypeLabel } from './engine_archetype-engine.js';
 import { setupDetailedLogControls } from './ui_battle-results.js';
-import { characters } from './data_characters.js';
+import { characters } from './data_characters.js'; // This is where base character data should be imported from
 
 // Centralized DOM references used across UI modules, or for orchestration
 const DOM_SHARED = {
@@ -83,7 +83,11 @@ function updateArchetypeInfo() {
     const fighter2Id = DOM_SHARED.fighter2Select?.value || null;
     const locationId = DOM_SHARED.locationSelect?.value || null;
     
-    const archetypeData = resolveArchetypeLabel(fighter1Id, fighter2Id, locationId);
+    // Pass full character data objects to resolveArchetypeLabel
+    const fighter1Data = characters[fighter1Id];
+    const fighter2Data = characters[fighter2Id];
+
+    const archetypeData = resolveArchetypeLabel(fighter1Id, fighter2Id, locationId, fighter1Data, fighter2Data);
     renderArchetypeDisplay(archetypeData, {
         container: DOM_SHARED.archetypeContainer,
         headline: DOM_SHARED.archetypeHeadline,
