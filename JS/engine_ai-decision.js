@@ -328,7 +328,7 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
 }
 
 // Helper function to calculate energy costs
-function calculateEnergyCost(move, conditions, actorEnergy) {
+function calculateEnergyCost(move, conditions) {
     const energyCostEstimate = Math.round((move.power || 0) * 0.22) + 4;
     const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
     const energyCostModifier = envModForElement.energyCostModifier || 1.0;
@@ -338,8 +338,7 @@ function calculateEnergyCost(move, conditions, actorEnergy) {
         energyCostEstimate,
         envModForElement,
         energyCostModifier,
-        estimatedEnergyCostWithEnv,
-        isAffordable: estimatedEnergyCostWithEnv <= actorEnergy
+        estimatedEnergyCostWithEnv
     };
 }
 
@@ -365,10 +364,11 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
         let isEscalationFinisherAttempt = false;
 
         // Calculate energy costs
-        const energyCosts = calculateEnergyCost(move, conditions, actorEnergy);
+        const energyCosts = calculateEnergyCost(move, conditions);
+        const isAffordable = energyCosts.estimatedEnergyCostWithEnv <= actorEnergy;
 
         // Energy-based move filtering
-        if (!energyCosts.isAffordable) {
+        if (!isAffordable) {
             if (move.name === "Struggle") {
                 weight = 1.0; // Always allow Struggle
             } else {
@@ -649,8 +649,8 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     // Filter moves based on energy costs
     weightedMoves = weightedMoves.filter(moveInfo => {
         if (!moveInfo.move) return false;
-        const energyCosts = calculateEnergyCost(moveInfo.move, conditions, actor.energy);
-        return energyCosts.isAffordable || moveInfo.move.name === "Struggle";
+        const energyCosts = calculateEnergyCost(moveInfo.move, conditions);
+        return energyCosts.estimatedEnergyCostWithEnv <= actor.energy;
     });
 
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
