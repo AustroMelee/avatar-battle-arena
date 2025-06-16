@@ -1,4 +1,4 @@
-// FILE: js/engine_narrative-engine.js
+// FILE: engine_narrative-engine.js
 'use strict';
 
 // ====================================================================================
@@ -10,7 +10,8 @@
 
 // --- UPDATED IMPORTS ---
 import { effectivenessLevels } from './data_narrative_effectiveness.js';
-import { phaseTemplates, BATTLE_PHASES } from './data_narrative_phases.js'; // Corrected import path, added BATTLE_PHASES
+import { phaseTemplates } from './data_narrative_phases.js';
+import { BATTLE_PHASES } from './engine_battle-phase.js'; // NEW: Correct import for BATTLE_PHASES
 import { impactPhrases } from './data_narrative_outcomes.js';
 import { collateralImpactPhrases } from './data_narrative_collateral.js';
 import { introductoryPhrases } from './data_narrative_introductions.js';
@@ -356,7 +357,7 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
         impactSentencePool = impactPhrases.REPOSITION?.[impactSentenceKey];
     } else if (move.type === 'Defense' || move.type === 'Utility') {
         const isReactive = opponent?.lastMove?.type === 'Offense';
-        impactSentencePool = isReactive ? impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE;
+        impactSentencePool = impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE;
     } else {
         impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
