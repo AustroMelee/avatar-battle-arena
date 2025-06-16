@@ -9,7 +9,7 @@ import { characters } from './data_characters.js';
 import { locationConditions } from './location-battle-conditions.js';
 // --- UPDATED IMPORTS ---
 import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases.js'; // Corrected import path (now on one line)
-import { locations } from './locations.js'; // NEW: Import locations for locationPhaseOverrides
+import { locations, locationPhaseOverrides } from './locations.js'; // NEW: Import locations for locationPhaseOverrides
 // --- END UPDATED IMPORTS ---
 import { selectMove, updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';

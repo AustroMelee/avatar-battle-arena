@@ -75,3 +75,36 @@ export const locations = {
         featureB: "quaint village houses",
     },
 };
+
+export const locationPhaseOverrides = {
+    'eastern-air-temple': {
+        pokingDuration: 2 // Air temple battles tend to start more aggressively
+    },
+    'northern-water-tribe': {
+        pokingDuration: 3 // Water tribe battles are more methodical
+    },
+    'ba-sing-se': {
+        pokingDuration: 2 // Urban environment leads to quicker escalation
+    },
+    'si-wong-desert': {
+        pokingDuration: 1 // Desert heat makes fighters more aggressive
+    },
+    'foggy-swamp': {
+        pokingDuration: 3 // Fog makes fighters more cautious
+    },
+    'boiling-rock': {
+        pokingDuration: 1 // Dangerous environment forces quick action
+    },
+    'fire-nation-capital': {
+        pokingDuration: 2 // Urban environment with industrial hazards
+    },
+    'omashu': {
+        pokingDuration: 2 // Vertical environment encourages quick action
+    },
+    'great-divide': {
+        pokingDuration: 1 // Open environment leads to quick engagement
+    },
+    'kyoshi-island': {
+        pokingDuration: 2 // Balanced environment
+    }
+};
