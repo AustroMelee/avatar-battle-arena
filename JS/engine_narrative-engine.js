@@ -5,7 +5,7 @@
 // - Overhauled generateActionDescriptionObject for clarity and consistency.
 // - Simplified generateTurnNarrationObjects to focus on its core role.
 
-import { introductoryPhrases, impactPhrases, genericLines, conjugatePresent } from './data_narrative_flavor.js';
+import { introductoryPhrases, impactPhrases, genericLines, conjugatePresent } from './narrative-flavor.js';
 import { effectivenessLevels } from './move-interaction-matrix.js';
 import { escalationStateNarratives } from './data_narrative_escalation.js';
 import { phaseTemplates } from './data_narrative_phases.js';
