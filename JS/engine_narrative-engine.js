@@ -457,14 +457,15 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
         narrativeEventsForAction.forEach(event => {
             if (event.quote) {
                 const actorNameSpan = `<span class="char-${event.actor.id}">${event.actor.name}</span>`;
-                const quoteText = event.quote.line || event.quote; // FIX: Use the .line property or the quote itself if it's a string
-                const dialogueHtml = `<p class="dialogue-line">${actorNameSpan} says, "<em>${quoteText}</em>"</p>`;
+                const rawQuoteLine = event.quote.line || event.quote;
+                const substitutedQuoteLine = substituteTokens(rawQuoteLine, actor, defender, { actorName: actor.name, opponentName: defender.name });
+                const dialogueHtml = `<p class="dialogue-line">${actorNameSpan} says, "<em>${substitutedQuoteLine}</em>"</p>`;
                 
                 narrationObjects.push({
                     type: 'dialogue_event',
                     actorId: event.actor.id,
-                    characterName: event.actor.name,
-                    text: `${event.actor.name} says, "${quoteText}"`,
+                    characterName: actor.name,
+                    text: `${actor.name} says, "${substitutedQuoteLine}"`,
                     html_content: dialogueHtml,
                     isDialogue: true,
                     dialogueType: 'quote' 

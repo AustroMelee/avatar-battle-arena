@@ -39,17 +39,15 @@ export const omashuConditions = {
         ]
     },
     environmentalModifiers: {
-        earth: { damageMultiplier: 1.5, energyCostModifier: 0.8, description: "Earthbending tears Omashu apart with ease and low energy cost." },
-        metal: { damageMultiplier: 1.2, energyCostModifier: 0.95, description: "Metalbending can warp the city's infrastructure." }, // Re-added metal modifier
-        fire: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Fire performs at baseline, but collateral impact varies by bender's ethics." }, // Neutral, but affected by character ethics
-        lightning: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Lightning performs at baseline, but collateral impact varies by bender's ethics." }, // Neutral, but affected by character ethics
-        water: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Waterbending is severely limited by scarce water sources." }, // UPDATED: Severe penalty for water
-        ice: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Ice bending is severely limited by scarce water sources." }, // NEW: Consistent with water
-        physical: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Verticality and precarious footing can hinder physical combat." },
-        // NEW: Modifiers for general move tags affected by environment
-        ranged_attack: { damageMultiplier: 0.6, energyCostModifier: 1.3, description: "Chute systems and urban verticality create severe line-of-sight disruptions for ranged attacks." }, // NEW: Severe penalty for ranged
-        mobility_move: { damageMultiplier: 1.5, energyCostModifier: 0.7, description: "The delivery chutes and platforms offer maximum agility exploitation." }, // NEW: Major buff for mobility
-        evasive: { damageMultiplier: 1.5, energyCostModifier: 0.7, description: "The delivery chutes and platforms offer maximum evasive opportunities." } // NEW: Major buff for evasive
+        air: { damage: 10, energy: -5, reason: "The open chutes and verticality create strong air currents." },
+        fire: { damage: -10, energy: 5, reason: "The stone and metal environment offers little to burn." },
+        earth: { damage: 25, energy: -20, reason: "The entire city of Omashu is a paradise for earthbenders." },
+        water: { damage: -40, energy: 30, reason: "Water sources are very limited in the stone city." },
+        ice: { damage: -50, energy: 40, reason: "The lack of water makes icebending nearly impossible." },
+        physical: { damage: 5, energy: 0, reason: "The chutes and structures provide many opportunities for unconventional attacks." },
+        mobility_move: { damage: 25, energy: -20, reason: "The delivery system is a playground for highly mobile fighters." },
+        evasive: { damage: 15, energy: -10, reason: "The complex network of chutes offers endless escape routes." },
+        ranged_attack: { damage: -25, energy: 15, reason: "The twisting chutes make it difficult to maintain line of sight." }
     },
     disabledElements: [],
     notes: "A massive, tiered city of stone perfect for earthbenders. Gravity is a significant factor. Water is scarce. Offers excellent parkour and evasive opportunities, but severely hinders ranged attacks."

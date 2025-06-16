@@ -5,12 +5,19 @@
 
 import { locations } from './locations.js';
 import { locationConditions } from './location-battle-conditions.js';
+import { getModifierDescription } from './utils_description-generator.js';
 
 let locationGrid = null;
 let locationNameDisplay = null;
 let locationSelect = null; // Hidden input for value
 let locationEnvironmentSummary = null;
 let onSelectionChangeCallback = null;
+
+// Capitalizes the first letter of a string.
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// Formats an element or move type name for display.
+const formatTypeName = (type) => capitalize(type.replace(/_/g, ' '));
 
 /**
  * Creates a single location card DOM element.
@@ -165,4 +172,45 @@ export function populateLocationGrid(locGridElement, locNameDisplayElement, locS
     if (locationEnvironmentSummary) {
         locationEnvironmentSummary.innerHTML = 'Select a battlefield to see its environmental characteristics.';
     }
+}
+
+/**
+ * Displays the details of a selected location in the UI.
+ * @param {object} location - The location object from location-battle-conditions.js.
+ */
+export function displayLocationDetails(location) {
+    const detailsElement = document.getElementById('location-details');
+    if (!detailsElement) return;
+
+    // Build the HTML for the location details
+    let environmentalImpactHtml = '';
+    if (location.environmentalModifiers) {
+        for (const type in location.environmentalModifiers) {
+            const modifier = location.environmentalModifiers[type];
+            const typeName = formatTypeName(type);
+
+            // Generate descriptions for damage and energy
+            const damageDesc = getModifierDescription(modifier.damage, 'damage');
+            const energyDesc = getModifierDescription(modifier.energy, 'energy');
+
+            // Build the final sentence
+            let descriptionSentence = `<span class="location-modifier-type">${typeName}:</span> Attacks are <span class="location-modifier-value">${damageDesc}</span>`;
+            if (modifier.energy !== 0) {
+                descriptionSentence += ` and their techniques are <span class="location-modifier-value">${energyDesc}</span>`;
+            }
+            descriptionSentence += `. <em>(${modifier.reason})</em>`;
+
+            environmentalImpactHtml += `<p>${descriptionSentence}</p>`;
+        }
+    }
+
+    detailsElement.innerHTML = `
+        <h3>${location.name}</h3>
+        <p>${location.description}</p>
+        <div class="elemental-impact">
+            <h4>Elemental & Tactical Impact:</h4>
+            ${environmentalImpactHtml}
+        </div>
+        <p><strong>Fragility:</strong> ${location.fragility}%</p>
+    `;
 }

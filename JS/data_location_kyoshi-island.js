@@ -40,16 +40,15 @@ export const kyoshiIslandConditions = {
         ]
     },
     environmentalModifiers: {
-        water: { damageMultiplier: 1.3, energyCostModifier: 0.8, description: "Waterbending unleashes the ocean's might." }, // UPDATED: More potent
-        ice: { damageMultiplier: 1.3, energyCostModifier: 0.8, description: "Ice bending is exceptionally potent by the ocean." },    // NEW: For consistency with water
-        fire: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Fire struggles slightly against pervasive coastal moisture." }, // UPDATED: Slight penalty
-        lightning: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Lightning is diffused by coastal moisture." }, // NEW: Consistent with fire
-        earth: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Earthbending can damage village structures and terrain." },
-        physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "The varied terrain provides balanced physical combat." },
-        // NEW: Modifiers for general move tags affected by environment
-        ranged_attack: { damageMultiplier: 0.8, energyCostModifier: 1.1, description: "Vegetation and structures create line-of-sight disruptions for ranged attacks." }, // NEW: Penalty for ranged
-        mobility_move: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Urban and natural features provide excellent parkour opportunities." }, // NEW: Buff for mobility
-        evasive: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Urban and natural features provide excellent evasive opportunities." } // NEW: Buff for evasive
+        air: { damage: 0, energy: 0, reason: "The temperate climate has little effect on airbending." },
+        fire: { damage: -10, energy: 5, reason: "The wooden buildings are vulnerable, but the sea air is damp." },
+        earth: { damage: 5, energy: 0, reason: "The island provides ample earth for bending." },
+        water: { damage: 15, energy: -10, reason: "Being surrounded by the sea is a massive advantage for waterbenders." },
+        ice: { damage: 10, energy: -5, reason: "The sea provides a vast source for icebending." },
+        physical: { damage: 10, energy: -5, reason: "The close quarters of the village favor physical combat." },
+        mobility_move: { damage: -15, energy: 10, reason: "The buildings and narrow streets can restrict broad movements." },
+        evasive: { damage: 20, energy: -15, reason: "The rooftops and alleys of the village are perfect for evasive maneuvers." },
+        ranged_attack: { damage: -20, energy: 15, reason: "The buildings provide significant cover, hindering ranged attacks." }
     },
     disabledElements: [],
     notes: "A balanced environment with abundant water, but urban structures and varied terrain create cover and hinder clear sightlines. Favors agile and mobile combatants."

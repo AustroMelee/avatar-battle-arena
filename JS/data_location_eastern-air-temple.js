@@ -38,16 +38,51 @@ export const easternAirTempleConditions = {
         ]
     },
     environmentalModifiers: {
-        air: { damageMultiplier: 1.15, energyCostModifier: 0.9, description: "Airbending flows freely with the winds." },
-        fire: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Fire struggles against the high winds." },
-        earth: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Earthbending is challenging on unstable platforms." },
-        water: { damageMultiplier: 0.3, energyCostModifier: 1.8, description: "Waterbending is severely hindered by lack of water sources." }, // NEW: Severe penalty for water
-        ice: { damageMultiplier: 0.3, energyCostModifier: 1.8, description: "Ice bending is severely hindered by lack of water sources." },   // NEW: Severe penalty for ice
-        physical: { damageMultiplier: 0.9, energyCostModifier: 1.05, description: "Physical attacks are hindered by footing and wind." },
-        // NEW: Modifiers for general move tags affected by environment
-        mobility_move: { damageMultiplier: 1.2, energyCostModifier: 0.8, description: "Verticality and air currents enhance agile movement." },
-        evasive: { damageMultiplier: 1.2, energyCostModifier: 0.8, description: "Verticality and air currents enhance evasive maneuvers." },
-        ranged_attack: { damageMultiplier: 0.7, energyCostModifier: 1.15, description: "Cover and verticality hinder clear line of sight for ranged attacks." }
+        air: { 
+            damage: 15, 
+            energy: -10, 
+            reason: "Airbending flows freely with the winds." 
+        },
+        fire: { 
+            damage: -20, 
+            energy: 20, 
+            reason: "Fire struggles against the high winds." 
+        },
+        earth: { 
+            damage: 0,
+            energy: 5, 
+            reason: "Earthbending is challenging on unstable platforms." 
+        },
+        water: { 
+            damage: -70, 
+            energy: 80, 
+            reason: "Waterbending is severely hindered by lack of water sources." 
+        },
+        ice: { 
+            damage: -70, 
+            energy: 80, 
+            reason: "Ice bending is severely hindered by lack of water sources." 
+        },
+        physical: { 
+            damage: -10, 
+            energy: 5, 
+            reason: "Physical attacks are hindered by footing and wind." 
+        },
+        mobility_move: { 
+            damage: 20, 
+            energy: -20, 
+            reason: "Verticality and air currents enhance agile movement." 
+        },
+        evasive: { 
+            damage: 20, 
+            energy: -20, 
+            reason: "Verticality and air currents enhance evasive maneuvers." 
+        },
+        ranged_attack: { 
+            damage: -30, 
+            energy: 15, 
+            reason: "Cover and verticality hinder clear line of sight for ranged attacks." 
+        },
     },
     disabledElements: ['water', 'ice'], // NEW: Explicitly disable by default, only canteen/specific moves allowed
     notes: "High altitude and strong winds favor airbenders. Structures are old and somewhat brittle. Lack of water. Agile and evasive movements are highly effective due to verticality and air currents, but ranged attacks are hampered by cover."

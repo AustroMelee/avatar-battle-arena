@@ -39,16 +39,15 @@ export const foggySwampConditions = {
         ]
     },
     environmentalModifiers: {
-        water: { damageMultiplier: 1.1, energyCostModifier: 0.9, description: "Waterbending amplifies the swamp's natural currents." },
-        earth: { damageMultiplier: 1.2, energyCostModifier: 0.95, description: "Earthbending causes massive mudslides and root damage." },
-        fire: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Fire performs normally, but humidity may increase energy cost slightly." }, // Adjusted from 1.3/1.15
-        lightning: { damageMultiplier: 1.0, energyCostModifier: 1.05, description: "Lightning performs normally, but humidity may increase energy cost slightly." }, // Consistent with fire
-        air: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Airbending is partially absorbed by dense fog and humidity." },
-        physical: { damageMultiplier: 0.8, energyCostModifier: 1.3, description: "Physical combat is severely hampered by thick muck, roots, and low visibility." }, // Increased penalty
-        // NEW: Modifiers for general move tags affected by environment
-        ranged_attack: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Dense fog and vegetation severely hinder precise ranged attacks." }, // Significant penalty
-        mobility_move: { damageMultiplier: 0.7, energyCostModifier: 1.4, description: "Difficult terrain (mud, roots) heavily impedes agile movement." }, // Significant penalty
-        evasive: { damageMultiplier: 0.7, energyCostModifier: 1.4, description: "Difficult terrain (mud, roots) heavily impedes evasive maneuvers." } // Significant penalty
+        air: { damage: -15, energy: 10, reason: "The dense, heavy fog dampens air currents." },
+        fire: { damage: -25, energy: 20, reason: "The dampness of the swamp makes firebending difficult." },
+        earth: { damage: 10, energy: -5, reason: "The soft, muddy ground is easily manipulated." },
+        water: { damage: 25, energy: -20, reason: "The entire swamp is a massive source of water." },
+        ice: { damage: 20, energy: -15, reason: "The abundant water can be readily frozen." },
+        physical: { damage: -10, energy: 5, reason: "The murky water and tangled roots hinder movement." },
+        mobility_move: { damage: -20, energy: 15, reason: "The swamp's terrain makes agile movements difficult." },
+        evasive: { damage: 15, energy: -10, reason: "The fog and dense vegetation provide excellent cover for hiding." },
+        ranged_attack: { damage: -30, energy: 25, reason: "The thick fog severely obscures visibility for ranged attacks." }
     },
     // NEW: Psychological impact specific to this location
     psychologicalImpact: {

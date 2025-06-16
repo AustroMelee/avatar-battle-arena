@@ -3,8 +3,10 @@
 
 // Environmental conditions for Northern Water Tribe City.
 
-export const northernWaterTribeConditions = {
+export const northernWaterTribe = {
     id: 'northern-water-tribe',
+    name: 'Northern Water Tribe City',
+    description: "A majestic city of ice and water, the stronghold of the Northern Water Tribe, under a perpetual twilight during the winter.",
     waterRich: true,
     iceRich: true,
     isSlippery: true,
@@ -13,7 +15,7 @@ export const northernWaterTribeConditions = {
     isDense: true,    // NEW: For close quarters
     hasCover: true,   // NEW: Ice pillars, buildings
     isCramped: true,  // NEW: Narrow ice bridges, pathways
-    fragility: 0.6, 
+    fragility: 30,
     damageThresholds: {
         minor: 10, moderate: 25, severe: 50, catastrophic: 75
     },
@@ -40,15 +42,15 @@ export const northernWaterTribeConditions = {
         ]
     },
     environmentalModifiers: {
-        water: { damageMultiplier: 1.3, energyCostModifier: 0.7, description: "Waterbending thrives with abundant water and ice, reaching near-maximum strength." }, // UPDATED: More significant buff
-        ice: { damageMultiplier: 1.3, energyCostModifier: 0.7, description: "Ice bending is exceptionally potent with abundant ice." }, // UPDATED: More significant buff
-        fire: { damageMultiplier: 0.4, energyCostModifier: 1.8, description: "Fire is severely suppressed by the extreme cold and moisture, and drains energy rapidly." }, // UPDATED: Major debuff
-        lightning: { damageMultiplier: 0.4, energyCostModifier: 1.8, description: "Lightning is severely suppressed by the extreme cold and moisture, and drains energy rapidly." }, // NEW: Consistent with fire
-        earth: { damageMultiplier: 1.0, energyCostModifier: 1.2, specialModifier: 'frozen_earth_impact', description: "Earthbending is possible on frozen ground, but unfamiliar and costs more energy." }, // UPDATED: Energy cost
-        physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Slippery surfaces and cold drain physical stamina." }, // Slight penalty for physical
-        ranged_attack: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Dense ice structures severely hinder line-of-sight and effectiveness of projectiles." }, // NEW: Severe penalty for ranged
-        mobility_move: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Cold saps agility over time, increasing energy cost for mobile maneuvers." }, // NEW: Penalty for mobility
-        evasive: { damageMultiplier: 0.8, energyCostModifier: 1.2, description: "Cold saps stamina, increasing energy cost for evasive maneuvers." } // NEW: Penalty for evasive
+        air: { damage: -10, energy: 5, reason: "The frigid air is thin and difficult to manipulate." },
+        fire: { damage: -20, energy: 15, reason: "The intense cold severely weakens firebending." },
+        earth: { damage: -50, energy: 50, reason: "There is no earth to bend, only ice and snow." },
+        water: { damage: 30, energy: -25, reason: "The city itself is a masterpiece of waterbending, empowering its masters." },
+        ice: { damage: 35, energy: -30, reason: "Ice is the fundamental element of the city, granting unparalleled control." },
+        physical: { damage: -5, energy: 5, reason: "The icy surfaces make footing treacherous for physical combat." },
+        mobility_move: { damage: 10, energy: -10, reason: "The canals and ice slides allow for unique and rapid movement." },
+        evasive: { damage: 5, energy: 0, reason: "The ice architecture provides ample cover." },
+        ranged_attack: { damage: -15, energy: 10, reason: "The glittering ice and constant flurries can obscure vision." }
     },
     disabledElements: [], // Elements are not 'disabled' but heavily modified
     notes: "An abundance of water and ice makes this a fortress for waterbenders. Firebending is severely suppressed. Earthbending can adapt to frozen earth, but at a cost. Movement is affected by cold."

@@ -102,7 +102,6 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
             hp: 0, maxHp: 100, // Treat as defeated for safety
             energy: 0, momentum: 0, stunDuration: 0,
             stunResistance: 0, consecutiveStuns: 0, stunImmunityTurns: 0,
-            images: {},
             tacticalState: null, moveHistory: [], moveFailureHistory: [],
             consecutiveDefensiveTurns: 0, aiLog: [`ERROR: Character data for "${fighterId}" not loaded/found.`],
             relationalState: null,
@@ -156,7 +155,6 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         stunResistance: 0,
         consecutiveStuns: 0,
         stunImmunityTurns: 0,
-        images: characterData.images || {},
         tacticalState: null, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         // Access relationships from characterData directly
@@ -192,6 +190,7 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         techniquesSiWongDesert: characterData.techniquesSiWongDesert || [],
         techniquesBoilingRock: characterData.techniquesBoilingRock || [],
         quotes: characterData.quotes || {}, // Ensure quotes are copied
+        images: characterData.images || {},
     };
 }
 

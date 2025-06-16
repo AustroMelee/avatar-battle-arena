@@ -37,17 +37,15 @@ export const siWongDesertConditions = {
         ]
     },
     environmentalModifiers: {
-        fire: { damageMultiplier: 1.2, energyCostModifier: 0.8, solar_amplification: true, description: "Fire is significantly amplified by the sun and heat." }, // UPDATED: Major buff
-        lightning: { damageMultiplier: 1.2, energyCostModifier: 0.8, solar_amplification: true, description: "Lightning is significantly amplified by the sun and heat." }, // NEW: Consistent with fire
-        earth: { damageMultiplier: 1.5, energyCostModifier: 0.85, sensory_impairment: true, description: "Earthbending can reshape the sandy terrain dramatically, but seismic sense is impaired." }, // UPDATED: Sensory impairment for Toph
-        water: { damageMultiplier: 0.3, energyCostModifier: 2.0, description: "Waterbending is critically hindered by extreme scarcity." }, // UPDATED: Critically hindered
-        ice: { damageMultiplier: 0.3, energyCostModifier: 2.0, description: "Icebending is critically hindered by extreme scarcity." }, // NEW: Consistent with water
-        air: { damageMultiplier: 1.0, energyCostModifier: 0.95, description: "Airbending can manipulate sand, but costs energy." },
-        physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Heat and shifting sand drain physical stamina." },
-        // NEW: Modifiers for general move tags affected by environment
-        ranged_attack: { damageMultiplier: 1.2, energyCostModifier: 0.9, description: "Open terrain provides perfect line-of-sight for ranged attacks." }, // NEW: Buff for ranged
-        mobility_move: { damageMultiplier: 1.1, energyCostModifier: 0.95, description: "Wide open spaces allow for effective pursuit and mobile maneuvers." }, // NEW: Buff for mobility
-        evasive: { damageMultiplier: 1.1, energyCostModifier: 0.95, description: "Wide open spaces allow for effective evasive maneuvers." } // NEW: Buff for evasive
+        air: { damage: 10, energy: -5, reason: "The open desert winds empower airbending." },
+        fire: { damage: 15, energy: -10, reason: "The intense sun and dry air are ideal for firebending." },
+        earth: { damage: 20, energy: -15, reason: "The endless sand provides a unique and powerful medium for earthbenders." },
+        water: { damage: -80, energy: 80, reason: "The desert is devoid of water, making waterbending nearly impossible." },
+        ice: { damage: -90, energy: 90, reason: "Ice instantly sublimates in the scorching heat." },
+        physical: { damage: -15, energy: 10, reason: "The shifting sands make movement and physical attacks difficult." },
+        mobility_move: { damage: -10, energy: 5, reason: "The soft sand hinders agile movements." },
+        evasive: { damage: -20, energy: 15, reason: "The open desert offers little cover for evasion." },
+        ranged_attack: { damage: 10, energy: -5, reason: "The flat, open terrain offers clear lines of sight." }
     },
     disabledElements: [], // Elements are heavily modified, not disabled
     notes: "Scorching heat and lack of water severely penalize waterbenders. Firebending is amplified. Earthbending (especially Toph's seismic sense) is impaired by sand. Favors ranged and highly mobile combatants in open space."

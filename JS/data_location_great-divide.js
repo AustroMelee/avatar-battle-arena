@@ -37,18 +37,18 @@ export const greatDivideConditions = {
         ]
     },
     environmentalModifiers: {
-        air: { damageMultiplier: 1.3, energyCostModifier: 0.7, description: "Airbending thrives with strong canyon updrafts and open space." }, // Major buff for Aang
-        earth: { damageMultiplier: 1.4, energyCostModifier: 0.8, description: "Earthbending commands the abundant rock and sheer canyon walls." }, // Major buff for Bumi/Toph
-        fire: { damageMultiplier: 1.25, energyCostModifier: 0.8, solar_amplification: true, description: "Fire is amplified by the dry, exposed environment and sun." }, // Major buff for firebenders
+        air: { damage: 10, energy: -5, reason: "The open canyon is ideal for powerful air currents." },
+        earth: { damage: 15, energy: -10, reason: "The canyon walls provide an endless supply of rock." },
+        fire: { damage: -10, energy: 5, reason: "The windiness of the canyon makes controlling fire difficult." },
         lightning: { damageMultiplier: 1.3, energyCostModifier: 0.75, solar_amplification: true, description: "Lightning is highly effective and amplified by the open, dry air." }, // Major buff for lightning
-        water: { damageMultiplier: 0.1, energyCostModifier: 3.0, description: "Waterbending is critically hindered by extreme scarcity; minimal effect." }, // Major debuff for water
-        ice: { damageMultiplier: 0.1, energyCostModifier: 3.0, description: "Ice bending is critically hindered by extreme scarcity; minimal effect." },   // Major debuff for ice
-        physical: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Precarious footing and verticality hinder physical combat." }, // Slight penalty
+        water: { damage: -60, energy: 60, reason: "Water is extremely scarce in the arid canyon." },
+        ice: { damage: -70, energy: 70, reason: "There is no water to freeze in the hot canyon." },
+        physical: { damage: -5, energy: 5, reason: "The uneven, rocky terrain makes footing precarious." },
         
         // General move tag modifiers influenced by terrain
-        ranged_attack: { damageMultiplier: 0.6, energyCostModifier: 1.3, description: "Irregular terrain creates many line-of-sight obstructions for ranged attacks." }, // Major debuff for Mai
-        mobility_move: { damageMultiplier: 1.5, energyCostModifier: 0.7, description: "Extreme verticality and open space offer excellent agile movement." }, // Major buff for Ty Lee
-        evasive: { damageMultiplier: 1.5, energyCostModifier: 0.7, description: "Extreme verticality and open space offer excellent evasive maneuvers." },   // Major buff for Ty Lee
+        ranged_attack: { damage: -15, energy: 10, reason: "The variable elevation and wind makes ranged attacks unreliable." },
+        mobility_move: { damage: 20, energy: -15, reason: "The cliffs and ledges are perfect for acrobatic movement." },
+        evasive: { damage: 10, energy: -5, reason: "The numerous rocks and crevices offer places to hide." },
         
         // NEW MECHANIC: Toph's aerial vulnerability
         aerialAttackVulnerability: { 
