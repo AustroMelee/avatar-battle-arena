@@ -6,7 +6,7 @@
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
 import { MAX_MOMENTUM, MIN_MOMENTUM } from './engine_momentum.js';
-import { getPhaseAIModifiers } = './engine_battle-phase.js';
+import { getPhaseAIModifiers } from './engine_battle-phase.js'; // CORRECTED LINE
 import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
 import { locationConditions } from './location-battle-conditions.js'; // NEW: Import locationConditions
 
