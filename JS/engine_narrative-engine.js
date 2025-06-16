@@ -316,164 +316,67 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
  }
 
 // OLD: export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {})
-export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}, battleState) { // FIX: Added battleState parameter
-    let introPhrase = '';
-    let tacticalPrefix = '';
-    let tacticalSuffix = '';
-
-    // Handle Lightning Redirection narrative first, based on result flags
-    if (result.isReactedAction && result.reactionType === 'lightning_redirection') {
-        // Narrative events for redirection are now expected to be in result.narrativeEvents
-        // This function will primarily format the "move line" part.
-        // The actual descriptive text of what happened during redirection comes from narrativeEvents.
-        const redirector = actor; // In this context, actor is the one who redirected (Zuko)
-        const lightningUser = opponent; // Opponent is the one who threw lightning (Azula/Ozai)
-
-        const redirectEffectiveness = effectivenessLevels[result.effectiveness.label.toUpperCase()] || effectivenessLevels.NORMAL;
-
-        const moveLineHtml = phaseTemplates.move
-            .replace(/{actorId}/g, redirector.id)
-            .replace(/{actorName}/g, redirector.name)
-            .replace(/{moveName}/g, "Lightning Redirection") // Standardized name for the reactive move
-            .replace(/{moveEmoji}/g, redirectEffectiveness.emoji || '⚡↩️')
-            .replace(/{effectivenessLabel}/g, result.effectiveness.label)
-            .replace(/{effectivenessEmoji}/g, redirectEffectiveness.emoji)
-            .replace(/{moveDescription}/g, '') // Narrative events from result.narrativeEvents will fill this
-            .replace(/{collateralDamageDescription}/g, '');
-
+export function generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry) {
+    if (!move || !result || !result.effectiveness) {
         return {
             type: 'move_action_event',
-            actorId: redirector.id,
-            characterName: redirector.name,
-            moveName: "Lightning Redirection",
-            moveType: "lightning",
-            effectivenessLabel: result.effectiveness.label,
-            text: result.narrativeEvents.map(e => e.text).join(' ') || `${redirector.name} redirects ${lightningUser.name}'s lightning!`, // Fallback text
-            isMoveAction: true,
-            html_content: moveLineHtml, // This will be combined with narrativeEvents from result
-            isKOAction: false, // Redirection itself isn't usually a KO
-            isRedirectedAction: true,
-            narrativeEventsToPrepend: result.narrativeEvents || [] // Key for narrative engine
-            // stunAppliedToOriginalAttacker is handled above by modifying attacker.stunDuration directly
+            html_content: `<p class="move-line error">A move was attempted by ${actor.name}, but the outcome was unclear.</p>`
         };
     }
-    // Standard move narrative generation
-    if (aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
-        const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late;
-        const selectedPhrase = getRandomElement(escalationFinisherPool); // This can be an object {type, line} or string
-        // OLD: introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent) : "Sensing the end is near,";
-        introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent, {battleState}) : "Sensing the end is near,"; // FIX: Pass battleState
-    } else {
-        const intentForIntro = aiLogEntry.intent || 'StandardExchange';
-        // OLD: const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move });
-        const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move, battleState }); // FIX: Pass battleState
-        // FIX: Safely extract line or use the string directly if introQuote is a string
-        if (introQuote && (introQuote.type === 'action' || typeof introQuote.line === 'string')) {
-            // OLD: introPhrase = substituteTokens(introQuote.line || introQuote, actor, opponent);
-            introPhrase = substituteTokens(introQuote.line || introQuote, actor, opponent, {battleState}); // FIX: Pass battleState
-        } else { // If introQuote is null or not a recognized type, use default phase/generic intro
-            const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
-            const selectedPhrase = getRandomElement(phaseSpecificIntroPool); // This can be an object {type, line} or string
-            // OLD: introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent) : "Responding,";
-            introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent, {battleState}) : "Responding,"; // FIX: Pass battleState
+
+    const effectiveness = result.effectiveness.label;
+    const effectivenessClass = effectiveness.toLowerCase();
+    const actorName = `<span class="move-actor char-${actor.id}">${actor.name}</span>`;
+    const moveName = `<span class="move-name">${move.name}</span>`;
+    const emoji = getEmojiForMoveType(move.moveType, effectiveness);
+
+    // Main action line
+    const actionLine = `${actorName} used ${moveName} ${emoji}`;
+
+    // Effectiveness description
+    const effectivenessLine = `<span class="move-effectiveness ${effectivenessClass}">${effectiveness}</span>`;
+
+    // Detailed description generation
+    let descriptionText = findNarrativeQuote(actor, defender, 'onMove', effectiveness.toLowerCase(), {
+        moveName: move.name,
+        moveType: move.moveType,
+        phase: currentPhase,
+    });
+
+    if (!descriptionText) {
+        // Fallback description
+        switch (effectiveness.toLowerCase()) {
+            case 'critical':
+                descriptionText = `${actor.name} lands a devastating blow, turning the tide of battle!`;
+                break;
+            case 'strong':
+                descriptionText = `A powerful strike from ${actor.name} that puts ${defender.name} on the defensive.`;
+                break;
+            case 'weak':
+                descriptionText = `${defender.name} weathers the attack from ${actor.name}, which was less effective than intended.`;
+                break;
+            default:
+                descriptionText = `A standard exchange between the two combatants.`;
         }
     }
 
-    // The line `if (introPhrase.includes(actor.name))` now uses a guaranteed string for introPhrase
-
-
-    if (result.payoff && result.consumedStateName) {
-        // OLD: tacticalPrefix = substituteTokens(`Capitalizing on {opponentName} being ${result.consumedStateName}, `, actor, opponent);
-        tacticalPrefix = substituteTokens(`Capitalizing on {opponentName} being ${result.consumedStateName}, `, actor, opponent, {battleState}); // FIX: Pass battleState
+    // Add context from AI log if available
+    if (result.consumedStateName) {
+        descriptionText += ` It capitalized on ${defender.name} being ${result.consumedStateName}.`;
     }
 
-    if (actor.tacticalState?.name && actor.tacticalState.duration >= 0 && actor.tacticalState.isPositive) {
-        // OLD: tacticalSuffix += substituteTokens(` {actorName} is now ${actor.tacticalState.name}!`, actor, opponent);
-        tacticalSuffix += substituteTokens(` {actorName} is now ${actor.tacticalState.name}!`, actor, opponent, {battleState}); // FIX: Pass battleState
-    } else if (actor.tacticalState?.name && actor.tacticalState.duration >= 0 && !actor.tacticalState.isPositive && move.isRepositionMove) {
-        // OLD: tacticalSuffix += substituteTokens(` However, {actorName} is now ${actor.tacticalState.name}!`, actor, opponent);
-        tacticalSuffix += substituteTokens(` However, {actorName} is now ${actor.tacticalState.name}!`, actor, opponent, {battleState}); // FIX: Pass battleState
-    } else if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
-        // OLD: tacticalSuffix += substituteTokens(` The move leaves {opponentName} ${move.setup.name}!`, actor, opponent);
-        tacticalSuffix += substituteTokens(` The move leaves {opponentName} ${move.setup.name}!`, actor, opponent, {battleState}); // FIX: Pass battleState
-    }
-
-    let impactSentenceKey = result.effectiveness.label.toUpperCase();
-    let impactSentencePool;
-
-    // Use specific impact phrases for redirection if they exist
-    if (result.effectiveness.label === "RedirectedSuccess" || result.effectiveness.label === "RedirectedFail") {
-        impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey]; // These are now in DEFAULT
-    } else if (move.isRepositionMove) {
-        impactSentencePool = impactPhrases.REPOSITION?.[impactSentenceKey];
-    } else if (move.type === 'Defense' || move.type === 'Utility') {
-        const isReactive = opponent?.lastMove?.type === 'Offense';
-        // The error is here: You have an unbound ternary operator that is not part of an assignment.
-        // It should be `isReactive ? impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE`
-        impactSentencePool = isReactive ? impactPhrases.DEFENSE?.REACTIVE : impactPhrases.DEFENSE?.PROACTIVE; // FIX
-    } else {
-        impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
-    }
-
-    const impactSentenceTemplate = getRandomElement(impactSentencePool);
-    // OLD: const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, { '{targetName}': opponent?.name, '{actorName}': actor?.name }) : "The move unfolds.";
-    const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, {
-        '{targetName}': opponent?.name || 'the opponent',
-        '{actorName}': actor?.name || 'The attacker',
-        battleState // FIX: Pass battleState here
-    }) : "The move unfolds.";
-
-
-    let baseActionTextTemplate;
-    if (move.name === "Struggle") {
-        baseActionTextTemplate = `{actorName} struggles to fight back`;
-    } else {
-        const verb = conjugatePresent(move.verb || 'executes');
-        const objectString = (typeof move.object === 'string') ? move.object : "an action";
-        // FIX: Ensure move.object is a string and its first character is accessed safely
-        const article = (move.requiresArticle && typeof objectString === 'string' && objectString.length > 0) ?
-                        ((['a','e','i','o','u'].includes(objectString[0].toLowerCase()) ? `an ${objectString}` : `a ${objectString}`))
-                        : objectString;
-        baseActionTextTemplate = `{actorName} ${verb} ${article}`;
-    }
-    // OLD: const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent);
-    const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent, {battleState}); // FIX: Pass battleState
-
-    let fullDescText;
-    // For redirected actions, the introPhrase might already be set by the redirection logic.
-    // We want the main "move description" to be the impact sentence.
-    if (result.isReactedAction) {
-        fullDescText = impactSentence; // The introPhrase is handled by the narrativeEventsToPrepend
-    } else if (introPhrase.includes(actor.name)) { // This line now uses a guaranteed string for introPhrase
-        // OLD: fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (typeof move.object === 'string' && move.object.length > 0 && ['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
-        fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (typeof move.object === 'string' && move.object.length > 0 && ['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`; // FIX: Added battleState to substituteTokens calls above this point
-    } else {
-        // OLD: fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
-        fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`; // FIX: Added battleState to substituteTokens calls above this point
-    }
-
-
-    const moveLineHtml = phaseTemplates.move
-        .replace(/{actorId}/g, actor.id)
-        .replace(/{actorName}/g, actor.name)
-        .replace(/{moveName}/g, move.name)
-        .replace(/{moveEmoji}/g, result.effectiveness.emoji || '⚔️')
-        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
-        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
-        .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`)
-        .replace(/{collateralDamageDescription}/g, '');
+    const html_content = `
+        <div class="move-line">
+            <div class="move-header">
+                ${actionLine} - ${effectivenessLine}
+            </div>
+            <p class="move-description">${descriptionText}</p>
+        </div>
+    `;
 
     return {
         type: 'move_action_event',
-        actorId: actor.id,
-        characterName: actor.name,
-        moveName: move.name,
-        moveType: move.element || move.type,
-        effectivenessLabel: result.effectiveness.label,
-        text: fullDescText,
-        isMoveAction: true,
-        html_content: moveLineHtml,
-        isKOAction: result.isKOAction || false
+        html_content: html_content,
     };
 }
 
@@ -588,69 +491,39 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
 }
 
 
-export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}, battleState) { // FIX: Added battleState
-    let turnEventObjects = [];
+export function generateTurnNarrationObjects(narrativeEventsForAction, move, actor, defender, result, environmentState, locationData, currentPhase, isPreBattle, aiLogEntry, battleState) {
+    let narrationObjects = [];
 
-    // Handle narrative events from reactive defenses first if they exist on the result
-    if (result && result.isReactedAction && result.narrativeEventsToPrepend) {
-        result.narrativeEventsToPrepend.forEach(event => {
-            // These events are already formatted by formatQuoteEvent in engine_lightning-redirection.js
-            // We just need to ensure they are added to the log.
-            if (event) { // Ensure event is not null/undefined
-                turnEventObjects.push(event);
+    // 1. Process specific narrative quotes that were triggered (e.g., mental state changes)
+    if (narrativeEventsForAction && narrativeEventsForAction.length > 0) {
+        narrativeEventsForAction.forEach(event => {
+            if (event.quote) {
+                const dialogueHtml = phaseTemplates.dialogue
+                    .replace('{characterName}', `<span class="char-${event.actor.id}">${event.actor.name}</span>`)
+                    .replace('{dialogueText}', event.quote);
+                
+                narrationObjects.push({
+                    type: 'dialogue_event',
+                    actorId: event.actor.id,
+                    characterName: event.actor.name,
+                    text: `${event.actor.name} says, "${event.quote}"`,
+                    html_content: dialogueHtml,
+                    isDialogue: true,
+                    dialogueType: 'quote' 
+                });
             }
         });
     }
 
-    // Standard dialogue events (quotes, etc.)
-    events.forEach(event => {
-        // OLD: const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry });
-        const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry, battleState }); // FIX: Pass battleState
-        if (quoteEvent) {
-            turnEventObjects.push(quoteEvent);
-        }
-    });
-
-    // Only generate action descriptions and collateral if a `move` object exists (i.e., not a NarrativeOnly turn)
-    if (move && result) { // Check for move object
-        // Generate the main action description, which could be a standard move or the "move line" part of a reacted action
-        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry, battleState); // FIX: Pass battleState
-        turnEventObjects.push(actionEvent); // This actionEvent will now be simpler for reacted actions
-
-        // Standard move execution quote (if not a reacted action that already has its narrative)
-        if (!result.isReactedAction) {
-            // OLD: const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry };
-            const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry, battleState }; // FIX: Pass battleState
-            const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
-            if (moveExecutionQuote) {
-                // OLD: const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, { currentPhaseKey, aiLogEntry });
-                const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, { currentPhaseKey, aiLogEntry, battleState }); // FIX: Pass battleState
-                if (quoteEvent) {
-                    quoteEvent.isMoveExecutionQuote = true;
-                    turnEventObjects.push(quoteEvent);
-                }
-            }
-        }
-
-
-        const collateralEvent = generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData, battleState); // FIX: Pass battleState
-        if (collateralEvent) {
-            // Append collateral HTML to the actionEvent's HTML if it exists and is not already handled
-            if (actionEvent.html_content && !actionEvent.html_content.includes('collateral-damage-description')) {
-                 actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, collateralEvent.html_content);
-            } else if (!actionEvent.html_content.includes('collateral-damage-description')) { // If no main action HTML, just add collateral
-                turnEventObjects.push(collateralEvent);
-            }
-        } else if (actionEvent.html_content) {
-             actionEvent.html_content = actionEvent.html_content.replace(/{collateralDamageDescription}/g, '');
-        }
-    } else if (currentPhaseKey === BATTLE_PHASES.PRE_BANTER) { // NEW: Handle narrative-only turns
-        // For PreBanter, we might add a subtle hint that no combat occurred yet
-        if (turnEventObjects.length === 0) { // If no actual banter was found for this character
-            turnEventObjects.push({ type: 'narrative_info', text: `(${actor.name} observes their opponent in silence.)`, html_content: `<p class="narrative-info char-${actor.id}">(${actor.name} observes their opponent in silence.)</p>` });
-        }
+    // 2. Generate the primary action description for the move itself
+    if (move && result && !isPreBattle) {
+        const actionDescription = generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry);
+        narrationObjects.push(actionDescription);
     }
-    return turnEventObjects;
+    
+    // 3. (Future) Add narration for reactions or other tertiary events if needed.
+
+    return narrationObjects;
 }
 
 export function getFinalVictoryLine(winner, loser) {

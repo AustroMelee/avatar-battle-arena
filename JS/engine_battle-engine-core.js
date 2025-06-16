@@ -592,6 +592,15 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         const battleContextFiredQuotes = new Set();
 
         const processTurnSegment = (currentAttacker, currentDefender) => {
+            // Add a turn marker event to the log
+            turnSpecificEventsForLog.push({
+                type: 'turn_marker',
+                actorId: currentAttacker.id,
+                characterName: currentAttacker.name,
+                turn: turn + 1,
+                portrait: currentAttacker.images.portrait,
+            });
+
             if (charactersMarkedForDefeat.has(currentAttacker.id)) {
                 currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is already marked for defeat and cannot act this segment.`);
                 return;
@@ -729,7 +738,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 locationData,
                 phaseState.currentPhase,
                 false,
-                result.aiLogEntry || {},
+                aiDecision.aiLogEntryFromSelectMove || {},
                 currentBattleState
             );
             turnSpecificEventsForLog.push(...turnNarrationObjects);

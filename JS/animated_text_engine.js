@@ -82,67 +82,95 @@ function processNextMessage() {
     renderMessage(message);
 }
 
-function renderMessage(message) { // message is already validated by processNextMessage
+function processAndAnimateEvent(event) {
+    if (!event || !event.type) {
+        console.warn("Animated Text Engine: Skipping invalid event object:", event);
+        return null;
+    }
+
+    let lineClass = '';
+    let htmlContent = '';
+
+    switch (event.type) {
+        case 'turn_marker':
+            lineClass = 'turn-marker-simulated';
+            const { portrait, characterName, turn } = event;
+            const nameSpan = `<span class="turn-marker-name char-${event.actorId}">${characterName}</span>`;
+            const turnSpan = `<span class="turn-marker-turn">Turn ${turn}</span>`;
+            htmlContent = `
+                <img src="${portrait}" alt="${characterName}" class="turn-marker-portrait">
+                <div class="turn-marker-info">
+                    ${nameSpan}
+                    ${turnSpan}
+                </div>
+            `;
+            break;
+
+        case 'move_action_event':
+            lineClass = 'move-action-simulated';
+            htmlContent = event.html_content;
+            break;
+        case 'dialogue_event':
+            lineClass = 'dialogue-simulated';
+            htmlContent = event.html_content;
+            break;
+        case 'environmental_summary_event':
+            lineClass = 'environmental-simulated';
+            htmlContent = event.html_content;
+            break;
+        case 'phase_header_event':
+            lineClass = 'phase-header-simulated';
+            htmlContent = event.html_content;
+            break;
+        case 'final_blow_event':
+        case 'conclusion_event':
+        case 'stalemate_result_event':
+            lineClass = 'phase-header-simulated'; // Use a similar prominent style
+            htmlContent = event.html_content;
+            break;
+        default:
+            // For simple text events or unknown types, render them plainly.
+            if (event.text) {
+                lineClass = 'narrative-info'; // A generic class
+                htmlContent = `<p>${event.text}</p>`;
+            } else {
+                return null; // Don't render anything if we can't process it.
+            }
+    }
+
     const lineElement = document.createElement('div');
-    lineElement.className = 'simulation-line';
-    if (message.isPhaseHeader) lineElement.classList.add('phase-header-simulated');
-    if (message.isMoveAction) lineElement.classList.add('move-action-simulated');
-    if (message.isDialogue) {
-        lineElement.classList.add('dialogue-simulated');
-        if (message.dialogueType) lineElement.classList.add(`dialogue-${message.dialogueType}`);
-    }
-    if (message.isEnvironmental) lineElement.classList.add('environmental-simulated');
+    lineElement.className = `simulation-line ${lineClass}`;
+    lineElement.innerHTML = htmlContent;
 
-    if (message.actorId) { // Check if actorId exists
-        const iconUrl = getCharacterImage(message.actorId); // getCharacterImage should return null if not found
-        if (iconUrl) {
-            const iconImg = document.createElement('img');
-            iconImg.src = iconUrl;
-            iconImg.alt = message.characterName || message.actorId; // Fallback alt text
-            iconImg.className = 'simulation-char-icon';
-            lineElement.appendChild(iconImg);
-        }
-    }
+    return lineElement;
+}
 
-    const textSpan = document.createElement('span');
-    textSpan.className = 'simulation-text-content';
+function renderMessage(message) { // message is already validated by processNextMessage
+    const lineElement = processAndAnimateEvent(message);
 
-    if (message.isMoveAction && message.moveType) {
-        const emoji = getEmojiForMoveType(message.moveType, message.effectivenessLabel);
-        if (emoji) {
-            const emojiSpan = document.createElement('span');
-            emojiSpan.className = 'simulation-move-emoji';
-            emojiSpan.textContent = emoji + ' '; // Add space after emoji
-            textSpan.appendChild(emojiSpan);
-        }
+    if (!lineElement) {
+        // If event couldn't be processed, just move on.
+        const pauseDuration = message.pauseAfter || DEFAULT_PAUSE_MS;
+        currentTimeoutId = setTimeout(() => {
+            if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(false);
+            processNextMessage();
+        }, pauseDuration);
+        return;
     }
-    lineElement.appendChild(textSpan);
 
     if (simulationContainerElement) { // Ensure container still exists
         simulationContainerElement.appendChild(lineElement);
         focusOnLatestMessage(simulationContainerElement, lineElement); // focusOnLatestMessage should be robust
     }
 
-
-    typeMessage(textSpan, message.text, () => { // typeMessage handles onFinished
-        const emojiElement = textSpan.querySelector('.simulation-move-emoji');
-        if (emojiElement && message.impactLevel) {
-            animateEmoji(emojiElement, message.impactLevel); // animateEmoji should be robust
-        }
-
-        // Determine pause duration, ensuring message.pauseAfter is a number if it exists
-        let pauseDuration = DEFAULT_PAUSE_MS;
-        if (typeof message.pauseAfter === 'number' && message.pauseAfter > 0) {
-            pauseDuration = message.pauseAfter;
-        } else if (message.impactLevel === 'high' || message.impactLevel === 'critical') {
-            pauseDuration = HIGH_IMPACT_PAUSE_MS;
-        }
-
-        currentTimeoutId = setTimeout(() => {
-            if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(false); // Step complete, not end of queue
-            processNextMessage();
-        }, pauseDuration);
-    });
+    // Since we are now rendering full HTML, the "typing" effect is less relevant
+    // for complex components. We will just pause and proceed.
+    // We can add more sophisticated animations per-type later if needed.
+    const pauseDuration = message.pauseAfter || DEFAULT_PAUSE_MS;
+    currentTimeoutId = setTimeout(() => {
+        if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(false);
+        processNextMessage();
+    }, pauseDuration);
 }
 
 function typeMessage(element, text, onFinished) {

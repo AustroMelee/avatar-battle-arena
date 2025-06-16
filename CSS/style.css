@@ -628,10 +628,47 @@ body {
 }
 
 .simulation-line.environmental-simulated {
-    font-style: italic;
-    color: var(--accent-2);
-    opacity: 0.8;
-    font-size: 0.9rem;
+    border-left-color: #fca5a5; /* Light red for environmental impact */
+    background-color: rgba(252, 165, 165, 0.05);
+}
+
+.simulation-line.turn-marker-simulated {
+    background: linear-gradient(90deg, rgba(20, 30, 60, 0.7), rgba(15, 15, 35, 0.2));
+    border-left: 5px solid var(--accent-gold);
+    border-right: 5px solid var(--accent-gold);
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.turn-marker-portrait {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid var(--surface-border-hover);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.turn-marker-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.turn-marker-name {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.turn-marker-turn {
+    font-size: 1rem;
+    color: var(--text-parchment-gold);
+    text-transform: uppercase;
 }
 
 .simulation-char-icon {
