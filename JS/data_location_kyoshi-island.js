@@ -7,9 +7,12 @@ export const kyoshiIslandConditions = {
     id: 'kyoshi-island',
     isCoastal: true,
     waterRich: true,
-    earthRich: true,
+    earthRich: true, // Earth is present, but less open than a pure earth arena
     hasCover: true,
     plantsRich: true,
+    isUrban: true,   // NEW: For village structure/buildings
+    isDense: true,   // NEW: For close-quarters
+    isCramped: true, // NEW: For alleyways, tight spaces
     fragility: 0.6, 
     damageThresholds: {
         minor: 10, moderate: 25, severe: 50, catastrophic: 75
@@ -37,11 +40,17 @@ export const kyoshiIslandConditions = {
         ]
     },
     environmentalModifiers: {
-        water: { damageMultiplier: 1.3, energyCostModifier: 0.85, description: "Waterbending can unleash the power of the ocean with ease." },
+        water: { damageMultiplier: 1.3, energyCostModifier: 0.8, description: "Waterbending unleashes the ocean's might." }, // UPDATED: More potent
+        ice: { damageMultiplier: 1.3, energyCostModifier: 0.8, description: "Ice bending is exceptionally potent by the ocean." },    // NEW: For consistency with water
+        fire: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Fire struggles slightly against pervasive coastal moisture." }, // UPDATED: Slight penalty
+        lightning: { damageMultiplier: 0.9, energyCostModifier: 1.1, description: "Lightning is diffused by coastal moisture." }, // NEW: Consistent with fire
         earth: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Earthbending can damage village structures and terrain." },
-        fire: { damageMultiplier: 1.1, energyCostModifier: 1.05, description: "Fire burns wooden structures easily, but moisture can hinder." },
-        physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "The varied terrain provides balanced physical combat." }
+        physical: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "The varied terrain provides balanced physical combat." },
+        // NEW: Modifiers for general move tags affected by environment
+        ranged_attack: { damageMultiplier: 0.8, energyCostModifier: 1.1, description: "Vegetation and structures create line-of-sight disruptions for ranged attacks." }, // NEW: Penalty for ranged
+        mobility_move: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Urban and natural features provide excellent parkour opportunities." }, // NEW: Buff for mobility
+        evasive: { damageMultiplier: 1.2, energyCostModifier: 0.85, description: "Urban and natural features provide excellent evasive opportunities." } // NEW: Buff for evasive
     },
     disabledElements: [],
-    notes: "A balanced environment with access to multiple elements. Village structures are relatively fragile."
+    notes: "A balanced environment with abundant water, but urban structures and varied terrain create cover and hinder clear sightlines. Favors agile and mobile combatants."
 };

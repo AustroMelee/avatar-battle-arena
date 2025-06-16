@@ -1,4 +1,4 @@
-// FILE: data_characters_masters.js
+// FILE: js/data_characters_masters.js
 'use strict';
 
 // Aggregates Master character data.
@@ -21,10 +21,16 @@ personalityProfile: {
         "Boulder Throw": 1.5,
         "Ground Spike": 1.0,
         "Terrain Reshape": 1.7,
-        "Tactical Reposition": 0.5
+        "Tactical Reposition": 0.5,
+        "Iceberg Toss": 1.4, // NEW for NWT
+        "Permafrost Prison": 1.5, // NEW for NWT
+        "Glacier Control": 1.3, // NEW for NWT
+        "Sand Funnel": 1.4, // NEW for Si Wong
+        "Quicksand Trap": 1.5, // NEW for Si Wong
+        "Glass Shard Barrage": 1.3 // NEW for Si Wong
     }
 },
-specialTraits: { resilientToManipulation: 1.0, madGenius: true },
+specialTraits: { resilientToManipulation: 1.0, madGenius: true, swampImmunity: true }, // UPDATED: Added swampImmunity
 collateralTolerance: 0.5,
 mobility: 0.3,
 curbstompRules: [
@@ -55,7 +61,16 @@ narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Lettuce leaf? Mmm, tasty! Oh, right, the fight!" }, { type: 'internal', line: "They expect me to be a straightforward old man. Heh. Time to think outside the box... or inside the rock!" }],
 Mid: [{type: 'spoken', line: "Is that all the jings you've got? I've seen better jings from a badger-mole!"}],
-Late: [{type: 'action', line: "cackles madly, the earth itself trembling with his amusement and power."}]
+Late: [{type: 'action', line: "cackles madly, the earth itself trembling with his amusement and power."}],
+'eastern-air-temple': [{ type: 'spoken', line: "Such brittle stone! Are you sure this old place can handle a real rumble?" }, { type: 'internal', line: "This temple holds so many memories... better not smash *everything*!" }],
+'fire-nation-capital': [{ type: 'spoken', line: "Ah, the Fire Lord's palace! A perfect place for some... architectural rearrangements!" }, { type: 'internal', line: "So much perfectly good earth, just waiting to be played with!" }],
+'kyoshi-island': [{ type: 'spoken', line: "Ooh, a new island to play with! Hope these little houses are sturdy!" }, { type: 'internal', line: "Such unique geology! So many possibilities... so little time before they stop me." }],
+'northern-water-tribe': [{ type: 'spoken', line: "Ice! How wonderfully crunchy! Let's see what kind of jings this has!" }, { type: 'internal', line: "So much frozen water. A new challenge for an old master!" }],
+'omashu': [{ type: 'spoken', line: "Omashu! My city! Let's see if it's still as much fun as I remember!" }, { type: 'internal', line: "These chutes are a delight! And this stone... oh, the possibilities!" }],
+'si-wong-desert': [{ type: 'spoken', line: "Sand? Oh, lovely! So much to play with here!" }, { type: 'internal', line: "This heat... it's a bit much, but the sand is wonderfully malleable!" }],
+'foggy-swamp': [{ type: 'spoken', line: "What a wonderfully squishy place! Let's make some mud pies!" }, { type: 'internal', line: "Mud and roots! The earth truly comes alive here! I'm feeling extra creative!" }],
+'boiling-rock': [{ type: 'spoken', line: "Ooh, metal and steam! How delightfully volatile! This will be fun!" }, { type: 'internal', line: "The earth is never truly hidden. Even here, I can make it dance." }],
+'great-divide': [{ type: 'spoken', line: "The Great Divide is just begging for a proper rearrangement! You ready for some real earthbending?" }, { type: 'internal', line: "This whole canyon is my playground! No one can escape my reach here!" }] // UPDATED for Great Divide
 },
 onIntentSelection: {
 DesperateGambit: { Generic: [{ type: 'spoken', line: "Let's try some neutral jing! You know, the kind where I wait... and then throw a building at you!" }] },
@@ -88,6 +103,34 @@ techniques: [
 { name: "Terrain Reshape", verb: 'reshape', object: 'the battlefield', type: 'Utility', power: 40, element: 'earth', moveTags: ['utility_control', 'environmental_manipulation'], collateralImpact: 'low' },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
+techniquesNorthernWaterTribe: [ // NEW MOVESET for Northern Water Tribe
+    { name: "Iceberg Punch", verb: 'punch', object: 'a chunk of ice towards', type: 'Offense', power: 55, element: 'ice', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'environmental_manipulation'], collateralImpact: 'low' },
+    { name: "Permafrost Prison", verb: 'trap', object: 'her opponent in permafrost', type: 'Finisher', power: 95, element: 'ice', moveTags: ['debuff_disable', 'single_target', 'construct_creation', 'requires_opening'], collateralImpact: 'low' },
+    { name: "Glacier Control", verb: 'manipulate', object: 'the surrounding glaciers', type: 'Utility', power: 60, element: 'ice', moveTags: ['environmental_manipulation', 'utility_control'], collateralImpact: 'high' },
+    { name: "Frozen Ground Shockwave", verb: 'send', object: 'a shockwave through the frozen ground', type: 'Offense', power: 50, element: 'earth', moveTags: ['area_of_effect_small', 'unblockable_ground'], collateralImpact: 'low' },
+    { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'physical', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+],
+techniquesOmashu: [ // NEW MOVESET for Omashu (adapted from existing earth moves)
+    { name: "Stone Spire", verb: 'erupt with', object: 'a spire of rock from the ground', type: 'Offense', power: 50, requiresArticle: true, element: 'earth', moveTags: ['melee_range', 'ranged_attack_medium', 'single_target', 'unblockable_ground'], collateralImpact: 'low' },
+    { name: "Chute Collapse", verb: 'cause', object: 'a chute to collapse', type: 'Offense', power: 65, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
+    { name: "Omashu Barrier", verb: 'raise', object: 'a massive Omashu stone barrier', type: 'Defense', power: 70, requiresArticle: true, element: 'earth', moveTags: ['defensive_stance', 'utility_block', 'construct_creation'], collateralImpact: 'low' },
+    { name: "Boulder Barrage (Omashu)", verb: 'launch', object: 'a volley of Omashu boulders', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation'], collateralImpact: 'medium' },
+    { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+],
+techniquesSiWongDesert: [ // NEW MOVESET for Si Wong Desert
+    { name: "Sand Funnel", verb: 'create', object: 'a swirling sand funnel', type: 'Offense', power: 50, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'debuff_disable', 'environmental_manipulation'], collateralImpact: 'low' },
+    { name: "Quicksand Trap", verb: 'form', object: 'a quicksand trap', type: 'Utility', power: 45, requiresArticle: true, element: 'earth', moveTags: ['trap_delayed', 'utility_control', 'environmental_manipulation'], setup: { name: 'Immobilized', duration: 2, intensity: 1.3 }, collateralImpact: 'none' },
+    { name: "Glass Shard Barrage", verb: 'launch', object: 'a barrage of scorching glass shards', type: 'Offense', power: 60, requiresArticle: true, element: 'earth', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation'], collateralImpact: 'medium' },
+    { name: "Desert Tremor", verb: 'send', object: 'a localized tremor through the sand', type: 'Offense', power: 55, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'unblockable_ground'], collateralImpact: 'low' },
+    { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+],
+techniquesBoilingRock: [ // NEW MOVESET for Boiling Rock
+    { name: "Metal Grasp", verb: 'bend', object: 'metal to seize', type: 'Offense', power: 60, requiresArticle: true, element: 'metal', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'environmental_manipulation'], collateralImpact: 'low' },
+    { name: "Gondola Toss", verb: 'rip', object: 'a gondola from its cables and toss it', type: 'Offense', power: 75, requiresArticle: true, element: 'metal', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small', 'environmental_manipulation', 'highRisk'], collateralImpact: 'high' },
+    { name: "Steam Vent Burst", verb: 'cause', object: 'a steam vent to erupt', type: 'Utility', power: 50, requiresArticle: true, element: 'earth', moveTags: ['area_of_effect_small', 'utility_control', 'environmental_manipulation', 'setup'], setup: { name: 'Blinded', duration: 1, intensity: 1.2 }, collateralImpact: 'medium' },
+    { name: "Wire Trap", verb: 'twist', object: 'metal wires into a trap', type: 'Utility', power: 45, requiresArticle: true, element: 'metal', moveTags: ['trap_delayed', 'utility_control', 'environmental_manipulation'], setup: { name: 'Pinned', duration: 2, intensity: 1.3 }, collateralImpact: 'low' },
+    { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+],
 quotes: { postWin: ["Time for a nap! Or maybe some cabbage!"], postWin_overwhelming: ["The earth moves for me! No one can stop the Mad King!"], postWin_specific: { 'toph-beifong': "Not bad, Twinkle-toes! But you have to get up pretty early in the morning to out-crazy me!" } },
 relationships: {}
 },
@@ -109,10 +152,12 @@ personalityProfile: {
         "Ice Darts": 1.0,
         "Minor Water Shield": 1.0,
         "Water Pouch Splash": 1.0,
-        "Tactical Reposition": 1.0
+        "Tactical Reposition": 1.0,
+        "Air Moisture Lance": 1.2, // NEW for EAT
+        "Gale-Enhanced Shield": 1.3 // NEW for EAT
     }
 },
-specialTraits: { resilientToManipulation: 0.8, traditionalMaster: true },
+specialTraits: { resilientToManipulation: 0.8, traditionalMaster: true, ethicalRestraintSwamp: true }, // UPDATED: Added ethicalRestraintSwamp
 collateralTolerance: 0.3,
 mobility: 0.5,
 curbstompRules: [
@@ -143,7 +188,16 @@ narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "Let us see if you have learned anything about discipline." }],
 Mid: [{type: 'spoken', line: "Your form is sloppy. You rely too much on brute force!"}],
-Late: [{type: 'internal', line: "The traditions of the North will prevail."}]
+Late: [{type: 'internal', line: "The traditions of the North will prevail."}],
+'eastern-air-temple': [{ type: 'spoken', line: "Limited water is no excuse for lack of discipline. I shall make do." }, { type: 'internal', line: "The air here is crisp. I can feel the moisture within it." }],
+'fire-nation-capital': [{ type: 'spoken', line: "This land reeks of fire. It is time for water to assert its balance." }, { type: 'internal', line: "Such insolence, to challenge the water tribes in their own capital. Oh, wait, it's *their* capital." }],
+'kyoshi-island': [{ type: 'spoken', line: "The ocean answers my call! Let them face the true power of water!" }, { type: 'internal', line: "Here, my bending is at its peak. This island is truly a bastion of water." }],
+'northern-water-tribe': [{ type: 'spoken', line: "This is my home. The Northern Water Tribe will not fall!" }, { type: 'internal', line: "My power is absolute here. No one can stand against me in this domain." }],
+'omashu': [{ type: 'spoken', line: "A city of stone. A test of adaptability. Water will find its way." }, { type: 'internal', line: "These limited water sources require immense discipline to wield effectively." }],
+'si-wong-desert': [{ type: 'spoken', line: "Foolishness! There is no water here. But I shall find moisture wherever I can." }, { type: 'internal', line: "To face a battle here... a true test of one's inner reserves. And my pouch." }],
+'foggy-swamp': [{ type: 'spoken', line: "The swamp's chaos is a test of true discipline. Water will find order in this mire." }, { type: 'internal', line: "The water here is abundant, but its quality demands precise control. And patience." }],
+'boiling-rock': [{ type: 'spoken', line: "This boiling water... I must use it with precision, for justice, not cruelty." }, { type: 'internal', line: "The heat is intense. I must control the steam, not be consumed by it." }],
+'great-divide': [{ type: 'spoken', line: "This chasm offers no comfort for water. I must rely on perfect form and discipline to find any moisture." }, { type: 'internal', line: "Every drop, every move, must be precise. This is a true test of a master." }] // UPDATED for Great Divide
 },
 onIntentSelection: {
 CautiousDefense: { Early: [{ type: 'internal', line: "A flawless defense is the foundation of victory. Let them waste their energy." }] },
@@ -184,11 +238,11 @@ techniquesCanteen: [
 { name: "Water Pouch Splash", verb: 'splash', object: 'water from his pouch to distract', type: 'Utility', power: 20, element: 'water', moveTags: ['utility_control', 'limited_resource'], setup: { name: 'Slightly Distracted', duration: 1, intensity: 1.05 }, collateralImpact: 'none', isCanteenMove: true },
 { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
-techniques: [ // Defaulting to full techniques
-    { name: "Ice Spikes", verb: 'launch', object: 'volley of ice spikes', type: 'Offense', power: 50, requiresArticle: true, element: 'ice', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
-    { name: "Water Barrier", verb: 'erect', object: 'solid water barrier', type: 'Defense', power: 60, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'construct_creation', 'setup'], collateralImpact: 'none' },
-    { name: "Tidal Surge", verb: 'summon', object: 'powerful tidal surge', type: 'Offense', power: 75, requiresArticle: true, element: 'water', moveTags: ['area_of_effect', 'environmental_manipulation'], collateralImpact: 'medium' },
-    { name: "Octopus Form", verb: 'assume', object: 'the Octopus Form', type: 'Finisher', power: 90, element: 'water', moveTags: ['defensive_stance', 'channeled', 'versatile', 'area_of_effect_small', 'requires_opening'], collateralImpact: 'low' },
+techniquesEasternAirTemple: [
+    { name: "Air Moisture Lance", verb: 'form', object: 'a lance from condensed air moisture', type: 'Offense', power: 40, element: 'water', moveTags: ['ranged_attack', 'single_target', 'limited_resource'], collateralImpact: 'none' },
+    { name: "Condensed Mist Shield", verb: 'gather', object: 'mist into a dense shield', type: 'Defense', power: 45, requiresArticle: true, element: 'water', moveTags: ['defensive_stance', 'utility_block', 'limited_resource'], collateralImpact: 'none' },
+    { name: "Ground Moisture Trip", verb: 'extract', object: 'moisture to create a slippery patch', type: 'Utility', power: 25, element: 'water', moveTags: ['utility_control', 'trap_delayed', 'limited_resource'], setup: { name: 'Off-Balance', duration: 1, intensity: 1.1 }, collateralImpact: 'none', isCanteenMove: true },
+    { name: "Canteen Water Jet", verb: 'shoot', object: 'a jet of water from his canteen', type: 'Offense', power: 30, element: 'water', moveTags: ['ranged_attack_medium', 'single_target', 'limited_resource'], collateralImpact: 'none', isCanteenMove: true },
     { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'water', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
 ],
 quotes: { postWin: ["Discipline prevails."], postWin_overwhelming: ["My mastery is absolute. There is no question of the outcome."], postWin_specific: { 'katara': "You have learned much, but the student has not yet surpassed the master." } },
@@ -212,7 +266,7 @@ personalityProfile: {
         "Tactical Reposition": 1.0
     }
 },
-specialTraits: { resilientToManipulation: 1.0, fireMaster: true },
+specialTraits: { resilientToManipulation: 1.0, fireMaster: true, ethicalRestraintSwamp: true }, // UPDATED: Added ethicalRestraintSwamp
 collateralTolerance: 0.0,
 mobility: 0.4,
 curbstompRules: [
@@ -243,7 +297,16 @@ narrative: {
 battleStart: {
 Early: [{ type: 'spoken', line: "You wish to see the destructive power of fire? I will show you... so that you may learn to respect it." }],
 Mid: [{type: 'spoken', line: "Control is paramount. Without it, fire consumes all."}],
-Late: [{type: 'internal', line: "This battle is a lesson... a harsh one, perhaps."}]
+Late: [{type: 'internal', line: "This battle is a lesson... a harsh one, perhaps."}],
+'eastern-air-temple': [{ type: 'spoken', line: "To wield fire here is a great responsibility. I will not let it scorch these sacred grounds." }, { type: 'internal', line: "The wind... it tugs at my flames. It is a constant test of my discipline." }],
+'fire-nation-capital': [{ type: 'spoken', line: "This place demands precision. No unnecessary flame." }, { type: 'internal', line: "To fight here... it is to face the very essence of what I abandoned." }],
+'kyoshi-island': [{ type: 'spoken', line: "This peaceful island... I will protect it from unnecessary flame." }, { type: 'internal', line: "The cost of fire in such a place is too high. I must be precise." }],
+'northern-water-tribe': [{ type: 'spoken', line: "The ice tries to extinguish my flame. It will not succeed." }, { type: 'internal', line: "To maintain control here... a true test of discipline. And patience." }],
+'omashu': [{ type: 'spoken', line: "This ancient city must not be reduced to ash. I will fight with care." }, { type: 'internal', line: "Every flame must be controlled. Especially here." }],
+'si-wong-desert': [{ type: 'spoken', line: "My flame burns with purpose, even in this wasteland. I will not let it consume." }, { type: 'internal', line: "The desert amplifies fire's destructive nature. I must be ever so careful." }],
+'foggy-swamp': [{ type: 'spoken', line: "I despise this place, but if I must use my fire, it will be with utmost control." }, { type: 'internal', line: "The dampness, the gases... every flame must be a calculated risk. I must not lose control." }],
+'boiling-rock': [{ type: 'spoken', line: "This chaotic environment is a test of true control. I must master it." }, { type: 'internal', line: "Fire must not be unleashed recklessly here. Too much potential for widespread destruction." }],
+'great-divide': [{ type: 'spoken', line: "This canyon is a stark reminder of fire's power. I must control it perfectly." }, { type: 'internal', line: "To wield fire here means absolute discipline. One errant flame could consume everything." }] // UPDATED for Great Divide
 },
 onIntentSelection: {
 CautiousDefense: { Generic: [{ type: 'internal', line: "Control. Fire must be controlled, contained. I will not let it rage." }] },

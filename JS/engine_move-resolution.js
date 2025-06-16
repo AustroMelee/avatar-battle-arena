@@ -37,7 +37,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         move = { ...DEFAULT_MOVE_PROPERTIES, name: "ErrorMove", type: 'Offense', power: 5 };
     }
     const currentMoveTags = Array.isArray(move.moveTags) ? move.moveTags : [];
-    // Ensure the move object itself has its tags correctly for reactive defense check
+    // Ensure the move object itself has its tags correctly for reactive defense check.
+    // This is primarily for the `lightning_attack` tag for Zuko's redirection.
     const moveForReactiveCheck = { ...move, moveTags: currentMoveTags };
 
 
@@ -84,7 +85,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         if (reactiveResult.type === 'lightning_redirection') {
             if (reactiveResult.success) {
                 finalDamageToDefender = 0; // Zuko takes no damage
-                stunAppliedToOriginalAttacker = reactiveResult.stunAppliedToAttacker || 0;
+                stunAppliedToOriginalAttacker = redirectionResult.stunAppliedToAttacker || 0;
                 // Attacker (Azula/Ozai) is stunned
                 if (stunAppliedToOriginalAttacker > 0) {
                     attacker.stunDuration = (attacker.stunDuration || 0) + stunAppliedToOriginalAttacker;
@@ -101,7 +102,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         }
         // Apply momentum changes from the reaction
         if (reactiveResult.momentumChangeAttacker) applyMomentumChange(attacker, reactiveResult.momentumChangeAttacker, `Opponent ${reactiveResult.type}`);
-        if (reactiveResult.momentumChangeDefender) applyMomentumChange(defender, reactiveResult.momentumChangeDefender, `Successful ${reactiveResult.type}`);
+        if (reactiveResult.momentumChangeDefender) modifyMomentum(defender, reactiveResult.momentumChangeDefender, `Successful reactive defense`);
 
         return {
             effectiveness: { label: reactiveResult.effectivenessLabel, emoji: reactiveResult.effectivenessEmoji },
@@ -115,7 +116,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             isReactedAction: true,
             reactionType: reactiveResult.type,
             reactionSuccess: reactiveResult.success,
-            narrativeEventsToPrepend: reactiveResult.narrativeEvents || [] // Key for narrative engine
+            narrativeEventsToPrepend: redirectionResult.narrativeEvents || [] // Key for narrative engine
             // stunAppliedToOriginalAttacker is handled above by modifying attacker.stunDuration directly
         };
     }
@@ -176,7 +177,22 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
 
     if (move.isRepositionMove) {
         const mobilityFactor = attacker.mobility !== undefined ? attacker.mobility : 0.5;
-        const successChance = 0.4 + (mobilityFactor * 0.6); // Base 40% + up to 60% from mobility
+        let successChance = 0.4 + (mobilityFactor * 0.6); // Base 40% + up to 60% from mobility
+        
+        // Apply environmental mobility modifiers
+        if (locationData?.environmentalModifiers?.mobility_move) {
+            const envMobMod = locationData.environmentalModifiers.mobility_move;
+            successChance *= (envMobMod.damageMultiplier || 1.0); // Assuming damageMultiplier acts as general effectiveness
+            if (envMobMod.description) interactionLog.push(`${attacker.name}'s mobility affected by environment: ${envMobMod.description}`);
+            
+            // Azula/Ozai's Jet Propulsion mitigating muddy terrain or enhancing verticality
+            if (attacker.specialTraits?.canJetPropel && (locationData.isMuddy || locationData.isVertical)) {
+                successChance = Math.min(1.0, successChance * 1.5); // Boost success in muddy/vertical terrain if can jet propel
+                interactionLog.push(`${attacker.name}'s jet propulsion partially mitigates/enhances mobility in this terrain.`);
+                attacker.aiLog.push(`[Env Effect]: Jet Propulsion buffed Reposition in ${locationData.isMuddy ? 'muddy' : 'vertical'} terrain.`);
+            }
+        }
+
         const roll = Math.random();
         let effectivenessResult = DEFAULT_EFFECTIVENESS;
 
@@ -224,6 +240,20 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${logReasons.join(', ')}.`);
         attacker.aiLog.push(`[Env Influence]: ${move.name} affected by ${logReasons.join(', ')} (x${envMultiplier.toFixed(2)} power, x${envEnergyMod.toFixed(2)} energy).`);
     }
+
+    // NEW MECHANIC: Toph's Aerial Threat Vulnerability
+    if (locationData?.environmentalModifiers?.aerialAttackVulnerability && defender.specialTraits?.seismicSense && attacker.mobility > defender.mobility * 1.5) { // Check if attacker is significantly more mobile (implies aerial advantage)
+        const vulnerabilityMod = locationData.environmentalModifiers.aerialAttackVulnerability;
+        if (move.element !== 'earth' && move.element !== 'physical' && move.type !== 'Defense') { // Only applies to non-earth/physical attacks, not defensive moves
+            // Assuming this modifier is configured to apply when defender is 'grounded' and attacker is 'airborne'.
+            // For now, simplify to: if attacker has significantly higher mobility than defender, and is not using an earth/physical move.
+            multiplier *= (vulnerabilityMod.damageMultiplier || 1.0);
+            momentumChangeDefender += (vulnerabilityMod.momentumChangeDefender || 0); // Apply momentum penalty to defender
+            logReasons.push(vulnerabilityMod.description);
+            attacker.aiLog.push(`[Env Effect]: Defender ${defender.name} (Toph) vulnerable to aerial attack from ${attacker.name}.`);
+        }
+    }
+
 
     let critChance = 0.1; // Base crit chance
     const attackerMomentum = typeof attacker.momentum === 'number' ? attacker.momentum : 0;
@@ -323,23 +353,70 @@ export function getAvailableMoves(actor, conditions) {
     let currentTechniquesSource = [];
 
     const isWaterbender = ['katara', 'pakku'].includes(actor.id);
-    const requiresCanteen = isWaterbender && (disabledElements.includes('water') || disabledElements.includes('ice'));
+    const isEarthbender = ['bumi', 'toph-beifong'].includes(actor.id);
+    const usesEasternAirTempleMoves = isWaterbender && conditions.id === 'eastern-air-temple' && actor.techniquesEasternAirTemple;
+    const usesNorthernWaterTribeMoves = isEarthbender && conditions.id === 'northern-water-tribe' && actor.techniquesNorthernWaterTribe;
+    const usesOmashuMoves = isEarthbender && conditions.id === 'omashu' && actor.techniquesOmashu;
+    const usesSiWongDesertMoves = isEarthbender && conditions.id === 'si-wong-desert' && actor.techniquesSiWongDesert; // NEW: Condition for Si Wong Desert moveset
+    const usesBoilingRockMoves = ['bumi', 'toph-beifong'].includes(actor.id) && conditions.id === 'boiling-rock' && actor.techniquesBoilingRock; // NEW: Condition for Boiling Rock moveset
 
-    if (requiresCanteen) {
-        currentTechniquesSource = actor.techniquesCanteen || [];
-        if (currentTechniquesSource.length === 0 && actor.techniquesFull && actor.aiLog) {
-            actor.aiLog.push(`[Terrain Warning]: ${actor.name} in ${conditions.id} requires canteen moves but has none defined. No water/ice moves available.`);
+    // NEW: Logic for location-specific movesets
+    if (usesEasternAirTempleMoves) {
+        currentTechniquesSource = actor.techniquesEasternAirTemple;
+        if (currentTechniquesSource.length === 0 && actor.aiLog) {
+            actor.aiLog.push(`[Terrain Warning]: ${actor.name} in Eastern Air Temple has no specific moves defined. Falling back to default.`);
+            currentTechniquesSource = actor.techniquesFull || actor.techniques || [];
         }
-    } else if (actor.techniquesFull && Array.isArray(actor.techniquesFull) && actor.techniquesFull.length > 0) {
-        currentTechniquesSource = actor.techniquesFull;
-    } else if (actor.techniques && Array.isArray(actor.techniques) && actor.techniques.length > 0) {
-        currentTechniquesSource = actor.techniques;
+    } else if (usesNorthernWaterTribeMoves) {
+        currentTechniquesSource = actor.techniquesNorthernWaterTribe;
+        if (currentTechniquesSource.length === 0 && actor.aiLog) {
+            actor.aiLog.push(`[Terrain Warning]: ${actor.name} in Northern Water Tribe has no specific earthbending moves defined. Falling back to default.`);
+            currentTechniquesSource = actor.techniquesFull || actor.techniques || [];
+        }
+    } else if (usesOmashuMoves) {
+        currentTechniquesSource = actor.techniquesOmashu;
+        if (currentTechniquesSource.length === 0 && actor.aiLog) {
+            actor.aiLog.push(`[Terrain Warning]: ${actor.name} in Omashu has no specific earthbending moves defined. Falling back to default.`);
+            currentTechniquesSource = actor.techniquesFull || actor.techniques || [];
+        }
+    } else if (usesSiWongDesertMoves) { // NEW: Si Wong Desert moveset priority for earthbenders
+        currentTechniquesSource = actor.techniquesSiWongDesert;
+        if (currentTechniquesSource.length === 0 && actor.aiLog) {
+            actor.aiLog.push(`[Terrain Warning]: ${actor.name} in Si Wong Desert has no specific earthbending moves defined. Falling back to default.`);
+            currentTechniquesSource = actor.techniquesFull || actor.techniques || [];
+        }
+    } else if (usesBoilingRockMoves) { // NEW: Boiling Rock moveset priority for earth/metalbenders
+        currentTechniquesSource = actor.techniquesBoilingRock;
+        if (currentTechniquesSource.length === 0 && actor.aiLog) {
+            actor.aiLog.push(`[Terrain Warning]: ${actor.name} in Boiling Rock has no specific earth/metalbending moves defined. Falling back to default.`);
+            currentTechniquesSource = actor.techniquesFull || actor.techniques || [];
+        }
     }
+    else {
+        const hasWaterInLocation = locationData?.waterRich || !disabledElements.includes('water');
+        // NEW: Special rule for Boiling Rock waterbenders: always use canteen moves
+        const forceCanteenInBoilingRock = isWaterbender && conditions.id === 'boiling-rock' && locationData.hotWaterSource;
+
+        const requiresCanteen = isWaterbender && (forceCanteenInBoilingRock || !hasWaterInLocation || disabledElements.includes('water') || disabledElements.includes('ice'));
+
+        if (requiresCanteen) {
+            currentTechniquesSource = actor.techniquesCanteen || [];
+            if (currentTechniquesSource.length === 0 && actor.techniquesFull && actor.aiLog) {
+                actor.aiLog.push(`[Terrain Warning]: ${actor.name} in ${conditions.id} requires canteen moves but has none defined. No water/ice moves available.`);
+            }
+        } else if (actor.techniquesFull && Array.isArray(actor.techniquesFull) && actor.techniquesFull.length > 0) {
+            currentTechniquesSource = actor.techniquesFull;
+        } else if (actor.techniques && Array.isArray(actor.techniques) && actor.techniques.length > 0) {
+            currentTechniquesSource = actor.techniques;
+        }
+    }
+
 
     const validTechniques = currentTechniquesSource.filter(move => move && typeof move === 'object' && move.name && move.type);
 
     let available = validTechniques.filter(move => {
         const moveElement = move.element || DEFAULT_MOVE_PROPERTIES.element;
+        // If the location specifies this element is disabled AND the move is NOT a canteen move (which bypasses disabling)
         if (disabledElements.includes(moveElement) && !move.isCanteenMove) return false;
 
         if (conditions.id === 'boiling-rock' && (moveElement === 'water' || moveElement === 'ice') && !move.isCanteenMove) {
@@ -391,18 +468,62 @@ function applyEnvironmentalModifiers(move, attacker, conditions, moveTagsParam) 
 
     const locationData = locationConditions[conditions?.id];
     if (locationData?.environmentalModifiers) {
-        const mod = locationData.environmentalModifiers[moveElement];
-        if (mod) {
-            if (typeof mod.damageMultiplier === 'number') {
-                multiplier *= mod.damageMultiplier;
-                logReasons.push(`${mod.description || `Location affects ${moveElement} damage`}`);
+        // Apply element-specific modifiers (e.g., fire in desert, water in swamp)
+        const elementMod = locationData.environmentalModifiers[moveElement];
+        if (elementMod) {
+            if (typeof elementMod.damageMultiplier === 'number') {
+                multiplier *= elementMod.damageMultiplier;
+                logReasons.push(`${elementMod.description || `Location affects ${moveElement} damage`}`);
             }
-            if (typeof mod.energyCostModifier === 'number') {
-                energyCostModifier *= mod.energyCostModifier;
-                if (mod.description && !logReasons.some(r => r.includes(mod.description))) {
-                    logReasons.push(`${mod.description} (energy cost)`);
-                } else if (!mod.description) {
+            if (typeof elementMod.energyCostModifier === 'number') {
+                energyCostModifier *= elementMod.energyCostModifier;
+                if (elementMod.description && !logReasons.some(r => r.includes(elementMod.description))) {
+                    logReasons.push(`${elementMod.description} (energy cost)`);
+                } else if (!elementMod.description) {
                      logReasons.push(`Location affects ${moveElement} energy cost`);
+                }
+            }
+            // Solar Amplification for Fire/Lightning
+            if (elementMod.solar_amplification) {
+                multiplier *= 1.25; // Additional buff if solar amplified
+                energyCostModifier *= 0.85; // Reduced energy cost
+                logReasons.push(`Solar Amplification`);
+            }
+            // Sensory Impairment for Earth (Toph)
+            // If Toph has specific swamp immunity, this particular sensory impairment doesn't apply
+            if (elementMod.sensory_impairment && attacker.specialTraits?.seismicSense && !(conditions.id === 'foggy-swamp' && attacker.specialTraits?.swampImmunity)) {
+                multiplier *= 0.7; // Reduce effectiveness for seismic-based attacks
+                energyCostModifier *= 1.3; // Increase energy cost for impaired sensing
+                logReasons.push(`Sensory Impairment`);
+            }
+            // Moral Restraint for Waterbenders in Boiling Rock
+            if (elementMod.moral_restraint_potential && (attacker.id === 'katara' || attacker.id === 'pakku') && (moveElement === 'water' || moveElement === 'ice')) {
+                 multiplier *= 0.5; // Halve damage for offensive water/ice moves
+                 energyCostModifier *= 1.5; // Increase energy cost
+                 logReasons.push(`Moral Restraint (Boiling Water)`);
+            }
+            // Vertical Threat Vulnerability (for Toph in Boiling Rock)
+            if (elementMod.vertical_threat_vulnerability && attacker.id === 'toph-beifong' && move.type !== 'Defense') {
+                 multiplier *= 0.7; // General attack effectiveness reduced if fighting aerial/vertical opponents
+                 logReasons.push(`Vertical Threat Vulnerability`);
+            }
+        }
+
+        // Apply modifiers based on move tags, if defined in location conditions
+        for (const tag of localMoveTags) {
+            const tagMod = locationData.environmentalModifiers[tag];
+            if (tagMod) {
+                if (typeof tagMod.damageMultiplier === 'number') {
+                    multiplier *= tagMod.damageMultiplier;
+                    logReasons.push(`${tagMod.description || `Location affects ${tag} move damage`}`);
+                }
+                if (typeof tagMod.energyCostModifier === 'number') {
+                    energyCostModifier *= tagMod.energyCostModifier;
+                    if (tagMod.description && !logReasons.some(r => r.includes(tagMod.description))) {
+                        logReasons.push(`${tagMod.description} (energy cost)`);
+                    } else if (!tagMod.description) {
+                        logReasons.push(`Location affects ${tag} move energy cost`);
+                    }
                 }
             }
         }
@@ -420,6 +541,23 @@ function applyEnvironmentalModifiers(move, attacker, conditions, moveTagsParam) 
         multiplier *= 1.05;
         logReasons.push(`cold environment empowers ${moveElement}`);
     }
+    // Muddy terrain general mobility penalty for physical/evasive moves
+    if (conditions?.isMuddy) {
+        if (localMoveTags.includes('mobility_move') || localMoveTags.includes('evasive')) {
+            // This multiplier interacts with the general 'mobility_move'/'evasive' modifiers in the swamp.
+            // It acts as an additional penalty for *any* character not explicitly buffed.
+            // For Azula/Ozai with jet propulsion, this will be counteracted by their specific trait logic.
+            multiplier *= 0.8; // Base penalty for general mobility in mud
+            energyCostModifier *= 1.2;
+            logReasons.push(`muddy terrain hinders mobility`);
+        }
+        if (attacker.type === 'Nonbender' || attacker.element === 'physical') {
+            multiplier *= 0.9; // General physical combat penalty
+            energyCostModifier *= 1.1;
+            logReasons.push(`muddy terrain hinders physical combat`);
+        }
+    }
+
 
     return { multiplier, energyCostModifier, logReasons };
 }

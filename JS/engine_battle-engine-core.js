@@ -557,11 +557,11 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         fighter2Escalation: fighter2.escalationState
     };
 
-    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase });
+    const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase, locationId: locId }); // Pass locationId
     if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true));
 
-    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase });
-    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, environmentState, locationData, phaseState.currentPhase, true));
+    const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase, locationId: locId }); // Pass locationId
+    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, fighter1.environmentState, locationData, phaseState.currentPhase, true));
 
     if (checkCurbstompConditions(initiator, responder, locId, currentBattleState, battleEventLog, true)) {
         initiator.aiLog.push(`[Pre-Battle Curbstomp Check]: ${initiator.name} OR ${responder.name} triggered or was affected by a curbstomp rule.`);
@@ -603,7 +603,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 type: 'phase_header_event',
                 phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji,
                 phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`,
-                isPhaseHeader: true,
                 html_content: phaseTemplates.header
                     .replace('{phaseDisplayName}', currentPhaseInfo.name)
                     .replace('{phaseEmoji}', currentPhaseInfo.emoji)
@@ -671,7 +670,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
             const addNarrativeEvent = (quote, actorForQuote) => {
                 if (quote && !battleContextFiredQuotes.has(`${actorForQuote.id}-${quote.line}`)) {
-                    narrativeEventsForAction.push({ quote, actor: actorForQuote });
+                    const opponentForQuote = actorForQuote.id === currentAttacker.id ? currentDefender : currentAttacker;
+                    narrativeEventsForAction.push({ quote, actor: actorForQuote, opponent: opponentForQuote }); // Pass opponent
                     battleContextFiredQuotes.add(`${actorForQuote.id}-${quote.line}`);
                 }
             };
@@ -712,11 +712,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     currentAttacker, 
                     result, 
                     phaseState.currentPhase,
-                    {} 
+                    aiLogEntryFromSelectMove 
                 );
                  turnSpecificEventsForLog.push(reactionMoveLine);
             } else {
-                result.isKOAction = (currentDefender.hp - result.damage <= 0);
                 turnSpecificEventsForLog.push(...generateTurnNarrationObjects(narrativeEventsForAction, move, currentAttacker, currentDefender, result, environmentState, locationData, phaseState.currentPhase, false, aiLogEntryFromSelectMove));
             }
             
@@ -751,8 +750,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 else addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onCollateral', 'observingDamage', collateralContext), currentDefender);
             }
 
-            updateMentalState(currentDefender, currentAttacker, result, environmentState);
-            updateMentalState(currentAttacker, currentDefender, null, environmentState);
+            updateMentalState(currentDefender, currentAttacker, result, environmentState, locId); // <-- Pass locId here
+            updateMentalState(currentAttacker, currentDefender, null, environmentState, locId); // <-- Pass locId here
 
             if (currentDefender.mentalState.level !== oldDefenderMentalState) {
                 addNarrativeEvent(findNarrativeQuote(currentDefender, currentAttacker, 'onStateChange', currentDefender.mentalState.level, { currentPhaseKey: phaseState.currentPhase }), currentDefender);

@@ -1,4 +1,4 @@
-// FILE: data_characters_antagonists.js
+// FILE: js/data_characters_antagonists.js
 'use strict';
 
 // Aggregates Antagonist character data.
@@ -27,7 +27,7 @@ export const antagonistCharacters = {
                 "Tactical Reposition": 0.9
             }
         },
-        specialTraits: { manipulative: 0.8, canGenerateLightning: true },
+        specialTraits: { manipulative: 0.8, canGenerateLightning: true, canJetPropel: true }, // UPDATED: Added canJetPropel
         collateralTolerance: 0.9,
         mobility: 0.95,
         curbstompRules: [
@@ -61,7 +61,16 @@ export const antagonistCharacters = {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You think you stand a chance against me? That's... adorable." }, { type: 'internal', line: "Show no weakness. Perfection is the only acceptable outcome." }],
                 Mid: [{ type: 'spoken', line: "Is this the best you can do? Pathetic." }],
-                Late: [{ type: 'spoken', line: "You will fall. Everyone does." }]
+                Late: [{ type: 'spoken', line: "You will fall. Everyone does." }],
+                'eastern-air-temple': [{ type: 'spoken', line: "These dusty ruins will serve as a fitting graveyard for your hopes." }, { type: 'internal', line: "Such wasted space. This temple will burn beautifully." }],
+                'fire-nation-capital': [{ type: 'spoken', line: "Welcome to my stage. Prepare to be extinguished." }, { type: 'internal', line: "This is my domain. No one is safe from my fire here." }],
+                'kyoshi-island': [{ type: 'spoken', line: "This quaint little island will make a delightful bonfire." }, { type: 'internal', line: "Peaceful places are so easily corrupted. And burned." }],
+                'northern-water-tribe': [{ type: 'spoken', line: "The cold will only make your defeat more exquisite." }, { type: 'internal', line: "This ice is brittle. I shall shatter it, and their hope, with my flames." }],
+                'omashu': [{ type: 'spoken', line: "These old stones will crumble beautifully under my flames." }, { type: 'internal', line: "So many levels, so many angles to exploit. This is amusing." }],
+                'si-wong-desert': [{ type: 'spoken', line: "The sun lends its power to my fury. You will melt!" }, { type: 'internal', line: "This heat amplifies my precision. Nowhere to hide." }],
+                'foggy-swamp': [{ type: 'spoken', line: "This wretched place cannot hide you from my perfect fire. Come out and face your end." }, { type: 'internal', line: "Mud and fog. Annoying, but easily burned away. I will find them." }],
+                'boiling-rock': [{ type: 'spoken', line: "This prison will be your tomb. No one escapes me." }, { type: 'internal', line: "The perfect stage for a display of overwhelming force." }],
+                'great-divide': [{ type: 'spoken', line: "The canyon will amplify my power. There's no escaping my lightning here!" }, { type: 'internal', line: "So much open space. Perfect for hunting. And nowhere for them to hide from my flames." }] // UPDATED for Great Divide
             },
             onIntentSelection: {
                 CapitalizeOnOpening: { Generic: [{ type: 'spoken', line: "There! An opening. This ends now." }] },
@@ -82,7 +91,7 @@ export const antagonistCharacters = {
                 broken: { Late: [{ type: 'spoken', line: "No... you all fear me! You have to!" }] }
             },
             onCollateral: {
-                causingDamage: { Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "The weak will always be swept away. This is merely an extension of my will." }] },
+                causingDamage: { Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "Let the weak will always be swept away. This is merely an extension of my will." }] },
                 observingDamage: { Generic: [{ type: 'internal', line: "Amateurish destruction. But effective enough." }, { type: 'spoken', line: "Good. Let the world burn around you. It's only fitting." }] },
                 stressedByDamage: [],
                 thrivingInDamage: { Generic: [{ type: 'spoken', line: "This is where true power is forged: in the ashes." }, { type: 'internal', line: "The destruction enhances my focus. There is no escape here." }] }
@@ -103,7 +112,7 @@ export const antagonistCharacters = {
             }
         },
         techniques: [
-            { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], setup: { name: 'Exposed', duration: 2, intensity: 1.35 }, collateralImpact: 'none' },
+            { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], collateralImpact: 'none' },
             { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'], collateralImpact: 'low' },
             { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
             { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', type: 'Finisher', power: 100, requiresArticle: true, element: 'lightning', moveTags: ['ranged_attack', 'instantaneous', 'single_target', 'unblockable_standard', 'requires_opening', 'highRisk', 'lightning_attack'], collateralImpact: 'medium' },
@@ -132,7 +141,7 @@ export const antagonistCharacters = {
                 "Tactical Reposition": 0.7
             }
         },
-        specialTraits: { manipulative: 0.6, canGenerateLightning: true },
+        specialTraits: { manipulative: 0.6, canGenerateLightning: true, canJetPropel: true }, // UPDATED: Added canJetPropel
         collateralTolerance: 1.0,
         mobility: 0.3,
         curbstompRules: [
@@ -163,7 +172,16 @@ export const antagonistCharacters = {
             battleStart: {
                 Early: [{ type: 'spoken', line: "You dare challenge the Phoenix King? You will learn your place." }],
                 Mid: [{ type: 'spoken', line: "Feel the power of the Fire Lord! Your struggle is meaningless!" }],
-                Late: [{ type: 'action', line: "roars, unleashing a torrent of flame that consumes the battlefield." }]
+                Late: [{ type: 'action', line: "roars, unleashing a torrent of flame that consumes the battlefield." }],
+                'eastern-air-temple': [{ type: 'spoken', line: "This temple will serve as a monument to my power, once it is reduced to ash." }, { type: 'internal', line: "A fitting place to display true dominion. These winds merely fuel my rage." }],
+                'fire-nation-capital': [{ type: 'spoken', line: "This is my throne room. Your pathetic defiance ends here!" }, { type: 'internal', line: "Let the very stones of my city reinforce my power." }],
+                'kyoshi-island': [{ type: 'spoken', line: "This symbol of the old world will burn first." }, { type: 'internal', line: "Kyoshi's pathetic legacy ends with fire." }],
+                'northern-water-tribe': [{ type: 'spoken', line: "This frozen wasteland will feel my wrath. Nothing can withstand my fire!" }, { type: 'internal', line: "The cold merely tests my resolve. They will witness true power." }],
+                'omashu': [{ type: 'spoken', line: "Another conquered city. Another display of my absolute power." }, { type: 'internal', line: "These structures are a mere inconvenience. They will bend or break." }],
+                'si-wong-desert': [{ type: 'spoken', line: "The sun is my ally here. You will be incinerated!" }, { type: 'internal', line: "This barren land mirrors my soul. Total annihilation awaits." }],
+                'foggy-swamp': [{ type: 'spoken', line: "This putrid swamp will burn, and you with it. Nothing will defy the Phoenix King!" }, { type: 'internal', line: "The stench and illusion are minor annoyances. My flames will purify this place." }],
+                'boiling-rock': [{ type: 'spoken', line: "No one escapes my dominion. This prison is a monument to my power." }, { type: 'internal', line: "The heat here suits me. Their despair will fuel my flames." }],
+                'great-divide': [{ type: 'spoken', line: "This chasm will be your grave. Feel the fire of your Phoenix King!" }, { type: 'internal', line: "The canyon's vastness is merely a stage for my absolute power. Nowhere to hide from my flames." }] // UPDATED for Great Divide
             },
             onIntentSelection: { PressAdvantage: { Mid: [{ type: 'spoken', line: "There is no escape. Your world is ending." }] } },
             onManipulation: { asAttacker: { Generic: [{ type: 'spoken', line: "Your friends cannot help you. Your hope is an illusion." }] } },
@@ -218,7 +236,7 @@ export const antagonistCharacters = {
                 "Tactical Reposition": 1.0
             }
         },
-        specialTraits: { resilientToManipulation: 0.3 },
+        specialTraits: { resilientToManipulation: 0.3, swampPhobia: true }, // UPDATED: Added swampPhobia
         collateralTolerance: 0.4,
         mobility: 0.6,
         curbstompRules: [
@@ -248,7 +266,16 @@ export const antagonistCharacters = {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Ugh. Let's just get this over with." }, { type: 'internal', line: "If I finish this quickly, maybe I can get some peace and quiet." }],
                 Mid: [{ type: 'spoken', line: "Are you done yet? This is boring." }],
-                Late: [{ type: 'internal', line: "Fine. I guess I'll try a little harder." }]
+                Late: [{ type: 'internal', line: "Fine. I guess I'll try a little harder." }],
+                'eastern-air-temple': [{ type: 'spoken', line: "The wind's annoying. Just hold still so I can finish this." }, { type: 'internal', line: "Too many places to hide here. This is inefficient." }],
+                'fire-nation-capital': [{ type: 'spoken', line: "Just another day at the office." }, { type: 'internal', line: "So many places for targets to hide. This is going to be tedious." }],
+                'kyoshi-island': [{ type: 'spoken', line: "Great. More trees to block my view." }, { type: 'internal', line: "So many places for them to evade. This is going to be annoying." }],
+                'northern-water-tribe': [{ type: 'spoken', line: "This is cold. And annoying. Why is nothing standing still?" }, { type: 'internal', line: "Too many moving targets, too many ice pillars. This is not my ideal battlefield." }],
+                'omashu': [{ type: 'spoken', line: "Another city. Another maze. This is going to be slow." }, { type: 'internal', line: "So many distractions. Hard to get a clean shot." }],
+                'si-wong-desert': [{ type: 'spoken', line: "At least there's no trees to block my view. Now, hold still." }, { type: 'internal', line: "Perfect visibility. Nowhere for them to hide." }],
+                'foggy-swamp': [{ type: 'spoken', line: "Ugh, this place is disgusting. Just hold still so I can end it." }, { type: 'internal', line: "The fog... the mud... this is truly wretched. Focus, Mai, just focus." }],
+                'boiling-rock': [{ type: 'spoken', line: "All this heat... and the clanking. Just try to stay in one place." }, { type: 'internal', line: "So many wires and gondolas. More ways for them to move. Annoying." }],
+                'great-divide': [{ type: 'spoken', line: "Too many rocks. Not enough clear lines of fire. This is tedious." }, { type: 'internal', line: "The echoes are annoying. And getting a clear shot is a nightmare. I hate this place." }] // UPDATED for Great Divide
             },
             onIntentSelection: {
                 OpeningMoves: { Early: [{ type: 'internal', line: "Let's see how long it takes before {opponent.s} gets bored and makes a mistake." }] },
@@ -285,7 +312,7 @@ export const antagonistCharacters = {
             }
         },
         techniques: [
-            { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
+            { name: "Knife Barrage", verb: 'unleash', object: 'barrage of knives', type: 'Offense', power: 50, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'area_of_effect_small'], collateralImpact: 'low' },
             { name: "Precision Strike", verb: 'throw', object: 'single, perfectly aimed knife', type: 'Offense', power: 65, requiresArticle: true, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'single_target', 'precise'], collateralImpact: 'none' },
             { name: "Knife Wall", verb: 'create', object: 'defensive wall of knives', type: 'Defense', power: 45, requiresArticle: true, element: 'physical', moveTags: ['defensive_stance', 'utility_block', 'trap_delayed'], collateralImpact: 'none' },
             { name: "Pinning Strike", verb: 'pin', object: "her foe's sleeve to a wall", type: 'Utility', power: 40, element: 'physical', moveTags: ['ranged_attack', 'projectile', 'debuff_disable', 'single_target', 'precise', 'humiliation'], setup: { name: 'Pinned', duration: 2, intensity: 1.45 }, collateralImpact: 'low' },
@@ -313,7 +340,7 @@ export const antagonistCharacters = {
                 "Tactical Reposition": 1.3
             }
         },
-        specialTraits: { resilientToManipulation: 0.2, chiBlocker: true },
+        specialTraits: { resilientToManipulation: 0.2 }, // UPDATED: Removed swampPhobia, no longer a general trait
         collateralTolerance: 0.1,
         mobility: 1.0,
         curbstompRules: [
@@ -343,7 +370,16 @@ export const antagonistCharacters = {
             battleStart: {
                 Early: [{ type: 'spoken', line: "Wow, your aura is, like, super-aggressive today! Let's fix that!" }],
                 Mid: [{ type: 'spoken', line: "This is fun! You're pretty good at this not-getting-hit thing!" }],
-                Late: [{ type: 'spoken', line: "Okay, time to really turn on the charm... and the chi-blocking!" }]
+                Late: [{ type: 'spoken', line: "Okay, time to really turn on the charm... and the chi-blocking!" }],
+                'eastern-air-temple': [{ type: 'spoken', line: "This place has so many fun ledges to flip off of!" }, { type: 'internal', line: "Okay, keep them guessing. Lots of places to pop out!" }],
+                'fire-nation-capital': [{ type: 'spoken', line: "Ooh, so many tall buildings to bounce off of!" }, { type: 'internal', line: "This is a big playground! Lots of new friends to tag!" }],
+                'kyoshi-island': [{ type: 'spoken', line: "This island has such a good aura! Let's keep it fun!" }, { type: 'internal', line: "Plenty of places to hide and surprise! Perfect!" }],
+                'northern-water-tribe': [{ type: 'spoken', line: "So much slippery ice! This is going to be a fun challenge!" }, { type: 'internal', line: "It's cold, but bouncing around will keep me warm. And them guessing!" }],
+                'omashu': [{ type: 'spoken', line: "So many chutes! This is like a giant amusement park!" }, { type: 'internal', line: "Lots of tight spaces to dart in and out of! Perfect for chi-blocking!" }],
+                'si-wong-desert': [{ type: 'spoken', line: "So much open space for gymnastics! Let's chase them down!" }, { type: 'internal', line: "It's hot, but I'll just keep moving! They can't hide from me here." }],
+                'foggy-swamp': [{ type: 'spoken', line: "Ooh, this place has a super unique aura! Like, earthy but also watery!" }, { type: 'internal', line: "So much to bounce off! And hide in! This is going to be a fun game of tag!" }],
+                'boiling-rock': [{ type: 'spoken', line: "Whee! So many wires and gondolas! This is going to be so much fun!" }, { type: 'internal', line: "This place is a giant jungle gym! They'll never catch me!" }],
+                'great-divide': [{ type: 'spoken', line: "So many walls to flip off! This is going to be amazing parkour!" }, { type: 'internal', line: "The air here is so clear! I can spot them from anywhere. Time to play chase!" }] // UPDATED for Great Divide
             },
             onIntentSelection: {
                 CapitalizeOnOpening: { Mid: [{ type: 'spoken', line: "Ooh, you're off-balance! Perfect time for a poke!" }] },
@@ -375,7 +411,7 @@ export const antagonistCharacters = {
             }
         },
         techniques: [
-            { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], setup: { name: 'Distracted', duration: 1, intensity: 1.2 }, collateralImpact: 'none' },
+            { name: "Acrobatic Flips", verb: 'execute', object: 'series of acrobatic flips', type: 'Utility', power: 25, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
             { name: "Pressure Point Strike", verb: 'strike', object: 'vital pressure point', type: 'Offense', power: 60, requiresArticle: true, element: 'physical', moveTags: ['melee_range', 'single_target', 'debuff_disable', 'precise'], collateralImpact: 'none' },
             { name: "Graceful Dodge", verb: 'dodge', object: 'incoming attack', type: 'Defense', power: 40, requiresArticle: true, element: 'utility', moveTags: ['utility_reposition', 'evasive'], collateralImpact: 'none' },
             { name: "Chi-Blocking Flurry", verb: 'deliver', object: 'flurry of chi-blocking strikes', type: 'Finisher', power: 85, requiresArticle: true, element: 'special', moveTags: ['melee_range', 'debuff_disable', 'single_target', 'unblockable', 'requires_opening'], collateralImpact: 'none' },

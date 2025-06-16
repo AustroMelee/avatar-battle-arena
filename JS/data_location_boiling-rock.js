@@ -9,7 +9,10 @@ export const boilingRockConditions = {
     isHot: true,
     metalRich: true,
     isPrecarious: true,
-    waterRich: true, 
+    waterRich: true, // Existing: confirms water is present
+    isVertical: true, // NEW: For multi-level structures, gondolas, wires
+    isCramped: true, // NEW: For walkways, tight spaces
+    hotWaterSource: true, // NEW: Explicitly marks the water as boiling, for specific moral/tactical choices
     fragility: 0.8, 
     damageThresholds: {
         minor: 10, moderate: 25, severe: 50, catastrophic: 75
@@ -38,11 +41,17 @@ export const boilingRockConditions = {
     },
     environmentalModifiers: {
         fire: { damageMultiplier: 1.2, energyCostModifier: 0.9, description: "Fire melts and warps metal, thriving in the heat." },
-        earth: { damageMultiplier: 1.1, energyCostModifier: 1.0, description: "Earthbending causes structural collapse of metal." },
-        water: { damageMultiplier: 1.0, energyCostModifier: 1.0, description: "Waterbending can disturb the boiling lake, causing steam explosions." },
+        lightning: { damageMultiplier: 1.3, energyCostModifier: 0.85, description: "Lightning arcs effectively through metal structures and steam." }, // NEW: Specific for lightning in metal/steam
+        earth: { damageMultiplier: 1.1, energyCostModifier: 1.0, specialModifier: 'vertical_threat_vulnerability', description: "Earthbending causes structural collapse of metal but struggles with vertical threats." }, // UPDATED: Special modifier for Toph
+        water: { damageMultiplier: 0.6, energyCostModifier: 1.4, specialModifier: 'moral_restraint_potential', description: "Waterbending is limited to personal reserves or dangerous steam; offensive use of boiling water is rare due to moral restraint." }, // UPDATED: Severe penalty + moral restraint tag
+        ice: { damageMultiplier: 0.5, energyCostModifier: 1.5, description: "Icebending is highly inefficient due to constant heat and limited water sources." }, // NEW: Severe penalty for ice
         metal: { damageMultiplier: 1.3, energyCostModifier: 0.85, description: "Metalbending is empowered by the abundant metal structures." },
-        physical: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Precarious footing and extreme heat impact physical combat." }
+        physical: { damageMultiplier: 1.0, energyCostModifier: 1.1, description: "Precarious footing and extreme heat impact physical combat." },
+        // NEW: Modifiers for general move tags affected by environment
+        ranged_attack: { damageMultiplier: 1.1, energyCostModifier: 0.9, description: "Open gondolas and strategic perches offer strong projectile positions." }, // NEW: Buff for ranged
+        mobility_move: { damageMultiplier: 1.3, energyCostModifier: 0.8, description: "Wires, gondolas, and verticality allow extreme agility exploitation." }, // NEW: Major buff for mobility
+        evasive: { damageMultiplier: 1.3, energyCostModifier: 0.8, description: "The complex vertical layout offers excellent evasive opportunities." } // NEW: Major buff for evasive
     },
     disabledElements: [],
-    notes: "Metal and heat are abundant, but the terrain is treacherous. Extremely volatile environment. Water is present but dangerous."
+    notes: "Metal and heat are abundant, and the terrain is highly vertical and precarious. Water is present but boiling and potentially ethically problematic for waterbenders. Favors agile, aggressive benders and those who thrive on chaos or exploit verticality."
 };

@@ -110,8 +110,8 @@ export const locationCurbstompRules = {
                     let prob = 0.5;
                     if (char.id === 'bumi') prob *= 0.05;
                     else if (char.id === 'sokka') prob *= 2.5;
-                    else if (char.type === 'Nonbender') prob *= 1.8;
-                    else if (char.element === 'earth') prob *= 0.6;
+                    else if (char.type === "Nonbender") prob *= 1.8;
+                    else if (char.element === "earth") prob *= 0.6;
 
                     if (char.mobility > 0.75) prob *= 0.4;
                     else if (char.mobility < 0.35) prob *= 1.8;
@@ -178,7 +178,7 @@ export const locationCurbstompRules = {
             appliesToCharacter: "toph-beifong",
             triggerChance: 0.60,
             canTriggerPreBattle: true,
-            outcome: { type: "disadvantage_character", effect: "reduced_accuracy_defense_20_percent", successMessage: "The murky, soft ground of the Foggy Swamp dulls Toph's seismic sense, making her vulnerable.", failureMessage: "Toph focuses intensely, managing to 'see' through the muck surprisingly well." }
+            outcome: { type: "disadvantage_character", effect: "reduced_accuracy_defense_20_percent", successMessage: "The murky, soft ground of the Foggy Swamp dulls Toph's seismic sense, making her vulnerable.", failureMessage: "Toph adapts quickly to the shifting sands, managing to maintain her senses remarkably well." }
         },
         {
             id: "swamp_katara_buff",
@@ -206,14 +206,7 @@ export const locationCurbstompRules = {
             canTriggerPreBattle: true,
             outcome: { type: "power_increase_character_50_percent", message: "{characterName} feels invigorated by the heart of the Fire Nation, their flames burning with imperial might!" }
         },
-        {
-            id: "fn_capital_open_space_ranged",
-            description: "Open plaza benefits ranged attacks.",
-            appliesToMoveType: "ranged_attack",
-            triggerChance: 1.0,
-            canTriggerPreBattle: true,
-            outcome: { type: "effectiveness_increase_30_percent", message: "The open expanse of the plaza allows for devastatingly effective ranged assaults." }
-        },
+        // REMOVED: fn_capital_open_space_ranged as per plan. Rely on environmentalModifiers.
         {
             id: "fn_capital_intimidation",
             description: "Non-Fire Nation combatants feel intimidated.",
@@ -329,12 +322,46 @@ export const locationCurbstompRules = {
             outcome: { type: "disruption_random_character", effect: "minor_stun_or_misstep", successMessage: "The panicked crowd surges, momentarily disrupting {actualVictimName}'s attack!", failureMessage: "The fighters manage to weave through the throngs of people." }
         },
         {
-            id: "bs_lower_ring_tylee_chiblock",
-            description: "Ty Lee's chi-blocking excels in the close quarters.",
+            id: "bs_lower_ring_tylee_chiblock", // NEW CURBSTOMP RULE FOR TY LEE IN BA SING SE
+            description: "Ty Lee corners and disables her opponent in the tight spaces of Ba Sing Se's Lower Ring.",
             appliesToCharacter: "ty-lee",
-            triggerChance: 0.40,
-            canTriggerPreBattle: true,
-            outcome: { type: "advantage_character", effect: "chi_blocking_effectiveness_increase_40_percent", successMessage: "The tight alleys and rooftops of the Lower Ring are a perfect playground for Ty Lee's acrobatic chi-blocking!", failureMessage: "" }
+            triggerChance: 0.85, // High chance if condition met
+            canTriggerPreBattle: false,
+            conditionLogic: (tylee, opponent, battleState) => {
+                const isCrampedOrDense = (battleState.location?.isCramped || false) || (battleState.location?.isDense || false);
+                const isOpponentMobile = opponent.mobility > 0.6; // Less mobile opponents are easier
+                return isCrampedOrDense && !isOpponentMobile;
+            },
+            activatingMoveName: "Chi-Blocking Flurry",
+            activatingMoveTags: ["melee_range", "debuff_disable", "unblockable"],
+            outcome: {
+                type: "instant_paralysis_target", // Incapacitates and applies stun
+                duration: 2, // Stun for 2 turns
+                successMessage: "Ty Lee's acrobatic agility allows her to corner {targetName} in the tight urban labyrinth, unleashing a precise {moveName} that instantly blocks {targetName}'s chi!",
+                failureMessage: "{targetName} narrowly evades Ty Lee's disabling flurry in the cramped confines, but the pressure mounts!"
+            }
+        }
+    ],
+    'eastern-air-temple': [ // NEW: EASTERN AIR TEMPLE SPECIFIC CURBSTOMP
+        {
+            id: "aang_eat_home_turf_domination",
+            description: "Aang's mastery of airbending in his sacred home temple.",
+            appliesToCharacter: "aang-airbending-only",
+            triggerChance: 0.8, // High chance for Aang on his home turf
+            canTriggerPreBattle: false, // Triggers during battle based on performance
+            conditionLogic: (aang, opponent, battleState) => {
+                // Aang is doing well (high HP, low stress) and/or opponent is struggling
+                const aangIsConfident = aang.hp > 80 && aang.mentalState.level === 'stable';
+                const opponentIsStruggling = opponent.hp < 50 || opponent.mentalState.level === 'shaken';
+                return aangIsConfident || opponentIsStruggling;
+            },
+            activatingMoveName: "Tornado Whirl", // Or any powerful air move
+            activatingMoveTags: ["air", "area_of_effect_large", "unblockable"],
+            outcome: {
+                type: "instant_win_attacker_overwhelm",
+                successMessage: "With the full force of the Eastern Air Temple's winds, Aang's {moveName} becomes an unstoppable storm, sweeping {targetName} into utter defeat!",
+                failureMessage: "{targetName} miraculously finds a momentary foothold against Aang's powerful air currents in the hallowed temple."
+            }
         }
     ]
 };

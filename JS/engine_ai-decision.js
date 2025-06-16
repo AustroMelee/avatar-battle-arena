@@ -6,8 +6,9 @@
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
 import { MAX_MOMENTUM, MIN_MOMENTUM } from './engine_momentum.js';
-import { getPhaseAIModifiers } from './engine_battle-phase.js';
+import { getPhaseAIModifiers } = './engine_battle-phase.js';
 import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
+import { locationConditions } from './location-battle-conditions.js'; // NEW: Import locationConditions
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -317,6 +318,8 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
 
     const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
 
+    const locationData = locationConditions[conditions.id];
+    const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
 
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
@@ -388,6 +391,57 @@ function calculateMoveWeights(actor, defender, conditions, intent, prediction, c
             }
             if (intent === 'FinishingBlowAttempt') {
                 weight *= 0.2; reasons.push('Finishing_LessReposition');
+            }
+        }
+
+        // Environmental adaptation for AI move selection (based on your notes)
+        if (locationData) {
+            // High agility characters in vertical/cramped environments -> favor mobility/evasive moves
+            if (actor.mobility > 0.7 && (locationData.isVertical || locationData.isCramped)) {
+                if (move.moveTags.includes('mobility_move') || move.moveTags.includes('evasive')) {
+                    weight *= 1.5; reasons.push('EnvBuff_Mobility');
+                }
+            }
+            // Ranged attack penalty in dense/cover_rich environments
+            if ((locationData.isDense || locationData.hasCover) && move.moveTags.includes('ranged_attack')) {
+                weight *= 0.7; reasons.push('EnvPenalty_Ranged');
+            }
+
+            // Collateral Tolerance influence for destructive moves
+            // NEW: Conditional override for Eastern Air Temple specifically for Bumi, Toph, Zuko, Jeong Jeong
+            let effectiveCollateralTolerance = actor.collateralTolerance !== undefined ? actor.collateralTolerance : 0.5;
+            const sacredTempleFighters = ['bumi', 'toph-beifong', 'zuko', 'jeong-jeong'];
+
+            if (conditions.id === 'eastern-air-temple' && sacredTempleFighters.includes(actor.id)) {
+                // For these specific characters, their collateral tolerance is effectively very low AT THIS LOCATION
+                effectiveCollateralTolerance = 0.05; // Treat as extremely sensitive to collateral
+                actor.aiLog.push(`[Collateral AI]: ${actor.name} treating EAT as sacred. Effective Collateral Tolerance: ${effectiveCollateralTolerance.toFixed(2)}.`);
+            }
+
+
+            if ((move.type === 'Offense' || move.type === 'Finisher') &&
+                (move.collateralImpact === 'medium' || move.collateralImpact === 'high' || move.collateralImpact === 'catastrophic')) {
+
+                let collateralBias = 1.0;
+                let collateralReason = 'CollateralBias:';
+
+                if (effectiveCollateralTolerance < 0.4) { // Low tolerance (or overridden to be low for EAT)
+                    if (environmentDamageLevel < 30) { // Early game, not much damage yet
+                        collateralBias = 0.3; // Significantly reduce likelihood of high-collateral moves
+                        collateralReason += "LowTolerance_LowDamage(x0.3)";
+                    } else if (environmentDamageLevel < 70) { // Mid-game, some damage
+                        collateralBias = 0.6; // Moderately reduce
+                        collateralReason += "LowTolerance_MidDamage(x0.6)";
+                    } else { // High damage already, might use as desperate measure or just accept.
+                        collateralBias = 0.9;
+                        collateralReason += "LowTolerance_HighDamage(x0.9)";
+                    }
+                } else if (effectiveCollateralTolerance > 0.7) { // High tolerance (e.g., Azula, Ozai)
+                    collateralBias = 1.2; // Slightly increase likelihood
+                    collateralReason += "HighTolerance(x1.2)";
+                }
+                weight *= collateralBias;
+                reasons.push(collateralReason);
             }
         }
 
