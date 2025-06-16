@@ -302,7 +302,8 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
             html_content: moveLineHtml, // This will be combined with narrativeEvents from result
             isKOAction: false, // Redirection itself isn't usually a KO
             isRedirectedAction: true,
-            narrativeEventsToPrepend: result.narrativeEvents || [] // To be processed by generateTurnNarrationObjects
+            narrativeEventsToPrepend: result.narrativeEvents || [] // Key for narrative engine
+            // stunAppliedToOriginalAttacker is handled above by modifying attacker.stunDuration directly
         };
     }
     // Standard move narrative generation
@@ -364,7 +365,7 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     }
 
     const impactSentenceTemplate = getRandomElement(impactSentencePool);
-    // OLD: const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, { '{targetName}': opponent?.name || 'the opponent', '{actorName}': actor?.name || 'The attacker' }) : "The move unfolds.";
+    // OLD: const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, { '{targetName}': opponent?.name, '{actorName}': actor?.name }) : "The move unfolds.";
     const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, {
         '{targetName}': opponent?.name || 'the opponent',
         '{actorName}': actor?.name || 'The attacker',
@@ -614,8 +615,7 @@ export function getFinalVictoryLine(winner, loser) {
 
     const winnerVictoryStyle = winner.victoryStyle || 'default';
     const victoryPhrasesPool = postBattleVictoryPhrases[winnerVictoryStyle] || postBattleVictoryPhrases.default;
-    const winnerHp = winner.hp !== undefined ? winner.hp : 0;
-    const outcomeType = winnerHp > 50 ? 'dominant' : 'narrow';
+    const outcomeType = (winner.hp !== undefined && loser.hp !== undefined && winner.hp > (loser.hp + 20)) ? 'dominant' : 'narrow';
     let phraseTemplate = getRandomElement(victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant); // FIX: Get random element
 
     // FIX: Safely extract line or use the string directly if phraseTemplate is a string
@@ -685,6 +685,7 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
         text: substitutedText,
         html_content: `<p class="${htmlClass}">${substitutedText}</p>`,
         curbstompRuleId: rule.id,
+        actualAttackerId: attacker.id, // ADD THIS LINE: Store the ID directly
         isEscape: isEscape,
         isMajorEvent: !isEscape && !(explicitContext.isSelfSabotageOutcome)
     };

@@ -391,6 +391,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                              if (rule.actualTarget.hp <= 0) {
                                 if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
                                     charactersMarkedForDefeat.add(rule.actualTarget.id);
+                                    // Set their HP to 0 so they are considered defeated.
+                                    if (rule.actualTarget.hp > 0) rule.actualTarget.hp = 0;
                                     aDefeatWasMarkedByThisCheck = true;
                                     // If this KO's them, the original curbstomp still "triggered" leading to this point.
                                 }
@@ -481,6 +483,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     case "instant_win_attacker":
                         if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
                             charactersMarkedForDefeat.add(rule.actualTarget.id);
+                            // Set their HP to 0 so they are considered defeated.
+                            if (rule.actualTarget.hp > 0) rule.actualTarget.hp = 0;
                             aDefeatWasMarkedByThisCheck = true;
                         }
                         break;
@@ -489,6 +493,9 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                         const charLosingId = rule.appliesToCharacter;
                         if (charLosingId && !charactersMarkedForDefeat.has(charLosingId)) {
                            charactersMarkedForDefeat.add(charLosingId);
+                           // Set their HP to 0 so they are considered defeated.
+                           const losingChar = charLosingId === attacker.id ? attacker : defender;
+                           if (losingChar.hp > 0) losingChar.hp = 0;
                            aDefeatWasMarkedByThisCheck = true;
                         }
                         break;
@@ -498,6 +505,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     case "instant_loss_random_character_if_knocked_off":
                         if (mechanicallyDeterminedLoserId && !charactersMarkedForDefeat.has(mechanicallyDeterminedLoserId)) {
                             charactersMarkedForDefeat.add(mechanicallyDeterminedLoserId);
+                            const losingChar = mechanicallyDeterminedLoserId === attacker.id ? attacker : defender;
+                            if (losingChar.hp > 0) losingChar.hp = 0;
                             aDefeatWasMarkedByThisCheck = true;
                         }
                         break;
@@ -506,6 +515,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                         if (!isSelfSabotageOutcome) {
                             if (!charactersMarkedForDefeat.has(rule.actualTarget.id)) {
                                 charactersMarkedForDefeat.add(rule.actualTarget.id);
+                                if (rule.actualTarget.hp > 0) rule.actualTarget.hp = 0;
                                 aDefeatWasMarkedByThisCheck = true;
                             }
                         } else {
@@ -531,6 +541,7 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
 
                             if (rule.actualAttacker.hp <=0 && !charactersMarkedForDefeat.has(rule.actualAttacker.id)) {
                                 charactersMarkedForDefeat.add(rule.actualAttacker.id);
+                                if (rule.actualAttacker.hp > 0) rule.actualAttacker.hp = 0;
                                 aDefeatWasMarkedByThisCheck = true;
                             }
                         }
@@ -541,11 +552,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                     case "instant_incapacitation_target_burn":
                         const stunDurationApplied = outcome.duration || 1;
                         rule.actualTarget.stunDuration = (rule.actualTarget.stunDuration || 0) + stunDurationApplied;
-                        rule.actualTarget.hp = clamp(Math.min(rule.actualTarget.hp, 10), 1, rule.actualTarget.maxHp);
-                        if (rule.actualTarget.hp <= 0 && !charactersMarkedForDefeat.has(rule.actualTarget.id)) {
-                            charactersMarkedForDefeat.add(rule.actualTarget.id);
-                            aDefeatWasMarkedByThisCheck = true;
-                        }
+                        // Ensure HP is capped at a non-lethal value if it's an incapacitation, not a kill
+                        rule.actualTarget.hp = clamp(rule.actualTarget.hp, 1, rule.actualTarget.maxHp); // Ensure HP doesn't drop to 0 from this effect alone
                         battleState.logSystemMessage = `${rule.actualTarget.name} is incapacitated by ${rule.actualAttacker.name}'s ${rule.id}! Stun Duration: ${rule.actualTarget.stunDuration}`;
                         break;
                 }
@@ -565,8 +573,9 @@ function evaluateTerminalState(fighter1, fighter2, isStalemateFlag) {
     const f1DefeatedByRegistry = charactersMarkedForDefeat.has(fighter1.id);
     const f2DefeatedByRegistry = charactersMarkedForDefeat.has(fighter2.id);
 
-    if (f1DefeatedByRegistry) fighter1.hp = 0;
-    if (f2DefeatedByRegistry) fighter2.hp = 0;
+    // If marked for defeat, ensure HP is 0 for consistent state
+    if (f1DefeatedByRegistry && fighter1.hp > 0) fighter1.hp = 0;
+    if (f2DefeatedByRegistry && fighter2.hp > 0) fighter2.hp = 0;
 
     const f1DefeatedByHp = fighter1.hp <= 0;
     const f2DefeatedByHp = fighter2.hp <= 0;
@@ -583,7 +592,7 @@ function evaluateTerminalState(fighter1, fighter2, isStalemateFlag) {
         winnerId = fighter1.id;
         loserId = fighter2.id;
     }
-    if (isStalemateFlag && !battleOver) {
+    if (isStalemateFlag && !battleOver) { // If stalemate was forced but no one's HP dropped to zero
         battleOver = true;
     }
 
@@ -1084,31 +1093,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
     if (lastCurbstompEvent && finalLoserFull && charactersMarkedForDefeat.has(finalLoserFull.id)) {
         // Identify who performed the curbstomp (attacker of the rule)
-        // This requires knowing which curbstomp rule it was and who its 'actualAttacker' was.
-        // For simplicity here, we assume the narrative text contains the winner's name.
-        // Let's find the rule based on curbstompRuleId in the event
-        let ruleDef = null;
-        if (lastCurbstompEvent.curbstompRuleId) {
-            // Search universalMechanics
-            ruleDef = Object.values(universalMechanics).find(r => r.id === lastCurbstompEvent.curbstompRuleId);
-            if (ruleDef) { // Universal rule implies the characterId field is the actor
-                decisiveEventActorId = ruleDef.characterId;
-            } else { // Search location rules
-                const locRules = locationCurbstompRules[locId] || [];
-                ruleDef = locRules.find(r => r.id === lastCurbstompEvent.curbstompRuleId);
-                if (ruleDef) { // Location rule might apply to a pair or character
-                     decisiveEventActorId = ruleDef.actualAttacker?.id || (ruleDef.appliesToPair ? ruleDef.appliesToPair[0] : ruleDef.appliesToCharacter);
-                } else { // Search character rules
-                    for (const charID in characterCurbstompRules) {
-                        ruleDef = characterCurbstompRules[charID].find(r => r.id === lastCurbstompEvent.curbstompRuleId);
-                        if (ruleDef) {
-                            decisiveEventActorId = charID; // The key of characterCurbstompRules is the actor
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        decisiveEventActorId = lastCurbstompEvent.actualAttackerId; // CHANGE THIS LINE
+
         if (decisiveEventActorId && decisiveEventActorId === winnerId) {
             decisiveEventNarrative = lastCurbstompEvent.text;
         }
