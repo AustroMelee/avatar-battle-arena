@@ -692,7 +692,76 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 }
             }
 
-            // ... rest of processTurnSegment implementation ...
+            // --- AI Action Selection ---
+            const move = selectMove(currentAttacker, currentDefender, currentBattleState, locId);
+            if (!move) {
+                currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
+                // Potentially add a "hesitation" narrative event here
+                return; 
+            }
+
+            // --- Move Execution & Resolution ---
+            const result = calculateMove(move, currentAttacker, currentDefender, conditions, currentBattleState, battleEventLog, phaseState, charactersMarkedForDefeat);
+            
+            // Generate narration for the entire action
+            const turnNarrationObjects = generateTurnNarrationObjects(
+                narrativeEventsForAction,
+                move,
+                currentAttacker,
+                currentDefender,
+                result,
+                environmentState,
+                locationData,
+                phaseState.currentPhase,
+                false,
+                result.aiLogEntry || {},
+                currentBattleState
+            );
+            turnSpecificEventsForLog.push(...turnNarrationObjects);
+
+
+            // --- Update Fighter States Post-Action ---
+            // Update mental state based on the move's outcome
+            updateMentalState(currentAttacker, currentDefender, result, environmentState, locId);
+            updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, environmentState, locId);
+
+            // Update momentum
+            modifyMomentum(currentAttacker, result.momentumChange.attacker, `Own Move (${result.effectiveness.label})`);
+            modifyMomentum(currentDefender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
+
+            // Apply stun if the move caused it
+            if (result.stunDuration > 0) {
+                applyStun(currentDefender, result.stunDuration);
+            }
+
+            // Handle HP changes and defeat checking
+            if (result.damage > 0) {
+                currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
+            }
+            if (result.selfDamage > 0) {
+                currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
+            }
+
+            if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName && !result.isReactedAction) {
+                 currentDefender.tacticalState = null;
+                 currentAttacker.aiLog.push(`[Tactical State Consumed]: ${currentAttacker.name} consumed ${currentDefender.name}'s ${result.consumedStateName} state.`);
+            }
+
+
+            if (currentDefender.hp <= 0 && !charactersMarkedForDefeat.has(currentDefender.id)) {
+                charactersMarkedForDefeat.add(currentDefender.id);
+            }
+            currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
+            currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
+            currentAttacker.lastMove = move;
+
+            updateAiMemory(currentDefender, currentAttacker);
+            updateAiMemory(currentAttacker, currentDefender);
+
+            terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
+            if (terminalOutcome.battleOver) {
+                battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
+            }
         };
 
         const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER);
