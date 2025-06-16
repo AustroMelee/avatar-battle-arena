@@ -2,9 +2,20 @@
 'use strict';
 
 import { characters } from './data_characters.js';
-import { phaseTemplates } from './narrative-v2.js';
-// NEW IMPORT FOR ESCALATION
-import { ESCALATION_STATES } from './engine_escalation.js';
+// --- CORRECTED IMPORT PATH ---
+import { phaseTemplates } from './data_narrative_phases.js';
+// --- END CORRECTED IMPORT ---
+import { updateAiMemory, attemptManipulation, adaptPersonality } from './engine_ai-decision.js';
+import { calculateMove } from './engine_move-resolution.js';
+import { updateMentalState } from './engine_mental-state.js';
+import { generateTurnNarrationObjects, getFinalVictoryLine, findNarrativeQuote, generateCurbstompNarration, substituteTokens, generateEscalationNarrative, generateActionDescriptionObject } from './engine_narrative-engine.js';
+import { modifyMomentum } from './engine_momentum.js';
+import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
+import { universalMechanics } from './data_mechanics_universal.js';
+import { locationCurbstompRules } from './data_mechanics_locations.js';
+import { characterCurbstompRules } from './data_mechanics_characters.js';
+import { calculateIncapacitationScore, determineEscalationState, ESCALATION_STATES } from './engine_escalation.js';
+import { checkReactiveDefense } from './engine_reactive-defense.js';
 
 function determineImpactLevel(effectivenessLabel, moveType) {
     if (!effectivenessLabel || typeof effectivenessLabel !== 'string') return 'low';
@@ -225,7 +236,7 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                     if (event.newState === ESCALATION_STATES.PRESSURED) escalationClass = 'highlight-pressured';
                     else if (event.newState === ESCALATION_STATES.SEVERELY_INCAPACITATED) escalationClass = 'highlight-severe';
                     else if (event.newState === ESCALATION_STATES.TERMINAL_COLLAPSE) escalationClass = 'highlight-terminal';
-                    contentToAppend = `<p class="narrative-escalation ${escalationClass} char-${event.actorId || 'unknown'}">${textContent}</p>`;
+                    contentToAppend = `<p class="narrative-escalation char-${event.actorId || 'unknown'}">${textContent}</p>`;
                     break;
                 // --- END NEW ---
                 case 'stun_event': // Added to handle stun messages
