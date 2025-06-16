@@ -32,6 +32,15 @@ let charactersMarkedForDefeat = new Set();
 // NEW: Define a higher total turn limit for the battle
 const MAX_TOTAL_TURNS = 25;
 
+// Add energy management constants
+const MIN_ENERGY_FOR_ACTION = 10;
+const ENERGY_RECOVERY_PER_TURN = 5;
+const MAX_ENERGY = 100;
+
+// Add stun management constants
+const MAX_CONSECUTIVE_STUNS = 2;
+const STUN_RESISTANCE_INCREASE = 0.5;
+
 function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState }) {
     if (typeof rule.weightingLogic === 'function') {
         const weightedOutcome = rule.weightingLogic({ attacker, defender, rule, location: locationData, situation: { ...battleState, environmentState: battleState.environmentState || { damageLevel: 0 } } });
@@ -795,13 +804,15 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         ));
     }
 
-    // Initial curbstomp check for rules allowed pre-battle
-    if (checkCurbstompConditions(fighter1, fighter2, locId, currentBattleState, battleEventLog, true)) {
-        fighter1.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter1.name} OR ${fighter2.name} triggered or was affected by a curbstomp rule.`);
-    }
-    if (!charactersMarkedForDefeat.has(fighter1.id) && !charactersMarkedForDefeat.has(fighter2.id)) {
-        if (checkCurbstompConditions(fighter2, fighter1, locId, currentBattleState, battleEventLog, true)) {
-            fighter2.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter2.name} OR ${fighter1.name} triggered or was affected by a curbstomp rule.`);
+    // Only check for pre-battle curbstomps if explicitly allowed by location
+    if (locationData.allowPreBattleCurbstomp) {
+        if (checkCurbstompConditions(fighter1, fighter2, locId, currentBattleState, battleEventLog, true)) {
+            fighter1.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter1.name} OR ${fighter2.name} triggered or was affected by a curbstomp rule.`);
+        }
+        if (!charactersMarkedForDefeat.has(fighter1.id) && !charactersMarkedForDefeat.has(fighter2.id)) {
+            if (checkCurbstompConditions(fighter2, fighter1, locId, currentBattleState, battleEventLog, true)) {
+                fighter2.aiLog.push(`[Pre-Battle Curbstomp Check]: ${fighter2.name} OR ${fighter1.name} triggered or was affected by a curbstomp rule.`);
+            }
         }
     }
 
@@ -902,9 +913,25 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
             if (battleOver || isStalemate) return;
 
+            // Energy management
+            if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
+                currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
+                currentAttacker.aiLog.push(`[Energy Recovery]: ${currentAttacker.name} recovers energy to ${currentAttacker.energy}.`);
+                turnSpecificEventsForLog.push({
+                    type: 'energy_recovery_event',
+                    actorId: currentAttacker.id,
+                    characterName: currentAttacker.name,
+                    text: `${currentAttacker.name} takes a moment to recover energy. (Energy: ${currentAttacker.energy})`,
+                    html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} takes a moment to recover energy. (Energy: ${currentAttacker.energy})</p>`
+                });
+                return;
+            }
+
+            // Stun management
             if (currentAttacker.stunDuration > 0) {
                 currentAttacker.stunDuration--;
-                currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned. Turns remaining: ${currentAttacker.stunDuration}.`);
+                currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE;
+                currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned. Turns remaining: ${currentAttacker.stunDuration}. Stun resistance increased to ${currentAttacker.stunResistance}.`);
                 turnSpecificEventsForLog.push({
                     type: 'stun_event',
                     actorId: currentAttacker.id,
@@ -1202,6 +1229,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
     // Create clean copies of final states without circular references
     const createCleanFighterState = (fighter) => {
+        if (!fighter) return null;
         const cleanState = { ...fighter };
         // Remove circular references
         delete cleanState.opponent;
@@ -1219,8 +1247,60 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         winnerId: winnerId,
         loserId: loserId,
         isDraw: isStalemate,
-        finalState: { fighter1: finalFighter1State, fighter2: finalFighter2State },
+        finalState: { 
+            fighter1: finalFighter1State || createCleanFighterState(fighter1), 
+            fighter2: finalFighter2State || createCleanFighterState(fighter2) 
+        },
         environmentState,
         phaseSummary: phaseState.phaseSummaryLog
     };
+}
+
+// Modify the stun application logic
+function applyStun(fighter, duration) {
+    // Apply stun resistance
+    const effectiveDuration = Math.max(1, Math.floor(duration * (1 - (fighter.stunResistance || 0))));
+    
+    // Check for consecutive stuns
+    if (fighter.consecutiveStuns >= MAX_CONSECUTIVE_STUNS) {
+        fighter.aiLog.push(`[Stun Resistance]: ${fighter.name} has built up resistance to stuns. Duration reduced from ${duration} to ${effectiveDuration}.`);
+        return effectiveDuration;
+    }
+    
+    fighter.consecutiveStuns = (fighter.consecutiveStuns || 0) + 1;
+    fighter.stunDuration = effectiveDuration;
+    return effectiveDuration;
+}
+
+// Add energy cost to moves
+function calculateMoveEnergyCost(move, fighter) {
+    const baseCost = move.energyCost || 20;
+    const effectiveness = move.effectiveness || 'Normal';
+    
+    // Adjust cost based on effectiveness
+    const effectivenessMultiplier = {
+        'Critical': 1.5,
+        'Strong': 1.2,
+        'Normal': 1.0,
+        'Weak': 0.8
+    }[effectiveness] || 1.0;
+    
+    return Math.floor(baseCost * effectivenessMultiplier);
+}
+
+// Modify move execution to include energy costs
+function executeMove(move, attacker, defender) {
+    const energyCost = calculateMoveEnergyCost(move, attacker);
+    
+    if (attacker.energy < energyCost) {
+        attacker.aiLog.push(`[Energy Check]: ${attacker.name} doesn't have enough energy (${attacker.energy}/${energyCost}) to execute ${move.name}.`);
+        return false;
+    }
+    
+    attacker.energy -= energyCost;
+    attacker.aiLog.push(`[Energy Cost]: ${attacker.name} used ${energyCost} energy executing ${move.name}. Remaining energy: ${attacker.energy}`);
+    
+    // ... rest of move execution logic ...
+    
+    return true;
 }
