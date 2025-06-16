@@ -119,7 +119,8 @@ function evaluatePersonalityTrigger(triggerId, character, opponent, battleState)
         case "serious_fight":
             return (ally && ally.hp < ally.maxHp * 0.3) || opponentUsedLethalForce;
         case "authority_challenged":
-            return (opponentLandedSignificantHits >= 2) || opponentTaunted;
+            // FIX: Use opponentTaunted from battleState, not non-existent opponentUsedTaunt
+            return (opponentLandedSignificantHits >= 2) || opponentTaunted; 
         case "underestimated":
             return opponentTauntedAgeOrStrategy || (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove.power > 50);
         case "in_control":
@@ -273,7 +274,8 @@ function checkCurbstompConditions(attacker, defender, locationId, battleState, b
                         reactiveCurbstompResult.narrativeEvents.forEach(rawEventData => {
                             if (rawEventData.quote && rawEventData.actor) {
                                 const opponentForNarration = rawEventData.actor.id === rule.actualAttacker.id ? rule.actualTarget : rule.actualAttacker;
-                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForNarration, null, battleState.environmentState, battleState.location, battleState.currentPhase, true);
+                                // FIX: Pass full battleState to generateTurnNarrationObjects
+                                const formattedEventArray = generateTurnNarrationObjects([rawEventData], null, rawEventData.actor, opponentForNarration, null, battleState.environmentState, battleState.location, battleState.currentPhase, true, null, battleState);
                                 battleEventLog.push(...formattedEventArray);
                             }
                         });
@@ -561,10 +563,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     };
 
     const initialBanter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase, locationId: locId }); // Pass locationId
-    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true));
+    if (initialBanter1) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter1, actor: fighter1}], null, fighter1, fighter2, null, environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState)); // FIX: Pass battleState
 
     const initialBanter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', 'general', { currentPhaseKey: phaseState.currentPhase, locationId: locId }); // Pass locationId
-    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, fighter1.environmentState, locationData, phaseState.currentPhase, true));
+    if (initialBanter2) battleEventLog.push(...generateTurnNarrationObjects([{quote: initialBanter2, actor: fighter2}], null, fighter2, fighter1, null, fighter1.environmentState, locationData, phaseState.currentPhase, true, null, currentBattleState)); // FIX: Pass battleState
 
     if (checkCurbstompConditions(initiator, responder, locId, currentBattleState, battleEventLog, true)) {
         initiator.aiLog.push(`[Pre-Battle Curbstomp Check]: ${initiator.name} OR ${responder.name} triggered or was affected by a curbstomp rule.`);
@@ -718,7 +720,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     currentAttacker, 
                     result, 
                     phaseState.currentPhase,
-                    aiLogEntryFromSelectMove 
+                    aiLogEntryFromSelectMove,
+                    currentBattleState // FIX: Pass battleState here
                 );
                  turnSpecificEventsForLog.push(reactionMoveLine);
             } else {

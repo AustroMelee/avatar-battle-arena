@@ -25,7 +25,7 @@ import { ESCALATION_STATES } from './engine_escalation.js';
 
 
 function conjugatePresent(verbPhrase) {
-    if (!verbPhrase) return '';
+    if (!verbPhrase || typeof verbPhrase !== 'string') return ''; // FIX: Added type check for verbPhrase
     const words = verbPhrase.split(' ');
     let verb = words[0];
     const rest = words.slice(1).join(' ');
@@ -57,7 +57,7 @@ function conjugatePresent(verbPhrase) {
         verb = verb + 's';
     }
     return rest ? `${verb} ${rest}` : verb;
-}
+ }
 
 export function substituteTokens(template, primaryActorForContext, secondaryActorForContext, additionalContext = {}) {
     if (typeof template !== 'string') return '';
@@ -251,7 +251,7 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
     };
  }
 
-export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}) {
+export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {}, battleState) { // FIX: Added battleState parameter
     let introPhrase = '';
     let tacticalPrefix = '';
     let tacticalSuffix = '';
@@ -296,18 +296,18 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
         const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late;
         const selectedPhrase = getRandomElement(escalationFinisherPool); // This can be an object {type, line} or string
         // FIX: Safely extract line or use the string directly if selectedPhrase is a string
-        introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent) : "Sensing the end is near,";
+        introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent, {battleState}) : "Sensing the end is near,"; // FIX: Pass battleState
     } else {
         const intentForIntro = aiLogEntry.intent || 'StandardExchange';
-        const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move });
+        const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move, battleState }); // FIX: Pass battleState
         // FIX: Safely extract line or use the string directly if introQuote is a string
         if (introQuote && (introQuote.type === 'action' || typeof introQuote.line === 'string')) {
-            introPhrase = substituteTokens(introQuote.line || introQuote, actor, opponent);
+            introPhrase = substituteTokens(introQuote.line || introQuote, actor, opponent, {battleState}); // FIX: Pass battleState
         } else { // If introQuote is null or not a recognized type, use default phase/generic intro
             const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
             const selectedPhrase = getRandomElement(phaseSpecificIntroPool); // This can be an object {type, line} or string
             // FIX: Safely extract line or use the string directly if selectedPhrase is a string
-            introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent) : "Responding,";
+            introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent, {battleState}) : "Responding,"; // FIX: Pass battleState
         }
     }
 
@@ -316,15 +316,15 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
 
 
     if (result.payoff && result.consumedStateName) {
-        tacticalPrefix = substituteTokens(`Capitalizing on {opponentName} being ${result.consumedStateName}, `, actor, opponent);
+        tacticalPrefix = substituteTokens(`Capitalizing on {opponentName} being ${result.consumedStateName}, `, actor, opponent, {battleState}); // FIX: Pass battleState
     }
 
     if (actor.tacticalState?.name && actor.tacticalState.duration >= 0 && actor.tacticalState.isPositive) {
-        tacticalSuffix += substituteTokens(` {actorName} is now ${actor.tacticalState.name}!`, actor, opponent);
+        tacticalSuffix += substituteTokens(` {actorName} is now ${actor.tacticalState.name}!`, actor, opponent, {battleState}); // FIX: Pass battleState
     } else if (actor.tacticalState?.name && actor.tacticalState.duration >= 0 && !actor.tacticalState.isPositive && move.isRepositionMove) {
-        tacticalSuffix += substituteTokens(` However, {actorName} is now ${actor.tacticalState.name}!`, actor, opponent);
+        tacticalSuffix += substituteTokens(` However, {actorName} is now ${actor.tacticalState.name}!`, actor, opponent, {battleState}); // FIX: Pass battleState
     } else if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
-        tacticalSuffix += substituteTokens(` The move leaves {opponentName} ${move.setup.name}!`, actor, opponent);
+        tacticalSuffix += substituteTokens(` The move leaves {opponentName} ${move.setup.name}!`, actor, opponent, {battleState}); // FIX: Pass battleState
     }
 
     let impactSentenceKey = result.effectiveness.label.toUpperCase();
@@ -346,7 +346,8 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     // FIX: Safely extract line or use the string directly if impactSentenceTemplate is a string
     const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, {
         '{targetName}': opponent?.name || 'the opponent',
-        '{actorName}': actor?.name || 'The attacker'
+        '{actorName}': actor?.name || 'The attacker',
+        battleState // FIX: Pass battleState here
     }) : "The move unfolds.";
 
 
@@ -356,12 +357,13 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     } else {
         const verb = conjugatePresent(move.verb || 'executes');
         const objectString = (typeof move.object === 'string') ? move.object : "an action";
+        // FIX: Ensure move.object is a string and its first character is accessed safely
         const article = (move.requiresArticle && typeof objectString === 'string' && objectString.length > 0) ?
                         ((['a','e','i','o','u'].includes(objectString[0].toLowerCase()) ? `an ${objectString}` : `a ${objectString}`))
                         : objectString;
         baseActionTextTemplate = `{actorName} ${verb} ${article}`;
     }
-    const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent);
+    const baseActionText = substituteTokens(baseActionTextTemplate, actor, opponent, {battleState}); // FIX: Pass battleState
 
     let fullDescText;
     // For redirected actions, the introPhrase might already be set by the redirection logic.
@@ -369,8 +371,10 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     if (result.isReactedAction) {
         fullDescText = impactSentence; // The introPhrase is handled by the narrativeEventsToPrepend
     } else if (introPhrase.includes(actor.name)) { // This line now uses a guaranteed string for introPhrase
-        fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
+        // FIX: Added battleState to substituteTokens calls
+        fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (typeof move.object === 'string' && move.object.length > 0 && ['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
     } else {
+        // FIX: Added battleState to substituteTokens calls
         fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
     }
 
@@ -445,7 +449,7 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
     const defaultFlavor = `The tide of battle shifts for {actorName}.`;
     const selectedFlavorTextTemplate = getRandomElement(flavorTextPool);
     // FIX: Safely extract line or use the string directly if selectedFlavorTextTemplate is a string
-    const flavorText = selectedFlavorTextTemplate ? substituteTokens(selectedFlavorTextTemplate.line || selectedFlavorTextTemplate, fighter, null) : defaultFlavor;
+    const flavorText = selectedFlavorTextTemplate ? (selectedFlavorTextTemplate.line || selectedFlavorTextTemplate) : defaultFlavor; // FIX: Ensure flavorText is a string
     const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
 
 
@@ -508,7 +512,7 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
 }
 
 
-export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}) {
+export function generateTurnNarrationObjects(events, move, actor, opponent, result, environmentState, locationData, currentPhaseKey, isInitialBanter = false, aiLogEntry = {}, battleState) { // FIX: Added battleState
     let turnEventObjects = [];
 
     // Handle narrative events from reactive defenses first if they exist on the result
@@ -524,7 +528,7 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
 
     // Standard dialogue events (quotes, etc.)
     events.forEach(event => {
-        const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry });
+        const quoteEvent = formatQuoteEvent(event.quote, event.actor, opponent, { '{moveName}': move?.name, currentPhaseKey, aiLogEntry, battleState }); // FIX: Pass battleState
         if (quoteEvent) {
             turnEventObjects.push(quoteEvent);
         }
@@ -532,15 +536,15 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
 
     if (!isInitialBanter && move && result) {
         // Generate the main action description, which could be a standard move or the "move line" part of a reacted action
-        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry);
+        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry, battleState); // FIX: Pass battleState
         turnEventObjects.push(actionEvent); // This actionEvent will now be simpler for reacted actions
 
         // Standard move execution quote (if not a reacted action that already has its narrative)
         if (!result.isReactedAction) {
-            const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry };
+            const moveQuoteContext = { result: result.effectiveness.label, currentPhaseKey, aiLogEntry, battleState }; // FIX: Pass battleState
             const moveExecutionQuote = findNarrativeQuote(actor, opponent, 'onMoveExecution', move.name, moveQuoteContext);
             if (moveExecutionQuote) {
-                const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, { currentPhaseKey, aiLogEntry });
+                const quoteEvent = formatQuoteEvent(moveExecutionQuote, actor, opponent, { currentPhaseKey, aiLogEntry, battleState }); // FIX: Pass battleState
                 if (quoteEvent) {
                     quoteEvent.isMoveExecutionQuote = true;
                     turnEventObjects.push(quoteEvent);
