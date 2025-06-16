@@ -575,7 +575,7 @@ function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
 }
 
 
-function selectFromDistribution(movesWithProbs) {
+export function selectFromDistribution(movesWithProbs) {
     if (!movesWithProbs || movesWithProbs.length === 0) {
         return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackNoProbs'], isEscalationFinisherAttempt: false };
     }

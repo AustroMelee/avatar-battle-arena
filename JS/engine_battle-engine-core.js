@@ -69,16 +69,20 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
 
 // Corrected initializeFighterState to be more robust
 function initializeFighterState(charId, opponentId, emotionalMode) {
+    // DIAGNOSTIC START
+    console.log(`[DEBUG] Initializing fighter state for charId: '${charId}'`);
+    if (!characters) {
+        console.error("[DEBUG] 'characters' object is undefined/null during initializeFighterState!");
+        // Return a broken fighter immediately to prevent further errors
+        return { id: charId, name: `[MISSING CHARS OBJECT - ${charId}]`, hp: 0, maxHp: 100, energy: 0, momentum: 0, stunDuration: 0, tacticalState: null, moveHistory: [], moveFailureHistory: [], consecutiveDefensiveTurns: 0, aiLog: [`ERROR: 'characters' object is null/undefined.`], relationalState: null, mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, contextualState: {}, collateralTolerance: 0.0, mobility: 0.0, personalityProfile: {}, aiMemory: {}, curbstompRulesAppliedThisBattle: new Set(), faction: 'Error', element: 'error', specialTraits: {}, criticalHitsTaken: 0, intelligence: 0, hasMetalArmor: false, incapacitationScore: 100, escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, summary: `(ERROR: 'characters' object is null/undefined.)` };
+    }
     const characterData = characters[charId];
-
-    // If characterData is not found, return a minimal, safe fallback object.
-    // This prevents errors later when trying to access properties like 'name'
-    // on an undefined character object if it somehow got through.
     if (!characterData) {
-        console.error(`Character with ID "${charId}" not found during initialization. Returning fallback data.`);
+        console.error(`[DEBUG] Character data for ID '${charId}' not found in 'characters' object.`);
+        // Return a broken fighter immediately to prevent further errors
         return {
             id: charId,
-            name: `[Missing Data: ${charId}]`, // Safe fallback name
+            name: `[MISSING DATA - ${charId}]`, // Safe fallback name
             hp: 0, maxHp: 100, // Treat as defeated for safety
             energy: 0, momentum: 0, stunDuration: 0,
             tacticalState: null, moveHistory: [], moveFailureHistory: [],
@@ -102,6 +106,7 @@ function initializeFighterState(charId, opponentId, emotionalMode) {
             summary: `(ERROR: Character data for ${charId} missing or corrupted.)` // Add a summary for dev logs
         };
     }
+    // DIAGNOSTIC END
 
     // Ensure characterData.name exists before using it
     const characterName = characterData.name || charId; // Fallback to ID if name is missing
@@ -999,8 +1004,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             fighter2.incapacitationScore = score2;
 
             const oldEscalationState1 = fighter1.escalationState;
-            const oldEscalationState2 = fighter2.escalationState;
             const newEscalationState1 = determineEscalationState(score1);
+            const oldEscalationState2 = fighter2.escalationState;
             const newEscalationState2 = determineEscalationState(score2);
 
             if ((newEscalationState1 === ESCALATION_STATES.SEVERELY_INCAPACITATED || newEscalationState1 === ESCALATION_STATES.TERMINAL_COLLAPSE) &&
@@ -1093,7 +1098,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
     if (lastCurbstompEvent && finalLoserFull && charactersMarkedForDefeat.has(finalLoserFull.id)) {
         // Identify who performed the curbstomp (attacker of the rule)
-        decisiveEventActorId = lastCurbstompEvent.actualAttackerId; // CHANGE THIS LINE
+        decisiveEventActorId = lastCurbstompEvent.actualAttackerId; 
 
         if (decisiveEventActorId && decisiveEventActorId === winnerId) {
             decisiveEventNarrative = lastCurbstompEvent.text;
