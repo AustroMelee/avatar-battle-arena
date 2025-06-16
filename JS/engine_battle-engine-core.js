@@ -794,15 +794,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
         if (!isNarrativeOnlyTurn) {
             processTurnSegment(currentAttacker, currentDefender);
-            if (battleOver) {
-                battleEventLog.push(...turnSpecificEventsForLog);
-                break;
-            }
             processTurnSegment(currentDefender, currentAttacker);
-            if (battleOver) {
-                battleEventLog.push(...turnSpecificEventsForLog);
-                break;
-            }
         } else {
             if (currentAttacker.id === f1Id) {
                 battleEventLog.push({
@@ -812,6 +804,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 });
             }
         }
+
+        // Add all events from the completed turn to the main battle log
+        battleEventLog.push(...turnSpecificEventsForLog);
 
         // Clear and update environment state
         environmentState.specificImpacts.clear();
@@ -886,7 +881,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
 
         if (battleOver) break;
-        // Swap the current attacker and defender references
+        // Swap the current attacker and defender references for the next turn
         [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
     }
 
