@@ -207,3 +207,17 @@ export function getEmojiForMoveType(moveType, effectivenessLabel) {
         default: return '➡️';
     }
 }
+
+export const postBattleVictoryPhrases = {
+    default: {
+        dominant: [
+            { line: "{WinnerName} stands victorious. It was a flawless victory." },
+            { line: "Overwhelmed by {WinnerName}'s power, {LoserName} falls." }
+        ],
+        narrow: [
+            { line: "In a close battle, {WinnerName} emerges as the victor." },
+            { line: "{WinnerName} narrowly defeats {LoserName} after a grueling fight." }
+        ]
+    },
+    // Add character-specific victory styles here later if needed
+};
