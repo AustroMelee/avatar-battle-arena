@@ -518,7 +518,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     charactersMarkedForDefeat.clear();
 
     let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
-    let fighter2 = initializeF2Id, f1Id, emotionalMode);
+    let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode); // FIX: Corrected this line
 
     const conditions = { ...locationConditions[locId], id: locId, isDay: timeOfDay === 'day', isNight: timeOfDay === 'night' };
     let battleEventLog = [];
@@ -770,7 +770,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             currentAttacker.lastMoveEffectiveness = result.effectiveness.label;
             currentAttacker.consecutiveDefensiveTurns = (move.type === 'Utility' || move.type === 'Defense') ? currentAttacker.consecutiveDefensiveTurns + 1 : 0;
 
-            if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove && !result.isReactedAction) {
+            if (move.setup && result.effectiveness.label !== 'Weak' && !move.isRepositionMove) {
                 currentDefender.tacticalState = { ...move.setup, isPositive: false };
                 currentAttacker.aiLog.push(`[Tactical State Apply]: ${currentDefender.name} is now ${currentDefender.tacticalState.name}!`);
                 if (move.setup.name === 'Pinned' && currentDefender.stunDuration > 0) {
