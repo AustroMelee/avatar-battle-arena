@@ -456,9 +456,8 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
     if (narrativeEventsForAction && narrativeEventsForAction.length > 0) {
         narrativeEventsForAction.forEach(event => {
             if (event.quote) {
-                const dialogueHtml = phaseTemplates.dialogue
-                    .replace('{characterName}', `<span class="char-${event.actor.id}">${event.actor.name}</span>`)
-                    .replace('{dialogueText}', event.quote);
+                const actorNameSpan = `<span class="char-${event.actor.id}">${event.actor.name}</span>`;
+                const dialogueHtml = `<p class="dialogue-line">${actorNameSpan} says, "<em>${event.quote}</em>"</p>`;
                 
                 narrationObjects.push({
                     type: 'dialogue_event',
