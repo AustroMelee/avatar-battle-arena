@@ -394,7 +394,7 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
     
     // Initialize all variables at the start
     const profile = actor.personalityProfile;
-    const availableMoves = actor.techniques || [];
+    const availableMoves = getAvailableMoves(actor, conditions, currentPhase);
     const locationData = conditions;
     const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
     const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');

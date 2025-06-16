@@ -4,7 +4,7 @@
 // Version 1.1: Null-Safety Pass
 
 // --- NEW IMPORT ---
-import { characters } from './data_characters.js'; // For getCharacterImage
+import { getCharacterImageFromUI as getCharacterImage } from './ui.js';
 // --- END NEW IMPORT ---
 import { focusOnLatestMessage } from './camera_control.js'; // camera_control.js should be robust
 
@@ -22,9 +22,6 @@ let onStepCompleteCallbackInternal = null; // Renamed to avoid conflict
 // --- NEW FUNCTION: getCharacterImage ---
 // This function was originally expected from ui.js but wasn't exported.
 // Adding it here for a self-contained fix within animated_text_engine.
-function getCharacterImage(charId) {
-    return characters[charId]?.imageUrl || null;
-}
 // --- END NEW FUNCTION ---
 
 

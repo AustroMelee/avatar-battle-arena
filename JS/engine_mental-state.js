@@ -56,9 +56,9 @@ export function updateMentalState(actor, opponent, moveResult, environmentState 
         // Cold-Based Stamina Depletion (Northern Water Tribe, Eastern Air Temple, etc.)
         if (locationData.isCold) {
             let coldEnergyDrain = 0;
-            const baseDrain = 5; // Base energy drain per turn
-            const progressiveDrain = (currentTurn / 6) * 10; // Increases over battle duration, max 10 by turn 6
-            const damageEffect = (environmentState.damageLevel / 100) * 5; // Additional drain if environment is damaged/harsher
+            const baseDrain = 8; // Base energy drain per turn
+            const progressiveDrain = (currentTurn / 6) * 16; // Increases over battle duration, max 16 by turn 6
+            const damageEffect = (environmentState.damageLevel / 100) * 8; // Additional drain if environment is damaged/harsher
 
             if (actor.element === 'fire' || actor.element === 'lightning') {
                 coldEnergyDrain = (baseDrain * 2) + progressiveDrain + damageEffect; // Firebenders suffer more
@@ -76,8 +76,8 @@ export function updateMentalState(actor, opponent, moveResult, environmentState 
         // Heat Exhaustion System (Si Wong Desert)
         if (locationData.isDesert) {
             let heatEnergyDrain = 0;
-            const baseDrain = 6; // Base energy drain per turn
-            const progressiveDrain = (currentTurn / 6) * 12; // Increases over battle duration, max 12 by turn 6
+            const baseDrain = 9; // Base energy drain per turn
+            const progressiveDrain = (currentTurn / 6) * 18; // Increases over battle duration, max 18 by turn 6
 
             if (actor.element === 'water' || actor.element === 'ice') {
                 heatEnergyDrain = (baseDrain * 2.5) + progressiveDrain; // Waterbenders suffer most

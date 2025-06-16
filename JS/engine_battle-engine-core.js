@@ -34,7 +34,7 @@ const MAX_TOTAL_TURNS = 25;
 
 // Add energy management constants
 const MIN_ENERGY_FOR_ACTION = 10;
-const ENERGY_RECOVERY_PER_TURN = 5;
+const ENERGY_RECOVERY_PER_TURN = 4;
 const MAX_ENERGY = 100;
 
 // Add stun management constants
@@ -90,7 +90,7 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
     if (!characters) {
         console.error("[DEBUG] 'characters' object is undefined/null during initializeFighterState!");
         // Return a broken fighter immediately to prevent further errors
-        return { id: fighterId, name: `[MISSING CHARS OBJECT - ${fighterId}]`, hp: 0, maxHp: 100, energy: 0, momentum: 0, stunDuration: 0, tacticalState: null, moveHistory: [], moveFailureHistory: [], consecutiveDefensiveTurns: 0, aiLog: [`ERROR: 'characters' object is null/undefined.`], relationalState: null, mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, contextualState: {}, collateralTolerance: 0.0, mobility: 0.0, personalityProfile: {}, aiMemory: {}, curbstompRulesAppliedThisBattle: new Set(), faction: 'Error', element: 'error', specialTraits: {}, criticalHitsTaken: 0, intelligence: 0, hasMetalArmor: false, incapacitationScore: 100, escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, summary: `(ERROR: 'characters' object is null/undefined.)` };
+        return { id: fighterId, name: `[MISSING CHARS OBJECT - ${fighterId}]`, hp: 0, maxHp: 100, energy: 0, momentum: 0, stunDuration: 0, stunResistance: 0, consecutiveStuns: 0, stunImmunityTurns: 0, tacticalState: null, moveHistory: [], moveFailureHistory: [], consecutiveDefensiveTurns: 0, aiLog: [`ERROR: 'characters' object is null/undefined.`], relationalState: null, mentalState: { level: 'broken', stress: 100, mentalStateChangedThisTurn: false }, contextualState: {}, collateralTolerance: 0.0, mobility: 0.0, personalityProfile: {}, aiMemory: {}, curbstompRulesAppliedThisBattle: new Set(), faction: 'Error', element: 'error', specialTraits: {}, criticalHitsTaken: 0, intelligence: 0, hasMetalArmor: false, incapacitationScore: 100, escalationState: ESCALATION_STATES.TERMINAL_COLLAPSE, summary: `(ERROR: 'characters' object is null/undefined.)` };
     }
     const characterData = characters[fighterId];
     if (!characterData) {
@@ -101,6 +101,7 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
             name: `[MISSING DATA - ${fighterId}]`, // Safe fallback name
             hp: 0, maxHp: 100, // Treat as defeated for safety
             energy: 0, momentum: 0, stunDuration: 0,
+            stunResistance: 0, consecutiveStuns: 0, stunImmunityTurns: 0,
             tacticalState: null, moveHistory: [], moveFailureHistory: [],
             consecutiveDefensiveTurns: 0, aiLog: [`ERROR: Character data for "${fighterId}" not loaded/found.`],
             relationalState: null,
@@ -151,6 +152,9 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         hp: 100, maxHp: 100,
         energy: 100, momentum: 0, lastMove: null, lastMoveEffectiveness: null,
         stunDuration: 0,
+        stunResistance: 0,
+        consecutiveStuns: 0,
+        stunImmunityTurns: 0,
         tacticalState: null, moveHistory: [], moveFailureHistory: [],
         consecutiveDefensiveTurns: 0, aiLog: [],
         // Access relationships from characterData directly
@@ -593,6 +597,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 return;
             }
 
+            if (currentAttacker.stunImmunityTurns > 0) {
+                currentAttacker.stunImmunityTurns--;
+            }
+
             if (battleOver || isStalemate) return;
 
             // Energy management
@@ -612,6 +620,12 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             // Stun management
             if (currentAttacker.stunDuration > 0) {
                 currentAttacker.stunDuration--;
+                
+                if (currentAttacker.stunDuration === 0) {
+                    currentAttacker.consecutiveStuns = 0;
+                    currentAttacker.aiLog.push(`[Stun Expired]: ${currentAttacker.name} has recovered from being stunned.`);
+                }
+
                 currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE;
                 currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned. Turns remaining: ${currentAttacker.stunDuration}. Stun resistance increased to ${currentAttacker.stunResistance}.`);
                 turnSpecificEventsForLog.push({
@@ -894,12 +908,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             text: "The battle ends in a STALEMATE!",
             html_content: phaseTemplates.stalemateResult
         });
-        if (finalWinnerFull) {
-            finalWinnerFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
-        }
-        if (finalLoserFull) {
-            finalLoserFull.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
-        }
+        fighter1.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
+        fighter2.summary = "The battle reached an impasse, with neither fighter able to secure victory.";
     } else if (finalWinnerFull && finalLoserFull) {
         const isKOByHp = finalLoserFull.hp <= 0;
         const isTimeoutVictory = turn >= MAX_TOTAL_TURNS && !isKOByHp;
@@ -938,14 +948,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             finalLoserFull.summary = `${finalLoserFull.name} fought bravely but was ultimately overcome.`;
         }
     } else {
-        // Handle cases where we don't have valid fighter states
+        // Handle cases where we don't have valid fighter states, ensuring a summary is always set.
         const defaultSummary = "The battle ended in an unexpected state.";
-        if (finalWinnerFull) {
-            finalWinnerFull.summary = defaultSummary;
-        }
-        if (finalLoserFull) {
-            finalLoserFull.summary = defaultSummary;
-        }
+        if (fighter1) fighter1.summary = defaultSummary;
+        if (fighter2) fighter2.summary = defaultSummary;
     }
 
     // Add conclusion event
@@ -1003,9 +1009,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         return cleanState;
     };
 
-    // Determine final states without circular references
-    const finalFighter1State = createCleanFighterState(currentAttacker.id === f1Id ? currentAttacker : currentDefender);
-    const finalFighter2State = createCleanFighterState(currentDefender.id === f2Id ? currentDefender : currentAttacker);
+    // Determine final states without circular references using the original, now-updated, fighter objects
+    const finalFighter1State = createCleanFighterState(fighter1);
+    const finalFighter2State = createCleanFighterState(fighter2);
 
     // Update phase state in battle state
     currentBattleState.currentPhase = phaseState.currentPhase;
@@ -1016,8 +1022,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         loserId: loserId,
         isDraw: isStalemate,
         finalState: { 
-            fighter1: finalFighter1State || createCleanFighterState(fighter1), 
-            fighter2: finalFighter2State || createCleanFighterState(fighter2) 
+            fighter1: finalFighter1State, 
+            fighter2: finalFighter2State
         },
         environmentState,
         phaseSummary: phaseState.phaseSummaryLog
@@ -1026,18 +1032,23 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
 // Modify the stun application logic
 function applyStun(fighter, duration) {
+    if (fighter.stunImmunityTurns > 0) {
+        fighter.aiLog.push(`[Stun Resist]: ${fighter.name} is immune to stun for this turn.`);
+        return; // No stun applied
+    }
+
     // Apply stun resistance
     const effectiveDuration = Math.max(1, Math.floor(duration * (1 - (fighter.stunResistance || 0))));
     
     // Check for consecutive stuns
     if (fighter.consecutiveStuns >= MAX_CONSECUTIVE_STUNS) {
-        fighter.aiLog.push(`[Stun Resistance]: ${fighter.name} has built up resistance to stuns. Duration reduced from ${duration} to ${effectiveDuration}.`);
-        return effectiveDuration;
+        fighter.aiLog.push(`[Stun Resistance]: ${fighter.name} has built up resistance to being stun-locked.`);
+        return; // Resist the stun
     }
     
     fighter.consecutiveStuns = (fighter.consecutiveStuns || 0) + 1;
     fighter.stunDuration = effectiveDuration;
-    return effectiveDuration;
+    fighter.stunImmunityTurns = 2; // Grant 2 turns of stun immunity after being stunned.
 }
 
 // Add energy cost to moves

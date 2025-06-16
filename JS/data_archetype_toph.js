@@ -119,7 +119,7 @@ export const tophArchetypeData = {
         },
         '_DEFAULT_LOCATION_': {
             label: "Air vs. Earth: Aang vs. Toph",
-            introA: "Toph, the master of air, faces Toph's unyielding earthbending, a classic elemental confrontation.", // Corrected to Aang
+            introA: "Aang, the master of air, faces Toph's unyielding earthbending, a classic elemental confrontation.",
             introB: "Toph Beifong senses Aang's movements through the earth, ready to prove that nothing escapes her seismic perception."
         }
     },

@@ -626,7 +626,7 @@ export const maiArchetypeData = {
         },
         'omashu': {
             label: "Omashu's Perch, Fire's Reluctance: Mai vs. Jeong Jeong",
-            introA: "Mai utilizes Omashu's high ramparts for sniper-like attacks, her daggers raining down on Master Jeong Jeong's fluid water defenses.", // Corrected to Jeong Jeong
+            introA: "Mai utilizes Omashu's high ramparts for sniper-like attacks, her daggers challenging Jeong Jeong's ability to maintain precise fire control.",
             introB: "Jeong Jeong, with immense focus, shapes his fire around Omashu's structures, his defense a testament to his control against Mai's volleys."
         },
         'great-divide': {
@@ -747,7 +747,7 @@ export const maiArchetypeData = {
         },
         onIntentSelection: {
             OpeningMoves: { Early: [{ type: 'internal', line: "Let's see how long it takes before {opponent.s} gets bored and makes a mistake." }] },
-            PressAdvantage: { Mid: [{ type: 'spoken', line: "If you’re going to surrender, now’s your chance." }] },
+            PressAdvantage: { Mid: [{ type: 'spoken', line: "If you're going to surrender, now's your chance." }] },
             DesperateGambit: { Late: [{ type: 'spoken', line: "Guess I have to try now. Great." }] }
         },
         onMoveExecution: {
@@ -757,10 +757,10 @@ export const maiArchetypeData = {
                 Weak: { Generic: [{ type: 'internal', line: "This is getting annoying." }] }
             }
         },
-        onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Nice try. I’ve heard worse from Ty Lee when she’s hungry." }] } },
+        onManipulation: { asVictim: { Generic: [{ type: 'internal', line: "Nice try. I've heard worse from Ty Lee when she's hungry." }] } },
         onPrediction: {
             correct: { Generic: [{ type: 'spoken', line: "Predictable. I could have thrown that with my eyes closed." }] },
-            wrong: { Generic: [{ type: 'internal', line: "Alright, that was actually clever. Doesn’t mean I care." }] }
+            wrong: { Generic: [{ type: 'internal', line: "Alright, that was actually clever. Doesn't mean I care." }] }
         },
         onStateChange: {
             stressed: { Mid: [{ type: 'internal', line: "Now this is actually annoying." }] },
