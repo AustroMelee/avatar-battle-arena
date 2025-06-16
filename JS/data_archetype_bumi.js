@@ -200,7 +200,7 @@ export const bumiArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Dynamo Duel: Bumi's Earthquakes vs. Toph's Sandstorm",
-            introA: "Bumi turns the Si Wong Desert into a playground of shifting sands and stone, challenging Toph's ability to find and control water.", // Corrected Toph to water
+            introA: "Bumi turns the Si Wong Desert into a playground of shifting sands and stone, challenging Toph's seismic sense with unpredictable earthen forms.",
             introB: "Toph turns the desert into a swirling vortex of sand and stone, but King Bumi counters with localized earthquakes and rock fists."
         },
         'foggy-swamp': {
@@ -374,7 +374,7 @@ export const bumiArchetypeData = {
         },
         'si-wong-desert': {
             label: "Desert Firestorm, Earth Titan's Play: Bumi vs. Ozai",
-            introA: "Bumi transforms the Si Wong into a sea of fire, but King Bumi turns the sand itself into a weapon, challenging the Fire Lord's dominion.",
+            introA: "Bumi transforms the Si Wong Desert into a sea of fire, but King Bumi turns the sand itself into a weapon, challenging the Fire Lord's dominion.",
             introB: "Bumi, his laughter booming across the dunes, creates colossal sand creatures and earthen ramparts to 'entertain' Fire Lord Ozai."
         },
         'foggy-swamp': {

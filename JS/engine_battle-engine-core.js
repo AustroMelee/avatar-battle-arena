@@ -715,7 +715,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
 
             // --- Move Execution & Resolution ---
-            const result = calculateMove(move, currentAttacker, currentDefender, conditions, currentBattleState, battleEventLog, phaseState, charactersMarkedForDefeat);
+            const result = calculateMove(move, currentAttacker, currentDefender, conditions, battleEventLog, environmentState, locId, modifyMomentum);
             
             // Generate narration for the entire action
             const turnNarrationObjects = generateTurnNarrationObjects(
