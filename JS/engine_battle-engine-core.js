@@ -275,7 +275,16 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         // Make sure techniques are copied from characterData here, if they are meant to be character-wide.
         // If techniques can vary by location, they will be selected later by getAvailableMoves.
         // For now, assume a 'techniques' array is available on the base character object.
-        techniques: characterData.techniques || [],
+        techniques: [
+            ...(characterData.techniques || []),
+            ...(characterData.techniquesFull || []),
+            ...(characterData.techniquesCanteen || []),
+            ...(characterData.techniquesEasternAirTemple || []),
+            ...(characterData.techniquesNorthernWaterTribe || []),
+            ...(characterData.techniquesOmashu || []),
+            ...(characterData.techniquesSiWongDesert || []),
+            ...(characterData.techniquesBoilingRock || [])
+        ],
         techniquesFull: characterData.techniquesFull || [],
         techniquesCanteen: characterData.techniquesCanteen || [],
         techniquesEasternAirTemple: characterData.techniquesEasternAirTemple || [],
