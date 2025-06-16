@@ -124,7 +124,9 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
 
     if (trigger === 'onIntentSelection' && aiLogEntry.isEscalationFinisherAttempt && context.move?.type === 'Finisher') {
         if (introductoryPhrases.EscalationFinisher && introductoryPhrases.EscalationFinisher.length > 0) {
-            return { type: 'action', line: getRandomElement(introductoryPhrases.EscalationFinisher) };
+            const selectedQuote = getRandomElement(introductoryPhrases.EscalationFinisher);
+            // FIX: Ensure selectedQuote is not null and has a .line property if it's an object
+            return selectedQuote ? { type: 'action', line: selectedQuote.line || selectedQuote } : null;
         }
     }
 
@@ -196,7 +198,15 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
     for (const getPool of lookupPaths) {
         pool = getPool();
         if (pool && Array.isArray(pool) && pool.length > 0) {
-            return getRandomElement(pool);
+            const selectedElement = getRandomElement(pool);
+            // If the selected element is an object with 'type' and 'line', return it directly.
+            // Otherwise, assume it's a plain string and wrap it as 'spoken' type.
+            if (selectedElement && typeof selectedElement === 'object' && selectedElement.type && selectedElement.line) {
+                return selectedElement;
+            } else if (typeof selectedElement === 'string') {
+                return { type: 'spoken', line: selectedElement };
+            }
+            return null; // Fallback if element is not string or expected object format
         }
     }
 
@@ -223,7 +233,7 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
     if (type === 'environmental') {
         htmlContent = `<p class="${narrativeClass}">${formattedLine}</p>`;
     } else if (type === 'action') {
-        htmlContent = `<p class="${narrativeClass}">${substituteTokens(line, actor, opponent, context)}</p>`;
+        htmlContent = `<p class="${narrativeClass}">${formattedLine}</p>`; // Use formattedLine directly for action type
     } else {
         const verb = type === 'internal' ? 'thinks' : 'says';
         htmlContent = `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
@@ -284,26 +294,25 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     // Standard move narrative generation
     if (aiLogEntry.isEscalationFinisherAttempt && move.type === 'Finisher') {
         const escalationFinisherPool = introductoryPhrases.EscalationFinisher || introductoryPhrases.Late;
-        const selectedPhrase = getRandomElement(escalationFinisherPool);
-        // FIX: Ensure selectedPhrase is not null before calling .line
-        introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line, actor, opponent) : "Sensing the end is near,";
+        const selectedPhrase = getRandomElement(escalationFinisherPool); // This can be an object {type, line} or string
+        // FIX: Safely extract line or use the string directly if selectedPhrase is a string
+        introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent) : "Sensing the end is near,";
     } else {
         const intentForIntro = aiLogEntry.intent || 'StandardExchange';
         const introQuote = findNarrativeQuote(actor, opponent, 'onIntentSelection', intentForIntro, { currentPhaseKey, aiLogEntry, move });
-        if (introQuote && introQuote.type === 'action') {
-            introPhrase = substituteTokens(introQuote.line, actor, opponent);
-        } else { // If introQuote is dialogue or null, use default phase/generic intro
+        // FIX: Safely extract line or use the string directly if introQuote is a string
+        if (introQuote && (introQuote.type === 'action' || typeof introQuote.line === 'string')) {
+            introPhrase = substituteTokens(introQuote.line || introQuote, actor, opponent);
+        } else { // If introQuote is null or not a recognized type, use default phase/generic intro
             const phaseSpecificIntroPool = introductoryPhrases[currentPhaseKey] || introductoryPhrases.Generic;
-            const selectedPhrase = getRandomElement(phaseSpecificIntroPool);
-            // FIX: Ensure selectedPhrase is not null
-            introPhrase = selectedPhrase ? substituteTokens(selectedPhrase, actor, opponent) : "Responding,";
+            const selectedPhrase = getRandomElement(phaseSpecificIntroPool); // This can be an object {type, line} or string
+            // FIX: Safely extract line or use the string directly if selectedPhrase is a string
+            introPhrase = selectedPhrase ? substituteTokens(selectedPhrase.line || selectedPhrase, actor, opponent) : "Responding,";
         }
     }
 
-    // FIX: Ensure introPhrase is a string before calling .includes()
-    if (typeof introPhrase !== 'string') {
-        introPhrase = String(introPhrase); // Coerce to string to prevent error
-    }
+    // The line `if (introPhrase.includes(actor.name))` now has `introPhrase` guaranteed to be a string
+    // after the above safe extractions or default assignments.
 
 
     if (result.payoff && result.consumedStateName) {
@@ -333,9 +342,9 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
         impactSentencePool = impactPhrases.DEFAULT?.[impactSentenceKey];
     }
 
-    const impactSentenceTemplate = getRandomElement(impactSentencePool); // FIX: Get the actual element
-    // FIX: Ensure impactSentenceTemplate is not null before using it
-    const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate, actor, opponent, { // Pass actor and opponent as context
+    const impactSentenceTemplate = getRandomElement(impactSentencePool);
+    // FIX: Safely extract line or use the string directly if impactSentenceTemplate is a string
+    const impactSentence = impactSentenceTemplate ? substituteTokens(impactSentenceTemplate.line || impactSentenceTemplate, actor, opponent, {
         '{targetName}': opponent?.name || 'the opponent',
         '{actorName}': actor?.name || 'The attacker'
     }) : "The move unfolds.";
@@ -359,7 +368,7 @@ export function generateActionDescriptionObject(move, actor, opponent, result, c
     // We want the main "move description" to be the impact sentence.
     if (result.isReactedAction) {
         fullDescText = impactSentence; // The introPhrase is handled by the narrativeEventsToPrepend
-    } else if (introPhrase.includes(actor.name)) {
+    } else if (introPhrase.includes(actor.name)) { // This line now uses a guaranteed string for introPhrase
         fullDescText = `${introPhrase} ${tacticalPrefix}${conjugatePresent(move.verb || 'executes')} ${ (move.requiresArticle ? ( (['a','e','i','o','u'].includes(move.object[0].toLowerCase()) ? `an ${move.object}` : `a ${move.object}`) ) : move.object) || 'an action'}. ${impactSentence}${tacticalSuffix}`;
     } else {
         fullDescText = `${introPhrase} ${tacticalPrefix}${baseActionText}. ${impactSentence}${tacticalSuffix}`;
@@ -398,8 +407,8 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
     if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) return null;
 
     const collateralPhraseTemplate = getRandomElement(collateralImpactPhrases[impactLevel]);
-    // FIX: Ensure collateralPhraseTemplate is not null before using it
-    const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate, actor, opponent) : '';
+    // FIX: Safely extract line or use the string directly if collateralPhraseTemplate is a string
+    const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent) : '';
 
     let description = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`;
     let specificImpactPhrase = '';
@@ -434,9 +443,9 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
         flavorTextPool.push(...escalationStateNarratives[newState]);
     }
     const defaultFlavor = `The tide of battle shifts for {actorName}.`;
-    const selectedFlavorTextTemplate = getRandomElement(flavorTextPool); // FIX: Get the actual element
-    // FIX: Ensure selectedFlavorTextTemplate is not null
-    const flavorText = selectedFlavorTextTemplate ? substituteTokens(selectedFlavorTextTemplate, fighter, null) : defaultFlavor;
+    const selectedFlavorTextTemplate = getRandomElement(flavorTextPool);
+    // FIX: Safely extract line or use the string directly if selectedFlavorTextTemplate is a string
+    const flavorText = selectedFlavorTextTemplate ? substituteTokens(selectedFlavorTextTemplate.line || selectedFlavorTextTemplate, fighter, null) : defaultFlavor;
     const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
 
 
@@ -572,11 +581,15 @@ export function getFinalVictoryLine(winner, loser) {
     const victoryPhrasesPool = postBattleVictoryPhrases[winnerVictoryStyle] || postBattleVictoryPhrases.default;
     const winnerHp = winner.hp !== undefined ? winner.hp : 0;
     const outcomeType = winnerHp > 50 ? 'dominant' : 'narrow';
-    let phraseTemplate = victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant;
+    let phraseTemplate = getRandomElement(victoryPhrasesPool[outcomeType] || victoryPhrasesPool.dominant); // FIX: Get random element
+
+    // FIX: Safely extract line or use the string directly if phraseTemplate is a string
+    const finalPhrase = phraseTemplate ? (phraseTemplate.line || phraseTemplate) : (victoryPhrasesPool.default.dominant.line || victoryPhrasesPool.default.dominant);
+
 
     const winnerPronounP = winner.pronouns?.p || 'their';
 
-    return substituteTokens(phraseTemplate, winner, safeLoser, {
+    return substituteTokens(finalPhrase, winner, safeLoser, {
         WinnerName: winner.name,
         LoserName: safeLoser.name,
         WinnerPronounP: winnerPronounP
