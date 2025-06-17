@@ -229,6 +229,7 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                 htmlLog += contentToAppend;
             }
             console.log("[DEBUG] turn_marker event processed:", event);
+            console.log(`[DEBUG] turn_marker portrait src value: "${event.portrait}" for character: ${event.characterName}`);
         } else if (htmlContentForEvent) {
              // If html_content is directly provided (like for escalation or curbstomp), use it
             if (isPhaseDivOpen) {
