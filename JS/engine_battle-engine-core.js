@@ -706,6 +706,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     currentBattleState
                 ));
             }
+
+            currentAttacker.aiLog.push(`[Phase Transition]: ${currentAttacker.name} transitioned to ${phaseState.currentPhase} Phase.`);
+            currentDefender.aiLog.push(`[Phase Transition]: ${currentDefender.name} transitioned to ${phaseState.currentPhase} Phase.`);
+            currentBattleState.currentPhase = phaseState.currentPhase;
         }
 
         if (charactersMarkedForDefeat.has(currentAttacker.id)) {
