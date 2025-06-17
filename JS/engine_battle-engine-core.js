@@ -840,8 +840,8 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
             // --- Update Fighter States Post-Action ---
             // Update mental state based on the move's outcome
-            updateMentalState(currentAttacker, currentDefender, result, environmentState, locId);
-            updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, environmentState, locId);
+            updateMentalState(currentAttacker, currentDefender, result, environmentState, locId, currentBattleState);
+            updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, environmentState, locId, currentBattleState);
 
             // Update momentum
             modifyMomentum(currentAttacker, result.momentumChange.attacker, `Own Move (${result.effectiveness.label})`);
