@@ -4,6 +4,13 @@ export const omashu = {
     id: 'omashu',
     name: 'Omashu Delivery Chutes',
     description: "A vast, city-wide network of stone and metal chutes for transporting goods, creating a chaotic and unpredictable battlefield.",
+    envDescription: "the sprawling, chaotic delivery chutes of Omashu",
+    envImpactVariants: [
+        "A package cart careens wildly off its rails.",
+        "The stone walls rumble with the force of the impact.",
+        "The scent of cabbage momentarily fills the air."
+    ],
+    envTags: ["urban", "industrial", "stone", "chutes", "chaotic"],
     environmentalModifiers: {
         air: { damage: 10, energy: -5, reason: "The open chutes and verticality create strong air currents." },
         fire: { damage: -10, energy: 5, reason: "The stone and metal environment offers little to burn." },

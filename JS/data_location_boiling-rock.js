@@ -4,6 +4,13 @@ export const boilingRock = {
     id: 'boiling-rock',
     name: 'The Boiling Rock',
     description: "A high-security prison in the middle of a boiling lake, with metal structures and oppressive heat.",
+    envDescription: "the precarious metal platforms overlooking a boiling lake",
+    envImpactVariants: [
+        "Steam erupts from the scalding lake below.",
+        "A metal walkway groans under the force of the blow.",
+        "The oppressive heat makes every movement a struggle."
+    ],
+    envTags: ["metal", "industrial", "hot", "prison", "steam"],
     environmentalModifiers: {
         air: { damage: -10, energy: 5, reason: "The hot, heavy air slightly hinders airbending." },
         fire: { damage: 15, energy: -10, reason: "The intense heat empowers firebending." },

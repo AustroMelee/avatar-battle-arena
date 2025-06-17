@@ -4,6 +4,13 @@ export const fireNationCapital = {
     id: 'fire-nation-capital',
     name: 'Fire Nation Capital',
     description: "The heart of the Fire Nation, a city built in a volcanic caldera, teeming with industrial might and imperial architecture.",
+    envDescription: "the grand, volcanic plaza of the Fire Nation Capital",
+    envImpactVariants: [
+        "The plaza shudders as stone fragments fly.",
+        "Red banners whip in the sudden blast.",
+        "Ash falls softly, settling on the scorched tiles."
+    ],
+    envTags: ["urban", "fiery", "volcanic", "stone", "imperial"],
     environmentalModifiers: {
         air: { damage: -15, energy: 10, reason: "The oppressive, controlled environment stifles free-flowing air currents." },
         fire: { damage: 20, energy: -15, reason: "The heart of the Fire Nation empowers its benders." },

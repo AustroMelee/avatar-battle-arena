@@ -4,6 +4,13 @@ export const greatDivide = {
     id: 'great-divide',
     name: 'The Great Divide',
     description: "The largest canyon in the world, a vast and treacherous chasm that tests the resolve of any who dare to cross.",
+    envDescription: "the vast and perilous expanse of the Great Divide",
+    envImpactVariants: [
+        "Loose rocks tumble down the canyon walls.",
+        "A gust of wind whips through the chasm.",
+        "The ground trembles underfoot, threatening to give way."
+    ],
+    envTags: ["canyon", "rocky", "windy", "open", "arid"],
     environmentalModifiers: {
         air: { damage: 10, energy: -5, reason: "The open canyon is ideal for powerful air currents." },
         fire: { damage: -10, energy: 5, reason: "The windiness of the canyon makes controlling fire difficult." },

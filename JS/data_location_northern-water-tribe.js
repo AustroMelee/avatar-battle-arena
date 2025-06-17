@@ -4,6 +4,13 @@ export const northernWaterTribe = {
     id: 'northern-water-tribe',
     name: 'Northern Water Tribe City',
     description: "A majestic city of ice and water, the stronghold of the Northern Water Tribe, under a perpetual twilight during the winter.",
+    envDescription: "the majestic, frozen city of the Northern Water Tribe",
+    envImpactVariants: [
+        "Ice shards explode from the impact point.",
+        "The frozen canals crack under the strain.",
+        "A flurry of snow whips up, obscuring the view."
+    ],
+    envTags: ["ice", "water", "arctic", "city", "frozen"],
     environmentalModifiers: {
         air: { damage: -10, energy: 5, reason: "The frigid air is thin and difficult to manipulate." },
         fire: { damage: -20, energy: 15, reason: "The intense cold severely weakens firebending." },

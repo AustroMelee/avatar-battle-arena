@@ -4,6 +4,13 @@ export const foggySwamp = {
     id: 'foggy-swamp',
     name: 'The Foggy Swamp',
     description: "A vast, mystical wetland teeming with unique flora and fauna, home to an isolated tribe of waterbenders.",
+    envDescription: "the dense, misty expanse of the Foggy Swamp",
+    envImpactVariants: [
+        "Water splashes wildly as roots are torn from the earth.",
+        "A thick mist momentarily obscures the view.",
+        "Strange swamp creatures scatter from the disturbance."
+    ],
+    envTags: ["swamp", "water", "mystical", "foggy", "dense_vegetation"],
     environmentalModifiers: {
         air: { damage: -15, energy: 10, reason: "The dense, heavy fog dampens air currents." },
         fire: { damage: -25, energy: 20, reason: "The dampness of the swamp makes firebending difficult." },

@@ -149,15 +149,41 @@ export const tacticalFlavor = {
 };
 
 export const consumedStateNarratives = {
-    Repositioned: {
-        text: "This consumes {targetName}'s positional advantage.",
-        html: "This consumes <span class=\"narrative-context char-{targetId}\">{targetName}'s</span> positional advantage."
-    },
-    // Add other consumed states here
     default: {
-        text: "This consumes {targetName}'s {stateName} state.",
-        html: "This consumes <span class=\"narrative-context char-{targetId}\">{targetName}'s</span> <span class=\"tactical-state\">{stateName}</span> state."
+        text: "{actorName} absorbs the energy, feeling {possessive} strength grow.",
+        html: "<span class='buff'>{actorName} absorbs a power boost!</span>"
+    },
+    berserk: {
+        // Per-character overrides
+        aang: {
+            text: "{actorName}'s tattoos glow fiercely, the air thrumming as {actor.s} enters a berserk state!",
+            html: "<span class='buff aang'>Aang surges with unstoppable force!</span>",
+            chain: {
+                text: "{actorName} devours another surge of power—his state is barely contained!",
+                html: "<span class='buff aang'>Aang's berserk fury compounds!</span>"
+            }
+        },
+        zuko: {
+            text: "Fire crackles hungrily as {actorName}'s rage boils over.",
+            html: "<span class='buff zuko'>Zuko loses all restraint.</span>",
+        },
+        // Fallback
+        text: "{actorName} is consumed by fury.",
+        html: "<span class='buff'>Fury takes over!</span>",
+        chain: {
+            text: "{actorName} stacks yet another buff—{actor.s} can barely control it.",
+            html: "<span class='buff'>Power multiplies out of control!</span>"
+        }
+    },
+    shield: {
+        text: "{actorName} is enveloped in a shimmering barrier.",
+        html: "<span class='buff'>A shield shimmers to life.</span>",
+        chain: {
+            text: "{actorName}'s shield layers grow thicker.",
+            html: "<span class='buff'>Shields stack like fortress walls.</span>"
+        }
     }
+    // ...etc
 };
 
 export function conjugatePresent(verbPhrase) {

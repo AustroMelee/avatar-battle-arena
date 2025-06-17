@@ -150,6 +150,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         const elementalCollateralMod = locationData.collateralModifiers?.[moveElement]?.damageMultiplier || 1.0;
         collateralDamageCalculated = Math.round(basePower * baseCollateralImpact * fragilityMultiplier * elementalCollateralMod);
         collateralDamageCalculated = clamp(collateralDamageCalculated, 0, 30);
+        // DEBUG: Log calculated collateral damage
+        console.log(`[DEBUG] Collateral Damage Calculated for ${move.name}: ${collateralDamageCalculated}`);
     }
 
     if (currentMoveTags.includes('requires_opening')) {

@@ -4,6 +4,13 @@ export const kyoshiIsland = {
     id: 'kyoshi-island',
     name: 'Kyoshi Island',
     description: "A tranquil island known for its fierce warriors and the giant Unagi that prowls its shores.",
+    envDescription: "the traditional village and rocky shores of Kyoshi Island",
+    envImpactVariants: [
+        "Splinters fly as a wooden house takes the hit.",
+        "The ocean spray mists the air, stinging their eyes.",
+        "A Kyoshi Warrior statue seems to watch silently."
+    ],
+    envTags: ["island", "coastal", "traditional", "wooden", "water"],
     environmentalModifiers: {
         air: { damage: 0, energy: 0, reason: "The temperate climate has little effect on airbending." },
         fire: { damage: -10, energy: 5, reason: "The wooden buildings are vulnerable, but the sea air is damp." },

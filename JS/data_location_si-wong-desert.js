@@ -4,6 +4,13 @@ export const siWongDesert = {
     id: 'si-wong-desert',
     name: 'Si Wong Desert',
     description: "A vast and treacherous desert, where the sand itself can be a weapon.",
+    envDescription: "endless golden dunes under a white sun",
+    envImpactVariants: [
+        "The sands shift violently underfoot.",
+        "A sudden gust sends grit swirling into eyes.",
+        "Heat ripples shimmer above the parched earth."
+    ],
+    envTags: ["sand", "desert", "sunny", "open", "arid"],
     environmentalModifiers: {
         air: { damage: 10, energy: -5, reason: "The open desert winds empower airbending." },
         fire: { damage: 15, energy: -10, reason: "The intense sun and dry air are ideal for firebending." },

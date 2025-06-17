@@ -6,6 +6,13 @@ export const easternAirTemple = {
     id: 'eastern-air-temple',
     name: 'Eastern Air Temple',
     description: "A serene temple on a remote mountain peak, with open courtyards and strong winds.",
+    envDescription: "the windswept courtyards and high peaks of the Eastern Air Temple",
+    envImpactVariants: [
+        "A sudden gust nearly knocks them off balance.",
+        "Stone carvings chip as the attack glances off.",
+        "The serene silence is shattered by the impact."
+    ],
+    envTags: ["mountain", "windy", "air", "temple", "stone"],
     environmentalEffects: [
         "Strong winds",
         "Unstable footing",
