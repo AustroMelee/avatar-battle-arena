@@ -1,105 +1,134 @@
-// FILE: main.js
 'use strict';
 
 import { simulateBattle } from './engine_battle-engine-core.js';
-// --- UPDATED IMPORTS ---
-import { showLoadingState, showResultsState } from './ui_loading-states.js'; // Imports show/hide loading/results states
-import { populateAllUI, resetGlobalUI, getCharacterImageFromUI as getCharacterImage } from './ui.js'; // Harmonized UI functions, and importing getCharacterImage
-import { setSimulationMode, initializeSimulationManagerDOM, resetSimulationManager } from './simulation_mode_manager.js'; // Correct imports for sim manager
-import { setupDetailedLogControls } from './ui_battle-results.js'; // Correct import for setupDetailedLogControls
-// --- END UPDATED IMPORTS ---
-import { initializeDevModeUI } from './dev_mode_manager.js';
+import { characters } from '../data/data_characters.js';
+import { locations } from '../data/data_mechanics_locations.js';
 
-const battleBtn = document.getElementById('battleBtn'); // Keep this as it's the trigger element
-let currentSimMode = "animated";
+const archetypes = {}; // Cache for storing loaded archetype data
 
-function handleBattleStart() {
-    const f1Id = document.getElementById('fighter1-value').value;
-    const f2Id = document.getElementById('fighter2-value').value;
-    const locId = document.getElementById('location-value').value;
-    const timeOfDay = document.getElementById('time-of-day-value').value;
-    const emotionalMode = document.getElementById('emotional-mode').checked;
-    if (!f1Id || !f2Id || !locId) {
-        alert("Please select both fighters and a battlefield.");
-        return;
+async function loadArchetypeData(characterId) {
+    if (!characterId || archetypes[characterId]) {
+        return; // Don't load if no ID or already loaded
     }
-    if (f1Id === f2Id) {
-        alert('Please select two different fighters!');
-        return;
+    try {
+        const module = await import(`../data/data_archetype_${characterId}.js`);
+        archetypes[characterId] = module[`${characterId}ArchetypeData`];
+        console.log(`Loaded archetype data for: ${characterId}`);
+    } catch (error) {
+        console.error(`Failed to load archetype data for ${characterId}:`, error);
+        archetypes[characterId] = null; // Mark as failed to avoid re-fetching
     }
-
-    resetGlobalUI(); // Use the global reset function
-    showLoadingState(currentSimMode); // Use the centralized loading state function
-
-    setTimeout(() => {
-        try {
-            const rawBattleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
-            showResultsState(rawBattleResult, currentSimMode); // Use the centralized results display function
-        } catch (error) {
-            console.error("An error occurred during battle simulation:", error);
-            alert("A critical error occurred. Please check the console and refresh.");
-            // Re-enable button and hide loading on error
-            const loadingSpinner = document.getElementById('loading'); // Direct access here
-            if (loadingSpinner) loadingSpinner.classList.add('hidden');
-
-            const simModeContainer = document.getElementById('simulation-mode-container'); // Direct access here
-            if (simModeContainer) {
-                simModeContainer.classList.add('hidden');
-            }
-            if (battleBtn) battleBtn.disabled = false;
-            resetSimulationManager(); // Use the centralized simulation manager reset
-        }
-    }, 1500);
 }
 
-function handleModeSelectionChange(event) {
-    if (event.target.name === "simulationMode") {
-        currentSimMode = event.target.value;
-        setSimulationMode(currentSimMode); // Use the centralized set mode function
-        console.log("Simulation mode changed to:", currentSimMode);
+function populateGrid(gridId, items, type, onSelect) {
+    const grid = document.getElementById(gridId);
+    grid.innerHTML = '';
+    for (const key in items) {
+        const item = items[key];
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.dataset.id = item.id;
+        cell.innerHTML = `<img src="${item.imageUrl}" alt="${item.name}"><p>${item.name}</p>`;
+        cell.addEventListener('click', () => onSelect(item.id, type));
+        grid.appendChild(cell);
     }
+}
+
+async function updateArchetypeInfo(fighter1Id, fighter2Id) {
+    await Promise.all([
+        loadArchetypeData(fighter1Id),
+        loadArchetypeData(fighter2Id)
+    ]);
+
+    const headline = document.getElementById('archetype-headline');
+    const introA = document.getElementById('archetype-intro-a');
+    const introB = document.getElementById('archetype-intro-b');
+    const error = document.getElementById('archetype-error');
+    
+    headline.textContent = '';
+    introA.textContent = '';
+    introB.textContent = '';
+    error.textContent = '';
+
+    const archetype1 = archetypes[fighter1Id];
+    const archetype2 = archetypes[fighter2Id];
+
+    let data;
+    // Prioritize checking fighter1's archetype for fighter2, then vice-versa
+    if (archetype1 && archetype1[fighter2Id]) {
+        const locationId = document.getElementById('location-value').value || '_DEFAULT_LOCATION_';
+        data = archetype1[fighter2Id][locationId] || archetype1[fighter2Id]['_DEFAULT_LOCATION_'];
+    } else if (archetype2 && archetype2[fighter1Id]) {
+        const locationId = document.getElementById('location-value').value || '_DEFAULT_LOCATION_';
+        data = archetype2[fighter1Id][locationId] || archetype2[fighter1Id]['_DEFAULT_LOCATION_'];
+    }
+
+    if (data) {
+        headline.textContent = data.label;
+        introA.textContent = data.introA;
+        introB.textContent = data.introB;
+    } else {
+        error.textContent = 'No specific narrative data available for this matchup.';
+    }
+}
+
+async function handleSelection(id, type) {
+    document.getElementById(`${type}-value`).value = id;
+    const name = type === 'location' ? locations[id].name : characters[id].name;
+    document.getElementById(`${type}-name-display`).textContent = name;
+
+    const f1 = document.getElementById('fighter1-value').value;
+    const f2 = document.getElementById('fighter2-value').value;
+    if (f1 && f2) {
+        await updateArchetypeInfo(f1, f2);
+    }
+}
+
+function handleBattle() {
+    const f1 = document.getElementById('fighter1-value').value;
+    const f2 = document.getElementById('fighter2-value').value;
+    const loc = document.getElementById('location-value').value;
+    const time = document.getElementById('time-of-day-value').value;
+    const emotional = document.getElementById('emotional-mode').checked;
+
+    if (!f1 || !f2 || !loc) {
+        alert('Please select both fighters and a location.');
+        return;
+    }
+
+    const resultsSection = document.getElementById('results');
+    const loading = document.getElementById('loading');
+    const battleResults = document.getElementById('battle-results');
+    
+    resultsSection.style.display = 'block';
+    loading.classList.remove('hidden');
+    battleResults.classList.add('hidden');
+
+    setTimeout(() => {
+        const result = simulateBattle(f1, f2, loc, time, emotional);
+        
+        loading.classList.add('hidden');
+        battleResults.classList.remove('hidden');
+        
+        document.getElementById('winner-name').textContent = result.winner ? `${result.winner} is victorious!` : 'The battle is a draw!';
+        document.getElementById('battle-story').textContent = result.victoryLine;
+    }, 500);
 }
 
 function init() {
-    populateAllUI(); // Use the global populate UI function
+    populateGrid('fighter1-grid', characters, 'fighter1', handleSelection);
+    populateGrid('fighter2-grid', characters, 'fighter2', handleSelection);
+    populateGrid('location-grid', locations, 'location', handleSelection);
 
-    // Initialize simulation manager, passing the necessary DOM elements directly from the main document
-    // (these are accessed via document.getElementById in the sim manager, so no need for DOM_SHARED here)
-    initializeSimulationManagerDOM({
-        simulationContainer: document.getElementById('simulation-mode-container'),
-        cancelButton: document.getElementById('cancel-simulation'),
-        battleResultsContainer: document.getElementById('battle-results'),
-        winnerNameDisplay: document.getElementById('winner-name'),
-        analysisListDisplay: document.getElementById('analysis-list'),
-        battleStoryDisplay: document.getElementById('battle-story'),
-        animatedLogOutput: document.getElementById('animated-log-output'),
-        zoomInBtn: document.getElementById('zoom-in'),
-        zoomOutBtn: document.getElementById('zoom-out'),
+    document.getElementById('battleBtn').addEventListener('click', handleBattle);
+    
+    document.querySelectorAll('.time-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelector('.time-toggle-btn.selected').classList.remove('selected');
+            btn.classList.add('selected');
+            document.getElementById('time-of-day-value').value = btn.dataset.value;
+        });
     });
-    setSimulationMode(currentSimMode); // Set initial mode in manager
-
-    const modeSelectionContainer = document.querySelector('.mode-selection-section');
-    if (modeSelectionContainer) {
-        modeSelectionContainer.addEventListener('change', handleModeSelectionChange);
-    } else {
-        console.error("Mode selection container not found for event listener setup.");
-    }
-
-    const defaultModeRadio = document.getElementById(`mode-${currentSimMode}`);
-    if (defaultModeRadio) {
-        defaultModeRadio.checked = true;
-    }
-
-    if (battleBtn) {
-        battleBtn.addEventListener('click', handleBattleStart);
-    } else {
-        console.error("Battle button not found.");
-    }
-
-    setupDetailedLogControls(); // Call the imported setup function
-    initializeDevModeUI(); // Initialize Dev Mode UI
 }
 
-
-// Kick off app initialization on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', init); 

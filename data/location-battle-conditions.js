@@ -1,3 +1,4 @@
+// FILE: location-battle-conditions.js
 'use strict';
 
 // Import individual location condition objects
@@ -12,11 +13,12 @@ import { northernWaterTribe } from './data_location_northern-water-tribe.js';
 import { omashu } from './data_location_omashu.js';
 import { siWongDesert } from './data_location_si-wong-desert.js';
 
+
 /**
- * A comprehensive list of all available battle locations.
- * This object is used to populate the location selection UI.
+ * A map of location IDs to their battle conditions.
+ * This is the central export used by the battle engine to get location data.
  */
-export const locations = {
+export const locationConditions = {
     'ba-sing-se': baSingSe,
     'boiling-rock': boilingRock,
     'eastern-air-temple': easternAirTemple,

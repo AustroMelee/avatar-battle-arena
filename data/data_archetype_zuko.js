@@ -248,8 +248,8 @@ export const zukoArchetypeData = {
         },
         'northern-water-tribe': {
             label: "Frozen Agni Kai: Zuko vs. Azula at World's Edge",
-            introA: "Zuko's desperate fire struggles against the arctic cold and Azula's even colder, more powerful blue flames. He knows her tricks, but can he withstand her perfect, chilling assault?",
-            introB: "Azula, her fire burning with terrifying intensity even in the frozen north, aims to extinguish Zuko's defiant spark for good, a cruel smile playing on her lips."
+            introA: "Zuko's passionate, broader fire attacks are a stark contrast to Azula's controlled, lightning-like precision on the slippery battlefield of the Northern Water Tribe.",
+            introB: "Azula, using the ice to her advantage for quick, sliding attacks, forces Zuko into a desperate defense, their sibling rivalry reaching a boiling point in the freezing cold."
         },
         'ba-sing-se': {
             label: "City of Secrets, Sibling Showdown: Zuko vs. Azula",
@@ -292,9 +292,9 @@ export const zukoArchetypeData = {
             introB: "Azula, seeing Kyoshi Island as another pawn in her game, meets Zuko's challenge with her signature blue fire and chilling superiority. She will use lightning if he falters."
         },
         '_DEFAULT_LOCATION_': {
-            label: "Brother Against Sister: Zuko vs. Azula",
-            introA: "Zuko, fighting for his honor and redemption, stands against his prodigiously powerful and ruthless sister, Azula. He must be prepared for her lightning.",
-            introB: "Azula, the perfectionist firebending master, aims to crush her brother Zuko and prove her undeniable superiority. She is aware of his redirection and will choose her moment carefully for lightning."
+            label: "Frozen Agni Kai: Zuko vs. Azula at World's Edge",
+            introA: "Zuko's passionate, broader fire attacks are a stark contrast to Azula's controlled, lightning-like precision on the slippery battlefield of the Northern Water Tribe.",
+            introB: "Azula, using the ice to her advantage for quick, sliding attacks, forces Zuko into a desperate defense, their sibling rivalry reaching a boiling point in the freezing cold."
         }
     },
     // --- Zuko vs Ozai (ozai-not-comet-enhanced) ---
@@ -705,6 +705,17 @@ export const zukoArchetypeData = {
     },
     // NEW: Add new battleStart property for PreBanter and Poking, and phaseTransition property
     narrative: {
+        byOpponent: {
+            'azula': {
+                onManipulation: {
+                    asAttacker: {
+                        Generic: [
+                            { type: 'spoken', line: "Still playing the hero, Zuzu? It doesn't suit you." }
+                        ]
+                    }
+                }
+            }
+        },
         battleStart: {
             PreBanter: [ // NEW: For the very first narrative-only turn (Turn 0)
                 { type: 'spoken', line: "My honor demands this fight! Prepare yourself!" },
