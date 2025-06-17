@@ -7,6 +7,8 @@
 import { characterCurbstompRules } from './data_mechanics_characters.js';
 import { locationCurbstompRules } from './data_mechanics_locations.js';
 import { generateLogEvent } from './utils_log_event.js';
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
+import { seededRandom } from './utils_seeded_random.js';
 
 // This Set is exported so other modules can read it, but it should only be
 // modified by this manager.
