@@ -38,3 +38,15 @@ alert("Failed to copy logs to clipboard. Please enable clipboard access or try m
 return false;
 }
 }
+
+/**
+ * Returns a random element from an array.
+ * @param {Array<any>} arr - The input array.
+ * @returns {any} A random element from the array.
+ */
+export function getRandomElement(arr) {
+    if (!arr || arr.length === 0) {
+        return undefined;
+    }
+    return arr[Math.floor(Math.random() * arr.length)];
+}

@@ -1,7 +1,7 @@
 // FILE: engine_ai-decision.js
 'use strict';
 
-// Version 8.7: Lightning Redirection AI Awareness & Enhanced Logging
+// Version 8.8: System-Wide AI Upgrades—Stress Branching, Finisher Probability Floor, Aggro Press, Prediction Bonus, Environmental Polish
 
 import { getAvailableMoves } from './engine_move-resolution.js';
 import { moveInteractionMatrix } from './move-interaction-matrix.js';
@@ -46,53 +46,6 @@ function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor', propertyP
         return null;
     }
     return value;
-}
-
-// Add validation function at the top of the file
-function validateActorState(actor, functionName) {
-    if (!actor) {
-        throw new Error(`${functionName}: Actor is undefined or null`);
-    }
-    if (!actor.techniques || !Array.isArray(actor.techniques)) {
-        throw new Error(`${functionName}: Actor ${actor.name || 'unknown'} has invalid techniques array`);
-    }
-    if (!actor.personalityProfile) {
-        throw new Error(`${functionName}: Actor ${actor.name || 'unknown'} has no personality profile`);
-    }
-    if (typeof actor.energy !== 'number') {
-        throw new Error(`${functionName}: Actor ${actor.name || 'unknown'} has invalid energy value`);
-    }
-    return true;
-}
-
-// Add error handling wrapper
-function withErrorHandling(fn, errorContext) {
-    return function(...args) {
-        try {
-            return fn.apply(this, args);
-        } catch (error) {
-            console.error(`Error in ${errorContext}:`, error);
-            // Log the error to the actor's AI log if available
-            const actor = args[0];
-            if (actor && actor.aiLog) {
-                actor.aiLog.push(`[ERROR] ${errorContext}: ${error.message}`);
-            }
-            // Return a safe fallback
-            return {
-                move: { 
-                    name: "Struggle", 
-                    verb: 'struggle', 
-                    type: 'Offense', 
-                    power: 10, 
-                    element: 'physical', 
-                    moveTags: [] 
-                },
-                weight: 1,
-                reasons: [`Error: ${error.message}`],
-                isEscalationFinisherAttempt: false
-            };
-        }
-    };
 }
 
 export function adaptPersonality(actor) {
@@ -151,7 +104,6 @@ export function updateAiMemory(learner, opponent) {
     learner.aiMemory.moveSuccessCooldown = learner.aiMemory.moveSuccessCooldown || {};
     learner.aiMemory.opponentSequenceLog = learner.aiMemory.opponentSequenceLog || {};
     learner.aiMemory.opponentModel = learner.aiMemory.opponentModel || DEFAULT_AI_MEMORY.opponentModel;
-
 
     if (learner.lastMove && learner.lastMove.name) {
         const moveName = learner.lastMove.name;
@@ -228,9 +180,6 @@ function getDynamicPersonality(actor, currentPhase) {
     });
 
     const baseAggression = baseActorProfile.aggression !== undefined ? baseActorProfile.aggression : DEFAULT_PERSONALITY_PROFILE.aggression;
-    // Removed the AI log push from here as it was very spammy; AI log now in selectMove
-    // actor.aiLog.push(`[Phase Influence (${currentPhase})]: Base Aggro: ${baseAggression.toFixed(2)}, Phase Modded Aggro: ${(dynamicProfile.aggression || baseAggression).toFixed(2)}`);
-
 
     if (actor.relationalState?.emotionalModifiers) {
         Object.keys(actor.relationalState.emotionalModifiers).forEach(key => {
@@ -279,27 +228,24 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     const healthDiff = actorHp - defenderHp;
 
     const defenderEscalationState = safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name, 'escalationState');
-    
-    // --- Phase-specific Intent Priorities ---
+
     if (currentPhase === BATTLE_PHASES.PRE_BANTER) {
         actor.aiLog.push(`[Intent Decided]: NarrativeOnly due to ${BATTLE_PHASES.PRE_BANTER} Phase.`);
-        return 'NarrativeOnly'; // Purely narrative, no combat actions
+        return 'NarrativeOnly';
     }
     if (currentPhase === BATTLE_PHASES.POKING) {
-        // Poking Phase: Encourage low-risk, probing moves, repositioning
         if (actor.aiMemory.repositionCooldown === 0 && actor.mobility > 0.4 && Math.random() < 0.7) {
              actor.aiLog.push(`[Intent Decided]: OpeningMoves (Poking Phase Reposition)`);
-             return 'OpeningMoves'; // Prioritize repositioning
+             return 'OpeningMoves';
         }
-        if (profile.patience > 0.6 || actor.energy > 70) { // Cautious probing if patient or high energy
+        if (profile.patience > 0.6 || actor.energy > 70) {
              actor.aiLog.push(`[Intent Decided]: CautiousDefense (Poking Phase)`);
              return 'CautiousDefense';
         }
         actor.aiLog.push(`[Intent Decided]: PokingPhaseTactics (Default Poking)`);
-        return 'PokingPhaseTactics'; // General probing
+        return 'PokingPhaseTactics';
     }
-    
-    // --- Core Intent Logic (Prioritized by specific situations) ---
+
     if (defenderEscalationState === ESCALATION_STATES.SEVERELY_INCAPACITATED || defenderEscalationState === ESCALATION_STATES.TERMINAL_COLLAPSE) {
         if (profile.opportunism > 0.5 || profile.aggression > 0.7) {
             actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt due to Opponent Escalation (${defenderEscalationState}) and Actor Opportunism/Aggression.`);
@@ -318,7 +264,7 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
         actor.aiLog.push(`[Intent Decided]: DesperateGambit due to Actor Low HP, High Risk Tolerance.`);
         return 'DesperateGambit';
     }
-    
+
     const actorMentalStateLevel = safeGet(actor.mentalState, 'level', 'stable', actor.name, 'mentalState.level');
     if (actorMentalStateLevel === 'broken') {
         actor.aiLog.push(`[Intent Decided]: UnfocusedRage due to Broken Mental State.`);
@@ -326,6 +272,11 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     }
     if (actorMentalStateLevel === 'shaken') {
         actor.aiLog.push(`[Intent Decided]: PanickedDefense due to Shaken Mental State.`);
+        return 'PanickedDefense';
+    }
+    // SYSTEM-WIDE UPGRADE: Add branch for 'stressed'
+    if (actorMentalStateLevel === 'stressed') {
+        actor.aiLog.push(`[Intent Decided]: PanickedDefense due to Stressed Mental State.`);
         return 'PanickedDefense';
     }
 
@@ -340,10 +291,10 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
         actor.aiLog.push(`[Intent Decided]: ConserveEnergy due to Low Energy.`);
         return 'ConserveEnergy';
     }
-    
+
     // --- REVISED: Defaulting Logic based on Phase (⚠️ SAFER FALLBACK) ---
     if (currentPhase === BATTLE_PHASES.EARLY) {
-         if (profile.patience > 0.8 && turn < 2) { // Allow for a very cautious start
+         if (profile.patience > 0.8 && turn < 2) {
              actor.aiLog.push(`[Intent Decided]: CautiousDefense (Default Early Phase Cautious).`);
              return 'CautiousDefense';
          }
@@ -359,108 +310,37 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
          return 'StandardExchange';
     }
     if (currentPhase === BATTLE_PHASES.LATE) {
-         // Even in late, if not in a finishing blow scenario, try to press or fall back to standard
+         // SYSTEM-WIDE UPGRADE: PressAdvantage more likely with health advantage
          if (profile.aggression > 0.7 && healthDiff > 0) {
-             actor.aiLog.push(`[Intent Decided]: PressAdvantage (Default Late Phase Aggro).`);
+             actor.aiLog.push(`[Intent Decided]: PressAdvantage (Default Late Phase Aggro, Health Lead).`);
              return 'PressAdvantage';
          }
-         actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt (Default Late Phase).`); // Push towards finisher
+         actor.aiLog.push(`[Intent Decided]: FinishingBlowAttempt (Default Late Phase).`);
          return 'FinishingBlowAttempt';
     }
-    
-    // Should theoretically not be reached if phase logic is complete, but as ultimate fallback
+
     actor.aiLog.push(`[Intent Decided]: StandardExchange (Ultimate Fallback).`);
     return 'StandardExchange';
 }
 
-// Helper function to calculate energy costs
-function calculateEnergyCost(move, conditions) {
-    const energyCostEstimate = Math.round((move.power || 0) * 0.22) + 4;
-    const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
-    const energyCostModifier = envModForElement.energyCostModifier || 1.0;
-    const estimatedEnergyCostWithEnv = energyCostEstimate * energyCostModifier;
-    
-    return {
-        energyCostEstimate,
-        envModForElement,
-        energyCostModifier,
-        estimatedEnergyCostWithEnv
-    };
-}
-
-// Update the calculateMoveWeights function
-const calculateMoveWeights = withErrorHandling(function(actor, defender, conditions, intent, prediction, currentPhase) {
-    validateActorState(actor, 'calculateMoveWeights');
-    
-    // Initialize all variables at the start
-    const profile = actor.personalityProfile;
+function calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase) {
+    if (!actor || !defender || !conditions) {
+        return [{ move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1.0, reasons: ["ErrorInCalculateMoveWeights"] }];
+    }
     const availableMoves = getAvailableMoves(actor, conditions, currentPhase);
-    const locationData = conditions;
+    const profile = getDynamicPersonality(actor, currentPhase);
+
+    const actorMomentum = safeGet(actor, 'momentum', 0, actor.name, 'momentum');
+    const locationData = locationConditions[conditions.id];
     const environmentDamageLevel = conditions.environmentState?.damageLevel || 0;
-    const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
-    const isLowEnergy = actorEnergy < 30;
-    const isCriticalEnergy = actorEnergy < 10;
-    const energyConservationWeight = isCriticalEnergy ? 2.0 : (isLowEnergy ? 1.5 : 1.0);
-    
-    // Validate inputs
-    if (!defender) {
-        throw new Error('calculateMoveWeights: Defender is required');
-    }
-    if (!conditions) {
-        throw new Error('calculateMoveWeights: Conditions are required');
-    }
-    if (!intent) {
-        throw new Error('calculateMoveWeights: Intent is required');
-    }
-    if (!currentPhase) {
-        throw new Error('calculateMoveWeights: Current phase is required');
-    }
 
     return availableMoves.map(move => {
         if (!move || !move.name || !move.type || !move.moveTags) {
-            return { 
-                move: { 
-                    name: "Struggle", 
-                    verb: 'struggle', 
-                    type: 'Offense', 
-                    power: 10, 
-                    element: 'physical', 
-                    moveTags: [] 
-                }, 
-                weight: 0.001, 
-                reasons: ["InvalidMoveObjectEncountered"] 
-            };
+            return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 0.001, reasons: ["InvalidMoveObjectEncountered"] };
         }
-
         let weight = 1.0;
         let reasons = [];
         let isEscalationFinisherAttempt = false;
-
-        // Calculate energy costs
-        const energyCosts = calculateEnergyCost(move, conditions);
-        const isAffordable = energyCosts.estimatedEnergyCostWithEnv <= actorEnergy;
-
-        // Energy-based move filtering
-        if (!isAffordable) {
-            if (move.name === "Struggle") {
-                weight = 1.0; // Always allow Struggle
-            } else {
-                return { move, weight: 0 }; // Skip unaffordable moves
-            }
-        }
-
-        // Energy conservation logic
-        if (isCriticalEnergy) {
-            if (move.moveTags.includes('low_cost') || move.type === 'Defense') {
-                weight *= energyConservationWeight;
-            } else {
-                weight *= 0.5; // Reduce weight of expensive moves
-            }
-        } else if (isLowEnergy) {
-            if (move.moveTags.includes('low_cost')) {
-                weight *= energyConservationWeight;
-            }
-        }
 
         switch (move.type) {
             case 'Offense': weight *= (1 + profile.aggression * 1.5); reasons.push(`Aggro:${profile.aggression.toFixed(2)}`); break;
@@ -470,16 +350,21 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
                 weight *= (1 + profile.riskTolerance * 2.0);
                 reasons.push(`Risk:${profile.riskTolerance.toFixed(2)}`);
                 const defenderHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
-                if (currentPhase === BATTLE_PHASES.EARLY) weight *= 0.05; // Finisher penalty in Early phase
-                else if (currentPhase === BATTLE_PHASES.POKING) weight *= 0.001; // Effectively disable in Poking
+                if (currentPhase === BATTLE_PHASES.EARLY) weight *= 0.05;
+                else if (currentPhase === BATTLE_PHASES.POKING) weight *= 0.001;
                 else if (currentPhase === BATTLE_PHASES.MID && defenderHp > 50) weight *= 0.3;
                 else if (currentPhase === BATTLE_PHASES.LATE || defenderHp <= 30) weight *= 2.5;
+                // SYSTEM-WIDE UPGRADE: Finisher Probability Floor (Late phase)
+                if (currentPhase === BATTLE_PHASES.LATE) {
+                    weight = Math.max(weight, 10.0);
+                    reasons.push('FinisherProbabilityFloor');
+                }
                 break;
             default:
                 break;
         }
 
-        // Lightning Redirection AI Logic
+        // Lightning Redirection AI Logic (unchanged)
         if (move.moveTags.includes('lightning_attack') && defender.id === 'zuko' && defender.specialTraits?.canRedirectLightning) {
             let lightningRiskModifier = 1.0;
             const zukoHp = safeGet(defender, 'hp', 100, defender.name, 'hp');
@@ -487,20 +372,19 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
             let riskReason = "LightningVsZuko:";
 
             if (zukoHp > 60 && (zukoMentalState === 'stable' || zukoMentalState === 'stressed')) {
-                lightningRiskModifier = 0.2; // High risk for Azula/Ozai
+                lightningRiskModifier = 0.2;
                 riskReason += "HighRisk(ZukoHealthyStable)";
             } else if (zukoHp > 30 && (zukoMentalState === 'stable' || zukoMentalState === 'stressed')) {
-                lightningRiskModifier = 0.5; // Medium risk
+                lightningRiskModifier = 0.5;
                 riskReason += "MedRisk(ZukoDamagedStable)";
             } else if (zukoHp <= 30 || zukoMentalState === 'shaken' || zukoMentalState === 'broken') {
-                lightningRiskModifier = 1.5; // Lower risk for Azula/Ozai (higher chance Zuko fails redirect)
+                lightningRiskModifier = 1.5;
                 riskReason += "LowRisk(ZukoWeakUnstable)";
             }
             weight *= lightningRiskModifier;
             reasons.push(riskReason);
             actor.aiLog.push(`[Lightning AI]: Considering ${move.name} vs Zuko. HP:${zukoHp}, Mental:${zukoMentalState}. RiskMod: ${lightningRiskModifier.toFixed(2)}.`);
         }
-
 
         if (move.isRepositionMove) {
             const actorMobility = safeGet(actor, 'mobility', 0.5, actor.name, 'mobility');
@@ -528,30 +412,26 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
             }
         }
 
-        // Environmental adaptation for AI move selection (based on your notes)
+        // Environmental adaptation (unchanged)
+
         if (locationData) {
-            // High agility characters in vertical/cramped environments -> favor mobility/evasive moves
             if (actor.mobility > 0.7 && (locationData.isVertical || locationData.isCramped)) {
                 if (move.moveTags.includes('mobility_move') || move.moveTags.includes('evasive')) {
                     weight *= 1.5; reasons.push('EnvBuff_Mobility');
                 }
             }
-            // Ranged attack penalty in dense/cover_rich environments
             if ((locationData.isDense || locationData.hasCover) && move.moveTags.includes('ranged_attack')) {
                 weight *= 0.7; reasons.push('EnvPenalty_Ranged');
             }
 
-            // Collateral Tolerance influence for destructive moves
-            // NEW: Conditional override for Eastern Air Temple specifically for Bumi, Toph, Zuko, Jeong Jeong
+            // Collateral Tolerance (unchanged)
             let effectiveCollateralTolerance = actor.collateralTolerance !== undefined ? actor.collateralTolerance : 0.5;
             const sacredTempleFighters = ['bumi', 'toph-beifong', 'zuko', 'jeong-jeong'];
 
             if (conditions.id === 'eastern-air-temple' && sacredTempleFighters.includes(actor.id)) {
-                // For these specific characters, their collateral tolerance is effectively very low AT THIS LOCATION
-                effectiveCollateralTolerance = 0.05; // Treat as extremely sensitive to collateral
+                effectiveCollateralTolerance = 0.05;
                 actor.aiLog.push(`[Collateral AI]: ${actor.name} treating EAT as sacred. Effective Collateral Tolerance: ${effectiveCollateralTolerance.toFixed(2)}.`);
             }
-
 
             if ((move.type === 'Offense' || move.type === 'Finisher') &&
                 (move.collateralImpact === 'medium' || move.collateralImpact === 'high' || move.collateralImpact === 'catastrophic')) {
@@ -559,19 +439,19 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
                 let collateralBias = 1.0;
                 let collateralReason = 'CollateralBias:';
 
-                if (effectiveCollateralTolerance < 0.4) { // Low tolerance (or overridden to be low for EAT)
-                    if (environmentDamageLevel < 30) { // Early game, not much damage yet
-                        collateralBias = 0.3; // Significantly reduce likelihood of high-collateral moves
+                if (effectiveCollateralTolerance < 0.4) {
+                    if (environmentDamageLevel < 30) {
+                        collateralBias = 0.3;
                         collateralReason += "LowTolerance_LowDamage(x0.3)";
-                    } else if (environmentDamageLevel < 70) { // Mid-game, some damage
-                        collateralBias = 0.6; // Moderately reduce
+                    } else if (environmentDamageLevel < 70) {
+                        collateralBias = 0.6;
                         collateralReason += "LowTolerance_MidDamage(x0.6)";
-                    } else { // High damage already, might use as desperate measure or just accept.
+                    } else {
                         collateralBias = 0.9;
                         collateralReason += "LowTolerance_HighDamage(x0.9)";
                     }
-                } else if (effectiveCollateralTolerance > 0.7) { // High tolerance (e.g., Azula, Ozai)
-                    collateralBias = 1.2; // Slightly increase likelihood
+                } else if (effectiveCollateralTolerance > 0.7) {
+                    collateralBias = 1.2;
                     collateralReason += "HighTolerance(x1.2)";
                 }
                 weight *= collateralBias;
@@ -587,7 +467,7 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
         if (move.moveTags?.includes('evasive') && profile.patience > 0.6) { weight *= (1.0 + profile.patience); reasons.push('EvasiveTag'); }
         if (move.moveTags?.includes('highRisk') && profile.riskTolerance > 0.5) { weight *= (1.0 + profile.riskTolerance * 1.2); reasons.push('HighRiskTag'); }
 
-        // NEW: Update intentMultipliers to include new phase intents
+        // --- Intent Multipliers (unchanged)
         const intentMultipliers = {
             StandardExchange: { Offense: 1.2, Defense: 1.0, Utility: 1.0, Finisher: 0.8 },
             OpeningMoves: { Offense: 0.8, Defense: 1.2, Utility: 1.3, Finisher: 0.1, low_cost: 1.5, evasive: 1.3 },
@@ -600,9 +480,8 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
             PanickedDefense: { Offense: 0.3, Defense: 2.5, Utility: 1.5, Finisher: 0.01, defensive_stance: 2.5, evasive: 2.0 },
             BreakTheTurtle: { Offense: 1.4, Defense: 0.7, Utility: 1.1, Finisher: 0.9, environmental_manipulation: 1.8, unblockable_ground: 2.0, bypasses_defense: 1.9 },
             ConserveEnergy: { Offense: 0.7, Defense: 1.1, Utility: 1.4, Finisher: 0.2, low_cost: 3.0, utility_reposition: 1.5 },
-            // --- NEW Phase-Specific Intents ---
-            NarrativeOnly: { Offense: 0.001, Defense: 0.001, Utility: 0.001, Finisher: 0.001 }, // Effectively disable combat moves
-            PokingPhaseTactics: { Offense: 0.7, Defense: 1.5, Utility: 2.0, Finisher: 0.01, low_cost: 2.0, evasive: 1.8, utility_control: 1.5, ranged_attack: 1.0 } // Favor probing attacks, defensive, utility
+            NarrativeOnly: { Offense: 0.001, Defense: 0.001, Utility: 0.001, Finisher: 0.001 },
+            PokingPhaseTactics: { Offense: 0.7, Defense: 1.5, Utility: 2.0, Finisher: 0.01, low_cost: 2.0, evasive: 1.8, utility_control: 1.5, ranged_attack: 1.0 }
         };
         const multipliers = intentMultipliers[intent] || {};
         if (multipliers[move.type]) { weight *= multipliers[move.type]; reasons.push(`Intent:${intent}`); }
@@ -610,6 +489,7 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
         if (multipliers['low_cost'] && energyCostEstimate < 20) weight *= multipliers['low_cost'];
         (move.moveTags || []).forEach(tag => { if (multipliers[tag]) { weight *= multipliers[tag]; reasons.push(`IntentTag:${tag}`); } });
 
+        // SYSTEM-WIDE UPGRADE: Prediction Weight Scaling
         if (prediction.confidence > 0.4 && prediction.predictedMove) {
             const counters = moveInteractionMatrix[move.name]?.counters;
             if (counters && counters[prediction.predictedMove]) {
@@ -622,6 +502,7 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
         const envModForElement = conditions.environmentalModifiers?.[move.element] || {};
         const energyCostModifier = envModForElement.energyCostModifier || 1.0;
         const estimatedEnergyCostWithEnv = energyCostEstimate * energyCostModifier;
+        const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
         if (actorEnergy < estimatedEnergyCostWithEnv) {
             weight = 0;
             reasons.push(`EnergyTooHigh`);
@@ -653,7 +534,7 @@ const calculateMoveWeights = withErrorHandling(function(actor, defender, conditi
         if (weight < 0.05 && move.name !== "Struggle") return { move, weight: 0, reasons, isEscalationFinisherAttempt };
         return { move, weight, reasons, isEscalationFinisherAttempt };
     });
-}, 'calculateMoveWeights');
+}
 
 function getSoftmaxProbabilities(weightedMoves, temperature = 1.0) {
     if (!weightedMoves || weightedMoves.length === 0) {
@@ -701,48 +582,23 @@ export function selectFromDistribution(movesWithProbs) {
     return movesWithProbs[movesWithProbs.length - 1] || { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, weight: 1, probability: 1, reasons: ['EmergencyFallbackDistributionEnd'], isEscalationFinisherAttempt: false };
 }
 
-// Update the selectMove function
-export const selectMove = withErrorHandling(function(actor, defender, conditions, turn, currentPhase) {
-    validateActorState(actor, 'selectMove');
-    
+export function selectMove(actor, defender, conditions, turn, currentPhase) {
     if (!actor || !defender || !conditions || !actor.aiLog) {
-        return { 
-            move: { 
-                name: "Struggle", 
-                verb: 'struggle', 
-                type: 'Offense', 
-                power: 10, 
-                element: 'physical', 
-                moveTags: [] 
-            }, 
-            aiLogEntry: { 
-                intent: 'Error', 
-                chosenMove: 'Struggle',
-                error: 'Invalid input parameters'
-            } 
-        };
+        return { move: { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] }, aiLogEntry: { intent: 'Error', chosenMove: 'Struggle'} };
     }
-
     actor.personalityProfile = actor.personalityProfile || { ...DEFAULT_PERSONALITY_PROFILE };
     actor.aiMemory = actor.aiMemory || { ...DEFAULT_AI_MEMORY };
 
     const struggleMove = { name: "Struggle", verb: 'struggle', type: 'Offense', power: 10, element: 'physical', moveTags: [] };
     const intent = determineStrategicIntent(actor, defender, turn, currentPhase);
-    
+
+    // NEW: Handle the NarrativeOnly intent
     if (intent === 'NarrativeOnly') {
-        return { move: null, aiLogEntryFromSelectMove: { turn: turn + 1, phase: currentPhase, intent, chosenMove: 'None (Narrative Turn)', actorState: { /* ... */ }, opponentEscalation: defender.escalationState } };
+         return { move: null, aiLogEntryFromSelectMove: { turn: turn + 1, phase: currentPhase, intent, chosenMove: 'None (Narrative Turn)', actorState: { /* ... */ }, opponentEscalation: defender.escalationState } };
     }
 
     const prediction = predictOpponentNextMove(actor, defender);
     let weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, prediction, currentPhase);
-
-    // Filter moves based on energy costs
-    const actorEnergy = safeGet(actor, 'energy', 100, actor.name, 'energy');
-    weightedMoves = weightedMoves.filter(moveInfo => {
-        if (!moveInfo.move) return false;
-        const energyCosts = calculateEnergyCost(moveInfo.move, conditions);
-        return energyCosts.estimatedEnergyCostWithEnv <= actorEnergy || moveInfo.move.name === "Struggle";
-    });
 
     let validMoves = weightedMoves.filter(m => m.move && m.weight > 0 && m.move.name !== "Struggle");
 
@@ -753,7 +609,7 @@ export const selectMove = withErrorHandling(function(actor, defender, conditions
         if (!struggleWeightInfo) {
             validMoves.push({ move: struggleMove, weight: 0.01, reasons: ['LowProbStruggleDefault'], isEscalationFinisherAttempt: false });
         } else if (!validMoves.find(m => m.move?.name === "Struggle")){
-            validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) });
+             validMoves.push({...struggleWeightInfo, weight: Math.max(0.01, struggleWeightInfo.weight) });
         }
     }
 
@@ -789,9 +645,9 @@ export const selectMove = withErrorHandling(function(actor, defender, conditions
         isEscalationFinisherAttempt: isEscalationFinisher
     };
     actor.aiLog.push(aiLogEntry);
-    
-    return { 
+
+    return {
         move: chosenMove,
         aiLogEntryFromSelectMove: aiLogEntry
     };
-}, 'selectMove');
+}

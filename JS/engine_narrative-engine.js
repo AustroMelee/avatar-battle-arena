@@ -17,6 +17,7 @@ import { getRandomElement } from './engine_battle-engine-core.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
 import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { NarrativeStringBuilder } from './utils_narrative-string-builder.js';
+import { locations } from '../locations.js'; // NEW: Import locations for env data
 
 // --- ARCHETYPE DATA IMPORTS ---
 import { aangArchetypeData } from './data_archetype_aang.js';
@@ -48,6 +49,28 @@ const archetypeDataMap = {
     // Add other character IDs and their archetype data here
 };
 // --- END ARCHETYPE DATA IMPORTS ---
+
+function getEnvironmentImpactLine(locationId, moveType = null, moveElement = null) {
+    const loc = locations[locationId];
+    if (!loc || !loc.envImpactVariants) return "";
+
+    const baseVariants = loc.envImpactVariants;
+    let chosenVariant = getRandomElement(baseVariants);
+
+    // Optional: Tag-Driven Line Selection
+    if (moveType && moveElement && loc.envTags) {
+        // Example: Water move in desert location
+        if (moveElement === 'water' && loc.envTags.includes('desert')) {
+            const specialLine = "Desperate for moisture, every drop of water vanishes before it can hit the sand.";
+            if (Math.random() < 0.3) { // 30% chance for rare line
+                chosenVariant = specialLine;
+            }
+        }
+        // Add more tag-driven conditions as needed
+    }
+
+    return chosenVariant;
+}
 
 export function substituteTokens(template, primaryActorForContext, secondaryActorForContext, additionalContext = {}) {
     if (typeof template !== 'string') return '';
@@ -365,9 +388,27 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
 
     // Add additional narration for consumed states (Point 5)
     if (result.consumedStateName) {
-        const stateNarrative = consumedStateNarratives[result.consumedStateName] || consumedStateNarratives.default;
-        const text = substituteTokens(stateNarrative.text, actor, defender, { stateName: result.consumedStateName, targetId: defender.id });
-        const html = substituteTokens(stateNarrative.html, actor, defender, { stateName: result.consumedStateName, targetId: defender.id });
+        // Pseudocode
+        const stateData = consumedStateNarratives[result.consumedStateName] || consumedStateNarratives.default;
+
+        // Character override
+        const charId = actor.id;
+        const numBuffsConsumed = result.numBuffsConsumed || 1; // Assuming this is passed or defaults to 1
+        const isChain = (numBuffsConsumed > 1);
+
+        let narrativeBlock = stateData;
+        if (typeof stateData === "object" && stateData[charId]) {
+            narrativeBlock = stateData[charId];
+        }
+
+        // If it's a chain (multiple buffs consumed at once)
+        if (isChain && narrativeBlock.chain) {
+            narrativeBlock = narrativeBlock.chain;
+        }
+
+        const text = substituteTokens(narrativeBlock.text, actor, defender, { stateName: result.consumedStateName, targetId: defender.id, numBuffsConsumed: numBuffsConsumed });
+        const html = substituteTokens(narrativeBlock.html, actor, defender, { stateName: result.consumedStateName, targetId: defender.id, numBuffsConsumed: numBuffsConsumed });
+
         return {
             ...moveAction,
             additionalEvents: [{
@@ -496,19 +537,50 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
 
 
 export function generateTurnNarrationObjects(narrativeEventsForAction, move, actor, defender, result, environmentState, locationData, currentPhase, isPreBattle, aiLogEntry, battleState) {
-    let narrationObjects = [];
+    const narrationObjects = [];
 
-    // 1. Process specific narrative quotes that were triggered (e.g., mental state changes)
+    // 1. Pre-battle narration (if applicable)
+    if (isPreBattle) {
+        const preBattleQuote = findNarrativeQuote(actor, defender, 'battleStart', locationData.id, { locationId: locationData.id, currentPhaseKey: currentPhase });
+        if (preBattleQuote) {
+            narrationObjects.push(formatQuoteEvent(preBattleQuote, actor, defender, { battleState, move, result }));
+        }
+    }
+
+    // 2. Process specific narrative quotes that were triggered (e.g., mental state changes)
     if (narrativeEventsForAction && narrativeEventsForAction.length > 0) {
         narrationObjects.push(...narrativeEventsForAction.map(event => formatQuoteEvent(event.quote, event.actor, defender, { battleState, move, result })));
     }
 
-    // 2. Generate the primary action description for the move itself
+    // 3. Generate the primary action description for the move itself
     if (move && result && !isPreBattle) {
         const actionDescription = generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry);
-        narrationObjects.push(actionDescription);
+        
+        // NEW: Get environmental impact line and append it
+        const envImpactLine = getEnvironmentImpactLine(locationData.id, move.type, move.element);
 
-        // NEW: Add narrative based on move outcome (after action description)
+        if (actionDescription.narration) {
+            const fullActionLine = `${actionDescription.narration}${envImpactLine ? ` ${envImpactLine}` : ''}`;
+            narrationObjects.push({
+                type: 'action',
+                line: fullActionLine,
+                metadata: actionDescription.metadata
+            });
+
+            // DEBUG LOG (Optional, for development only)
+            if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+                console.log("--- Narrative Debug Log ---");
+                console.log(`Location: ${locationData.name} (ID: ${locationData.id})`);
+                console.log(`Environmental Impact Line: "${envImpactLine}"`);
+                console.log(`Full Action Narration: "${fullActionLine}"`);
+                if (result.consumedStateName) {
+                    console.log(`Consumed State: ${result.consumedStateName} (Buffs Consumed: ${result.numBuffsConsumed || 1})`);
+                }
+                console.log("---------------------------");
+            }
+        }
+
+        // Add narrative based on move outcome (after action description)
         const narrativeContext = { move, result, battleState, currentPhase };
 
         // Character reaction to their own move's effectiveness
@@ -564,7 +636,7 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
         }
     }
     
-    // 3. (Future) Add narration for reactions or other tertiary events if needed.
+    // 4. (Future) Add narration for reactions or other tertiary events if needed.
 
     return narrationObjects;
 }
