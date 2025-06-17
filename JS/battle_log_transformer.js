@@ -180,6 +180,7 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
 }
 
 export function transformEventsToHtmlLog(structuredLogEvents) {
+    console.log("[DEBUG] transformEventsToHtmlLog: structuredLogEvents received:", structuredLogEvents);
     if (!structuredLogEvents || !Array.isArray(structuredLogEvents)) {
         return "<p>Error: Battle log data is corrupted or unavailable.</p>";
     }
@@ -211,6 +212,23 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                 .replace('{phaseContent}', phaseHeaderHtml);
             isPhaseDivOpen = true;
 
+        } else if (event.type === 'turn_marker') { // NEW: Handle turn marker events specifically
+            let contentToAppend = `<div class="turn-marker">
+                <div class="turn-marker-portrait">
+                    <img src="${event.portrait}" alt="${event.characterName} portrait">
+                </div>
+                <div class="turn-marker-info">
+                    <span class="turn-number">Turn ${event.turn}</span>
+                    <span class="character-name-turn">${event.characterName}</span>
+                </div>
+            </div>`;
+            if (isPhaseDivOpen) {
+                htmlLog = htmlLog.slice(0, -6); // Remove closing </div>
+                htmlLog += contentToAppend + `</div>`; // Add new content and re-close
+            } else {
+                htmlLog += contentToAppend;
+            }
+            console.log("[DEBUG] turn_marker event processed:", event);
         } else if (htmlContentForEvent) {
              // If html_content is directly provided (like for escalation or curbstomp), use it
             if (isPhaseDivOpen) {
@@ -223,17 +241,6 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
             // Fallback for events that might only have `text` and not pre-formatted `html_content`
             let contentToAppend = "";
             switch (event.type) {
-                case 'turn_marker': // NEW: Handle turn marker events with portraits
-                    contentToAppend = `<div class="turn-marker">
-                        <div class="turn-marker-portrait">
-                            <img src="${event.portrait}" alt="${event.characterName} portrait">
-                        </div>
-                        <div class="turn-marker-info">
-                            <span class="turn-number">Turn ${event.turn}</span>
-                            <span class="character-name-turn">${event.characterName}</span>
-                        </div>
-                    </div>`;
-                    break;
                 case 'battle_end_ko_event':
                     contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${textContent}</p>`;
                     break;
