@@ -184,7 +184,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             continue;
         }
 
-        const result = calculateMove(move, currentAttacker, currentDefender, currentBattleState.locationConditions, battleEventLog, currentBattleState.environmentState, locId, modifyMomentum);
+        const result = calculateMove(move, currentAttacker, currentDefender, currentBattleState.locationConditions, battleEventLog, currentBattleState.environmentState, locId, modifyMomentum, currentBattleState);
         
         // Apply all effects from the move result
         result.effects.forEach(effect => {
