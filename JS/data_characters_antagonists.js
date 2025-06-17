@@ -9,7 +9,7 @@
 export const antagonistCharacters = {
     'azula': {
         id: 'azula', name: "Azula", type: "Bender", element: "fire", pronouns: { s: 'she', p: 'her', o: 'her' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/1/12/Azula.png',
+        imageUrl: 'img/img_azula.avif',
         victoryStyle: "Ruthless", powerTier: 8,
         faction: "FireNation",
         isInsane: false,

@@ -11,7 +11,7 @@
 export const gaangCharacters = {
     'aang-airbending-only': {
         id: 'aang-airbending-only', name: "Aang (Airbending only)", type: "Bender", element: "air", pronouns: { s: 'he', p: 'his', o: 'him' },
-        imageUrl: 'https://static.wikia.nocookie.net/avatar/images/a/ae/Aang_at_Jasmine_Dragon.png',
+        imageUrl: 'img/img_aang.avif',
         victoryStyle: "Pacifist", powerTier: 9,
         faction: "AirNomad",
         personalityProfile: {
