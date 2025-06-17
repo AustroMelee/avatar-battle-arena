@@ -7,7 +7,7 @@
 import { conjugatePresent, getEmojiForMoveType, postBattleVictoryPhrases, consumedStateNarratives } from './narrative-flavor.js';
 import { effectivenessLevels } from './move-interaction-matrix.js';
 import { escalationStateNarratives } from './data_narrative_escalation.js';
-import { phaseTemplates } from './data_narrative_phases.js';
+import { phaseTemplates, battlePhases } from './data_narrative_phases.js';
 
 import { locationConditions } from './location-battle-conditions.js';
 import { characters as characterData } from './data_characters.js';
@@ -16,7 +16,6 @@ import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { NarrativeStringBuilder } from './utils_narrative-string-builder.js';
 import { locations } from './locations.js';
 import { generateLogEvent } from './engine_battle-engine-core.js';
-import { battlePhases } from './engine_battle-phase.js'; // Import battlePhases
 import { findNarrativeQuote } from './data_narrative_collateral.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
