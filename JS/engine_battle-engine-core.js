@@ -22,7 +22,7 @@ import { applyEffect } from './engine_effect_application.js';
 import { selectMove, updateAiMemory, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
-import { generateTurnNarrationObjects, findNarrativeQuote, generateCurbstompNarration, generateEscalationNarrative } from './engine_narrative-engine.js';
+import { generateTurnNarrationObjects, findNarrativeQuote, generateCurbstompNarration, generateEscalationNarrative, generateEnvironmentalSummaryEvent } from './engine_narrative-engine.js';
 import { modifyMomentum } from './engine_momentum.js';
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
 import { setSeed, seededRandom, getRandomElementSeeded } from './utils_seeded_random.js';
@@ -137,104 +137,114 @@ currentAttacker.currentTurn = turn;
 currentDefender.currentTurn = turn;
 
 // Phase Transition Check
- if (checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, locId)) {
-      // Generate phase transition narration
-      const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
-      if (currentPhaseInfo) {
-         battleEventLog.push(generateLogEvent(currentBattleState, { type: 'phase_header_event', phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji, phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`, html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji) }));
-         const quote1 = findNarrativeQuote(currentAttacker, currentDefender, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
-         if (quote1) battleEventLog.push(...generateTurnNarrationObjects([{ quote: quote1, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, true, null, currentBattleState));
-         const quote2 = findNarrativeQuote(currentDefender, currentAttacker, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
-         if (quote2) battleEventLog.push(...generateTurnNarrationObjects([{ quote: quote2, actor: currentDefender }], null, currentDefender, currentAttacker, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, true, null, currentBattleState));
-     }
- }
- currentBattleState.currentPhase = phaseState.currentPhase;
+if (checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, locId)) {
+    // Reset environmental impact counters for the new phase
+    currentBattleState.environmentState.environmentalImpactCount = 0;
+    currentBattleState.environmentState.environmentalImpactsThisPhase = [];
 
- // Turn Start Marker
- const turnSpecificEventsForLog = [generateLogEvent(currentBattleState, { type: 'turn_marker', actorId: currentAttacker.id, characterName: currentAttacker.name, turn: turn + 1, portrait: currentAttacker.portrait })];
+    // Generate phase transition narration
+    const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
+    if (currentPhaseInfo) {
+        battleEventLog.push(generateLogEvent(currentBattleState, { type: 'phase_header_event', phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji, phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`, html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji) }));
+        const quote1 = findNarrativeQuote(currentAttacker, currentDefender, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+        if (quote1) battleEventLog.push(...generateTurnNarrationObjects([{ quote: quote1, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, true, null, currentBattleState));
+        const quote2 = findNarrativeQuote(currentDefender, currentAttacker, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+        if (quote2) battleEventLog.push(...generateTurnNarrationObjects([{ quote: quote2, actor: currentDefender }], null, currentDefender, currentAttacker, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, true, null, currentBattleState));
+    }
+}
+currentBattleState.currentPhase = phaseState.currentPhase;
 
- // Check for defeat/skip turn conditions
- if (charactersMarkedForDefeat.has(currentAttacker.id) || currentAttacker.stunDuration > 0 || currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
-     if (currentAttacker.stunDuration > 0) {
-         currentAttacker.stunDuration--;
-         if (currentAttacker.stunDuration === 0) currentAttacker.consecutiveStuns = 0;
-         // Removed: currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE; // Stun resistance handled by applyEffect
-         turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} is stunned and unable to move!`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>` }));
-     }
-     if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
-         currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
-         turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'energy_recovery_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} recovers energy.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers energy.</p>` }));
-     }
-     battleEventLog.push(...turnSpecificEventsForLog);
-     [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
-     turn++;
-     continue;
- }
+// Turn Start Marker
+const turnSpecificEventsForLog = [generateLogEvent(currentBattleState, { type: 'turn_marker', actorId: currentAttacker.id, characterName: currentAttacker.name, turn: turn + 1, portrait: currentAttacker.portrait })];
 
- // --- NEW: Manipulation Attempt ---
- const manipulationResult = attemptManipulation(currentAttacker, currentDefender, currentBattleState, battleEventLog);
- if (manipulationResult.success) {
-     battleEventLog.push(generateLogEvent(currentBattleState, { type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration }));
-     // Apply the effect to the defender
-     updateMentalState(currentDefender, currentAttacker, { effectiveness: { label: manipulationResult.effect } }, currentBattleState.environmentState, locId, currentBattleState);
- }
- // --- END NEW ---
+// Check for defeat/skip turn conditions
+if (charactersMarkedForDefeat.has(currentAttacker.id) || currentAttacker.stunDuration > 0 || currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
+    if (currentAttacker.stunDuration > 0) {
+        currentAttacker.stunDuration--;
+        if (currentAttacker.stunDuration === 0) currentAttacker.consecutiveStuns = 0;
+        // Removed: currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE; // Stun resistance handled by applyEffect
+        turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} is stunned and unable to move!`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>` }));
+    }
+    if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
+        currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
+        turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'energy_recovery_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} recovers energy.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers energy.</p>` }));
+    }
+    battleEventLog.push(...turnSpecificEventsForLog);
+    [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
+    turn++;
+    continue;
+}
 
- // AI Action Selection & Resolution
- const aiDecision = selectMove(currentAttacker, currentDefender, currentBattleState.locationConditions, turn, currentBattleState.currentPhase);
- const move = aiDecision.move;
- 
- if (!move) {
-     currentAttacker.aiLog.push("[Action Failed]: AI selected an undefined move.");
-     [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
-     turn++;
-     continue;
- }
+// --- NEW: Manipulation Attempt ---
+const manipulationResult = attemptManipulation(currentAttacker, currentDefender, currentBattleState, battleEventLog);
+if (manipulationResult.success) {
+    battleEventLog.push(generateLogEvent(currentBattleState, { type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration }));
+    // Apply the effect to the defender
+    updateMentalState(currentDefender, currentAttacker, { effectiveness: { label: manipulationResult.effect } }, currentBattleState.environmentState, locId, currentBattleState);
+}
+// --- END NEW ---
 
- // -- CORRECT ARGUMENT ORDER HERE --
- const result = calculateMove(
-     move,
-     currentAttacker,
-     currentDefender,
-     currentBattleState.locationConditions,
-     battleEventLog,
-     currentAttacker.aiLog,
-     currentBattleState.environmentState,
-     locId,
-     modifyMomentum,
-     currentBattleState
- );
- 
- // Apply all effects from the move result
- result.effects.forEach(effect => {
-     applyEffect(effect, currentAttacker, currentDefender, currentBattleState, battleEventLog);
- });
+// AI Action Selection & Resolution
+const aiDecision = selectMove(currentAttacker, currentDefender, currentBattleState.locationConditions, turn, currentBattleState.currentPhase);
+const move = aiDecision.move;
 
- // Narration and State Updates
- turnSpecificEventsForLog.push(...generateTurnNarrationObjects([], {...move, actionVariants: move.actionVariants || []}, currentAttacker, currentDefender, result, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, aiDecision.aiLogEntryFromSelectMove, currentBattleState));
- updateMentalState(currentAttacker, currentDefender, result, currentBattleState.environmentState, locId, currentBattleState);
- updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, currentBattleState.environmentState, locId, currentBattleState);
- 
- // Removed: Direct application of stun, damage, selfDamage, collateralDamage. Now handled by applyEffect.
- // if (result.stunDuration > 0) applyStun(currentDefender, result.stunDuration);
- // if (result.damage > 0) currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
- // if (result.selfDamage > 0) currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
- // if (result.collateralDamage > 0) currentBattleState.environmentState.damageLevel = clamp(currentBattleState.environmentState.damageLevel + result.collateralDamage, 0, 100);
- 
- currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
- currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
- updateAiMemory(currentDefender, currentAttacker);
- updateAiMemory(currentAttacker, currentDefender);
- battleEventLog.push(...turnSpecificEventsForLog);
+if (!move) {
+    currentAttacker.aiLog.push("[Action Failed]: AI selected an undefined move.");
+    [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
+    turn++;
+    continue;
+}
 
- // Check for battle end
- terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
- if (terminalOutcome.battleOver) {
-     battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
- }
+// -- CORRECT ARGUMENT ORDER HERE --
+const result = calculateMove(
+    move,
+    currentAttacker,
+    currentDefender,
+    currentBattleState.locationConditions,
+    battleEventLog,
+    currentAttacker.aiLog,
+    currentBattleState.environmentState,
+    locId,
+    modifyMomentum,
+    currentBattleState
+);
 
- [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
- turn++;
+// Apply all effects from the move result
+result.effects.forEach(effect => {
+    applyEffect(effect, currentAttacker, currentDefender, currentBattleState, battleEventLog);
+});
+
+// Narration and State Updates
+turnSpecificEventsForLog.push(...generateTurnNarrationObjects([], {...move, actionVariants: move.actionVariants || []}, currentAttacker, currentDefender, result, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, aiDecision.aiLogEntryFromSelectMove, currentBattleState));
+updateMentalState(currentAttacker, currentDefender, result, currentBattleState.environmentState, locId, currentBattleState);
+updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, currentBattleState.environmentState, locId, currentBattleState);
+
+// Removed: Direct application of stun, damage, selfDamage, collateralDamage. Now handled by applyEffect.
+// if (result.stunDuration > 0) applyStun(currentDefender, result.stunDuration);
+// if (result.damage > 0) currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
+// if (result.selfDamage > 0) currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
+// if (result.collateralDamage > 0) currentBattleState.environmentState.damageLevel = clamp(currentBattleState.environmentState.damageLevel + result.collateralDamage, 0, 100);
+
+currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
+currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
+updateAiMemory(currentDefender, currentAttacker);
+updateAiMemory(currentAttacker, currentDefender);
+battleEventLog.push(...turnSpecificEventsForLog);
+
+    // Consolidate environmental impacts at the end of the turn if too many occurred
+    const envSummaryEvent = generateEnvironmentalSummaryEvent(currentBattleState, currentBattleState.environmentState, locId);
+    if (envSummaryEvent) {
+        battleEventLog.push(envSummaryEvent);
+    }
+
+// Check for battle end
+terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
+if (terminalOutcome.battleOver) {
+    battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
+}
+
+[currentAttacker, currentDefender] = [currentDefender, currentAttacker];
+turn++;
 
 }
 

@@ -47,6 +47,10 @@
  * @property {string} description - A brief description of the location.
  * @property {string} envDescription - A phrase describing the environment within the location for narrative use.
  * @property {string[]} envImpactVariants - Short phrases describing environmental impacts within this location.
+ * @property {string[]} envImpactInitial - Initial phrases describing environmental impacts within this location.
+ * @property {string[]} envImpactMid - Mid phrases describing environmental impacts within this location.
+ * @property {string[]} envImpactLate - Late phrases describing environmental impacts within this location.
+ * @property {string[]} envImpactCritical - Critical phrases describing environmental impacts within this location.
  * @property {string[]} envTags - An array of tags describing the environment (e.g., 'urban', 'fiery').
  * @property {LocationEnvironmentalModifiers} environmentalModifiers - Modifiers applied to moves based on element or move type.
  * @property {number} fragility - A numerical value representing how easily the environment takes collateral damage.
@@ -66,6 +70,32 @@ export const fireNationCapital = {
         "The plaza shudders as stone fragments fly.",
         "Red banners whip in the sudden blast.",
         "Ash falls softly, settling on the scorched tiles."
+    ],
+    envImpactInitial: [
+        "Dust motes dance in the disturbed air.",
+        "A distant clang echoes through the plaza.",
+        "Minor cracks spiderweb across the nearby paving stones.",
+        "A light breeze picks up, rustling the ceremonial banners."
+    ],
+    envImpactMid: [
+        "Stone fragments scatter across the ground.",
+        "The air crackles with residual energy.",
+        "Deep fissures appear in the plaza's surface.",
+        "Nearby structures groan under the strain.",
+        "The scent of ozone and scorched earth hangs heavy."
+    ],
+    envImpactLate: [
+        "The very ground groans, threatening to collapse.",
+        "Flames lick erratically at nearby pillars, casting dancing shadows.",
+        "Massive chunks of debris are hurled across the arena.",
+        "The air is thick with dust and the stench of destruction.",
+        "The architectural grandeur begins to crumble under the relentless assault."
+    ],
+    envImpactCritical: [
+        "A violent tremor shakes the entire plaza, nearly unbalancing the combatants!",
+        "A section of a nearby building crumbles into dust with a deafening roar!",
+        "The air screams with displaced force, a vortex of elemental power!",
+        "The ground ruptures, molten rock briefly visible beneath the surface before sealing!"
     ],
     envTags: ["urban", "fiery", "volcanic", "stone", "imperial"],
     environmentalModifiers: {
