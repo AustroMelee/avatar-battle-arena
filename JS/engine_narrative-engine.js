@@ -16,6 +16,7 @@ import { characters as characterData } from './data_characters.js';
 import { getRandomElement } from './engine_battle-engine-core.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
 import { BATTLE_PHASES } from './engine_battle-phase.js';
+import { NarrativeStringBuilder } from './utils_narrative-string-builder.js';
 
 // --- ARCHETYPE DATA IMPORTS ---
 import { aangArchetypeData } from './data_archetype_aang.js';
@@ -303,7 +304,6 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
     }
 }
 
-// OLD: export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {})
 export function generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry) {
     if (!actor || !defender) return null;
 
@@ -316,34 +316,18 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
     const moveVerb = conjugatePresent(move.verb || 'acts');
     const moveObject = move.object || 'meaningfully';
 
-    let actionBaseText = `${actorName} ${moveVerb} ${moveObject}`;
-    let htmlBaseText = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject}`;
-
     const effectiveness = result?.effectiveness?.label || 'Normal';
     const effectivenessFlavor = effectivenessLevels[effectiveness]?.flavor || '';
     const effectivenessColor = effectivenessLevels[effectiveness]?.colorClass || '';
 
-    // EFFECTIVENESS PHRASE BUILD
-    let effectivenessPhraseText = "";
-    let effectivenessPhraseHtml = "";
+    // Use the NarrativeStringBuilder to build the core action description
+    const builder = new NarrativeStringBuilder(actor.id, actorName, moveVerb, moveObject, effectivenessLevels);
+    const { actionSentence, htmlSentence } = builder.buildActionDescription(effectiveness, effectivenessFlavor, effectivenessColor);
 
-    if (effectiveness !== 'Normal' && effectiveness !== 'Ineffective') {
-        if (effectivenessFlavor) {
-            effectivenessPhraseText = `${effectivenessFlavor}, hitting with ${effectiveness.toLowerCase()} impact`;
-            effectivenessPhraseHtml = `${effectivenessFlavor}, hitting with <span class="${effectivenessColor}">${effectiveness.toLowerCase()}</span> impact`;
-        } else {
-            effectivenessPhraseText = `hitting with ${effectiveness.toLowerCase()} impact`;
-            effectivenessPhraseHtml = `hitting with <span class="${effectivenessColor}">${effectiveness.toLowerCase()}</span> impact`;
-        }
-    }
+    // Initialize final output strings with the assembled core action sentence and HTML
+    let finalActionText = actionSentence;
+    let finalHtmlContent = htmlSentence;
 
-    // FINAL CONCAT
-    const finalActionText = `${actionBaseText}${effectivenessPhraseText ? `, ${effectivenessPhraseText}` : ''}.`;
-    const finalHtmlContent = `${htmlBaseText}${effectivenessPhraseHtml ? `, ${effectivenessPhraseHtml}` : ''}.</p>`;
-
-    // Initialize final output strings with the core action
-    // Removed the re-initialization as finalActionText and finalHtmlContent are directly built above.
-    
     // Append other details (damage, stun, etc.) as separate paragraphs/lines.
     // Damage/Healing
     if (result.damage > 0) {
