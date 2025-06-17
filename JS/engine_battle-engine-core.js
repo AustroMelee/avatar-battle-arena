@@ -306,6 +306,7 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         techniquesBoilingRock: characterData.techniquesBoilingRock || [],
         quotes: characterData.quotes || {}, // Ensure quotes are copied
         images: characterData.images || {},
+        portrait: characterData.imageUrl || null, // Ensure portrait is set for UI
     };
 }
 
