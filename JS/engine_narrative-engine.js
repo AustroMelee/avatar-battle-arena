@@ -98,63 +98,6 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
         }
     }
     return text;
- }
-
-export function findNarrativeQuote(actor, recipient, type, phase, context) {
-    const archetype = allArchetypes[actor.id]; // Use allArchetypes here
-    if (!archetype || !archetype.quotes) return null;
-
-    if (!actor) return null;
-    const actorArchetypeData = archetypeDataMap[actor.id] || {};
-    const narrativeData = actorArchetypeData.narrative || {};
-
-    let pool = null;
-    const currentPhaseKey = context.currentPhaseKey || 'Generic';
-
-    const lookupPaths = [];
-
-    // Relationship-specific narrative first
-    if (recipient?.id && actor.relationships?.[recipient.id]?.narrative) {
-        const relNarrative = actor.relationships[recipient.id].narrative;
-        if (relNarrative[type]?.[phase]?.Generic) {
-            lookupPaths.push(() => relNarrative[type][phase].Generic);
-        }
-    }
-
-    // Character's general narrative from archetype data
-    if (type === 'battleStart' && context.locationId) {
-        if (actorArchetypeData[recipient.id]?.[context.locationId]?.label) {
-            // This is for the matchup intro, handled by resolveArchetypeLabel
-        } else if (narrativeData[type]?.[currentPhaseKey]) {
-            lookupPaths.push(() => narrativeData[type][currentPhaseKey]);
-        }
-    } else {
-        if (narrativeData[type]?.[phase]?.[currentPhaseKey]) {
-            lookupPaths.push(() => narrativeData[type][phase][currentPhaseKey]);
-        }
-        if (narrativeData[type]?.[phase]?.Generic) {
-            lookupPaths.push(() => narrativeData[type][phase].Generic);
-        }
-    }
-
-    // General trigger fallback
-    if (narrativeData[type]?.general?.Generic) {
-        lookupPaths.push(() => narrativeData[type].general.Generic);
-    }
-
-    for (const getPool of lookupPaths) {
-        pool = getPool();
-        if (pool && Array.isArray(pool) && pool.length > 0) {
-            const selectedElement = getRandomElement(pool);
-            if (selectedElement && typeof selectedElement === 'object' && selectedElement.type && selectedElement.line) {
-                return selectedElement;
-            } else if (typeof selectedElement === 'string') {
-                return { type: 'spoken', line: selectedElement };
-            }
-        }
-    }
-
-    return null;
 }
 
 export function formatQuoteEvent(quote, actor, opponent, context) {
