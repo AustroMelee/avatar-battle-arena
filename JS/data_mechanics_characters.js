@@ -3,6 +3,34 @@
 
 // Refined Curb Stomp Mechanics (v2) for Direct Engine Integration
 
+/**
+ * @typedef {object} CurbstompOutcome
+ * @property {string} type - The type of effect (should map to a value in EFFECT_TYPES).
+ * @property {string} [successMessage] - Message displayed on successful outcome.
+ * @property {string} [failureMessage] - Message displayed on failed outcome (for self-sabotage).
+ * @property {number} [value] - Numeric value for effects like damage increase or evasion.
+ * @property {number} [mercyChance] - Chance for mercy for conditional KO.
+ * @property {number} [selfSabotageChance] - Chance for self-sabotage for conditional KO.
+ * @property {string} [message] - General message for the outcome.
+ */
+
+/**
+ * @typedef {object} CurbstompRule
+ * @property {string} id - Unique identifier for the rule.
+ * @property {string} description - A description of the rule.
+ * @property {number} triggerChance - The probability (0-1) of this rule triggering.
+ * @property {boolean} canTriggerPreBattle - True if this rule can trigger before the main battle loop.
+ * @property {string} severity - The severity or category of the rule ('lethal', 'buff', etc.).
+ * @property {function(object, object, object): boolean} conditionLogic - A function that returns true if the conditions for the rule are met.
+ * @property {CurbstompOutcome} outcome - The effect or outcome of the rule.
+ */
+
+/**
+ * Character-specific curbstomp rules.
+ * These rules define conditions under which a character might achieve an overwhelming victory
+ * or trigger a special pre-battle or in-battle effect.
+ * @type {object.<string, CurbstompRule[]>}
+ */
 export const characterCurbstompRules = {
     'azula': [
         {
@@ -15,7 +43,7 @@ export const characterCurbstompRules = {
                 return !azula.mentalState.isInsane && (opponent.specialTraits?.hasMetalArmor || opponent.specialTraits?.isWet);
             },
             outcome: { 
-                type: "instant_win", 
+                type: "instant_ko", 
                 successMessage: "Azula's lightning strikes with surgical precision, using {targetName}'s armor or the water around them as a fatal conductor.",
             }
         },
@@ -29,7 +57,7 @@ export const characterCurbstompRules = {
                 return !azula.mentalState.isInsane && battleState.isOpenTerrain;
             },
             outcome: { 
-                type: "instant_win", 
+                type: "instant_ko", 
                 successMessage: "Azula conjures a terrifying vortex of blue flame, engulfing and incinerating {targetName}.",
             }
         },
@@ -44,7 +72,7 @@ export const characterCurbstompRules = {
                 return azula.mentalState.level === 'broken'; // simplified from isInsane
             },
             outcome: { 
-                type: "conditional_instant_win_or_self_sabotage", 
+                type: "conditional_ko_or_self_sabotage", 
                 successMessage: "In her madness, Azula unleashes a wild, unpredictable assault that completely overwhelms {targetName}!",
                 selfSabotageMessage: "Azula's attack is powerful but reckless, going awry and leaving her vulnerable."
             }
@@ -56,7 +84,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: true,
             severity: 'buff',
             outcome: { 
-                type: "damage_increase_character", 
+                type: "damage_modifier", 
                 value: 0.25,
                 message: "Azula's blue fire rages with terrifying intensity, burning through standard defenses."
             }
@@ -74,7 +102,7 @@ export const characterCurbstompRules = {
             },
             // Special outcome to reflect Aang's reluctance to kill
             outcome: {
-                type: "conditional_instant_win_or_mercy",
+                type: "conditional_ko_or_mercy",
                 mercyChance: 0.20,
                 successMessage: "Aang's eyes glow with the power of a thousand lifetimes. He unleashes the full power of the Avatar State, overwhelming {targetName} completely.",
                 mercyMessage: "The Avatar State gives Aang the power to win, but at the last moment, his own spirit pulls back, incapacitating but not killing {targetName}."
@@ -87,7 +115,7 @@ export const characterCurbstompRules = {
             canTriggerPreBattle: true,
             severity: 'buff',
             outcome: { 
-                type: "evasion_increase_vs_grounded",
+                type: "evasion_modifier",
                 value: 0.60,
                 message: "Aang zips around on his air scooter, making him an incredibly difficult target for ground-based assaults."
             }

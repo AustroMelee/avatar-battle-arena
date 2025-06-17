@@ -1,5 +1,62 @@
 'use strict';
 
+/**
+ * @typedef {object} LocationEnvironmentalModifiers
+ * @property {object} [air] - Modifiers for airbending in this location.
+ * @property {number} [air.damage] - Damage modifier.
+ * @property {number} [air.energy] - Energy cost modifier.
+ * @property {string} [air.reason] - Explanation for the modifier.
+ * @property {object} [fire] - Modifiers for firebending.
+ * @property {number} [fire.damage] - Damage modifier.
+ * @property {number} [fire.energy] - Energy cost modifier.
+ * @property {string} [fire.reason] - Explanation for the modifier.
+ * @property {object} [earth] - Modifiers for earthbending.
+ * @property {number} [earth.damage] - Damage modifier.
+ * @property {number} [earth.energy] - Energy cost modifier.
+ * @property {string} [earth.reason] - Explanation for the modifier.
+ * @property {object} [water] - Modifiers for waterbending.
+ * @property {number} [water.damage] - Damage modifier.
+ * @property {number} [water.energy] - Energy cost modifier.
+ * @property {string} [water.reason] - Explanation for the modifier.
+ * @property {object} [ice] - Modifiers for icebending (part of waterbending, but separate for detail).
+ * @property {number} [ice.damage] - Damage modifier.
+ * @property {number} [ice.energy] - Energy cost modifier.
+ * @property {string} [ice.reason] - Explanation for the modifier.
+ * @property {object} [physical] - Modifiers for physical attacks.
+ * @property {number} [physical.damage] - Damage modifier.
+ * @property {number} [physical.energy] - Energy cost modifier.
+ * @property {string} [physical.reason] - Explanation for the modifier.
+ * @property {object} [mobility_move] - Modifiers for mobility-focused moves.
+ * @property {number} [mobility_move.damage] - Damage modifier.
+ * @property {number} [mobility_move.energy] - Energy cost modifier.
+ * @property {string} [mobility_move.reason] - Explanation for the modifier.
+ * @property {object} [evasive] - Modifiers for evasive moves.
+ * @property {number} [evasive.damage] - Damage modifier.
+ * @property {number} [evasive.energy] - Energy cost modifier.
+ * @property {string} [evasive.reason] - Explanation for the modifier.
+ * @property {object} [ranged_attack] - Modifiers for ranged attacks.
+ * @property {number} [ranged_attack.damage] - Damage modifier.
+ * @property {number} [ranged_attack.energy] - Energy cost modifier.
+ * @property {string} [ranged_attack.reason] - Explanation for the modifier.
+ */
+
+/**
+ * @typedef {object} LocationData
+ * @property {string} id - Unique identifier for the location.
+ * @property {string} name - Display name of the location.
+ * @property {string} description - A brief description of the location.
+ * @property {string} envDescription - A phrase describing the environment within the location for narrative use.
+ * @property {string[]} envImpactVariants - Short phrases describing environmental impacts within this location.
+ * @property {string[]} envTags - An array of tags describing the environment (e.g., 'urban', 'fiery').
+ * @property {LocationEnvironmentalModifiers} environmentalModifiers - Modifiers applied to moves based on element or move type.
+ * @property {number} fragility - A numerical value representing how easily the environment takes collateral damage.
+ * @property {string} background - URL to a background image for the location.
+ */
+
+/**
+ * The data for the Fire Nation Capital location.
+ * @type {LocationData}
+ */
 export const fireNationCapital = {
     id: 'fire-nation-capital',
     name: 'Fire Nation Capital',

@@ -1,15 +1,13 @@
 'use strict';
 
 // Import individual location condition objects
-import { fireNationCapital } from './data_location_fire-nation-capital.js';
+import { allLocations } from './data_locations_index.js';
 
 /**
  * A comprehensive list of all available battle locations.
  * This object is used to populate the location selection UI.
  */
-export const locations = {
-    'fire-nation-capital': fireNationCapital,
-};
+export const locations = allLocations;
 
 // This can be expanded with location-specific overrides for battle phases, etc.
 export const locationPhaseOverrides = {

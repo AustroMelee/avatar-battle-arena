@@ -8,6 +8,7 @@ import { moveInteractionMatrix } from './move-interaction-matrix.js';
 import { getPhaseAIModifiers, BATTLE_PHASES } from './engine_battle-phase.js';
 import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
 import { locationConditions } from './location-battle-conditions.js';
+import { isInControl, isDesperateBroken } from './utils_condition_evaluator.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -114,6 +115,16 @@ function determineStrategicIntent(actor, defender, turn, currentPhase) {
     const actorHp = safeGet(actor, 'hp', 100, actor.name);
     const defenderHp = safeGet(defender, 'hp', 100, defender.name);
 
+    if (isInControl(actor, defender, { characterReceivedCriticalHit: defender.lastMove?.isCrit })) {
+        if (profile.opportunism > 0.6) return 'PressAdvantage';
+        if (profile.aggression > 0.8) return 'OverwhelmOffense';
+    }
+
+    if (isDesperateBroken(actor, defender, {})) {
+        if (profile.riskTolerance > 0.6) return 'DesperateGambit';
+        if (profile.aggression > 0.7) return 'RecklessOffense';
+    }
+
     if (currentPhase === BATTLE_PHASES.PRE_BANTER) return 'NarrativeOnly';
     if (currentPhase === BATTLE_PHASES.POKING) return 'PokingPhaseTactics';
 
@@ -179,7 +190,9 @@ function calculateMoveWeights(actor, defender, conditions, intent, currentPhase)
             DesperateGambit: { Finisher: 2.0, highRisk: 2.5 },
             FinishingBlowAttempt: { Finisher: 3.5, requires_opening: 2.8 },
             ConserveEnergy: { low_cost: 3.0 },
-            PokingPhaseTactics: { Utility: 2.0, Defense: 1.5, low_cost: 2.0 }
+            PokingPhaseTactics: { Utility: 2.0, Defense: 1.5, low_cost: 2.0 },
+            OverwhelmOffense: { Offense: 2.0, Finisher: 1.8, aggressive: 1.5 },
+            RecklessOffense: { Offense: 1.5, Finisher: 2.5, highRisk: 3.0, utility: 0.1 }
         };
         const multipliers = intentMultipliers[intent] || {};
         if (multipliers[move.type]) { weight *= multipliers[move.type]; reasons.push(`Intent:${intent}`); }

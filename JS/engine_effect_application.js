@@ -81,11 +81,22 @@ export function applyEffect(effect, actor, target, battleState, battleEventLog) 
             }
             break;
         case EFFECT_TYPES.MOMENTUM_CHANGE:
-            // Momentum changes are global to battle state or affect specific fighters
             if (effect.targetId) {
-                // Assuming modifyMomentum can handle targetId directly
-                modifyMomentum(effect.targetId, effect.value, battleState.currentMomentum);
-                message = `Momentum for ${effect.targetId} changes by ${effect.value}.`;
+                // Resolve the target character from the battle participants (actor/target)
+                let targetCharacter = null;
+                if (actor && actor.id === effect.targetId) {
+                    targetCharacter = actor;
+                } else if (target && target.id === effect.targetId) {
+                    targetCharacter = target;
+                }
+                
+                if (targetCharacter) {
+                    modifyMomentum(targetCharacter, effect.value, `Battle effect`);
+                    message = `Momentum for ${targetCharacter.name} changes by ${effect.value}.`;
+                } else {
+                    console.warn(`Character with ID ${effect.targetId} not found among battle participants for momentum change.`);
+                    success = false;
+                }
             } else {
                 console.warn("Momentum change effect requires a targetId.");
                 success = false;

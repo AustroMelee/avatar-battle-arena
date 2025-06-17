@@ -2,8 +2,9 @@
 'use strict';
 
 // Import all individual character archetype data files
-import { characters as characterData } from './data_characters.js';
-import { locations as locationData } from './locations.js';
+import { characters } from './data_characters.js';
+import { locations } from './locations.js';
+import { allArchetypes } from './data_archetypes_index.js';
 
 import { aangArchetypeData } from './data_archetype_aang.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
@@ -28,8 +29,23 @@ const SELECT_PLACEHOLDER_INTRO = "Select fighters and a battlefield to reveal th
 const ERROR_TITLE = "Matchup Anomaly";
 const ERROR_INTRO = "There was an issue determining the matchup details. Please try again.";
 
+/**
+ * Determines the archetype label for a given matchup and location.
+ * This function now receives full character data objects.
+ * @param {string} fighter1Id - The ID of the first fighter.
+ * @param {string} fighter2Id - The ID of the second fighter.
+ * @param {string} locationId - The ID of the location.
+ * @param {object} fighter1Data - The full data object for fighter 1.
+ * @param {object} fighter2Data - The full data object for fighter 2.
+ * @returns {object} An object containing the archetype headline and intro texts.
+ */
+export function resolveArchetypeLabel(fighter1Id, fighter2Id, locationId, fighter1Data, fighter2Data) {
+    const defaultHeadline = "Royal Rumble: Princess's Perfection vs. Avatar's Air"; // Fallback
 
-export function resolveArchetypeLabel(fighter1Id, fighter2Id, locationId) {
+    // Access archetype data via the consolidated allArchetypes object
+    const fighter1Archetype = allArchetypes[fighter1Id];
+    const fighter2Archetype = allArchetypes[fighter2Id];
+
     if (!fighter1Id || !fighter2Id || !locationId) {
         return {
             label: SELECT_PLACEHOLDER_TITLE,
