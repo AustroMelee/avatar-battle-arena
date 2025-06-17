@@ -82,7 +82,7 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
     return null; // No victim determined by this logic
 }
 
-function applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog) {
+function applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog, isPreBattle = false) {
     const allRules = [
         ...(characterCurbstompRules[fighter1.id] || []),
         ...(characterCurbstompRules[fighter2.id] || []),
@@ -142,17 +142,23 @@ function applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog) {
                 case 'instant_win':
                     winner = outcome.winner ? (protagonist.id === outcome.winner ? protagonist : opponent) : protagonist;
                     loser = (winner.id === protagonist.id) ? opponent : protagonist;
-                    charactersMarkedForDefeat.add(loser.id);
+                    if (!isPreBattle || battleState.locationConditions[battleState.locationId]?.allowPreBattleCurbstomp) {
+                        charactersMarkedForDefeat.add(loser.id);
+                    }
                     battleEventLog.push({ type: 'curbstomp_event', text: `${winner.name} secured a decisive victory over ${loser.name} due to ${rule.description}.` });
                     break;
                 case 'instant_loss':
                     loser = protagonist;
-                    charactersMarkedForDefeat.add(loser.id);
+                    if (!isPreBattle || battleState.locationConditions[battleState.locationId]?.allowPreBattleCurbstomp) {
+                        charactersMarkedForDefeat.add(loser.id);
+                    }
                     battleEventLog.push({ type: 'curbstomp_event', text: `${loser.name} was decisively defeated due to ${rule.description}.` });
                     break;
                 case 'environmental_kill':
                     loser = protagonist;
-                    charactersMarkedForDefeat.add(loser.id);
+                    if (!isPreBattle || battleState.locationConditions[battleState.locationId]?.allowPreBattleCurbstomp) {
+                        charactersMarkedForDefeat.add(loser.id);
+                    }
                     battleEventLog.push({ type: 'curbstomp_event', text: `The environment itself proved fatal for ${loser.name}.` });
                     break;
                 case 'buff':
@@ -456,6 +462,24 @@ function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
         damageHistory: []
     };
 
+    const locationData = locationConditions[locId];
+    if (!locationData) {
+        throw new Error(`Invalid location ID: ${locId}`);
+    }
+
+    const currentLocConditions = { 
+        id: locId, 
+        timeOfDay, 
+        ...locationData,
+        environmentalModifiers: locationData.environmentalModifiers || {},
+        damageThresholds: locationData.damageThresholds || {
+            minor: 20,
+            moderate: 40,
+            severe: 60,
+            catastrophic: 80
+        }
+    };
+
     const state = {
         turn: 0,
         currentPhase: 'EARLY', // Initialize with EARLY phase
@@ -475,7 +499,8 @@ function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
         emotionalMode,
         lastPhaseTransition: null,
         phaseHistory: [],
-        errorCount: 0
+        errorCount: 0,
+        locationConditions: currentLocConditions // Add location conditions to state
     };
 
     validateBattleState(state);
@@ -504,24 +529,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     fighter1.opponentId = fighter2.id;
     fighter2.opponentId = fighter1.id;
     currentBattleState.opponentId = fighter1.id;
-
-    const locationData = locationConditions[locId];
-    if (!locationData) {
-        throw new Error(`Invalid location ID: ${locId}`);
-    }
-
-    const conditions = { 
-        id: locId, 
-        timeOfDay, 
-        ...locationData,
-        environmentalModifiers: locationData.environmentalModifiers || {},
-        damageThresholds: locationData.damageThresholds || {
-            minor: 20,
-            moderate: 40,
-            severe: 60,
-            catastrophic: 80
-        }
-    };
 
     // Use the environmentState from currentBattleState
     const { environmentState } = currentBattleState;
@@ -570,7 +577,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             fighter2, 
             null, 
             environmentState, 
-            locationData, 
+            currentBattleState.locationConditions, // Use locationData from battleState
             phaseState.currentPhase, 
             true, 
             null, 
@@ -591,7 +598,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             fighter1, 
             null, 
             environmentState, 
-            locationData, 
+            currentBattleState.locationConditions, // Use locationData from battleState
             phaseState.currentPhase, 
             true, 
             null, 
@@ -600,7 +607,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     }
 
     // NEW: Apply all pre-battle curbstomp, buff, and debuff rules
-    applyCurbstompRules(fighter1, fighter2, currentBattleState, battleEventLog);
+    applyCurbstompRules(fighter1, fighter2, currentBattleState, battleEventLog, true);
 
     // Evaluate outcome after pre-battle curbstomps
     let terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
@@ -671,7 +678,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     currentDefender,
                     null,
                     environmentState,
-                    locationData,
+                    currentBattleState.locationConditions, // Use locationData from battleState
                     phaseState.currentPhase,
                     true,
                     null,
@@ -691,7 +698,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     currentAttacker,
                     null,
                     environmentState,
-                    locationData,
+                    currentBattleState.locationConditions, // Use locationData from battleState
                     phaseState.currentPhase,
                     true,
                     null,
@@ -784,10 +791,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         if (charactersMarkedForDefeat.has(currentDefender.id) || charactersMarkedForDefeat.has(currentAttacker.id)) {
             terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
             if (terminalOutcome.battleOver) {
-                battleOver = true;
-                winnerId = terminalOutcome.winnerId;
-                loserId = terminalOutcome.loserId;
-                isStalemate = terminalOutcome.isStalemate;
+                battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
                 continue; // Exit current turn to process battle outcome
             }
         }
@@ -822,7 +826,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
 
         // --- AI Action Selection ---
-        const aiDecision = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, currentBattleState.currentPhase);
+        const aiDecision = selectMove(currentAttacker, currentDefender, currentBattleState.locationConditions, currentBattleState.turn, currentBattleState.currentPhase); // Use currentBattleState.locationConditions
         const move = aiDecision.move;
         if (!move) {
             currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
@@ -831,7 +835,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
 
         // --- Move Execution & Resolution ---
-        const result = calculateMove(move, currentAttacker, currentDefender, conditions, battleEventLog, environmentState, locId, modifyMomentum);
+        const result = calculateMove(move, currentAttacker, currentDefender, currentBattleState.locationConditions, battleEventLog, environmentState, locId, modifyMomentum); // Use currentBattleState.locationConditions
         
         // Generate narration for the entire action
         const turnNarrationObjects = generateTurnNarrationObjects(
@@ -841,7 +845,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             currentDefender,
             result,
             environmentState,
-            locationData,
+            currentBattleState.locationConditions, // Use locationData from battleState
             phaseState.currentPhase,
             false,
             aiDecision.aiLogEntryFromSelectMove || {},
@@ -898,7 +902,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
 
         // Clear and update environment state
         environmentState.specificImpacts.clear();
-        const currentLocData = locationConditions[locId];
+        const currentLocData = currentBattleState.locationConditions; // Use currentBattleState.locationConditions
         if (currentLocData && currentLocData.damageThresholds && environmentState.damageLevel > 0) {
             let impactTier = null;
             if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) impactTier = 'catastrophic';
@@ -906,10 +910,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) impactTier = 'moderate';
             else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) impactTier = 'minor';
 
-            if (impactTier && locationData.environmentalImpacts[impactTier] && locationData.environmentalImpacts[impactTier].length > 0) {
-                const randomIndex = getRandomElement(locationData.environmentalImpacts[impactTier]);
+            if (impactTier && currentLocData.environmentalImpacts[impactTier] && currentLocData.environmentalImpacts[impactTier].length > 0) { // Use currentLocData.environmentalImpacts
+                const randomIndex = getRandomElement(currentLocData.environmentalImpacts[impactTier]);
                 if (randomIndex !== null) {
-                    environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
+                    environmentState.specificImpacts.add(currentLocData.environmentalImpacts[impactTier][randomIndex]);
                 }
             }
         }
