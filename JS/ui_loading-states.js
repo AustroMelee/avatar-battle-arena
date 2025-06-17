@@ -22,6 +22,7 @@ const DOM_ELEMENTS = {
     copyDetailedLogsBtn: document.getElementById('copy-detailed-logs-btn'),
     // FIX: Add battleBtn to DOM_ELEMENTS
     battleBtn: document.getElementById('battleBtn'),
+    simulationContainer: document.getElementById('simulation-container'),
 };
 
 /**
@@ -123,20 +124,25 @@ export function showResultsState(battleResult, simulationMode) {
 
     if (simulationMode === "animated") {
         if (DOM_ELEMENTS.animatedLogOutput) DOM_ELEMENTS.animatedLogOutput.innerHTML = '';
+        DOM_ELEMENTS.simulationContainer?.classList.remove('hidden');
         
         const animationQueue = transformEventsToAnimationQueue(battleResult.log);
         startAnimationSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
             // Always populate battleStory with the full log after animation, or if cancelled/error
             if (DOM_ELEMENTS.battleStory && finalBattleResult.log) {
                 DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
+                console.log("[DEBUG] battleStory innerHTML after animated population:", DOM_ELEMENTS.battleStory.innerHTML);
             }
             displayFinalResultsPanel(finalBattleResult);
             DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); 
         });
 
     } else {
-        DOM_ELEMENTS.animatedLogOutput.closest('.simulation-mode-container')?.classList.add('hidden'); 
-        if (DOM_ELEMENTS.battleStory && battleResult.log) DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
+        DOM_ELEMENTS.simulationContainer?.classList.remove('hidden');
+        if (DOM_ELEMENTS.battleStory && battleResult.log) {
+            DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
+            console.log("[DEBUG] battleStory innerHTML for instant mode:", DOM_ELEMENTS.battleStory.innerHTML);
+        }
         displayFinalResultsPanel(battleResult);
     }
 }
