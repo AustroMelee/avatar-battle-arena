@@ -87,7 +87,7 @@ export function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMod
             environmentalImpactsThisPhase: [], // To track specific impacts within a phase
             environmentalImpactCount: 0, // To count impacts within a phase
         },
-        locationConditions: { ...locationData.environmentalModifiers }, // Use environmentalModifiers as conditions
+        locationConditions: locationData, // Pass the entire locationData object
         characters: { [f1Id]: null, [f2Id]: null }, // Placeholder, fighters populated after initialization
         characterReceivedCriticalHit: { // Track critical hits for narrative/AI
             [f1Id]: false,
