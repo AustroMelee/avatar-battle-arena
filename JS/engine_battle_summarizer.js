@@ -78,7 +78,7 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
     if (!isStalemate && finalWinnerFull && finalLoserFull) {
         const finalWords = getFinalVictoryLine(finalWinnerFull, finalLoserFull);
         const conclusionContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
-        const conclusionTextRaw = substituteTokens(`${finalWinnerFull.name} stands victorious. "${finalWords}"`, finalWinnerFull, finalLoserFull, conclusionContext);
+        const conclusionTextRaw = substituteTokens(`${finalWinnerFull.name} stands victorious. ${finalWords}`, finalWinnerFull, finalLoserFull, conclusionContext);
         const conclusionTextHtml = phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw);
         battleResult.log.push({
             type: 'conclusion_event',

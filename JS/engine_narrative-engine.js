@@ -26,7 +26,7 @@ import { azulaArchetypeData } from './data_archetype_azula.js';
 
 import { allArchetypes } from './data_archetypes_index.js'; // Import all archetypes
 
-function getEnvironmentImpactLine(locationId, currentPhase, isCrit = false, moveType = null, moveElement = null) {
+function getEnvironmentImpactLine(locationId, currentPhase, isCrit = false, moveType = null, moveElement = null, impactCount = 0) {
     const loc = locations[locationId];
     if (!loc) {
         return ""; // Safety
@@ -222,6 +222,7 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
         moveName: move.name,
         moveType: move.type,
         moveTags: move.moveTags || [],
+        text: actionSentence,
         html_content: htmlSentence,
         effectiveness: effectiveness,
         damage: result.damage,
@@ -239,7 +240,7 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
     }
 
     const isCrit = result.effectiveness.label === 'Critical';
-    const collateralPhrase = getEnvironmentImpactLine(locationData.id, battleState.currentPhase, isCrit, move.type, move.element);
+    const collateralPhrase = getEnvironmentImpactLine(locationData.id, battleState.currentPhase, isCrit, move.type, move.element, environmentState.environmentalImpactCount);
 
     if (!collateralPhrase) {
         console.log("generateCollateralDamageEvent - No collateral phrase generated.");
@@ -248,24 +249,26 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
 
     // Increment impact count and store the phrase for summarization
     environmentState.environmentalImpactCount = (environmentState.environmentalImpactCount || 0) + 1;
-    environmentState.environmentalImpactsThisPhase.push(collateralPhrase);
+    environmentState.environmentalImpactsThisPhase.push({
+        line: collateralPhrase,
+        turn: battleState.turn,
+        phase: battleState.currentPhase,
+        move: move.name,
+        actor: actor.name
+    });
 
-    // Only generate an individual log event for critical impacts or if it's among the first few impacts
-    const IMPACT_LOG_THRESHOLD = 2; // Log individual impacts up to this count per phase
+    const htmlContent = `<p class="environmental-impact-text">${collateralPhrase}</p>`;
 
-    if (isCrit || environmentState.environmentalImpactCount <= IMPACT_LOG_THRESHOLD) {
-        const fullCollateralText = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`.trim();
-        console.log("generateCollateralDamageEvent - Full Collateral Text:", fullCollateralText);
-        return generateLogEvent(battleState, {
-            type: 'collateral_damage_event',
-            actorId: actor.id,
-            text: fullCollateralText,
-            isEnvironmental: true,
-            html_content: `<p class="collateral-damage-description">${fullCollateralText}</p>`
-        });
-    }
-
-    return null; // Do not log individual event if threshold exceeded and not critical
+    return generateLogEvent(battleState, {
+        type: 'collateral_damage_event',
+        actorId: actor.id,
+        characterName: actor.name,
+        text: collateralPhrase,
+        html_content: htmlContent,
+        isEnvironmental: true,
+        impactAmount: envDamageEffect.value,
+        locationId: locationData.id
+    });
 }
 
 export function generateEscalationNarrative(fighter, oldState, newState, battleState) {
@@ -295,42 +298,38 @@ export function generateEscalationNarrative(fighter, oldState, newState, battleS
  * @returns {object|null} A summarized environmental event or null if no summary is needed.
  */
 export function generateEnvironmentalSummaryEvent(battleState, environmentState, locationId) {
-    const IMPACT_THRESHOLD = 2; // Number of impacts before a summary is considered
-    if (environmentState.environmentalImpactCount < IMPACT_THRESHOLD) {
-        return null; // Not enough impacts to summarize
+    if (!environmentState.environmentalImpactsThisPhase || environmentState.environmentalImpactsThisPhase.length === 0) {
+        return null;
     }
 
-    const loc = locations[locationId];
-    if (!loc) return null;
+    let summaryPhrase = "The environment remained largely untouched.";
+    let summaryHtml = "";
 
-    let summaryMessage = "";
-    let htmlSummary = "";
-    const currentPhase = battleState.currentPhase;
+    const impactCount = environmentState.environmentalImpactsThisPhase.length;
 
-    if (currentPhase === 'Decisive' || currentPhase === 'FinalBlow') {
-        // More dramatic summaries for late phases
-        summaryMessage = `Environmental Damage (Phase Summary): ${getRandomElementSeeded(loc.envImpactLate || loc.envImpactMid || loc.envImpactVariants)}. The battle has scarred the very landscape.`;
-        htmlSummary = `<p class="environmental-impact-summary dramatic">${summaryMessage}</p>`;
-    } else if (environmentState.environmentalImpactsThisPhase.length > IMPACT_THRESHOLD) {
-        // General summary for earlier phases
-        summaryMessage = `Environmental Damage (Phase Summary): Repeated elemental clashes leave the ${loc.envDescription} scarred.`;
-        htmlSummary = `<p class="environmental-impact-summary">${summaryMessage}</p>`;
+    if (impactCount === 1) {
+        summaryPhrase = `The battle left a subtle mark on the surroundings.`;
+    } else if (impactCount >= 2 && impactCount <= 4) {
+        summaryPhrase = `Minor alterations appeared in the environment due to the ongoing fight.`;
+    } else if (impactCount >= 5 && impactCount <= 7) {
+        summaryPhrase = `The environment visibly reacted to the clash, showing signs of significant impact.`;
+    } else if (impactCount >= 8) {
+        summaryPhrase = `Widespread destruction scarred the landscape, a testament to the battle's ferocity.`;
+    }
+    
+    let detailedImpacts = environmentState.environmentalImpactsThisPhase.map(impact => `<li>${impact.line}</li>`).join('');
+    if (detailedImpacts) {
+        summaryHtml = `<div class="environmental-summary"><p><strong>Environmental Echoes:</strong> ${summaryPhrase}</p><ul>${detailedImpacts}</ul></div>`;
     } else {
-        return null; // No specific summary message for this condition
+        summaryHtml = `<div class="environmental-summary"><p><strong>Environmental Echoes:</strong> ${summaryPhrase}</p></div>`;
     }
-
-    // Reset counts after summarizing
-    environmentState.environmentalImpactCount = 0;
-    environmentState.environmentalImpactsThisPhase = [];
 
     return generateLogEvent(battleState, {
         type: 'environmental_summary_event',
-        actorId: null,
-        characterName: 'Environment',
-        text: summaryMessage,
-        html_content: htmlSummary,
+        text: summaryPhrase,
+        html_content: summaryHtml,
         isEnvironmental: true,
-        isMajorEvent: true
+        totalImpactsThisPhase: impactCount
     });
 }
 

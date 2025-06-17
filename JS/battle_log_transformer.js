@@ -132,8 +132,8 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
     structuredLogEvents.forEach(event => {
         if (!event || !event.type) return;
 
-        let currentTurnNumber = (event.turn !== undefined) ? event.turn : null; // Use event.turn consistently
-        let turnNumberHtml = currentTurnNumber !== null ? `<div class="log-turn-number">Turn ${currentTurnNumber}</div>` : '';
+        let eventHtml = event.html_content; // Removed fallback to generic <p>
+        let turnNumberHtml = (event.turnNumber !== undefined && event.type !== 'turn_marker') ? `<div class="log-turn-number">Turn ${event.turnNumber + 1}</div>` : '';
 
         if (event.type === 'phase_header_event') {
             if (isPhaseDivOpen) htmlLog += `</div>`; // Close previous phase
@@ -141,24 +141,24 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
             htmlLog += phaseHeaderHtml;
             isPhaseDivOpen = true;
         } else {
-            let eventHtml = event.html_content || `<p class="log-generic">${event.text || 'Unknown event.'}</p>`;
+            // All events should now have html_content generated at their source.
+            // If an event type does not, it's a bug that needs to be addressed at the source.
+            // This ensures no 'Unknown event.' ever appears.
+            if (!eventHtml) {
+                console.warn(`Event of type '${event.type}' is missing html_content. Event:`, event);
+                return; // Skip rendering this event if no content
+            }
 
             switch (event.type) {
                 case 'turn_marker':
                     // Turn marker already handled by currentTurnNumber above, but if it has html_content, use it.
+                    // This event type primarily serves to provide the turn number context.
                     if (event.html_content) { appendToLog(event.html_content); }
                     break;
                 case 'move_action_event':
-                    // Direct append, as html_content is already formatted
-                    appendToLog(turnNumberHtml + eventHtml);
-                    break;
-                case 'collateral_damage_event': // Now used for specific environmental impacts
-                case 'environmental_impact_event': // Alias for clarity
-                    appendToLog(turnNumberHtml + eventHtml);
-                    break;
+                case 'collateral_damage_event':
+                case 'environmental_impact_event':
                 case 'environmental_summary_event':
-                    appendToLog(turnNumberHtml + eventHtml);
-                    break;
                 case 'dialogue_event':
                 case 'internal_thought_event':
                 case 'stun_event':
@@ -170,15 +170,20 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                 case 'final_blow_event':
                 case 'stalemate_result_event':
                 case 'conclusion_event':
+                case 'status_change_event': // Added this to explicitly handle general status changes
                     appendToLog(turnNumberHtml + eventHtml);
                     break;
                 case 'dice_roll':
-                    appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong></div>`);
+                    // Dice rolls will be handled separately. For now, ensure they don't appear as "Unknown Event"
+                    // They should still appear in the raw log, but not necessarily in the main narrative flow.
+                    // For now, I'm modifying the existing dice roll output to be more distinct.
+                    appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${characters[event.actorId]?.name || event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong>${event.moveName ? ` (for ${event.moveName})` : ''}</div>`);
                     break;
                 default:
-                    // Fallback for any unhandled event types
-                    appendToLog(turnNumberHtml + eventHtml);
-                    console.warn(`Unhandled event type in transformEventsToHtmlLog: ${event.type}`, event);
+                    // This 'default' should ideally never be hit if all event types are handled.
+                    // If it is, it indicates a new, unhandled event type.
+                    console.warn(`Unhandled event type in transformEventsToHtmlLog (no explicit case): ${event.type}`, event);
+                    appendToLog(turnNumberHtml + eventHtml); // Fallback to ensure it's still displayed
                     break;
             }
         }
