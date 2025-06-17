@@ -9,8 +9,7 @@ import { getPhaseAIModifiers, BATTLE_PHASES } from './engine_battle-phase.js';
 import { getEscalationAIWeights, ESCALATION_STATES } from './engine_escalation.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { isInControl, isDesperateBroken } from './utils_condition_evaluator.js';
-
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+import { clamp } from './utils_math.js';
 
 const DEFAULT_PERSONALITY_PROFILE = {
     aggression: 0.5, patience: 0.5, riskTolerance: 0.5, opportunism: 0.5,

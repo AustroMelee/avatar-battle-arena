@@ -8,8 +8,7 @@ import { ESCALATION_STATES } from './engine_escalation.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
 import { generateLogEvent } from './utils_log_event.js';
-
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+import { clamp } from './utils_math.js';
 
 /**
  * Applies a single game effect to a character or the battle state.

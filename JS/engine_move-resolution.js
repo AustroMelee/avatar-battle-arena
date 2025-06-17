@@ -17,8 +17,7 @@ import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for 
 import { seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
 import { generateLogEvent } from './utils_log_event.js';
 import { locationConditions } from './location-battle-conditions.js';
-
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+import { clamp } from './utils_math.js';
 
 const DEFAULT_MOVE_PROPERTIES = {
     power: 30,
@@ -109,8 +108,6 @@ export function calculateMove(move, attacker, defender, conditions, battleEventL
 
     const critRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
     const isCritical = critRoll < critChance;
-
-    console.log("Debugging battleState in calculateMove:", battleState);
 
     battleEventLog.push(generateLogEvent(battleState, {
         type: "dice_roll",

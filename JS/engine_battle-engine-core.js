@@ -29,7 +29,8 @@ import { setSeed, seededRandom, getRandomElementSeeded } from './utils_seeded_ra
 import { generateLogEvent } from './utils_log_event.js';
 import { USE_DETERMINISTIC_RANDOM, RANDOM_SEED } from './config_game.js';
 
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+// --- NEW UTILITY IMPORTS ---
+import { clamp } from './utils_math.js';
 
 /**
 
@@ -171,7 +172,7 @@ currentDefender.currentTurn = turn;
  }
 
  // --- NEW: Manipulation Attempt ---
- const manipulationResult = attemptManipulation(currentAttacker, currentDefender);
+ const manipulationResult = attemptManipulation(currentAttacker, currentDefender, currentBattleState, battleEventLog);
  if (manipulationResult.success) {
      battleEventLog.push(generateLogEvent(currentBattleState, { type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration }));
      // Apply the effect to the defender
@@ -189,8 +190,6 @@ currentDefender.currentTurn = turn;
      turn++;
      continue;
  }
-
- console.log("Debugging currentBattleState before calculateMove:", currentBattleState); // Add this line
 
  // -- CORRECT ARGUMENT ORDER HERE --
  const result = calculateMove(
