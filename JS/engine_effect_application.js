@@ -5,9 +5,8 @@ import { characters } from './data_characters.js';
 import { applyCurbstompRules, charactersMarkedForDefeat } from './engine_curbstomp_manager.js';
 import { modifyMomentum } from './engine_momentum.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
-import { getRandomElement } from './engine_battle-engine-core.js';
+import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
-import { seededRandom } from './utils_seeded_random.js';
 import { generateLogEvent } from './utils_log_event.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
