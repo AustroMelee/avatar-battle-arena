@@ -77,14 +77,20 @@ function formatAiLogForOutput(aiLog) {
     return aiLog.map(entry => {
         if (typeof entry === 'object' && entry !== null) {
             let parts = [];
-            if (entry.turn !== undefined) parts.push(`T${entry.turn}`);
+            if (entry.turn !== undefined) parts.push(`${entry.characterName || 'Unknown'}-T${entry.turn}`);
             if (entry.phase) parts.push(`Phase:${entry.phase}`);
             if (entry.intent) parts.push(`Intent:${entry.intent}`);
             if (entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
             if (entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
             if (entry.actorState) {
                 const as = entry.actorState;
-                parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum} MS:${as.mental} ES:${as.escalation}`);
+                parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum}`);
+                if (as.previousMental && as.mental !== as.previousMental) {
+                    parts.push(`MS:${as.previousMental.toUpperCase()}->${as.mental.toUpperCase()} 🔔`);
+                } else {
+                    parts.push(`MS:${as.mental.toUpperCase()}`);
+                }
+                parts.push(`ES:${as.escalation}`);
             }
             if (entry.opponentEscalation) {
                 parts.push(`OppES:${entry.opponentEscalation}`);
@@ -100,7 +106,11 @@ function formatAiLogForOutput(aiLog) {
                 parts.push(`Reasons:[${entry.reasons}]`);
             }
             if (entry.isEscalationFinisherAttempt) {
-                parts.push(`(Escalation Finisher Attempt!)`);
+                parts.push(`[FINISHER ATTEMPT!]`);
+            }
+            // Highlight Critical Hits or other significant effectiveness
+            if (entry.effectiveness && (entry.effectiveness === 'Critical' || entry.effectiveness === 'Strong')) {
+                parts.push(`[${entry.effectiveness.toUpperCase()}]`);
             }
             return `- ${parts.join(' | ')}`;
         }

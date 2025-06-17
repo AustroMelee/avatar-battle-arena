@@ -18,6 +18,7 @@ import { locations } from './locations.js';
 import { generateLogEvent } from './utils_log_event.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
+import { EFFECT_TYPES } from './data_mechanics_definitions.js';
 
 // --- ARCHETYPE DATA IMPORTS (Stripped Down) ---
 import { aangArchetypeData } from './data_archetype_aang.js';
@@ -211,6 +212,9 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
     const builder = new NarrativeStringBuilder(actor, defender, move, effectivenessLevels, locationData, { isCrit: effectiveness === 'Critical' });
     const { actionSentence, htmlSentence } = builder.buildActionDescription(effectiveness, null, null);
     
+    console.log("generateActionDescriptionObject - Action Sentence:", actionSentence);
+    console.log("generateActionDescriptionObject - HTML Sentence:", htmlSentence);
+
     return generateLogEvent(battleState, {
         type: 'move_action_event',
         actorId: actor.id,
@@ -226,12 +230,21 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
 }
 
 export function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData, battleState, result) {
-    if (!result || result.collateralDamage === 0) return null;
+    // Check if an ENVIRONMENTAL_DAMAGE effect exists in the result
+    const envDamageEffect = result.effects?.find(effect => effect.type === EFFECT_TYPES.ENVIRONMENTAL_DAMAGE);
+
+    if (!envDamageEffect) {
+        console.log("generateCollateralDamageEvent - No environmental damage effect found.");
+        return null; // No environmental damage effect, so no narrative needed
+    }
 
     const isCrit = result.effectiveness.label === 'Critical';
     const collateralPhrase = getEnvironmentImpactLine(locationData.id, battleState.currentPhase, isCrit, move.type, move.element);
 
-    if (!collateralPhrase) return null; // No relevant phrase generated
+    if (!collateralPhrase) {
+        console.log("generateCollateralDamageEvent - No collateral phrase generated.");
+        return null; // No relevant phrase generated
+    }
 
     // Increment impact count and store the phrase for summarization
     environmentState.environmentalImpactCount = (environmentState.environmentalImpactCount || 0) + 1;
@@ -242,6 +255,7 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
 
     if (isCrit || environmentState.environmentalImpactCount <= IMPACT_LOG_THRESHOLD) {
         const fullCollateralText = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`.trim();
+        console.log("generateCollateralDamageEvent - Full Collateral Text:", fullCollateralText);
         return generateLogEvent(battleState, {
             type: 'collateral_damage_event',
             actorId: actor.id,
@@ -350,3 +364,8 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
         text: narrationText
     });
 }
+
+// Centralized Tag/Context Registry
+const NARRATIVE_TAGS = {
+    // ... existing code ...
+};

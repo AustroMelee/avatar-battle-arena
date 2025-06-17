@@ -105,7 +105,7 @@ export function applyEffect(effect, actor, target, battleState, battleEventLog) 
                 success = false;
             }
             break;
-        case EFFECT_TYPES.COLLATERAL_DAMAGE:
+        case EFFECT_TYPES.ENVIRONMENTAL_DAMAGE:
             if (primaryTarget && typeof primaryTarget.damageLevel === 'number') {
                 primaryTarget.damageLevel = clamp(primaryTarget.damageLevel + effect.value, 0, 100);
                 message = `Environmental damage increases by ${effect.value}.`;

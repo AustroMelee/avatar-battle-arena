@@ -283,11 +283,12 @@ export function selectMove(actor, defender, conditions, turn, currentPhase) {
     
     const aiLogEntry = {
         turn: turn + 1,
+        characterName: actor.name,
         phase: currentPhase,
         intent: intent,
         chosenMove: chosenMoveInfo.move.name,
         finalProb: `${((chosenMoveInfo.probability || 0) * 100).toFixed(1)}%`,
-        actorState: { hp: actor.hp, energy: actor.energy, momentum: actor.momentum, mental: actor.mentalState.level, escalation: actor.escalationState },
+        actorState: { hp: actor.hp, energy: actor.energy, momentum: actor.momentum, mental: actor.mentalState.level, escalation: actor.escalationState, previousMental: actor._previousMentalState },
         opponentEscalation: defender.escalationState,
         reasons: (chosenMoveInfo.reasons || []).join(', ')
     };

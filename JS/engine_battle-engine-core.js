@@ -154,31 +154,31 @@ if (checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, 
 }
 currentBattleState.currentPhase = phaseState.currentPhase;
 
-// Turn Start Marker
-const turnSpecificEventsForLog = [generateLogEvent(currentBattleState, { type: 'turn_marker', actorId: currentAttacker.id, characterName: currentAttacker.name, turn: turn + 1, portrait: currentAttacker.portrait })];
+// Initialize turn-specific log events
+let turnEvents = [generateLogEvent(currentBattleState, { type: 'turn_marker', actorId: currentAttacker.id, characterName: currentAttacker.name, turn: turn + 1, portrait: currentAttacker.portrait })];
 
-// Check for defeat/skip turn conditions
+// Handle stun and energy conditions
 if (charactersMarkedForDefeat.has(currentAttacker.id) || currentAttacker.stunDuration > 0 || currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
     if (currentAttacker.stunDuration > 0) {
         currentAttacker.stunDuration--;
         if (currentAttacker.stunDuration === 0) currentAttacker.consecutiveStuns = 0;
-        // Removed: currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE; // Stun resistance handled by applyEffect
-        turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} is stunned and unable to move!`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>` }));
+        turnEvents.push(generateLogEvent(currentBattleState, { type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} is stunned and unable to move!`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>` }));
     }
     if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
         currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
-        turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'energy_recovery_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} recovers energy.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers energy.</p>` }));
+        turnEvents.push(generateLogEvent(currentBattleState, { type: 'energy_recovery_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} recovers energy.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers energy.</p>` }));
     }
-    battleEventLog.push(...turnSpecificEventsForLog);
+    // Even if a turn is skipped, push the events collected so far
+    battleEventLog.push(...turnEvents);
     [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
     turn++;
-    continue;
+    continue; // Skip the rest of the turn logic if fighter cannot act
 }
 
 // --- NEW: Manipulation Attempt ---
 const manipulationResult = attemptManipulation(currentAttacker, currentDefender, currentBattleState, battleEventLog);
 if (manipulationResult.success) {
-    battleEventLog.push(generateLogEvent(currentBattleState, { type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration }));
+    turnEvents.push(generateLogEvent(currentBattleState, { type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration }));
     // Apply the effect to the defender
     updateMentalState(currentDefender, currentAttacker, { effectiveness: { label: manipulationResult.effect } }, currentBattleState.environmentState, locId, currentBattleState);
 }
@@ -190,6 +190,8 @@ const move = aiDecision.move;
 
 if (!move) {
     currentAttacker.aiLog.push("[Action Failed]: AI selected an undefined move.");
+    turnEvents.push(generateLogEvent(currentBattleState, { type: 'action_failure_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} failed to choose a move.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} failed to choose a move.</p>` }));
+    battleEventLog.push(...turnEvents); // Log failure and move on
     [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
     turn++;
     continue;
@@ -214,28 +216,31 @@ result.effects.forEach(effect => {
     applyEffect(effect, currentAttacker, currentDefender, currentBattleState, battleEventLog);
 });
 
-// Narration and State Updates
-turnSpecificEventsForLog.push(...generateTurnNarrationObjects([], {...move, actionVariants: move.actionVariants || []}, currentAttacker, currentDefender, result, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, aiDecision.aiLogEntryFromSelectMove, currentBattleState));
+// Update AI log entry with move effectiveness and if it was a critical hit
+if (aiDecision.aiLogEntryFromSelectMove) {
+    aiDecision.aiLogEntryFromSelectMove.effectiveness = result.effectiveness.label; // e.g., 'Critical', 'Strong', 'Normal', 'Weak'
+    if (result.effectiveness.label === 'Critical') {
+        aiDecision.aiLogEntryFromSelectMove.isCriticalHit = true;
+    }
+}
+
+// Narration and State Updates (Add to turnEvents)
+turnEvents.push(...generateTurnNarrationObjects([], {...move, actionVariants: move.actionVariants || []}, currentAttacker, currentDefender, result, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, aiDecision.aiLogEntryFromSelectMove, currentBattleState));
 updateMentalState(currentAttacker, currentDefender, result, currentBattleState.environmentState, locId, currentBattleState);
 updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, currentBattleState.environmentState, locId, currentBattleState);
-
-// Removed: Direct application of stun, damage, selfDamage, collateralDamage. Now handled by applyEffect.
-// if (result.stunDuration > 0) applyStun(currentDefender, result.stunDuration);
-// if (result.damage > 0) currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
-// if (result.selfDamage > 0) currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
-// if (result.collateralDamage > 0) currentBattleState.environmentState.damageLevel = clamp(currentBattleState.environmentState.damageLevel + result.collateralDamage, 0, 100);
 
 currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
 currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
 updateAiMemory(currentDefender, currentAttacker);
 updateAiMemory(currentAttacker, currentDefender);
-battleEventLog.push(...turnSpecificEventsForLog);
 
-    // Consolidate environmental impacts at the end of the turn if too many occurred
-    const envSummaryEvent = generateEnvironmentalSummaryEvent(currentBattleState, currentBattleState.environmentState, locId);
-    if (envSummaryEvent) {
-        battleEventLog.push(envSummaryEvent);
-    }
+// Consolidate environmental impacts at the end of the turn if too many occurred
+const envSummaryEvent = generateEnvironmentalSummaryEvent(currentBattleState, currentBattleState.environmentState, locId);
+if (envSummaryEvent) {
+    turnEvents.push(envSummaryEvent); // Add summary to turnEvents
+}
+
+battleEventLog.push(...turnEvents); // ONLY PUSH ONCE AT THE END OF THE TURN
 
 // Check for battle end
 terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
@@ -250,6 +255,8 @@ turn++;
 
 // --- Post-Battle Summary Generation ---
 const finalBattleResult = { log: battleEventLog, winnerId, loserId, isDraw: isStalemate, finalState: { fighter1: { ...fighter1 }, fighter2: { ...fighter2 } }, environmentState: currentBattleState.environmentState, phaseSummary: phaseState.phaseSummaryLog };
+
+console.log("Final Battle Result Log:", finalBattleResult.log);
 
 // Check timeout condition
 if (!battleOver && turn >= MAX_TOTAL_TURNS) {

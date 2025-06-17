@@ -13,7 +13,7 @@ export const EFFECT_TYPES = {
     ENERGY_CHANGE: 'energy_change',
     STUN: 'stun',
     MOMENTUM_CHANGE: 'momentum_change',
-    COLLATERAL_DAMAGE: 'collateral_damage',
+    ENVIRONMENTAL_DAMAGE: 'environmental_damage',
 
     // State Modifiers (Buffs/Debuffs)
     EVASION_MODIFIER: 'evasion_modifier',
@@ -69,7 +69,7 @@ export const MECHANIC_DEFINITIONS = {
         params: { value: { type: 'number', required: true }, targetId: { type: 'string', required: true } },
         targets: ['global'], // Momentum is often global to the battle state or involves interactions
     },
-    [EFFECT_TYPES.COLLATERAL_DAMAGE]: {
+    [EFFECT_TYPES.ENVIRONMENTAL_DAMAGE]: {
         description: "Increases environmental damage.",
         params: { value: { type: 'number', required: true } },
         targets: ['environment'],

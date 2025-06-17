@@ -119,6 +119,12 @@ export const fireNationCapital = {
             'Feinting Ember Step': { energyCostModifier: 0.7, description: "Azula uses the urban landscape to her advantage for swift, deceptive movements." }
         }
     },
+    damageThresholds: {
+        minor: 10,
+        moderate: 25,
+        severe: 50,
+        catastrophic: 75
+    },
     fragility: 60,
     background: 'img/img_caldera.jpg',
 }; 

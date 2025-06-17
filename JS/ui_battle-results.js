@@ -158,63 +158,16 @@ export function displayFinalAnalysis(finalState, winnerId, isDraw = false, envir
     }
 
     if (detailedBattleLogsContent) {
+        // Clear previous logs
         detailedBattleLogsContent.innerHTML = '';
 
-        let allLogsHtml = "";
-
-        const formatAiLogEntries = (logEntries) => {
-            return logEntries.map(entry => {
-                if (typeof entry === 'object' && entry !== null) {
-                    let parts = [];
-                    if (entry.turn !== undefined) parts.push(`T${entry.turn}`);
-                    if (entry.phase) parts.push(`Phase:${entry.phase}`);
-                    if (entry.intent) parts.push(`Intent:${entry.intent}`);
-                    if (entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
-                    if (entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
-                    if (entry.actorState) {
-                        const as = entry.actorState;
-                        parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${as.momentum} MS:${as.mental}`);
-                        if (as.escalation) parts.push(`ES:${as.escalation}`);
-                    }
-                    if (entry.opponentEscalation) {
-                        parts.push(`OppES:${entry.opponentEscalation}`);
-                    }
-                    if (entry.prediction) {
-                        parts.push(`Pred:${entry.prediction}`);
-                    }
-                    if (entry.consideredMoves && Array.isArray(entry.consideredMoves) && entry.consideredMoves.length > 0) {
-                        const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name || 'UnknownMove'}(${m.prob || 'N/A'})`).join(', ');
-                        if (topConsiderations) parts.push(`Considered:[${topConsiderations}]`);
-                    }
-                    if (entry.reasons) {
-                        parts.push(`Reasons:[${entry.reasons}]`);
-                    }
-                    if (entry.isEscalationFinisherAttempt) {
-                        parts.push(`(Escalation Finisher Attempt!)`);
-                    }
-                    return `- ${parts.join(' | ')}`;
-                }
-                return `- ${String(entry).replace(/</g, "<").replace(/>/g, ">")}`; // Sanitize HTML
-            }).join('\n') + '\n';
-        };
-
-        if (fighter1.aiLog && fighter1.aiLog.length > 0) {
-            const logTitleF1 = `<strong>${fighter1.name}'s AI Decision Log:</strong><br>`;
-            const logPreF1 = `<pre><code>${formatAiLogEntries(fighter1.aiLog)}</code></pre>`;
-            allLogsHtml += `<div class="ai-log-fighter">${logTitleF1}${logPreF1}</div>`;
-        }
-
-        if (fighter2.aiLog && fighter2.aiLog.length > 0) {
-            const logTitleF2 = `<strong>${fighter2.name}'s AI Decision Log:</strong><br>`;
-            const logPreF2 = `<pre><code>${formatAiLogEntries(fighter2.aiLog)}</code></pre>`;
-            allLogsHtml += `<div class="ai-log-fighter">${logTitleF2}${logPreF2}</div>`;
-        }
-
-        if (allLogsHtml) {
-            detailedBattleLogsContent.innerHTML = allLogsHtml;
-        } else {
-            detailedBattleLogsContent.innerHTML = '<p><em>No detailed AI logs available for this battle.</em></p>';
-        }
+        // Use the transformer to convert the raw event log into HTML
+        const fullHtmlLog = transformEventsToHtmlLog(finalBattleResult.log, {
+            fighter1: finalBattleResult.finalState.fighter1,
+            fighter2: finalBattleResult.finalState.fighter2,
+            location: locationConditions[locationId] // Pass full location data
+        });
+        detailedBattleLogsContent.innerHTML = fullHtmlLog;
     }
 }
 

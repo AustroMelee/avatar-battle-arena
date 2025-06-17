@@ -132,28 +132,55 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
     structuredLogEvents.forEach(event => {
         if (!event || !event.type) return;
 
-        // If the event provides pre-formatted HTML, use it.
-        if (event.html_content) {
-            if (event.type === 'phase_header_event') {
-                if (isPhaseDivOpen) htmlLog += `</div>`; // Close previous phase
-                const phaseHeaderHtml = event.html_content.replace('{phaseKey}', event.phaseKey || 'unknown');
-                htmlLog += phaseHeaderHtml;
-                isPhaseDivOpen = true;
-            } else {
-                // Add turn number to non-phase header events
-                if (event.turnNumber !== undefined) {
-                    htmlLog += `<div class="log-turn-number">Turn ${event.turnNumber}</div>`;
-                }
-                appendToLog(event.html_content);
+        let currentTurnNumber = (event.turn !== undefined) ? event.turn : null; // Use event.turn consistently
+        let turnNumberHtml = currentTurnNumber !== null ? `<div class="log-turn-number">Turn ${currentTurnNumber}</div>` : '';
+
+        if (event.type === 'phase_header_event') {
+            if (isPhaseDivOpen) htmlLog += `</div>`; // Close previous phase
+            const phaseHeaderHtml = event.html_content.replace('{phaseKey}', event.phaseKey || 'unknown');
+            htmlLog += phaseHeaderHtml;
+            isPhaseDivOpen = true;
+        } else {
+            let eventHtml = event.html_content || `<p class="log-generic">${event.text || 'Unknown event.'}</p>`;
+
+            switch (event.type) {
+                case 'turn_marker':
+                    // Turn marker already handled by currentTurnNumber above, but if it has html_content, use it.
+                    if (event.html_content) { appendToLog(event.html_content); }
+                    break;
+                case 'move_action_event':
+                    // Direct append, as html_content is already formatted
+                    appendToLog(turnNumberHtml + eventHtml);
+                    break;
+                case 'collateral_damage_event': // Now used for specific environmental impacts
+                case 'environmental_impact_event': // Alias for clarity
+                    appendToLog(turnNumberHtml + eventHtml);
+                    break;
+                case 'environmental_summary_event':
+                    appendToLog(turnNumberHtml + eventHtml);
+                    break;
+                case 'dialogue_event':
+                case 'internal_thought_event':
+                case 'stun_event':
+                case 'energy_recovery_event':
+                case 'manipulation_narration_event':
+                case 'action_failure_event':
+                case 'escalation_change_event':
+                case 'curbstomp_event':
+                case 'final_blow_event':
+                case 'stalemate_result_event':
+                case 'conclusion_event':
+                    appendToLog(turnNumberHtml + eventHtml);
+                    break;
+                case 'dice_roll':
+                    appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong></div>`);
+                    break;
+                default:
+                    // Fallback for any unhandled event types
+                    appendToLog(turnNumberHtml + eventHtml);
+                    console.warn(`Unhandled event type in transformEventsToHtmlLog: ${event.type}`, event);
+                    break;
             }
-        } else if (event.text) {
-            // Fallback for simple text events
-            if (event.turnNumber !== undefined) {
-                htmlLog += `<div class="log-turn-number">Turn ${event.turnNumber}</div>`;
-            }
-            appendToLog(`<p class="log-generic">${event.text}</p>`);
-        } else if (event.type === "dice_roll") {
-            appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong></div>`);
         }
     });
 

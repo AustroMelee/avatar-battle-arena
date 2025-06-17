@@ -151,7 +151,6 @@ export function calculateMove(move, attacker, defender, conditions, battleEventL
         effectsToApply.push({ type: EFFECT_TYPES.STUN, duration: 1, targetId: defender.id });
     }
 
-    // Placeholder for collateral damage (was always 0 before)
     // If move has a collateralImpact, create a COLLATERAL_DAMAGE effect
     if (move.collateralImpact && move.collateralImpact !== 'none') {
         let collateralValue = 0;
@@ -162,7 +161,8 @@ export function calculateMove(move, attacker, defender, conditions, battleEventL
             case 'catastrophic': collateralValue = 50; break;
         }
         if (collateralValue > 0) {
-            effectsToApply.push({ type: EFFECT_TYPES.COLLATERAL_DAMAGE, value: collateralValue });
+            // Add an ENVIRONMENTAL_DAMAGE effect, which applyEffect will process
+            effectsToApply.push({ type: EFFECT_TYPES.ENVIRONMENTAL_DAMAGE, value: collateralValue });
         }
     }
 

@@ -41,7 +41,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName} evades with effortless agility on ${actorPronounS} iconic air-ball.", tags: ['evasive', 'skill'] },
             { text: "${actorName} misjudges a turn on ${actorPronounS} air scooter, stumbling for a moment!", tags: ['miss', 'humor'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'low'
     },
     'Air Blast': {
         counters: {
@@ -54,7 +55,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName}'s air blast goes wide, merely ruffling ${targetName}'s clothes.", tags: ['miss', 'humor'] },
             { text: "A perfectly timed air blast from ${actorName} sends ${targetName} sprawling!", tags: ['crit'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'medium'
     },
     'Wind Shield': {
         counters: {
@@ -66,7 +68,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName} creates a shimmering, transparent wall of wind, deflecting all!", tags: ['defensive', 'skill'] },
             { text: "${actorName}'s wind shield flickers, almost failing against the onslaught.", tags: ['fail', 'tension'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'low'
     },
     'Tornado Whirl': {
         counters: {
@@ -78,7 +81,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName} becomes the eye of a storm, deflecting all around ${actorPronounO} with ease.", tags: ['metaphor', 'defensive', 'aoe'] },
             { text: "${actorName}'s tornado whirl loses cohesion, dissipating harmlessly.", tags: ['miss', 'fail'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'medium'
     },
 
     // ============================================================
@@ -94,7 +98,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName} sends forth a volley of intensely hot, azure flames, like a shower of falling stars!", tags: ['metaphor', 'aggressive', 'crit'] },
             { text: "${actorName}'s blue fire daggers dissipate, a rare lapse in her precision.", tags: ['miss', 'fail'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'low'
     },
     'Lightning Generation': {
         /* Punishable Move */
@@ -104,7 +109,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName} summons a brilliant, arcing bolt of electrical energy, a true force of nature!", tags: ['metaphor', 'finisher', 'aggressive'] },
             { text: "${actorName}'s lightning crackles harmlessly, failing to connect.", tags: ['miss', 'fail'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'high'
     },
     'Flame Burst': { // Reactive defense
         counters: {
@@ -116,7 +122,8 @@ export const moveInteractionMatrix = {
             { text: "${actorName} detonates a concussive nova of flames around ${actorPronounO}self, a fiery shield!", tags: ['metaphor', 'defensive'] },
             { text: "${actorName}'s flame burst sputters, leaving ${actorPronounO} momentarily exposed.", tags: ['fail', 'tension'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'medium'
     },
 
     // ============================================================
@@ -134,6 +141,7 @@ export const moveInteractionMatrix = {
             { text: "${actorName}'s repositioning is clumsy, leaving ${actorPronounO} briefly exposed.", tags: ['fail', 'tension'] },
             { text: "With unmatched agility, ${actorName} perfectly repositions, gaining a critical advantage!", tags: ['crit', 'evasive'] }
         ],
-        isVerbPhrase: false
+        isVerbPhrase: false,
+        collateralImpact: 'none' // Repositioning usually doesn't cause environmental damage
     }
 };
