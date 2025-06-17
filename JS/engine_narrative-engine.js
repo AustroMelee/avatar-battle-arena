@@ -52,24 +52,56 @@ const archetypeDataMap = {
 
 function getEnvironmentImpactLine(locationId, moveType = null, moveElement = null) {
     const loc = locations[locationId];
-    if (!loc || !loc.envImpactVariants) return "";
-
-    const baseVariants = loc.envImpactVariants;
-    let chosenVariant = getRandomElement(baseVariants);
-
-    // Optional: Tag-Driven Line Selection
-    if (moveType && moveElement && loc.envTags) {
-        // Example: Water move in desert location
-        if (moveElement === 'water' && loc.envTags.includes('desert')) {
-            const specialLine = "Desperate for moisture, every drop of water vanishes before it can hit the sand.";
-            if (Math.random() < 0.3) { // 30% chance for rare line
-                chosenVariant = specialLine;
-            }
-        }
-        // Add more tag-driven conditions as needed
+    if (!loc) {
+        console.log('envImpact:', { locationId, variants: 'N/A', chosen: 'No location found' });
+        return ""; // Safety
     }
 
-    return chosenVariant;
+    const envImpactVariants = loc.envImpactVariants;
+    const envTags = loc.envTags || [];
+    let chosen = "";
+
+    // 1. Prioritize Tag-driven and Elemental-driven lines
+    if (moveType && moveElement && envTags.length > 0) {
+        // Specific Elemental Impact in Desert (e.g., Water in Si Wong Desert)
+        if (moveElement === 'water' && envTags.includes('desert')) {
+            chosen = "Desperate for moisture, every drop of water vanishes before it can hit the sand.";
+            console.log('envImpact: Tag-driven (Water in Desert)', { locationId, moveElement, envTags, chosen });
+            // For testing, we can make this 100% chance, but for production, use a lower probability.
+            // if (Math.random() < 1.0) { return chosen; } // 100% chance for testing
+            return chosen;
+        }
+        // Add more specific tag/element combinations here
+        // Example: Earth moves in 'cramped' locations
+        if (moveElement === 'earth' && envTags.includes('cramped') && envImpactVariants && envImpactVariants.length > 0) {
+            const earthCrampedLines = envImpactVariants.filter(line => line.includes('echoes') || line.includes('confined') || line.includes('rumble'));
+            if (earthCrampedLines.length > 0) {
+                chosen = getRandomElement(earthCrampedLines);
+                console.log('envImpact: Tag-driven (Earth in Cramped)', { locationId, moveElement, envTags, chosen });
+                return chosen;
+            }
+        }
+        // Example: Fire moves in 'dense' locations (maybe causes more smoke)
+        if (moveElement === 'fire' && envTags.includes('dense') && envImpactVariants && envImpactVariants.length > 0) {
+            const fireDenseLines = envImpactVariants.filter(line => line.includes('smoke') || line.includes('ash') || line.includes('blaze'));
+            if (fireDenseLines.length > 0) {
+                chosen = getRandomElement(fireDenseLines);
+                console.log('envImpact: Tag-driven (Fire in Dense)', { locationId, moveElement, envTags, chosen });
+                return chosen;
+            }
+        }
+    }
+
+    // 2. Fallback to generic envImpactVariants if they exist
+    if (envImpactVariants && envImpactVariants.length > 0) {
+        chosen = getRandomElement(envImpactVariants);
+        console.log('envImpact: Random Variant', { locationId, variants: envImpactVariants, chosen });
+        return chosen;
+    }
+
+    // 3. Only fallback to empty string if truly no variants
+    console.log('envImpact: No Variants Available', { locationId, variants: 'None', chosen: 'Empty string' });
+    return ""; // or a more subtle default if you really want
 }
 
 export function substituteTokens(template, primaryActorForContext, secondaryActorForContext, additionalContext = {}) {
@@ -360,14 +392,26 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
 
     const { actionSentence, htmlSentence } = builder.buildActionDescription(effectiveness, effectivenessFlavor, effectivenessColor);
 
-    const moveAction = { // FIX: Renamed from actionDescription to moveAction for clarity
+    const fullDescText = `${actionSentence} ${effectivenessFlavor ? `(${effectivenessFlavor})` : ''}`;
+    
+    const moveLineHtml = htmlSentence
+        .replace(/{actorId}/g, actor.id)
+        .replace(/{actorName}/g, actor.name)
+        .replace(/{moveName}/g, move.name)
+        .replace(/{moveEmoji}/g, result.effectiveness.emoji || '⚔️') 
+        .replace(/{effectivenessLabel}/g, result.effectiveness.label)
+        .replace(/{effectivenessEmoji}/g, result.effectiveness.emoji)
+        .replace(/{moveDescription}/g, `<p class="move-description">${fullDescText}</p>`);
+
+    const moveAction = {
         type: 'move_action_event',
         actorId: actor.id,
+        characterName: actor.name,
         moveName: move.name,
         moveType: move.type,
         moveTags: move.moveTags || [],
-        action_text: actionSentence, // Use the sentence generated by the builder
-        html_content: htmlSentence, // Use the HTML sentence generated by the builder
+        action_text: actionSentence,
+        html_content: moveLineHtml,
         effectiveness: effectiveness,
         effectiveness_flavor: effectivenessFlavor,
         damage: result.damage,
@@ -388,7 +432,13 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
 
     // Add additional narration for consumed states (Point 5)
     if (result.consumedStateName) {
-        // Pseudocode
+        // DEBUG: Log consumed state information
+        console.log('Narrative: Consumed State Detected', {
+            consumedStateName: result.consumedStateName,
+            numBuffsConsumed: result.numBuffsConsumed,
+            actorId: actor.id
+        });
+
         const stateData = consumedStateNarratives[result.consumedStateName] || consumedStateNarratives.default;
 
         // Character override
@@ -399,11 +449,15 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
         let narrativeBlock = stateData;
         if (typeof stateData === "object" && stateData[charId]) {
             narrativeBlock = stateData[charId];
+            console.log('Narrative: Using Character-Specific Narrative Block', { charId, narrativeBlock });
         }
 
         // If it's a chain (multiple buffs consumed at once)
         if (isChain && narrativeBlock.chain) {
             narrativeBlock = narrativeBlock.chain;
+            console.log('Narrative: Using Chain Template', { narrativeBlock });
+        } else if (isChain) {
+            console.warn('Narrative: Chain detected but no specific chain template found for', result.consumedStateName);
         }
 
         const text = substituteTokens(narrativeBlock.text, actor, defender, { stateName: result.consumedStateName, targetId: defender.id, numBuffsConsumed: numBuffsConsumed });
@@ -435,6 +489,11 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
     const collateralPhraseTemplate = getRandomElement(collateralImpactPhrases[impactLevel]);
     // OLD: const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent) : '';
     const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent, {battleState}) : ''; // FIX: Pass battleState
+
+    // NEW: Add the collateral phrase to environmentState.specificImpacts
+    if (collateralPhrase) {
+        environmentState.specificImpacts.add(collateralPhrase);
+    }
 
     let description = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`;
     let specificImpactPhrase = '';
@@ -627,12 +686,9 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
             narrationObjects.push(formatQuoteEvent(actorInternalThought, actor, defender, narrativeContext));
         }
 
-        // Check for environmental impact narrative (if collateral damage occurred)
-        if (result.collateralDamage > 0) {
-            const envImpactNarrative = findNarrativeQuote(actor, defender, 'onCollateral', 'general', { ...narrativeContext, impactText: 'The environment feels the impact of the battle.' });
-            if (envImpactNarrative) {
-                narrationObjects.push(formatQuoteEvent(envImpactNarrative, actor, defender, narrativeContext));
-            }
+        const collateralEvent = generateCollateralDamageEvent(move, actor, defender, environmentState, locationData, battleState);
+        if (collateralEvent) {
+            narrationObjects.push(collateralEvent); 
         }
     }
     
