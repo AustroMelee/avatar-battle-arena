@@ -35,6 +35,14 @@ const SITUATIONAL_STRESS = {
         turnThreshold: 15, // Stress applies after this many turns
         stressPerTurn: 5,
         reason: "The endless, scorching desert sun drains morale."
+    },
+    // NEW: Waterbender-specific stress conditions
+    'waterbender_low_supply': {
+        stressPerTurn: 10,
+        reason: "Lack of sufficient water source diminishes a Waterbender's resolve.",
+        locations: ['si-wong-desert', 'fire-nation-capital', 'boiling-rock'], // Locations with low water
+        hpThreshold: 0.4, // Apply if HP is below 40%
+        momentumThreshold: -30 // Apply if momentum is very low
     }
 };
 
@@ -69,7 +77,7 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
         if (moveResult.isDodged) applyStress(fighter, 'MOVE_DODGED', battleState);
     }
 
-    // --- NEW: Apply situational stress from location ---
+    // --- NEW: Apply situational stress from location and character-specific conditions ---
     const situationalRule = SITUATIONAL_STRESS[locId];
     if (situationalRule) {
         let shouldApply = false;
@@ -91,6 +99,28 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
         }
     }
 
+    // NEW: Azula's Perfection High Bar
+    if (fighter.id === 'azula' && (fighter.hp < fighter.maxHp * 0.4 || fighter.criticalHitsTaken >= 2)) {
+        const stressGain = 20 / (fighter.mentalResilience || 1.0);
+        fighter.mentalState.stress += Math.round(stressGain);
+        fighter.aiLog.push(`[Azula Stress]: +${Math.round(stressGain)} stress from not meeting perfectionist standards. Total: ${fighter.mentalState.stress}`);
+    }
+
+    // NEW: Mai's LOS/Swamp stress
+    if (fighter.id === 'mai' && (locId === 'foggy-swamp' || fighter.criticalHitsTaken >= 1)) {
+        const stressGain = 15 / (fighter.mentalResilience || 1.0);
+        fighter.mentalState.stress += Math.round(stressGain);
+        fighter.aiLog.push(`[Mai Stress]: +${Math.round(stressGain)} stress from poor LOS/swamp. Total: ${fighter.mentalState.stress}`);
+    }
+
+    // NEW: Waterbender specific stress
+    const waterbenderLowSupplyRule = SITUATIONAL_STRESS['waterbender_low_supply'];
+    if (fighter.element === 'water' && waterbenderLowSupplyRule.locations.includes(locId) && 
+        (fighter.hp < fighter.maxHp * waterbenderLowSupplyRule.hpThreshold || fighter.momentum < waterbenderLowSupplyRule.momentumThreshold)) {
+        const stressGain = waterbenderLowSupplyRule.stressPerTurn / (fighter.mentalResilience || 1.0);
+        fighter.mentalState.stress += Math.round(stressGain);
+        fighter.aiLog.push(`[Waterbender Stress]: +${Math.round(stressGain)} stress from low water supply/poor performance. Total: ${fighter.mentalState.stress}`);
+    }
 
     // Clamp stress to a max value (e.g., 150) to prevent runaway numbers
     fighter.mentalState.stress = Math.min(fighter.mentalState.stress, 150);

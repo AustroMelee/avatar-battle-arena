@@ -223,6 +223,17 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
             // Fallback for events that might only have `text` and not pre-formatted `html_content`
             let contentToAppend = "";
             switch (event.type) {
+                case 'turn_marker': // NEW: Handle turn marker events with portraits
+                    contentToAppend = `<div class="turn-marker">
+                        <div class="turn-marker-portrait">
+                            <img src="${event.portrait}" alt="${event.characterName} portrait">
+                        </div>
+                        <div class="turn-marker-info">
+                            <span class="turn-number">Turn ${event.turn}</span>
+                            <span class="character-name-turn">${event.characterName}</span>
+                        </div>
+                    </div>`;
+                    break;
                 case 'battle_end_ko_event':
                     contentToAppend = `<div class="final-blow-header">Final Blow 💥</div><p class="final-blow">${textContent}</p>`;
                     break;

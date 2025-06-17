@@ -67,9 +67,9 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
 
     const replacements = {
         '{actorName}': additionalContext.attackerName || actor?.name || 'A fighter',
-        '{opponentName}': additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent',
+        '{opponentName}': additionalContext.targetName || (actor?.id === opponent?.id ? opponentPronouns.p + ' reflection' : opponent?.name) || opponentPronouns.p + ' opponent',
 
-        '{targetName}': additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent',
+        '{targetName}': additionalContext.targetName || (actor?.id === opponent?.id ? opponentPronouns.p + ' reflection' : opponent?.name) || opponentPronouns.p + ' opponent',
         '{attackerName}': additionalContext.attackerName || actor?.name || 'A fighter',
 
         '{WinnerName}': additionalContext.WinnerName || actorNameDisplay,
@@ -222,18 +222,24 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
 
     // Fallback for specific triggers if no quote found (e.g., if a new phase has no intro defined)
     if (trigger === 'battleStart') {
-         if (currentPhaseKey === BATTLE_PHASES.PRE_BANTER) return { type: 'spoken', line: `{actorName} prepares for battle, sensing the tension in the air.` };
-         if (currentPhaseKey === BATTLE_PHASES.POKING) return { type: 'spoken', line: `{actorName} begins to probe {opponentName}'s defenses cautiously.` };
+         if (currentPhaseKey === BATTLE_PHASES.PRE_BANTER) return { type: 'spoken', line: `{actorName} prepares for battle, sensing the tension in {actor.p} air.` };
+         if (currentPhaseKey === BATTLE_PHASES.POKING) return { type: 'spoken', line: `{actorName} begins to probe {opponent.p} defenses cautiously.` };
     }
     if (trigger === 'phaseTransition') {
-         if (subTrigger === BATTLE_PHASES.POKING) return { type: 'action', line: `The silence breaks, and the probing begins for {actorName}!` };
-         if (subTrigger === BATTLE_PHASES.EARLY) return { type: 'action', line: `The battle intensifies! The true fight begins for {actorName}!` };
-         if (subTrigger === BATTLE_PHASES.MID) return { type: 'action', line: `The conflict reaches a new height. The stakes are rising for {actorName}!` };
-         if (subTrigger === BATTLE_PHASES.LATE) return { type: 'action', line: `The end is in sight. {actorName} prepares for a decisive confrontation!` };
+         if (subTrigger === BATTLE_PHASES.POKING) return { type: 'action', line: `The silence breaks, and the probing begins for {actor.o}!` };
+         if (subTrigger === BATTLE_PHASES.EARLY) return { type: 'action', line: `The battle intensifies! The true fight begins for {actor.o}!` };
+         if (subTrigger === BATTLE_PHASES.MID) return { type: 'action', line: `The conflict reaches a new height. The stakes are rising for {actor.o}!` };
+         if (subTrigger === BATTLE_PHASES.LATE) return { type: 'action', line: `The end is in sight. {actor.s} prepares for a decisive confrontation!` };
     }
 
     if (trigger === 'onCollateral' && subTrigger === 'general' && context.impactText) {
         return { type: 'environmental', line: context.impactText };
+    }
+
+    // NEW: Handle internal thoughts
+    if (trigger === 'internalThought' && actor.quotes?.internalThoughts && actor.quotes.internalThoughts.length > 0) {
+        const selectedThought = getRandomElement(actor.quotes.internalThoughts);
+        return selectedThought ? { type: 'internal', line: selectedThought.line || selectedThought } : null;
     }
 
     return null;
@@ -275,66 +281,102 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
 
 // OLD: export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {})
 export function generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry) {
-    if (!move || !result || !result.effectiveness) {
-        return {
-            type: 'move_action_event',
-            html_content: `<p class="move-line error">A move was attempted by ${actor.name}, but the outcome was unclear.</p>`
-        };
+    if (!actor || !defender) return null;
+
+    const actorName = actor.name;
+    const defenderName = defender.name;
+
+    const actorPronouns = actor.pronouns || { s: 'they', p: 'their', o: 'them' };
+    const defenderPronouns = defender.pronouns || { s: 'they', p: 'their', o: 'them' };
+
+    const moveVerb = conjugatePresent(move.verb || 'acts');
+    const moveObject = move.object || 'meaningfully';
+
+    let actionText = '';
+    let htmlContent = '';
+    let additionalContext = {};
+
+    // Base action description
+    actionText = `${actorName} ${moveVerb} ${moveObject}.`;
+    htmlContent = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject}.</p>`;
+
+    // Effectiveness flavor
+    const effectiveness = result?.effectiveness?.label || 'Normal';
+    const effectivenessEmoji = result?.effectiveness?.emoji || '';
+    const effectivenessFlavor = effectivenessLevels[effectiveness]?.flavor || '';
+    const effectivenessColor = effectivenessLevels[effectiveness]?.colorClass || '';
+
+    if (effectiveness !== 'Normal' && effectiveness !== 'Ineffective') {
+        actionText += ` ${effectivenessFlavor}, ${actorPronouns.s} move hitting with ${effectiveness.toLowerCase()} impact.`;
+        htmlContent = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject}. <span class="${effectivenessColor}">${effectivenessFlavor}, ${actorPronouns.s} move hitting with ${effectiveness.toLowerCase()} impact.</span></p>`;
     }
 
-    const effectiveness = result.effectiveness.label;
-    const effectivenessClass = effectiveness.toLowerCase();
-    const actorName = `<span class="move-actor char-${actor.id}">${actor.name}</span>`;
-    const moveName = `<span class="move-name">${move.name}</span>`;
-    const emoji = getEmojiForMoveType(move.moveType, effectiveness);
-
-    // Main action line
-    const actionLine = `${actorName} used ${moveName} ${emoji}`;
-
-    // Effectiveness description
-    const effectivenessLine = `<span class="move-effectiveness ${effectivenessClass}">${effectiveness}</span>`;
-
-    // Detailed description generation
-    let descriptionText = findNarrativeQuote(actor, defender, 'onMove', effectiveness.toLowerCase(), {
-        moveName: move.name,
-        moveType: move.moveType,
-        phase: currentPhase,
-    });
-
-    if (!descriptionText) {
-        // Fallback description
-        switch (effectiveness.toLowerCase()) {
-            case 'critical':
-                descriptionText = `${actor.name} lands a devastating blow, turning the tide of battle!`;
-                break;
-            case 'strong':
-                descriptionText = `A powerful strike from ${actor.name} that puts ${defender.name} on the defensive.`;
-                break;
-            case 'weak':
-                descriptionText = `${defender.name} weathers the attack from ${actor.name}, which was less effective than intended.`;
-                break;
-            default:
-                descriptionText = `A standard exchange between the two combatants.`;
-        }
+    // Damage/Healing
+    if (result.damage > 0) {
+        actionText += ` It deals ${result.damage} damage to ${defenderName}.`;
+        htmlContent += `<p class="narrative-damage char-${defender.id}">It deals <span class="damage-value">${result.damage}</span> damage to ${defenderName}.</p>`;
+    } else if (result.healing > 0) {
+        actionText += ` ${actorPronouns.s} heals for ${result.healing} HP.`;
+        htmlContent += `<p class="narrative-healing char-${actor.id}">${actorPronouns.s} heals for <span class="healing-value">${result.healing}</span> HP.</p>`;
     }
 
-    // Add context from AI log if available
-    if (result.consumedStateName) {
-        descriptionText += ` It capitalized on ${defender.name} being ${result.consumedStateName}.`;
+    // Self-damage
+    if (result.selfDamage > 0) {
+        actionText += ` But ${actorPronouns.s} takes ${result.selfDamage} recoil damage.`;
+        htmlContent += `<p class="narrative-self-damage char-${actor.id}">But ${actorPronouns.s} takes <span class="damage-value">${result.selfDamage}</span> recoil damage.</p>`;
     }
 
-    const html_content = `
-        <div class="move-line">
-            <div class="move-header">
-                ${actionLine} - ${effectivenessLine}
-            </div>
-            <p class="move-description">${descriptionText}</p>
-        </div>
-    `;
+    // Stun
+    if (result.stunDuration > 0) {
+        actionText += ` ${defenderName} is stunned for ${result.stunDuration} turn(s)!`;
+        htmlContent += `<p class="narrative-stun char-${defender.id}">${defenderName} is stunned for <span class="stun-value">${result.stunDuration}</span> turn(s)!</p>`;
+    }
+
+    // Debuffs/Buffs
+    if (result.debuff) {
+        actionText += ` ${defenderName} is now ${result.debuff.name.toLowerCase()}.`;
+        htmlContent += `<p class="narrative-debuff char-${defender.id}">${defenderName} is now <span class="debuff-name">${result.debuff.name.toLowerCase()}</span>.</p>`;
+    }
+    if (result.buff) {
+        actionText += ` ${actorName} gains ${result.buff.name.toLowerCase()}.`;
+        htmlContent += `<p class="narrative-buff char-${actor.id}">${actorName} gains <span class="buff-name">${result.buff.name.toLowerCase()}</span>.</p>`;
+    }
+
+    // Tactical State interaction (e.g., opening consumed)
+    if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName) {
+        actionText += ` This consumes ${defenderName}'s ${result.consumedStateName} state.`;
+        htmlContent += `<p class="narrative-context char-${actor.id}">This consumes ${defenderName}'s <span class="tactical-state">${result.consumedStateName}</span> state.</p>`;
+    }
+
+    // Environmental Impact
+    if (result.environmentalDamage > 0) {
+        actionText += ` The environment takes ${result.environmentalDamage} damage.`;
+        htmlContent += `<p class="narrative-environmental-damage">The environment takes <span class="damage-value">${result.environmentalDamage}</span> damage.</p>`;
+    }
+
+    // Reactive Defense
+    if (result.isReactedAction) {
+        actionText += ` However, ${defenderName} responded with a reactive defense!`;
+        htmlContent += `<p class="narrative-context char-${defender.id}">However, ${defenderName} responded with a reactive defense!</p>`;
+    }
+
+    // Move-specific narration from the move itself (if available)
+    if (move.narrative && move.narrative[effectiveness]) {
+        const moveNarrative = substituteTokens(move.narrative[effectiveness], actor, defender, { ...additionalContext, move: move, result: result });
+        actionText += ` ${moveNarrative}`; // Append to existing text
+        htmlContent += `<p class="narrative-move-specific">${moveNarrative}</p>`;
+    }
+
+    // Quotes and AI log entries for debugging
+    const aiLogEntryText = aiLogEntry?.text ? `(${aiLogEntry.text})` : '';
+    if (aiLogEntryText) {
+        actionText += ` ${aiLogEntryText}`;
+        htmlContent += `<p class="narrative-log-entry">${aiLogEntryText}</p>`;
+    }
 
     return {
-        type: 'move_action_event',
-        html_content: html_content,
+        actionText: actionText,
+        htmlContent: htmlContent
     };
 }
 
@@ -486,103 +528,95 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
 }
 
 export function getFinalVictoryLine(winner, loser) {
-    if (!winner) return "The battle ends.";
-    const winnerArchetypeData = characterData[winner.id]?.archetypeData || {};
-    const winnerQuotes = winnerArchetypeData.quotes || {};
-
-    const safeLoser = loser || { name: "their opponent", pronouns: { s: 'they', p: 'their', o: 'them' } };
-
-    const finalQuote = findNarrativeQuote(winner, safeLoser, 'onVictory', 'Default', {});
-    if (finalQuote && typeof finalQuote.line === 'string') {
-        return substituteTokens(finalQuote.line, winner, safeLoser, {
-            WinnerName: winner.name,
-            LoserName: safeLoser.name
-        });
+    if (!winner || !loser) {
+        return postBattleVictoryPhrases.generic.defeat[0]; // Fallback if winner/loser are not defined
     }
 
-    const winnerVictoryStyle = winner.victoryStyle || 'default';
-    const victoryPhrasesPool = postBattleVictoryPhrases[winnerVictoryStyle] || postBattleVictoryPhrases.default;
-    const outcomeType = (winner.hp !== undefined && safeLoser.hp !== undefined && winner.hp > (safeLoser.hp + 20)) ? 'dominant' : 'narrow';
-    let phraseTemplate = getRandomElement(victoryPhrasesPool[outcomeType]);
-
-    // Check for character-specific post-win quotes first
-    if (winnerQuotes.postWin_specific && winnerQuotes.postWin_specific[safeLoser.id]) {
-        phraseTemplate = { line: winnerQuotes.postWin_specific[safeLoser.id] };
-    } else if (winnerQuotes.postWin_overwhelming && outcomeType === 'dominant') {
-        phraseTemplate = { line: winnerQuotes.postWin_overwhelming };
-    } else if (winnerQuotes.postWin) {
-        phraseTemplate = { line: getRandomElement(winnerQuotes.postWin) };
-    }
-
-    // FIX: Safely extract line or use the string directly if phraseTemplate is a string
-    const finalPhrase = phraseTemplate ? (phraseTemplate.line || phraseTemplate) : (victoryPhrasesPool.default.dominant[0].line || victoryPhrasesPool.default.dominant[0]); // Ensure default is an array
-
-
+    const winnerPronounS = winner.pronouns?.s || 'they';
     const winnerPronounP = winner.pronouns?.p || 'their';
+    const loserPronounS = loser.pronouns?.s || 'they';
+    const loserPronounO = loser.pronouns?.o || 'them';
 
-    return substituteTokens(finalPhrase, winner, safeLoser, {
-        WinnerName: winner.name,
-        LoserName: safeLoser.name,
-        WinnerPronounP: winnerPronounP
-    });
+    // Attempt to find a specific victory phrase based on the winner and loser IDs
+    if (winner.quotes?.postWin_specific?.[loser.id]?.length > 0) {
+        const specificQuote = getRandomElement(winner.quotes.postWin_specific[loser.id]);
+        if (specificQuote) return specificQuote;
+    }
+
+    // Fallback to general overwhelming victory if the winner delivered a curbstomp or massive damage
+    // NOTE: This logic might need refinement based on how curbstomp/overwhelming victory is determined in the battle engine
+    if (winner.summary?.includes('decisive victory') || winner.summary?.includes('completely overwhelmed')) {
+        if (winner.quotes?.postWin_overwhelming?.length > 0) {
+            const overwhelmingQuote = getRandomElement(winner.quotes.postWin_overwhelming);
+            if (overwhelmingQuote) return overwhelmingQuote;
+        }
+    }
+
+    // General victory phrases
+    if (winner.quotes?.postWin?.length > 0) {
+        const generalWinQuote = getRandomElement(winner.quotes.postWin);
+        if (generalWinQuote) return generalWinQuote;
+    }
+
+    // Generic fallback if no specific quotes are found
+    return getRandomElement(postBattleVictoryPhrases.generic.victory)
+        .replace(/{winner.s}/g, winnerPronounS)
+        .replace(/{loser.o}/g, loserPronounO);
 }
 
 export function generateCurbstompNarration(rule, attacker, target, isEscape = false, explicitContext = {}) {
-    let textTemplate;
-    let htmlClass = "narrative-curbstomp highlight-major";
+    if (!rule || !attacker || !target) return null;
 
-    const attackerName = attacker?.name || "Attacker";
-    const targetName = target?.name || "Target";
+    const attackerName = attacker.name;
+    const targetName = target.name;
 
-    let baseCharacterForToken;
+    const attackerPronouns = attacker.pronouns || { s: 'they', p: 'their', o: 'them' };
+    const targetPronouns = target.pronouns || { s: 'they', p: 'their', o: 'them' };
 
-    if (explicitContext.actualVictimName) {
-        baseCharacterForToken = explicitContext.actualVictimName;
-    } else if (rule.appliesToAll) {
-        if (rule.outcome?.type?.includes("loss_random") || rule.outcome?.type?.includes("loss_weighted") || rule.outcome?.type?.includes("death_target")) {
-            baseCharacterForToken = targetName;
-        } else if (rule.outcome?.type?.includes("loss_character") && rule.appliesToCharacter === target?.id) {
-            baseCharacterForToken = targetName;
-        } else {
-            baseCharacterForToken = attackerName;
-        }
-    } else if (rule.appliesToCharacter) {
-        baseCharacterForToken = characterData[rule.appliesToCharacter]?.name || (rule.appliesToCharacter === attacker?.id ? attackerName : targetName);
-    } else {
-        baseCharacterForToken = attackerName;
-    }
-
+    let narrationText = '';
 
     if (isEscape) {
-        textTemplate = rule.outcome.escapeMessage || `{targetName} narrowly escapes ${attackerName}'s devastating attempt!`;
-        htmlClass = "narrative-curbstomp highlight-escape";
-        if (!explicitContext.actualVictimName) {
-             baseCharacterForToken = targetName;
-        }
-
-    } else if (rule.outcome.type === "conditional_instant_kill_or_self_sabotage" && explicitContext.isSelfSabotageOutcome) {
-        textTemplate = rule.outcome.selfSabotageMessage || `${attackerName}'s move backfires!`;
-        htmlClass = "narrative-curbstomp highlight-neutral";
-    } else {
-        textTemplate = rule.outcome.successMessage || `${attackerName}'s ${rule.id} overwhelmingly defeats ${targetName}!`;
+        narrationText = `${targetName} manages to narrowly escape ${attacker.p} overwhelming assault!`;
+        return { type: 'curbstomp_escape', text: narrationText };
     }
 
-    let additionalContextForTokens = {
-        attackerName: attackerName,
-        targetName: targetName,
-        characterName: baseCharacterForToken,
-        '{moveName}': explicitContext['{moveName}'] || rule.activatingMoveName || "a devastating maneuver",
-    };
+    const outcomeType = rule.outcome?.type;
 
-    const substitutedText = substituteTokens(textTemplate, attacker, target, additionalContextForTokens);
+    switch (outcomeType) {
+        case 'instant_win':
+            narrationText = `${attackerName} delivers a crushing blow, ending the fight decisively and securing ${attackerPronouns.p} victory over ${targetName}.`;
+            break;
+        case 'instant_loss':
+            narrationText = `${targetName} is overwhelmed by the situation, leading to ${targetPronouns.p} immediate defeat.`;
+            break;
+        case 'environmental_kill':
+            narrationText = `The environment claims ${targetName} as ${targetPronouns.s} is unable to withstand its harsh conditions.`;
+            break;
+        case 'buff':
+            narrationText = `${attackerName} gains a significant advantage, boosting ${attackerPronouns.p} ${rule.outcome.property}.`;
+            break;
+        case 'debuff':
+            narrationText = `${targetName} is severely hampered, suffering a major debuff to ${targetPronouns.p} ${rule.outcome.property}.`;
+            break;
+        case 'advantage':
+            narrationText = `${attackerName} gains a significant strategic advantage, putting ${targetName} on the defensive.`;
+            break;
+        case 'external_intervention':
+            narrationText = `The conflict is abruptly interrupted by an unforeseen external force, bringing the battle to an unexpected halt.`;
+            break;
+        case 'loss_weighted_character': // Added for completeness, although handled by selectCurbstompVictim
+        case 'loss_random_character':
+            narrationText = `A decisive turn of events forces ${targetName} into an unfavorable position, leading to ${targetPronouns.p} defeat.`;
+            break;
+        default:
+            narrationText = `A pivotal moment occurs, fundamentally shifting the battle's trajectory against ${targetName}.`;
+            break;
+    }
 
-    return {
-        type: 'curbstomp_event',
-        text: substitutedText,
-        html_content: `<p class="${htmlClass}">${substitutedText}</p>`,
-        curbstompRuleId: rule.id,
-        actualAttackerId: attacker.id, // ADD THIS LINE: Store the ID directly
-        isEscape: isEscape,
-        isMajorEvent: !isEscape && !(explicitContext.isSelfSabotageOutcome)
-    };
+    // Append rule description if available and not too generic
+    if (rule.description && !narrationText.includes(rule.description)) {
+        narrationText += ` (${rule.description})`;
+    }
+
+    return { type: 'curbstomp_event', text: narrationText };
 }

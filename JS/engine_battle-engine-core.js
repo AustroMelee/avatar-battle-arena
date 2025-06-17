@@ -272,6 +272,7 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         hasMetalArmor: characterData.specialTraits?.hasMetalArmor || false,
         incapacitationScore: 0,
         escalationState: characterData.escalationState || ESCALATION_STATES.NORMAL,
+        mentalResilience: characterData.mentalResilience !== undefined ? characterData.mentalResilience : 1.2, // NEW: Default mental resilience
         // Make sure techniques are copied from characterData here, if they are meant to be character-wide.
         // If techniques can vary by location, they will be selected later by getAvailableMoves.
         // For now, assume a 'techniques' array is available on the base character object.
