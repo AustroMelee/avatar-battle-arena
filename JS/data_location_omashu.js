@@ -16,5 +16,5 @@ export const omashu = {
         ranged_attack: { damage: -25, energy: 15, reason: "The twisting chutes make it difficult to maintain line of sight." }
     },
     fragility: 50,
-    background: 'images/locations/omashu.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/1/18/Omashu.png',
 }; 

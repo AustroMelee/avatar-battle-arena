@@ -2,8 +2,8 @@
 
 export const kyoshiIsland = {
     id: 'kyoshi-island',
-    name: 'Kyoshi Island Village',
-    description: "A peaceful village on a serene island, protected by the elite Kyoshi Warriors.",
+    name: 'Kyoshi Island',
+    description: "A tranquil island known for its fierce warriors and the giant Unagi that prowls its shores.",
     environmentalModifiers: {
         air: { damage: 0, energy: 0, reason: "The temperate climate has little effect on airbending." },
         fire: { damage: -10, energy: 5, reason: "The wooden buildings are vulnerable, but the sea air is damp." },
@@ -16,5 +16,5 @@ export const kyoshiIsland = {
         ranged_attack: { damage: -20, energy: 15, reason: "The buildings provide significant cover, hindering ranged attacks." }
     },
     fragility: 65,
-    background: 'images/locations/kyoshi_island.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/a/a0/Kyoshi_Island.png',
 }; 

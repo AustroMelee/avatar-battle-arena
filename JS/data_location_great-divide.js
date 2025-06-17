@@ -3,7 +3,7 @@
 export const greatDivide = {
     id: 'great-divide',
     name: 'The Great Divide',
-    description: "A massive, treacherous canyon that tests the endurance and climbing skills of any who dare to cross.",
+    description: "The largest canyon in the world, a vast and treacherous chasm that tests the resolve of any who dare to cross.",
     environmentalModifiers: {
         air: { damage: 10, energy: -5, reason: "The open canyon is ideal for powerful air currents." },
         fire: { damage: -10, energy: 5, reason: "The windiness of the canyon makes controlling fire difficult." },
@@ -16,5 +16,5 @@ export const greatDivide = {
         ranged_attack: { damage: -15, energy: 10, reason: "The variable elevation and wind makes ranged attacks unreliable." }
     },
     fragility: 80,
-    background: 'images/locations/great_divide.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/3/33/Great_Divide.png',
 }; 

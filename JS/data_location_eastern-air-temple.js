@@ -89,5 +89,5 @@ export const easternAirTemple = {
         }
     ],
     fragility: 50,
-    background: 'images/locations/eastern_air_temple.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/5/52/Eastern_Air_Temple.png',
 };

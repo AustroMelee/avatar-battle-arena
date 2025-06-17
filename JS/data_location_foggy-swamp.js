@@ -3,7 +3,7 @@
 export const foggySwamp = {
     id: 'foggy-swamp',
     name: 'The Foggy Swamp',
-    description: "A mysterious, ancient swamp with tangled vines, murky water, and a powerful spiritual connection.",
+    description: "A vast, mystical wetland teeming with unique flora and fauna, home to an isolated tribe of waterbenders.",
     environmentalModifiers: {
         air: { damage: -15, energy: 10, reason: "The dense, heavy fog dampens air currents." },
         fire: { damage: -25, energy: 20, reason: "The dampness of the swamp makes firebending difficult." },
@@ -16,5 +16,5 @@ export const foggySwamp = {
         ranged_attack: { damage: -30, energy: 25, reason: "The thick fog severely obscures visibility for ranged attacks." }
     },
     fragility: 40,
-    background: 'images/locations/foggy_swamp.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/d/d9/Foggy_Swamp_Tribe.png',
 }; 

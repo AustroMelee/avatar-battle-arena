@@ -16,5 +16,5 @@ export const boilingRock = {
         ranged_attack: { damage: 10, energy: -5, reason: "Guard towers provide clear lines of sight for ranged attacks." }
     },
     fragility: 20,
-    background: 'images/locations/boiling_rock.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/c/c4/Boiling_Rock.png',
 }; 

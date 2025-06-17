@@ -16,5 +16,5 @@ export const northernWaterTribe = {
         ranged_attack: { damage: -15, energy: 10, reason: "The glittering ice and constant flurries can obscure vision." }
     },
     fragility: 30,
-    background: 'images/locations/northern_water_tribe.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/3/33/Northern_Water_Tribe.png',
 }; 

@@ -7,6 +7,8 @@ import { locations } from './locations.js';
 import { locationConditions } from './location-battle-conditions.js';
 import { getModifierDescription } from './utils_description-generator.js';
 
+console.log('Locations object as imported by ui_location-selection:', locations);
+
 let locationGrid = null;
 let locationNameDisplay = null;
 let locationSelect = null; // Hidden input for value

@@ -2,8 +2,8 @@
 
 export const fireNationCapital = {
     id: 'fire-nation-capital',
-    name: 'Fire Nation Capital Plaza',
-    description: "The grand plaza of the Fire Nation Capital, an imposing symbol of military might and industrial power.",
+    name: 'Fire Nation Capital',
+    description: "The heart of the Fire Nation, a city built in a volcanic caldera, teeming with industrial might and imperial architecture.",
     environmentalModifiers: {
         air: { damage: -15, energy: 10, reason: "The oppressive, controlled environment stifles free-flowing air currents." },
         fire: { damage: 20, energy: -15, reason: "The heart of the Fire Nation empowers its benders." },
@@ -16,5 +16,5 @@ export const fireNationCapital = {
         ranged_attack: { damage: 15, energy: -10, reason: "The wide-open plaza favors long-range attacks." }
     },
     fragility: 60,
-    background: 'images/locations/fire_nation_capital.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/f/f3/Fire_Nation_Capital.png',
 }; 

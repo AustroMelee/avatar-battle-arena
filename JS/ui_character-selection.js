@@ -5,6 +5,8 @@
 
 import { characters } from './data_characters.js';
 
+console.log('Characters object as imported by ui_character-selection:', characters);
+
 let fighter1Grid = null;
 let fighter2Grid = null;
 let fighter1NameDisplay = null;

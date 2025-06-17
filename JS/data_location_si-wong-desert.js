@@ -3,7 +3,7 @@
 export const siWongDesert = {
     id: 'si-wong-desert',
     name: 'Si Wong Desert',
-    description: "A vast, sun-scorched desert where the sand itself can be a powerful weapon or a deadly trap.",
+    description: "A vast and treacherous desert, where the sand itself can be a weapon.",
     environmentalModifiers: {
         air: { damage: 10, energy: -5, reason: "The open desert winds empower airbending." },
         fire: { damage: 15, energy: -10, reason: "The intense sun and dry air are ideal for firebending." },
@@ -16,5 +16,5 @@ export const siWongDesert = {
         ranged_attack: { damage: 10, energy: -5, reason: "The flat, open terrain offers clear lines of sight." }
     },
     fragility: 10,
-    background: 'images/locations/si_wong_desert.webp',
+    background: 'https://static.wikia.nocookie.net/avatar/images/1/1a/Si_Wong_Desert.png',
 }; 
