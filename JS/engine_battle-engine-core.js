@@ -603,7 +603,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
 
-    for (turn = 0; turn < MAX_TOTAL_TURNS && !battleOver; turn++) {
+    while (turn < MAX_TOTAL_TURNS && !battleOver) {
         currentBattleState.turn = turn;
         currentAttacker.currentTurn = turn;
         currentDefender.currentTurn = turn;
@@ -615,6 +615,19 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         currentBattleState.opponentLandedSignificantHits = 0;
         currentBattleState.characterReceivedCriticalHit = false;
         currentBattleState.characterLandedStrongOrCriticalHitLastTurn = false;
+
+        // --- Universal Turn Setup ---
+        const turnSpecificEventsForLog = [];
+        const battleContextFiredQuotes = new Set();
+
+        turnSpecificEventsForLog.push({
+            type: 'turn_marker',
+            actorId: currentAttacker.id,
+            characterName: currentAttacker.name,
+            turn: turn + 1,
+            portrait: currentAttacker.images.portrait,
+        });
+        // --- End Universal Turn Setup ---
 
         // At the start of each turn, check for phase transitions
         const phaseChanged = checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, locId);
@@ -682,94 +695,69 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             }
         }
 
-        let turnSpecificEventsForLog = [];
-        const battleContextFiredQuotes = new Set();
+        if (charactersMarkedForDefeat.has(currentAttacker.id)) {
+            currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is already marked for defeat and cannot act this segment.`);
+            continue;
+        }
 
-        const processTurnSegment = (currentAttacker, currentDefender) => {
-            // Add a turn marker event to the log
+        if (currentAttacker.stunImmunityTurns > 0) {
+            currentAttacker.stunImmunityTurns--;
+        }
+
+        if (battleOver || isStalemate) return;
+
+        // Energy management
+        if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
+            currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
+            currentAttacker.aiLog.push(`[Energy Recovery]: ${currentAttacker.name} recovers energy to ${currentAttacker.energy}.`);
             turnSpecificEventsForLog.push({
-                type: 'turn_marker',
+                type: 'energy_recovery_event',
                 actorId: currentAttacker.id,
                 characterName: currentAttacker.name,
-                turn: turn + 1,
-                portrait: currentAttacker.images.portrait,
+                text: `${currentAttacker.name} takes a moment to recover energy. (Energy: ${currentAttacker.energy})`,
+                html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} takes a moment to recover energy. (Energy: ${currentAttacker.energy})</p>`
             });
+            continue;
+        }
 
-            if (charactersMarkedForDefeat.has(currentAttacker.id)) {
-                currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is already marked for defeat and cannot act this segment.`);
-                return;
+        // Stun management
+        if (currentAttacker.stunDuration > 0) {
+            currentAttacker.stunDuration--;
+            
+            if (currentAttacker.stunDuration === 0) {
+                currentAttacker.consecutiveStuns = 0;
+                currentAttacker.aiLog.push(`[Stun Expired]: ${currentAttacker.name} has recovered from being stunned.`);
             }
 
-            if (currentAttacker.stunImmunityTurns > 0) {
-                currentAttacker.stunImmunityTurns--;
-            }
+            currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE;
+            currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned. Turns remaining: ${currentAttacker.stunDuration}. Stun resistance increased to ${currentAttacker.stunResistance}.`);
+            turnSpecificEventsForLog.push({
+                type: 'stun_event',
+                actorId: currentAttacker.id,
+                characterName: currentAttacker.name,
+                text: `${currentAttacker.name} is stunned and unable to move! (Stun remaining: ${currentAttacker.stunDuration} turn(s))`,
+                html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move! (Stun remaining: ${currentAttacker.stunDuration} turn(s))</p>`
+            });
+            currentBattleState.attackerIsStunned = true;
+            continue;
+        }
+        currentBattleState.attackerIsStunned = false;
 
-            if (battleOver || isStalemate) return;
+        // Get opponent using the helper function
+        const opponent = getOpponent(currentAttacker, fighter1, fighter2);
 
-            // Energy management
-            if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
-                currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
-                currentAttacker.aiLog.push(`[Energy Recovery]: ${currentAttacker.name} recovers energy to ${currentAttacker.energy}.`);
-                turnSpecificEventsForLog.push({
-                    type: 'energy_recovery_event',
-                    actorId: currentAttacker.id,
-                    characterName: currentAttacker.name,
-                    text: `${currentAttacker.name} takes a moment to recover energy. (Energy: ${currentAttacker.energy})`,
-                    html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} takes a moment to recover energy. (Energy: ${currentAttacker.energy})</p>`
-                });
-                return;
-            }
+        // Update battle state with opponent info
+        currentBattleState.opponentLandedCriticalHit = opponent.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
+        currentBattleState.opponentUsedLethalForce = opponent.lastMoveForPersonalityCheck?.isHighRisk || false;
+        currentBattleState.characterReceivedCriticalHit = false;
+        currentBattleState.opponentElement = opponent.element;
+        currentBattleState.fighter1Escalation = fighter1.escalationState;
+        currentBattleState.fighter2Escalation = fighter2.escalationState;
 
-            // Stun management
-            if (currentAttacker.stunDuration > 0) {
-                currentAttacker.stunDuration--;
-                
-                if (currentAttacker.stunDuration === 0) {
-                    currentAttacker.consecutiveStuns = 0;
-                    currentAttacker.aiLog.push(`[Stun Expired]: ${currentAttacker.name} has recovered from being stunned.`);
-                }
-
-                currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE;
-                currentAttacker.aiLog.push(`[Action Skipped]: ${currentAttacker.name} is stunned. Turns remaining: ${currentAttacker.stunDuration}. Stun resistance increased to ${currentAttacker.stunResistance}.`);
-                turnSpecificEventsForLog.push({
-                    type: 'stun_event',
-                    actorId: currentAttacker.id,
-                    characterName: currentAttacker.name,
-                    text: `${currentAttacker.name} is stunned and unable to move! (Stun remaining: ${currentAttacker.stunDuration} turn(s))`,
-                    html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move! (Stun remaining: ${currentAttacker.stunDuration} turn(s))</p>`
-                });
-                currentBattleState.attackerIsStunned = true;
-                return;
-            }
-            currentBattleState.attackerIsStunned = false;
-
-            // Get opponent using the helper function
-            const opponent = getOpponent(currentAttacker, fighter1, fighter2);
-
-            // Update battle state with opponent info
-            currentBattleState.opponentLandedCriticalHit = opponent.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
-            currentBattleState.opponentUsedLethalForce = opponent.lastMoveForPersonalityCheck?.isHighRisk || false;
-            currentBattleState.characterReceivedCriticalHit = false;
-            currentBattleState.opponentElement = opponent.element;
-            currentBattleState.fighter1Escalation = fighter1.escalationState;
-            currentBattleState.fighter2Escalation = fighter2.escalationState;
-
-            // Only check for curbstomp after minimum turns
-            if (currentBattleState.turn >= MIN_TURNS_BEFORE_CURBSTOMP) {
-                if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) {
-                    currentAttacker.aiLog.push(`[Curbstomp Check]: ${currentAttacker.name} has achieved a decisive advantage over ${currentDefender.name}.`);
-                    terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
-                    if (terminalOutcome.battleOver) {
-                        battleOver = true;
-                        winnerId = terminalOutcome.winnerId;
-                        loserId = terminalOutcome.loserId;
-                        isStalemate = terminalOutcome.isStalemate;
-                        return;
-                    }
-                }
-            }
-
-            if (charactersMarkedForDefeat.has(currentDefender.id) || charactersMarkedForDefeat.has(currentAttacker.id)) {
+        // Only check for curbstomp after minimum turns
+        if (currentBattleState.turn >= MIN_TURNS_BEFORE_CURBSTOMP) {
+            if (checkCurbstompConditions(currentAttacker, currentDefender, locId, currentBattleState, battleEventLog, false)) {
+                currentAttacker.aiLog.push(`[Curbstomp Check]: ${currentAttacker.name} has achieved a decisive advantage over ${currentDefender.name}.`);
                 terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
                 if (terminalOutcome.battleOver) {
                     battleOver = true;
@@ -779,215 +767,226 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     return;
                 }
             }
+        }
 
-            let narrativeEventsForAction = [];
-            const oldDefenderMentalState = currentDefender.mentalState.level;
-            const oldAttackerMentalState = currentAttacker.mentalState.level;
-            currentAttacker.mentalStateChangedThisTurn = false;
-
-            if (currentBattleState.turn > 0) adaptPersonality(currentAttacker);
-
-            if (currentAttacker.tacticalState) {
-                currentAttacker.tacticalState.duration--;
-                if (currentAttacker.tacticalState.duration <= 0) {
-                    currentAttacker.aiLog.push(`[Tactical State Expired]: ${currentAttacker.name} is no longer ${currentAttacker.tacticalState.name}.`);
-                    currentAttacker.tacticalState = null;
-                }
-            }
-
-            if (currentAttacker.stunDuration > 0) {
-                currentAttacker.stunDuration--;
-                if (currentAttacker.stunDuration === 0) {
-                    currentAttacker.aiLog.push(`[Stun Expired]: ${currentAttacker.name} is no longer stunned.`);
-                    turnSpecificEventsForLog.push({
-                        type: 'stun_event',
-                        actorId: currentAttacker.id,
-                        characterName: currentAttacker.name,
-                        text: `${currentAttacker.name} recovers from the stun!`,
-                        html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers from the stun!</p>`
-                    });
-                }
-            }
-
-            // --- AI Action Selection ---
-            const aiDecision = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, currentBattleState.currentPhase);
-            const move = aiDecision.move;
-            if (!move) {
-                currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
-                // Potentially add a "hesitation" narrative event here
-                return; 
-            }
-
-            // --- Move Execution & Resolution ---
-            const result = calculateMove(move, currentAttacker, currentDefender, conditions, battleEventLog, environmentState, locId, modifyMomentum);
-            
-            // Generate narration for the entire action
-            const turnNarrationObjects = generateTurnNarrationObjects(
-                narrativeEventsForAction,
-                move,
-                currentAttacker,
-                currentDefender,
-                result,
-                environmentState,
-                locationData,
-                phaseState.currentPhase,
-                false,
-                aiDecision.aiLogEntryFromSelectMove || {},
-                currentBattleState
-            );
-            turnSpecificEventsForLog.push(...turnNarrationObjects);
-
-
-            // --- Update Fighter States Post-Action ---
-            // Update mental state based on the move's outcome
-            updateMentalState(currentAttacker, currentDefender, result, environmentState, locId, currentBattleState);
-            updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, environmentState, locId, currentBattleState);
-
-            // Update momentum
-            modifyMomentum(currentAttacker, result.momentumChange.attacker, `Own Move (${result.effectiveness.label})`);
-            modifyMomentum(currentDefender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
-
-            // Apply stun if the move caused it
-            if (result.stunDuration > 0) {
-                applyStun(currentDefender, result.stunDuration);
-            }
-
-            // Handle HP changes and defeat checking
-            if (result.damage > 0) {
-                currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
-            }
-            if (result.selfDamage > 0) {
-                currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
-            }
-
-            if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName && !result.isReactedAction) {
-                 currentDefender.tacticalState = null;
-                 currentAttacker.aiLog.push(`[Tactical State Consumed]: ${currentAttacker.name} consumed ${currentDefender.name}'s ${result.consumedStateName} state.`);
-            }
-
-
-            if (currentDefender.hp <= 0 && !charactersMarkedForDefeat.has(currentDefender.id)) {
-                charactersMarkedForDefeat.add(currentDefender.id);
-            }
-            currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
-            currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
-            currentAttacker.lastMove = move;
-
-            updateAiMemory(currentDefender, currentAttacker);
-            updateAiMemory(currentAttacker, currentDefender);
-
-            terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
+        if (charactersMarkedForDefeat.has(currentDefender.id) || charactersMarkedForDefeat.has(currentAttacker.id)) {
+            terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
             if (terminalOutcome.battleOver) {
-                battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
-            }
-        };
-
-        const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER);
-
-        if (!isNarrativeOnlyTurn) {
-            processTurnSegment(currentAttacker, currentDefender);
-            processTurnSegment(currentDefender, currentAttacker);
-        } else {
-            if (currentAttacker.id === f1Id) {
-                battleEventLog.push({
-                    type: 'narrative_turn_marker',
-                    text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`,
-                    html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>`
-                });
-            }
-        }
-
-        // Add all events from the completed turn to the main battle log
-        battleEventLog.push(...turnSpecificEventsForLog);
-
-        // Clear and update environment state
-        environmentState.specificImpacts.clear();
-        const currentLocData = locationConditions[locId];
-        if (currentLocData && currentLocData.damageThresholds && environmentState.damageLevel > 0) {
-            let impactTier = null;
-            if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) impactTier = 'catastrophic';
-            else if (environmentState.damageLevel >= currentLocData.damageThresholds.severe) impactTier = 'severe';
-            else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) impactTier = 'moderate';
-            else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) impactTier = 'minor';
-
-            if (impactTier && locationData.environmentalImpacts[impactTier] && locationData.environmentalImpacts[impactTier].length > 0) {
-                const randomIndex = getRandomElement(locationData.environmentalImpacts[impactTier]);
-                if (randomIndex !== null) {
-                    environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
-                }
-            }
-        }
-
-        // Update battle state with environment changes by mutating the existing object
-        Object.assign(currentBattleState.environmentState, {
-            damageLevel: environmentState.damageLevel,
-            specificImpacts: new Set(environmentState.specificImpacts),
-            lastImpact: environmentState.lastImpact,
-            damageHistory: [...environmentState.damageHistory]
-        });
-
-        if (!isNarrativeOnlyTurn) {
-            currentBattleState.characterLandedStrongOrCriticalHitLastTurn = 
-                currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || 
-                currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
-        }
-
-        if (environmentState.damageLevel > 0 && environmentState.specificImpacts.size > 0) {
-            let environmentalSummaryHtml = `<div class="environmental-summary">`;
-            environmentalSummaryHtml += phaseTemplates.environmentalImpactHeader;
-            let allImpactTexts = [];
-            environmentState.specificImpacts.forEach(impact => {
-                const formattedImpactText = findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'general', {
-                    impactText: impact,
-                    currentPhaseKey: phaseState.currentPhase,
-                    battleState: currentBattleState
-                })?.line || impact;
-                allImpactTexts.push(formattedImpactText);
-            });
-            environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join('');
-            environmentalSummaryHtml += `</div>`;
-            turnSpecificEventsForLog.push({
-                type: 'environmental_summary_event',
-                texts: allImpactTexts,
-                html_content: environmentalSummaryHtml,
-                isEnvironmental: true
-            });
-        }
-
-        if (!battleOver && currentBattleState.turn >= 2) {
-            if (currentAttacker.consecutiveDefensiveTurns >= 3 && currentDefender.consecutiveDefensiveTurns >= 3 &&
-                Math.abs(currentAttacker.hp - currentDefender.hp) < 15 &&
-                phaseState.currentPhase !== BATTLE_PHASES.EARLY) {
-
-                if (currentAttacker.hp > 0) charactersMarkedForDefeat.add(currentAttacker.id);
-                if (currentDefender.hp > 0) charactersMarkedForDefeat.add(currentDefender.id);
-
-                terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, true);
                 battleOver = true;
                 winnerId = terminalOutcome.winnerId;
                 loserId = terminalOutcome.loserId;
                 isStalemate = terminalOutcome.isStalemate;
-                currentAttacker.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
-                currentDefender.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
+                return;
             }
         }
 
-        if (battleOver) break;
-        // Swap the current attacker and defender references for the next turn
-        [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
+        let narrativeEventsForAction = [];
+        const oldDefenderMentalState = currentDefender.mentalState.level;
+        const oldAttackerMentalState = currentAttacker.mentalState.level;
+        currentAttacker.mentalStateChangedThisTurn = false;
+
+        if (currentBattleState.turn > 0) adaptPersonality(currentAttacker);
+
+        if (currentAttacker.tacticalState) {
+            currentAttacker.tacticalState.duration--;
+            if (currentAttacker.tacticalState.duration <= 0) {
+                currentAttacker.aiLog.push(`[Tactical State Expired]: ${currentAttacker.name} is no longer ${currentAttacker.tacticalState.name}.`);
+                currentAttacker.tacticalState = null;
+            }
+        }
+
+        if (currentAttacker.stunDuration > 0) {
+            currentAttacker.stunDuration--;
+            if (currentAttacker.stunDuration === 0) {
+                currentAttacker.aiLog.push(`[Stun Expired]: ${currentAttacker.name} is no longer stunned.`);
+                turnSpecificEventsForLog.push({
+                    type: 'stun_event',
+                    actorId: currentAttacker.id,
+                    characterName: currentAttacker.name,
+                    text: `${currentAttacker.name} recovers from the stun!`,
+                    html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers from the stun!</p>`
+                });
+            }
+        }
+
+        // --- AI Action Selection ---
+        const aiDecision = selectMove(currentAttacker, currentDefender, conditions, currentBattleState.turn, currentBattleState.currentPhase);
+        const move = aiDecision.move;
+        if (!move) {
+            currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
+            // Potentially add a "hesitation" narrative event here
+            continue; 
+        }
+
+        // --- Move Execution & Resolution ---
+        const result = calculateMove(move, currentAttacker, currentDefender, conditions, battleEventLog, environmentState, locId, modifyMomentum);
+        
+        // Generate narration for the entire action
+        const turnNarrationObjects = generateTurnNarrationObjects(
+            narrativeEventsForAction,
+            move,
+            currentAttacker,
+            currentDefender,
+            result,
+            environmentState,
+            locationData,
+            phaseState.currentPhase,
+            false,
+            aiDecision.aiLogEntryFromSelectMove || {},
+            currentBattleState
+        );
+        turnSpecificEventsForLog.push(...turnNarrationObjects);
+
+
+        // --- Update Fighter States Post-Action ---
+        // Update mental state based on the move's outcome
+        updateMentalState(currentAttacker, currentDefender, result, environmentState, locId, currentBattleState);
+        updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, environmentState, locId, currentBattleState);
+
+        // Update momentum
+        modifyMomentum(currentAttacker, result.momentumChange.attacker, `Own Move (${result.effectiveness.label})`);
+        modifyMomentum(currentDefender, result.momentumChange.defender, `Opponent Move (${result.effectiveness.label}) by ${currentAttacker.name}`);
+
+        // Apply stun if the move caused it
+        if (result.stunDuration > 0) {
+            applyStun(currentDefender, result.stunDuration);
+        }
+
+        // Handle HP changes and defeat checking
+        if (result.damage > 0) {
+            currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
+        }
+        if (result.selfDamage > 0) {
+            currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
+        }
+
+        if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName && !result.isReactedAction) {
+             currentDefender.tacticalState = null;
+             currentAttacker.aiLog.push(`[Tactical State Consumed]: ${currentAttacker.name} consumed ${currentDefender.name}'s ${result.consumedStateName} state.`);
+        }
+
+
+        if (currentDefender.hp <= 0 && !charactersMarkedForDefeat.has(currentDefender.id)) {
+            charactersMarkedForDefeat.add(currentDefender.id);
+        }
+        currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
+        currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
+        currentAttacker.lastMove = move;
+
+        updateAiMemory(currentDefender, currentAttacker);
+        updateAiMemory(currentAttacker, currentDefender);
+
+        terminalOutcome = evaluateTerminalState(fighter1, fighter2, isStalemate);
+        if (terminalOutcome.battleOver) {
+            battleOver = true; winnerId = terminalOutcome.winnerId; loserId = terminalOutcome.loserId; isStalemate = terminalOutcome.isStalemate;
+        }
     }
 
+    const isNarrativeOnlyTurn = (currentBattleState.currentPhase === BATTLE_PHASES.PRE_BANTER);
+
+    if (!isNarrativeOnlyTurn) {
+        // Removed processTurnSegment calls
+    } else {
+        // For narrative-only turns, the turn marker is handled by the Universal Turn Setup.
+        // This narrative-specific turn marker is no longer needed.
+        // if (currentAttacker.id === f1Id) {
+        //     battleEventLog.push({
+        //         type: 'narrative_turn_marker',
+        //         text: `(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})`,
+        //         html_content: `<p class="narrative-info">(Narrative turn ${turn + 1} for ${currentBattleState.currentPhase})</p>`
+        //     });
+        // }
+    }
+
+    // Add all events from the completed turn to the main battle log
+    battleEventLog.push(...turnSpecificEventsForLog);
+
+    // Clear and update environment state
+    environmentState.specificImpacts.clear();
+    const currentLocData = locationConditions[locId];
+    if (currentLocData && currentLocData.damageThresholds && environmentState.damageLevel > 0) {
+        let impactTier = null;
+        if (environmentState.damageLevel >= currentLocData.damageThresholds.catastrophic) impactTier = 'catastrophic';
+        else if (environmentState.damageLevel >= currentLocData.damageThresholds.severe) impactTier = 'severe';
+        else if (environmentState.damageLevel >= currentLocData.damageThresholds.moderate) impactTier = 'moderate';
+        else if (environmentState.damageLevel >= currentLocData.damageThresholds.minor) impactTier = 'minor';
+
+        if (impactTier && locationData.environmentalImpacts[impactTier] && locationData.environmentalImpacts[impactTier].length > 0) {
+            const randomIndex = getRandomElement(locationData.environmentalImpacts[impactTier]);
+            if (randomIndex !== null) {
+                environmentState.specificImpacts.add(locationData.environmentalImpacts[impactTier][randomIndex]);
+            }
+        }
+    }
+
+    // Update battle state with environment changes by mutating the existing object
+    Object.assign(currentBattleState.environmentState, {
+        damageLevel: environmentState.damageLevel,
+        specificImpacts: new Set(environmentState.specificImpacts),
+        lastImpact: environmentState.lastImpact,
+        damageHistory: [...environmentState.damageHistory]
+    });
+
+    if (!isNarrativeOnlyTurn) {
+        currentBattleState.characterLandedStrongOrCriticalHitLastTurn = 
+            currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Strong' || 
+            currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
+    }
+
+    if (environmentState.damageLevel > 0 && environmentState.specificImpacts.size > 0) {
+        let environmentalSummaryHtml = `<div class="environmental-summary">`;
+        environmentalSummaryHtml += phaseTemplates.environmentalImpactHeader;
+        let allImpactTexts = [];
+        environmentState.specificImpacts.forEach(impact => {
+            const formattedImpactText = findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'general', {
+                impactText: impact,
+                currentPhaseKey: phaseState.currentPhase,
+                battleState: currentBattleState
+            })?.line || impact;
+            allImpactTexts.push(formattedImpactText);
+        });
+        environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join('');
+        environmentalSummaryHtml += `</div>`;
+        turnSpecificEventsForLog.push({
+            type: 'environmental_summary_event',
+            texts: allImpactTexts,
+            html_content: environmentalSummaryHtml,
+            isEnvironmental: true
+        });
+    }
+
+    if (!battleOver && currentBattleState.turn >= 2) {
+        if (currentAttacker.consecutiveDefensiveTurns >= 3 && currentDefender.consecutiveDefensiveTurns >= 3 &&
+            Math.abs(currentAttacker.hp - currentDefender.hp) < 15 &&
+            phaseState.currentPhase !== BATTLE_PHASES.EARLY) {
+
+            if (currentAttacker.hp > 0) charactersMarkedForDefeat.add(currentAttacker.id);
+            if (currentDefender.hp > 0) charactersMarkedForDefeat.add(currentDefender.id);
+
+            terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, true);
+            battleOver = true;
+            winnerId = terminalOutcome.winnerId;
+            loserId = terminalOutcome.loserId;
+            isStalemate = terminalOutcome.isStalemate;
+            currentAttacker.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
+            currentDefender.aiLog.push("[Stalemate Condition Met]: Prolonged defensive engagement.");
+        }
+    }
+
+    // Swap the current attacker and defender references for the next turn
+    [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
+    
     // Before final evaluateTerminalState and summary, log the last phase's duration if battle ends mid-phase
     if (phaseState.phaseSummaryLog.length === 0 || phaseState.phaseSummaryLog[phaseState.phaseSummaryLog.length - 1].phase !== phaseState.currentPhase) {
         phaseState.phaseSummaryLog.push({ phase: phaseState.currentPhase, turns: phaseState.turnInCurrentPhase });
     }
-
+    
     terminalOutcome = evaluateTerminalState(currentAttacker, currentDefender, isStalemate);
     battleOver = terminalOutcome.battleOver;
     winnerId = terminalOutcome.winnerId;
     loserId = terminalOutcome.loserId;
     isStalemate = terminalOutcome.isStalemate;
-
+    
     if (!battleOver && turn >= MAX_TOTAL_TURNS) {
         if (currentAttacker.hp === currentDefender.hp) {
             isStalemate = true;
@@ -997,10 +996,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         }
         battleOver = true;
     }
-
+    
     const finalWinnerFull = winnerId ? (currentAttacker.id === winnerId ? currentAttacker : currentDefender) : null;
     const finalLoserFull = loserId ? (currentAttacker.id === loserId ? currentAttacker : currentDefender) : null;
-
+    
     if (isStalemate) {
         battleEventLog.push({
             type: 'stalemate_result_event',
@@ -1013,7 +1012,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         const isKOByHp = finalLoserFull.hp <= 0;
         const isTimeoutVictory = turn >= MAX_TOTAL_TURNS && !isKOByHp;
         const lastCurbstompEvent = battleEventLog.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
-
+    
         if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull.id) && lastCurbstompEvent.actualAttackerId === finalWinnerFull.id) {
             finalWinnerFull.summary = lastCurbstompEvent.text;
             finalLoserFull.summary = `${finalLoserFull.name} was overcome by ${finalWinnerFull.name}'s decisive action.`;
@@ -1052,7 +1051,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         if (fighter1) fighter1.summary = defaultSummary;
         if (fighter2) fighter2.summary = defaultSummary;
     }
-
+    
     // Add conclusion event
     if (!isStalemate && finalWinnerFull && finalLoserFull) {
         const finalWords = getFinalVictoryLine(finalWinnerFull, finalLoserFull);
@@ -1080,13 +1079,13 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw)
         });
     }
-
+    
     // Update logs without creating circular references
     if (fighter1) fighter1.interactionLog = [...battleEventLog];
     if (fighter2) fighter2.interactionLog = [...battleEventLog];
     if (fighter1) fighter1.phaseLog = [...phaseState.phaseLog];
     if (fighter2) fighter2.phaseLog = [...phaseState.phaseLog];
-
+    
     // Create clean copies of final states without circular references
     const createCleanFighterState = (fighter) => {
         if (!fighter) {
@@ -1107,14 +1106,14 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         cleanState.opponentId = fighter.opponentId;
         return cleanState;
     };
-
+    
     // Determine final states without circular references using the original, now-updated, fighter objects
     const finalFighter1State = createCleanFighterState(fighter1);
     const finalFighter2State = createCleanFighterState(fighter2);
-
+    
     // Update phase state in battle state
     currentBattleState.currentPhase = phaseState.currentPhase;
-
+    
     return {
         log: battleEventLog,
         winnerId: winnerId,
@@ -1128,7 +1127,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         phaseSummary: phaseState.phaseSummaryLog
     };
 }
-
+    
 // Modify the stun application logic
 function applyStun(fighter, duration) {
     if (fighter.stunImmunityTurns > 0) {
