@@ -100,10 +100,46 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
     }
 
     // NEW: Azula's Perfection High Bar
-    if (fighter.id === 'azula' && (fighter.hp < fighter.maxHp * 0.4 || fighter.criticalHitsTaken >= 2)) {
-        const stressGain = 20 / (fighter.mentalResilience || 1.0);
-        fighter.mentalState.stress += Math.round(stressGain);
-        fighter.aiLog.push(`[Azula Stress]: +${Math.round(stressGain)} stress from not meeting perfectionist standards. Total: ${fighter.mentalState.stress}`);
+    if (fighter.id === 'azula') {
+        let azulaStressGain = 0;
+        let reason = [];
+
+        // Condition 1: Low HP
+        if (fighter.hp < fighter.maxHp * 0.5) { // Increased sensitivity from 0.4 to 0.5
+            azulaStressGain += 15; // Base stress
+            reason.push("low HP");
+            if (fighter.hp < fighter.maxHp * 0.2) { // Very low HP adds more stress
+                azulaStressGain += 15;
+                reason.push("critically low HP");
+            }
+        }
+
+        // Condition 2: Took multiple critical hits
+        if (fighter.criticalHitsTaken >= 1) { // Trigger on 1+ critical hit instead of 2+
+            azulaStressGain += 10; // Base stress
+            reason.push("critical hits taken");
+            if (fighter.criticalHitsTaken >= 3) { // More critical hits adds more stress
+                azulaStressGain += 10;
+                reason.push("multiple critical hits taken");
+            }
+        }
+
+        // Condition 3: Significantly negative momentum
+        if (fighter.momentum < -20) { // If momentum is very low
+            azulaStressGain += 20; // Significant stress from losing momentum
+            reason.push("loss of momentum");
+            if (fighter.momentum < -40) { // Extremely low momentum
+                azulaStressGain += 15;
+                reason.push("extreme loss of momentum");
+            }
+        }
+
+        if (azulaStressGain > 0) {
+            const resilience = fighter.mentalResilience || 1.0;
+            azulaStressGain /= resilience;
+            fighter.mentalState.stress += Math.round(azulaStressGain);
+            fighter.aiLog.push(`[Azula Perfectionist Stress]: +${Math.round(azulaStressGain)} stress from ${reason.join(', ')}. Total: ${fighter.mentalState.stress}`);
+        }
     }
 
     // NEW: Mai's LOS/Swamp stress
@@ -139,5 +175,15 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
         fighter.mentalState.level = newLevel;
         fighter.mentalStateChangedThisTurn = true;
         fighter.aiLog.push(`[Mental State Change]: ${fighter.name} is now ${newLevel.toUpperCase()}. (Stress: ${fighter.mentalState.stress})`);
+
+        // NEW: Adjust Azula's collateral tolerance when her mental state is broken
+        if (fighter.id === 'azula' && newLevel === 'broken') {
+            fighter.collateralTolerance = 0.99; // Represents extreme disregard for collateral damage
+            fighter.aiLog.push(`[Azula Collateral]: Azula's mental state is BROKEN. Collateral tolerance plummeted!`);
+        } else if (fighter.id === 'azula' && originalLevel === 'broken' && newLevel !== 'broken') {
+            // If she somehow recovers (unlikely for broken, but for completeness)
+            fighter.collateralTolerance = antagonistCharacters.azula.collateralTolerance; // Reset to default
+            fighter.aiLog.push(`[Azula Collateral]: Azula's mental state recovered. Collateral tolerance reset.`);
+        }
     }
 }

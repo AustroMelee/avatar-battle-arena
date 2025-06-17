@@ -81,7 +81,10 @@ export const azulaArchetypeData = {
             broken: { Late: [{ type: 'spoken', line: "No... you all fear me! You have to!" }] }
         },
         onCollateral: {
-            causingDamage: { Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "Let the weak will always be swept away. This is merely an extension of my will." }] },
+            causingDamage: {
+                Generic: [{ type: 'spoken', line: "Such insignificant things, crumbling before true power." }, { type: 'internal', line: "Let the weak will always be swept away. This is merely an extension of my will." }],
+                'fire-nation-capital': [{ type: 'internal', line: "This is *my* Capital. I will not have it tarnished by this insignificant battle." }, { type: 'spoken', line: "Watch where you tread, Avatar. You are defiling *my* home!" }]
+            },
             observingDamage: { Generic: [{ type: 'internal', line: "Amateurish destruction. But effective enough." }, { type: 'spoken', line: "Good. Let the world burn around you. It's only fitting." }] },
             stressedByDamage: [],
             thrivingInDamage: { Generic: [{ type: 'spoken', line: "This is where true power is forged: in the ashes." }, { type: 'internal', line: "The destruction enhances my focus. There is no escape here." }] }

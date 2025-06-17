@@ -35,7 +35,7 @@ export const characterCurbstompRules = {
     'azula': [
         {
             id: "azula_sane_precision_lightning",
-            description: "A sane Azula's lightning is a tool of chilling precision, especially effective against conductive targets.",
+            description: "When calm and focused, Azula's lightning is surgically precise. Auto-KO vs. conductive targets (metal, wet), with a 95% hit rate. Fails if emotionally unstable or charge is interrupted.",
             triggerChance: 0.75,
             canTriggerPreBattle: false,
             severity: 'lethal',
@@ -44,12 +44,12 @@ export const characterCurbstompRules = {
             },
             outcome: { 
                 type: "instant_ko", 
-                successMessage: "Azula's lightning strikes with surgical precision, using {targetName}'s armor or the water around them as a fatal conductor.",
+                successMessage: "Azula's lightning strikes with surgical precision, using {targetName}'s armor or the water around them as a fatal conductor. A perfect, unblockable shot!",
             }
         },
         {
             id: "azula_sane_fire_tornado",
-            description: "Azula creates a vortex of blue fire, incinerating anyone caught within.",
+            description: "In open space, Azula can spiral her fire into a searing vortex. Instant-KO if target is mid-cast or grounded. High risk, high reward.",
             triggerChance: 0.55,
             canTriggerPreBattle: false,
             severity: 'lethal',
@@ -58,12 +58,12 @@ export const characterCurbstompRules = {
             },
             outcome: { 
                 type: "instant_ko", 
-                successMessage: "Azula conjures a terrifying vortex of blue flame, engulfing and incinerating {targetName}.",
+                successMessage: "Azula conjures a terrifying vortex of blue flame, engulfing and incinerating {targetName} mid-action!",
             }
         },
         {
             id: "azula_insane_unstable_kill",
-            description: "A mentally unstable Azula attacks with raw, unpredictable power.",
+            description: "If mentally unstable, Azula's flames intensify unpredictably, losing targeting but overriding defense logic.",
             triggerChance: 0.60, // 60% chance to be an instant kill
             selfSabotageChance: 0.40, // 40% chance it backfires
             canTriggerPreBattle: false,
@@ -73,41 +73,24 @@ export const characterCurbstompRules = {
             },
             outcome: { 
                 type: "conditional_ko_or_self_sabotage", 
-                successMessage: "In her madness, Azula unleashes a wild, unpredictable assault that completely overwhelms {targetName}!",
-                selfSabotageMessage: "Azula's attack is powerful but reckless, going awry and leaving her vulnerable."
+                successMessage: "In her madness, Azula unleashes a wild, unpredictable assault that completely overwhelms {targetName}! Her raw power overrides all defenses.",
+                selfSabotageMessage: "Azula's attack is powerful but reckless, going awry and leaving her vulnerable. Her madness causes her to lose control."
             }
         },
         {
             id: "azula_blue_fire_surge",
-            description: "Her iconic blue fire burns hotter, allowing her to cut through defenses.",
+            description: "Her blue fire burns hotter, overriding basic defenses. Applies to all fire-based attacks.",
             triggerChance: 1.0,
             canTriggerPreBattle: true,
             severity: 'buff',
             outcome: { 
                 type: "damage_modifier", 
                 value: 0.25,
-                message: "Azula's blue fire rages with terrifying intensity, burning through standard defenses."
+                message: "Azula's blue fire rages with terrifying intensity, burning through standard defenses and penetrating resistance."
             }
         }
     ],
     'aang': [
-        {
-            id: "aang_avatar_state",
-            description: "When in mortal danger, Aang can enter the Avatar State, wielding unimaginable power.",
-            triggerChance: 0.95,
-            canTriggerPreBattle: false,
-            severity: 'lethal',
-            conditionLogic: (aang, opponent, battleState) => {
-                return (aang.hp < 20 || aang.mentalState.level === 'broken');
-            },
-            // Special outcome to reflect Aang's reluctance to kill
-            outcome: {
-                type: "conditional_ko_or_mercy",
-                mercyChance: 0.20,
-                successMessage: "Aang's eyes glow with the power of a thousand lifetimes. He unleashes the full power of the Avatar State, overwhelming {targetName} completely.",
-                mercyMessage: "The Avatar State gives Aang the power to win, but at the last moment, his own spirit pulls back, incapacitating but not killing {targetName}."
-            }
-        },
         {
             id: "aang_mobility_edge",
             description: "Aang's mastery of airbending gives him a significant defensive advantage against grounded attacks.",

@@ -180,17 +180,35 @@ function calculateMoveWeights(actor, defender, conditions, intent, currentPhase)
         if (signatureBias !== 1.0) { weight *= signatureBias; reasons.push(`SigMove`); }
         if (actor.lastMove?.name === move.name) { weight *= (1.0 - profile.antiRepeater); reasons.push(`AntiRepeat`); }
 
+        // NEW: Azula's Broken Mental State effects
+        if (actor.id === 'azula' && actor.mentalState.level === 'broken') {
+            // Prioritize high-risk, high-power, and high-collateral moves
+            if (move.moveTags.includes('highRisk') || move.power >= 70) {
+                weight *= 2.0; // Significantly increase weight for high-risk/power moves
+                reasons.push('AzulaBroken:HighRisk/Power');
+            }
+            if (move.collateralImpact && move.collateralImpact !== 'none') {
+                // Further boost moves that cause collateral damage
+                weight *= 1.5; 
+                reasons.push('AzulaBroken:CollateralBoost');
+            }
+            // Reduce patience and defensive bias even further (already set in getDynamicPersonality, but can reinforce here)
+            weight *= (1 + profile.aggression * 0.5); // Even more aggression
+            weight *= (1 - profile.defensiveBias * 0.5); // Even less defense
+            reasons.push('AzulaBroken:AggressionSurge');
+        }
+
         // Intent Multipliers
         const intentMultipliers = {
             StandardExchange: { Offense: 1.2, Finisher: 0.8 },
-            OpeningMoves: { Utility: 1.3, Finisher: 0.1 },
+            OpeningMoves: { Utility: 1.3, Finisher: 1.2, aggressive: 1.2 },
             CautiousDefense: { Offense: 0.5, Defense: 1.8 },
             PressAdvantage: { Offense: 1.5, Finisher: 1.2 },
             CapitalizeOnOpening: { Offense: 1.8, Finisher: 1.5 },
             DesperateGambit: { Finisher: 2.0, highRisk: 2.5 },
             FinishingBlowAttempt: { Finisher: 3.5, requires_opening: 2.8 },
             ConserveEnergy: { low_cost: 3.0 },
-            PokingPhaseTactics: { Utility: 2.0, Defense: 1.5, low_cost: 2.0 },
+            PokingPhaseTactics: { Utility: 2.0, Defense: 1.5, low_cost: 2.0, mobility_move: 1.8, evasive: 1.8 },
             OverwhelmOffense: { Offense: 2.0, Finisher: 1.8, aggressive: 1.5 },
             RecklessOffense: { Offense: 1.5, Finisher: 2.5, highRisk: 3.0, utility: 0.1 }
         };

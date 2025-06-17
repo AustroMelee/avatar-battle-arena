@@ -18,12 +18,12 @@ export const antagonistCharacters = {
             creativity: 0.6, defensiveBias: 0.1, antiRepeater: 0.3,
             predictability: 0.8,
             signatureMoveBias: {
-                "Calculated Feint": 1.2,
-                "Blue Fire Daggers": 1.4,
-                "Fire Whip": 1.1,
+                "Feinting Ember Step": 1.2,
+                "Blue Flame Daggers": 1.4,
+                "Fire Lash": 1.1,
                 "Lightning Generation": 1.9,
-                "Flame Burst": 1.1,
-                "Precision Strike": 1.3,
+                "Flame Burst Counter": 1.1,
+                "Precision Flame Strike": 1.3,
                 "Tactical Reposition": 0.9
             }
         },
@@ -31,10 +31,10 @@ export const antagonistCharacters = {
         collateralTolerance: 0.9,
         mobility: 0.95,
         curbstompRules: [
-            { ruleId: "azula_sane_lightning_precision", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
+            { ruleId: "azula_sane_precision_lightning", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
             { ruleId: "azula_sane_fire_tornado", characterId: "azula", conditionLogic: (azula) => !azula.isInsane },
-            { ruleId: "azula_insane_unpredictable_attacks", characterId: "azula", conditionLogic: (azula) => azula.isInsane },
-            { ruleId: "azula_insane_blue_fire_buff", characterId: "azula", conditionLogic: (azula) => azula.isInsane }
+            { ruleId: "azula_insane_unstable_kill", characterId: "azula", conditionLogic: (azula) => azula.mentalState.level === 'broken' },
+            { ruleId: "azula_blue_fire_surge", characterId: "azula", conditionLogic: (azula) => true } // Blue Fire Surge is always active if this rule exists
         ],
         personalityTriggers: {
             "in_control": "(character.hp > character.maxHp * 0.5) && !(battleState.characterReceivedCriticalHit) && (opponent.mentalState.level === 'stable' || opponent.mentalState.level === 'stressed')",
@@ -58,13 +58,13 @@ export const antagonistCharacters = {
             }
         },
         techniques: [
-            { name: "Calculated Feint", verb: 'execute', object: 'a deceptive feint', type: 'Utility', power: 15, element: 'utility', moveTags: ['utility_reposition', 'setup', 'humiliation'], collateralImpact: 'none' },
-            { name: "Blue Fire Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged_attack', 'projectile', 'precise', 'area_of_effect_small'], collateralImpact: 'low' },
-            { name: "Fire Whip", verb: 'lash', object: 'out with a fire whip', type: 'Offense', power: 55, element: 'fire', moveTags: ['melee_range', 'ranged_attack_medium', 'channeled', 'single_target'], collateralImpact: 'low' },
-            { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', type: 'Finisher', power: 100, requiresArticle: true, element: 'lightning', moveTags: ['ranged_attack', 'instantaneous', 'single_target', 'unblockable_standard', 'requires_opening', 'highRisk', 'lightning_attack'], collateralImpact: 'medium' },
-            { name: "Flame Burst", verb: 'erupt with', object: 'burst of blue flame', type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['defensive_stance', 'utility_block', 'area_of_effect_small', 'pushback', 'counter'], collateralImpact: 'low' },
-            { name: "Precision Strike", verb: 'strike', object: 'with a focused fire blast', type: 'Offense', power: 70, element: 'fire', moveTags: ['ranged_attack', 'single_target', 'precise'], collateralImpact: 'low' },
-            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'utility', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
+            { name: "Feinting Ember Step", verb: 'execute', object: 'a deceptive feint', description: "Uses deceptive movement to bait enemy attacks and create punishing openings.", type: 'Utility', power: 15, element: 'utility', moveTags: ['utility', 'reaction_bait', 'combo_starter', 'safe_reset'], collateralImpact: 'none' },
+            { name: "Blue Flame Daggers", verb: 'launch', object: 'razor-sharp blue fire daggers', description: "Rapid, scalpel-like blue fire blasts thrown with lethal accuracy.", type: 'Offense', power: 45, element: 'fire', moveTags: ['ranged', 'multi_shot', 'small_aoe_splash', 'high_accuracy', 'ignite_chance'], collateralImpact: 'low' },
+            { name: "Fire Lash", verb: 'lash', object: 'out with a fire whip', description: "A flexible arc of fire used for mid-range harassment or trip pressure.", type: 'Offense', power: 55, element: 'fire', moveTags: ['channeled', 'zone_control', 'can_trip', 'medium_damage'], collateralImpact: 'low' },
+            { name: "Lightning Generation", verb: 'generate', object: 'precise bolt of lightning', description: "A focused bolt of lightning, unblockable but punishable if misused.", type: 'Finisher', power: 100, requiresArticle: true, element: 'lightning', moveTags: ['ranged', 'high_damage', 'unblockable', 'requires_opening', '-80% effect if punished'], collateralImpact: 'medium' },
+            { name: "Flame Burst Counter", verb: 'erupt with', object: 'burst of blue flame', description: "Reactive burst of fire to punish aggression or create distance.", type: 'Defense', power: 50, requiresArticle: true, element: 'fire', moveTags: ['reactive_defense', 'aoe_burst', 'knockback', 'counter_starter'], collateralImpact: 'low' },
+            { name: "Precision Flame Strike", verb: 'strike', object: 'with a focused fire blast', description: "A single-target jet of fire, faster and narrower than standard blasts.", type: 'Offense', power: 70, element: 'fire', moveTags: ['ranged', 'high_accuracy', 'single_target', 'quick_execution'], collateralImpact: 'low' },
+            { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', description: "Azula uses explosive momentum or smoke to escape danger and reset positioning.", type: 'Utility', power: 10, element: 'utility', moveTags: ['utility', 'evasion', 'mobility', 'combo_escape'], isRepositionMove: true, collateralImpact: 'none' }
         ],
         quotes: { postWin: ["Flawless. As expected."], postWin_overwhelming: ["My power is absolute. You are beneath me."], postWin_specific: { 'zuko': "You were always weak, Zuzu. That's why you'll always lose." } },
         relationships: { 'zuko': { relationshipType: "sibling_rivalry_dominant", stressModifier: 1.5, resilienceModifier: 0.9 }, 'ozai-not-comet-enhanced': { relationshipType: "parental_fear", stressModifier: 2.5, resilienceModifier: 0.7 }, 'iroh': { relationshipType: "contemptuous_underestimation", stressModifier: 0.8, resilienceModifier: 1.1 } }

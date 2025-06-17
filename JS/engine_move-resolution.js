@@ -83,6 +83,16 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     multiplier *= envMultiplier;
     let energyCost = ((move.name === 'Struggle') ? 0 : Math.round((move.power || 30) * 0.22) + 4) * envEnergyMod;
 
+    // NEW: Apply character-specific move adjustments based on location (collateral damage aversion)
+    const locationData = conditions.id ? locationConditions[conditions.id] : null;
+    if (locationData?.characterMoveAdjustments?.[attacker.id]?.[move.name]) {
+        const adjustment = locationData.characterMoveAdjustments[attacker.id][move.name];
+        if (adjustment.energyCostModifier) {
+            energyCost *= adjustment.energyCostModifier;
+            logReasons.push(adjustment.description || `character's aversion to collateral damage`);
+        }
+    }
+
     if (logReasons.length > 0) {
         interactionLog.push(`${attacker.name}'s ${move.name} was influenced by: ${logReasons.join(', ')}.`);
         attacker.aiLog.push(`[Env Influence]: ${move.name} affected by ${logReasons.join(', ')} (x${envMultiplier.toFixed(2)} power, x${envEnergyMod.toFixed(2)} energy).`);

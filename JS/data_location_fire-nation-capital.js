@@ -79,6 +79,16 @@ export const fireNationCapital = {
         evasive: { damage: -15, energy: 10, reason: "Lack of cover makes evasion challenging." },
         ranged_attack: { damage: 15, energy: -10, reason: "The wide-open plaza favors long-range attacks." }
     },
+    characterMoveAdjustments: {
+        'aang-airbending-only': {
+            'Cyclone Vortex': { energyCostModifier: 0.5, description: "Aang's aversion to collateral damage makes large-scale airbending costly in the capital." }
+        },
+        'azula': {
+            'Lightning Generation': { energyCostModifier: 0.5, description: "Azula's desire to preserve her capital makes powerful, destructive lightning attacks taxing." },
+            'Tactical Reposition': { energyCostModifier: 0.7, description: "Azula fluidly navigates her home city, making tactical repositioning almost effortless." },
+            'Feinting Ember Step': { energyCostModifier: 0.7, description: "Azula uses the urban landscape to her advantage for swift, deceptive movements." }
+        }
+    },
     fragility: 60,
     background: 'img/img_caldera.jpg',
 }; 
