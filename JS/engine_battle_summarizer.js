@@ -7,7 +7,7 @@
 import { phaseTemplates } from './data_narrative_phases.js';
 import { getFinalVictoryLine, substituteTokens } from './engine_narrative-engine.js';
 import { charactersMarkedForDefeat } from './engine_curbstomp_manager.js';
-import { MAX_TOTAL_TURNS } from './data_battle_rules.js';
+import { MAX_TOTAL_TURNS } from './config_game.js';
 
 /**
  * Generates the final summary events and text for the battle result object.
