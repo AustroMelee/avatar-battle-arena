@@ -55,7 +55,7 @@ function handleBattleStart() {
 function handleModeSelectionChange(event) {
     if (event.target.name === "simulationMode") {
         currentSimMode = event.target.value;
-        setSimulationMode(currentSimMode); // Use the centralized set mode function
+        setSimulationMode(currentSimMode);
         console.log("Simulation mode changed to:", currentSimMode);
     }
 }

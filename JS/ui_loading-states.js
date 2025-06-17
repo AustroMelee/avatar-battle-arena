@@ -142,6 +142,7 @@ export function showResultsState(battleResult, simulationMode) {
         if (DOM_ELEMENTS.battleStory && battleResult.log) {
             DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
             console.log("[DEBUG] battleStory innerHTML for instant mode:", DOM_ELEMENTS.battleStory.innerHTML);
+            DOM_ELEMENTS.battleStory.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         displayFinalResultsPanel(battleResult);
     }

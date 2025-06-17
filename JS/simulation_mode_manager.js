@@ -6,7 +6,7 @@
 import { startAnimationSequence, stopCurrentAnimation } from './animated_text_engine.js'; // animated_text_engine should be robust
 import { resetCamera, enableCameraControls, disableCameraControls } from './camera_control.js'; // camera_control should be robust
 
-let currentSimulationMode = "instant"; // Default
+let currentSimulationMode = null; // Default to null, will be set by main.js
 let isSimulationRunning = false;
 let animationQueue = [];
 let battleResultForPostAnimation = null;
@@ -77,9 +77,18 @@ export function getSimulationMode() {
 }
 
 export function startSimulation(eventQueue, battleResult, onCompleteCallback) {
-    // Check for essential DOM elements before proceeding
+    // If mode is instant, immediately call callback without animation
+    if (currentSimulationMode === "instant") {
+        console.log("Sim Manager (startSimulation): Running in instant mode. Skipping animation.");
+        if (typeof onCompleteCallback === 'function') {
+            onCompleteCallback(battleResult, false); // false indicates success (no animation needed)
+        }
+        return;
+    }
+
+    // Check for essential DOM elements before proceeding with animated mode
     if (!DOM.simulationContainer || !DOM.animatedLogOutput) {
-        console.error("Sim Manager (startSimulation): Critical DOM elements (simulationContainer or animatedLogOutput) not initialized. Cannot start animated simulation.");
+        console.error("Sim Manager (startSimulation): Critical DOM elements (simulationContainer or animatedLogOutput) not initialized for animated mode. Cannot start animated simulation.");
         if (typeof onCompleteCallback === 'function') {
             onCompleteCallback(battleResult, true); // true indicates fallback to instant/error
         }
