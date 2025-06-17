@@ -1,6 +1,8 @@
 // FILE: js/engine_mental-state.js
 'use strict';
 
+import { generateStatusChangeEvent } from './engine_narrative-engine.js';
+
 const MENTAL_STATE_THRESHOLDS = {
     broken: 100,
     shaken: 75,
