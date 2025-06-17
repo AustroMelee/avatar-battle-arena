@@ -93,8 +93,54 @@ export const masterCharacters = {
             { name: "Wire Trap", verb: 'twist', object: 'metal wires into a trap', type: 'Utility', power: 45, requiresArticle: true, element: 'metal', moveTags: ['trap_delayed', 'utility_control', 'environmental_manipulation'], setup: { name: 'Pinned', duration: 2, intensity: 1.3 }, collateralImpact: 'low' },
             { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'earth', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
         ],
-        quotes: { postWin: ["Time for a nap! Or maybe some cabbage!"], postWin_overwhelming: ["The earth moves for me! No one can stop the Mad King!"], postWin_specific: { 'toph-beifong': "Not bad, Twinkle-toes! But you have to get up pretty early in the morning to out-crazy me!" } },
-        relationships: {}
+        quotes: {
+            postWin: ["Time for a nap! Or maybe some cabbage?"],
+            postWin_overwhelming: ["The earth moves for me! No one can stop the Mad King!"],
+            internalThoughts: [ // NEW: Internal thoughts for Bumi
+                { line: "Time for some fun! What kind of earth can I throw today?", type: "internal" },
+                { line: "Such serious faces. Don't they know battle is a game?", type: "internal" },
+                { line: "Hm, a new challenge. I wonder if they like riddles?", type: "internal" },
+                { line: "The earth whispers its secrets. Time to listen, or to rumble?", type: "internal" }
+            ],
+            onHit: { // NEW: Reactions to being hit
+                Critical: [{ line: "Oof! A solid hit, but Bumi's tougher than he looks!", type: "internal" }],
+                Strong: [{ line: "A good rumble! Makes the blood flow!", type: "internal" }],
+                Normal: [{ line: "Just a tap. Bumi's hardly noticed.", type: "internal" }],
+                Weak: [{ line: "Is that all? My grandmother hits harder!", type: "internal" }]
+            }
+        },
+        relationships: {
+            'aang': {
+                relationship: 'mentor_student',
+                dynamic: 'positive',
+                history: 'long_standing',
+                narrative: {
+                    battleStart: {
+                        Generic: [{ line: "Aang! My old friend! Still as spry as ever, I see! Now, let's play a game of battle!", type: "spoken" }],
+                        PRE_BANTER: [{ line: "Aang! My old friend! Still as spry as ever, I see! Now, let's play a game of battle!", type: "spoken" }]
+                    },
+                    onHit: {
+                        Critical: [{ line: "Aang, you've gotten stronger! A true master in the making!", type: "spoken" }],
+                        Strong: [{ line: "Still got it, eh, Aang? Don't hold back!", type: "spoken" }]
+                    }
+                }
+            },
+            'toph': {
+                relationship: 'friendly_rivalry',
+                dynamic: 'positive',
+                history: 'recent',
+                narrative: {
+                    battleStart: {
+                        Generic: [{ line: "Toph! My favorite student! Show me what that seismic sense can do!", type: "spoken" }],
+                        PRE_BANTER: [{ line: "Toph! My favorite student! Show me what that seismic sense can do!", type: "spoken" }]
+                    },
+                    onHit: {
+                        Critical: [{ line: "A solid hit, little Twinkletoes! You've learned well!", type: "spoken" }],
+                        Strong: [{ line: "Good. Now feel the earth's rumble!", type: "spoken" }]
+                    }
+                }
+            }
+        }
     },
     'pakku': {
         id: 'pakku', name: "Pakku", type: "Bender", element: "water", pronouns: { s: 'he', p: 'his', o: 'him' },
@@ -225,7 +271,22 @@ export const masterCharacters = {
             { name: "Reluctant Finale", verb: 'end', object: 'the fight with a wall of flame', type: 'Finisher', power: 90, element: 'fire', moveTags: ['area_of_effect_large', 'pushback', 'environmental_manipulation', 'requires_opening'], collateralImpact: 'medium' },
             { name: "Tactical Reposition", verb: 'execute', object: 'a nimble repositioning', type: 'Utility', power: 10, element: 'fire', moveTags: ['mobility_move', 'evasive', 'reposition'], isRepositionMove: true, collateralImpact: 'none' }
         ],
-        quotes: { postWin: ["The destructive path of fire has been averted, for now."], postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."] },
+        quotes: {
+            postWin: ["The destructive path of fire has been averted, for now."],
+            postWin_reflective: ["The true victory lies in avoiding destruction, not causing it."],
+            internalThoughts: [ // NEW: Internal thoughts for Jeong Jeong
+                { line: "Another conflict. Fire is a burden, not a tool for aggression.", type: "internal" },
+                { line: "I must demonstrate the true nature of fire: control, not destruction.", type: "internal" },
+                { line: "The intensity grows. A fragile balance, easily broken.", type: "internal" },
+                { line: "The culmination. May this end swiftly, with minimal suffering.", type: "internal" }
+            ],
+            onHit: { // NEW: Reactions to being hit
+                Critical: [{ line: "Such reckless power! I must maintain my composure.", type: "internal" }],
+                Strong: [{ line: "A forceful blow. My discipline must hold.", type: "internal" }],
+                Normal: [{ line: "A minor impact. It will not sway me.", type: "internal" }],
+                Weak: [{ line: "A wasted effort. Such crude application of force.", type: "internal" }]
+            }
+        },
         relationships: {}
     },
 };

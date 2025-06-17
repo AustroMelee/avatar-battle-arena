@@ -1245,7 +1245,86 @@ body {
 }
 
 .narrative-log-entry {
+    font-size: 0.7em;
+    color: #777;
+}
+
+/* New styles for character turn icons */
+.turn-marker-portrait img {
+    width: 32px; /* Adjust size as needed */
+    height: 32px; /* Ensure aspect ratio */
+    border-radius: 50%; /* Make it round */
+    border: 2px solid var(--border-scroll); /* Optional: add a border */
+    margin-right: 10px; /* Spacing between image and text */
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Styles for the new move line format */
+.move-line {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    margin: 0.7rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease-out;
+    border-left: 5px solid transparent;
+}
+
+.move-line .move-actor {
+    font-weight: bold;
+    margin-right: 0.2rem;
+}
+
+.move-line .move-name {
+    font-style: italic;
+    color: var(--text-parchment-gold);
+}
+
+.move-line .move-effectiveness {
+    font-weight: bold;
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    font-size: 0.85em;
+    margin-left: auto; /* Push to the right */
+}
+
+/* Elemental Colors for move lines */
+.move-line.element-fire { border-color: var(--fire-color); background-color: rgba(255, 72, 72, 0.08); }
+.move-line.element-water { border-color: var(--water-color); background-color: rgba(69, 183, 209, 0.08); }
+.move-line.element-earth { border-color: var(--earth-color); background-color: rgba(183, 164, 118, 0.08); }
+.move-line.element-air { border-color: var(--air-color); background-color: rgba(138, 255, 138, 0.08); }
+.move-line.element-chi { border-color: var(--chi-color); background-color: rgba(153, 51, 255, 0.08); }
+.move-line.element-physical { border-color: var(--nonbender-color); background-color: rgba(164, 210, 247, 0.08); }
+.move-line.element-metal { border-color: #A9A9A9; background-color: rgba(169, 169, 169, 0.08); }
+.move-line.element-ice { border-color: #ADD8E6; background-color: rgba(173, 216, 230, 0.08); }
+
+/* Effectiveness-based styling */
+.move-line.effectiveness-critical { box-shadow: 0 0 15px var(--accent-red), inset 0 0 10px var(--accent-red); animation: pulseRed 0.8s ease-out forwards; }
+.move-line.effectiveness-strong { box-shadow: 0 0 10px var(--accent-gold), inset 0 0 5px var(--accent-gold); }
+.move-line.effectiveness-normal { /* Default styling */ }
+.move-line.effectiveness-weak { opacity: 0.7; }
+
+/* Keyframe animation for critical hits */
+@keyframes pulseRed {
+    0% { transform: scale(1); box-shadow: 0 0 5px var(--accent-red); }
+    50% { transform: scale(1.02); box-shadow: 0 0 25px var(--accent-red); }
+    100% { transform: scale(1); box-shadow: 0 0 15px var(--accent-red); }
+}
+
+/* New dialogue line format */
+.dialogue-line {
+    padding: 0.5rem 0;
+    font-style: italic;
+    line-height: 1.4;
     color: var(--text-primary);
-    opacity: 0.7;
-    font-size: 0.8em;
+}
+
+.dialogue-line span {
+    font-style: normal; /* Override italic for character name */
+    font-weight: bold;
 }

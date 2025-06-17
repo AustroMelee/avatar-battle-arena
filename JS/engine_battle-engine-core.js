@@ -310,6 +310,7 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
         quotes: characterData.quotes || {}, // Ensure quotes are copied
         images: characterData.images || {},
         portrait: characterData.imageUrl || null, // Ensure portrait is set for UI
+        pronouns: characterData.pronouns || { s: 'he', p: 'his', o: 'him' }, // NEW: Ensure pronouns are always set
     };
 }
 

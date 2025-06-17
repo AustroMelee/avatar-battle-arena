@@ -119,8 +119,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             isReactedAction: true,
             reactionType: reactiveResult.type,
             reactionSuccess: reactiveResult.success,
-            narrativeEventsToPrepend: reactiveResult.narrativeEvents || [] // Key for narrative engine
-            // stunAppliedToOriginalAttacker is handled above by modifying attacker.stunDuration directly
+            narrativeEventsToPrepend: reactiveResult.narrativeEvents || [], // Key for narrative engine
+            stunDuration: 0 // No stun from reposition moves
         };
     }
     // --- END GLOBAL REACTIVE DEFENSE HOOK ---
@@ -138,6 +138,7 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
 
     let momentumChangeAttacker = 0;
     let momentumChangeDefender = 0;
+    let stunDurationApplied = 0; // NEW: Initialize for regular stun application
 
     const locationData = locationConditions[locationId];
     const collateralImpactType = move.collateralImpact || DEFAULT_MOVE_PROPERTIES.collateralImpact;
@@ -232,7 +233,8 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
             payoff: false, // Not a payoff move in the standard sense
             consumedStateName: null,
             collateralDamage: 0, // No direct collateral
-            momentumChange: { attacker: 0, defender: 0 } // Momentum handled by direct modifyMomentum calls
+            momentumChange: { attacker: 0, defender: 0 }, // Momentum handled by direct modifyMomentum calls
+            stunDuration: 0 // No stun from reposition moves
         };
     }
 
@@ -346,15 +348,30 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
         }
     }
 
+    // Apply stun chance after effectiveness, but before damage application for narrative context
+    if (move.stunChance && Math.random() < move.stunChance && defender.stunImmunityTurns <= 0) {
+        stunDurationApplied = move.stunDuration || 1; // Default to 1 turn if stunChance is met
+        attacker.aiLog.push(`[Stun Applied]: ${defender.name} stunned for ${stunDurationApplied} turn(s).`);
+    }
+
+    // Final clamping and energy cost reduction for utility/defensive moves
+    energyCost = clamp(energyCost, 0, 100);
+    if (move.type === 'Defense' || move.type === 'Utility') {
+        energyCost = Math.max(5, energyCost * 0.7); // Reduce energy cost for non-offensive moves
+    }
+
     return {
         effectiveness: effectivenessLevel,
         damage: clamp(Math.round(damage), 0, 100),
-        energyCost: clamp(Math.round(energyCost), 4, 100),
+        selfDamage: clamp(Math.round(move.selfDamage || 0), 0, 100),
+        energyCost: energyCost,
         wasPunished,
         payoff,
         consumedStateName,
         collateralDamage: Math.round(collateralDamageCalculated),
-        momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender }
+        momentumChange: { attacker: momentumChangeAttacker, defender: momentumChangeDefender },
+        isReactedAction: false,
+        stunDuration: stunDurationApplied // NEW: Return applied stun duration
     };
 }
 

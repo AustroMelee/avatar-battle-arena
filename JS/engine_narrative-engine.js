@@ -58,18 +58,23 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
     const actorNameDisplay = additionalContext.WinnerName || additionalContext.attackerName || additionalContext.characterName || actor?.name || 'A fighter';
     const opponentNameDisplay = additionalContext.LoserName || additionalContext.targetName || (actor?.id === opponent?.id ? 'their reflection' : opponent?.name) || 'Their opponent';
 
-    const actorPronouns = actor?.pronouns || { s: 'they', p: 'their', o: 'them' };
-    const opponentPronouns = opponent?.pronouns || { s: 'they', p: 'their', o: 'them' };
+    const actorPronouns = actor?.pronouns;
+    const opponentPronouns = opponent?.pronouns;
 
-    const winnerPronouns = (additionalContext.WinnerName === actor?.name) ? actorPronouns : opponentPronouns;
-    const loserPronouns = (additionalContext.LoserName === actor?.name) ? actorPronouns : opponentPronouns;
+    // If for some reason pronouns are still undefined, default to a sensible (non-they/them) value.
+    // This should ideally be handled at character data loading or fighter initialization.
+    const safeActorPronouns = actorPronouns || { s: 'he', p: 'his', o: 'him' };
+    const safeOpponentPronouns = opponentPronouns || { s: 'he', p: 'his', o: 'him' };
+
+    const winnerPronouns = (additionalContext.WinnerName === actor?.name) ? safeActorPronouns : safeOpponentPronouns;
+    const loserPronouns = (additionalContext.LoserName === actor?.name) ? safeActorPronouns : safeOpponentPronouns;
 
 
     const replacements = {
         '{actorName}': additionalContext.attackerName || actor?.name || 'A fighter',
-        '{opponentName}': additionalContext.targetName || (actor?.id === opponent?.id ? opponentPronouns.p + ' reflection' : opponent?.name) || opponentPronouns.p + ' opponent',
+        '{opponentName}': additionalContext.targetName || (actor?.id === opponent?.id ? safeOpponentPronouns.p + ' reflection' : opponent?.name) || safeOpponentPronouns.p + ' opponent',
 
-        '{targetName}': additionalContext.targetName || (actor?.id === opponent?.id ? opponentPronouns.p + ' reflection' : opponent?.name) || opponentPronouns.p + ' opponent',
+        '{targetName}': additionalContext.targetName || (actor?.id === opponent?.id ? safeOpponentPronouns.p + ' reflection' : opponent?.name) || safeOpponentPronouns.p + ' opponent',
         '{attackerName}': additionalContext.attackerName || actor?.name || 'A fighter',
 
         '{WinnerName}': additionalContext.WinnerName || actorNameDisplay,
@@ -77,13 +82,13 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
 
         '{characterName}': additionalContext.characterName || actorNameDisplay,
 
-        '{actor.s}': actorPronouns.s,
-        '{actor.p}': actorPronouns.p,
-        '{actor.o}': actorPronouns.o,
+        '{actor.s}': safeActorPronouns.s,
+        '{actor.p}': safeActorPronouns.p,
+        '{actor.o}': safeActorPronouns.o,
 
-        '{opponent.s}': opponentPronouns.s,
-        '{opponent.p}': opponentPronouns.p,
-        '{opponent.o}': opponentPronouns.o,
+        '{opponent.s}': safeOpponentPronouns.s,
+        '{opponent.p}': safeOpponentPronouns.p,
+        '{opponent.o}': safeOpponentPronouns.o,
 
         '{WinnerPronounS}': winnerPronouns.s,
         '{WinnerPronounP}': winnerPronouns.p,
@@ -92,13 +97,13 @@ export function substituteTokens(template, primaryActorForContext, secondaryActo
         '{LoserPronounP}': loserPronouns.p,
         '{LoserPronounO}': loserPronouns.o,
 
-        '{possessive}': actorPronouns.p,
+        '{possessive}': safeActorPronouns.p,
         ...additionalContext
     };
 
     for (const [token, value] of Object.entries(replacements)) {
         if (typeof token === 'string' && value !== undefined && value !== null) {
-            text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), String(value));
+            text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\$&'), 'g'), String(value));
         }
     }
     return text;
@@ -248,36 +253,55 @@ export function findNarrativeQuote(actor, opponent, trigger, subTrigger, context
 export function formatQuoteEvent(quote, actor, opponent, context) {
     if (!quote || typeof quote.line !== 'string') return null;
     const { type, line } = quote;
-    const characterName = actor?.name || 'Narrator';
-    const formattedLine = substituteTokens(line, actor, opponent, context);
 
-    const actorNameForHtml = actor ? actor.name : "Narrator";
-    const actorIdForHtml = actor ? actor.id : "environment";
-    const actorSpan = `<span class="char-${actorIdForHtml}">${actorNameForHtml}</span>`;
+    const substitutedLine = substituteTokens(line, actor, opponent, context);
 
-    let htmlContent = "";
-    const narrativeClass = `narrative-${type || 'spoken'}`;
-
-    if (type === 'environmental') {
-        htmlContent = `<p class="${narrativeClass}">${formattedLine}</p>`;
-    } else if (type === 'action') {
-        htmlContent = `<p class="${narrativeClass}">${formattedLine}</p>`; // Use formattedLine directly for action type
-    } else {
-        const verb = type === 'internal' ? 'thinks' : 'says';
-        htmlContent = `<p class="${narrativeClass}">${actorSpan} ${verb}, "<em>${formattedLine}</em>"</p>`;
+    switch (type) {
+        case 'spoken':
+        case 'action': // Actions with spoken lines
+            const actorNameSpan = `<span class="char-${actor.id}">${actor.name}</span>`;
+            const dialogueHtml = `<p class="dialogue-line">${actorNameSpan} says, "<em>${substitutedLine}</em>"</p>`;
+            return {
+                type: 'dialogue_event',
+                actorId: actor.id,
+                characterName: actor.name,
+                text: `${actor.name} says, "${substitutedLine}"`,
+                html_content: dialogueHtml,
+                isDialogue: true,
+                dialogueType: type
+            };
+        case 'internal':
+            const internalHtml = `<p class="dialogue-line internal-thought char-${actor.id}"><em>(${substitutedLine})</em></p>`;
+            return {
+                type: 'internal_thought_event',
+                actorId: actor.id,
+                characterName: actor.name,
+                text: `(${actor.name} thinks: ${substitutedLine})`,
+                html_content: internalHtml,
+                isInternalThought: true,
+                dialogueType: type
+            };
+        case 'environmental':
+            const environmentalHtml = `<p class="environmental-impact-text">${substitutedLine}</p>`;
+            return {
+                type: 'environmental_impact_event',
+                actorId: null,
+                characterName: 'Environment',
+                text: substitutedLine,
+                html_content: environmentalHtml,
+                isEnvironmental: true
+            };
+        default:
+            // Fallback for unhandled types, or if no specific formatting is needed beyond text
+            return {
+                type: 'generic_narrative_event',
+                actorId: actor?.id || null,
+                characterName: actor?.name || 'Narrator',
+                text: substitutedLine,
+                html_content: `<p class="narrative-event">${substitutedLine}</p>`,
+            };
     }
-
-    return {
-        type: 'dialogue_event',
-        actorId: actor?.id || null,
-        characterName: characterName,
-        text: formattedLine,
-        isDialogue: (type === 'spoken' || type === 'internal' || type === 'action'),
-        isActionNarrative: (type === 'action'),
-        isEnvironmental: (type === 'environmental'),
-        html_content: htmlContent,
-    };
- }
+}
 
 // OLD: export function generateActionDescriptionObject(move, actor, opponent, result, currentPhaseKey, aiLogEntry = {})
 export function generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry) {
@@ -376,7 +400,8 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
 
     return {
         actionText: actionText,
-        htmlContent: htmlContent
+        htmlContent: htmlContent,
+        element: move.element || null
     };
 }
 
@@ -496,30 +521,68 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
 
     // 1. Process specific narrative quotes that were triggered (e.g., mental state changes)
     if (narrativeEventsForAction && narrativeEventsForAction.length > 0) {
-        narrativeEventsForAction.forEach(event => {
-            if (event.quote) {
-                const actorNameSpan = `<span class="char-${event.actor.id}">${event.actor.name}</span>`;
-                const rawQuoteLine = event.quote.line || event.quote;
-                const substitutedQuoteLine = substituteTokens(rawQuoteLine, actor, defender, { actorName: actor.name, opponentName: defender.name });
-                const dialogueHtml = `<p class="dialogue-line">${actorNameSpan} says, "<em>${substitutedQuoteLine}</em>"</p>`;
-                
-                narrationObjects.push({
-                    type: 'dialogue_event',
-                    actorId: event.actor.id,
-                    characterName: actor.name,
-                    text: `${actor.name} says, "${substitutedQuoteLine}"`,
-                    html_content: dialogueHtml,
-                    isDialogue: true,
-                    dialogueType: 'quote' 
-                });
-            }
-        });
+        narrationObjects.push(...narrativeEventsForAction.map(event => formatQuoteEvent(event.quote, event.actor, defender, { battleState, move, result })));
     }
 
     // 2. Generate the primary action description for the move itself
     if (move && result && !isPreBattle) {
         const actionDescription = generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry);
         narrationObjects.push(actionDescription);
+
+        // NEW: Add narrative based on move outcome (after action description)
+        const narrativeContext = { move, result, battleState, currentPhase };
+
+        // Character reaction to their own move's effectiveness
+        const actorReactionToMove = findNarrativeQuote(actor, defender, 'onMoveExecution', result.effectiveness.label, narrativeContext);
+        if (actorReactionToMove) {
+            narrationObjects.push(formatQuoteEvent(actorReactionToMove, actor, defender, narrativeContext));
+        }
+
+        // Defender reaction to being hit / taking damage
+        if (result.damage > 0) {
+            const defenderReactionToHit = findNarrativeQuote(defender, actor, 'onHit', result.effectiveness.label, narrativeContext);
+            if (defenderReactionToHit) {
+                narrationObjects.push(formatQuoteEvent(defenderReactionToHit, defender, actor, narrativeContext));
+            }
+        }
+
+        // Defender reaction to being stunned
+        if (result.stunDuration > 0) {
+            const defenderReactionToStun = findNarrativeQuote(defender, actor, 'onStun', 'general', narrativeContext);
+            if (defenderReactionToStun) {
+                narrationObjects.push(formatQuoteEvent(defenderReactionToStun, defender, actor, narrativeContext));
+            }
+        }
+
+        // Narrative for a punished move (attacker perspective)
+        if (result.wasPunished) {
+            const actorPunishedNarrative = findNarrativeQuote(actor, defender, 'onMoveExecution', 'wasPunished', narrativeContext);
+            if (actorPunishedNarrative) {
+                narrationObjects.push(formatQuoteEvent(actorPunishedNarrative, actor, defender, narrativeContext));
+            }
+        }
+
+        // Narrative for a reactive defense action
+        if (result.isReactedAction) {
+            const defenderReactiveNarrative = findNarrativeQuote(defender, actor, 'onReactiveDefense', result.reactionSuccess ? 'success' : 'fail', narrativeContext);
+            if (defenderReactiveNarrative) {
+                narrationObjects.push(formatQuoteEvent(defenderReactiveNarrative, defender, actor, narrativeContext));
+            }
+        }
+
+        // Internal thought after a move (e.g., assessing situation, stress)
+        const actorInternalThought = findNarrativeQuote(actor, defender, 'internalThought', 'afterMove', narrativeContext);
+        if (actorInternalThought) {
+            narrationObjects.push(formatQuoteEvent(actorInternalThought, actor, defender, narrativeContext));
+        }
+
+        // Check for environmental impact narrative (if collateral damage occurred)
+        if (result.collateralDamage > 0) {
+            const envImpactNarrative = findNarrativeQuote(actor, defender, 'onCollateral', 'general', { ...narrativeContext, impactText: 'The environment feels the impact of the battle.' });
+            if (envImpactNarrative) {
+                narrationObjects.push(formatQuoteEvent(envImpactNarrative, actor, defender, narrativeContext));
+            }
+        }
     }
     
     // 3. (Future) Add narration for reactions or other tertiary events if needed.

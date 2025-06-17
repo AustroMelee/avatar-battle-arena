@@ -249,7 +249,26 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                     const curbstompClass = event.isEscape ? "highlight-escape" : (event.isMajorEvent ? "highlight-major" : "highlight-neutral");
                     contentToAppend = `<div class="curbstomp-event-header">Curbstomp! 🌪️</div><p class="narrative-curbstomp ${curbstompClass}">${textContent}</p>`;
                     break;
-                // --- NEW: Escalation Change Event for HTML Log (should use html_content if available) ---
+                case 'move_action_event':
+                    const effectivenessEmoji = {
+                        'Critical': '💥',
+                        'Strong': '💪',
+                        'Normal': '⚔️',
+                        'Weak': '💨'
+                    }[event.effectivenessLabel] || '⚔️';
+                    const effectivenessClass = event.effectivenessLabel || 'Normal';
+                    const elementClass = event.element ? `element-${event.element}` : '';
+                    contentToAppend = `<p class="move-line char-${event.actorId} ${elementClass} effectiveness-${effectivenessClass.toLowerCase()}">
+                        <span class="move-actor">${event.characterName}</span> 
+                        <span class="move-description">used <span class="move-name">${event.moveName}</span>.</span>
+                        <span class="move-effectiveness ${effectivenessClass}">${event.effectivenessLabel} ${effectivenessEmoji}</span>
+                    </p>`;
+                    break;
+                case 'dialogue_event': // Ensure dialogue events are properly formatted as well
+                    contentToAppend = `<p class="dialogue-line char-${event.actorId}">
+                        <span class="char-${event.actorId}">${event.characterName}</span> says, "<em>${textContent}</em>"
+                    </p>`;
+                    break;
                 case 'escalation_change_event': // This case should ideally not be hit if html_content is always provided
                     let escalationClass = 'highlight-neutral';
                     if (event.newState === ESCALATION_STATES.PRESSURED) escalationClass = 'highlight-pressured';
@@ -257,7 +276,6 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                     else if (event.newState === ESCALATION_STATES.TERMINAL_COLLAPSE) escalationClass = 'highlight-terminal';
                     contentToAppend = `<p class="narrative-escalation char-${event.actorId || 'unknown'}">${textContent}</p>`;
                     break;
-                // --- END NEW ---
                 case 'stun_event': // Added to handle stun messages
                     contentToAppend = `<p class="narrative-action char-${event.actorId || 'unknown'}">${textContent}</p>`;
                     break;
