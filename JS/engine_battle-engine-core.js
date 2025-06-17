@@ -958,34 +958,33 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Strong' ||
             currentAttacker.lastMoveForPersonalityCheck?.effectiveness === 'Critical';
 
-        // Environmental Impact Narration - Overhaul (Point 4)
-        // Only generate environmental narration if damage level is significant and enough turns have passed.
-        const MIN_DAMAGE_FOR_ENVIRONMENTAL_NARRATION = 20;
-        const MIN_TURNS_BETWEEN_ENVIRONMENTAL_NARRATION = 3; // Or adjust based on desired frequency
+        // Environmental Summary at end of turn
+        // DEBUG: Log contents of environmentState.specificImpacts before environmental_summary_event
+        console.log('[DEBUG] environmentState.specificImpacts before environmental_summary_event:', Array.from(environmentState.specificImpacts));
+        if (environmentState.specificImpacts.size > 0 || environmentState.cumulativeDamage > 0) {
+            let environmentalSummaryHtml = (phaseTemplates.environmentalSummaryWrapper || '<div>{header}{content}</div>')
+                .replace('{header}', phaseTemplates.environmentalImpactHeader || '<h5>Environmental Impact 🌍</h5>');
 
-        if (environmentState.damageLevel >= MIN_DAMAGE_FOR_ENVIRONMENTAL_NARRATION && environmentState.specificImpacts.size > 0) {
-            if (currentBattleState.turn === 0 || (currentBattleState.turn - (currentBattleState.lastEnvironmentalNarrationTurn || -Infinity) >= MIN_TURNS_BETWEEN_ENVIRONMENTAL_NARRATION)) {
-                let environmentalSummaryHtml = `<div class=\"environmental-summary\">`;
-                environmentalSummaryHtml += phaseTemplates.environmentalImpactHeader;
-                let allImpactTexts = [];
-                environmentState.specificImpacts.forEach(impact => {
-                    const formattedImpactText = findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'general', {
-                        impactText: impact,
-                        currentPhaseKey: phaseState.currentPhase,
-                        battleState: currentBattleState
-                    })?.line || impact;
-                    allImpactTexts.push(formattedImpactText);
-                });
-                environmentalSummaryHtml += allImpactTexts.map(text => `<p class=\"environmental-impact-text\">${text}</p>`).join('');
-                environmentalSummaryHtml += `</div>`;
-                battleEventLog.push({
-                    type: 'environmental_summary_event',
-                    texts: allImpactTexts,
-                    html_content: environmentalSummaryHtml,
-                    isEnvironmental: true
-                });
-                currentBattleState.lastEnvironmentalNarrationTurn = currentBattleState.turn;
-            }
+            let allImpactTexts = [];
+            environmentState.specificImpacts.forEach(impact => {
+                const formattedImpactText = findNarrativeQuote(currentAttacker, currentDefender, 'onCollateral', 'general', {
+                    impactText: impact,
+                    currentPhaseKey: phaseState.currentPhase,
+                    battleState: currentBattleState
+                })?.line || impact;
+                allImpactTexts.push(formattedImpactText);
+            });
+            environmentalSummaryHtml += allImpactTexts.map(text => `<p class="environmental-impact-text">${text}</p>`).join('');
+            environmentalSummaryHtml += `</div>`;
+                        // DEBUG: Log contents of environmentState.specificImpacts before environmental_summary_event
+                        console.log('[DEBUG] environmentState.specificImpacts before environmental_summary_event:', Array.from(environmentState.specificImpacts));
+            turnSpecificEventsForLog.push({
+                type: 'environmental_summary_event',
+                texts: allImpactTexts,
+                html_content: environmentalSummaryHtml,
+                isEnvironmental: true
+            });
+            currentBattleState.lastEnvironmentalNarrationTurn = currentBattleState.turn;
         }
 
         if (!battleOver && currentBattleState.turn >= MIN_TURNS_BEFORE_CURBSTOMP) { // Check curbstomp after minimum turns
