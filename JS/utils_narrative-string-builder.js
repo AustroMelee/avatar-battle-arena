@@ -1,8 +1,7 @@
 'use strict';
 
-import { getRandomElement } from './utils_clipboard.js'; // Assuming this utility exists or will be created
-import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
-import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
+import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
 
 // Centralized Tag/Context Registry
 const NARRATIVE_TAGS = {
@@ -90,7 +89,7 @@ export class NarrativeStringBuilder {
         }
         if (this.environment) {
             processedText = processedText.replace(/\${environmentName}/g, this.environment.name || 'the surroundings');
-            processedText = processedText.replace(/\${envKeyword}/g, getRandomElement(this.environment.tags || ['area']) || 'the area');
+            processedText = processedText.replace(/\${envKeyword}/g, getRandomElementSeeded(this.environment.tags || ['area']) || 'the area');
         }
         if (this.move) {
             processedText = processedText.replace(/\${moveName}/g, this.move.name || 'a move');
@@ -198,63 +197,136 @@ export class NarrativeStringBuilder {
         const { candidates: candidateVariants, reasons: selectionReasons } = this._getFilteredVariants();
 
         if (candidateVariants.length > 0) {
-            const selectedVariant = getRandomElement(candidateVariants);
+            const selectedVariant = getRandomElementSeeded(candidateVariants);
             baseActionText = this._replacePlaceholders(selectedVariant.text);
             if (this.debugMode) {
-                console.log(`[NarrativeBuilder] Selected variant: "${selectedVariant.text}" (Reasons: ${selectionReasons.join('; ')})`);
+                console.log("[NarrativeBuilder] Selected Variant:", selectedVariant);
             }
-        } else if (this.move.actionVariants && this.move.actionVariants.length > 0) {
+        } else if (this.move) {
             // This fallback block is technically redundant if _getFilteredVariants handles ultimate fallback correctly,
             // but it's kept for robustness in case _getFilteredVariants returns an empty array for some edge case.
-            const selectedVariantText = getRandomElement(this.move.actionVariants.map(v => v.text || v));
+            const selectedVariantText = getRandomElementSeeded(this.move.actionVariants.map(v => v.text || v));
             baseActionText = this._replacePlaceholders(selectedVariantText);
             if (this.debugMode) {
-                console.log(`[NarrativeBuilder] Fallback to raw actionVariants. Selected: "${selectedVariantText}"`);
+                console.log("[NarrativeBuilder] Fallback to move name or generic variant.", selectedVariantText);
             }
         } else {
-            baseActionText = this._replacePlaceholders(this.move.name);
+            baseActionText = "An unknown action unfolds.";
             if (this.debugMode) {
-                console.log(`[NarrativeBuilder] Fallback to move name: "${this.move.name}"`);
+                console.log("[NarrativeBuilder] No move data, using generic action text.");
             }
         }
 
-        // Apply article correction if necessary. This assumes baseActionText is a noun phrase.
-        // We'll apply this more intelligently if the baseActionText starts with a noun phrase
-        // which would typically require an article.
-        // For now, let's assume we want to prepend an article if it doesn't already have one
-        // and it looks like a phrase that needs one.
-        const startsWithArticleRegex = /^(a|an|the)\\s/i;
-        if (!startsWithArticleRegex.test(baseActionText) && 
-            (baseActionText.includes(' ') || !baseActionText.startsWith('of') && !baseActionText.startsWith('with')) && // Heuristic: if it's a phrase or not a prepositional phrase
-            !this.move.isVerbPhrase) { // New property on move to indicate if it's already a verb phrase like 'repositions for tactical advantage'
-            baseActionText = this.addArticle(baseActionText);
-        }
-
-        // Construct the full action description including actor and move
-        const actionPhrase = `${this.actor.name} ${this.move.isVerbPhrase ? baseActionText : 'executes ' + baseActionText}`;
-
-        let effectivenessPhraseText = "";
-        let effectivenessPhraseHtml = "";
-
-        if (effectiveness !== 'Normal' && effectiveness !== 'Ineffective') {
-            const impactText = `hitting with ${effectiveness.toLowerCase()} impact`;
-            const impactHtml = `hitting with <span class="effectiveness-label">${effectiveness.toLowerCase()}</span> impact`;
-
-            if (effectivenessFlavor) {
-                effectivenessPhraseText = `${effectivenessFlavor}, ${impactText}`;
-                effectivenessPhraseHtml = `${effectivenessFlavor}, ${impactHtml}`;
-            } else {
-                effectivenessPhraseText = impactText;
-                effectivenessPhraseHtml = impactHtml;
-            }
-        }
-
-        // 2️⃣ Base sentence assembly (no HTML yet):
-        let actionSentence = `${actionPhrase}${effectivenessPhraseText ? `, ${effectivenessPhraseText}` : ''}.`;
-
-        // 3️⃣ HTML wrapping stage (safe & clean):
-        let htmlSentence = `<p class="narrative-action char-${this.actor.id}">${actionPhrase}${effectivenessPhraseHtml ? `, <span class="${effectivenessColor}">${effectivenessPhraseHtml}</span>` : ''}.</p>`;
-
-        return { actionSentence, htmlSentence };
+        const finalDescription = this._applyEffectivenessFlavor(baseActionText, effectiveness, effectivenessFlavor, effectivenessColor);
+        return finalDescription.charAt(0).toUpperCase() + finalDescription.slice(1); // Capitalize first letter
     }
-} 
+
+    _applyEffectivenessFlavor(text, effectiveness, effectivenessFlavor, effectivenessColor) {
+        if (!effectiveness) return text;
+
+        let flavorText = "";
+        if (effectivenessFlavor) {
+            flavorText = effectivenessFlavor;
+        } else {
+            switch (effectiveness) {
+                case 'super-effective':
+                    flavorText = getRandomElementSeeded([
+                        "It's super effective! ",
+                        "A devastating blow! ",
+                        "Unleashed with full force! "
+                    ]);
+                    break;
+                case 'not-very-effective':
+                    flavorText = getRandomElementSeeded([
+                        "It's not very effective... ",
+                        "A glancing blow. ",
+                        "Barely makes a dent. "
+                    ]);
+                    break;
+                case 'no-effect':
+                    flavorText = getRandomElementSeeded([
+                        "It has no effect. ",
+                        "Completely shrugged off. ",
+                        "A futile effort. "
+                    ]);
+                    break;
+                case 'critical':
+                    flavorText = getRandomElementSeeded([
+                        "Critical hit! ",
+                        "A precise strike! ",
+                        "Exploiting a weakness! "
+                    ]);
+                    break;
+                case 'miss':
+                    flavorText = getRandomElementSeeded([
+                        "It misses! ",
+                        "A wild swing. ",
+                        "Fails to connect. "
+                    ]);
+                    break;
+                default:
+                    flavorText = ""; // No specific flavor for default effectiveness
+            }
+        }
+
+        // Prepend color span if color is provided
+        if (effectivenessColor) {
+            return `<span style="color:${effectivenessColor};">${flavorText}</span>${text}`;
+        }
+
+        return flavorText + text;
+    }
+
+    buildEnvironmentalNarrative(eventType, details) {
+        let narrative = "";
+        switch (eventType) {
+            case 'activation':
+                narrative = `The environment of ${this.environment.name || 'the battlefield'} activates, influencing the combatants.`;
+                if (details?.impacts?.length > 0) {
+                    const impactDescriptions = details.impacts.map(impact => {
+                        return `${impact.type} (${impact.magnitude})`;
+                    });
+                    narrative += ` Key impacts: ${impactDescriptions.join(', ')}.`;
+                }
+                break;
+            case 'damage':
+                const damagedEntities = details.entities.map(e => e.name).join(' and ');
+                const damageFlavor = getRandomElementSeeded([
+                    `The environment lashes out, affecting ${damagedEntities}.`,
+                    `Environmental hazards impact ${damagedEntities}.`,
+                    `${damagedEntities} contend with the treacherous surroundings.`
+                ]);
+                narrative = `${damageFlavor} (${details.damageAmount} damage).`;
+                break;
+            case 'change':
+                const changeFlavor = getRandomElementSeeded([
+                    `The ${this.environment.name} shifts, altering the dynamics of the fight.`, `The battlefield morphs, creating new challenges.`, `The environment responds to the escalating conflict.`]);
+                narrative = `${changeFlavor} New state: ${details.newState}.`;
+                break;
+            default:
+                narrative = `Something happens with the environment.`;
+        }
+        return this._replacePlaceholders(narrative);
+    }
+
+    buildQuoteEvent(quoteText, speaker) {
+        // Quotes are direct and don't use complex narrative logic, but still use placeholders.
+        let formattedQuote = `"${quoteText}"`;
+        if (speaker) {
+            formattedQuote += ` - ${speaker}`; // Assuming speaker is a name string, not object
+        }
+        return this._replacePlaceholders(formattedQuote);
+    }
+
+    buildDescription(tags, context = {}) {
+        const relevantTags = Array.isArray(tags) ? tags : [tags];
+        const candidates = NARRATIVE_TAGS.filter(tag => relevantTags.includes(tag.name)); // Assuming NARRATIVE_TAGS is an array of objects
+
+        if (candidates.length === 0) {
+            return "A general event occurred.";
+        }
+
+        const selectedDescription = getRandomElementSeeded(candidates).description;
+        return this._replacePlaceholders(selectedDescription);
+    }
+}
