@@ -481,18 +481,24 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
 
 export function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData, battleState) { // FIX: Added battleState
     if (!move.collateralImpact || move.collateralImpact === 'none' || environmentState.damageLevel === 0) {
+        console.log('[DEBUG] generateCollateralDamageEvent: Move has no collateral impact or environment damage is 0');
         return null;
     }
     const impactLevel = move.collateralImpact.toUpperCase();
+    console.log('[DEBUG] generateCollateralDamageEvent: impactLevel = ', impactLevel);
+    console.log('[DEBUG] generateCollateralDamageEvent: collateralImpactPhrases[impactLevel] = ', collateralImpactPhrases[impactLevel]);
+
     if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) return null;
 
     const collateralPhraseTemplate = getRandomElement(collateralImpactPhrases[impactLevel]);
-    // OLD: const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent) : '';
-    const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent, {battleState}) : ''; // FIX: Pass battleState
+    const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent, {battleState}) : '';
+
+    console.log('[DEBUG] generateCollateralDamageEvent: generated collateralPhrase = ', collateralPhrase);
 
     // NEW: Add the collateral phrase to environmentState.specificImpacts
     if (collateralPhrase) {
         environmentState.specificImpacts.add(collateralPhrase);
+        console.log('[DEBUG] generateCollateralDamageEvent: Added collateralPhrase to specificImpacts. Current impacts:', Array.from(environmentState.specificImpacts));
     }
 
     let description = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase}`;
