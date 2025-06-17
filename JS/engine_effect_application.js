@@ -136,7 +136,7 @@ export function applyEffect(effect, actor, target, battleState, battleEventLog) 
 
                 // Trigger detailed environmental narrative event
                 // We need to pass the original move that caused this for context
-                const collateralEvent = generateCollateralDamageEvent(effect.sourceMove, actor, target, primaryTarget, battleState.locationConditions[battleState.locationId], battleState, { effectiveness: { label: 'Normal' }, effects: [effect] });
+                const collateralEvent = generateCollateralDamageEvent(effect.sourceMove, actor, target, primaryTarget, battleState.locationConditions, battleState, { effectiveness: { label: 'Normal' }, effects: [effect] });
                 if (collateralEvent) generatedEvents.push(collateralEvent);
             }
             break;
