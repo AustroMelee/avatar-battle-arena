@@ -401,7 +401,7 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
     return {
         type: 'move_action_event',
         actionText: actionText,
-        htmlContent: htmlContent,
+        html_content: htmlContent,
         element: move.element || null
     };
 }
