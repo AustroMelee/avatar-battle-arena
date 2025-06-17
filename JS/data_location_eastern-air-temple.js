@@ -89,5 +89,5 @@ export const easternAirTemple = {
         }
     ],
     fragility: 50,
-    background: 'https://static.wikia.nocookie.net/avatar/images/5/52/Eastern_Air_Temple.png',
+    background: 'https://i0.wp.com/legendofgenji.wordpress.com/wp-content/uploads/2016/05/spirits11-5.jpg?ssl=1',
 };

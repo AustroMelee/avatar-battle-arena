@@ -16,5 +16,5 @@ export const greatDivide = {
         ranged_attack: { damage: -15, energy: 10, reason: "The variable elevation and wind makes ranged attacks unreliable." }
     },
     fragility: 80,
-    background: 'https://static.wikia.nocookie.net/avatar/images/3/33/Great_Divide.png',
+    background: 'https://comicvine.gamespot.com/a/uploads/original/11128/111282615/8198878-thegreatdivide.jpg',
 }; 

@@ -16,5 +16,5 @@ export const baSingSe = {
         ranged_attack: { damage: -25, energy: 15, reason: "Buildings and corners obstruct long-range attacks." }
     },
     fragility: 70,
-    background: 'https://static.wikia.nocookie.net/avatar/images/a/a0/Lower_Ring.png',
+    background: 'https://64.media.tumblr.com/70504a59db039b4d070b9cd425274773/tumblr_n87buy49nr1rpfi93o1_1280.jpg',
 }; 

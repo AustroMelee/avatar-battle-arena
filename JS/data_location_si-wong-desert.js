@@ -16,5 +16,5 @@ export const siWongDesert = {
         ranged_attack: { damage: 10, energy: -5, reason: "The flat, open terrain offers clear lines of sight." }
     },
     fragility: 10,
-    background: 'https://static.wikia.nocookie.net/avatar/images/1/1a/Si_Wong_Desert.png',
+    background: 'https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fvignette1.wikia.nocookie.net%2Favatar%2Fimages%2F8%2F84%2FSi_Wong_Dunes.png%2Frevision%2Flatest%3Fcb%3D20090924182600%26path-prefix%3Dnl&f=1&nofb=1&ipt=ae96b0349753ac5d17eab260be68b812fae1fa5bfa529a8b2511fa3771f9192a',
 }; 

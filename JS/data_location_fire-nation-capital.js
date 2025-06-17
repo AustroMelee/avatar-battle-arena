@@ -16,5 +16,5 @@ export const fireNationCapital = {
         ranged_attack: { damage: 15, energy: -10, reason: "The wide-open plaza favors long-range attacks." }
     },
     fragility: 60,
-    background: 'https://static.wikia.nocookie.net/avatar/images/f/f3/Fire_Nation_Capital.png',
+    background: 'https://i.redd.it/mqr12b0n9vw41.jpg',
 }; 

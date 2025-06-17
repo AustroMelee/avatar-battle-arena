@@ -16,5 +16,5 @@ export const kyoshiIsland = {
         ranged_attack: { damage: -20, energy: 15, reason: "The buildings provide significant cover, hindering ranged attacks." }
     },
     fragility: 65,
-    background: 'https://static.wikia.nocookie.net/avatar/images/a/a0/Kyoshi_Island.png',
+    background: 'https://64.media.tumblr.com/3ab423cde2d3526736ec70e55b844eba/88d557d930392bf4-aa/s1280x1920/4e1a6134355302c2dfbcfc216ceef07dbdcfe49a.jpg',
 }; 
