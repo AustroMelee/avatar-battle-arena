@@ -4,11 +4,18 @@
 // --- UPDATED IMPORT ---
 import { battlePhases as phaseDefinitions } from './data_narrative_phases.js'; // Corrected import path
 import { locations } from './locations.js'; // Ensure this import is here
-import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
 import { generateLogEvent } from './utils_log_event.js'; // NEW: Import generateLogEvent
 // --- END UPDATED IMPORT ---
+
+export const BATTLE_PHASES = {
+    PRE_BANTER: 'PreBanter',
+    POKING: 'Poking',
+    EARLY: 'Early',
+    MID: 'Mid',
+    LATE: 'Late'
+};
 
 const MIN_POKING_DURATION = 1; // Minimum duration for the Poking phase
 const MAX_POKING_DURATION = 3; // Maximum duration for the Poking phase
