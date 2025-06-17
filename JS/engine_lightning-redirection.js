@@ -5,7 +5,7 @@
 
 // --- UPDATED IMPORT ---
 import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
-import { BENDING_ELEMENTS, EFFECT_TYPES } from './data_mechanics_definitions.js';
+import { EFFECT_TYPES } from './data_mechanics_definitions.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
 import { generateLogEvent } from './utils_log_event.js'; // NEW: Import generateLogEvent
