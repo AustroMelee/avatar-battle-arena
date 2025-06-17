@@ -900,9 +900,21 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         if (result.damage > 0) {
             currentDefender.hp = clamp(currentDefender.hp - result.damage, 0, 100);
         }
+// ... existing code ...
         if (result.selfDamage > 0) {
             currentAttacker.hp = clamp(currentAttacker.hp - result.selfDamage, 0, 100);
         }
+
+        // NEW: Update environmentState.damageLevel with collateralDamage
+        if (result.collateralDamage > 0) {
+            environmentState.damageLevel = clamp(environmentState.damageLevel + result.collateralDamage, 0, 100);
+            environmentState.lastDamageSourceId = currentAttacker.id;
+            console.log(`[DEBUG] environmentState.damageLevel updated: ${environmentState.damageLevel}`);
+        }
+
+        if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName && !result.isReactedAction) {
+             currentDefender.tacticalState = null;
+// ... existing code ...
 
         if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName && !result.isReactedAction) {
              currentDefender.tacticalState = null;
