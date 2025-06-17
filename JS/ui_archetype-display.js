@@ -1,6 +1,9 @@
 // FILE: js/ui_archetype-display.js
 'use strict';
 
+import { characters } from './data_characters.js';
+import { allLocations } from './data_locations_index.js';
+
 export function renderArchetypeDisplay(data, domElements) {
     if (!domElements || !domElements.headline || !domElements.introA || !domElements.introB || !domElements.error) {
         console.error("Archetype Display: Required DOM elements are missing.");
@@ -25,6 +28,21 @@ export function renderArchetypeDisplay(data, domElements) {
              domElements.container.classList.add('no-selection');
         } else {
             domElements.container.classList.remove('no-selection');
+        }
+
+        // Update character and location images
+        const aangImageElement = document.getElementById('aang-image');
+        const azulaImageElement = document.getElementById('azula-image');
+        const locationImageElement = document.getElementById('location-image');
+
+        if (aangImageElement) {
+            aangImageElement.src = characters['aang-airbending-only']?.imageUrl || '';
+        }
+        if (azulaImageElement) {
+            azulaImageElement.src = characters['azula']?.imageUrl || '';
+        }
+        if (locationImageElement) {
+            locationImageElement.src = allLocations['fire-nation-capital']?.background || '';
         }
     }
 }
