@@ -310,98 +310,108 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
     const actorName = actor.name;
     const defenderName = defender.name;
 
-    const actorPronouns = actor.pronouns || { s: 'they', p: 'their', o: 'them' };
-    const defenderPronouns = defender.pronouns || { s: 'they', p: 'their', o: 'them' };
+    const actorPronouns = actor.pronouns || { s: 'he', p: 'his', o: 'him' };
+    const defenderPronouns = defender.pronouns || { s: 'he', p: 'his', o: 'him' };
 
     const moveVerb = conjugatePresent(move.verb || 'acts');
     const moveObject = move.object || 'meaningfully';
 
-    let actionText = '';
-    let htmlContent = '';
-    let additionalContext = {};
+    let actionBaseText = `${actorName} ${moveVerb} ${moveObject}`;
+    let htmlBaseText = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject}`;
 
-    // Base action description
-    actionText = `${actorName} ${moveVerb} ${moveObject}.`;
-    htmlContent = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject}.</p>`;
-
-    // Effectiveness flavor
     const effectiveness = result?.effectiveness?.label || 'Normal';
-    const effectivenessEmoji = result?.effectiveness?.emoji || '';
     const effectivenessFlavor = effectivenessLevels[effectiveness]?.flavor || '';
     const effectivenessColor = effectivenessLevels[effectiveness]?.colorClass || '';
 
+    // EFFECTIVENESS PHRASE BUILD
+    let effectivenessPhraseText = "";
+    let effectivenessPhraseHtml = "";
+
     if (effectiveness !== 'Normal' && effectiveness !== 'Ineffective') {
-        actionText = `${actorName} ${moveVerb} ${moveObject} ${effectivenessFlavor}, hitting with ${effectiveness.toLowerCase()} impact.`;
-        htmlContent = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject} <span class="${effectivenessColor}">${effectivenessFlavor}</span>, hitting with ${effectiveness.toLowerCase()} impact.</p>`;
+        if (effectivenessFlavor) {
+            effectivenessPhraseText = `${effectivenessFlavor}, hitting with ${effectiveness.toLowerCase()} impact`;
+            effectivenessPhraseHtml = `${effectivenessFlavor}, hitting with <span class="${effectivenessColor}">${effectiveness.toLowerCase()}</span> impact`;
+        } else {
+            effectivenessPhraseText = `hitting with ${effectiveness.toLowerCase()} impact`;
+            effectivenessPhraseHtml = `hitting with <span class="${effectivenessColor}">${effectiveness.toLowerCase()}</span> impact`;
+        }
     }
 
+    // FINAL CONCAT
+    const finalActionText = `${actionBaseText}${effectivenessPhraseText ? `, ${effectivenessPhraseText}` : ''}.`;
+    const finalHtmlContent = `${htmlBaseText}${effectivenessPhraseHtml ? `, ${effectivenessPhraseHtml}` : ''}.</p>`;
+
+    // Initialize final output strings with the core action
+    // Removed the re-initialization as finalActionText and finalHtmlContent are directly built above.
+    
+    // Append other details (damage, stun, etc.) as separate paragraphs/lines.
     // Damage/Healing
     if (result.damage > 0) {
-        actionText += ` It deals ${result.damage} damage to ${defenderName}.`;
-        htmlContent += `<p class="narrative-damage char-${defender.id}">It deals <span class="damage-value">${result.damage}</span> damage to ${defenderName}.</p>`;
+        finalActionText += ` It deals ${result.damage} damage to ${defenderName}.`;
+        finalHtmlContent += `<p class="narrative-damage char-${defender.id}">It deals <span class="damage-value">${result.damage}</span> damage to ${defenderName}.</p>`;
     } else if (result.healing > 0) {
-        actionText += ` ${actorPronouns.s} heals for ${result.healing} HP.`;
-        htmlContent += `<p class="narrative-healing char-${actor.id}">${actorPronouns.s} heals for <span class="healing-value">${result.healing}</span> HP.</p>`;
+        finalActionText += ` ${actorPronouns.s} heals for ${result.healing} HP.`;
+        finalHtmlContent += `<p class="narrative-healing char-${actor.id}">${actorPronouns.s} heals for <span class="healing-value">${result.healing}</span> HP.</p>`;
     }
 
     // Self-damage
     if (result.selfDamage > 0) {
-        actionText += ` But ${actorPronouns.s} takes ${result.selfDamage} recoil damage.`;
-        htmlContent += `<p class="narrative-self-damage char-${actor.id}">But ${actorPronouns.s} takes <span class="damage-value">${result.selfDamage}</span> recoil damage.</p>`;
+        finalActionText += ` But ${actorPronouns.s} takes ${result.selfDamage} recoil damage.`;
+        finalHtmlContent += `<p class="narrative-self-damage char-${actor.id}">But ${actorPronouns.s} takes <span class="damage-value">${result.selfDamage}</span> recoil damage.</p>`;
     }
 
     // Stun
     if (result.stunDuration > 0) {
-        actionText += ` ${defenderName} is stunned for ${result.stunDuration} turn(s)!`;
-        htmlContent += `<p class="narrative-stun char-${defender.id}">${defenderName} is stunned for <span class="stun-value">${result.stunDuration}</span> turn(s)!</p>`;
+        finalActionText += ` ${defenderName} is stunned for ${result.stunDuration} turn(s)!`;
+        finalHtmlContent += `<p class="narrative-stun char-${defender.id}">${defenderName} is stunned for <span class="stun-value">${result.stunDuration}</span> turn(s)!</p>`;
     }
 
     // Debuffs/Buffs
     if (result.debuff) {
-        actionText += ` ${defenderName} is now ${result.debuff.name.toLowerCase()}.`;
-        htmlContent += `<p class="narrative-debuff char-${defender.id}">${defenderName} is now <span class="debuff-name">${result.debuff.name.toLowerCase()}</span>.</p>`;
+        finalActionText += ` ${defenderName} is now ${result.debuff.name.toLowerCase()}.`;
+        finalHtmlContent += `<p class="narrative-debuff char-${defender.id}">${defenderName} is now <span class="debuff-name">${result.debuff.name.toLowerCase()}</span>.</p>`;
     }
     if (result.buff) {
-        actionText += ` ${actorName} gains ${result.buff.name.toLowerCase()}.`;
-        htmlContent += `<p class="narrative-buff char-${actor.id}">${actorName} gains <span class="buff-name">${result.buff.name.toLowerCase()}</span>.</p>`;
+        finalActionText += ` ${actorName} gains ${result.buff.name.toLowerCase()}.`;
+        finalHtmlContent += `<p class="narrative-buff char-${actor.id}">${actorName} gains <span class="buff-name">${result.buff.name.toLowerCase()}</span>.</p>`;
     }
 
     // Tactical State interaction (e.g., opening consumed)
     if (move.moveTags?.includes('requires_opening') && result.payoff && result.consumedStateName) {
-        actionText += ` This consumes ${defenderName}'s ${result.consumedStateName} state.`;
-        htmlContent += `<p class="narrative-context char-${actor.id}">This consumes ${defenderName}'s <span class="tactical-state">${result.consumedStateName}</span> state.</p>`;
+        finalActionText += ` This consumes ${defenderName}'s ${result.consumedStateName} state.`;
+        finalHtmlContent += `<p class="narrative-context char-${actor.id}">This consumes ${defenderName}'s <span class="tactical-state">${result.consumedStateName}</span> state.</p>`;
     }
 
     // Environmental Impact
     if (result.environmentalDamage > 0) {
-        actionText += ` The environment takes ${result.environmentalDamage} damage.`;
-        htmlContent += `<p class="narrative-environmental-damage">The environment takes <span class="damage-value">${result.environmentalDamage}</span> damage.</p>`;
+        finalActionText += ` The environment takes ${result.environmentalDamage} damage.`;
+        finalHtmlContent += `<p class="narrative-environmental-damage">The environment takes <span class="damage-value">${result.environmentalDamage}</span> damage.</p>`;
     }
 
     // Reactive Defense
     if (result.isReactedAction) {
-        actionText += ` However, ${defenderName} responded with a reactive defense!`;
-        htmlContent += `<p class="narrative-context char-${defender.id}">However, ${defenderName} responded with a reactive defense!</p>`;
+        finalActionText += ` However, ${defenderName} responded with a reactive defense!`;
+        finalHtmlContent += `<p class="narrative-context char-${defender.id}">However, ${defenderName} responded with a reactive defense!</p>`;
     }
 
     // Move-specific narration from the move itself (if available)
     if (move.narrative && move.narrative[effectiveness]) {
-        const moveNarrative = substituteTokens(move.narrative[effectiveness], actor, defender, { ...additionalContext, move: move, result: result });
-        actionText += ` ${moveNarrative}`; // Append to existing text
-        htmlContent += `<p class="narrative-move-specific">${moveNarrative}</p>`;
+        const moveNarrative = substituteTokens(move.narrative[effectiveness], actor, defender, { battleState: currentBattleState, move: move, result: result });
+        finalActionText += ` ${moveNarrative}`; // Append to existing text
+        finalHtmlContent += `<p class="narrative-move-specific">${moveNarrative}</p>`;
     }
 
     // Quotes and AI log entries for debugging
     const aiLogEntryText = aiLogEntry?.text ? `(${aiLogEntry.text})` : '';
     if (aiLogEntryText) {
-        actionText += ` ${aiLogEntryText}`;
-        htmlContent += `<p class="narrative-log-entry">${aiLogEntryText}</p>`;
+        finalActionText += ` ${aiLogEntryText}`;
+        finalHtmlContent += `<p class="narrative-log-entry">${aiLogEntryText}</p>`;
     }
 
     return {
         type: 'move_action_event',
-        actionText: actionText,
-        html_content: htmlContent,
+        actionText: finalActionText,
+        html_content: finalHtmlContent,
         element: move.element || null
     };
 }
