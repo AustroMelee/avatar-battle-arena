@@ -194,28 +194,39 @@ export class NarrativeStringBuilder {
 
     buildActionDescription(effectiveness, effectivenessFlavor, effectivenessColor) {
         let baseActionText;
+        let htmlSentence;
         const { candidates: candidateVariants, reasons: selectionReasons } = this._getFilteredVariants();
 
         if (candidateVariants.length > 0) {
             const selectedVariant = getRandomElementSeeded(candidateVariants);
             baseActionText = this._replacePlaceholders(selectedVariant.text);
+            // Generate HTML with appropriate styling for character and move
+            htmlSentence = `<p class="narrative-action char-${this.actor.id}">${baseActionText}</p>`;
             if (this.debugMode) {
                 console.log("[NarrativeBuilder] Selected Variant:", selectedVariant);
             }
         } else if (this.move) {
-            baseActionText = `The ${this.move.name} unfolds.`;
+            // Fallback for when no specific action variant is found
+            baseActionText = `${this.actor.name} uses ${this.addArticle(this.move.name)}.`;
+            htmlSentence = `<p class="narrative-action char-${this.actor.id}">${baseActionText}</p>`;
             if (this.debugMode) {
                 console.log("[NarrativeBuilder] Fallback to move name as no suitable variants were found.");
             }
         } else {
             baseActionText = "An unknown action unfolds.";
+            htmlSentence = `<p class="narrative-action">${baseActionText}</p>`;
             if (this.debugMode) {
                 console.log("[NarrativeBuilder] No move data, using generic action text.");
             }
         }
 
-        const finalDescription = this._applyEffectivenessFlavor(baseActionText, effectiveness, effectivenessFlavor, effectivenessColor);
-        return finalDescription.charAt(0).toUpperCase() + finalDescription.slice(1); // Capitalize first letter
+        // Apply effectiveness flavor to both text and HTML versions
+        const finalActionText = this._applyEffectivenessFlavor(baseActionText, effectiveness, effectivenessFlavor, effectivenessColor);
+        // The HTML already includes the character class, just need to integrate the flavor
+        const finalHtmlSentence = this._applyEffectivenessFlavor(htmlSentence, effectiveness, effectivenessFlavor, effectivenessColor);
+
+        // Capitalize the first letter of the sentence
+        return { actionSentence: finalActionText.charAt(0).toUpperCase() + finalActionText.slice(1), htmlSentence: finalHtmlSentence };
     }
 
     _applyEffectivenessFlavor(text, effectiveness, effectivenessFlavor, effectivenessColor) {

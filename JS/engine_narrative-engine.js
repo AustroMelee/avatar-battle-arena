@@ -364,6 +364,67 @@ export function generateCurbstompNarration(rule, attacker, target, isEscape = fa
     });
 }
 
+export function generateStatusChangeEvent(battleState, character, type, oldValue, newValue, attributeName) {
+    let text = '';
+    let html_content = '';
+    let isSignificant = false;
+
+    switch (type) {
+        case 'hp_change':
+            const hpChange = newValue - oldValue;
+            if (hpChange !== 0) {
+                text = `${character.name} ${hpChange > 0 ? 'recovers' : 'loses'} ${Math.abs(hpChange)} HP. (Current: ${newValue})`;
+                html_content = `<p class="status-change ${hpChange > 0 ? 'hp-heal' : 'hp-damage'} char-${character.id}">${character.name} <span class="hp-change-value">${hpChange > 0 ? '+' : ''}${hpChange} HP</span></p>`;
+                if (Math.abs(hpChange) >= 10 || newValue <= 20) isSignificant = true; // Significant if large change or low HP
+            }
+            break;
+        case 'energy_change':
+            const energyChange = newValue - oldValue;
+            if (energyChange !== 0) {
+                text = `${character.name} ${energyChange > 0 ? 'gains' : 'loses'} ${Math.abs(energyChange)} Energy. (Current: ${newValue})`;
+                html_content = `<p class="status-change ${energyChange > 0 ? 'energy-gain' : 'energy-loss'} char-${character.id}">${character.name} <span class="energy-change-value">${energyChange > 0 ? '+' : ''}${energyChange} Energy</span></p>`;
+                if (Math.abs(energyChange) >= 10 || newValue <= 10) isSignificant = true; // Significant if large change or low energy
+            }
+            break;
+        case 'mental_state_change':
+            text = `${character.name}'s mental state shifts from ${oldValue} to ${newValue}.`;
+            html_content = `<p class="status-change mental-state-change char-${character.id}">${character.name}'s mental state: <span class="old-state">${oldValue}</span> → <span class="new-state">${newValue}</span></p>`;
+            if (oldValue !== newValue) isSignificant = true;
+            break;
+        case 'momentum_change':
+            const momentumChange = newValue - oldValue;
+            if (momentumChange !== 0) {
+                text = `${character.name}'s momentum ${momentumChange > 0 ? 'increases' : 'decreases'} by ${Math.abs(momentumChange)}. (Current: ${newValue})`;
+                html_content = `<p class="status-change momentum-change ${momentumChange > 0 ? 'momentum-gain' : 'momentum-loss'} char-${character.id}">${character.name}'s Momentum: <span class="momentum-change-value">${momentumChange > 0 ? '+' : ''}${momentumChange}</span> (Current: ${newValue})</p>`;
+                if (Math.abs(momentumChange) >= 2) isSignificant = true;
+            }
+            break;
+        case 'stun_status_change':
+            text = newValue > 0 ? `${character.name} is stunned for ${newValue} turn(s).` : `${character.name} recovers from stun.`;
+            html_content = `<p class="status-change stun-status ${newValue > 0 ? 'stunned' : 'recovered'} char-${character.id}">${text}</p>`;
+            isSignificant = true;
+            break;
+        default:
+            console.warn(`Attempted to generate unknown status change event type: ${type}`);
+            return null;
+    }
+
+    if (text === '') return null; // No change, no event
+
+    return generateLogEvent(battleState, {
+        type: 'status_change_event',
+        actorId: character.id,
+        characterName: character.name,
+        text: text,
+        html_content: html_content,
+        isSignificant: isSignificant,
+        statusType: type,
+        oldValue: oldValue,
+        newValue: newValue,
+        attributeName: attributeName || type.replace('_change', '') // e.g., 'hp', 'energy'
+    });
+}
+
 // Centralized Tag/Context Registry
 const NARRATIVE_TAGS = {
     // ... existing code ...

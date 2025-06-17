@@ -211,9 +211,13 @@ const result = calculateMove(
     currentBattleState
 );
 
-// Apply all effects from the move result
+// Apply all effects from the move result and collect generated events
 result.effects.forEach(effect => {
-    applyEffect(effect, currentAttacker, currentDefender, currentBattleState, battleEventLog);
+    // Pass the current 'move' as sourceMove to the effect application
+    const effectResult = applyEffect({ ...effect, sourceMove: move }, currentAttacker, currentDefender, currentBattleState, battleEventLog);
+    if (effectResult.events && effectResult.events.length > 0) {
+        turnEvents.push(...effectResult.events);
+    }
 });
 
 // Update AI log entry with move effectiveness and if it was a critical hit
@@ -225,11 +229,22 @@ if (aiDecision.aiLogEntryFromSelectMove) {
 }
 
 // Narration and State Updates (Add to turnEvents)
+// Generate main action narration
 turnEvents.push(...generateTurnNarrationObjects([], {...move, actionVariants: move.actionVariants || []}, currentAttacker, currentDefender, result, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, aiDecision.aiLogEntryFromSelectMove, currentBattleState));
-updateMentalState(currentAttacker, currentDefender, result, currentBattleState.environmentState, locId, currentBattleState);
-updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, currentBattleState.environmentState, locId, currentBattleState);
+    
+// Update mental state and collect any generated events
+const mentalStateEventAttacker = updateMentalState(currentAttacker, currentDefender, result, currentBattleState.environmentState, locId, currentBattleState);
+if (mentalStateEventAttacker) turnEvents.push(mentalStateEventAttacker);
 
+const mentalStateEventDefender = updateMentalState(currentDefender, currentAttacker, { ...result, wasAttacker: false }, currentBattleState.environmentState, locId, currentBattleState);
+if (mentalStateEventDefender) turnEvents.push(mentalStateEventDefender);
+
+// Log energy change due to move cost explicitly
+const oldEnergyAttacker = currentAttacker.energy;
 currentAttacker.energy = clamp(currentAttacker.energy - result.energyCost, 0, 100);
+const energyCostEvent = generateStatusChangeEvent(currentBattleState, currentAttacker, 'energy_change', oldEnergyAttacker, currentAttacker.energy, 'energy');
+if (energyCostEvent) turnEvents.push(energyCostEvent);
+
 currentAttacker.moveHistory.push({ ...move, effectiveness: result.effectiveness.label });
 updateAiMemory(currentDefender, currentAttacker);
 updateAiMemory(currentAttacker, currentDefender);

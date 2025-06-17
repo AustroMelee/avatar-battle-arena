@@ -176,14 +176,9 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
         fighter.mentalStateChangedThisTurn = true;
         fighter.aiLog.push(`[Mental State Change]: ${fighter.name} is now ${newLevel.toUpperCase()}. (Stress: ${fighter.mentalState.stress})`);
 
-        // NEW: Adjust Azula's collateral tolerance when her mental state is broken
-        if (fighter.id === 'azula' && newLevel === 'broken') {
-            fighter.collateralTolerance = 0.99; // Represents extreme disregard for collateral damage
-            fighter.aiLog.push(`[Azula Collateral]: Azula's mental state is BROKEN. Collateral tolerance plummeted!`);
-        } else if (fighter.id === 'azula' && originalLevel === 'broken' && newLevel !== 'broken') {
-            // If she somehow recovers (unlikely for broken, but for completeness)
-            fighter.collateralTolerance = antagonistCharacters.azula.collateralTolerance; // Reset to default
-            fighter.aiLog.push(`[Azula Collateral]: Azula's mental state recovered. Collateral tolerance reset.`);
-        }
+        // NEW: Log mental state change event
+        const mentalStateEvent = generateStatusChangeEvent(battleState, fighter, 'mental_state_change', originalLevel, newLevel, 'mentalState');
+        if (mentalStateEvent) return mentalStateEvent; // Return the event instead of pushing
     }
+    return null; // Return null if no state change occurred
 }
