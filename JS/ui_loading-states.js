@@ -97,7 +97,7 @@ export function showResultsState(battleResult, simulationMode) {
 
         const locationId = result.locationId || document.getElementById('location-value')?.value;
         if (locationId) {
-            displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, locationId);
+            displayFinalAnalysis(result);
         } else {
             console.error("Location ID not found for final analysis.");
             document.getElementById('analysis-list').innerHTML = "<li>Error: Location data missing for analysis.</li>"; 

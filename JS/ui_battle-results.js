@@ -40,13 +40,9 @@ function initializeDOMElements() {
 
 /**
  * Displays the final battle analysis, including fighter stats and environmental impact.
- * @param {object} finalState - Object containing fighter1 and fighter2's final states.
- * @param {string} winnerId - The ID of the winning fighter.
- * @param {boolean} isDraw - True if the battle was a draw.
- * @param {object} environmentState - Final state of the environment.
- * @param {string} locationId - The ID of the battle location.
+ * @param {object} battleResult - Object containing battle result data.
  */
-export function displayFinalAnalysis(finalState, winnerId, isDraw = false, environmentState, locationId) {
+export function displayFinalAnalysis(battleResult) {
     initializeDOMElements(); // Ensure elements are initialized
 
     if (!analysisList) {
@@ -54,11 +50,12 @@ export function displayFinalAnalysis(finalState, winnerId, isDraw = false, envir
         return;
     }
     analysisList.innerHTML = '';
-    if (!finalState || !finalState.fighter1 || !finalState.fighter2) {
+    if (!battleResult || !battleResult.finalState || !battleResult.finalState.fighter1 || !battleResult.finalState.fighter2) {
         console.error("Final state for analysis is incomplete.");
         analysisList.innerHTML = "<li>Error: Analysis data incomplete.</li>";
         return;
     }
+    const { finalState, winnerId, isDraw, environmentState, locationId } = battleResult;
     const { fighter1, fighter2 } = finalState;
 
     const createListItem = (text, value, valueClass = 'modifier-neutral') => {
@@ -162,9 +159,9 @@ export function displayFinalAnalysis(finalState, winnerId, isDraw = false, envir
         detailedBattleLogsContent.innerHTML = '';
 
         // Use the transformer to convert the raw event log into HTML
-        const fullHtmlLog = transformEventsToHtmlLog(finalBattleResult.log, {
-            fighter1: finalBattleResult.finalState.fighter1,
-            fighter2: finalBattleResult.finalState.fighter2,
+        const fullHtmlLog = transformEventsToHtmlLog(battleResult.log, {
+            fighter1: battleResult.finalState.fighter1,
+            fighter2: battleResult.finalState.fighter2,
             location: locationConditions[locationId] // Pass full location data
         });
         detailedBattleLogsContent.innerHTML = fullHtmlLog;
