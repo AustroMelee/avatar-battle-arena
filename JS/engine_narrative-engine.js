@@ -25,12 +25,6 @@ import { azulaArchetypeData } from './data_archetype_azula.js';
 
 import { allArchetypes, archetypeDataMap } from './data_archetypes_index.js'; // Import all archetypes
 
-const archetypeDataMap = {
-    'aang-airbending-only': aangArchetypeData,
-    'azula': azulaArchetypeData,
-};
-// --- END ARCHETYPE DATA IMPORTS ---
-
 function getEnvironmentImpactLine(locationId, moveType = null, moveElement = null) {
     const loc = locations[locationId];
     if (!loc) {
