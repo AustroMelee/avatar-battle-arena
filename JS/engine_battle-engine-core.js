@@ -22,7 +22,7 @@ import { applyEffect } from './engine_effect_application.js';
 import { selectMove, updateAiMemory, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
-import { generateTurnNarrationObjects, findNarrativeQuote, generateCurbstompNarration, generateEscalationNarrative, generateEnvironmentalSummaryEvent } from './engine_narrative-engine.js';
+import { generateTurnNarrationObjects, findNarrativeQuote, generateCurbstompNarration, generateEscalationNarrative, generateEnvironmentalSummaryEvent, generateStatusChangeEvent } from './engine_narrative-engine.js';
 import { modifyMomentum } from './engine_momentum.js';
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
 import { setSeed, seededRandom, getRandomElementSeeded } from './utils_seeded_random.js';
