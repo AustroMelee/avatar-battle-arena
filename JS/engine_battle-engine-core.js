@@ -1,15 +1,15 @@
 // FILE: engine/engine_battle-engine-core.js
 'use strict';
 
-import { initializeFighterState, initializeBattleState } from '../scripts/engine/state_initializer.js';
-import { applyCurbstompRules } from '../scripts/engine/curbstomp_handler.js';
-import { evaluateTerminalState } from '../scripts/engine/terminal_state.js';
-import { executeTurn } from '../scripts/engine/turn_manager.js';
-import { checkAndTransitionPhase, BATTLE_PHASES } from '../scripts/engine/engine_battle-phase.js';
-import { findNarrativeQuote, generateTurnNarrationObjects, getFinalVictoryLine, substituteTokens } from '../scripts/engine/engine_narrative-engine.js';
+import { initializeFighterState, initializeBattleState } from './state_initializer.js';
+import { applyCurbstompRules } from './curbstomp_handler.js';
+import { evaluateTerminalState } from './terminal_state.js';
+import { executeTurn } from './turn_manager.js';
+import { checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
+import { findNarrativeQuote, generateTurnNarrationObjects, getFinalVictoryLine, substituteTokens } from './engine_narrative-engine.js';
 import { phaseTemplates, battlePhases as phaseDefinitions } from '../data/data_narrative_phases.js';
 import { locationConditions, locationPhaseOverrides } from '../data/location-battle-conditions.js';
-import { getRandomElement } from '../scripts/utils/helpers.js';
+import { getRandomElement } from './helpers.js';
 
 const MAX_TOTAL_TURNS = 25;
 
