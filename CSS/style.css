@@ -1034,9 +1034,9 @@ body {
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
     font-weight: bold;
-    box-shadow: 0 0 12px rgba(255, 204, 102, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2); /* Enhanced glow */
-    font-size: 1.2rem;
-    z-index: 5; /* Below character portraits, but above location */
+    box-shadow: 0 0 12px rgba(255, 204, 102, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2);
+    font-size: 1.4rem;
+    z-index: 5;
     white-space: nowrap;
     text-shadow: 0 0 3px #000;
 }
@@ -1064,11 +1064,11 @@ body {
 }
 
 .character-image-container:first-child {
-    margin-left: 15%;
+    margin-left: 18%;
 }
 
 .character-image-container:last-child {
-    margin-right: 15%;
+    margin-right: 18%;
 }
 
 .character-portrait {
