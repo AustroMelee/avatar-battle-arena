@@ -17,7 +17,7 @@ import { getRandomElement } from './engine_battle-engine-core.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
 import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { NarrativeStringBuilder } from './utils_narrative-string-builder.js';
-import { locations } from '../locations.js'; // NEW: Import locations for env data
+import { locations } from './locations.js'; // CORRECTED: Import locations from same directory
 
 // --- ARCHETYPE DATA IMPORTS ---
 import { aangArchetypeData } from './data_archetype_aang.js';
