@@ -644,6 +644,14 @@ body {
     text-align: left;
     max-width: 80ch;
     margin: 1rem auto 2rem auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.battle-story p {
+    text-transform: none;
 }
 
 .phase-header {
@@ -1011,20 +1019,27 @@ body {
 }
 
 .versus-emblem-container {
+    display: none;
+}
+
+.versus-label {
+    display: none;
+}
+
+.vs-badge {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 15; /* Above characters and background */
-}
-
-.versus-label {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: var(--accent-gold);
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
-  text-align: center;
-  margin: 1rem 0;
+    background: linear-gradient(to bottom, #ffcc66, #ff9900);
+    color: #000;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-weight: bold;
+    box-shadow: 0 0 6px #ffb347;
+    font-size: 1.2rem;
+    z-index: 5;
+    white-space: nowrap;
 }
 
 .character-image-container {
@@ -1062,11 +1077,19 @@ body {
 
 /* Faction-themed glows (initial state) */
 #aang-image.character-portrait {
-    box-shadow: 0 0 15px var(--air-color), 0 0 30px var(--air-color);
+    box-shadow: none;
 }
 
 #azula-image.character-portrait {
-    box-shadow: 0 0 15px var(--fire-color), 0 0 30px var(--fire-color);
+    box-shadow: none;
+}
+
+.character-portrait.aang {
+    box-shadow: 0 0 12px rgba(180, 240, 255, 0.7);
+}
+
+.character-portrait.azula {
+    box-shadow: 0 0 12px rgba(255, 120, 255, 0.6);
 }
 
 /* Hover effect for portraits */
@@ -1116,9 +1139,6 @@ body {
         width: 100px;
         height: 100px;
     }
-    .versus-label {
-        font-size: 2rem;
-    }
 }
 
 @media (max-width: 768px) {
@@ -1133,9 +1153,6 @@ body {
         height: 80px;
         margin: 0 5% !important;
     }
-    .versus-label {
-        font-size: 1.8rem;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1146,8 +1163,5 @@ body {
     .character-image-container {
         width: 60px;
         height: 60px;
-    }
-    .versus-label {
-        font-size: 1.5rem;
     }
 }
