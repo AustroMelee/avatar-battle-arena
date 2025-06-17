@@ -23,7 +23,7 @@ import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
 import { aangArchetypeData } from './data_archetype_aang.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
 
-import { allArchetypes, archetypeDataMap } from './data_archetypes_index.js'; // Import all archetypes
+import { allArchetypes } from './data_archetypes_index.js'; // Import all archetypes
 
 function getEnvironmentImpactLine(locationId, moveType = null, moveElement = null) {
     const loc = locations[locationId];
@@ -97,7 +97,7 @@ export function findNarrativeQuote(actor, recipient, type, phase, context) {
     if (!archetype || !archetype.quotes) return null;
 
     if (!actor) return null;
-    const actorArchetypeData = archetypeDataMap[actor.id] || {};
+    const actorArchetypeData = allArchetypes[actor.id] || {};
     const narrativeData = actorArchetypeData.narrative || {};
 
     let pool = null;
