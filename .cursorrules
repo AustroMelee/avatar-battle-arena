@@ -1,0 +1,7 @@
+# Cursor Ruleset Hack: Nano/Sed Mode (Hardened)
+
+rules:
+  - when: always
+    apply_edit_with_shell: true
+    edit_file_shell_command: |
+      printf '%s' '{content}' > '{path}'

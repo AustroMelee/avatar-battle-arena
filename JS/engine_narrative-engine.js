@@ -488,7 +488,7 @@ export function generateEscalationNarrative(fighter, oldState, newState) {
         isEscalationEvent: true,
         highlightClass: highlightClass
     };
-}
+} // End of generateEscalationNarration
 
 
 export function generateTurnNarrationObjects(narrativeEventsForAction, move, actor, defender, result, environmentState, locationData, currentPhase, isPreBattle, aiLogEntry, battleState) {
