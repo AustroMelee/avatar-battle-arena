@@ -55,8 +55,8 @@ export function resolveArchetypeLabel(fighter1Id, fighter2Id, locationId, fighte
         };
     }
 
-    const fighter1Name = characterData[fighter1Id]?.name || "Fighter 1";
-    const fighter2Name = characterData[fighter2Id]?.name || "Fighter 2";
+    const fighter1Name = characters[fighter1Id]?.name || "Fighter 1";
+    const fighter2Name = characters[fighter2Id]?.name || "Fighter 2";
 
     let entry = null;
     const fighterAData = combinedArchetypeMap[fighter1Id];
