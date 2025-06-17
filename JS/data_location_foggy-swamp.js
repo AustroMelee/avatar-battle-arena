@@ -16,5 +16,5 @@ export const foggySwamp = {
         ranged_attack: { damage: -30, energy: 25, reason: "The thick fog severely obscures visibility for ranged attacks." }
     },
     fragility: 40,
-    background: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/d6d7c1b2-0ee9-4c1d-8409-df66708de1b2/dcl1087-f747ae92-7c52-425c-9e39-cb44a8ac1192.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2Q2ZDdjMWIyLTBlZTktNGMxZC04NDA5LWRmNjY3MDhkZTFiMlwvZGNsMTA4Ny1mNzQ3YWU5Mi03YzUyLTQyNWMtOWUzOS1jYjQ0YThhYzExOTIucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQnXX0.JlX6wz3VT7glihqrMtryIFr7catdfCSucw4iB53M_wg',
+    background: 'https://images4.wikia.nocookie.net/__cb20120605160051/avatar/images/a/a7/Banyan-grove_tree.png',
 }; 
