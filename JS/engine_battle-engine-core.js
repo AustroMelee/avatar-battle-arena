@@ -87,6 +87,8 @@ function applyStun(fighter, duration) {
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     resetCurbstompState();
     
+    const battleEventLog = [];
+
     // Initialize deterministic random seed if enabled
     if (USE_DETERMINISTIC_RANDOM) {
         setSeed(RANDOM_SEED);
@@ -102,7 +104,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     fighter2.opponentId = fighter1.id;
     currentBattleState.opponentId = fighter1.id;
 
-    const battleEventLog = [];
     let turn = 0;
     let battleOver = false, winnerId = null, loserId = null, isStalemate = false;
 
