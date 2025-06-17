@@ -31,7 +31,7 @@ const DEFAULT_EFFECTIVENESS = effectivenessLevels.NORMAL || { label: "Normal", e
  * Calculates the final outcome of a move.
  * @returns {object} The result of the move, including effectiveness, cost, and a list of effects to apply.
  */
-export function calculateMove(move, attacker, defender, conditions, interactionLog, environmentState, locationId, modifyMomentum) {
+export function calculateMove(move, attacker, defender, conditions, battleEventLog, interactionLog, environmentState, locationId, modifyMomentum) {
     if (!move || typeof move !== 'object') {
         move = { ...DEFAULT_MOVE_PROPERTIES, name: "ErrorMove", type: 'Offense', power: 5 };
     }
