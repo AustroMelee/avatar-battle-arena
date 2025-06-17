@@ -148,6 +148,18 @@ export const tacticalFlavor = {
     }
 };
 
+export const consumedStateNarratives = {
+    Repositioned: {
+        text: "This consumes {targetName}'s positional advantage.",
+        html: "This consumes <span class=\"narrative-context char-{targetId}\">{targetName}'s</span> positional advantage."
+    },
+    // Add other consumed states here
+    default: {
+        text: "This consumes {targetName}'s {stateName} state.",
+        html: "This consumes <span class=\"narrative-context char-{targetId}\">{targetName}'s</span> <span class=\"tactical-state\">{stateName}</span> state."
+    }
+};
+
 export function conjugatePresent(verbPhrase) {
     if (!verbPhrase || typeof verbPhrase !== 'string') return '';
     const words = verbPhrase.split(' ');

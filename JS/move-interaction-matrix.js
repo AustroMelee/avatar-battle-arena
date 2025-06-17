@@ -87,6 +87,13 @@ export const moveInteractionMatrix = {
             'Sword Strike': 1.3, 'Pressure Point Strike': 1.3, // Maintains distance from melee attackers
             'Fire Comet': 1.2, // Can dodge a telegraphed projectile
         },
+        actionVariants: [
+            "glides gracefully on his air scooter",
+            "zips around on an air scooter",
+            "maneuvers quickly with his air scooter",
+            "dashes forward on a sphere of air"
+        ],
+        isVerbPhrase: true
     },
     'Air Blast': {
         counters: {
@@ -94,6 +101,13 @@ export const moveInteractionMatrix = {
             'Fire Whip': 1.2, 'Flame Whips': 1.2, // Can dissipate channeled, thin fire attacks
             'Mist Cloud': 1.5, // Blows away the mist
         },
+        actionVariants: [
+            "launches a focused air blast",
+            "sends forth a burst of air",
+            "unleashes a concentrated air current",
+            "pushes with a strong gust of wind"
+        ],
+        isVerbPhrase: true
     },
     'Wind Shield': {
         counters: {
@@ -101,6 +115,12 @@ export const moveInteractionMatrix = {
             'Fire Daggers': 1.3, 'Blue Fire Daggers': 1.2, 'Ice Spears': 1.2, // Deflects elemental projectiles
             'Water Stream': 1.5, // Disperses weak water attacks
         },
+        actionVariants: [
+            "forms a protective wind shield",
+            "conjures a swirling barrier of air",
+            "erects an ethereal wind defense"
+        ],
+        isVerbPhrase: true
     },
     'Tornado Whirl': {
         counters: {
@@ -109,6 +129,12 @@ export const moveInteractionMatrix = {
             'Pressure Point Strike': 1.4, 'Sword Strike': 1.4, // Keeps melee attackers at bay
             'Mist Cloud': 1.8, // Sucks up and disperses the mist entirely
         },
+        actionVariants: [
+            "creates a powerful tornado whirl",
+            "spins into a rapidly moving vortex",
+            "generates a miniature cyclone"
+        ],
+        isVerbPhrase: true
     },
 
     // ============================================================
@@ -120,6 +146,13 @@ export const moveInteractionMatrix = {
             'Ground Spike': 1.2, // Erodes rock
             'Sword Strike': 1.2, 'Boomerang Throw': 1.1, // Can catch/deflect physical attacks
         },
+        actionVariants: [
+            "lashes out with a water whip",
+            "snaps a whip of water",
+            "strikes with a flowing water whip",
+            "sends a torrent of water whipping forward"
+        ],
+        isVerbPhrase: true
     },
     'Ice Spears': {
         counters: {
@@ -128,6 +161,12 @@ export const moveInteractionMatrix = {
             'Earth Wave': 1.2, // Pierces through loose earth
             'Acrobatic Flips': 1.2, // Harder for a purely evasive move to dodge a volley
         },
+        actionVariants: [
+            "hurls a volley of ice spears",
+            "conjures and fires sharp ice shards",
+            "launches a barrage of frozen projectiles"
+        ],
+        isVerbPhrase: true
     },
     'Water Shield': {
         counters: {
@@ -136,6 +175,12 @@ export const moveInteractionMatrix = {
             'Boulder Throw': 1.2, // A strong shield can slow or stop a boulder
             'Air Blast': 1.1, // Solid water has more mass than air
         },
+        actionVariants: [
+            "forms a flowing water shield",
+            "erects a defensive barrier of water",
+            "generates a protective water dome"
+        ],
+        isVerbPhrase: true
     },
     'Ice Prison': {
         counters: {
@@ -143,6 +188,12 @@ export const moveInteractionMatrix = {
             'Pressure Point Strike': 1.6, 'Chi-Blocking Flurry': 1.6, // Creates distance, preventing melee strikes
             'Sword Strike': 1.5, 'Flame Sword': 1.4,
         },
+        actionVariants: [
+            "creates an ice prison",
+            "traps with a wall of ice",
+            "encases the opponent in a cage of ice"
+        ],
+        isVerbPhrase: true
     },
     'Tidal Wave': { /* Punishable Move */ },
     'Bloodbending': { /* Punishable Move */ },
@@ -150,13 +201,27 @@ export const moveInteractionMatrix = {
     // ============================================================
     //  ZUKO
     // ============================================================
-    'Fire Daggers': { counters: { 'Ice Spears': 1.2, 'Ice Prison': 1.2, 'Air Blast': 1.1, 'Gust Push': 1.1 } },
+    'Fire Daggers': {
+        counters: { 'Ice Spears': 1.2, 'Ice Prison': 1.2, 'Air Blast': 1.1, 'Gust Push': 1.1 },
+        actionVariants: [
+            "hurls fire daggers",
+            "throws sharp bursts of flame",
+            "launches precise fire shards"
+        ],
+        isVerbPhrase: true
+    },
     'Flame Sword': {
         counters: {
             'Water Whip': 1.2, // Can evaporate parts of the whip on contact
             'Ice Spears': 1.3, // Smashes through ice projectiles
             'Sword Strike': 1.1, // A flaming sword has an advantage
         },
+        actionVariants: [
+            "engages with his flaming sword",
+            "attacks with a blade of fire",
+            "strikes with his fiery saber"
+        ],
+        isVerbPhrase: true
     },
     'Fire Shield': {
         counters: {
@@ -164,16 +229,44 @@ export const moveInteractionMatrix = {
             'Boomerang Throw': 1.2, 'Knife Barrage': 1.2, // Can melt/deflect physical projectiles
             'Air Blast': 1.1, // A hot shield disperses air
         },
+        actionVariants: [
+            "forms a fire shield",
+            "conjures a defensive flame barrier",
+            "erects a wall of fire"
+        ],
+        isVerbPhrase: true
     },
     'Dragon\'s Breath': {
         counters: { 'Ice Armor': 1.5, 'Water Shield': 1.2, 'Tornado Whirl': 1.3, 'Air Blast': 1.4 }, // Overpowers and consumes lesser elemental attacks
+        actionVariants: [
+            "unleashes a torrent of dragon's breath fire",
+            "breathes a stream of powerful flames",
+            "incinerates with dragon fire"
+        ],
+        isVerbPhrase: true
     },
 
     // ============================================================
     //  TOPH
     // ============================================================
-    'Earth Wave': { counters: { 'Fire Whip': 1.2, 'Gust Push': 1.3, 'Water Stream': 1.4 } }, // Grounds fire, too heavy for wind, absorbs weak water
-    'Rock Armor': { /* Punishable Move */ },
+    'Earth Wave': {
+        counters: { 'Fire Whip': 1.2, 'Gust Push': 1.3, 'Water Stream': 1.4 }, // Grounds fire, too heavy for wind, absorbs weak water
+        actionVariants: [
+            "sends forth an earth wave",
+            "creates a surging wave of rock",
+            "causes the ground to undulate forward"
+        ],
+        isVerbPhrase: true
+    },
+    'Rock Armor': {
+        /* Punishable Move */
+        actionVariants: [
+            "dons a protective rock armor",
+            "envelops herself in earthen plating",
+            "forms a defensive shell of stone"
+        ],
+        isVerbPhrase: true
+    },
     'Seismic Slam': {
         counters: {
             'Air Scooter': 1.4, 'Acrobatic Flips': 1.4, // Knocks mobile opponents off their feet
@@ -181,6 +274,12 @@ export const moveInteractionMatrix = {
             'Wind Shield': 1.5, 'Water Shield': 1.3, // Goes under shields
             'Defensive Stance': 1.8, // Bypasses a simple block
         },
+        actionVariants: [
+            "delivers a seismic slam",
+            "causes a localized earthquake",
+            "pounds the ground with immense force"
+        ],
+        isVerbPhrase: true
     },
     'Metal Bending': {
         counters: {
@@ -189,9 +288,31 @@ export const moveInteractionMatrix = {
             'Rock Coffin': 1.2, // Breaches rock with metal shards
             'Canteen Whip': 1.5, // Can capture/crush a metal canteen
         },
+        actionVariants: [
+            "performs metal bending",
+            "manipulates nearby metal objects",
+            "flexes her metalbending skill"
+        ],
+        isVerbPhrase: true
     },
-    'Boulder Throw': { counters: { 'Ice Spears': 1.3, 'Wind Shield': 1.4, 'Fire Shield': 1.3, 'Air Blast': 1.2 } },
-    'Rock Coffin': { /* Punishable Move */ },
+    'Boulder Throw': {
+        counters: { 'Ice Spears': 1.3, 'Wind Shield': 1.4, 'Fire Shield': 1.3, 'Air Blast': 1.2 },
+        actionVariants: [
+            "hurls a massive boulder",
+            "launches a large rock projectile",
+            "throws a heavy stone"
+        ],
+        isVerbPhrase: true
+    },
+    'Rock Coffin': {
+        /* Punishable Move */
+        actionVariants: [
+            "creates a rock coffin",
+            "traps the opponent in stone",
+            "encases the foe in an earthen cage"
+        ],
+        isVerbPhrase: true
+    },
 
     // ============================================================
     //  AZULA
@@ -202,14 +323,34 @@ export const moveInteractionMatrix = {
             'Dragon\'s Breath': 1.2, // Precision and heat > raw, wider flame
             'Gust Push': 1.3, 'Tornado Whirl': 1.2, // Pierces air currents
         },
+        actionVariants: [
+            "hurls blue fire daggers",
+            "throws precise bursts of blue flame",
+            "launches razor-sharp blue fire shards"
+        ],
+        isVerbPhrase: true
     },
-    'Lightning Generation': { /* Punishable Move */ },
+    'Lightning Generation': {
+        /* Punishable Move */
+        actionVariants: [
+            "generates crackling lightning",
+            "unleashes a bolt of pure lightning",
+            "strikes with controlled electricity"
+        ],
+        isVerbPhrase: true
+    },
     'Flame Burst': { // Reactive defense
         counters: {
             'Sword Strike': 1.5, 'Pressure Point Strike': 1.5, 'Chi-Blocking Flurry': 1.4, // Repels close-range attackers
             'Ice Spears': 1.3, 'Water Whip': 1.2, // Evaporates incoming attacks
             'Pinning Strike': 1.3, // Melts incoming knives
         },
+        actionVariants: [
+            "releases a defensive flame burst",
+            "erupts with a sudden burst of fire",
+            "creates a reactive flame explosion"
+        ],
+        isVerbPhrase: true
     },
 
     // ============================================================
@@ -217,6 +358,12 @@ export const moveInteractionMatrix = {
     // ============================================================
     'Pressure Point Strike': {
         counters: pressurePointCounters,
+        actionVariants: [
+            "delivers a precise pressure point strike",
+            "attempts to block chi with a swift jab",
+            "targets a vital pressure point"
+        ],
+        isVerbPhrase: true
     },
     'Pinning Strike': { // Mai's specialty
         counters: {
@@ -225,35 +372,114 @@ export const moveInteractionMatrix = {
             'Air Blast': 1.3, // Knife has more piercing power than a non-lethal gust
             'Tactical Positioning': 1.4, // Pins the opponent in place, preventing repositioning
         },
+        actionVariants: [
+            "executes a pinning strike",
+            "throws a knife to pin the opponent",
+            "immobilizes with a precise throw"
+        ],
+        isVerbPhrase: true
     },
     'Ricochet Shot': {
         counters: {
             'Water Shield': 1.4, 'Fire Wall': 1.4, 'Wind Shield': 1.4, 'Knife Wall': 1.4, // Bypasses frontal defenses
             'Rock Armor': 1.2, // Can find gaps from unexpected angles
         },
+        actionVariants: [
+            "fires a ricochet shot",
+            "bounces a projectile off a surface",
+            "sends a shot deflecting off an obstacle"
+        ],
+        isVerbPhrase: true
     },
     'Improvised Trap': { // Sokka
         counters: {
             'Acrobatic Flips': 1.3, 'Air Scooter': 1.3, // Anticipates movement paths
             'Tactical Positioning': 1.5, // Cuts off escape routes
         },
+        actionVariants: [
+            "devises a clever trap",
+            "sets an improvised snare",
+            "lays a cunning booby trap"
+        ],
+        isVerbPhrase: true
+    },
+    'Acrobatic Flips': {
+        actionVariants: [
+            "executes a series of acrobatic flips",
+            "performs dazzling aerial maneuvers",
+            "flips and tumbles with astounding agility"
+        ],
+        isVerbPhrase: true
+    },
+    'Nimble Repositioning': {
+        actionVariants: [
+            "executes a nimble repositioning",
+            "repositions with agile footwork",
+            "moves into a more advantageous spot"
+        ],
+        isVerbPhrase: true
     },
 
     // ============================================================
     //  CROSS-CHARACTER FINISHERS
     // ============================================================
     'Emperor\'s Wrath': { /* Punishable Move */ },
-    'Redemption\'s Fury': { // Zuko
+    'Redemption\'s Fury': {
         counters: { 'Precision Strike': 1.2 }, // Flurry overwhelms a single focused blast
+        actionVariants: [
+            "unleashes Redemption's Fury",
+            "erupts with a powerful surge of flame",
+            "delivers a furious, redeeming attack"
+        ],
+        isVerbPhrase: true
     },
-    'Final Pin': { // Mai
+    'Final Pin': {
         counters: { 'Graceful Dodge': 1.4, 'Acrobatic Flips': 1.4 }, // Area denial is hard to evade
+        actionVariants: [
+            "executes a final pinning maneuver",
+            "immobilizes the foe with a decisive throw",
+            "lands the ultimate pinning strike"
+        ],
+        isVerbPhrase: true
     },
-    'Chi-Blocking Flurry': { // Ty Lee
-        counters: {
-            ...pressurePointCounters, // Inherits all benefits from its base move
-            'Seismic Slam': 1.5, // Flips over the shockwave to deliver the final blows
-            'Redemption\'s Fury': 1.3, // Gets inside the flurry to disable the attacker
-        },
+    'Chi-Blocking Flurry': {
+        actionVariants: [
+            "delivers a flurry of chi-blocking strikes",
+            "unleashes a rapid sequence of chi blocks",
+            "assaults with blindingly fast pressure point jabs"
+        ],
+        isVerbPhrase: true
+    },
+    'Strikes Vital Pressure Point': {
+        actionVariants: [
+            "strikes a vital pressure point",
+            "lands a precise hit to a critical chi node",
+            "targets a crucial pressure point"
+        ],
+        isVerbPhrase: true
+    },
+    'Springs Masterfully Constructed Snare Trap': {
+        actionVariants: [
+            "springs a masterfully constructed snare trap",
+            "activates a cleverly hidden ensnaring device",
+            "triggers a concealed snare"
+        ],
+        isVerbPhrase: true
+    },
+    'Devises Clever Trap': {
+        actionVariants: [
+            "devises a clever trap",
+            "sets an improvised snare",
+            "lays a cunning booby trap"
+        ],
+        isVerbPhrase: true
+    },
+    'Series of Acrobatic Flips': {
+        actionVariants: [
+            "executes a series of acrobatic flips",
+            "performs dazzling aerial maneuvers",
+            "flips and tumbles with astounding agility"
+        ],
+        isVerbPhrase: true
     }
 };
