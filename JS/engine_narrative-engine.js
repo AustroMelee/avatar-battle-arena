@@ -39,7 +39,7 @@ function getEnvironmentImpactLine(locationId, moveType = null, moveElement = nul
 
     const envImpactVariants = loc.envImpactVariants;
     if (envImpactVariants && envImpactVariants.length > 0) {
-        return getRandomElement(envImpactVariants);
+        return getRandomElementSeeded(envImpactVariants);
     }
     return "";
 }

@@ -15,6 +15,8 @@ import { getAvailableMoves as getMoves } from './engine_move_availability.js'; /
 import { EFFECT_TYPES } from './data_mechanics_definitions.js'; // NEW IMPORT
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
 import { seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
+import { generateLogEvent } from './utils_log_event.js';
+import { locationConditions } from './location-battle-conditions.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -31,7 +33,7 @@ const DEFAULT_EFFECTIVENESS = effectivenessLevels.NORMAL || { label: "Normal", e
  * Calculates the final outcome of a move.
  * @returns {object} The result of the move, including effectiveness, cost, and a list of effects to apply.
  */
-export function calculateMove(move, attacker, defender, conditions, battleEventLog, interactionLog, environmentState, locationId, modifyMomentum) {
+export function calculateMove(move, attacker, defender, conditions, battleEventLog, interactionLog, environmentState, locationId, modifyMomentum, battleState) {
     if (!move || typeof move !== 'object') {
         move = { ...DEFAULT_MOVE_PROPERTIES, name: "ErrorMove", type: 'Offense', power: 5 };
     }
