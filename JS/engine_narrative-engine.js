@@ -331,8 +331,8 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
     const effectivenessColor = effectivenessLevels[effectiveness]?.colorClass || '';
 
     if (effectiveness !== 'Normal' && effectiveness !== 'Ineffective') {
-        actionText += ` ${effectivenessFlavor}, ${actorPronouns.s} move hitting with ${effectiveness.toLowerCase()} impact.`;
-        htmlContent = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject}. <span class="${effectivenessColor}">${effectivenessFlavor}, ${actorPronouns.s} move hitting with ${effectiveness.toLowerCase()} impact.</span></p>`;
+        actionText = `${actorName} ${moveVerb} ${moveObject} ${effectivenessFlavor}, hitting with ${effectiveness.toLowerCase()} impact.`;
+        htmlContent = `<p class="narrative-action char-${actor.id}">${actorName} ${moveVerb} ${moveObject} <span class="${effectivenessColor}">${effectivenessFlavor}</span>, hitting with ${effectiveness.toLowerCase()} impact.</p>`;
     }
 
     // Damage/Healing
