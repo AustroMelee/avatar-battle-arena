@@ -80,5 +80,5 @@ export const fireNationCapital = {
         ranged_attack: { damage: 15, energy: -10, reason: "The wide-open plaza favors long-range attacks." }
     },
     fragility: 60,
-    background: 'https://archive.org/download/avatar-the-last-airbender-fire-nation-capitol-concept-art-by-sergei-sarichev./sergei-sarichev-capitol-wide.jpg',
+    background: 'img/img_caldera.jpg',
 }; 
