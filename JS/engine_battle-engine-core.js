@@ -199,10 +199,11 @@ currentDefender.currentTurn = turn;
      currentDefender,
      currentBattleState.locationConditions,
      battleEventLog,
+     currentAttacker.aiLog,
      currentBattleState.environmentState,
      locId,
      modifyMomentum,
-     currentBattleState // <--- last argument
+     currentBattleState
  );
  
  // Apply all effects from the move result
