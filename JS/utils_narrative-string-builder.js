@@ -256,5 +256,3 @@ export class NarrativeStringBuilder {
         return { actionSentence, htmlSentence };
     }
 } 
-    }
-} 
