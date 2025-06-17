@@ -126,8 +126,8 @@ export function showResultsState(battleResult, simulationMode) {
         
         const animationQueue = transformEventsToAnimationQueue(battleResult.log);
         startAnimationSimulation(animationQueue, battleResult, (finalBattleResult, wasCancelledOrError) => {
-            if (wasCancelledOrError && DOM_ELEMENTS.battleStory && finalBattleResult.log) {
-                // If cancelled, show the full log in the battle story section
+            // Always populate battleStory with the full log after animation, or if cancelled/error
+            if (DOM_ELEMENTS.battleStory && finalBattleResult.log) {
                 DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(finalBattleResult.log);
             }
             displayFinalResultsPanel(finalBattleResult);
