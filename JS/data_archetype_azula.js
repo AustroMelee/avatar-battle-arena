@@ -150,6 +150,17 @@ export const azulaArchetypeData = {
                 { type: 'spoken', line: "Unacceptable!" },
                 { type: 'internal', line: "A minor setback. It will be rectified." }
             ]
-        }
+        },
+        inPhaseNarrative: { // NEW: General narrative within a phase
+            Generic: [
+                { type: 'internal', line: "They persist. How utterly tiresome." },
+                { type: 'spoken', line: "You truly believe you can challenge me?" }
+            ],
+            Poking: [{ type: 'internal', line: "They are testing me. How quaint." }],
+            Early: [{ type: 'spoken', line: "The game has begun. Don't bore me." }],
+            Mid: [{ type: 'internal', line: "Their resistance is... mildly irritating." }],
+            Late: [{ type: 'spoken', line: "This will end when I decree it!" }],
+            Decisive: [{ type: 'internal', line: "The final act. Time to extinguish this nuisance." }],
+        },
     }
 };

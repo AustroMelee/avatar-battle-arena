@@ -86,6 +86,8 @@ export function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMod
             damageLevel: 0, // Initial environmental damage
             environmentalImpactsThisPhase: [], // To track specific impacts within a phase
             environmentalImpactCount: 0, // To count impacts within a phase
+            highestImpactLevelThisPhase: 'subtle', // NEW: Track the highest impact level achieved in the current phase
+            narrativeTriggeredThisPhase: false, // NEW: Track if a general in-phase narrative has been triggered
         },
         locationConditions: locationData, // Pass the entire locationData object
         characters: { [f1Id]: null, [f2Id]: null }, // Placeholder, fighters populated after initialization

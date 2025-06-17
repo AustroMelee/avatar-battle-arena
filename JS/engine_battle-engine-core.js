@@ -141,6 +141,8 @@ if (checkAndTransitionPhase(phaseState, currentAttacker, currentDefender, turn, 
     // Reset environmental impact counters for the new phase
     currentBattleState.environmentState.environmentalImpactCount = 0;
     currentBattleState.environmentState.environmentalImpactsThisPhase = [];
+    currentBattleState.environmentState.highestImpactLevelThisPhase = 'subtle'; // Reset for new phase
+    currentBattleState.environmentState.narrativeTriggeredThisPhase = false; // Reset for new phase
 
     // Generate phase transition narration
     const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
@@ -161,6 +163,15 @@ let turnEvents = [generateLogEvent(currentBattleState, { type: 'turn_marker', ac
 const turnStartQuoteAttacker = findNarrativeQuote(currentAttacker, currentDefender, 'turnStart', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
 if (turnStartQuoteAttacker) {
     turnEvents.push(...generateTurnNarrationObjects([{ quote: turnStartQuoteAttacker, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, null, currentBattleState));
+}
+
+// NEW: Add a general in-phase narrative if not already triggered this phase
+if (!currentBattleState.environmentState.narrativeTriggeredThisPhase) {
+    const inPhaseQuoteAttacker = findNarrativeQuote(currentAttacker, currentDefender, 'inPhaseNarrative', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
+    if (inPhaseQuoteAttacker) {
+        turnEvents.push(...generateTurnNarrationObjects([{ quote: inPhaseQuoteAttacker, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, null, currentBattleState));
+        currentBattleState.environmentState.narrativeTriggeredThisPhase = true; // Mark as triggered
+    }
 }
 
 // Handle stun and energy conditions
@@ -291,22 +302,22 @@ if (envSummaryEvent) {
 // NEW: Add quotes for momentum changes
 // Note: Momentum changes are now primarily handled via effects. This part of the code needs to check actual momentum change.
 // For simplicity, I'll add generic momentum change quotes here, but a more robust solution would involve hooking into modifyMomentum or the status change event.
-const oldMomentumAttacker = currentAttacker.momentum; // Assuming oldMomentumAttacker is captured at turn start
-const momentumChangeAttacker = currentAttacker.momentum - oldMomentumAttacker; // Assuming oldMomentumAttacker is captured at turn start
-if (momentumChangeAttacker > 0) {
+const oldMomentumAttacker = currentAttacker.momentum || 0; // Ensure it's always a number
+const momentumChangeAttacker = currentAttacker.momentum - oldMomentumAttacker;
+if (!isNaN(momentumChangeAttacker) && momentumChangeAttacker > 0) {
     const momentumGainQuote = findNarrativeQuote(currentAttacker, currentDefender, 'onMomentumGain', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
     if (momentumGainQuote) turnEvents.push(...generateTurnNarrationObjects([{ quote: momentumGainQuote, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, null, currentBattleState));
-} else if (momentumChangeAttacker < 0) {
+} else if (!isNaN(momentumChangeAttacker) && momentumChangeAttacker < 0) {
     const momentumLossQuote = findNarrativeQuote(currentAttacker, currentDefender, 'onMomentumLoss', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
     if (momentumLossQuote) turnEvents.push(...generateTurnNarrationObjects([{ quote: momentumLossQuote, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, null, currentBattleState));
 }
 
-const oldMomentumDefender = currentDefender.momentum; // Assuming oldMomentumDefender is captured at turn start
-const momentumChangeDefender = currentDefender.momentum - oldMomentumDefender; // Assuming oldMomentumDefender is captured at turn start
-if (momentumChangeDefender > 0) {
+const oldMomentumDefender = currentDefender.momentum || 0; // Ensure it's always a number
+const momentumChangeDefender = currentDefender.momentum - oldMomentumDefender;
+if (!isNaN(momentumChangeDefender) && momentumChangeDefender > 0) {
     const momentumGainQuote = findNarrativeQuote(currentDefender, currentAttacker, 'onMomentumGain', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
     if (momentumGainQuote) turnEvents.push(...generateTurnNarrationObjects([{ quote: momentumGainQuote, actor: currentDefender }], null, currentDefender, currentAttacker, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, null, currentBattleState));
-} else if (momentumChangeDefender < 0) {
+} else if (!isNaN(momentumChangeDefender) && momentumChangeDefender < 0) {
     const momentumLossQuote = findNarrativeQuote(currentDefender, currentAttacker, 'onMomentumLoss', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
     if (momentumLossQuote) turnEvents.push(...generateTurnNarrationObjects([{ quote: momentumLossQuote, actor: currentDefender }], null, currentDefender, currentAttacker, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, false, null, currentBattleState));
 }

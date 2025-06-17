@@ -96,16 +96,27 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
 
     // Environmental Damage Analysis (NEW)
     const envDamageLevel = battleResult.environmentState.damageLevel;
+    const highestImpactLevelLogged = battleResult.environmentState.highestImpactLevelThisPhase || 'subtle'; // Get the highest level logged
     let envSummaryText = "The environment remained largely untouched.";
 
-    if (envDamageLevel > 0 && envDamageLevel <= 20) {
-        envSummaryText = "The environment sustained minimal noticeable damage.";
-    } else if (envDamageLevel > 20 && envDamageLevel <= 50) {
-        envSummaryText = "The surroundings show clear signs of the battle's intensity.";
-    } else if (envDamageLevel > 50 && envDamageLevel <= 80) {
-        envSummaryText = "Significant environmental disruption is evident across the arena.";
-    } else if (envDamageLevel > 80) {
-        envSummaryText = "The landscape bears scars of widespread destruction, a testament to the battle's ferocity.";
+    // Determine summary text based on the highest impact level actually logged
+    switch (highestImpactLevelLogged) {
+        case 'critical':
+            envSummaryText = "The landscape bears scars of widespread destruction, a testament to the battle's ferocity.";
+            break;
+        case 'widespread':
+            envSummaryText = "Widespread destruction scarred the landscape, a testament to the battle's ferocity.";
+            break;
+        case 'significant':
+            envSummaryText = "Significant environmental disruption is evident across the arena.";
+            break;
+        case 'minor':
+            envSummaryText = "The environment sustained minimal noticeable damage.";
+            break;
+        case 'subtle':
+        default:
+            envSummaryText = "The environment remained largely untouched.";
+            break;
     }
 
     battleResult.environmentalSummary = envSummaryText; // Store for UI display

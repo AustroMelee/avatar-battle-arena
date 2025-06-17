@@ -26,6 +26,16 @@ import { azulaArchetypeData } from './data_archetype_azula.js';
 
 import { allArchetypes } from './data_archetypes_index.js'; // Import all archetypes
 
+// Environmental Impact Severity Mapping
+const ENVIRONMENTAL_IMPACT_SEVERITY = {
+    'subtle': 1,
+    'minor': 2,
+    'moderate': 3,
+    'significant': 4,
+    'widespread': 5,
+    'critical': 6,
+};
+
 function getEnvironmentImpactLine(locationId, currentPhase, isCrit = false, moveType = null, moveElement = null, recentlyUsedLines = []) {
     const loc = locations[locationId];
     if (!loc) {
@@ -245,6 +255,26 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
         return null; // No environmental damage effect, so no narrative needed
     }
 
+    // Determine impact level based on value, for tracking highest impact this phase
+    let currentImpactLevelKey = 'subtle';
+    if (envDamageEffect.value > 80) {
+        currentImpactLevelKey = 'critical';
+    } else if (envDamageEffect.value > 50) {
+        currentImpactLevelKey = 'widespread';
+    } else if (envDamageEffect.value > 20) {
+        currentImpactLevelKey = 'significant';
+    } else if (envDamageEffect.value > 0) {
+        currentImpactLevelKey = 'minor';
+    }
+
+    // Update highest impact level for the current phase
+    const currentSeverity = ENVIRONMENTAL_IMPACT_SEVERITY[currentImpactLevelKey];
+    const highestSeverityThisPhase = ENVIRONMENTAL_IMPACT_SEVERITY[environmentState.highestImpactLevelThisPhase] || 0;
+    if (currentSeverity > highestSeverityThisPhase) {
+        environmentState.highestImpactLevelThisPhase = currentImpactLevelKey;
+        console.log(`Updated highestImpactLevelThisPhase to: ${currentImpactLevelKey}`);
+    }
+
     const isCrit = result.effectiveness.label === 'Critical';
     const collateralPhrase = getEnvironmentImpactLine(locationData.id, battleState.currentPhase, isCrit, move.type, move.element, environmentState.environmentalImpactsThisPhase.map(e => e.line));
 
@@ -260,7 +290,8 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
         turn: battleState.turn,
         phase: battleState.currentPhase,
         move: move.name,
-        actor: actor.name
+        actor: actor.name,
+        severity: currentImpactLevelKey // Store severity for later reference
     });
 
     const htmlContent = `<p class="environmental-impact-text">${collateralPhrase}</p>`;
@@ -310,25 +341,39 @@ export function generateEnvironmentalSummaryEvent(battleState, environmentState,
 
     let summaryPhrase = ""; // Will be dynamically set
     let headerPhrase = ""; // The more narrative header phrase
-    const impactCount = environmentState.environmentalImpactsThisPhase.length;
 
-    if (impactCount === 1) {
-        summaryPhrase = `The battle left a subtle mark on the surroundings.`;
-        headerPhrase = `The environment bears subtle new marks.`;
-    } else if (impactCount >= 2 && impactCount <= 4) {
-        summaryPhrase = `Minor alterations appeared in the environment due to the ongoing fight.`;
-        headerPhrase = `The arena shows minor fresh scars.`;
-    } else if (impactCount >= 5 && impactCount <= 7) {
-        summaryPhrase = `The environment visibly reacted to the clash, showing signs of significant impact.`;
-        headerPhrase = `The environment visibly reacted to the clash.`;
-    } else if (impactCount >= 8) {
-        summaryPhrase = `Widespread destruction scarred the landscape, a testament to the battle's ferocity.`;
-        headerPhrase = `Widespread destruction scars the landscape.`;
+    const highestImpactLevel = environmentState.highestImpactLevelThisPhase;
+    console.log(`Generating summary based on highestImpactLevelThisPhase: ${highestImpactLevel}`);
+
+    switch (highestImpactLevel) {
+        case 'critical':
+            summaryPhrase = `The landscape bears scars of widespread destruction, a testament to the battle's ferocity.`;
+            headerPhrase = `The very ground is rent by the battle's fury.`;
+            break;
+        case 'widespread':
+            summaryPhrase = `Widespread destruction scarred the landscape, a testament to the battle's ferocity.`;
+            headerPhrase = `Widespread destruction scars the landscape.`;
+            break;
+        case 'significant':
+            summaryPhrase = `The environment visibly reacted to the clash, showing signs of significant impact.`;
+            headerPhrase = `The environment visibly reacted to the clash.`;
+            break;
+        case 'minor':
+            summaryPhrase = `Minor alterations appeared in the environment due to the ongoing fight.`;
+            headerPhrase = `The arena shows minor fresh scars.`;
+            break;
+        case 'subtle':
+        default:
+            summaryPhrase = `The battle left a subtle mark on the surroundings.`;
+            headerPhrase = `The environment bears subtle new marks.`;
+            break;
     }
     
     // Select a distinct environmental impact from the phase for display, if available
-    const distinctImpact = environmentState.environmentalImpactsThisPhase.length > 0
-        ? getRandomElementSeeded(environmentState.environmentalImpactsThisPhase.map(e => e.line))
+    // This should now be consistent with the highest impact level
+    const relevantImpacts = environmentState.environmentalImpactsThisPhase.filter(e => e.severity === highestImpactLevel); // Filter by highest severity
+    const distinctImpact = relevantImpacts.length > 0
+        ? getRandomElementSeeded(relevantImpacts.map(e => e.line))
         : null;
 
     let htmlContent = `<div class="environmental-summary"><p class="environmental-summary-header">${headerPhrase}</p>`;
@@ -342,7 +387,7 @@ export function generateEnvironmentalSummaryEvent(battleState, environmentState,
         text: summaryPhrase, // The original summaryPhrase for raw log
         html_content: htmlContent, // The richer HTML content
         isEnvironmental: true,
-        totalImpactsThisPhase: impactCount,
+        totalImpactsThisPhase: environmentState.environmentalImpactsThisPhase.length,
         summaryDetail: distinctImpact // Store the distinct impact for potential future use
     });
 }

@@ -142,6 +142,17 @@ export const aangArchetypeData = {
             stressedByDamage: { Generic: [{ type: 'internal', line: "The world... it's hurting. I can't let this continue." }, { type: 'spoken', line: "This isn't what Gyatso taught me! I have to find a way out!" }] },
             thrivingInDamage: []
         },
-        onVictory: { Default: { Generic: [{ line: "Phew! Nobody got hurt, right? Mostly." }] } }
+        onVictory: { Default: { Generic: [{ line: "Phew! Nobody got hurt, right? Mostly." }] } },
+        inPhaseNarrative: { // NEW: General narrative within a phase
+            Generic: [
+                { type: 'internal', line: "I need to stay focused. This fight isn't over yet." },
+                { type: 'spoken', line: "The air feels heavy today... I need to find a way through this." }
+            ],
+            Poking: [{ type: 'internal', line: "Just a little longer... I need to see their full style." }],
+            Early: [{ type: 'spoken', line: "This is getting more intense. I have to keep my head." }],
+            Mid: [{ type: 'internal', line: "The tension is rising. What's my next move?" }],
+            Late: [{ type: 'spoken', line: "I have to push harder. Everyone is counting on me!" }],
+            Decisive: [{ type: 'internal', line: "This is it. One final push for peace." }],
+        },
     }
 };
