@@ -1092,6 +1092,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     if (fighter1) fighter1.phaseLog = [...phaseState.phaseLog];
     if (fighter2) fighter2.phaseLog = [...phaseState.phaseLog];
     
+    // DIAGNOSTIC: Log final aiLog content before returning
+    console.log(`[DEBUG] Final fighter1.aiLog:`, fighter1.aiLog);
+    console.log(`[DEBUG] Final fighter2.aiLog:`, fighter2.aiLog);
+
     // Create clean copies of final states without circular references
     const createCleanFighterState = (fighter) => {
         if (!fighter) {
