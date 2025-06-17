@@ -115,7 +115,7 @@ body {
     color: var(--fire-color); /* Or a blend, like var(--accent-gold) */
     text-align: center;
     margin-top: -0.5rem; /* Pull it up slightly */
-    text-shadow: 0 0 10px var(--fire-color);
+    text-shadow: 0 0 10px var(--fire-color), 0 0 6px rgba(255, 120, 0, 0.7); /* Enhanced glow */
 }
 
 /* Mode Selection Styles */
@@ -235,7 +235,7 @@ body {
 }
 
 .archetype-intro {
-    font-size: 0.95rem;
+    font-size: 1.05rem; /* Increased font size by +1px */
     color: var(--text-primary);
     line-height: 1.5;
     margin: 0;
@@ -257,10 +257,11 @@ body {
 }
 
 .archetype-error {
-    font-size: 1rem;
-    color: var(--accent-red);
-    font-weight: bold;
-    margin-top: 1rem;
+    font-size: 2rem;
+    color: var(--fire-color); /* Or a blend, like var(--accent-gold) */
+    text-align: center;
+    margin-top: -0.5rem; /* Pull it up slightly */
+    text-shadow: 0 0 10px var(--fire-color), 0 0 6px rgba(255, 120, 0, 0.7); /* Enhanced glow */
 }
 
 /* Battle Button */
@@ -269,7 +270,7 @@ body {
     width: 100%;
     max-width: 400px;
     margin: 2rem auto;
-    padding: 1rem 2.5rem;
+    padding: 1.25rem 2.5rem;
     background: #8c482f;
     border: 4px outset #6e5e48;
     border-radius: 10px;
@@ -280,14 +281,15 @@ body {
     text-transform: uppercase;
     letter-spacing: 2px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 5px 15px rgba(255, 100, 50, 0.3); /* Enhanced shadow */
+    transition: transform 0.15s ease-in-out;
 }
 
 .battle-button:hover:not(:disabled) {
-    background: var(--mk-dark-red);
-    box-shadow: 0 0 20px var(--mk-gold), 0 15px 30px rgba(0,0,0,0.6);
-    transform: translateY(-3px);
+    transform: scale(1.05); /* Enlarge on hover */
+    box-shadow: 0 0 10px #ff7e5f, 0 0 20px #ff7e5f; /* Hover glow */
+    background: #a35538; /* Slightly lighter on hover */
+    border-color: #7a6a50; /* Adjust border on hover */
 }
 
 .battle-button:active:not(:disabled) {
@@ -638,20 +640,16 @@ body {
 }
 
 .battle-story {
-    line-height: 1.7;
-    font-size: 1.1rem;
-    color: var(--text-primary);
-    text-align: left;
-    max-width: 80ch;
-    margin: 1rem auto 2rem auto;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
+    background: linear-gradient(to bottom, rgba(15,15,25,0.9), rgba(10,10,15,0.85)); /* Gradient background */
+    border: 1px solid rgba(255, 215, 128, 0.2); /* Subtle border */
+    backdrop-filter: blur(2px); /* Soft blur effect */
+    border-radius: 12px; /* More rounded corners */
     padding: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem; /* Add some margin below the story block */
 }
 
 .battle-story p {
-    text-transform: none;
+    text-transform: none; /* Ensure capitalization is controlled by content, not CSS */
 }
 
 .phase-header {
@@ -1007,7 +1005,7 @@ body {
 .battle-visuals-section {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
     margin: 2rem auto;
     max-width: 1000px;
     position: relative;
@@ -1036,10 +1034,11 @@ body {
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
     font-weight: bold;
-    box-shadow: 0 0 6px #ffb347;
+    box-shadow: 0 0 12px rgba(255, 204, 102, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2); /* Enhanced glow */
     font-size: 1.2rem;
-    z-index: 5;
+    z-index: 5; /* Below character portraits, but above location */
     white-space: nowrap;
+    text-shadow: 0 0 3px #000;
 }
 
 .character-image-container {
@@ -1056,6 +1055,12 @@ body {
     border: 3px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-family: var(--font-title);
+    font-size: 2rem;
+    color: var(--text-title-gold);
+    margin-bottom: 1rem;
+    text-shadow: 1px 2px 0 var(--shadow-stone); /* Existing shadow */
+    letter-spacing: 1px;
 }
 
 .character-image-container:first-child {
