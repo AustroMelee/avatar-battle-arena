@@ -140,11 +140,20 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
                 htmlLog += phaseHeaderHtml;
                 isPhaseDivOpen = true;
             } else {
+                // Add turn number to non-phase header events
+                if (event.turnNumber !== undefined) {
+                    htmlLog += `<div class="log-turn-number">Turn ${event.turnNumber}</div>`;
+                }
                 appendToLog(event.html_content);
             }
         } else if (event.text) {
             // Fallback for simple text events
+            if (event.turnNumber !== undefined) {
+                htmlLog += `<div class="log-turn-number">Turn ${event.turnNumber}</div>`;
+            }
             appendToLog(`<p class="log-generic">${event.text}</p>`);
+        } else if (event.type === "dice_roll") {
+            appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong></div>`);
         }
     });
 

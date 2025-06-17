@@ -4,6 +4,11 @@ import { EFFECT_TYPES, MECHANIC_DEFINITIONS } from './data_mechanics_definitions
 import { characters } from './data_characters.js';
 import { applyCurbstompRules, charactersMarkedForDefeat } from './engine_curbstomp_manager.js';
 import { modifyMomentum } from './engine_momentum.js';
+import { ESCALATION_STATES } from './engine_escalation.js';
+import { getRandomElement } from './engine_battle-engine-core.js';
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
+import { seededRandom } from './utils_seeded_random.js';
+import { generateLogEvent } from './utils_log_event.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -145,14 +150,55 @@ export function applyEffect(effect, actor, target, battleState, battleEventLog) 
             break;
         case EFFECT_TYPES.CONDITIONAL_KO_OR_SELF_SABOTAGE:
             if (primaryTarget && actor) {
-                if (Math.random() < effect.selfSabotageChance) {
-                    // Self-sabotage: attacker takes damage/stun
-                    actor.hp = clamp(actor.hp - 30, 0, 100);
-                    actor.stunDuration = (actor.stunDuration || 0) + 1;
-                    message = effect.selfSabotageMessage || `${actor.name}'s attack backfires, leaving ${actor.pronouns.o} vulnerable!`;
+                const mercyRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
+                const hasMercy = effect.mercyChance && mercyRoll < effect.mercyChance;
+
+                battleEventLog.push(generateLogEvent(battleState, {
+                    type: "dice_roll",
+                    rollType: "mercyChance",
+                    actorId: primaryTarget.id,
+                    result: mercyRoll,
+                    threshold: effect.mercyChance,
+                    outcome: hasMercy ? "mercy granted" : "no mercy"
+                }));
+
+                if (hasMercy) {
+                    battleEventLog.push(generateLogEvent(battleState, {
+                        type: 'narrative_event',
+                        text: `${primaryTarget.name} miraculously withstands what should have been a fatal blow!`,
+                        html_content: `<p class="narrative-survivor">${primaryTarget.name} miraculously withstands what should have been a fatal blow!</p>`,
+                    }));
                 } else {
-                    charactersMarkedForDefeat.add(primaryTarget.id);
-                    message = effect.successMessage || `${primaryTarget.name} is defeated by a wild, unpredictable assault!`;
+                    const selfSabotageRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
+                    const isSelfSabotage = effect.selfSabotageChance && selfSabotageRoll < effect.selfSabotageChance;
+
+                    battleEventLog.push(generateLogEvent(battleState, {
+                        type: "dice_roll",
+                        rollType: "selfSabotageChance",
+                        actorId: actor.id,
+                        result: selfSabotageRoll,
+                        threshold: effect.selfSabotageChance,
+                        outcome: isSelfSabotage ? "self sabotage" : "no self sabotage"
+                    }));
+
+                    if (isSelfSabotage) {
+                        const selfDamage = Math.floor(primaryTarget.maxHp * 0.3);
+                        primaryTarget.hp = clamp(primaryTarget.hp - selfDamage, 0, primaryTarget.maxHp);
+                        battleEventLog.push(generateLogEvent(battleState, {
+                            type: 'narrative_event',
+                            text: effect.selfSabotageMessage || `${actor.name}'s attack backfires, causing self-harm!`,
+                            html_content: `<p class="narrative-self-sabotage">${actor.name}'s attack backfires!</p>`,
+                        }));
+                    } else {
+                        primaryTarget.hp = 0;
+                        battleEventLog.push(generateLogEvent(battleState, {
+                            type: 'final_blow_event',
+                            text: effect.successMessage || `${primaryTarget.name} is incapacitated!`, // Or more specific message
+                            html_content: `<p class="final-blow">${primaryTarget.name} is incapacitated!</p>`,
+                            targetId: primaryTarget.id
+                        }));
+                        charactersMarkedForDefeat.add(primaryTarget.id);
+                    }
                 }
             }
             break;
@@ -194,6 +240,10 @@ export function applyEffect(effect, actor, target, battleState, battleEventLog) 
                 console.warn("ADJUST_AI_PROFILE requires a target with personalityProfile and adjustments.");
                 success = false;
             }
+            break;
+        case EFFECT_TYPES.NARRATIVE_ONLY:
+            // This effect type is solely for narrative purposes and doesn't alter game state.
+            battleEventLog.push(generateLogEvent(battleState, { type: 'narrative_event', eventId: effect.eventId, text: effect.message || "" }));
             break;
         default:
             console.warn(`Unhandled effect type: ${effect.type}`);

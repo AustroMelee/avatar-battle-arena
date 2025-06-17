@@ -13,6 +13,8 @@ import { checkReactiveDefense } from './engine_reactive-defense.js';
 import { applyEnvironmentalModifiers } from './engine_environmental-modifiers.js';
 import { getAvailableMoves as getMoves } from './engine_move_availability.js'; // Renamed to avoid conflict
 import { EFFECT_TYPES } from './data_mechanics_definitions.js'; // NEW IMPORT
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
+import { seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
@@ -103,7 +105,20 @@ export function calculateMove(move, attacker, defender, conditions, interactionL
     const totalEffectivenessValue = basePower * multiplier;
     let effectivenessLevel = DEFAULT_EFFECTIVENESS;
 
-    if (Math.random() < critChance) {
+    const critRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
+    const isCritical = critRoll < critChance;
+
+    battleEventLog.push(generateLogEvent(battleState, {
+        type: "dice_roll",
+        rollType: "critChance",
+        actorId: attacker.id,
+        result: critRoll,
+        threshold: critChance,
+        outcome: isCritical ? "critical hit" : "no crit",
+        moveName: move.name
+    }));
+
+    if (isCritical) {
         effectivenessLevel = effectivenessLevels.CRITICAL || DEFAULT_EFFECTIVENESS;
         calculatedDamage += Math.round(totalEffectivenessValue * 0.5);
         effectsToApply.push({ type: EFFECT_TYPES.MOMENTUM_CHANGE, value: 2, targetId: attacker.id });

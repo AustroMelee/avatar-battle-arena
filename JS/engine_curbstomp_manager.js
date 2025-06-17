@@ -6,6 +6,7 @@
 
 import { characterCurbstompRules } from './data_mechanics_characters.js';
 import { locationCurbstompRules } from './data_mechanics_locations.js';
+import { generateLogEvent } from './utils_log_event.js';
 
 // This Set is exported so other modules can read it, but it should only be
 // modified by this manager.
@@ -30,26 +31,72 @@ function selectCurbstompVictim({ attacker, defender, rule, locationData, battleS
         if (typeof weightedOutcome === 'string') {
             return weightedOutcome;
         } else if (weightedOutcome && typeof weightedOutcome.victimId === 'string' && typeof weightedOutcome.probability === 'number') {
-            if (Math.random() < weightedOutcome.probability) {
+            const probabilityRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
+            const didTrigger = probabilityRoll < weightedOutcome.probability;
+
+            battleEventLog.push(generateLogEvent(battleState, {
+                type: "dice_roll",
+                rollType: "curbstompVictimProbability",
+                actorId: attacker.id, // Assuming attacker is context for this roll
+                result: probabilityRoll,
+                threshold: weightedOutcome.probability,
+                outcome: didTrigger ? "triggered" : "not triggered",
+                ruleId: rule.id
+            }));
+
+            if (didTrigger) {
                 return weightedOutcome.victimId;
             }
             return null;
         } else if (weightedOutcome && typeof weightedOutcome.probabilities === 'object') {
-            const rand = Math.random();
+            const rand = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
             let cumulativeProb = 0;
+
+            battleEventLog.push(generateLogEvent(battleState, {
+                type: "dice_roll",
+                rollType: "curbstompVictimDistribution",
+                actorId: attacker.id, // Assuming attacker is context for this roll
+                result: rand,
+                details: weightedOutcome.probabilities,
+                outcome: "", // Will be filled below
+                ruleId: rule.id
+            }));
+
             for (const charId in weightedOutcome.probabilities) {
                 cumulativeProb += weightedOutcome.probabilities[charId];
                 if (rand < cumulativeProb) {
+                    // Update outcome for the previously logged dice_roll event
+                    const lastDiceRollEvent = battleEventLog[battleEventLog.length - 1];
+                    if (lastDiceRollEvent && lastDiceRollEvent.type === "dice_roll" && lastDiceRollEvent.rollType === "curbstompVictimDistribution") {
+                        lastDiceRollEvent.outcome = `selected ${charId}`;
+                    }
                     return charId;
                 }
             }
-            return Math.random() < 0.5 ? attacker.id : defender.id;
+            const fallbackVictim = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) < 0.5 ? attacker.id : defender.id;
+            const lastDiceRollEvent = battleEventLog[battleEventLog.length - 1];
+            if (lastDiceRollEvent && lastDiceRollEvent.type === "dice_roll" && lastDiceRollEvent.rollType === "curbstompVictimDistribution") {
+                lastDiceRollEvent.outcome = `fallback selected ${fallbackVictim}`;
+            }
+            return fallbackVictim;
         }
     }
 
     // Default or fallback victim selection
     if (rule.outcome?.type?.includes("loss_weighted_character") || rule.outcome?.type?.includes("loss_random_character")) {
-        return Math.random() < 0.5 ? attacker.id : defender.id;
+        const fallbackRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
+        const selectedFighter = fallbackRoll < 0.5 ? attacker.id : defender.id;
+
+        battleEventLog.push(generateLogEvent(battleState, {
+            type: "dice_roll",
+            rollType: "curbstompFallbackVictim",
+            actorId: attacker.id, // Context for this roll
+            result: fallbackRoll,
+            threshold: 0.5,
+            outcome: `selected ${selectedFighter}`,
+            ruleId: rule.id
+        }));
+        return selectedFighter;
     }
     if (rule.appliesToCharacter && (rule.outcome?.type?.includes("loss_weighted_character") || rule.outcome?.type?.includes("instant_death_character"))) {
         return rule.appliesToCharacter;
@@ -73,7 +120,19 @@ export function applyCurbstompRules(fighter1, fighter2, battleState, battleEvent
     ];
 
     for (const rule of allRules) {
-        if (Math.random() >= (rule.triggerChance || 1.0)) continue;
+        const triggerRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
+        const didRuleTrigger = triggerRoll >= (rule.triggerChance || 1.0); // Renamed for clarity
+
+        battleEventLog.push(generateLogEvent(battleState, {
+            type: "dice_roll",
+            rollType: "curbstompRuleTrigger",
+            ruleId: rule.id,
+            result: triggerRoll,
+            threshold: rule.triggerChance || 1.0,
+            outcome: didRuleTrigger ? "triggered" : "not triggered"
+        }));
+
+        if (!didRuleTrigger) continue; // Changed condition
 
         let protagonists = [];
         let antagonist = null;
@@ -110,7 +169,7 @@ export function applyCurbstompRules(fighter1, fighter2, battleState, battleEvent
 
             const outcome = rule.outcome;
             if (Math.random() < 0.15 && (outcome.type.includes('instant_') || outcome.type.includes('environmental_kill'))) {
-                battleEventLog.push({ type: 'narrative_event', text: `By some miracle, ${protagonist.name} survives what should have been a fatal blow!`, html_content: `<p class="narrative-survivor">By some miracle, ${protagonist.name} survives what should have been a fatal blow!</p>` });
+                battleEventLog.push(generateLogEvent(battleState, { type: 'narrative_event', text: `By some miracle, ${protagonist.name} survives what should have been a fatal blow!`, html_content: `<p class="narrative-survivor">By some miracle, ${protagonist.name} survives what should have been a fatal blow!</p>` }));
                 protagonist.aiLog.push(`[Survivor's Luck]: Miraculously survived rule '${rule.id}'.`);
                 continue;
             }
@@ -123,21 +182,21 @@ export function applyCurbstompRules(fighter1, fighter2, battleState, battleEvent
                     if (!isPreBattle || battleState.locationConditions[battleState.locationId]?.allowPreBattleCurbstomp) {
                         charactersMarkedForDefeat.add(loser.id);
                     }
-                    battleEventLog.push({ type: 'curbstomp_event', text: `${winner.name} secured a decisive victory over ${loser.name} due to ${rule.description}.` });
+                    battleEventLog.push(generateLogEvent(battleState, { type: 'curbstomp_event', text: `${winner.name} secured a decisive victory over ${loser.name} due to ${rule.description}.` }));
                     break;
                 case 'instant_loss':
                     loser = protagonist;
                     if (!isPreBattle || battleState.locationConditions[battleState.locationId]?.allowPreBattleCurbstomp) {
                         charactersMarkedForDefeat.add(loser.id);
                     }
-                    battleEventLog.push({ type: 'curbstomp_event', text: `${loser.name} was decisively defeated due to ${rule.description}.` });
+                    battleEventLog.push(generateLogEvent(battleState, { type: 'curbstomp_event', text: `${loser.name} was decisively defeated due to ${rule.description}.` }));
                     break;
                 case 'environmental_kill':
                     loser = protagonist;
                     if (!isPreBattle || battleState.locationConditions[battleState.locationId]?.allowPreBattleCurbstomp) {
                         charactersMarkedForDefeat.add(loser.id);
                     }
-                    battleEventLog.push({ type: 'curbstomp_event', text: `The environment itself proved fatal for ${loser.name}.` });
+                    battleEventLog.push(generateLogEvent(battleState, { type: 'curbstomp_event', text: `The environment itself proved fatal for ${loser.name}.` }));
                     break;
                 case 'buff':
                     protagonist[outcome.property] = (protagonist[outcome.property] || 0) + outcome.value;
@@ -153,7 +212,7 @@ export function applyCurbstompRules(fighter1, fighter2, battleState, battleEvent
                     antagonist.aiLog.push(`[Advantage]: Rule '${rule.id}' granted significant momentum boost.`);
                     break;
                 case 'external_intervention':
-                    battleEventLog.push({ type: 'narrative_event', text: 'The fight was interrupted by outside forces, ending in a draw.' });
+                    battleEventLog.push(generateLogEvent(battleState, { type: 'narrative_event', text: 'The fight was interrupted by outside forces, ending in a draw.' }));
                     break;
             }
         }

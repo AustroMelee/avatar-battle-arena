@@ -4,26 +4,32 @@
 // --- UPDATED IMPORT ---
 import { battlePhases as phaseDefinitions } from './data_narrative_phases.js'; // Corrected import path
 import { locations } from './locations.js'; // Ensure this import is here
+import { BATTLE_PHASES } from './engine_battle-phase.js';
+import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
+import { generateLogEvent } from './utils_log_event.js'; // NEW: Import generateLogEvent
 // --- END UPDATED IMPORT ---
 
-export const BATTLE_PHASES = {
-    PRE_BANTER: 'PreBanter',
-    POKING: 'Poking',
-    EARLY: 'Early', 
-    MID: 'Mid',     
-    LATE: 'Late'    
-};
+const MIN_POKING_DURATION = 1; // Minimum duration for the Poking phase
+const MAX_POKING_DURATION = 3; // Maximum duration for the Poking phase
 
-export function initializeBattlePhaseState() {
+export function initializeBattlePhaseState(battleState, battleEventLog) {
+    const pokingDuration = Math.floor((USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) * (MAX_POKING_DURATION - MIN_POKING_DURATION + 1)) + MIN_POKING_DURATION;
+
+    battleEventLog.push(generateLogEvent(battleState, {
+        type: "dice_roll",
+        rollType: "pokingDuration",
+        result: pokingDuration,
+        outcome: `Poking phase duration set to ${pokingDuration} turns.`
+    }));
+
     return {
         currentPhase: BATTLE_PHASES.PRE_BANTER,
         turnInCurrentPhase: 0,
-        // NEW: Randomized poking duration per battle
-        pokingDuration: Math.floor(Math.random() * 3) + 1, // Randomly 1, 2, or 3 turns for Poking phase
-        // NEW: For controlled phase logging UI
-        phaseSummaryLog: [], // [{ phase: 'PreBanter', turns: 1 }, { phase: 'Poking', turns: 3 }]
+        pokingDuration: pokingDuration,
+        pokingPhaseMaxTurns: pokingDuration,
+        phaseSummaryLog: [],
         phaseLog: [`Battle started in ${BATTLE_PHASES.PRE_BANTER} Phase.`],
-        // NEW: Store initial stats for phase delta calculations when a new phase begins
         currentPhaseFighterStats: {
             f1: { hp: null, momentum: null },
             f2: { hp: null, momentum: null }

@@ -1,6 +1,8 @@
 'use strict';
 
 import { getRandomElement } from './utils_clipboard.js'; // Assuming this utility exists or will be created
+import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
 
 // Centralized Tag/Context Registry
 const NARRATIVE_TAGS = {
@@ -161,7 +163,7 @@ export class NarrativeStringBuilder {
                 if (v.tags) {
                     if (v.tags.includes(NARRATIVE_TAGS.FINISHER) && this.turnContext?.isFinisherAttempt) { reasons.push('Finisher Intent'); return true; }
                     if (v.tags.includes(NARRATIVE_TAGS.COMEBACK) && this.turnContext?.isComebackSituation) { reasons.push('Comeback Situation'); return true; }
-                    if (v.tags.includes(NARRATIVE_TAGS.METAPHOR) && Math.random() < 0.2) { reasons.push('Random Metaphor Boost'); return true; } // Chance for metaphor
+                    if (v.tags.includes(NARRATIVE_TAGS.METAPHOR) && (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) < 0.2) { reasons.push('Random Metaphor Boost'); return true; } // Chance for metaphor
                 }
 
                 return false; // Does not match any broad criteria

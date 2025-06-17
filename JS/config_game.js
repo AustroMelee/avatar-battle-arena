@@ -17,4 +17,8 @@ export const MAX_ENERGY = 100;
 export const MAX_CONSECUTIVE_STUNS = 3;
 export const STUN_RESISTANCE_INCREASE = 0.2; // How much stun resistance increases per stun
 
+// --- Simulation Modes ---
+export const USE_DETERMINISTIC_RANDOM = true; // Set to true for dev mode, false for true randomness
+export const RANDOM_SEED = 12345; // Initial seed for deterministic mode
+
 // Add other global constants here as they are identified from other files. 

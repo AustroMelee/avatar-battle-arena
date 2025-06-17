@@ -22,12 +22,14 @@ import { applyEffect } from './engine_effect_application.js';
 import { selectMove, updateAiMemory, adaptPersonality } from './engine_ai-decision.js';
 import { calculateMove } from './engine_move-resolution.js';
 import { updateMentalState } from './engine_mental-state.js';
-import { generateTurnNarrationObjects, findNarrativeQuote } from './engine_narrative-engine.js';
+import { generateTurnNarrationObjects, findNarrativeQuote, generateCurbstompNarration, generateEscalationNarrative } from './engine_narrative-engine.js';
 import { modifyMomentum } from './engine_momentum.js';
 import { initializeBattlePhaseState, checkAndTransitionPhase, BATTLE_PHASES } from './engine_battle-phase.js';
+import { setSeed, seededRandom, getRandomElementSeeded } from './utils_seeded_random.js';
+import { generateLogEvent } from './utils_log_event.js';
+import { USE_DETERMINISTIC_RANDOM, RANDOM_SEED } from './config_game.js';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-export const getRandomElement = (arr) => arr && arr.length > 0 ? arr[Math.floor(Math.random() * arr.length)] : null;
 
 /**
  * Checks for overwhelming advantage conditions that could end the fight prematurely.
@@ -41,7 +43,7 @@ function checkCurbstompConditions(attacker, defender, locId, battleState, battle
     const isCurbstomp = (defender.hp <= attacker.hp * CURBSTOMP_HP_THRESHOLD) && (defender.momentum <= CURBSTOMP_MOMENTUM_THRESHOLD);
 
     if (isCurbstomp) {
-        const curbstompEvent = {
+        const curbstompEvent = generateLogEvent(battleState, {
             type: 'curbstomp_event',
             attackerId: attacker.id,
             defenderId: defender.id,
@@ -49,7 +51,7 @@ function checkCurbstompConditions(attacker, defender, locId, battleState, battle
             html_content: `<p class="narrative-action char-${attacker.id}">${attacker.name} has completely overwhelmed ${defender.name}!</p>`,
             isMajorEvent: true,
             actualAttackerId: attacker.id
-        };
+        });
         battleEventLog.push(curbstompEvent);
         attacker.aiLog.push(`[Curbstomp]: ${attacker.name} has achieved a decisive advantage over ${defender.name}.`);
         return true;
@@ -85,10 +87,16 @@ function applyStun(fighter, duration) {
 export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
     resetCurbstompState();
     
+    // Initialize deterministic random seed if enabled
+    if (USE_DETERMINISTIC_RANDOM) {
+        setSeed(RANDOM_SEED);
+        console.log(`Deterministic Randomness: Initialized with seed ${RANDOM_SEED}`);
+    }
+
     const fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
     const fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
     const currentBattleState = initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode);
-    const phaseState = initializeBattlePhaseState();
+    const phaseState = initializeBattlePhaseState(currentBattleState, battleEventLog);
 
     fighter1.opponentId = fighter2.id;
     fighter2.opponentId = fighter1.id;
@@ -125,7 +133,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
              // Generate phase transition narration
              const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
              if (currentPhaseInfo) {
-                battleEventLog.push({ type: 'phase_header_event', phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji, phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`, html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji) });
+                battleEventLog.push(generateLogEvent(currentBattleState, { type: 'phase_header_event', phaseName: currentPhaseInfo.name, phaseEmoji: currentPhaseInfo.emoji, phaseKey: phaseState.currentPhase, text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji}`, html_content: phaseTemplates.header.replace('{phaseDisplayName}', currentPhaseInfo.name).replace('{phaseEmoji}', currentPhaseInfo.emoji) }));
                 const quote1 = findNarrativeQuote(currentAttacker, currentDefender, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
                 if (quote1) battleEventLog.push(...generateTurnNarrationObjects([{ quote: quote1, actor: currentAttacker }], null, currentAttacker, currentDefender, null, currentBattleState.environmentState, currentBattleState.locationConditions, phaseState.currentPhase, true, null, currentBattleState));
                 const quote2 = findNarrativeQuote(currentDefender, currentAttacker, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState: currentBattleState });
@@ -135,7 +143,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         currentBattleState.currentPhase = phaseState.currentPhase;
 
         // Turn Start Marker
-        const turnSpecificEventsForLog = [{ type: 'turn_marker', actorId: currentAttacker.id, characterName: currentAttacker.name, turn: turn + 1, portrait: currentAttacker.portrait }];
+        const turnSpecificEventsForLog = [generateLogEvent(currentBattleState, { type: 'turn_marker', actorId: currentAttacker.id, characterName: currentAttacker.name, turn: turn + 1, portrait: currentAttacker.portrait })];
 
         // Check for defeat/skip turn conditions
         if (charactersMarkedForDefeat.has(currentAttacker.id) || currentAttacker.stunDuration > 0 || currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
@@ -143,11 +151,11 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 currentAttacker.stunDuration--;
                 if (currentAttacker.stunDuration === 0) currentAttacker.consecutiveStuns = 0;
                 // Removed: currentAttacker.stunResistance = (currentAttacker.stunResistance || 0) + STUN_RESISTANCE_INCREASE; // Stun resistance handled by applyEffect
-                turnSpecificEventsForLog.push({ type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} is stunned and unable to move!`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>` });
+                turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'stun_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} is stunned and unable to move!`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} is stunned and unable to move!</p>` }));
             }
             if (currentAttacker.energy < MIN_ENERGY_FOR_ACTION) {
-                currentAttatcher.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
-                turnSpecificEventsForLog.push({ type: 'energy_recovery_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} recovers energy.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers energy.</p>` });
+                currentAttacker.energy = Math.min(currentAttacker.energy + ENERGY_RECOVERY_PER_TURN, MAX_ENERGY);
+                turnSpecificEventsForLog.push(generateLogEvent(currentBattleState, { type: 'energy_recovery_event', actorId: currentAttacker.id, characterName: currentAttacker.name, text: `${currentAttacker.name} recovers energy.`, html_content: `<p class="narrative-action char-${currentAttacker.id}">${currentAttacker.name} recovers energy.</p>` }));
             }
             battleEventLog.push(...turnSpecificEventsForLog);
             [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
@@ -158,7 +166,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         // --- NEW: Manipulation Attempt ---
         const manipulationResult = attemptManipulation(currentAttacker, currentDefender);
         if (manipulationResult.success) {
-            battleEventLog.push({ type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration });
+            battleEventLog.push(generateLogEvent(currentBattleState, { type: 'manipulation_narration_event', actorId: currentAttacker.id, text: manipulationResult.narration, html_content: manipulationResult.narration }));
             // Apply the effect to the defender
             updateMentalState(currentDefender, currentAttacker, { effectiveness: { label: manipulationResult.effect } }, currentBattleState.environmentState, locId, currentBattleState);
         }

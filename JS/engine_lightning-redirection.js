@@ -5,6 +5,10 @@
 
 // --- UPDATED IMPORT ---
 import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
+import { BENDING_ELEMENTS, EFFECT_TYPES } from './data_mechanics_definitions.js';
+import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
+import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
+import { generateLogEvent } from './utils_log_event.js'; // NEW: Import generateLogEvent
 // --- END UPDATED IMPORT ---
 
 // --- LIGHTNING REDIRECTION CONSTANTS ---
@@ -61,7 +65,7 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
     // Clamp chance
     successChance = Math.max(LIGHTNING_REDIRECTION_MIN_SUCCESS_CHANCE, Math.min(LIGHTNING_REDIRECTION_MAX_SUCCESS_CHANCE, successChance));
     
-    const roll = Math.random();
+    const roll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
     logMessage += `Final Chance: ${successChance.toFixed(2)}, Roll: ${roll.toFixed(2)}.`;
     
     console.log(`[REDIRECTION ATTEMPT] ${defender.name} vs ${attacker.name}'s ${move.name}. Chance=${(successChance*100).toFixed(1)}% Roll=${(roll*100).toFixed(1)}%`);

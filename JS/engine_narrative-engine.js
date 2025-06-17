@@ -16,6 +16,7 @@ import { ESCALATION_STATES } from './engine_escalation.js';
 import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { NarrativeStringBuilder } from './utils_narrative-string-builder.js';
 import { locations } from './locations.js';
+import { generateLogEvent } from './utils_log_event.js';
 
 // --- ARCHETYPE DATA IMPORTS (Stripped Down) ---
 import { aangArchetypeData } from './data_archetype_aang.js';
@@ -159,29 +160,36 @@ export function formatQuoteEvent(quote, actor, opponent, context) {
     const substitutedLine = substituteTokens(line, actor, opponent, context);
 
     let htmlContent = '';
+    let baseEvent = {};
+
     switch (type) {
         case 'spoken':
         case 'action':
             htmlContent = `<p class="dialogue-line char-${actor.id}">${actor.name} says, "<em>${substitutedLine}</em>"</p>`;
-            return { type: 'dialogue_event', actorId: actor.id, characterName: actor.name, text: `${actor.name} says, "${substitutedLine}"`, html_content: htmlContent, isDialogue: true, dialogueType: type };
+            baseEvent = { type: 'dialogue_event', actorId: actor.id, characterName: actor.name, text: `${actor.name} says, "${substitutedLine}"`, html_content: htmlContent, isDialogue: true, dialogueType: type };
+            break;
         case 'internal':
             htmlContent = `<p class="dialogue-line internal-thought char-${actor.id}"><em>(${substitutedLine})</em></p>`;
-            return { type: 'internal_thought_event', actorId: actor.id, characterName: actor.name, text: `(${actor.name} thinks: ${substitutedLine})`, html_content: htmlContent, isInternalThought: true, dialogueType: type };
+            baseEvent = { type: 'internal_thought_event', actorId: actor.id, characterName: actor.name, text: `(${actor.name} thinks: ${substitutedLine})`, html_content: htmlContent, isInternalThought: true, dialogueType: type };
+            break;
         case 'environmental':
             htmlContent = `<p class="environmental-impact-text">${substitutedLine}</p>`;
-            return { type: 'environmental_impact_event', actorId: null, characterName: 'Environment', text: substitutedLine, html_content: htmlContent, isEnvironmental: true };
+            baseEvent = { type: 'environmental_impact_event', actorId: null, characterName: 'Environment', text: substitutedLine, html_content: htmlContent, isEnvironmental: true };
+            break;
         default:
             htmlContent = `<p class="narrative-event">${substitutedLine}</p>`;
-            return { type: 'generic_narrative_event', actorId: actor?.id || null, characterName: actor?.name || 'Narrator', text: substitutedLine, html_content: htmlContent };
+            baseEvent = { type: 'generic_narrative_event', actorId: actor?.id || null, characterName: actor?.name || 'Narrator', text: substitutedLine, html_content: htmlContent };
+            break;
     }
+    return generateLogEvent(context.battleState, baseEvent);
 }
 
-export function generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry) {
+export function generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry, battleState) {
     const effectiveness = result.effectiveness.label;
     const builder = new NarrativeStringBuilder(actor, defender, move, effectivenessLevels, locationData, { isCrit: effectiveness === 'Critical' });
     const { actionSentence, htmlSentence } = builder.buildActionDescription(effectiveness, null, null);
     
-    return {
+    return generateLogEvent(battleState, {
         type: 'move_action_event',
         actorId: actor.id,
         characterName: actor.name,
@@ -192,7 +200,7 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
         effectiveness: effectiveness,
         damage: result.damage,
         element: move.element,
-    };
+    });
 }
 
 export function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData, battleState, result) {
@@ -202,26 +210,41 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
         environmentState.specificImpacts.add(collateralPhrase);
     }
     const fullCollateralText = `${actor.name}'s attack impacts the surroundings: ${collateralPhrase || 'The area trembles.'}`.trim();
-    return { type: 'collateral_damage_event', actorId: actor.id, text: fullCollateralText, isEnvironmental: true, html_content: `<p class="collateral-damage-description">${fullCollateralText}</p>` };
+    return generateLogEvent(battleState, {
+        type: 'collateral_damage_event',
+        actorId: actor.id,
+        text: fullCollateralText,
+        isEnvironmental: true,
+        html_content: `<p class="collateral-damage-description">${fullCollateralText}</p>`
+    });
 }
 
-export function generateEscalationNarrative(fighter, oldState, newState) {
+export function generateEscalationNarrative(fighter, oldState, newState, battleState) {
     if (!fighter || !newState || oldState === newState) return null;
     const flavorText = getRandomElement(escalationStateNarratives[newState] || [`{actorName}'s condition worsens.`]);
     const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
     const templateKey = newState.toLowerCase().replace(/ /g, '_');
     const htmlTemplate = phaseTemplates.escalationStateChangeTemplates[templateKey] || phaseTemplates.escalationStateChangeTemplates.general;
     const htmlContent = substituteTokens(htmlTemplate, fighter, null, { '{escalationFlavorText}': substitutedFlavorText });
-    return { type: 'escalation_change_event', actorId: fighter.id, characterName: fighter.name, oldState, newState, text: substitutedFlavorText, html_content: htmlContent, isEscalationEvent: true };
+    return generateLogEvent(battleState, {
+        type: 'escalation_change_event',
+        actorId: fighter.id,
+        characterName: fighter.name,
+        oldState,
+        newState,
+        text: substitutedFlavorText,
+        html_content: htmlContent,
+        isEscalationEvent: true
+    });
 }
 
 export function generateTurnNarrationObjects(narrativeEventsForAction, move, actor, defender, result, environmentState, locationData, currentPhase, isPreBattle, aiLogEntry, battleState) {
     const narrationObjects = [];
     if (isPreBattle) {
         const preBattleQuote = findNarrativeQuote(actor, defender, 'battleStart', currentPhase, { locationId: locationData.id, currentPhaseKey: currentPhase });
-        if (preBattleQuote) narrationObjects.push(formatQuoteEvent(preBattleQuote, actor, defender, { battleState }));
+        if (preBattleQuote) narrationObjects.push(formatQuoteEvent(preBattleQuote, actor, defender, { battleState: battleState }));
     } else if (move && result) {
-        narrationObjects.push(generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry));
+        narrationObjects.push(generateActionDescriptionObject(move, actor, defender, result, environmentState, locationData, currentPhase, aiLogEntry, battleState));
         const collateralEvent = generateCollateralDamageEvent(move, actor, defender, environmentState, locationData, battleState, result);
         if (collateralEvent) narrationObjects.push(collateralEvent);
     }
@@ -236,9 +259,12 @@ export function getFinalVictoryLine(winner, loser) {
     return substituteTokens(getRandomElement(phraseTemplate), winner, loser, { WinnerName: winner.name, LoserName: loser.name, WinnerPronounP: winner.pronouns.p });
 }
 
-export function generateCurbstompNarration(rule, attacker, target, isEscape = false) {
+export function generateCurbstompNarration(rule, attacker, target, isEscape = false, battleState) {
     if (!rule) return null;
     let message = isEscape ? rule.outcome.failureMessage : rule.outcome.successMessage;
     let narrationText = substituteTokens(message, attacker, target, { attackerName: attacker.name, targetName: target.name });
-    return { type: 'curbstomp_event', text: narrationText };
+    return generateLogEvent(battleState, {
+        type: 'curbstomp_event',
+        text: narrationText
+    });
 }

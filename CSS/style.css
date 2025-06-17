@@ -59,8 +59,7 @@ html {
 body {
     background: 
         linear-gradient(rgba(18, 19, 25, 0.85), rgba(18, 19, 25, 0.95)),
-        linear-gradient(45deg, var(--water-color), var(--earth-color), var(--fire-color), var(--air-color), var(--mk-dark-red), var(--mk-black)),
-        url('https://i.pinimg.com/originals/e1/44/9a/e1449a528a11322a3de5537552c6595d.jpg') center/cover;
+        linear-gradient(45deg, var(--water-color), var(--earth-color), var(--fire-color), var(--air-color), var(--mk-dark-red), var(--mk-black));
     font-family: var(--font-body);
     color: var(--text-primary);
     min-height: 100vh;
@@ -118,6 +117,116 @@ body {
     text-shadow: 0 0 10px var(--fire-color), 0 0 6px rgba(255, 120, 0, 0.7); /* Enhanced glow */
 }
 
+/* Battle Background Section */
+.battle-background-section {
+    width: 100%;
+    height: 400px;
+    margin: 2rem auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.location-backdrop {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: brightness(1.05) contrast(1.1);
+}
+
+.battle-background-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(0,0,0,0.6) 100%);
+    z-index: 1;
+}
+
+/* Battle Visuals Section */
+.battle-visuals-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem auto;
+    max-width: 1000px;
+    position: relative;
+    z-index: 2;
+}
+
+.character-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.left-character {
+    margin-right: auto;
+}
+
+.right-character {
+    margin-left: auto;
+}
+
+.character-container:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255,255,255,0.6);
+}
+
+.character-portrait {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 50%;
+    display: block;
+}
+
+/* Faction-themed glows */
+.character-portrait.aang {
+    box-shadow: 0 0 12px rgba(180, 240, 255, 0.7);
+}
+
+.character-portrait.azula {
+    box-shadow: 0 0 12px rgba(255, 120, 255, 0.6);
+}
+
+.vs-badge {
+    background: radial-gradient(circle at center, #ffcc66, #cc6600);
+    color: #000;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    font-weight: bold;
+    box-shadow: 0 0 12px rgba(255, 204, 102, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2);
+    font-size: 2rem;
+    z-index: 3;
+    white-space: nowrap;
+    text-shadow: 0 0 3px #000;
+    transition: transform 0.15s ease-in-out;
+    font-family: var(--font-mk);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.vs-badge:hover {
+    transform: scale(1.1);
+}
+
 /* Mode Selection Styles */
 .mode-selection-section {
     background-color: var(--surface-bg);
@@ -128,7 +237,7 @@ body {
     margin: 0 auto 2rem auto;
     max-width: 700px;
     text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4); /* Smoother, larger shadow */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
@@ -900,33 +1009,48 @@ body {
 }
 
 @media (max-width: 1024px) {
-    .archetype-intros { grid-template-columns: 1fr; }
-    .simulation-mode-container { max-height: 60vh; }
+    .battle-background-section {
+        height: 300px;
+    }
+    .character-container {
+        width: 70px;
+        height: 70px;
+    }
+    .battle-visuals-section {
+        max-width: 900px;
+    }
 }
 
 @media (max-width: 768px) {
-    .container { padding: 1rem; }
-    .title { font-size: 2.5rem; }
-    .results-section { padding: 1.5rem; }
-    .simulation-mode-container { padding: 1rem; max-height: 50vh; }
-    .simulation-controls { padding: 0.3rem 0.5rem; margin: -1rem -1rem 0.75rem -1rem; top: -1rem; flex-wrap: wrap; gap: 0.5rem;}
-    .simulation-cancel-btn, .simulation-zoom-btn, .simulation-log-toggle-btn, .simulation-copy-btn { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
-    .animated-log-output { font-size: 0.95rem; }
-    .archetype-headline { font-size: 1.5rem; }
-    .archetype-intro { font-size: 0.9rem; }
-    .mode-options { flex-direction: column; gap: 0.5rem; }
-    .detailed-battle-logs-controls.results-actions-bar { flex-direction: column; gap: 0.5rem; }
-    .detailed-battle-logs-controls .results-details-toggle-btn, .detailed-battle-logs-controls .results-copy-btn { font-size: 0.85rem; padding: 0.5rem 1rem; width: 100%; max-width: 250px; }
+    .battle-background-section {
+        height: 250px;
+    }
+    .character-container {
+        width: 60px;
+        height: 60px;
+    }
+    .battle-visuals-section {
+        max-width: 700px;
+    }
+    .vs-badge {
+        font-size: 1.5rem;
+    }
 }
 
 @media (max-width: 480px) {
-    .title { font-size: 2rem; letter-spacing: 2px; }
-    .archetype-headline { font-size: 1.3rem; }
-    .simulation-mode-container { font-size: 0.9rem; }
-    .simulation-char-icon { width: 24px; height: 24px; }
-    .simulation-controls-group { flex-basis: 100%; justify-content: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;}
-    .simulation-copy-btn, .simulation-log-toggle-btn { margin-left: 0; }
-    .zoom-controls { flex-basis: 100%; justify-content: center; }
+    .battle-background-section {
+        height: 200px;
+    }
+    .character-container {
+        width: 50px;
+        height: 50px;
+    }
+    .battle-visuals-section {
+        max-width: 450px;
+    }
+    .vs-badge {
+        font-size: 1.2rem;
+    }
 }
 
 .narrative-spoken em, .narrative-internal em { font-style: italic; }
@@ -996,199 +1120,4 @@ body {
 .dialogue-line span {
     font-style: normal;
     font-weight: bold;
-}
-
-/* Battle Visuals Section */
-.battle-visuals-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin: 2rem auto;
-    max-width: 1000px;
-    position: relative;
-    height: 400px;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-.versus-emblem-container {
-    display: none;
-}
-
-.versus-label {
-    display: none;
-}
-
-.vs-badge {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle at center, #ffcc66, #cc6600);
-    color: #000;
-    padding: 0.6rem 1.2rem;
-    border-radius: 999px;
-    font-weight: bold;
-    box-shadow: 0 0 12px rgba(255, 204, 102, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2);
-    font-size: 2rem;
-    z-index: 3;
-    white-space: nowrap;
-    text-shadow: 0 0 3px #000;
-    transition: transform 0.15s ease-in-out;
-    font-family: var(--font-mk);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.05); }
-}
-
-.vs-badge:hover {
-    transform: translate(-50%, -50%) scale(1.1);
-}
-
-.character-image-container {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    z-index: 2;
-    background-color: rgba(0, 0, 0, 0.4);
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.character-image-container:first-child {
-    left: 20%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.character-image-container:last-child {
-    right: 20%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.character-image-container:hover {
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 0 20px rgba(255,255,255,0.6);
-}
-
-.character-portrait {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    border-radius: 50%;
-    display: block;
-}
-
-/* Faction-themed glows */
-.character-portrait.aang {
-    box-shadow: 0 0 12px rgba(180, 240, 255, 0.7);
-}
-
-.character-portrait.azula {
-    box-shadow: 0 0 12px rgba(255, 120, 255, 0.6);
-}
-
-/* Location Image Container */
-.location-image-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    border-radius: 10px;
-    z-index: 1;
-}
-
-.location-backdrop {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    filter: brightness(1.05) contrast(1.1);
-}
-
-/* Subtle vignette overlay for the location image */
-.location-image-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(0,0,0,0.6) 100%);
-    z-index: 5;
-}
-
-/* Responsive adjustments for smaller screens */
-@media (max-width: 1024px) {
-    .battle-visuals-section {
-        height: 300px;
-        max-width: 900px;
-    }
-    .character-image-container {
-        width: 70px;
-        height: 70px;
-    }
-    .character-image-container:first-child {
-        left: 15%;
-    }
-    .character-image-container:last-child {
-        right: 15%;
-    }
-    .vs-badge {
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .battle-visuals-section {
-        height: 250px;
-        max-width: 700px;
-    }
-    .character-image-container {
-        width: 60px;
-        height: 60px;
-    }
-    .character-image-container:first-child {
-        left: 10%;
-    }
-    .character-image-container:last-child {
-        right: 10%;
-    }
-    .vs-badge {
-        font-size: 1.2rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .battle-visuals-section {
-        height: 200px;
-        max-width: 450px;
-    }
-    .character-image-container {
-        width: 50px;
-        height: 50px;
-    }
-    .character-image-container:first-child {
-        left: 5%;
-    }
-    .character-image-container:last-child {
-        right: 5%;
-    }
-    .vs-badge {
-        font-size: 1rem;
-    }
 }
