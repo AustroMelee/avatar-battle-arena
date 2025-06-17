@@ -23,6 +23,7 @@ const DOM_ELEMENTS = {
     // FIX: Add battleBtn to DOM_ELEMENTS
     battleBtn: document.getElementById('battleBtn'),
     simulationContainer: document.getElementById('simulation-container'),
+    detailedBattleLogsContent: document.getElementById('detailed-battle-logs-content'),
 };
 
 /**
@@ -143,6 +144,13 @@ export function showResultsState(battleResult, simulationMode) {
             DOM_ELEMENTS.battleStory.innerHTML = transformEventsToHtmlLog(battleResult.log);
             console.log("[DEBUG] battleStory innerHTML for instant mode:", DOM_ELEMENTS.battleStory.innerHTML);
             DOM_ELEMENTS.battleStory.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Ensure detailed battle logs are visible by default in instant mode
+        if (DOM_ELEMENTS.detailedBattleLogsContent) {
+            DOM_ELEMENTS.detailedBattleLogsContent.classList.remove('hidden');
+        }
+        if (DOM_ELEMENTS.toggleDetailedLogsBtn) {
+            DOM_ELEMENTS.toggleDetailedLogsBtn.textContent = 'Hide Detailed Battle Logs ▲';
         }
         displayFinalResultsPanel(battleResult);
     }
