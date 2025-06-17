@@ -2,43 +2,17 @@
 'use strict';
 
 // Import all individual character archetype data files
-// NOTE: You will need to add an import for EACH character file as you create them.
-// For now, we'll assume only Sokka, Aang, Katara, Toph, Zuko, Azula, Mai, Ty Lee, Ozai, Pakku, Bumi, and Jeong Jeong exist.
-
 import { characters as characterData } from './data_characters.js';
 import { locations as locationData } from './locations.js';
 
-import { sokkaArchetypeData } from './data_archetype_sokka.js';
 import { aangArchetypeData } from './data_archetype_aang.js';
-import { kataraArchetypeData } from './data_archetype_katara.js';
-import { tophArchetypeData } from './data_archetype_toph.js';
-import { zukoArchetypeData } from './data_archetype_zuko.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
-import { maiArchetypeData } from './data_archetype_mai.js';
-import { tyleeArchetypeData } from './data_archetype_ty-lee.js';
-import { ozaiArchetypeData } from './data_archetype_ozai.js';
-import { pakkuArchetypeData } from './data_archetype_pakku.js';
-import { bumiArchetypeData } from './data_archetype_bumi.js';
-import { jeongjeongArchetypeData } from './data_archetype_jeong-jeong.js';
-
 
 // Combine all imported archetype data into a single map.
 // The structure will be: { fighterA_id: { fighterB_id: { location_id: {label, introA, introB} } } }
 const combinedArchetypeMap = {
-    'sokka': sokkaArchetypeData,
     'aang-airbending-only': aangArchetypeData,
-    'katara': kataraArchetypeData,
-    'toph-beifong': tophArchetypeData,
-    'zuko': zukoArchetypeData,
     'azula': azulaArchetypeData,
-    'mai': maiArchetypeData,
-    'ty-lee': tyleeArchetypeData,
-    'ozai-not-comet-enhanced': ozaiArchetypeData,
-    'pakku': pakkuArchetypeData,
-    'bumi': bumiArchetypeData,
-    'jeong-jeong': jeongjeongArchetypeData,
-    // Add other characters here as their files are created
-    // e.g., 'characterId': characterArchetypeData,
 };
 
 // Global Fallback (if Fighter A's data isn't even in combinedArchetypeMap)
@@ -67,7 +41,6 @@ export function resolveArchetypeLabel(fighter1Id, fighter2Id, locationId) {
 
     const fighter1Name = characterData[fighter1Id]?.name || "Fighter 1";
     const fighter2Name = characterData[fighter2Id]?.name || "Fighter 2";
-    // const locationName = locationData[locationId]?.name || "Battlefield"; // Not directly used in default strings anymore
 
     let entry = null;
     const fighterAData = combinedArchetypeMap[fighter1Id];

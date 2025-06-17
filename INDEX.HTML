@@ -13,7 +13,7 @@
 <div class="container">
 <header class="header">
 <h1 class="title">ATLA BATTLE ARENA</h1>
-<p class="subtitle">SELECT YOUR CHAMPIONS AND UNLEASH THE ELEMENTS!</p>
+<p class="subtitle">AANG vs. AZULA</p>
 </header>
 <main>
     <!-- Mode Selection UI -->
@@ -32,76 +32,16 @@
     </section>
     <!-- End Mode Selection UI -->
 
-    <section class="battle-setup">
-        <div class="fighter-selection-area">
-            <h2 class="fighter-title" id="fighter1-name-display">Choose Fighter 1</h2>
-            <div class="momentum-display" id="fighter1-momentum-display">
-                Momentum: <span class="momentum-value momentum-neutral" id="fighter1-momentum-value">0</span>
-            </div>
-            <!-- NEW: Escalation Display for Fighter 1 -->
-            <div class="escalation-display">
-                <span id="fighter1-incapacitation-score">Incap. Score: 0.0</span> | 
-                <span id="fighter1-escalation-state" class="escalation-status escalation-normal">Escalation: Normal</span>
-            </div>
-            <!-- END NEW -->
-            <div class="character-grid" id="fighter1-grid">
-            </div>
-            <!-- IMPORTANT: HIDDEN INPUT FOR FIGHTER 1 VALUE -->
-            <input type="hidden" id="fighter1-value" value="">
-        </div>
-        <div class="vs-divider" id="vsDivider">VS</div>
-        <div class="fighter-selection-area">
-            <h2 class="fighter-title" id="fighter2-name-display">Choose Fighter 2</h2>
-            <div class="momentum-display" id="fighter2-momentum-display">
-                Momentum: <span class="momentum-value momentum-neutral" id="fighter2-momentum-value">0</span>
-            </div>
-            <!-- NEW: Escalation Display for Fighter 2 -->
-            <div class="escalation-display">
-                <span id="fighter2-incapacitation-score">Incap. Score: 0.0</span> | 
-                <span id="fighter2-escalation-state" class="escalation-status escalation-normal">Escalation: Normal</span>
-            </div>
-            <!-- END NEW -->
-            <div class="character-grid" id="fighter2-grid">
-            </div>
-            <!-- IMPORTANT: HIDDEN INPUT FOR FIGHTER 2 VALUE -->
-            <input type="hidden" id="fighter2-value" value="">
-        </div>
-    </section>
-
-    <section class="location-section">
-        <h2 class="location-title" id="location-name-display">Choose a Battlefield</h2>
-        <div id="location-environment-summary" class="location-environment-summary"></div>
-        <div class="location-grid" id="location-grid">
-        </div>
-        <!-- IMPORTANT: HIDDEN INPUT FOR LOCATION VALUE -->
-        <input type="hidden" id="location-value" value="">
-        <div class="battlefield-options">
-            <div class="time-toggle-container" id="time-toggle-container">
-                <button class="time-toggle-btn selected" data-value="day" aria-label="Select Day">☀️</button>
-                <button class="time-toggle-btn" data-value="night" aria-label="Select Night">🌙</button>
-            </div>
-            <div class="options-bar">
-                <input type="checkbox" id="emotional-mode" checked>
-                <label for="emotional-mode">Enable Emotional Mode</label>
-            </div>
-        </div>
-        <div id="time-feedback" class="time-feedback"></div>
-        <input type="hidden" id="time-of-day-value" value="day">
-    </section>
-
     <section class="archetype-info-section" id="archetype-info-container">
-        <h3 class="archetype-headline" id="archetype-headline"></h3>
+        <h3 class="archetype-headline" id="archetype-headline">Royal Rumble: Princess's Perfection vs. Avatar's Air</h3>
         <div class="archetype-intros">
-            <p class="archetype-intro" id="archetype-intro-a"></p>
-            <p class="archetype-intro" id="archetype-intro-b"></p>
+            <p class="archetype-intro" id="archetype-intro-a">Azula, the favored princess, aims to definitively crush the Avatar in the Fire Nation capital, showcasing her absolute superiority.</p>
+            <p class="archetype-intro" id="archetype-intro-b">Aang confronts Azula in her own seat of power, his airbending a desperate whirlwind against her flawless, deadly fire.</p>
         </div>
         <p class="archetype-error" id="archetype-error"></p>
     </section>
     
     <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
-    <!-- NEW: Dev Mode Batch Button -->
-    <button class="battle-button dev-mode-button" id="runDevModeBatchBtn" style="display: none;">Run Dev Batch (100)</button>
-    <!-- END NEW -->
 
     <!-- Simulation Mode Container -->
     <section id="simulation-mode-container" class="simulation-mode-container hidden">
@@ -133,15 +73,7 @@
                 <div class="win-probability" id="win-probability"></div>
             </div>
             
-            <!-- REMOVED general results toggle and copy bar -->
-            <!-- 
-            <div class="results-actions-bar">
-                <button id="toggle-results-details-btn" class="results-details-toggle-btn" aria-expanded="true">Hide Story & Analysis ▼</button>
-                <button id="copy-results-story-btn" class="results-copy-btn">📋 Copy Story</button> 
-            </div>
-            -->
-
-            <div id="results-details-content"> <!-- This div will no longer be directly toggled by its own button -->
+            <div id="results-details-content">
                 <article class="battle-story" id="battle-story"></article>
                 <div class="outcome-analysis" id="outcome-analysis">
                     <h3 class="analysis-title">Outcome Analysis</h3>
@@ -153,28 +85,21 @@
                         <ul id="environment-impacts-list" class="environment-impacts-list"></ul>
                     </div>
 
-                    <!-- NEW: Detailed Battle Logs Section (within outcome-analysis) -->
                     <div class="detailed-battle-logs-section">
                         <div class="detailed-battle-logs-controls results-actions-bar">
-                            <!-- MODIFIED: Button text and aria-expanded -->
                             <button id="toggle-detailed-logs-btn" class="results-details-toggle-btn" aria-expanded="false">Show Detailed Battle Logs ►</button>
                             <button id="copy-detailed-logs-btn" class="results-copy-btn">📋 Copy Battle Logs</button>
                         </div>
-                        <!-- MODIFIED: Add .collapsed class by default -->
                         <div id="detailed-battle-logs-content" class="collapsible-content collapsed">
-                            <!-- AI Logs will be populated here by JS -->
                         </div>
                     </div>
-                    <!-- END NEW: Detailed Battle Logs Section -->
                 </div>
             </div>
         </div>
     </section>
 </main>
 </div>
-<!-- NEW: Dev Mode Manager script -->
-<script src="js/dev_mode_manager.js" type="module" defer></script>
-<!-- End NEW -->
 <script src="js/main.js" type="module" defer></script>
 </body>
 </html>
+

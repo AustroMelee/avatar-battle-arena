@@ -6,26 +6,17 @@
 // into a single 'characters' object for the rest of the application.
 
 import { gaangCharacters } from './data_characters_gaang.js';
-import { masterCharacters } from './data_characters_masters.js';
+// import { masterCharacters } from './data_characters_masters.js'; // REMOVED
 import { antagonistCharacters } from './data_characters_antagonists.js';
 
 import { aangArchetypeData } from './data_archetype_aang.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
-import { bumiArchetypeData } from './data_archetype_bumi.js';
-import { jeongjeongArchetypeData } from './data_archetype_jeong-jeong.js';
-import { kataraArchetypeData } from './data_archetype_katara.js';
-import { maiArchetypeData } from './data_archetype_mai.js';
-import { ozaiArchetypeData } from './data_archetype_ozai.js';
-import { pakkuArchetypeData } from './data_archetype_pakku.js';
-import { sokkaArchetypeData } from './data_archetype_sokka.js';
-import { tophArchetypeData } from './data_archetype_toph.js';
-import { tyleeArchetypeData } from './data_archetype_ty-lee.js';
-import { zukoArchetypeData } from './data_archetype_zuko.js';
+// All other archetype imports removed
 
 // Combine all base character data into one object.
 const baseCharacters = {
     ...gaangCharacters,
-    ...masterCharacters,
+    // ...masterCharacters, // REMOVED
     ...antagonistCharacters,
 };
 
@@ -33,16 +24,6 @@ const baseCharacters = {
 const archetypes = {
     'aang-airbending-only': aangArchetypeData,
     'azula': azulaArchetypeData,
-    'bumi': bumiArchetypeData,
-    'jeong-jeong': jeongjeongArchetypeData,
-    'katara': kataraArchetypeData,
-    'mai': maiArchetypeData,
-    'ozai-not-comet-enhanced': ozaiArchetypeData,
-    'pakku': pakkuArchetypeData,
-    'sokka': sokkaArchetypeData,
-    'toph-beifong': tophArchetypeData,
-    'ty-lee': tyleeArchetypeData,
-    'zuko': zukoArchetypeData,
 };
 
 /**

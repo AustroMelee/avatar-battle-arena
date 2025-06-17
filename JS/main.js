@@ -2,15 +2,12 @@
 'use strict';
 
 import { simulateBattle } from './engine_battle-engine-core.js';
-// --- UPDATED IMPORTS ---
-import { showLoadingState, showResultsState } from './ui_loading-states.js'; // Imports show/hide loading/results states
-import { populateAllUI, resetGlobalUI, getCharacterImageFromUI as getCharacterImage } from './ui.js'; // Harmonized UI functions, and importing getCharacterImage
-import { setSimulationMode, initializeSimulationManagerDOM, resetSimulationManager } from './simulation_mode_manager.js'; // Correct imports for sim manager
-import { setupDetailedLogControls } from './ui_battle-results.js'; // Correct import for setupDetailedLogControls
-// --- END UPDATED IMPORTS ---
-import { initializeDevModeUI } from './dev_mode_manager.js';
+import { showLoadingState, showResultsState } from './ui_loading-states.js';
+import { resetGlobalUI } from './ui.js';
+import { setSimulationMode, initializeSimulationManagerDOM } from './simulation_mode_manager.js';
+import { setupDetailedLogControls } from './ui_battle-results.js';
 
-const battleBtn = document.getElementById('battleBtn'); // Keep this as it's the trigger element
+const battleBtn = document.getElementById('battleBtn');
 let currentSimMode = "animated";
 
 function handleModeSelectionChange(event) {
@@ -22,10 +19,8 @@ function handleModeSelectionChange(event) {
 }
 
 function init() {
-    populateAllUI(); // Use the global populate UI function
+    // No longer need to populate UI selections
 
-    // Initialize simulation manager, passing the necessary DOM elements directly from the main document
-    // (these are accessed via document.getElementById in the sim manager, so no need for DOM_SHARED here)
     initializeSimulationManagerDOM({
         simulationContainer: document.getElementById('simulation-mode-container'),
         cancelButton: document.getElementById('cancel-simulation'),
@@ -37,13 +32,11 @@ function init() {
         zoomInBtn: document.getElementById('zoom-in'),
         zoomOutBtn: document.getElementById('zoom-out'),
     });
-    setSimulationMode(currentSimMode); // Set initial mode in manager
+    setSimulationMode(currentSimMode);
 
     const modeSelectionContainer = document.querySelector('.mode-selection-section');
     if (modeSelectionContainer) {
         modeSelectionContainer.addEventListener('change', handleModeSelectionChange);
-    } else {
-        console.error("Mode selection container not found for event listener setup.");
     }
 
     const defaultModeRadio = document.getElementById(`mode-${currentSimMode}`);
@@ -51,10 +44,33 @@ function init() {
         defaultModeRadio.checked = true;
     }
 
-    setupDetailedLogControls(); // Call the imported setup function
-    initializeDevModeUI(); // Initialize Dev Mode UI
-}
+    if (battleBtn) {
+        battleBtn.addEventListener('click', () => {
+            const f1Id = 'aang-airbending-only';
+            const f2Id = 'azula';
+            const locId = 'fire-nation-capital';
+            const timeOfDay = 'day';
+            const emotionalMode = true; // Hardcoded
 
+            resetGlobalUI();
+            showLoadingState(currentSimMode);
+
+            setTimeout(() => {
+                try {
+                    const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
+                    showResultsState(battleResult, currentSimMode);
+                } catch (error) {
+                     console.error("An error occurred during battle simulation:", error);
+                     alert("A critical error occurred. Please check the console and refresh.");
+                     if (document.getElementById('loading')) document.getElementById('loading').classList.add('hidden');
+                     if (battleBtn) battleBtn.disabled = false;
+                }
+            }, 100);
+        });
+    }
+
+    setupDetailedLogControls();
+}
 
 // Kick off app initialization on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', init);
