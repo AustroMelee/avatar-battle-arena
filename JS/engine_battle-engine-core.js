@@ -233,6 +233,9 @@ function initializeFighterState(fighterId, opponentId, emotionalMode = false) {
     // Ensure characterData.name exists before using it
     const characterName = characterData.name || fighterId; // Fallback to ID if name is missing
 
+    // DIAGNOSTIC: Log characterData.imageUrl
+    console.log(`[DEBUG] Initializing fighter state for '${fighterId}': characterData.imageUrl =`, characterData.imageUrl);
+
     const personalityProfile = characterData.personalityProfile || {
         aggression: 0.5, patience: 0.5, riskTolerance: 0.5, opportunism: 0.5,
         creativity: 0.5, defensiveBias: 0.5, antiRepeater: 0.5, signatureMoveBias: {}
@@ -561,6 +564,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     fighter1.aiLog.push(`Battle started in ${phaseState.currentPhase} Phase.`);
     fighter2.aiLog.push(`Battle started in ${phaseState.currentPhase} Phase.`);
 
+    // DIAGNOSTIC: Log initial aiLog state before loop
+    console.log(`[DEBUG] Before loop - fighter1.aiLog length: ${fighter1.aiLog.length}, content:`, fighter1.aiLog);
+    console.log(`[DEBUG] Before loop - fighter2.aiLog length: ${fighter2.aiLog.length}, content:`, fighter2.aiLog);
+
     // Helper function to get opponent without circular references
     const getOpponent = (fighter) => fighter.id === fighter1.id ? fighter2 : fighter1;
 
@@ -618,6 +625,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
     isStalemate = terminalOutcome.isStalemate;
 
     while (turn < MAX_TOTAL_TURNS && !battleOver) {
+        // DIAGNOSTIC: Log aiLog state at beginning of each turn
+        console.log(`[DEBUG] Turn ${turn + 1} START - currentAttacker.aiLog length: ${currentAttacker.aiLog.length}, content:`, currentAttacker.aiLog);
+        console.log(`[DEBUG] Turn ${turn + 1} START - currentDefender.aiLog length: ${currentDefender.aiLog.length}, content:`, currentDefender.aiLog);
+
         currentBattleState.turn = turn;
         currentAttacker.currentTurn = turn;
         currentDefender.currentTurn = turn;
@@ -638,7 +649,7 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
             actorId: currentAttacker.id,
             characterName: currentAttacker.name,
             turn: turn + 1,
-            portrait: currentAttacker.images.portrait,
+            portrait: currentAttacker.portrait, // Correctly use `portrait` here
         });
         // --- End Universal Turn Setup ---
 
@@ -651,8 +662,15 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                 currentDefender.aiLog.push(`[Phase Summary]: ${lastSummaryEntry.phase} concluded after ${lastSummaryEntry.turns} turns.`);
             }
         
-            currentAttacker.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
-            currentDefender.aiLog.push(phaseState.phaseLog[phaseState.phaseLog.length - 1]);
+            // Explicitly push phase transition message to AI log
+            const phaseTransitionMessage = `[Phase Transition]: Entered the ${phaseState.currentPhase} Phase.`;
+            currentAttacker.aiLog.push(phaseTransitionMessage);
+            currentDefender.aiLog.push(phaseTransitionMessage);
+
+            // DIAGNOSTIC: Log aiLog state immediately after phase transition pushes
+            console.log(`[DEBUG] Turn ${turn + 1} AFTER PHASE TRANSITION - currentAttacker.aiLog length: ${currentAttacker.aiLog.length}, content:`, currentAttacker.aiLog);
+            console.log(`[DEBUG] Turn ${turn + 1} AFTER PHASE TRANSITION - currentDefender.aiLog length: ${currentDefender.aiLog.length}, content:`, currentDefender.aiLog);
+
             currentBattleState.currentPhase = phaseState.currentPhase;
 
             const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
@@ -706,10 +724,6 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
                     currentBattleState
                 ));
             }
-
-            currentAttacker.aiLog.push(`[Phase Transition]: ${currentAttacker.name} transitioned to ${phaseState.currentPhase} Phase.`);
-            currentDefender.aiLog.push(`[Phase Transition]: ${currentDefender.name} transitioned to ${phaseState.currentPhase} Phase.`);
-            currentBattleState.currentPhase = phaseState.currentPhase;
         }
 
         if (charactersMarkedForDefeat.has(currentAttacker.id)) {
@@ -1114,6 +1128,10 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         delete cleanState.opponent; // Assuming 'opponent' property might exist and cause circularity
         // Keep only the opponent ID
         cleanState.opponentId = fighter.opponentId;
+
+        // Ensure aiLog is explicitly copied as a new array to avoid any shared reference issues
+        cleanState.aiLog = [...(fighter.aiLog || [])];
+
         return cleanState;
     };
     

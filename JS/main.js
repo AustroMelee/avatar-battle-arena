@@ -13,45 +13,6 @@ import { initializeDevModeUI } from './dev_mode_manager.js';
 const battleBtn = document.getElementById('battleBtn'); // Keep this as it's the trigger element
 let currentSimMode = "animated";
 
-function handleBattleStart() {
-    const f1Id = document.getElementById('fighter1-value').value;
-    const f2Id = document.getElementById('fighter2-value').value;
-    const locId = document.getElementById('location-value').value;
-    const timeOfDay = document.getElementById('time-of-day-value').value;
-    const emotionalMode = document.getElementById('emotional-mode').checked;
-    if (!f1Id || !f2Id || !locId) {
-        alert("Please select both fighters and a battlefield.");
-        return;
-    }
-    if (f1Id === f2Id) {
-        alert('Please select two different fighters!');
-        return;
-    }
-
-    resetGlobalUI(); // Use the global reset function
-    showLoadingState(currentSimMode); // Use the centralized loading state function
-
-    setTimeout(() => {
-        try {
-            const rawBattleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
-            showResultsState(rawBattleResult, currentSimMode); // Use the centralized results display function
-        } catch (error) {
-            console.error("An error occurred during battle simulation:", error);
-            alert("A critical error occurred. Please check the console and refresh.");
-            // Re-enable button and hide loading on error
-            const loadingSpinner = document.getElementById('loading'); // Direct access here
-            if (loadingSpinner) loadingSpinner.classList.add('hidden');
-
-            const simModeContainer = document.getElementById('simulation-mode-container'); // Direct access here
-            if (simModeContainer) {
-                simModeContainer.classList.add('hidden');
-            }
-            if (battleBtn) battleBtn.disabled = false;
-            resetSimulationManager(); // Use the centralized simulation manager reset
-        }
-    }, 1500);
-}
-
 function handleModeSelectionChange(event) {
     if (event.target.name === "simulationMode") {
         currentSimMode = event.target.value;
@@ -88,12 +49,6 @@ function init() {
     const defaultModeRadio = document.getElementById(`mode-${currentSimMode}`);
     if (defaultModeRadio) {
         defaultModeRadio.checked = true;
-    }
-
-    if (battleBtn) {
-        battleBtn.addEventListener('click', handleBattleStart);
-    } else {
-        console.error("Battle button not found.");
     }
 
     setupDetailedLogControls(); // Call the imported setup function
