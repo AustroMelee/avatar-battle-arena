@@ -1183,3 +1183,71 @@ body {
     .simulation-copy-btn, .simulation-log-toggle-btn { margin-left: 0; }
     .zoom-controls { flex-basis: 100%; justify-content: center; }
 }
+
+/* New styles for narrative events (spoken vs. internal) */
+.narrative-spoken em {
+    color: var(--accent-1); /* A prominent color for spoken words */
+    font-style: italic;
+}
+
+.narrative-internal em {
+    color: var(--text-parchment-gold); /* A more subdued color for thoughts */
+    font-style: italic;
+}
+
+.narrative-action {
+    color: var(--text-primary);
+}
+
+.narrative-damage {
+    color: var(--damage-high);
+}
+
+.narrative-healing {
+    color: var(--momentum-positive);
+}
+
+.narrative-self-damage {
+    color: var(--damage-medium);
+}
+
+.narrative-stun {
+    color: var(--accent-3);
+}
+
+.narrative-debuff {
+    color: var(--accent-red);
+}
+
+.narrative-buff {
+    color: var(--accent-2);
+}
+
+.narrative-context {
+    color: var(--text-parchment-gold);
+}
+
+.narrative-environmental-damage {
+    color: var(--shadow-ember);
+}
+
+.narrative-move-specific {
+    color: var(--text-primary);
+}
+
+.narrative-log-entry {
+    color: var(--text-primary);
+    opacity: 0.7;
+    font-size: 0.8em;
+}
+
+/* New styles for character turn icons */
+.turn-marker-portrait img {
+    width: 32px; /* Adjust size as needed */
+    height: 32px; /* Ensure aspect ratio */
+    border-radius: 50%; /* Make it round */
+    border: 2px solid var(--border-scroll); /* Optional: add a border */
+    margin-right: 10px; /* Spacing between image and text */
+    object-fit: cover;
+    flex-shrink: 0;
+}
