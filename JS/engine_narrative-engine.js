@@ -479,23 +479,33 @@ export function generateActionDescriptionObject(move, actor, defender, result, e
     return moveAction;
 }
 
-export function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData, battleState) { // FIX: Added battleState
-    if (!move.collateralImpact || move.collateralImpact === 'none' || environmentState.damageLevel === 0) {
-        console.log('[DEBUG] generateCollateralDamageEvent: Move has no collateral impact or environment damage is 0');
+export function generateCollateralDamageEvent(move, actor, opponent, environmentState, locationData, battleState, result) { // Added result parameter
+    if (!result || result.collateralDamage === 0 || environmentState.damageLevel === 0) {
+        console.log('[DEBUG] generateCollateralDamageEvent: No calculated collateral damage or environment damage is 0');
         return null;
     }
-    const impactLevel = move.collateralImpact.toUpperCase();
-    console.log('[DEBUG] generateCollateralDamageEvent: impactLevel = ', impactLevel);
-    console.log('[DEBUG] generateCollateralDamageEvent: collateralImpactPhrases[impactLevel] = ', collateralImpactPhrases[impactLevel]);
 
-    if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) return null;
+    let impactLevel;
+    if (result.collateralDamage <= 10) {
+        impactLevel = 'LOW';
+    } else if (result.collateralDamage <= 20) {
+        impactLevel = 'MEDIUM';
+    } else {
+        impactLevel = 'HIGH'; // For collateralDamage > 20 (up to max 30)
+    }
+
+    // Check if phrases exist for the determined impact level
+    if (!collateralImpactPhrases[impactLevel] || collateralImpactPhrases[impactLevel].length === 0) {
+        console.warn(`[WARNING] generateCollateralDamageEvent: No collateral phrases found for impactLevel: ${impactLevel}`);
+        return null; // Safety check if no phrases are defined
+    }
 
     const collateralPhraseTemplate = getRandomElement(collateralImpactPhrases[impactLevel]);
     const collateralPhrase = collateralPhraseTemplate ? substituteTokens(collateralPhraseTemplate.line || collateralPhraseTemplate, actor, opponent, {battleState}) : '';
 
     console.log('[DEBUG] generateCollateralDamageEvent: generated collateralPhrase = ', collateralPhrase);
 
-    // NEW: Add the collateral phrase to environmentState.specificImpacts
+    // Add the collateral phrase to environmentState.specificImpacts
     if (collateralPhrase) {
         environmentState.specificImpacts.add(collateralPhrase);
         console.log('[DEBUG] generateCollateralDamageEvent: Added collateralPhrase to specificImpacts. Current impacts:', Array.from(environmentState.specificImpacts));
@@ -692,7 +702,7 @@ export function generateTurnNarrationObjects(narrativeEventsForAction, move, act
             narrationObjects.push(formatQuoteEvent(actorInternalThought, actor, defender, narrativeContext));
         }
 
-        const collateralEvent = generateCollateralDamageEvent(move, actor, defender, environmentState, locationData, battleState);
+        const collateralEvent = generateCollateralDamageEvent(move, actor, defender, environmentState, locationData, battleState, result);
         if (collateralEvent) {
             narrationObjects.push(collateralEvent); 
         }
