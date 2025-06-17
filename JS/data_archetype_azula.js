@@ -44,6 +44,15 @@ export const azulaArchetypeData = {
             'boiling-rock': [{ type: 'spoken', line: "This prison will be your tomb. No one escapes me." }, { type: 'internal', line: "The perfect stage for a display of overwhelming force." }],
             'great-divide': [{ type: 'spoken', line: "The canyon will amplify my power. There's no escaping my lightning here!" }, { type: 'internal', line: "So much open space. Perfect for hunting. And nowhere for them to hide from my flames." }] // UPDATED for Great Divide
         },
+        turnStart: { // NEW: General turn start quotes
+            Generic: [
+                { type: 'internal', line: "Another turn, another opportunity for perfection." },
+                { type: 'spoken', line: "Let's get this over with." }
+            ],
+            Poking: [{ type: 'internal', line: "Still probing? How tedious." }],
+            Mid: [{ type: 'internal', line: "The battle intensifies. Good." }],
+            Late: [{ type: 'internal', line: "I can feel victory approaching. Don't disappoint me." }]
+        },
         phaseTransition: { // NEW: Top-level property for phase transition quotes
             Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
                 { type: 'spoken', line: "Let's begin, shall we? Don't make it tedious." },
@@ -71,6 +80,42 @@ export const azulaArchetypeData = {
             asAttacker: { Generic: [{ type: 'spoken', line: "You're pathetic. Your own mother thought you were a monster." }, { type: 'spoken', line: "Still trying so hard? You'll always be second best." }] },
             asVictim: { Generic: [{ type: 'internal', line: "Insolent worm. {opponent.s} will pay for that." }] }
         },
+        onManipulationSuccess: { // NEW: When Azula successfully manipulates
+            Generic: [
+                { type: 'spoken', line: "Such a simple mind. So easily swayed." },
+                { type: 'internal', line: "Their will is breaking. Excellent." }
+            ]
+        },
+        onManipulationFailure: { // NEW: When Azula fails to manipulate
+            Generic: [
+                { type: 'spoken', line: "A momentary lapse. This changes nothing." },
+                { type: 'internal', line: "They resisted? Unexpected. But futile." }
+            ]
+        },
+        onCriticalHitLanded: { // NEW: When Azula lands a critical hit
+            Generic: [
+                { type: 'spoken', line: "Perfection!" },
+                { type: 'internal', line: "They crumble before my power, as expected." }
+            ]
+        },
+        onCriticalHitReceived: { // NEW: When Azula receives a critical hit
+            Generic: [
+                { type: 'spoken', line: "Impossible!" },
+                { type: 'internal', line: "A fluke. It will not happen again." }
+            ]
+        },
+        onWeakHitLanded: { // NEW: When Azula lands a weak hit
+            Generic: [
+                { type: 'spoken', line: "Barely a scratch." },
+                { type: 'internal', line: "Insufficient. I must apply more pressure." }
+            ]
+        },
+        onWeakHitReceived: { // NEW: When Azula receives a weak hit
+            Generic: [
+                { type: 'spoken', line: "Is that all? How disappointing." },
+                { type: 'internal', line: "Such a pathetic attempt. It only fuels my contempt." }
+            ]
+        },
         onPrediction: {
             correct: { Generic: [{ type: 'spoken', line: "Of course you'd try that. You're so predictable." }] },
             wrong: { Generic: [{ type: 'internal', line: "A deviation from the expected pattern. Unlikely to happen again." }] }
@@ -93,6 +138,18 @@ export const azulaArchetypeData = {
             Finisher: { Generic: [{ line: "Almost a shame to have to snuff out such a pathetic flame." }] },
             Humiliation: { Generic: [{ line: "You were beaten before you even began. Remember that." }] },
             Default: { Generic: [{ line: "Flawless. As expected." }] }
+        },
+        onMomentumGain: { // NEW: When Azula gains momentum
+            Generic: [
+                { type: 'spoken', line: "The tide turns, as I command!" },
+                { type: 'internal', line: "My momentum grows. Their defeat is inevitable." }
+            ]
+        },
+        onMomentumLoss: { // NEW: When Azula loses momentum
+            Generic: [
+                { type: 'spoken', line: "Unacceptable!" },
+                { type: 'internal', line: "A minor setback. It will be rectified." }
+            ]
         }
     }
 };

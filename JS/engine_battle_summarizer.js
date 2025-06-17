@@ -93,4 +93,29 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
             html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw)
         });
     }
+
+    // Environmental Damage Analysis (NEW)
+    const envDamageLevel = battleResult.environmentState.damageLevel;
+    let envSummaryText = "The environment remained largely untouched.";
+
+    if (envDamageLevel > 0 && envDamageLevel <= 20) {
+        envSummaryText = "The environment sustained minimal noticeable damage.";
+    } else if (envDamageLevel > 20 && envDamageLevel <= 50) {
+        envSummaryText = "The surroundings show clear signs of the battle's intensity.";
+    } else if (envDamageLevel > 50 && envDamageLevel <= 80) {
+        envSummaryText = "Significant environmental disruption is evident across the arena.";
+    } else if (envDamageLevel > 80) {
+        envSummaryText = "The landscape bears scars of widespread destruction, a testament to the battle's ferocity.";
+    }
+
+    battleResult.environmentalSummary = envSummaryText; // Store for UI display
+
+    // Add environmental summary event to the log
+    battleResult.log.push({
+        type: 'environmental_final_summary_event',
+        text: `Environmental Damage: ${envDamageLevel}% ${envSummaryText}`,
+        html_content: `<div class="final-environmental-summary"><p><strong>Environmental Damage:</strong> ${envDamageLevel}%</p><p>${envSummaryText}</p></div>`,
+        isEnvironmental: true,
+        damageLevel: envDamageLevel
+    });
 }

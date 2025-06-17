@@ -26,7 +26,7 @@ import { azulaArchetypeData } from './data_archetype_azula.js';
 
 import { allArchetypes } from './data_archetypes_index.js'; // Import all archetypes
 
-function getEnvironmentImpactLine(locationId, currentPhase, isCrit = false, moveType = null, moveElement = null, impactCount = 0) {
+function getEnvironmentImpactLine(locationId, currentPhase, isCrit = false, moveType = null, moveElement = null, recentlyUsedLines = []) {
     const loc = locations[locationId];
     if (!loc) {
         return ""; // Safety
@@ -40,28 +40,34 @@ function getEnvironmentImpactLine(locationId, currentPhase, isCrit = false, move
         switch (currentPhase) {
             case 'Poking':
             case 'Opening':
-                messagePool = loc.envImpactInitial || loc.envImpactVariants;
+                messagePool = loc.envImpactInitial || [];
                 break;
             case 'Early':
-                messagePool = loc.envImpactInitial || loc.envImpactVariants;
+                messagePool = loc.envImpactInitial || [];
                 break;
             case 'Mid':
-                messagePool = loc.envImpactMid || loc.envImpactVariants;
+                messagePool = loc.envImpactMid || [];
                 break;
             case 'Late':
-                messagePool = loc.envImpactLate || loc.envImpactMid || loc.envImpactVariants;
+                messagePool = loc.envImpactLate || loc.envImpactMid || [];
                 break;
             case 'Decisive':
             case 'FinalBlow':
-                messagePool = loc.envImpactLate || loc.envImpactMid || loc.envImpactVariants;
+                messagePool = loc.envImpactLate || loc.envImpactMid || [];
                 break;
             default:
-                messagePool = loc.envImpactVariants;
+                messagePool = []; // Fallback if no specific phase pool
         }
     }
 
-    if (messagePool && messagePool.length > 0) {
-        return getRandomElementSeeded(messagePool);
+    // Filter out recently used lines and fall back to general variants if specific pool is exhausted
+    let availablePool = messagePool.filter(line => !recentlyUsedLines.includes(line));
+    if (availablePool.length === 0 && loc.envImpactVariants) {
+        availablePool = loc.envImpactVariants.filter(line => !recentlyUsedLines.includes(line));
+    }
+
+    if (availablePool && availablePool.length > 0) {
+        return getRandomElementSeeded(availablePool);
     }
     return "";
 }
@@ -240,11 +246,11 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
     }
 
     const isCrit = result.effectiveness.label === 'Critical';
-    const collateralPhrase = getEnvironmentImpactLine(locationData.id, battleState.currentPhase, isCrit, move.type, move.element, environmentState.environmentalImpactCount);
+    const collateralPhrase = getEnvironmentImpactLine(locationData.id, battleState.currentPhase, isCrit, move.type, move.element, environmentState.environmentalImpactsThisPhase.map(e => e.line));
 
     if (!collateralPhrase) {
-        console.log("generateCollateralDamageEvent - No collateral phrase generated.");
-        return null; // No relevant phrase generated
+        console.log("generateCollateralDamageEvent - No collateral phrase generated or line was a repeat.");
+        return null; // No relevant phrase generated or it was a repeat
     }
 
     // Increment impact count and store the phrase for summarization
@@ -302,34 +308,42 @@ export function generateEnvironmentalSummaryEvent(battleState, environmentState,
         return null;
     }
 
-    let summaryPhrase = "The environment remained largely untouched.";
-    let summaryHtml = "";
-
+    let summaryPhrase = ""; // Will be dynamically set
+    let headerPhrase = ""; // The more narrative header phrase
     const impactCount = environmentState.environmentalImpactsThisPhase.length;
 
     if (impactCount === 1) {
         summaryPhrase = `The battle left a subtle mark on the surroundings.`;
+        headerPhrase = `The environment bears subtle new marks.`;
     } else if (impactCount >= 2 && impactCount <= 4) {
         summaryPhrase = `Minor alterations appeared in the environment due to the ongoing fight.`;
+        headerPhrase = `The arena shows minor fresh scars.`;
     } else if (impactCount >= 5 && impactCount <= 7) {
         summaryPhrase = `The environment visibly reacted to the clash, showing signs of significant impact.`;
+        headerPhrase = `The environment visibly reacted to the clash.`;
     } else if (impactCount >= 8) {
         summaryPhrase = `Widespread destruction scarred the landscape, a testament to the battle's ferocity.`;
+        headerPhrase = `Widespread destruction scars the landscape.`;
     }
     
-    let detailedImpacts = environmentState.environmentalImpactsThisPhase.map(impact => `<li>${impact.line}</li>`).join('');
-    if (detailedImpacts) {
-        summaryHtml = `<div class="environmental-summary"><p><strong>Environmental Echoes:</strong> ${summaryPhrase}</p><ul>${detailedImpacts}</ul></div>`;
-    } else {
-        summaryHtml = `<div class="environmental-summary"><p><strong>Environmental Echoes:</strong> ${summaryPhrase}</p></div>`;
+    // Select a distinct environmental impact from the phase for display, if available
+    const distinctImpact = environmentState.environmentalImpactsThisPhase.length > 0
+        ? getRandomElementSeeded(environmentState.environmentalImpactsThisPhase.map(e => e.line))
+        : null;
+
+    let htmlContent = `<div class="environmental-summary"><p class="environmental-summary-header">${headerPhrase}</p>`;
+    if (distinctImpact) {
+        htmlContent += `<p class="environmental-summary-detail">${distinctImpact}</p>`;
     }
+    htmlContent += `</div>`;
 
     return generateLogEvent(battleState, {
         type: 'environmental_summary_event',
-        text: summaryPhrase,
-        html_content: summaryHtml,
+        text: summaryPhrase, // The original summaryPhrase for raw log
+        html_content: htmlContent, // The richer HTML content
         isEnvironmental: true,
-        totalImpactsThisPhase: impactCount
+        totalImpactsThisPhase: impactCount,
+        summaryDetail: distinctImpact // Store the distinct impact for potential future use
     });
 }
 
@@ -429,3 +443,4 @@ export function generateStatusChangeEvent(battleState, character, type, oldValue
 const NARRATIVE_TAGS = {
     // ... existing code ...
 };
+

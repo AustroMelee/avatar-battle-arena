@@ -1121,3 +1121,146 @@ body {
     font-style: normal;
     font-weight: bold;
 }
+
+/* Turn and Phase Structuring */
+.turn-group {
+    background-color: var(--simulation-line-bg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.turn-group:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.turn-header {
+    font-family: var(--font-title);
+    font-size: 1.4rem;
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.1);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.phase-group {
+    background-color: rgba(30, 30, 60, 0.7); /* Slightly darker/more prominent */
+    border: 2px solid var(--accent-3);
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.phase-group:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    transform: translateY(-3px);
+}
+
+/* Ensure events within turn/phase groups are properly padded */
+.turn-group .simulation-line, .phase-group .simulation-line {
+    padding: 0.4rem 0.5rem;
+    margin: 0.2rem 0;
+}
+
+/* Specific styling for battle log entries within these new groups */
+.battle-log-container .simulation-line {
+    background-color: transparent; /* Reset background for lines within groups */
+    border: none; /* Reset border for lines within groups */
+    box-shadow: none; /* Reset shadow for lines within groups */
+}
+
+/* General log line appearance adjustments for better integration */
+.simulation-line {
+    padding: var(--simulation-line-padding);
+    margin: var(--simulation-line-margin);
+    border-radius: 6px;
+    display: flex;
+    align-items: flex-start;
+    background-color: var(--simulation-line-bg);
+    border-left: 3px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.simulation-line:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left-color: var(--accent-1); /* Highlight on hover */
+}
+
+.environmental-summary-header {
+    font-weight: bold;
+    color: var(--text-title-gold);
+    margin-bottom: 0.5rem;
+}
+
+.environmental-summary-detail {
+    font-style: italic;
+    color: var(--text-parchment-gold);
+    font-size: 0.9em;
+}
+
+.final-environmental-summary {
+    background-color: rgba(255, 165, 0, 0.1);
+    border: 1px solid var(--shadow-ember);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.final-environmental-summary p {
+    margin: 0.5rem 0;
+}
+
+.final-environmental-summary strong {
+    color: var(--accent-gold);
+}
+
+/* Ensure new elements are added to the correct position */
+.battle-results #detailed-battle-logs-content {
+    position: relative; /* To contain absolutely positioned elements if any */
+}
+
+/* Example of styling the new dialogue events */
+.dialogue-line {
+    font-style: italic;
+    margin: 0.4rem 0;
+    padding: 0.3rem 0.5rem;
+    border-left: 4px solid;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.dialogue-line.char-aang-airbending-only {
+    border-color: var(--air-color);
+    color: var(--air-color);
+}
+
+.dialogue-line.char-azula {
+    border-color: var(--chi-color);
+    color: var(--chi-color);
+}
+
+.dialogue-line.internal-thought {
+    border-left: 4px solid var(--text-parchment-gold);
+    color: var(--text-parchment-gold);
+    opacity: 0.8;
+}
+
+.log-roll {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    padding: 0.3rem 0.6rem;
+    margin: 0.3rem 0;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: #b0c4de;
+}

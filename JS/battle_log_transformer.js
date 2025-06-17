@@ -113,16 +113,26 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
     }
 
     let htmlLog = "";
-    let isPhaseDivOpen = false;
+    let currentTurnDivOpen = false;
+    let currentPhaseDivOpen = false;
+    let currentTurn = -1; // Initialize with a value that ensures the first turn marker opens a div
+
+    // Helper to close the current turn div
+    const closeCurrentTurnDiv = () => {
+        if (currentTurnDivOpen) {
+            htmlLog += `</div>`; // Close .turn-group
+            currentTurnDivOpen = false;
+        }
+    };
 
     const appendToLog = (content) => {
-        if (isPhaseDivOpen) {
-            // Insert before the closing '</div>' tag of the current phase
+        if (currentPhaseDivOpen) {
+            // Insert before the closing '</div>' tag of the current phase (if it's the narrative container)
             const closingTagIndex = htmlLog.lastIndexOf('</div>');
             if (closingTagIndex !== -1) {
                 htmlLog = htmlLog.substring(0, closingTagIndex) + content + '</div>';
             } else {
-                htmlLog += content; // Fallback
+                htmlLog += content; // Fallback, though ideally should not happen if phase div is managed correctly
             }
         } else {
             htmlLog += content;
@@ -132,65 +142,85 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
     structuredLogEvents.forEach(event => {
         if (!event || !event.type) return;
 
-        let eventHtml = event.html_content; // Removed fallback to generic <p>
-        let turnNumberHtml = (event.turnNumber !== undefined && event.type !== 'turn_marker') ? `<div class="log-turn-number">Turn ${event.turnNumber + 1}</div>` : '';
+        // Handle turn grouping
+        if (event.type === 'turn_marker') {
+            if (currentTurnDivOpen) {
+                closeCurrentTurnDiv();
+            }
+            currentTurn = event.turn; // Update current turn number
+            htmlLog += `<div class="turn-group"><h3 class="turn-header">Turn ${event.turn + 1}</h3>`;
+            currentTurnDivOpen = true;
+            return; // Turn marker itself doesn't need further processing here
+        }
 
+        // Handle phase transitions
         if (event.type === 'phase_header_event') {
-            if (isPhaseDivOpen) htmlLog += `</div>`; // Close previous phase
+            closeCurrentTurnDiv(); // Close any open turn group before a phase header
+            if (currentPhaseDivOpen) {
+                htmlLog += `</div>`; // Close previous phase div
+            }
             const phaseHeaderHtml = event.html_content.replace('{phaseKey}', event.phaseKey || 'unknown');
-            htmlLog += phaseHeaderHtml;
-            isPhaseDivOpen = true;
-        } else {
-            // All events should now have html_content generated at their source.
-            // If an event type does not, it's a bug that needs to be addressed at the source.
-            // This ensures no 'Unknown event.' ever appears.
-            if (!eventHtml) {
-                console.warn(`Event of type '${event.type}' is missing html_content. Event:`, event);
-                return; // Skip rendering this event if no content
-            }
+            htmlLog += `<div class="phase-group" data-phase-key="${event.phaseKey || 'unknown'}">${phaseHeaderHtml}`; // Open new phase div with data attribute
+            currentPhaseDivOpen = true;
+            return; // Phase header itself doesn't need further processing here
+        }
 
-            switch (event.type) {
-                case 'turn_marker':
-                    // Turn marker already handled by currentTurnNumber above, but if it has html_content, use it.
-                    // This event type primarily serves to provide the turn number context.
-                    if (event.html_content) { appendToLog(event.html_content); }
-                    break;
-                case 'move_action_event':
-                case 'collateral_damage_event':
-                case 'environmental_impact_event':
-                case 'environmental_summary_event':
-                case 'dialogue_event':
-                case 'internal_thought_event':
-                case 'stun_event':
-                case 'energy_recovery_event':
-                case 'manipulation_narration_event':
-                case 'action_failure_event':
-                case 'escalation_change_event':
-                case 'curbstomp_event':
-                case 'final_blow_event':
-                case 'stalemate_result_event':
-                case 'conclusion_event':
-                case 'status_change_event': // Added this to explicitly handle general status changes
-                    appendToLog(turnNumberHtml + eventHtml);
-                    break;
-                case 'dice_roll':
-                    // Dice rolls will be handled separately. For now, ensure they don't appear as "Unknown Event"
-                    // They should still appear in the raw log, but not necessarily in the main narrative flow.
-                    // For now, I'm modifying the existing dice roll output to be more distinct.
-                    appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${characters[event.actorId]?.name || event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong>${event.moveName ? ` (for ${event.moveName})` : ''}</div>`);
-                    break;
-                default:
-                    // This 'default' should ideally never be hit if all event types are handled.
-                    // If it is, it indicates a new, unhandled event type.
-                    console.warn(`Unhandled event type in transformEventsToHtmlLog (no explicit case): ${event.type}`, event);
-                    appendToLog(turnNumberHtml + eventHtml); // Fallback to ensure it's still displayed
-                    break;
-            }
+        let eventHtml = event.html_content; 
+
+        // All events should now have html_content generated at their source.
+        // If an event type does not, it's a bug that needs to be addressed at the source.
+        // This ensures no 'Unknown event.' ever appears.
+        if (!eventHtml) {
+            console.warn(`Event of type '${event.type}' is missing html_content. Event:`, event);
+            return; // Skip rendering this event if no content
+        }
+
+        // Append other events to the current turn/phase group
+        // Ensure a turn group is open if not a phase header and not explicitly a turn marker
+        if (!currentTurnDivOpen && event.type !== 'phase_header_event') {
+             // This implies an event occurred before the first turn marker, or a phase changed without a new turn marker
+             // For robustness, open a default turn group or append directly to the current phase
+             // For this context, it will likely mean appending into an existing phase div
+             // If there's no phase div either, it will just append to htmlLog.
+             // This is a safety net; ideally, all events are within a turn or phase.
+            htmlLog += `<div class="turn-group"><h3 class="turn-header">Turn ${event.turn + 1} (Unmarked)</h3>`; // Fallback for events outside explicit turn markers
+            currentTurnDivOpen = true;
+        }
+
+        switch (event.type) {
+            case 'move_action_event':
+            case 'collateral_damage_event':
+            case 'environmental_impact_event':
+            case 'environmental_summary_event':
+            case 'dialogue_event':
+            case 'internal_thought_event':
+            case 'stun_event':
+            case 'energy_recovery_event':
+            case 'manipulation_narration_event':
+            case 'action_failure_event':
+            case 'escalation_change_event':
+            case 'curbstomp_event':
+            case 'final_blow_event':
+            case 'stalemate_result_event':
+            case 'conclusion_event':
+            case 'status_change_event': 
+            case 'environmental_final_summary_event': // New event type
+                appendToLog(eventHtml);
+                break;
+            case 'dice_roll':
+                appendToLog(`<div class="log-roll">🎲 [${event.rollType}] ${event.actorId ? `(${characters[event.actorId]?.name || event.actorId}) ` : ''}rolled ${event.result.toFixed(2)} ${event.threshold ? `vs ${event.threshold.toFixed(2)}` : ''} → <strong>${event.outcome}</strong>${event.moveName ? ` (for ${event.moveName})` : ''}</div>`);
+                break;
+            default:
+                console.warn(`Unhandled event type in transformEventsToHtmlLog (no explicit case): ${event.type}`, event);
+                appendToLog(eventHtml); // Fallback to ensure it's still displayed
+                break;
         }
     });
 
-    if (isPhaseDivOpen) {
-        htmlLog += `</div>`; // Ensure the last phase div is always closed
+    // Close any remaining open divs
+    closeCurrentTurnDiv();
+    if (currentPhaseDivOpen) {
+        htmlLog += `</div>`; // Close the last phase div
     }
 
     return htmlLog || "<p>The battle unfolds...</p>";

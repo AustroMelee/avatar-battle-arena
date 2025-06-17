@@ -44,6 +44,15 @@ export const aangArchetypeData = {
             'boiling-rock': [{ type: 'spoken', line: "So many ways to move around here! Let's get to it!" }, { type: 'internal', line: "This is a Fire Nation prison... I should be careful, but I can use its own structure against them." }],
             'great-divide': [{ type: 'spoken', line: "The air currents here are incredible! So many ways to move!" }, { type: 'internal', line: "Such an open space. I can use the wind to my full advantage without harming anything." }] // NEW for Great Divide
         },
+        turnStart: { // NEW: General turn start quotes
+            Generic: [
+                { type: 'internal', line: "Okay, what's next?" },
+                { type: 'spoken', line: "Here we go again!" }
+            ],
+            Poking: [{ type: 'internal', line: "Another turn to keep things light." }],
+            Mid: [{ type: 'internal', line: "Time to make my move count." }],
+            Late: [{ type: 'internal', line: "I need to end this soon, for everyone's sake." }]
+        },
         phaseTransition: { // NEW: Top-level property for phase transition quotes
             Poking: [ // Quote when transitioning TO Poking phase (from PreBanter)
                 { type: 'spoken', line: "Okay, looks like we're past introductions. Let's keep it light, though!" },
@@ -70,6 +79,42 @@ export const aangArchetypeData = {
         onManipulation: {
             asVictim: { Generic: [{ type: 'internal', line: "{opponent.p} words are... heavy. But I can't let them stop me." }] },
         },
+        onManipulationSuccess: { // NEW: When Aang successfully manipulates
+            Generic: [
+                { type: 'spoken', line: "See? There's always a way around!" },
+                { type: 'internal', line: "A gentle nudge can be more powerful than a punch." }
+            ]
+        },
+        onManipulationFailure: { // NEW: When Aang fails to manipulate
+            Generic: [
+                { type: 'spoken', line: "Oh, that didn't quite work. Uh oh." },
+                { type: 'internal', line: "They're not listening. I need another approach." }
+            ]
+        },
+        onCriticalHitLanded: { // NEW: When Aang lands a critical hit
+            Generic: [
+                { type: 'spoken', line: "Oops! Too much air!" },
+                { type: 'internal', line: "Whoa, that was a big one! Hope they're okay." }
+            ]
+        },
+        onCriticalHitReceived: { // NEW: When Aang receives a critical hit
+            Generic: [
+                { type: 'spoken', line: "Yikes! That stung!" },
+                { type: 'internal', line: "That hit me harder than I expected. Gotta be faster." }
+            ]
+        },
+        onWeakHitLanded: { // NEW: When Aang lands a weak hit
+            Generic: [
+                { type: 'spoken', line: "Hmm, didn't have much oomph." },
+                { type: 'internal', line: "That's not gonna cut it. Need to find a better angle." }
+            ]
+        },
+        onWeakHitReceived: { // NEW: When Aang receives a weak hit
+            Generic: [
+                { type: 'spoken', line: "Ha! Is that all you've got?" },
+                { type: 'internal', line: "Just a breeze. Nothing I can't handle." }
+            ]
+        },
         onPrediction: {
             correct: { Generic: [{ type: 'internal', line: "I felt the shift in the air. I knew that was coming." }] },
             wrong: { Generic: [{ type: 'internal', line: "Whoa, that was fast. Gotta be quicker." }] }
@@ -78,6 +123,18 @@ export const aangArchetypeData = {
             stressed: { Mid: [{ type: 'internal', line: "This is getting too violent. I have to end it without anyone getting seriously hurt." }] },
             shaken: { Late: [{ type: 'spoken', line: "Please, stop! This isn't the way!" }] },
             broken: { Late: [{ type: 'internal', line: "Everyone... Gyatso... I'm sorry..." }] }
+        },
+        onMomentumGain: { // NEW: When Aang gains momentum
+            Generic: [
+                { type: 'internal', line: "Alright, feeling good! Time to keep the flow going!" },
+                { type: 'spoken', line: "Yes! The wind is with me!" }
+            ]
+        },
+        onMomentumLoss: { // NEW: When Aang loses momentum
+            Generic: [
+                { type: 'internal', line: "Oh no, I'm losing my rhythm. Gotta get back in sync." },
+                { type: 'spoken', line: "Aw, nuts!" }
+            ]
         },
         onCollateral: {
             causingDamage: { Generic: [{ type: 'internal', line: "No! I have to be careful not to hurt anything else." }, { type: 'spoken', line: "Watch out! We don't have to destroy everything!" }] },
