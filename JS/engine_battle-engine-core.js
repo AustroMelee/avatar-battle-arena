@@ -222,6 +222,7 @@ const result = calculateMove(
     currentAttacker.aiLog,
     currentBattleState.environmentState,
     locId,
+    null,
     currentBattleState
 );
 
