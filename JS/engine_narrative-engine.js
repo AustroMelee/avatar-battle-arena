@@ -15,7 +15,7 @@ import { ESCALATION_STATES } from './engine_escalation.js';
 import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { NarrativeStringBuilder } from './utils_narrative-string-builder.js';
 import { locations } from './locations.js';
-import { generateLogEvent } from './engine_battle-engine-core.js';
+import { generateLogEvent } from './utils_log_event.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
 
