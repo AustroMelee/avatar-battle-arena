@@ -848,6 +848,11 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         // --- AI Action Selection ---
         const aiDecision = selectMove(currentAttacker, currentDefender, currentBattleState.locationConditions, currentBattleState.turn, currentBattleState.currentPhase); // Use currentBattleState.locationConditions
         const move = aiDecision.move;
+
+        // DIAGNOSTIC: Log the selected move and AI decision details
+        console.log(`[DEBUG] Turn ${turn + 1} - ${currentAttacker.name} selected move:`, move);
+        console.log(`[DEBUG] Turn ${turn + 1} - AI Decision:`, aiDecision);
+
         if (!move) {
             currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
             // Potentially add a "hesitation" narrative event here
@@ -857,6 +862,9 @@ export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = fal
         // --- Move Execution & Resolution ---
         const result = calculateMove(move, currentAttacker, currentDefender, currentBattleState.locationConditions, battleEventLog, environmentState, locId, modifyMomentum); // Use currentBattleState.locationConditions
         
+        // DIAGNOSTIC: Log the result of the move calculation
+        console.log(`[DEBUG] Turn ${turn + 1} - ${currentAttacker.name} move result:`, result);
+
         // Generate narration for the entire action
         const turnNarrationObjects = generateTurnNarrationObjects(
             narrativeEventsForAction,
