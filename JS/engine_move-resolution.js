@@ -110,6 +110,8 @@ export function calculateMove(move, attacker, defender, conditions, battleEventL
     const critRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
     const isCritical = critRoll < critChance;
 
+    console.log("Debugging battleState in calculateMove:", battleState);
+
     battleEventLog.push(generateLogEvent(battleState, {
         type: "dice_roll",
         rollType: "critChance",
