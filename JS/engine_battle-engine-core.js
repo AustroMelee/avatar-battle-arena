@@ -184,7 +184,7 @@ currentDefender.currentTurn = turn;
  const move = aiDecision.move;
  
  if (!move) {
-     currentAttacker.aiLog.push("[Action Failed]: AI failed to select a valid move.");
+     currentAttacker.aiLog.push("[Action Failed]: AI selected an undefined move.");
      [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
      turn++;
      continue;

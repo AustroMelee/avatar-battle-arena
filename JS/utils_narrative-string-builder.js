@@ -203,12 +203,9 @@ export class NarrativeStringBuilder {
                 console.log("[NarrativeBuilder] Selected Variant:", selectedVariant);
             }
         } else if (this.move) {
-            // This fallback block is technically redundant if _getFilteredVariants handles ultimate fallback correctly,
-            // but it's kept for robustness in case _getFilteredVariants returns an empty array for some edge case.
-            const selectedVariantText = getRandomElementSeeded(this.move.actionVariants.map(v => v.text || v));
-            baseActionText = this._replacePlaceholders(selectedVariantText);
+            baseActionText = `The ${this.move.name} unfolds.`;
             if (this.debugMode) {
-                console.log("[NarrativeBuilder] Fallback to move name or generic variant.", selectedVariantText);
+                console.log("[NarrativeBuilder] Fallback to move name as no suitable variants were found.");
             }
         } else {
             baseActionText = "An unknown action unfolds.";
