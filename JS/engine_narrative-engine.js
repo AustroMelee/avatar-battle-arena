@@ -5,7 +5,7 @@
 // - Removed all unnecessary character archetype imports and map entries.
 
 import { conjugatePresent, getEmojiForMoveType, postBattleVictoryPhrases, consumedStateNarratives } from './narrative-flavor.js';
-import { effectivenessLevels } from './move-interaction-matrix.js';
+import { effectivenessLevels } from './data_narrative_effectiveness.js';
 import { escalationStateNarratives } from './data_narrative_escalation.js';
 import { phaseTemplates, battlePhases } from './data_narrative_phases.js';
 
@@ -23,7 +23,7 @@ import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
 import { aangArchetypeData } from './data_archetype_aang.js';
 import { azulaArchetypeData } from './data_archetype_azula.js';
 
-import { allArchetypes } from './data_archetypes_index.js'; // Import all archetypes
+import { allArchetypes, archetypeDataMap } from './data_archetypes_index.js'; // Import all archetypes
 
 const archetypeDataMap = {
     'aang-airbending-only': aangArchetypeData,
@@ -222,7 +222,7 @@ export function generateCollateralDamageEvent(move, actor, opponent, environment
 
 export function generateEscalationNarrative(fighter, oldState, newState, battleState) {
     if (!fighter || !newState || oldState === newState) return null;
-    const flavorText = getRandomElement(escalationStateNarratives[newState] || [`{actorName}'s condition worsens.`]);
+    const flavorText = getRandomElementSeeded(escalationStateNarratives[newState] || [`{actorName}'s condition worsens.`]);
     const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
     const templateKey = newState.toLowerCase().replace(/ /g, '_');
     const htmlTemplate = phaseTemplates.escalationStateChangeTemplates[templateKey] || phaseTemplates.escalationStateChangeTemplates.general;
@@ -257,7 +257,7 @@ export function getFinalVictoryLine(winner, loser) {
     const winnerStyle = winner.victoryStyle || 'default';
     const phraseCategory = (winner.hp > 75) ? 'dominant' : 'narrow';
     const phraseTemplate = (postBattleVictoryPhrases[winnerStyle] && postBattleVictoryPhrases[winnerStyle][phraseCategory]) || postBattleVictoryPhrases.default[phraseCategory];
-    return substituteTokens(getRandomElement(phraseTemplate), winner, loser, { WinnerName: winner.name, LoserName: loser.name, WinnerPronounP: winner.pronouns.p });
+    return substituteTokens(getRandomElementSeeded(phraseTemplate), winner, loser, { WinnerName: winner.name, LoserName: loser.name, WinnerPronounP: winner.pronouns.p });
 }
 
 export function generateCurbstompNarration(rule, attacker, target, isEscape = false, battleState) {
