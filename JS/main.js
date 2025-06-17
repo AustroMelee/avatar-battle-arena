@@ -58,6 +58,8 @@ function init() {
             setTimeout(() => {
                 try {
                     const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
+                    // Pass location ID to the result display
+                    battleResult.locationId = locId;
                     showResultsState(battleResult, currentSimMode);
                 } catch (error) {
                      console.error("An error occurred during battle simulation:", error);

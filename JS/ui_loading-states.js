@@ -95,7 +95,7 @@ export function showResultsState(battleResult, simulationMode) {
             DOM_ELEMENTS.winProbability.textContent = `Outcome details below.`;
         }
 
-        const locationId = document.getElementById('location-value')?.value;
+        const locationId = result.locationId || document.getElementById('location-value')?.value;
         if (locationId) {
             displayFinalAnalysis(result.finalState, result.winnerId, result.isDraw, result.environmentState, locationId);
         } else {
