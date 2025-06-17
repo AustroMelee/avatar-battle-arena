@@ -238,6 +238,14 @@ export function transformEventsToHtmlLog(structuredLogEvents) {
             } else {
                 htmlLog += htmlContentForEvent; // Add directly if not in a phase
             }
+        } else if (event.type === 'move_action_event') { // NEW: Handle move_action_event specifically
+            console.log("[DEBUG] move_action_event processed:", event); // DIAGNOSTIC: Log the move_action_event
+            if (isPhaseDivOpen) {
+                htmlLog = htmlLog.slice(0, -6); // Remove closing </div>
+                htmlLog += event.html_content + `</div>`; // Add move content and re-close
+            } else {
+                htmlLog += event.html_content;
+            }
         } else if (textContent) {
             // Fallback for events that might only have `text` and not pre-formatted `html_content`
             let contentToAppend = "";
