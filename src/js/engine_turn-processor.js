@@ -156,7 +156,7 @@ const MIN_ENERGY_REGEN = 0;
  * @since 2.0.0
  * @public
  */
-export async function processTurn(battleState, options = {}) {
+async function processTurn(battleState, options = {}) {
     // Input validation
     if (!battleState || typeof battleState !== 'object') {
         throw new TypeError('processTurn: battleState must be a valid battle state object');
@@ -250,7 +250,6 @@ export async function processTurn(battleState, options = {}) {
         /** @type {BattleEvent} */
         const errorEvent = {
             type: 'TURN_ERROR',
-            turn: turnNumber,
             data: {
                 error: error.message,
                 turnNumber,
@@ -313,7 +312,7 @@ function validateTurnInput(battleState, options) {
     } catch (error) {
         throw new Error(`validateTurnInput: Invalid battle state - ${error.message}`);
     }
-
+    
     // Validate options
     if (typeof options.turnNumber !== 'undefined') {
         if (typeof options.turnNumber !== 'number' || options.turnNumber < 1) {
@@ -330,7 +329,7 @@ function validateTurnInput(battleState, options) {
         typeof options.enableDebugLogging !== 'boolean') {
         throw new TypeError('validateTurnInput: enableDebugLogging must be a boolean');
     }
-
+    
     if (typeof options.skipAI !== 'undefined' && 
         typeof options.skipAI !== 'boolean') {
         throw new TypeError('validateTurnInput: skipAI must be a boolean');
@@ -413,7 +412,7 @@ async function processTurnWithTimeout(battleState, options, signal) {
     // Pre-turn processing
     /** @type {BattleState} */
     let currentState = await processPreTurnEffects(battleState, activeFighter, options);
-
+    
     // Check abort signal
     if (signal.aborted) {
         throw new Error('Turn processing was aborted');
@@ -464,7 +463,7 @@ function determineActiveFighter(battleState, options) {
     const fighter1 = battleState.fighter1;
     /** @type {Fighter} */
     const fighter2 = battleState.fighter2;
-
+    
     /** @type {number} */
     const fighter1Speed = (fighter1.stats?.speed || fighter1.speed || 100) + (fighter1.speedBonus || 0);
     /** @type {number} */
@@ -507,7 +506,7 @@ async function processPreTurnEffects(battleState, activeFighter, options) {
 
     // Process status effects
     currentState = await processStatusEffects(currentState, activeFighter, 'pre-turn', options);
-
+    
     // Process environmental effects
     currentState = await processEnvironmentalEffects(currentState, activeFighter, 'pre-turn', options);
 
@@ -598,7 +597,7 @@ async function executeAction(decision, context) {
     // Find the selected move
     /** @type {Move | undefined} */
     const selectedMove = context.actor.moves?.find(move => move.id === decision.moveId);
-
+    
     if (!selectedMove) {
         throw new Error(`executeAction: Move '${decision.moveId}' not found for fighter ${context.actor.id}`);
     }
@@ -659,7 +658,7 @@ async function executeBasicAction(battleState, activeFighter, targetFighter, opt
     // Select first available move or default action
     /** @type {Move | null} */
     const basicMove = activeFighter.moves?.[0] || null;
-
+    
     if (!basicMove) {
         // Create a basic "struggle" move
         /** @type {Move} */
@@ -732,7 +731,7 @@ async function executeBasicAction(battleState, activeFighter, targetFighter, opt
 function applyMoveResult(battleState, moveResult, context) {
     /** @type {BattleState} */
     const updatedState = { ...battleState };
-
+    
     // Add move events to battle log
     if (moveResult.events && moveResult.events.length > 0) {
         updatedState.events = [...updatedState.events, ...moveResult.events];
@@ -746,7 +745,7 @@ function applyMoveResult(battleState, moveResult, context) {
             updatedState.fighter2.energy = Math.max(0, (updatedState.fighter2.energy || 100) - moveResult.energyCost);
         }
     }
-
+    
     // Apply status effects
     if (moveResult.effects && moveResult.effects.length > 0) {
         updatedState = applyStatusEffectsFromMove(updatedState, moveResult.effects, context);
@@ -816,10 +815,10 @@ async function processPostTurnEffects(battleState, activeFighter, options) {
 
     // Process status effects
     currentState = await processStatusEffects(currentState, activeFighter, 'post-turn', options);
-
+    
     // Process environmental effects
     currentState = await processEnvironmentalEffects(currentState, activeFighter, 'post-turn', options);
-
+    
     // Update momentum and escalation
     currentState = updateMomentumAndEscalation(currentState, activeFighter, options);
 
@@ -855,8 +854,9 @@ async function processStatusEffects(battleState, fighter, timing, options) {
         // Apply effect based on timing
         if (effect.timing === timing || !effect.timing) {
             currentState = await applyStatusEffectTick(currentState, fighter, effect, options);
-            
-            // Decrement duration
+        }
+         
+        // Decrement duration
             if (effect.duration) {
                 effect.duration--;
                 
@@ -865,7 +865,6 @@ async function processStatusEffects(battleState, fighter, timing, options) {
                     fighter.statusEffects.splice(i, 1);
                 }
             }
-        }
     }
 
     return currentState;
@@ -983,7 +982,7 @@ function updateMomentumAndEscalation(battleState, fighter, options) {
     const momentumChange = calculateMomentumChange(battleState, fighter);
     
     fighter.momentum = Math.max(-10, Math.min(10, (fighter.momentum || 0) + momentumChange));
-
+    
     // Update escalation based on battle progress
     /** @type {string} */
     const newEscalationState = calculateEscalationState(battleState, fighter);
@@ -1021,7 +1020,7 @@ function calculateMomentumChange(battleState, fighter) {
             momentumChange -= 1;
         }
     }
-
+    
     return Math.max(-2, Math.min(2, momentumChange));
 }
 
@@ -1146,4 +1145,6 @@ async function applyEnvironmentalEffect(battleState, fighter, effect, options) {
 // EXPORTS
 // ============================================================================
 
-export { processTurn };
+export {
+    processTurn
+};
