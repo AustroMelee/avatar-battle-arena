@@ -20,6 +20,7 @@
  * @typedef {import('./types.js').PhaseState} PhaseState
  * @typedef {import('./types.js').MentalState} MentalState
  * @typedef {import('./types.js').FighterStats} FighterStats
+ * @typedef {import('./types.js').BattleEngineOptions} BattleEngineOptions
  */
 
 /**
@@ -36,10 +37,9 @@
 // ============================================================================
 
 import { processTurn } from './engine_turn-processor.js';
-import { initializeBattleState, initializeFighter } from './engine_state_initializer.js';
-import { characters } from './data_characters.js';
+import { initializeBattleState, initializeFighterState } from './engine_state_initializer.js';
+import { getCharacterTemplate } from './data_characters.js';
 import { locations } from './locations.js';
-import { engineLogger } from './battle_logging/index.js';
 
 // ============================================================================
 // CONSTANTS
@@ -81,7 +81,7 @@ const TERMINAL_INCAPACITATION_THRESHOLD = 100;
  * @since 2.0.0
  * @public
  */
-export async function executeBattle(fighter1Id, fighter2Id, locationId, options = {}) {
+async function executeBattle(fighter1Id, fighter2Id, locationId, options = {}) {
     // Input validation
     if (typeof fighter1Id !== 'string') {
         throw new TypeError('executeBattle: fighter1Id must be a string');
@@ -115,7 +115,7 @@ export async function executeBattle(fighter1Id, fighter2Id, locationId, options 
 
         // Initialize battle state
         /** @type {BattleState} */
-        const initialState = await initializeBattleState(fighter1Id, fighter2Id, locationId, options);
+        const initialState = await initializeBattleState(fighter1Id, fighter2Id, locationId, 'day', true);
 
         // Execute battle turns
         /** @type {BattleResult} */
@@ -156,16 +156,16 @@ export async function executeBattle(fighter1Id, fighter2Id, locationId, options 
  */
 function validateBattleParameters(fighter1Id, fighter2Id, locationId) {
     // Check fighter existence
-    if (!characters[fighter1Id]) {
+    if (!getCharacterTemplate(fighter1Id)) {
         throw new Error(`executeBattle: Fighter '${fighter1Id}' not found in character database`);
     }
     
-    if (!characters[fighter2Id]) {
+    if (!getCharacterTemplate(fighter2Id)) {
         throw new Error(`executeBattle: Fighter '${fighter2Id}' not found in character database`);
     }
     
     // Check location existence
-    if (!locations[locationId]) {
+    if (!/** @type {Object<string, any>} */(locations)[locationId]) {
         throw new Error(`executeBattle: Location '${locationId}' not found in location database`);
     }
     
@@ -193,7 +193,7 @@ async function runBattleLoop(initialState, options) {
     let currentState = { ...initialState };
     
     /** @type {number} */
-    const maxTurns = options.maxTurns || DEFAULT_MAX_TURNS;
+    const maxTurns = (/** @type {BattleEngineOptions} */ (options)).maxTurns || DEFAULT_MAX_TURNS;
     
     /** @type {BattleEvent[]} */
     const battleLog = [];
@@ -203,16 +203,16 @@ async function runBattleLoop(initialState, options) {
     // Main battle loop
     for (let turnNumber = 1; turnNumber <= maxTurns; turnNumber++) {
         try {
-            if (options.enableDebugLogging) {
+            if ((/** @type {BattleEngineOptions} */ (options)).enableDebugLogging) {
                 console.debug(`[Battle Engine] Processing turn ${turnNumber}`);
             }
 
             // Process the turn
-            /** @type {BattleState} */
+            /** @type {BattleState & {events: BattleEvent[]}} */
             const turnResult = await processTurn(currentState, {
                 turnNumber,
-                enableNarrative: options.enableNarrative !== false,
-                enableDebugLogging: options.enableDebugLogging || false
+                enableNarrative: (/** @type {BattleEngineOptions} */ (options)).enableNarrative !== false,
+                enableDebugLogging: (/** @type {BattleEngineOptions} */ (options)).enableDebugLogging || false
             });
 
             // Add turn events to battle log
@@ -247,13 +247,13 @@ async function runBattleLoop(initialState, options) {
                 type: 'ERROR',
                 turn: turnNumber,
                 data: {
-                    message: error.message,
-                    stack: error.stack
+                    message: /** @type {Error} */ (error).message,
+                    stack: /** @type {Error} */ (error).stack
                 },
                 timestamp: new Date().toISOString()
             });
             
-            throw new Error(`Battle loop failed on turn ${turnNumber}: ${error.message}`);
+            throw new Error(`Battle loop failed on turn ${turnNumber}: ${/** @type {Error} */ (error).message}`);
         }
     }
 
@@ -435,7 +435,7 @@ function createBattleResult(finalState, winnerId, turnCount, battleLog, isDraw) 
  * @since 2.0.0
  * @public
  */
-export function calculateBattleStatistics(battleResult) {
+function calculateBattleStatistics(battleResult) {
     // Input validation
     if (!battleResult || typeof battleResult !== 'object') {
         throw new TypeError('calculateBattleStatistics: battleResult must be an object');

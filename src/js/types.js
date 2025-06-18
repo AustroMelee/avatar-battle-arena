@@ -148,13 +148,15 @@
 /**
  * @typedef {Object} BattleResult
  * @description Complete battle result
- * @property {BattleEvent[]} log - Complete battle event log
- * @property {string} [winnerId] - Winner fighter ID
- * @property {string} [loserId] - Loser fighter ID
+ * @property {string | null} winnerId - Winner fighter ID
+ * @property {string | null} loserId - Loser fighter ID
  * @property {boolean} isDraw - Whether battle was a draw
- * @property {Object} finalState - Final state of all fighters
- * @property {EnvironmentState} environmentState - Final environment state
- * @property {string[]} phaseSummary - Phase summary log
+ * @property {number} turnCount - Total turns in the battle
+ * @property {BattleState} finalState - Final state of the battle
+ * @property {BattleEvent[]} log - Complete battle event log
+ * @property {string} locationId - The ID of the location where the battle took place
+ * @property {string} timestamp - ISO 8601 timestamp of battle completion
+ * @property {Object} metadata - Additional metadata about the battle
  */
 
 /**
@@ -169,6 +171,7 @@
  * @property {Object<string, any>} [data] - Event-specific data
  * @property {number} timestamp - Event timestamp
  * @property {string} [category] - Event category for filtering
+ * @property {Object<string, any>} [context] - Transition context data
  */
 
 // ============================================================================
@@ -548,6 +551,15 @@
 /**
  * @typedef {function(any[], Object): ValidationResult} ValidatorFunction
  * @description Function signature for validation functions
+ */
+
+/**
+ * @typedef {Object} BattleEngineOptions
+ * @description Configuration options for battle engine
+ * @property {number} [maxTurns=50] - Maximum number of turns before draw
+ * @property {boolean} [enableNarrative=true] - Enable narrative generation
+ * @property {boolean} [enableDebugLogging=false] - Enable debug logging
+ * @property {string} [seed] - Random seed for deterministic battles
  */
 
 // ============================================================================

@@ -20,6 +20,46 @@ Each entry includes:
 
 ## Version History
 
+### Version 2.0.1 - Post-Restructuring Syntax & Pathing Fixes
+**Date:** June 18, 2025
+**Status:** 🔄 IN PROGRESS
+**Priority:** Critical
+
+#### 🐛 **Issue Summary**
+**Problem:** Following a major project restructuring (v2.0.0), the application failed to load due to multiple `SyntaxError` and pathing issues. The browser console reported duplicate exports and failed to locate critical JavaScript files.
+
+**User Impact:**
+- 🚨 **Application Not Loading**: The battle arena was completely inaccessible.
+-  console errors indicated a critical failure in the JavaScript module system.
+
+#### 🔍 **Root Cause Analysis**
+**Primary Issue:** The file migration to a `src/` directory was incomplete. While files were moved, references to them across the codebase were not updated, and several syntax errors were introduced.
+
+**Technical Details:**
+1.  **Duplicate Exports**: `engine_battle-engine-core.js` had functions exported both inline and in a separate export block, causing a `SyntaxError`.
+2.  **Incorrect `index.html` Paths**: The main HTML file was still referencing assets and scripts from the old `js/`, `css/`, and `img/` directories instead of the new `src/` structure.
+3.  **Outdated `jsconfig.json`**: The `jsconfig.json` file, critical for module resolution, had not been updated to reflect the new `src/` directory, causing linter and IDE errors.
+4.  **Incorrect Function Calls**: Linter errors revealed that some functions were being called with incorrect names or an incorrect number of arguments.
+
+#### 🛠️ **Technical Fix Applied**
+**Files Modified:**
+- `src/js/engine_battle-engine-core.js`
+- `index.html`
+- `jsconfig.json`
+- `src/js/types.js`
+
+**Fixes Implemented:**
+- **Resolved Duplicate Exports**: Removed inline `export` statements from `engine_battle-engine-core.js` to fix the `SyntaxError`.
+- **Updated `index.html`**: Corrected all `src` and `href` attributes to point to the new `src/` directory structure. This included the import map, stylesheet, and all image assets.
+- **Updated `jsconfig.json`**: Modified the `baseUrl`, `paths`, and `include` properties to correctly align with the new `src/` directory.
+- **Corrected Function Calls & Types**: Fixed incorrect function names and argument counts, and updated type definitions in `src/js/types.js` to ensure consistency.
+
+#### ✅ **Testing Verification**
+**Status:** ⏳ PENDING USER VALIDATION
+- **Visual Confirmation**: Pending - User to confirm application loads without console errors.
+- **Functionality Check**: Pending - User to confirm battle simulation is fully operational.
+- **IDE & Linter**: The linter no longer reports errors, and IDE features like code completion work as expected.
+
 ### Version 2.0.0 - Project Restructuring & Documentation Overhaul
 **Date:** June 18, 2025  
 **Status:** ✅ RESOLVED  
