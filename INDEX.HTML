@@ -331,8 +331,9 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
     window.ATLA_DEBUG.performance.start('main-module-load');
     
     try {
-        // Import main module (it doesn't export a default, it just runs)
-        await import('./js/main.js');
+        // Import main module with cache busting
+        const timestamp = Date.now();
+        await import(`./js/main.js?v=${timestamp}`);
         window.ATLA_DEBUG.trackModule('main', 'loaded');
         window.ATLA_DEBUG.performance.end('main-module-load');
         window.ATLA_DEBUG.log('MAIN', 'Application loaded successfully');
