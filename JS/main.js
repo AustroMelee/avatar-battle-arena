@@ -7,7 +7,6 @@
 'use strict';
 
 console.log('[MAIN] Avatar Battle Arena - Application loaded successfully');
-console.log('[MAIN] Module imports starting...');
 
 import { simulateBattle } from './engine_battle-engine-core.js';
 import { 
@@ -39,8 +38,6 @@ function handleModeSelectionChange(event) {
 }
 
 function init() {
-    console.log('[MAIN] 🚀 Initializing Avatar Battle Arena...');
-    
     // Initialize centralized state management
     resetGameState();
     
@@ -80,14 +77,10 @@ function init() {
 
     // Get battle button after DOM is loaded
     const battleBtn = document.getElementById('battleBtn');
-    console.log('[MAIN] 🔍 Looking for battle button...');
-    console.log('[MAIN] Battle button element:', battleBtn);
-    console.log('[MAIN] Battle button found:', !!battleBtn);
     
     if (battleBtn) {
-        console.log('[MAIN] ✅ Attaching click listener to battle button');
         battleBtn.addEventListener('click', () => {
-            console.log('[MAIN] ⚔️ FIGHT button clicked! Battle simulation initiated');
+            console.log('[MAIN] Battle simulation initiated');
             const f1Id = 'aang-airbending-only';
             const f2Id = 'azula';
             const locId = 'fire-nation-capital';
@@ -164,16 +157,9 @@ if (typeof window !== 'undefined') {
 
 // Kick off app initialization on DOMContentLoaded
 // Initialize when DOM is ready
-console.log('[MAIN] Setting up DOMContentLoaded listener...');
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('[MAIN] DOMContentLoaded event fired!');
-    init();
-});
+document.addEventListener('DOMContentLoaded', init);
 
 // Also check if DOM is already loaded (in case we missed the event)
-if (document.readyState === 'loading') {
-    console.log('[MAIN] DOM is still loading, waiting for DOMContentLoaded...');
-} else {
-    console.log('[MAIN] DOM is already ready, initializing immediately...');
+if (document.readyState !== 'loading') {
     init();
 }
