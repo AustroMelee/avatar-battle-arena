@@ -73,8 +73,12 @@ function init() {
         defaultModeRadio.checked = true;
     }
 
+    console.log('[MAIN] Looking for battle button with ID "battleBtn"...');
+    console.log('[MAIN] battleBtn element:', battleBtn);
+    console.log('[MAIN] battleBtn exists:', !!battleBtn);
+    
     if (battleBtn) {
-        console.log('[MAIN] Battle button found, adding click listener');
+        console.log('[MAIN] ✅ Battle button found, adding click listener');
         battleBtn.addEventListener('click', () => {
             console.log('[MAIN] ⚔️ FIGHT button clicked! Starting battle...');
             const f1Id = 'aang-airbending-only';
