@@ -325,6 +325,27 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
     🛰️
 </button>
 </div>
+<!-- Emergency Debug Test -->
+<script>
+    console.log('🔧 [TEST] Basic script loading test');
+    
+    // Test if we can find the button immediately
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🔧 [TEST] DOM loaded');
+        const testBtn = document.getElementById('battleBtn');
+        console.log('🔧 [TEST] Button found:', !!testBtn);
+        console.log('🔧 [TEST] Button element:', testBtn);
+        
+        if (testBtn) {
+            console.log('🔧 [TEST] Adding emergency click handler');
+            testBtn.addEventListener('click', () => {
+                console.log('🚨 [TEST] EMERGENCY: Button clicked!');
+                alert('Emergency test: Button is working!');
+            });
+        }
+    });
+</script>
+
 <!-- Main Application Module -->
 <script type="module">
     console.log('🔧 [HTML] Loading main application module...');
@@ -341,7 +362,8 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
         }
     } catch (error) {
         console.error('🚨 [HTML] Failed to load main module:', error);
-        alert('Failed to load the battle arena application. Please refresh the page.');
+        console.error('🚨 [HTML] Error details:', error.message, error.stack);
+        alert('Failed to load the battle arena application. Error: ' + error.message);
     }
 </script>
 </body>
