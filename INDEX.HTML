@@ -355,7 +355,8 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
             try {
                 // Import the battle simulation function
                 const { simulateBattle } = await import('./js/engine_battle-engine-core.js');
-                const { resetGlobalUI, showLoadingState, showResultsState } = await import('./js/ui.js');
+                const { resetGlobalUI } = await import('./js/ui.js');
+                const { showLoadingState, showResultsState } = await import('./js/state_manager.js');
                 
                 // Battle parameters (same as main.js)
                 const f1Id = 'aang-airbending-only';
