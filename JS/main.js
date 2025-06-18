@@ -38,6 +38,8 @@ function handleModeSelectionChange(event) {
 }
 
 function init() {
+    console.log('[MAIN] 🚀 Initializing Avatar Battle Arena...');
+    
     // Initialize centralized state management
     resetGameState();
     
@@ -77,9 +79,12 @@ function init() {
 
     // Get battle button after DOM is loaded
     const battleBtn = document.getElementById('battleBtn');
+    console.log('[MAIN] 🔍 Looking for battle button...');
+    console.log('[MAIN] Battle button element:', battleBtn);
     console.log('[MAIN] Battle button found:', !!battleBtn);
     
     if (battleBtn) {
+        console.log('[MAIN] ✅ Attaching click listener to battle button');
         battleBtn.addEventListener('click', () => {
             console.log('[MAIN] ⚔️ FIGHT button clicked! Battle simulation initiated');
             const f1Id = 'aang-airbending-only';
