@@ -169,3 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[MAIN] DOMContentLoaded event fired!');
     init();
 });
+
+// Also check if DOM is already loaded (in case we missed the event)
+if (document.readyState === 'loading') {
+    console.log('[MAIN] DOM is still loading, waiting for DOMContentLoaded...');
+} else {
+    console.log('[MAIN] DOM is already ready, initializing immediately...');
+    init();
+}
