@@ -304,25 +304,26 @@ function renderSimulationState() {
     
     const simulationContainer = document.getElementById('simulation-mode-container');
     if (simulationContainer) {
-        // Show container for animated mode when running, OR for instant mode when results are available
-        const shouldShow = (ui.mode === 'animated' && simulation.isRunning) || 
+        // Show container for animated mode when running OR when results are available,
+        // AND for instant mode when results are available
+        const shouldShow = (ui.mode === 'animated' && (simulation.isRunning || (ui.resultsVisible && battle.battleLog && battle.battleLog.length > 0))) || 
                           (ui.mode === 'instant' && ui.resultsVisible && battle.battleLog && battle.battleLog.length > 0);
         
         if (shouldShow) {
             simulationContainer.classList.remove('hidden');
             console.log('[STATE] Simulation container shown for mode:', ui.mode);
             
-            // For instant mode, populate the log output with the battle results
-            if (ui.mode === 'instant' && ui.resultsVisible && battle.battleLog) {
+            // For both modes, populate the log output with the battle results when available
+            if (ui.resultsVisible && battle.battleLog && battle.battleLog.length > 0) {
                 const animatedLogOutput = document.getElementById('animated-log-output');
                 if (animatedLogOutput) {
-                    // Transform battle log to HTML for instant display
+                    // Transform battle log to HTML for display
                     import('./log_to_html.js').then(({ transformEventsToHtmlLog }) => {
                         const htmlLog = transformEventsToHtmlLog(battle.battleLog);
                         animatedLogOutput.innerHTML = htmlLog || '<p>No battle log available.</p>';
-                        console.log('[STATE] Instant mode battle log populated in simulation container');
+                        console.log(`[STATE] ${ui.mode} mode battle log populated in simulation container`);
                     }).catch(err => {
-                        console.warn('[STATE] Could not load log_to_html for instant mode:', err);
+                        console.warn(`[STATE] Could not load log_to_html for ${ui.mode} mode:`, err);
                         animatedLogOutput.innerHTML = '<p>Battle completed. Check the results dialog for details.</p>';
                     });
                 }
