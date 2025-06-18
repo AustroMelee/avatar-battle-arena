@@ -18,6 +18,7 @@ import { MIN_ENERGY_FOR_ACTION, ENERGY_RECOVERY_PER_TURN, MAX_ENERGY } from './c
 import { generateTurnNarrationObjects, findNarrativeQuote, generateStatusChangeEvent, generateEnvironmentalSummaryEvent } from './engine_narrative-engine.js';
 import { clamp } from './utils_math.js';
 import { generateLogEvent } from './utils_log_event.js';
+import { safeGet } from './utils_safe_accessor.js';
 
 
 /**
