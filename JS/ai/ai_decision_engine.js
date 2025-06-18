@@ -45,7 +45,7 @@ function createAiLogEntry(actor, defender, turn, currentPhase, intent, chosenMov
 
     return {
         turn: turn + 1,
-        characterName: actor.name,
+        characterName: actor?.name || 'Unknown Actor',
         phase: currentPhase,
         intent: intent,
         intentDescription: getIntentDescription(intent),
@@ -53,14 +53,14 @@ function createAiLogEntry(actor, defender, turn, currentPhase, intent, chosenMov
         finalProb: finalProb,
         temperature: chosenMoveInfo.temperature || 'N/A',
         actorState: {
-            hp: actor.hp,
-            energy: actor.energy,
-            momentum: actor.momentum,
-            mental: actor.mentalState?.level,
-            escalation: actor.escalationState,
-            previousMental: actor._previousMentalState
+            hp: actor?.hp || 0,
+            energy: actor?.energy || 0,
+            momentum: actor?.momentum || 0,
+            mental: actor?.mentalState?.level || 'Normal',
+            escalation: actor?.escalationState || 'Normal',
+            previousMental: actor?._previousMentalState || 'Normal'
         },
-        opponentEscalation: defender.escalationState,
+        opponentEscalation: defender?.escalationState || 'Normal',
         reasons: (chosenMoveInfo.reasons || []).join(', '),
         selectionMethod: chosenMoveInfo.temperature === 0 ? 'deterministic' : 'probabilistic'
     };
