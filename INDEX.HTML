@@ -342,6 +342,20 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
         window.ATLA_DEBUG.log('MAIN', 'Failed to load application', error);
         console.error('Failed to load main module:', error);
     }
+    
+    // DIRECT BATTLE BUTTON HANDLER (bypassing main.js cache issues)
+    console.log('🔧 [DIRECT] Setting up battle button handler...');
+    const directBattleBtn = document.getElementById('battleBtn');
+    console.log('🔧 [DIRECT] Button found:', !!directBattleBtn);
+    
+    if (directBattleBtn) {
+        directBattleBtn.addEventListener('click', async () => {
+            console.log('🚨 [DIRECT] FIGHT button clicked!');
+            alert('Battle button clicked! (Direct handler working)');
+            // TODO: Call battle simulation here
+        });
+        console.log('🔧 [DIRECT] Battle button handler attached successfully');
+    }
 </script>
 </body>
 </html>

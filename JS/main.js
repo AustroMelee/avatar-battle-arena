@@ -1,4 +1,5 @@
-// FILE: main.js
+// FILE: main.js - FORCE RELOAD: 2025-06-18-06:30:00-UNIQUE-ID-12345
+// CACHE BUST: This comment forces browser reload
 'use strict';
 
 //# sourceURL=main.js
