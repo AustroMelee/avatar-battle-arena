@@ -19,14 +19,16 @@
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
         "lib": ["ES2020", "DOM"],
-        "baseUrl": ".",
+        "baseUrl": "./src",
         "paths": {
-            "./js/*": ["./js/*"],
-            "./css/*": ["./css/*"]
+            "js/*": ["./js/*"],
+            "css/*": ["./css/*"],
+            "assets/*": ["./assets/*"]
         }
     },
     "include": [
-        "js/**/*",
+        "src/js/**/*.js",
+        "src/css/**/*.css",
         "*.js",
         "*.html"
     ],
