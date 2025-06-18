@@ -529,29 +529,86 @@ export function showResultsState(battleResult, mode) {
  * @param {string} mode - Simulation mode
  */
 function handleBattleLogDisplay(battleResult, mode) {
-    // Import transformEventsToHtmlLog if needed
+    console.log('[STATE] handleBattleLogDisplay called with mode:', mode);
+    console.log('[STATE] Battle result log length:', battleResult.log?.length || 0);
+
+    // Import transformEventsToHtmlLog for battle story
     import('./log_to_html.js').then(({ transformEventsToHtmlLog }) => {
         const battleStoryEl = document.getElementById('battle-story');
         if (battleStoryEl && battleResult.log) {
-            battleStoryEl.innerHTML = transformEventsToHtmlLog(battleResult.log);
+            const htmlLog = transformEventsToHtmlLog(battleResult.log);
+            battleStoryEl.innerHTML = htmlLog;
+            console.log('[STATE] Battle story populated successfully');
+        } else {
+            console.warn('[STATE] Battle story element or log missing');
         }
     }).catch(err => {
         console.warn('Could not load battle log transformer:', err);
     });
 
-    // Handle detailed logs toggle for instant mode
-    if (mode === 'instant') {
-        const detailedLogsEl = document.getElementById('detailed-battle-logs-content');
-        const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
+    // Handle detailed logs content - populate with the full log data
+    const detailedLogsEl = document.getElementById('detailed-battle-logs-content');
+    const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
+    
+    if (detailedLogsEl && battleResult.log) {
+        console.log('[STATE] Populating detailed battle logs...');
         
-        if (detailedLogsEl) detailedLogsEl.classList.remove('hidden');
-        if (toggleBtn) toggleBtn.textContent = 'Hide Detailed Battle Logs ▲';
+        // Import the battle log transformer
+        import('./battle_log_transformer.js').then(({ transformEventsToHtmlLog }) => {
+            const detailedHtmlLog = transformEventsToHtmlLog(battleResult.log, {
+                fighter1: battleResult.finalState?.fighter1,
+                fighter2: battleResult.finalState?.fighter2,
+                location: battleResult.locationId
+            });
+            detailedLogsEl.innerHTML = detailedHtmlLog || '<p>No detailed battle log available.</p>';
+            console.log('[STATE] Detailed battle logs populated successfully');
+            
+            // Set up the toggle controls
+            import('./ui/battle_log_controls.js').then(({ setupBattleLogControls }) => {
+                const copyBtn = document.getElementById('copy-detailed-logs-btn');
+                setupBattleLogControls(toggleBtn, copyBtn, detailedLogsEl);
+                console.log('[STATE] Battle log controls set up successfully');
+            }).catch(err => {
+                console.warn('[STATE] Could not set up battle log controls:', err);
+            });
+            
+        }).catch(err => {
+            console.warn('[STATE] Could not load battle_log_transformer:', err);
+            // Fallback to basic HTML transformation
+            import('./log_to_html.js').then(({ transformEventsToHtmlLog }) => {
+                const fallbackHtml = transformEventsToHtmlLog(battleResult.log);
+                detailedLogsEl.innerHTML = fallbackHtml || '<p>No detailed battle log available.</p>';
+                console.log('[STATE] Detailed battle logs populated with fallback');
+            }).catch(fallbackErr => {
+                console.error('[STATE] Both battle log transformers failed:', fallbackErr);
+                detailedLogsEl.innerHTML = '<p>Error loading battle logs.</p>';
+            });
+        });
+        
+        // Handle detailed logs visibility for instant mode
+        if (mode === 'instant') {
+            detailedLogsEl.classList.remove('hidden', 'collapsed');
+            if (toggleBtn) {
+                toggleBtn.textContent = 'Hide Detailed Battle Logs ▼';
+                toggleBtn.setAttribute('aria-expanded', 'true');
+            }
+        } else {
+            // For animated mode, keep collapsed by default
+            detailedLogsEl.classList.add('collapsed');
+            if (toggleBtn) {
+                toggleBtn.textContent = 'Show Detailed Battle Logs ►';
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+    } else {
+        console.warn('[STATE] Detailed logs element or battle log missing');
     }
 
     // Handle analysis display
     import('./ui_battle-results.js').then(({ displayFinalAnalysis }) => {
         if (typeof displayFinalAnalysis === 'function') {
             displayFinalAnalysis(battleResult);
+            console.log('[STATE] Final analysis display completed');
         }
     }).catch(err => {
         console.warn('Could not load battle results module:', err);

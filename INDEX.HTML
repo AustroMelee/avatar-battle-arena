@@ -343,8 +343,36 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
         console.error('Failed to load main module:', error);
     }
     
-    // DIRECT BATTLE BUTTON HANDLER (bypassing main.js cache issues)
-    console.log('🔧 [DIRECT] Setting up battle button handler...');
+    // DIRECT BATTLE BUTTON AND MODE SELECTION HANDLERS (bypassing main.js cache issues)
+    console.log('🔧 [DIRECT] Setting up battle button and mode selection handlers...');
+    
+    // Mode selection handler
+    const modeSelectionContainer = document.querySelector('.mode-selection-section');
+    let currentSimMode = "animated";
+    
+    function handleModeSelectionChange(event) {
+        if (event.target.name === "simulationMode") {
+            currentSimMode = event.target.value;
+            console.log("🔧 [DIRECT] Simulation mode changed to:", currentSimMode);
+            
+            // Update state manager
+            import('./js/state_manager.js').then(({ updateGameState }) => {
+                updateGameState({ ui: { mode: currentSimMode } });
+            }).catch(err => console.warn('Could not update state:', err));
+            
+            // Update simulation mode manager
+            import('./js/simulation_mode_manager.js').then(({ setSimulationMode }) => {
+                setSimulationMode(currentSimMode);
+            }).catch(err => console.warn('Could not set simulation mode:', err));
+        }
+    }
+    
+    if (modeSelectionContainer) {
+        modeSelectionContainer.addEventListener('change', handleModeSelectionChange);
+        console.log('🔧 [DIRECT] Mode selection handler attached successfully');
+    }
+    
+    // Battle button handler
     const directBattleBtn = document.getElementById('battleBtn');
     console.log('🔧 [DIRECT] Button found:', !!directBattleBtn);
     
@@ -366,9 +394,7 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
                 const emotionalMode = true;
                 
                 console.log('🚨 [DIRECT] Starting battle simulation...');
-                
-                // Get current simulation mode
-                const currentSimMode = document.querySelector('input[name="simulationMode"]:checked')?.value || 'animated';
+                console.log('🚨 [DIRECT] Current mode:', currentSimMode);
                 
                 // Reset state and show loading
                 resetGlobalUI();
