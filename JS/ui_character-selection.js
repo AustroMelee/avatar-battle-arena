@@ -43,15 +43,18 @@ function getElementClass(character) {
  * @returns {HTMLElement} The created card element.
  */
 function createCharacterCard(character, fighterKey) {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'character-card';
     if (character) {
         card.classList.add(getElementClass(character));
         card.dataset.id = character.id;
+        card.setAttribute('role', 'option');
+        card.setAttribute('aria-label', `Character: ${character.name} for ${fighterKey}`);
+        card.setAttribute('tabindex', '0');
 
         const image = document.createElement('img');
         image.src = character.imageUrl;
-        image.alt = character.name;
+        image.alt = `${character.name} - Avatar character portrait`;
         image.loading = 'lazy';
         card.appendChild(image);
 
@@ -61,6 +64,14 @@ function createCharacterCard(character, fighterKey) {
 
         card.addEventListener('click', () => {
             handleCardClick(character, fighterKey, card);
+        });
+        
+        // Add keyboard support for accessibility
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleCardClick(character, fighterKey, card);
+            }
         });
     } else {
         card.textContent = 'No character data';

@@ -5,116 +5,341 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ATLA Battle Arena</title>
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+
+<!-- Zero-Dependency Setup: No CDN fonts, local fallbacks only -->
+<style>
+/* Local font declarations - fallback to system fonts for zero-dependency debugging */
+@font-face {
+    font-family: 'Cinzel-Local';
+    src: local('Cinzel'), local('Times New Roman'), local('serif');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Cinzel-Local';
+    src: local('Cinzel Bold'), local('Times New Roman Bold'), local('serif');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Cinzel-Local';
+    src: local('Cinzel Black'), local('Times New Roman'), local('serif');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'IM-Fell-English-SC-Local';
+    src: local('IM Fell English SC'), local('Small Caps'), local('serif');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Great-Vibes-Local';
+    src: local('Great Vibes'), local('Brush Script MT'), local('cursive');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Update CSS custom properties to use local fonts */
+:root {
+    --font-title: 'IM-Fell-English-SC-Local', 'Times New Roman', serif;
+    --font-body: 'Cinzel-Local', 'Times New Roman', serif;
+    --font-avatar: 'Great-Vibes-Local', 'Brush Script MT', cursive;
+    --font-mk: 'Impact', 'Arial Black', sans-serif;
+}
+</style>
+
+<!-- Zero-Dependency ES Modules: Import Map for local development -->
+<script type="importmap">
+{
+  "imports": {
+    "./js/main.js": "./js/main.js",
+    "./js/engine_battle-engine-core.js": "./js/engine_battle-engine-core.js",
+    "./js/state_manager.js": "./js/state_manager.js",
+    "./js/ui.js": "./js/ui.js",
+    "./js/simulation_mode_manager.js": "./js/simulation_mode_manager.js",
+    "./js/ui_battle-results.js": "./js/ui_battle-results.js",
+    "./js/utils_efficient_rendering.js": "./js/utils_efficient_rendering.js",
+    "./js/ui_character-selection_efficient.js": "./js/ui_character-selection_efficient.js",
+    "./js/ui_location-selection_efficient.js": "./js/ui_location-selection_efficient.js",
+    "./js/data_characters.js": "./js/data_characters.js",
+    "./js/locations.js": "./js/locations.js",
+    "./js/config_game.js": "./js/config_game.js",
+    "./js/engine_state_initializer.js": "./js/engine_state_initializer.js",
+    "./js/engine_terminal_state.js": "./js/engine_terminal_state.js",
+    "./js/engine_battle_summarizer.js": "./js/engine_battle_summarizer.js",
+    "./js/engine_curbstomp_manager.js": "./js/engine_curbstomp_manager.js",
+    "./js/engine_battle-phase.js": "./js/engine_battle-phase.js",
+    "./js/engine_phase-manager.js": "./js/engine_phase-manager.js",
+    "./js/engine_turn-processor.js": "./js/engine_turn-processor.js",
+    "./js/utils_seeded_random.js": "./js/utils_seeded_random.js",
+    "./js/utils_log_event.js": "./js/utils_log_event.js",
+    "./js/engine_narrative-engine.js": "./js/engine_narrative-engine.js"
+  }
+}
+</script>
+
+<!-- Debug utilities for zero-dependency debugging -->
+<script>
+// Zero-Dependency Debug Utilities
+window.ATLA_DEBUG = {
+    version: '1.0.0',
+    modules: {},
+    performance: {},
+    logs: [],
+    
+    log: function(module, message, data) {
+        const timestamp = new Date().toISOString();
+        const logEntry = { timestamp, module, message, data };
+        this.logs.push(logEntry);
+        console.log(`[${timestamp}] [${module}] ${message}`, data);
+    },
+    
+    trackModule: function(name, module) {
+        this.modules[name] = module;
+        this.log('DEBUG', `Module registered: ${name}`);
+    },
+    
+    listModules: function() {
+        console.table(Object.keys(this.modules));
+    },
+    
+    clearLogs: function() {
+        this.logs = [];
+        console.clear();
+    },
+    
+    exportLogs: function() {
+        const blob = new Blob([JSON.stringify(this.logs, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `atla-debug-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+};
+
+// Performance monitoring
+window.ATLA_DEBUG.performance.start = function(name) {
+    performance.mark(`${name}-start`);
+};
+
+window.ATLA_DEBUG.performance.end = function(name) {
+    performance.mark(`${name}-end`);
+    performance.measure(name, `${name}-start`, `${name}-end`);
+    const measure = performance.getEntriesByName(name)[0];
+    window.ATLA_DEBUG.log('PERFORMANCE', `${name} took ${measure.duration.toFixed(2)}ms`);
+};
+
+// Console shortcuts for debugging
+window.debug = window.ATLA_DEBUG;
+window.modules = () => window.ATLA_DEBUG.listModules();
+window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
+</script>
+
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-<div class="container">
-<header class="header">
-<h1 class="title">ATLA BATTLE ARENA</h1>
-<p class="subtitle">AANG vs. AZULA</p>
+<body data-component="app">
+<div class="container app">
+<header class="header page-header" data-component="page-header">
+<h1 class="title page-header__title">ATLA BATTLE ARENA</h1>
+<p class="subtitle page-header__subtitle">AANG vs. AZULA</p>
 </header>
-<section class="battle-background-section">
-    <img id="location-image" src="img/img_caldera.jpg" alt="Battle Location" class="location-backdrop">
+<section class="battle-background-section battle-background" data-component="battle-background" aria-label="Battle environment">
+    <picture>
+        <source media="(max-width: 600px)" srcset="img/img_caldera.jpg 800w" sizes="100vw">
+        <source media="(max-width: 900px)" srcset="img/img_caldera.jpg 1200w" sizes="100vw">
+        <img id="location-image" 
+             src="img/img_caldera.jpg" 
+             srcset="img/img_caldera.jpg 800w, img/img_caldera.jpg 1200w, img/img_caldera.jpg 1600w" 
+             sizes="(max-width: 600px) 100vw, (max-width: 900px) 90vw, 80vw"
+             alt="Fire Nation Capital - Battle Location" 
+             class="location-backdrop battle-background__image">
+    </picture>
 </section>
-<section class="battle-visuals-section">
-    <div class="character-container left-character">
-        <img src="img/img_aang.avif" alt="Aang" class="character-portrait character-image aang">
-    </div>
-    <div class="vs-badge">VS</div>
-    <div class="character-container right-character">
-        <img src="img/img_azula.avif" alt="Azula" class="character-portrait character-image azula">
-    </div>
+<section class="battle-visuals-section character-showcase" data-component="character-showcase" aria-label="Character showcase">
+    <article class="character-container left-character character-showcase__character character-showcase__character--left" role="img" aria-label="Aang - Avatar and Airbending Master">
+        <picture>
+            <source media="(max-width: 600px)" srcset="img/img_aang.avif 150w" sizes="80px">
+            <source media="(max-width: 900px)" srcset="img/img_aang.avif 200w" sizes="90px">
+            <img src="img/img_aang.avif" 
+                 srcset="img/img_aang.avif 150w, img/img_aang.avif 200w, img/img_aang.avif 300w" 
+                 sizes="(max-width: 600px) 80px, (max-width: 900px) 90px, 100px"
+                 alt="Aang, the Avatar" 
+                 class="character-portrait character-image aang character-showcase__portrait character-showcase__portrait--aang">
+        </picture>
+    </article>
+    <div class="vs-badge character-showcase__vs-badge" role="separator" aria-label="Versus">VS</div>
+    <article class="character-container right-character character-showcase__character character-showcase__character--right" role="img" aria-label="Azula - Fire Nation Princess">
+        <picture>
+            <source media="(max-width: 600px)" srcset="img/img_azula.avif 150w" sizes="80px">
+            <source media="(max-width: 900px)" srcset="img/img_azula.avif 200w" sizes="90px">
+            <img src="img/img_azula.avif" 
+                 srcset="img/img_azula.avif 150w, img/img_azula.avif 200w, img/img_azula.avif 300w" 
+                 sizes="(max-width: 600px) 80px, (max-width: 900px) 90px, 100px"
+                 alt="Azula, Fire Nation Princess" 
+                 class="character-portrait character-image azula character-showcase__portrait character-showcase__portrait--azula">
+        </picture>
+    </article>
 </section>
-<main>
+<main role="main">
     <!-- Mode Selection UI -->
-    <section class="mode-selection-section">
-        <h2 class="mode-selection-title">Choose Simulation Mode</h2>
-        <div class="mode-options">
-            <label class="mode-option">
-                <input type="radio" name="simulationMode" value="animated" id="mode-animated" checked>
-                <span>🎬 Animated Simulation</span>
+    <nav class="mode-selection-section mode-selection" data-component="mode-selection" role="navigation" aria-labelledby="mode-selection-title">
+        <h2 class="mode-selection-title mode-selection__title" id="mode-selection-title">Choose Simulation Mode</h2>
+        <fieldset class="mode-options mode-selection__options" role="radiogroup" aria-labelledby="mode-selection-title">
+            <legend class="sr-only">Select simulation type</legend>
+            <label class="mode-option mode-selection__option">
+                <input type="radio" name="simulationMode" value="animated" id="mode-animated" 
+                       checked aria-describedby="animated-description">
+                <span id="animated-description">🎬 Animated Simulation</span>
             </label>
-            <label class="mode-option">
-                <input type="radio" name="simulationMode" value="instant" id="mode-instant">
-                <span>⚡ Instant Results</span>
+            <label class="mode-option mode-selection__option">
+                <input type="radio" name="simulationMode" value="instant" id="mode-instant"
+                       aria-describedby="instant-description">
+                <span id="instant-description">⚡ Instant Results</span>
             </label>
-        </div>
-    </section>
+        </fieldset>
+    </nav>
     <!-- End Mode Selection UI -->
 
-    <section class="archetype-info-section" id="archetype-info-container">
-        <div class="title-wrap">
+    <section class="archetype-info-section" id="archetype-info-container" aria-labelledby="archetype-headline">
+        <header class="title-wrap">
             <h3 class="archetype-headline" id="archetype-headline">Royal Rumble: Princess's Perfection vs. Avatar's Air</h3>
-            <div class="divider-symbol">🔥</div>
-        </div>
-        <div class="archetype-intros">
+            <div class="divider-symbol" role="presentation" aria-hidden="true">🔥</div>
+        </header>
+        <div class="archetype-intros" role="group" aria-labelledby="archetype-headline">
             <p class="archetype-intro" id="archetype-intro-a">Azula, the favored princess, aims to definitively crush the Avatar in the Fire Nation capital, showcasing her absolute superiority.</p>
             <p class="archetype-intro" id="archetype-intro-b">Aang confronts Azula in her own seat of power, his airbending a desperate whirlwind against her flawless, deadly fire.</p>
         </div>
-        <p class="archetype-error" id="archetype-error"></p>
+        <div class="archetype-error" id="archetype-error" role="alert" aria-live="polite"></div>
     </section>
     
-    <button class="battle-button" id="battleBtn">⚔️ FIGHT ⚔️</button>
+    <div data-component="battle-button">
+        <button class="battle-button" id="battleBtn" 
+                aria-label="Start battle simulation between Aang and Azula">
+            ⚔️ FIGHT ⚔️
+        </button>
+    </div>
 
     <!-- Simulation Mode Container -->
-    <section id="simulation-mode-container" class="simulation-mode-container hidden">
-        <div class="simulation-controls">
-            <div class="simulation-controls-group"> 
-                <button id="cancel-simulation" class="simulation-cancel-btn">Cancel</button>
-                <button id="toggle-sim-log-btn" class="simulation-log-toggle-btn" aria-expanded="true">Hide Log ▼</button> 
-                <button id="copy-sim-log-btn" class="simulation-copy-btn">📋 Copy Sim Log</button> 
+    <section id="simulation-mode-container" class="simulation-mode-container simulation simulation--hidden" 
+             data-component="simulation" aria-labelledby="simulation-controls-title" aria-live="polite">
+        <div class="simulation-controls simulation__controls" role="toolbar" aria-label="Simulation controls">
+            <div class="simulation-controls-group simulation__controls-group" role="group" aria-label="Simulation actions"> 
+                <button id="cancel-simulation" class="simulation-cancel-btn simulation__button simulation__button--cancel" 
+                        aria-label="Cancel current battle simulation">Cancel</button>
+                <button id="toggle-sim-log-btn" class="simulation-log-toggle-btn simulation__button" 
+                        aria-expanded="true" aria-controls="animated-log-output"
+                        aria-label="Toggle battle log visibility">Hide Log ▼</button> 
+                <button id="copy-sim-log-btn" class="simulation-copy-btn simulation__button simulation__button--copy" 
+                        aria-label="Copy simulation log to clipboard">📋 Copy Sim Log</button> 
             </div>
-            <div class="zoom-controls">
-                <button id="zoom-out" class="simulation-zoom-btn">-</button>
-                <button id="zoom-in" class="simulation-zoom-btn">+</button>
+            <div class="zoom-controls simulation__controls-group" role="group" aria-label="Zoom controls">
+                <button id="zoom-out" class="simulation-zoom-btn simulation__button" 
+                        aria-label="Zoom out from battle simulation">-</button>
+                <button id="zoom-in" class="simulation-zoom-btn simulation__button" 
+                        aria-label="Zoom in on battle simulation">+</button>
             </div>
         </div>
-        <div id="animated-log-output" class="animated-log-output"> 
+        <div id="animated-log-output" class="animated-log-output simulation__log" 
+             role="log" aria-label="Battle progress updates" aria-live="polite"> 
             <!-- Animated text will appear here -->
         </div>
     </section>
     <!-- End Simulation Mode Container -->
 
-    <section class="results-section" id="results" style="display: none;">
-        <div class="loading hidden" id="loading">
-            <div class="spinner"></div>
+    <dialog class="results-section battle-results" data-component="battle-results" id="results" style="display: none;" 
+            aria-labelledby="battle-results-title" aria-describedby="battle-results-summary">
+        <div class="loading u-hidden" id="loading" role="status" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
             <p>The elements clash... calculating outcome...</p>
         </div>
-        <div id="battle-results" class="hidden">
-            <div class="winner-announcement">
-                <div class="winner-name" id="winner-name"></div>
-                <div class="win-probability" id="win-probability"></div>
-            </div>
+        <div id="battle-results" class="u-hidden">
+            <header class="winner-announcement" role="banner">
+                <h2 id="battle-results-title" class="sr-only">Battle Results</h2>
+                <div class="winner-name" id="winner-name" role="heading" aria-level="2"></div>
+                <div class="win-probability" id="win-probability" 
+                     aria-label="Victory probability"></div>
+            </header>
             
-            <div id="results-details-content">
-                <article class="battle-story" id="battle-story"></article>
-                <div class="outcome-analysis" id="outcome-analysis">
-                    <h3 class="analysis-title">Outcome Analysis</h3>
-                    <ul class="analysis-list" id="analysis-list">
+            <div id="results-details-content" aria-describedby="battle-results-summary">
+                <article class="battle-story" id="battle-story" 
+                         aria-labelledby="battle-story-title">
+                    <h3 id="battle-story-title" class="sr-only">Battle Narrative</h3>
+                </article>
+                <section class="outcome-analysis" id="outcome-analysis" 
+                         aria-labelledby="outcome-analysis-title">
+                    <h3 class="analysis-title" id="outcome-analysis-title">Outcome Analysis</h3>
+                    <ul class="analysis-list" id="analysis-list" role="list">
                     </ul>
-                    <div class="environmental-damage-section">
-                        <h3>Environmental Damage Analysis</h3>
-                        <div id="environment-damage-display" class="environmental-damage-level"></div>
-                        <ul id="environment-impacts-list" class="environment-impacts-list"></ul>
-                    </div>
+                    <section class="environmental-damage-section" 
+                             aria-labelledby="environmental-damage-title">
+                        <h3 id="environmental-damage-title">Environmental Damage Analysis</h3>
+                        <div id="environment-damage-display" class="environmental-damage-level" 
+                             aria-label="Environmental damage level"></div>
+                        <ul id="environment-impacts-list" class="environment-impacts-list" 
+                            role="list" aria-label="Environmental impact details"></ul>
+                    </section>
 
-                    <div class="detailed-battle-logs-section">
-                        <div class="detailed-battle-logs-controls results-actions-bar">
-                            <button id="toggle-detailed-logs-btn" class="results-details-toggle-btn" aria-expanded="false">Show Detailed Battle Logs ►</button>
-                            <button id="copy-detailed-logs-btn" class="results-copy-btn">📋 Copy Battle Logs</button>
+                    <section class="detailed-battle-logs-section" 
+                             aria-labelledby="detailed-logs-title">
+                        <h4 id="detailed-logs-title" class="sr-only">Detailed Battle Logs</h4>
+                        <div class="detailed-battle-logs-controls results-actions-bar" 
+                             role="toolbar" aria-label="Battle log controls">
+                            <button id="toggle-detailed-logs-btn" class="results-details-toggle-btn" 
+                                    aria-expanded="false" aria-controls="detailed-battle-logs-content"
+                                    aria-label="Toggle detailed battle logs visibility">
+                                Show Detailed Battle Logs ►
+                            </button>
+                            <button id="copy-detailed-logs-btn" class="results-copy-btn"
+                                    aria-label="Copy detailed battle logs to clipboard">
+                                📋 Copy Battle Logs
+                            </button>
                         </div>
-                        <div id="detailed-battle-logs-content" class="collapsible-content collapsed">
+                        <div id="detailed-battle-logs-content" class="collapsible-content collapsed"
+                             role="region" aria-labelledby="detailed-logs-title">
                         </div>
-                    </div>
-                </div>
+                    </section>
+                </section>
             </div>
         </div>
-    </section>
+        <button class="close-dialog-btn battle-results__close" aria-label="Close battle results dialog" 
+                onclick="document.getElementById('results').close()">×</button>
+    </dialog>
 </main>
+
+<!-- NASA-Level Replay System Access Button -->
+<button class="replay-system-btn" id="replay-system-btn" 
+        aria-label="Open Battle Replay System" 
+        title="🛰️ NASA-Level Battle Replay System">
+    🛰️
+</button>
 </div>
-<script src="js/main.js" type="module" defer></script>
+<!-- Zero-Dependency Debugging: Load main module with debugging -->
+<script type="module">
+    // Enable debugging
+    window.ATLA_DEBUG.performance.start('main-module-load');
+    
+    try {
+        // Import main module (it doesn't export a default, it just runs)
+        await import('./js/main.js');
+        window.ATLA_DEBUG.trackModule('main', 'loaded');
+        window.ATLA_DEBUG.performance.end('main-module-load');
+        window.ATLA_DEBUG.log('MAIN', 'Application loaded successfully');
+    } catch (error) {
+        window.ATLA_DEBUG.log('MAIN', 'Failed to load application', error);
+        console.error('Failed to load main module:', error);
+    }
+</script>
 </body>
 </html>

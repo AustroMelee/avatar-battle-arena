@@ -19,20 +19,23 @@ export const MOMENTUM_CRIT_MODIFIER_PER_POINT = 0.05; // 5% crit chance per mome
  * @param {string} reason - A string explaining why the momentum changed (for logging).
  */
 export function modifyMomentum(actor, delta, reason = 'General change') {
-    const oldMomentum = actor.momentum;
-    let newMomentum = actor.momentum + delta;
+    // Ensure momentum and delta are numbers; default to 0 if NaN or undefined
+    const currentMomentum = typeof actor.momentum === 'number' && !isNaN(actor.momentum) ? actor.momentum : 0;
+    const numericDelta = typeof delta === 'number' && !isNaN(delta) ? delta : 0;
+
+    let newMomentum = currentMomentum + numericDelta;
 
     // Clamp momentum to min/max bounds
     newMomentum = Math.max(MIN_MOMENTUM, Math.min(MAX_MOMENTUM, newMomentum));
 
-    if (newMomentum !== oldMomentum) {
+    if (newMomentum !== currentMomentum) {
         actor.momentum = newMomentum;
-        actor.aiLog.push(`[Momentum]: ${actor.name}'s momentum changed from ${oldMomentum} to ${newMomentum} due to: ${reason}.`);
+        actor.aiLog.push(`[Momentum]: ${actor.name}'s momentum changed from ${currentMomentum} to ${newMomentum} due to: ${reason}.`);
         // Signal UI update (UI module will pick this up)
         actor.momentumChanged = true;
-    } else if (delta !== 0) {
+    } else if (numericDelta !== 0) {
         // Log if momentum change was attempted but capped
-        actor.aiLog.push(`[Momentum]: ${actor.name}'s momentum attempted to change by ${delta} but was capped at ${oldMomentum}. Reason: ${reason}.`);
+        actor.aiLog.push(`[Momentum]: ${actor.name}'s momentum attempted to change by ${numericDelta} but was capped at ${currentMomentum}. Reason: ${reason}.`);
     }
 }
 
@@ -57,5 +60,7 @@ export function resetMomentum(actor, reason = 'Reset') {
  * @returns {number} The critical hit chance modifier (e.g., 0.1 for +10%).
  */
 export function getMomentumCritModifier(actor) {
-    return actor.momentum * MOMENTUM_CRIT_MODIFIER_PER_POINT;
+    // Ensure actor.momentum is a number; default to 0 if NaN or undefined
+    const currentMomentum = typeof actor.momentum === 'number' && !isNaN(actor.momentum) ? actor.momentum : 0;
+    return currentMomentum * MOMENTUM_CRIT_MODIFIER_PER_POINT;
 }

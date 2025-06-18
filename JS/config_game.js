@@ -1,5 +1,7 @@
 'use strict';
 
+//# sourceURL=config_game.js
+
 /**
  * Central configuration file for global game constants and rules.
  * This file consolidates values that might be tweaked for game balance

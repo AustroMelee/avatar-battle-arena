@@ -8,18 +8,7 @@ import { BATTLE_PHASES } from './engine_battle-phase.js';
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
 import { generateLogEvent } from './utils_log_event.js';
-
-/**
- * Safely retrieves a nested property from an object.
- * @param {object} obj - The object to query.
- * @param {string} path - The dot-separated path to the property.
- * @param {*} defaultValue - The value to return if the path is not found.
- * @returns {*} The property value or the default value.
- */
-function safeGet(obj, path, defaultValue) {
-    const value = path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    return (value !== undefined && value !== null) ? value : defaultValue;
-}
+import { safeGet } from './utils_safe_accessor.js';
 
 const MANIPULATION_BASE_CHANCE = 0.4; // Base chance to attempt a manipulation
 const MANIPULATION_SUCCESS_MODIFIERS = {

@@ -246,16 +246,26 @@ export function getEmojiForMoveType(moveType, effectivenessLabel) {
     }
 }
 
+// This block contains phrases for the winner at the end of a battle.
 export const postBattleVictoryPhrases = {
     default: {
-        dominant: [
-            { line: "{WinnerName} stands victorious. It was a flawless victory." },
-            { line: "Overwhelmed by {WinnerName}'s power, {LoserName} falls." }
-        ],
-        narrow: [
-            { line: "In a close battle, {WinnerName} emerges as the victor." },
-            { line: "{WinnerName} narrowly defeats {LoserName} after a grueling fight." }
-        ]
+        dominant: ["{WinnerName} stands victorious, having barely broken a sweat."],
+        narrow: ["With a final, desperate effort, {WinnerName} emerges as the victor."]
     },
-    // Add character-specific victory styles here later if needed
+    merciful: {
+        dominant: ["{WinnerName} shows mercy, standing over the defeated {LoserName} with compassion."],
+        narrow: ["Despite the close battle, {WinnerName} extends a hand to help {LoserName} up."]
+    },
+    dominant: {
+        dominant: ["{WinnerName} towers over the fallen {LoserName}, absolute power radiating from every fiber."],
+        narrow: ["Even in a close fight, {WinnerName}'s superiority becomes undeniable."]
+    },
+    ruthless: {
+        dominant: ["{WinnerName} shows no emotion as {LoserName} falls, victory achieved with cold efficiency."],
+        narrow: ["The narrow victory only makes {WinnerName}'s calculated precision more terrifying."]
+    },
+    playful: {
+        dominant: ["{WinnerName} grins widely, the victory as easy as child's play."],
+        narrow: ["'That was fun!' {WinnerName} chirps, despite the intense battle."]
+    }
 };

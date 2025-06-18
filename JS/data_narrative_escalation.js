@@ -2,8 +2,17 @@
 'use strict';
 
 // Defines narrative phrases for escalation states.
+// This block contains flavor text for character status changes.
 
 export const escalationStateNarratives = {
+    FRESH: ["{actorName} looks ready and focused."],
+    WINDED: ["{actorName} pauses to catch {actor.p} breath, the pace of the fight beginning to tell."],
+    INJURED: ["A grimace of pain flashes across {actorName}'s face, but {actor.s} fights on."],
+    EXHAUSTED: ["{actorName}'s movements become slower, weighted down by fatigue."],
+    DESPERATE: ["There's a desperate gleam in {actorName}'s eye; {actor.s}'s fighting on sheer will now."],
+    BROKEN: ["{actorName} stumbles, {actor.p} spirit and body pushed to their absolute limit."],
+    
+    // Legacy escalation states
     PRESSURED: [
         "The intensity of the fight is taking its toll on {actorName}!",
         "{actorName} is visibly struggling to keep up the pace.",
@@ -22,6 +31,8 @@ export const escalationStateNarratives = {
         "Any moment now, {actorName} is going to fall!",
         "This is the end of the line for {actorName}; {actor.s} can barely stand."
     ],
+    
+    // Character-specific escalation states
     'azula': {
         PRESSURED: ["Azula's perfect facade shows the barest hint of a crack under the strain."],
         SEVERELY_INCAPACITATED: ["A flicker of genuine fear, quickly suppressed, crosses Azula's face as her control slips."],

@@ -1,6 +1,8 @@
 // FILE: ui.js
 'use strict';
 
+//# sourceURL=ui.js
+
 // Orchestrates the main UI components and battle simulation flow.
 
 import { renderArchetypeDisplay } from './ui_archetype-display.js';

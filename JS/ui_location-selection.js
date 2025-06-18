@@ -28,13 +28,17 @@ const formatTypeName = (type) => capitalize(type.replace(/_/g, ' '));
  * @returns {HTMLElement} The created card element.
  */
 function createLocationCard(locationData, locationId) {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'location-card';
     if (locationData) {
         card.dataset.id = locationId;
+        card.setAttribute('role', 'option');
+        card.setAttribute('aria-label', `Location: ${locationData.name}`);
+        card.setAttribute('tabindex', '0');
+        
         const image = document.createElement('img');
         image.src = locationData.background;
-        image.alt = locationData.name;
+        image.alt = `${locationData.name} battlefield environment`;
         image.loading = 'lazy';
         card.appendChild(image);
 
@@ -44,6 +48,14 @@ function createLocationCard(locationData, locationId) {
 
         card.addEventListener('click', () => {
             handleCardClick(locationData, locationId, card);
+        });
+        
+        // Add keyboard support for accessibility
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                handleCardClick(locationData, locationId, card);
+            }
         });
     } else {
         card.textContent = "Error: Location Undefined";

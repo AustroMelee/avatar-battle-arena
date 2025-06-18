@@ -3,23 +3,7 @@
 
 import { characters } from './data_characters.js';
 import { ESCALATION_STATES } from './engine_escalation.js';
-
-/**
- * Determines the impact level for an animation based on move effectiveness and type.
- * @param {string} effectivenessLabel - The label of the move's effectiveness (e.g., 'Critical').
- * @param {string} moveType - The type of the move (e.g., 'Finisher').
- * @returns {string} The impact level ('low', 'medium', 'high', 'critical').
- */
-function determineImpactLevel(effectivenessLabel, moveType) {
-    if (!effectivenessLabel || typeof effectivenessLabel !== 'string') return 'low';
-    switch (effectivenessLabel.toLowerCase()) {
-        case 'critical': return 'critical';
-        case 'strong': return 'high';
-        case 'normal': return (moveType === 'Finisher' || moveType === 'finisher') ? 'high' : 'medium';
-        case 'weak': return 'low';
-        default: return 'low';
-    }
-}
+import { determineImpactLevel } from './utils_impact_level.js';
 
 /**
  * Transforms a structured log of battle events into a queue for the animated text engine.

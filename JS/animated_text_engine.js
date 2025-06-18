@@ -5,6 +5,7 @@
 
 // --- NEW IMPORT ---
 import { getCharacterImageFromUI as getCharacterImage } from './ui.js';
+import { getEmojiForMove } from './utils_impact_level.js';
 // --- END NEW IMPORT ---
 import { focusOnLatestMessage } from './camera_control.js'; // camera_control.js should be robust
 
@@ -46,11 +47,12 @@ export function startAnimationSequence(queue, container, onComplete) {
     }
 
     if (animationQueueInternal.length === 0) {
-        console.warn("Animated Text Engine: Animation queue is empty.");
+        console.warn("[Animated Text Engine] Animation queue is empty.");
         if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true);
         return;
     }
 
+    console.debug(`[Animated Text Engine] Starting animation with ${animationQueueInternal.length} events`);
     processNextMessage();
 }
 
@@ -61,7 +63,7 @@ function processNextMessage() {
         return;
     }
     if (currentMessageIndex >= animationQueueInternal.length) {
-        console.log("Animated Text Engine: Animation queue finished.");
+        console.log("[Animated Text Engine] Animation queue finished.");
         if (onStepCompleteCallbackInternal) onStepCompleteCallbackInternal(true);
         return;
     }
@@ -83,10 +85,22 @@ function processNextMessage() {
 }
 
 function processAndAnimateEvent(event) {
-    if (!event || !event.type) {
-        console.warn("Animated Text Engine: Skipping invalid event object:", event);
-        return null;
-    }
+    try {
+        // Defensive Programming: Comprehensive event validation
+        if (!event) {
+            console.warn("[Animated Text Engine] Event is null or undefined");
+            return null;
+        }
+        
+        if (typeof event !== 'object') {
+            console.warn("[Animated Text Engine] Event is not an object:", typeof event);
+            return null;
+        }
+        
+        if (!event.type || typeof event.type !== 'string') {
+            console.warn("[Animated Text Engine] Event missing or invalid type property:", event);
+            return null;
+        }
 
     let lineClass = '';
     let htmlContent = '';
@@ -138,11 +152,19 @@ function processAndAnimateEvent(event) {
             }
     }
 
-    const lineElement = document.createElement('div');
-    lineElement.className = `simulation-line ${lineClass}`;
-    lineElement.innerHTML = htmlContent;
+        const lineElement = document.createElement('div');
+        lineElement.className = `simulation-line ${lineClass}`;
+        lineElement.innerHTML = htmlContent;
 
-    return lineElement;
+        return lineElement;
+    } catch (error) {
+        console.error("[Animated Text Engine] Error processing event:", error, event);
+        // Return a safe fallback element
+        const fallbackElement = document.createElement('div');
+        fallbackElement.className = 'simulation-line narrative-info';
+        fallbackElement.innerHTML = '<p>Error processing event</p>';
+        return fallbackElement;
+    }
 }
 
 function renderMessage(message) { // message is already validated by processNextMessage
@@ -159,8 +181,15 @@ function renderMessage(message) { // message is already validated by processNext
     }
 
     if (simulationContainerElement) { // Ensure container still exists
-        simulationContainerElement.appendChild(lineElement);
-        focusOnLatestMessage(simulationContainerElement, lineElement); // focusOnLatestMessage should be robust
+        // Use DocumentFragment for efficient DOM operations
+        import('./utils_efficient_rendering.js').then(({ batchAppendElements }) => {
+            batchAppendElements(simulationContainerElement, [lineElement]);
+            focusOnLatestMessage(simulationContainerElement, lineElement); // focusOnLatestMessage should be robust
+        }).catch(() => {
+            // Fallback to direct append if module isn't available
+            simulationContainerElement.appendChild(lineElement);
+            focusOnLatestMessage(simulationContainerElement, lineElement);
+        });
     }
 
     // Since we are now rendering full HTML, the "typing" effect is less relevant
@@ -238,30 +267,9 @@ function animateEmoji(emojiElement, impactLevel) {
     emojiElement.classList.add(animationClass);
     setTimeout(() => {
         emojiElement.classList.remove(animationClass);
-    }, EMOJI_ANIMATION_DURATION_MS);
-}
+          }, EMOJI_ANIMATION_DURATION_MS);
+  }
 
 function getEmojiForMoveType(moveType, effectivenessLabel) {
-    if (typeof effectivenessLabel === 'string') {
-        if (effectivenessLabel.toLowerCase() === 'critical') return '💥';
-        if (effectivenessLabel.toLowerCase() === 'strong') return '🔥';
-    }
-
-    if (!moveType || typeof moveType !== 'string') return '➡️'; // Default if moveType is undefined or not a string
-
-    switch (moveType.toLowerCase()) {
-        case 'fire': return '🔥';
-        case 'water': return '💧';
-        case 'ice': return '❄️';
-        case 'earth': return '🪨';
-        case 'metal': return '⚙️';
-        case 'air': return '💨';
-        case 'lightning': return '⚡';
-        case 'physical': return '⚔️';
-        case 'utility': return '🛠️';
-        case 'special': return '✨';
-        case 'offense': return '⚔️';
-        case 'defense': return '🛡️';
-        default: return '➡️';
-    }
+    return getEmojiForMove(moveType, effectivenessLabel);
 }

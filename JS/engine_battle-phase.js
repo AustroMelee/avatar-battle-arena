@@ -7,6 +7,13 @@ import { locations } from './locations.js'; // Ensure this import is here
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
 import { generateLogEvent } from './utils_log_event.js'; // NEW: Import generateLogEvent
+import { 
+    PHASE_TRANSITION_THRESHOLDS, 
+    MENTAL_STATE_TRIGGERS, 
+    MOVE_TRIGGERS,
+    shouldMentalStateTriggerTransition,
+    getPhaseAIModifiers as getConfiguredPhaseAIModifiers 
+} from './config_phase_transitions.js';
 // --- END UPDATED IMPORT ---
 
 export const BATTLE_PHASES = {
@@ -17,11 +24,9 @@ export const BATTLE_PHASES = {
     LATE: 'Late'
 };
 
-const MIN_POKING_DURATION = 1; // Minimum duration for the Poking phase
-const MAX_POKING_DURATION = 3; // Maximum duration for the Poking phase
-
 export function initializeBattlePhaseState(battleState, battleEventLog) {
-    const pokingDuration = Math.floor((USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) * (MAX_POKING_DURATION - MIN_POKING_DURATION + 1)) + MIN_POKING_DURATION;
+    const pokingConfig = PHASE_TRANSITION_THRESHOLDS.POKING_TO_EARLY;
+    const pokingDuration = Math.floor((USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) * (pokingConfig.MAX_DURATION - pokingConfig.MIN_DURATION + 1)) + pokingConfig.MIN_DURATION;
 
     battleEventLog.push(generateLogEvent(battleState, {
         type: "dice_roll",
@@ -50,8 +55,8 @@ export function checkAndTransitionPhase(phaseState, fighter1, fighter2, totalTur
 
     // Helper to update currentPhaseFighterStats
     const updatePhaseStats = () => {
-        phaseState.currentPhaseFighterStats.f1 = { hp: fighter1.hp, momentum: fighter1.momentum };
-        phaseState.currentPhaseFighterStats.f2 = { hp: fighter2.hp, momentum: fighter2.momentum };
+        phaseState.currentPhaseFighterStats.f1 = { hp: fighter1.hp, momentum: Number(fighter1.momentum || 0) };
+        phaseState.currentPhaseFighterStats.f2 = { hp: fighter2.hp, momentum: Number(fighter2.momentum || 0) };
     };
 
     // PRE_BANTER -> POKING Transition (Always happens after 1 narrative turn)
@@ -93,18 +98,18 @@ export function checkAndTransitionPhase(phaseState, fighter1, fighter2, totalTur
         // Calculate deltas from the start of the current (EARLY) phase
         const hpDeltaF1 = phaseState.currentPhaseFighterStats.f1.hp - fighter1.hp;
         const hpDeltaF2 = phaseState.currentPhaseFighterStats.f2.hp - fighter2.hp;
-        const momentumDeltaF1 = fighter1.momentum - phaseState.currentPhaseFighterStats.f1.momentum; // Momentum gain
-        const momentumDeltaF2 = fighter2.momentum - phaseState.currentPhaseFighterStats.f2.momentum; // Momentum gain
+        const momentumDeltaF1 = Number(fighter1.momentum || 0) - Number(phaseState.currentPhaseFighterStats.f1.momentum || 0); // Momentum gain
+        const momentumDeltaF2 = Number(fighter2.momentum || 0) - Number(phaseState.currentPhaseFighterStats.f2.momentum || 0); // Momentum gain
 
         // Conditions based on absolute values (made less sensitive)
         if (fighter1.hp <= 60 || fighter2.hp <= 60) midPhaseTriggers++; // Adjusted from 70 to 60
-        if (Math.abs(fighter1.momentum) >= 5 || Math.abs(fighter2.momentum) >= 5) midPhaseTriggers++; // Adjusted from 3 to 5
+        if (Math.abs(Number(fighter1.momentum || 0)) >= 5 || Math.abs(Number(fighter2.momentum || 0)) >= 5) midPhaseTriggers++; // Adjusted from 3 to 5
 
         // New conditions based on deltas and differences for true escalation
         if (hpDeltaF1 >= 30 || hpDeltaF2 >= 30) midPhaseTriggers++; // One fighter took >= 30 damage in this phase
         if (momentumDeltaF1 >= 5 || momentumDeltaF2 >= 5) midPhaseTriggers++; // One fighter gained >= 5 momentum in this phase
-        if (Math.abs(fighter1.hp - fighter2.hp) >= 30) midPhaseTriggers++; // HP difference of 30 between fighters
-        if (Math.abs(fighter1.momentum - fighter2.momentum) >= 8) midPhaseTriggers++; // Momentum difference of 8 between fighters
+        if (Math.abs(Number(fighter1.hp - fighter2.hp)) >= 30) midPhaseTriggers++; // HP difference of 30 between fighters
+        if (Math.abs(Number(fighter1.momentum || 0) - Number(fighter2.momentum || 0)) >= 8) midPhaseTriggers++; // Momentum difference of 8 between fighters
 
         // Existing mental state and finisher move triggers
         if (fighter1.mentalState.level === 'stressed' || fighter2.mentalState.level === 'stressed') midPhaseTriggers++;
@@ -131,18 +136,18 @@ export function checkAndTransitionPhase(phaseState, fighter1, fighter2, totalTur
 
         // Conditions based on absolute values
         if (fighter1.hp <= 40 || fighter2.hp <= 40) latePhaseTriggers++;
-        if (Math.abs(fighter1.momentum) >= 4 || Math.abs(fighter2.momentum) >= 4) latePhaseTriggers++;
+        if (Math.abs(Number(fighter1.momentum || 0)) >= 4 || Math.abs(Number(fighter2.momentum || 0)) >= 4) latePhaseTriggers++;
 
         // New conditions based on deltas and differences for true escalation (similar to Early -> Mid)
         const hpDeltaF1 = phaseState.currentPhaseFighterStats.f1.hp - fighter1.hp;
         const hpDeltaF2 = phaseState.currentPhaseFighterStats.f2.hp - fighter2.hp;
-        const momentumDeltaF1 = fighter1.momentum - phaseState.currentPhaseFighterStats.f1.momentum;
-        const momentumDeltaF2 = fighter2.momentum - phaseState.currentPhaseFighterStats.f2.momentum;
+        const momentumDeltaF1 = Number(fighter1.momentum || 0) - Number(phaseState.currentPhaseFighterStats.f1.momentum || 0);
+        const momentumDeltaF2 = Number(fighter2.momentum || 0) - Number(phaseState.currentPhaseFighterStats.f2.momentum || 0);
 
         if (hpDeltaF1 >= 25 || hpDeltaF2 >= 25) latePhaseTriggers++; // One fighter took >= 25 damage in this phase
         if (momentumDeltaF1 >= 4 || momentumDeltaF2 >= 4) latePhaseTriggers++; // One fighter gained >= 4 momentum in this phase
-        if (Math.abs(fighter1.hp - fighter2.hp) >= 20) latePhaseTriggers++; // HP difference of 20
-        if (Math.abs(fighter1.momentum - fighter2.momentum) >= 6) latePhaseTriggers++; // Momentum difference of 6
+        if (Math.abs(Number(fighter1.hp - fighter2.hp)) >= 20) latePhaseTriggers++; // HP difference of 20
+        if (Math.abs(Number(fighter1.momentum || 0) - Number(fighter2.momentum || 0)) >= 6) latePhaseTriggers++; // Momentum difference of 6
 
         // Existing mental state and finisher move triggers
         if (['shaken', 'broken'].includes(fighter1.mentalState.level) || ['shaken', 'broken'].includes(fighter2.mentalState.level)) latePhaseTriggers++;

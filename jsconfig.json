@@ -1,0 +1,42 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "allowJs": true,
+        "noEmit": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "noImplicitOverride": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "target": "ES2020",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "lib": ["ES2020", "DOM"],
+        "baseUrl": ".",
+        "paths": {
+            "./js/*": ["./js/*"],
+            "./css/*": ["./css/*"]
+        }
+    },
+    "include": [
+        "js/**/*",
+        "*.js",
+        "*.html"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build"
+    ],
+    "typeAcquisition": {
+        "enable": true,
+        "include": ["dom", "es6"]
+    }
+} 

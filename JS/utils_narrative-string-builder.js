@@ -2,8 +2,10 @@
 
 import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
 import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
+import { executeFilterChain } from './utils_narrative-filters.js';
+import { EFFECTIVENESS_FLAVORS, ENVIRONMENTAL_NARRATIVES } from './data_effectiveness-flavors.js';
 
-// Centralized Tag/Context Registry
+// Centralized Tag/Context Registry (Fixed: now supports rich metadata)
 const NARRATIVE_TAGS = {
     CRIT: 'crit',
     MISS: 'miss',
@@ -40,6 +42,28 @@ const NARRATIVE_TAGS = {
     SACRED: 'sacred'
 };
 
+// Rich narrative tag definitions for buildDescription method
+const NARRATIVE_TAG_DEFINITIONS = [
+    { name: 'crit', description: 'A critical strike that finds the perfect opening.' },
+    { name: 'miss', description: 'An attack that fails to connect.' },
+    { name: 'humor', description: 'A moment of levity in the heat of battle.' },
+    { name: 'metaphor', description: 'A poetic description of the action.' },
+    { name: 'finisher', description: 'A decisive blow meant to end the fight.' },
+    { name: 'comeback', description: 'A desperate attempt to turn the tide.' },
+    { name: 'desperate', description: 'An action born of desperation.' },
+    // Add more as needed
+];
+
+/**
+ * @class NarrativeStringBuilder (Refactored v2.0)
+ * @description A refactored narrative string builder using Chain of Responsibility and data-driven patterns.
+ * Key improvements:
+ * - Replaced giant _getFilteredVariants method with Chain of Responsibility pattern
+ * - Made effectiveness flavors and environmental narratives data-driven
+ * - Fixed NARRATIVE_TAGS data structure bug
+ * - Improved placeholder replacement system
+ * - Enhanced modularity and testability
+ */
 export class NarrativeStringBuilder {
     constructor(actor, target, move, effectivenessLevels, environment, turnContext, debugMode = false) {
         this.actor = actor; // Full actor object for personality, id, name
@@ -73,123 +97,62 @@ export class NarrativeStringBuilder {
     }
 
     _replacePlaceholders(text) {
+        // Data-driven placeholder replacement
+        const placeholders = {
+            // Actor placeholders
+            actorName: this.actor?.name || 'The Fighter',
+            actorPronounS: this.actor?.pronouns?.s || 'he',
+            actorPronounO: this.actor?.pronouns?.o || 'him',
+            actorId: this.actor?.id || 'unknown-actor',
+            actorElement: this.actor?.element || 'energy',
+            
+            // Target placeholders
+            targetName: this.target?.name || 'The Opponent',
+            targetPronounS: this.target?.pronouns?.s || 'he',
+            targetPronounO: this.target?.pronouns?.o || 'him',
+            targetId: this.target?.id || 'unknown-target',
+            
+            // Environment placeholders
+            environmentName: this.environment?.name || 'the surroundings',
+            envKeyword: getRandomElementSeeded(this.environment?.tags || ['area']) || 'the area',
+            
+            // Move placeholders
+            moveName: this.move?.name || 'a move',
+            moveElement: this.move?.element || 'neutral'
+        };
+        
+        // Replace all placeholders in a single pass
         let processedText = text;
-        if (this.actor) {
-            processedText = processedText.replace(/\${actorName}/g, this.actor.name || 'The Fighter');
-            processedText = processedText.replace(/\${actorPronounS}/g, this.actor.pronouns?.s || 'he');
-            processedText = processedText.replace(/\${actorPronounO}/g, this.actor.pronouns?.o || 'him');
-            processedText = processedText.replace(/\${actorId}/g, this.actor.id || 'unknown-actor');
-            processedText = processedText.replace(/\${actorElement}/g, this.actor.element || 'energy');
+        for (const [key, value] of Object.entries(placeholders)) {
+            const regex = new RegExp(`\\$\\{${key}\\}`, 'g');
+            processedText = processedText.replace(regex, value);
         }
-        if (this.target) {
-            processedText = processedText.replace(/\${targetName}/g, this.target.name || 'The Opponent');
-            processedText = processedText.replace(/\${targetPronounS}/g, this.target.pronouns?.s || 'he');
-            processedText = processedText.replace(/\${targetPronounO}/g, this.target.pronouns?.o || 'him');
-            processedText = processedText.replace(/\${targetId}/g, this.target.id || 'unknown-target');
-        }
-        if (this.environment) {
-            processedText = processedText.replace(/\${environmentName}/g, this.environment.name || 'the surroundings');
-            processedText = processedText.replace(/\${envKeyword}/g, getRandomElementSeeded(this.environment.tags || ['area']) || 'the area');
-        }
-        if (this.move) {
-            processedText = processedText.replace(/\${moveName}/g, this.move.name || 'a move');
-            processedText = processedText.replace(/\${moveElement}/g, this.move.element || 'neutral');
-        }
+        
         return processedText;
     }
 
     _getFilteredVariants() {
         const allVariants = this.move.actionVariants || [];
-        const reasons = [];
-
-        // Fail-Fast Check
-        if (!Array.isArray(allVariants) || (allVariants.length > 0 && typeof allVariants[0]?.text !== 'string')) {
-            throw new Error("Malformed actionVariants structure for move: " + (this.move.name || 'Unknown Move') + ". Expected array of objects with 'text' property.");
-        }
-
-        let primeCandidates = [];
-
-        // --- Phase 1: Strict Context Tags (Crit, Miss, Humor, etc.) --- 
-        // Prioritize these tags first for direct matches
-        const strictContextTags = [];
-        if (this.turnContext?.isCrit) strictContextTags.push(NARRATIVE_TAGS.CRIT);
-        if (this.turnContext?.isMiss) strictContextTags.push(NARRATIVE_TAGS.MISS);
-        if (this.turnContext?.humorTrigger) strictContextTags.push(NARRATIVE_TAGS.HUMOR);
-        if (this.turnContext?.lowHp) strictContextTags.push(NARRATIVE_TAGS.DESPERATE);
-
-        if (strictContextTags.length > 0) {
-            const strictMatches = allVariants.filter(v =>
-                v.tags && strictContextTags.every(tag => v.tags.includes(tag))
-            );
-            if (strictMatches.length > 0) {
-                primeCandidates = strictMatches;
-                reasons.push(`Strict context match: ${strictContextTags.join(', ')}`);
-            }
-        }
-
-        // --- Phase 2: Broader Context (Personality, Environment, Phase) --- 
-        // If no strict matches, or to layer on top of strict matches, broaden the criteria.
-        if (primeCandidates.length === 0) {
-            primeCandidates = allVariants.filter(v => {
-                // Personality triggers
-                if (v.personalityTriggers && this.actor?.personalityProfile) {
-                    for (const trait in v.personalityTriggers) {
-                        if (this.actor.personalityProfile[trait] >= v.personalityTriggers[trait]) {
-                            reasons.push(`Personality: ${trait} > ${v.personalityTriggers[trait]}`);
-                            return true;
-                        }
-                    }
-                }
-
-                // Environmental tags
-                if (v.environmentTags && this.environment?.tags) {
-                    const commonTags = v.environmentTags.filter(tag => this.environment.tags.includes(tag));
-                    if (commonTags.length > 0) {
-                        reasons.push(`Environment: ${commonTags.join(', ')}`);
-                        return true;
-                    }
-                }
-
-                // Phase-based tags
-                if (v.tags && this.turnContext?.phase) {
-                    if (v.tags.includes(this.turnContext.phase.toLowerCase())) {
-                        reasons.push(`Phase: ${this.turnContext.phase}`);
-                        return true;
-                    }
-                }
-
-                // General tags (e.g., finisher, comeback, aggressive, defensive, metaphor)
-                if (v.tags) {
-                    if (v.tags.includes(NARRATIVE_TAGS.FINISHER) && this.turnContext?.isFinisherAttempt) { reasons.push('Finisher Intent'); return true; }
-                    if (v.tags.includes(NARRATIVE_TAGS.COMEBACK) && this.turnContext?.isComebackSituation) { reasons.push('Comeback Situation'); return true; }
-                    if (v.tags.includes(NARRATIVE_TAGS.METAPHOR) && (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) < 0.2) { reasons.push('Random Metaphor Boost'); return true; } // Chance for metaphor
-                }
-
-                return false; // Does not match any broad criteria
-            });
-        }
-
-        // Fallback to variants that don't have specific tags or conditions
-        if (primeCandidates.length === 0) {
-            primeCandidates = allVariants.filter(v => !v.tags || v.tags.length === 0);
-            if (primeCandidates.length > 0) { reasons.push("Fallback: Generic (no specific tags)"); }
-        }
-
-        // Final fallback: if nothing matched, use any available variant, even if it has tags that weren't selected for.
-        if (primeCandidates.length === 0 && allVariants.length > 0) {
-            primeCandidates = allVariants;
-            reasons.push("Ultimate Fallback: Using any available variant.");
-        } else if (primeCandidates.length === 0 && allVariants.length === 0) {
-            // This case should ideally be caught by the fail-fast if move.actionVariants is truly empty.
-            reasons.push("No variants available, falling back to move name.");
-        }
-
+        
+        // Build context object for the filter chain
+        const context = {
+            actor: this.actor,
+            target: this.target,
+            move: this.move,
+            environment: this.environment,
+            turnContext: this.turnContext,
+            NARRATIVE_TAGS
+        };
+        
+        // Execute the Chain of Responsibility pattern
+        const result = executeFilterChain(allVariants, context);
+        
         if (this.debugMode) {
-            console.log("[NarrativeBuilder] Filtered Variants Candidate Count:", primeCandidates.length);
-            console.log("[NarrativeBuilder] Reasons for selection pool:", reasons.join("; "));
+            console.log("[NarrativeBuilder] Filtered Variants Candidate Count:", result.candidates.length);
+            console.log("[NarrativeBuilder] Reasons for selection pool:", result.reasons.join("; "));
         }
-
-        return { candidates: primeCandidates, reasons };
+        
+        return result;
     }
 
     buildActionDescription(effectiveness, effectivenessFlavor, effectivenessColor) {
@@ -236,44 +199,12 @@ export class NarrativeStringBuilder {
         if (effectivenessFlavor) {
             flavorText = effectivenessFlavor;
         } else {
-            switch (effectiveness) {
-                case 'super-effective':
-                    flavorText = getRandomElementSeeded([
-                        "It's super effective! ",
-                        "A devastating blow! ",
-                        "Unleashed with full force! "
-                    ]);
-                    break;
-                case 'not-very-effective':
-                    flavorText = getRandomElementSeeded([
-                        "It's not very effective... ",
-                        "A glancing blow. ",
-                        "Barely makes a dent. "
-                    ]);
-                    break;
-                case 'no-effect':
-                    flavorText = getRandomElementSeeded([
-                        "It has no effect. ",
-                        "Completely shrugged off. ",
-                        "A futile effort. "
-                    ]);
-                    break;
-                case 'critical':
-                    flavorText = getRandomElementSeeded([
-                        "Critical hit! ",
-                        "A precise strike! ",
-                        "Exploiting a weakness! "
-                    ]);
-                    break;
-                case 'miss':
-                    flavorText = getRandomElementSeeded([
-                        "It misses! ",
-                        "A wild swing. ",
-                        "Fails to connect. "
-                    ]);
-                    break;
-                default:
-                    flavorText = ""; // No specific flavor for default effectiveness
+            // Data-driven approach: look up flavor text from EFFECTIVENESS_FLAVORS
+            const flavorOptions = EFFECTIVENESS_FLAVORS[effectiveness];
+            if (flavorOptions && flavorOptions.length > 0) {
+                flavorText = getRandomElementSeeded(flavorOptions);
+            } else {
+                flavorText = ""; // No specific flavor for this effectiveness type
             }
         }
 
@@ -287,32 +218,28 @@ export class NarrativeStringBuilder {
 
     buildEnvironmentalNarrative(eventType, details) {
         let narrative = "";
+        
+        // Data-driven approach: look up narrative template from ENVIRONMENTAL_NARRATIVES
+        const narrativeData = ENVIRONMENTAL_NARRATIVES[eventType] || ENVIRONMENTAL_NARRATIVES['default'];
+        
         switch (eventType) {
             case 'activation':
-                narrative = `The environment of ${this.environment.name || 'the battlefield'} activates, influencing the combatants.`;
+                narrative = narrativeData.base(this.environment.name);
                 if (details?.impacts?.length > 0) {
-                    const impactDescriptions = details.impacts.map(impact => {
-                        return `${impact.type} (${impact.magnitude})`;
-                    });
-                    narrative += ` Key impacts: ${impactDescriptions.join(', ')}.`;
+                    narrative += narrativeData.withImpacts(details.impacts);
                 }
                 break;
             case 'damage':
                 const damagedEntities = details.entities.map(e => e.name).join(' and ');
-                const damageFlavor = getRandomElementSeeded([
-                    `The environment lashes out, affecting ${damagedEntities}.`,
-                    `Environmental hazards impact ${damagedEntities}.`,
-                    `${damagedEntities} contend with the treacherous surroundings.`
-                ]);
-                narrative = `${damageFlavor} (${details.damageAmount} damage).`;
+                const damageFlavor = getRandomElementSeeded(narrativeData.flavors);
+                narrative = damageFlavor(damagedEntities) + narrativeData.suffix(details.damageAmount);
                 break;
             case 'change':
-                const changeFlavor = getRandomElementSeeded([
-                    `The ${this.environment.name} shifts, altering the dynamics of the fight.`, `The battlefield morphs, creating new challenges.`, `The environment responds to the escalating conflict.`]);
-                narrative = `${changeFlavor} New state: ${details.newState}.`;
+                const changeFlavor = getRandomElementSeeded(narrativeData.flavors);
+                narrative = changeFlavor(this.environment.name) + narrativeData.suffix(details.newState);
                 break;
             default:
-                narrative = `Something happens with the environment.`;
+                narrative = narrativeData.base();
         }
         return this._replacePlaceholders(narrative);
     }
@@ -328,7 +255,7 @@ export class NarrativeStringBuilder {
 
     buildDescription(tags, context = {}) {
         const relevantTags = Array.isArray(tags) ? tags : [tags];
-        const candidates = NARRATIVE_TAGS.filter(tag => relevantTags.includes(tag.name)); // Assuming NARRATIVE_TAGS is an array of objects
+        const candidates = NARRATIVE_TAG_DEFINITIONS.filter(tag => relevantTags.includes(tag.name));
 
         if (candidates.length === 0) {
             return "A general event occurred.";
