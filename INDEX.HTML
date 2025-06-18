@@ -325,100 +325,30 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
     🛰️
 </button>
 </div>
-<!-- Zero-Dependency Debugging: Load main module with debugging -->
+<!-- Main Application Module -->
 <script type="module">
-    // Enable debugging
+    // Initialize debug performance tracking
     window.ATLA_DEBUG.performance.start('main-module-load');
     
     try {
-        // Import main module with strong cache busting
-        const timestamp = Date.now();
-        const randomId = Math.random().toString(36).substring(7);
-        await import(`./js/main.js?v=${timestamp}&r=${randomId}&debug=true`);
+        // Load main application module
+        await import('./js/main.js');
         window.ATLA_DEBUG.trackModule('main', 'loaded');
         window.ATLA_DEBUG.performance.end('main-module-load');
-        window.ATLA_DEBUG.log('MAIN', 'Application loaded successfully');
+        window.ATLA_DEBUG.log('MAIN', 'Application initialized successfully');
     } catch (error) {
         window.ATLA_DEBUG.log('MAIN', 'Failed to load application', error);
         console.error('Failed to load main module:', error);
-    }
-    
-    // DIRECT BATTLE BUTTON AND MODE SELECTION HANDLERS (bypassing main.js cache issues)
-    console.log('🔧 [DIRECT] Setting up battle button and mode selection handlers...');
-    
-    // Mode selection handler
-    const modeSelectionContainer = document.querySelector('.mode-selection-section');
-    let currentSimMode = "animated";
-    
-    function handleModeSelectionChange(event) {
-        if (event.target.name === "simulationMode") {
-            currentSimMode = event.target.value;
-            console.log("🔧 [DIRECT] Simulation mode changed to:", currentSimMode);
-            
-            // Update state manager
-            import('./js/state_manager.js').then(({ updateGameState }) => {
-                updateGameState({ ui: { mode: currentSimMode } });
-            }).catch(err => console.warn('Could not update state:', err));
-            
-            // Update simulation mode manager
-            import('./js/simulation_mode_manager.js').then(({ setSimulationMode }) => {
-                setSimulationMode(currentSimMode);
-            }).catch(err => console.warn('Could not set simulation mode:', err));
-        }
-    }
-    
-    if (modeSelectionContainer) {
-        modeSelectionContainer.addEventListener('change', handleModeSelectionChange);
-        console.log('🔧 [DIRECT] Mode selection handler attached successfully');
-    }
-    
-    // Battle button handler
-    const directBattleBtn = document.getElementById('battleBtn');
-    console.log('🔧 [DIRECT] Button found:', !!directBattleBtn);
-    
-    if (directBattleBtn) {
-        directBattleBtn.addEventListener('click', async () => {
-            console.log('🚨 [DIRECT] FIGHT button clicked!');
-            
-            try {
-                // Import the battle simulation function
-                const { simulateBattle } = await import('./js/engine_battle-engine-core.js');
-                const { resetGlobalUI } = await import('./js/ui.js');
-                const { showLoadingState, showResultsState } = await import('./js/state_manager.js');
-                
-                // Battle parameters (same as main.js)
-                const f1Id = 'aang-airbending-only';
-                const f2Id = 'azula';
-                const locId = 'fire-nation-capital';
-                const timeOfDay = 'day';
-                const emotionalMode = true;
-                
-                console.log('🚨 [DIRECT] Starting battle simulation...');
-                console.log('🚨 [DIRECT] Current mode:', currentSimMode);
-                
-                // Reset state and show loading
-                resetGlobalUI();
-                showLoadingState(currentSimMode);
-                
-                // Small delay to show loading state
-                setTimeout(() => {
-                    try {
-                        const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
-                        battleResult.locationId = locId;
-                        showResultsState(battleResult, currentSimMode);
-                        console.log('🚨 [DIRECT] Battle simulation completed successfully');
-                    } catch (error) {
-                        console.error('[DIRECT] Error during battle simulation:', error);
-                        alert('Error during battle simulation: ' + error.message);
-                    }
-                }, 100);
-                
-            } catch (error) {
-                console.error('[DIRECT] Failed to import battle modules:', error);
-                alert('Failed to load battle system: ' + error.message);
-            }
-        });
-        console.log('🔧 [DIRECT] Battle button handler attached successfully');
+        
+        // Display user-friendly error message
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #f44336; color: white; padding: 20px; border-radius: 8px; text-align: center; z-index: 9999;';
+        errorDiv.innerHTML = `
+            <h3>Application Failed to Load</h3>
+            <p>Please refresh the page. If the problem persists, check the browser console for details.</p>
+            <button onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: white; color: #f44336; border: none; border-radius: 4px; cursor: pointer;">Refresh Page</button>
+        `;
+        document.body.appendChild(errorDiv);
     }
 </script>
 </body>

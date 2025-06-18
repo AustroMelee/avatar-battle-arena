@@ -1,10 +1,12 @@
-// FILE: main.js - FORCE RELOAD: 2025-06-18-06:30:00-UNIQUE-ID-12345
-// CACHE BUST: This comment forces browser reload
+/**
+ * @fileoverview Main application entry point for Avatar Battle Arena
+ * @description Initializes the battle simulation system, UI components, and event handlers
+ * @version 1.2.0
+ */
+
 'use strict';
 
-//# sourceURL=main.js
-
-console.log('🔧 [DEBUG] main.js loaded - version with debug messages');
+console.log('[MAIN] Avatar Battle Arena - Application loaded successfully');
 
 import { simulateBattle } from './engine_battle-engine-core.js';
 import { 
@@ -74,21 +76,14 @@ function init() {
         defaultModeRadio.checked = true;
     }
 
-    console.log('[MAIN] Looking for battle button with ID "battleBtn"...');
-    console.log('[MAIN] battleBtn element:', battleBtn);
-    console.log('[MAIN] battleBtn exists:', !!battleBtn);
-    
     if (battleBtn) {
-        console.log('[MAIN] ✅ Battle button found, adding click listener');
         battleBtn.addEventListener('click', () => {
-            console.log('[MAIN] ⚔️ FIGHT button clicked! Starting battle...');
+            console.log('[MAIN] Battle simulation initiated');
             const f1Id = 'aang-airbending-only';
             const f2Id = 'azula';
             const locId = 'fire-nation-capital';
             const timeOfDay = 'day';
-            const emotionalMode = true; // Hardcoded
-
-            console.log('[MAIN] Battle parameters:', { f1Id, f2Id, locId, timeOfDay, emotionalMode });
+            const emotionalMode = true;
 
             // Reset state and show loading - all through centralized state
             resetGlobalUI();
@@ -96,16 +91,14 @@ function init() {
 
             setTimeout(() => {
                 try {
-                    console.log('[MAIN] Calling simulateBattle...');
                     const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
                     console.log('[MAIN] Battle simulation completed successfully');
                     // Pass location ID to the result display
                     battleResult.locationId = locId;
                     showResultsState(battleResult, currentSimMode);
                 } catch (error) {
-                     console.error("[MAIN] An error occurred during battle simulation:", error);
-                     console.error("[MAIN] Error stack:", error.stack);
-                     alert("A critical error occurred. Please check the console and refresh.");
+                     console.error("[MAIN] Battle simulation failed:", error);
+                     alert("Battle simulation failed. Please refresh the page and try again.");
                      // Use state-driven error handling
                      updateGameState({ 
                          ui: { 
@@ -117,7 +110,7 @@ function init() {
             }, 100);
         });
     } else {
-        console.error('[MAIN] Battle button not found! Cannot attach click listener.');
+        console.warn('[MAIN] Battle button not found. Battle functionality may not work.');
     }
 
     setupDetailedLogControls();
