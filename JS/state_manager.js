@@ -230,17 +230,28 @@ function renderUIControls() {
     const resultsSection = document.getElementById('results');
     if (resultsSection) {
         if (ui.resultsVisible) {
+            console.log('[STATE] Showing results dialog...');
             // Handle dialog element properly
             if (resultsSection.tagName.toLowerCase() === 'dialog') {
-                resultsSection.showModal();
+                try {
+                    resultsSection.showModal();
+                    console.log('[STATE] Dialog showModal() called successfully');
+                } catch (err) {
+                    console.error('[STATE] Error calling showModal():', err);
+                    resultsSection.style.display = 'block';
+                }
             } else {
                 resultsSection.style.display = 'block';
                 void resultsSection.offsetWidth; // Force reflow
                 resultsSection.classList.add('show');
             }
         } else {
-            resultsSection.style.display = 'none';
-            resultsSection.classList.remove('show');
+            if (resultsSection.tagName.toLowerCase() === 'dialog') {
+                resultsSection.close();
+            } else {
+                resultsSection.style.display = 'none';
+                resultsSection.classList.remove('show');
+            }
         }
     }
     
@@ -521,6 +532,30 @@ export function showResultsState(battleResult, mode) {
 
     // Handle additional UI elements that need special handling
     handleBattleLogDisplay(battleResult, mode);
+    
+    // Populate winner information
+    const winnerNameEl = document.getElementById('winner-name');
+    const winProbabilityEl = document.getElementById('win-probability');
+    if (winnerNameEl && winProbabilityEl) {
+        if (battleResult.isDraw) {
+            winnerNameEl.textContent = 'Draw';
+            winProbabilityEl.textContent = 'The battle ended in a stalemate';
+        } else {
+            // Get character data for winner display
+            import('./data_characters.js').then(({ characters }) => {
+                const winnerName = characters[battleResult.winnerId]?.name || battleResult.winnerId;
+                winnerNameEl.textContent = `${winnerName} Wins!`;
+                winProbabilityEl.textContent = `Victory achieved through superior strategy`;
+                console.log('[STATE] Winner information populated:', winnerName);
+            }).catch(err => {
+                console.warn('[STATE] Could not load character data:', err);
+                winnerNameEl.textContent = `${battleResult.winnerId} Wins!`;
+                winProbabilityEl.textContent = `Victory achieved`;
+            });
+        }
+    } else {
+        console.warn('[STATE] Winner display elements not found');
+    }
 }
 
 /**
