@@ -10,14 +10,13 @@
 // --- MAIN INTERFACE ---
 export { selectMove, analyzeAiDecision, resetAiState, getAiSummary } from './ai_decision_engine.js';
 
-// --- PERSONALITY SYSTEM ---
+// --- FLAT EXPORTS (for direct import) ---
 export { 
     adaptPersonality, 
     getDynamicPersonality, 
     DEFAULT_PERSONALITY_PROFILE 
 } from './ai_personality.js';
 
-// --- MEMORY SYSTEM ---
 export { 
     updateAiMemory, 
     getMoveEffectivenessScore, 
@@ -27,7 +26,6 @@ export {
     DEFAULT_AI_MEMORY 
 } from './ai_memory.js';
 
-// --- STRATEGIC INTENT ---
 export { 
     determineStrategicIntent, 
     getIntentDescription, 
@@ -36,7 +34,6 @@ export {
     STRATEGIC_INTENTS 
 } from './ai_strategy_intent.js';
 
-// --- MOVE SCORING ---
 export { 
     calculateMoveWeights, 
     getViableMoves, 
@@ -44,7 +41,6 @@ export {
     getMoveWeightsSummary 
 } from './ai_move_scoring.js';
 
-// --- MOVE SELECTION ---
 export { 
     getSoftmaxProbabilities, 
     selectFromDistribution, 
@@ -55,6 +51,46 @@ export {
 } from './ai_move_selection.js';
 
 // --- NAMESPACED EXPORTS (for organized access) ---
+// Import all necessary functions for namespaced objects
+import { 
+    adaptPersonality, 
+    getDynamicPersonality, 
+    DEFAULT_PERSONALITY_PROFILE 
+} from './ai_personality.js';
+
+import { 
+    updateAiMemory, 
+    getMoveEffectivenessScore, 
+    isMoveOnCooldown, 
+    getOpponentProfile, 
+    resetMemoryAspect,
+    DEFAULT_AI_MEMORY 
+} from './ai_memory.js';
+
+import { 
+    determineStrategicIntent, 
+    getIntentDescription, 
+    isIntentAggressive, 
+    isIntentDefensive,
+    STRATEGIC_INTENTS 
+} from './ai_strategy_intent.js';
+
+import { 
+    calculateMoveWeights, 
+    getViableMoves, 
+    getTopMove, 
+    getMoveWeightsSummary 
+} from './ai_move_scoring.js';
+
+import { 
+    getSoftmaxProbabilities, 
+    selectFromDistribution, 
+    selectMoveFromWeights, 
+    calculateTemperature,
+    getSelectionStats,
+    validateProbabilities 
+} from './ai_move_selection.js';
+
 export const AiPersonality = {
     adapt: adaptPersonality,
     getDynamic: getDynamicPersonality,
