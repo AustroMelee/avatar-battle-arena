@@ -10,19 +10,19 @@
 // TYPE IMPORTS
 // ============================================================================
 /**
- * @typedef {import('../types.js').Fighter} Fighter
- * @typedef {import('../types.js').Move} Move
- * @typedef {import('../types.js').DecisionContext} DecisionContext
- * @typedef {import('../types.js').AiAnalysis} AiAnalysis
- * @typedef {import('../types.js').AiPersonality} AiPersonality
- * @typedef {import('../types.js').MoveEvaluation} MoveEvaluation
+ * @typedef {import('../types/battle.js').Fighter} Fighter
+ * @typedef {import('../types/battle.js').Move} Move
+ * @typedef {import('../types/ai.js').DecisionContext} DecisionContext
+ * @typedef {import('../types/ai.js').AiAnalysis} AiAnalysis
+ * @typedef {import('../types/ai.js').AiPersonality} AiPersonality
+ * @typedef {import('../types/ai.js').MoveEvaluation} MoveEvaluation
  */
 
 // ============================================================================
 // DEPENDENCY IMPORTS
 // ============================================================================
-import { getPersonalityTraits } from "./ai_personality.js";
-import { getOpponentPatterns } from "./ai_memory.js";
+import { getDynamicPersonality } from "./ai_personality.js";
+import { getMoveEffectivenessScore } from "./ai_memory.js";
 
 // ============================================================================
 // PERSONALITY MODIFIERS
@@ -38,7 +38,7 @@ import { getOpponentPatterns } from "./ai_memory.js";
  */
 function applyPersonalityModifiers(move, context, analysis) {
   /** @type {AiPersonality} */
-  const personality = getPersonalityTraits(context.self);
+  const personality = getDynamicPersonality(context.self, context.battleState.phaseState.currentPhase);
 
   /** @type {Record<string, number>} */
   const modifiers = {};
@@ -74,13 +74,10 @@ function applyPersonalityModifiers(move, context, analysis) {
  */
 async function applyMemoryModifiers(move, context) {
   try {
-    /** @type {any[]} */
-    const patterns = await getOpponentPatterns(context.opponent.id);
-    /** @type {number} */
-    const pastEffectiveness = patterns
-      .filter((p) => p.moveId === move.id)
-      .reduce((sum, p) => sum + (p.success ? 1 : -1), 0);
-    return Math.max(-10, Math.min(10, pastEffectiveness * 2));
+    const pastEffectiveness = getMoveEffectivenessScore(context.self.aiMemory, move.name);
+    // The score is an average (e.g., -1 to 3). We can scale it to the desired range.
+    // A simple multiplier will work for now.
+    return Math.max(-10, Math.min(10, pastEffectiveness * 5));
   } catch (error) {
     console.warn("[AI Utils] Error applying memory modifiers:", error);
     return 0;
