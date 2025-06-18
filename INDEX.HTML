@@ -331,9 +331,10 @@ window.exportDebug = () => window.ATLA_DEBUG.exportLogs();
     window.ATLA_DEBUG.performance.start('main-module-load');
     
     try {
-        // Import main module with cache busting
+        // Import main module with strong cache busting
         const timestamp = Date.now();
-        await import(`./js/main.js?v=${timestamp}`);
+        const randomId = Math.random().toString(36).substring(7);
+        await import(`./js/main.js?v=${timestamp}&r=${randomId}&debug=true`);
         window.ATLA_DEBUG.trackModule('main', 'loaded');
         window.ATLA_DEBUG.performance.end('main-module-load');
         window.ATLA_DEBUG.log('MAIN', 'Application loaded successfully');
