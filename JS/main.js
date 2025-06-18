@@ -3,6 +3,8 @@
 
 //# sourceURL=main.js
 
+console.log('🔧 [DEBUG] main.js loaded - version with debug messages');
+
 import { simulateBattle } from './engine_battle-engine-core.js';
 import { 
     updateGameState, 
