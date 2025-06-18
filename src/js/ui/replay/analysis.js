@@ -4,12 +4,12 @@
 
 "use strict";
 
-import { replaySystem } from "../../utils_deterministic_replay.js";
+// import { replaySystem } from "../../utils_deterministic_replay.js";
 import { getReplayState } from "./state.js";
 import { showNotification } from "./notifications.js";
 
 /**
- * @typedef {import('../../utils_deterministic_replay.js').BattleSnapshot} BattleSnapshot
+ * @typedef {object} BattleSnapshot
  * @typedef {import('../../types/battle.js').BattleState} BattleState
  */
 
@@ -23,20 +23,21 @@ export function analyzeSelectedSnapshot() {
         return;
     }
 
-    const snapshot = replaySystem.getSnapshotById(currentReplayId); // Assuming this method exists
-    if (!snapshot) {
-        showNotification("Snapshot not found", "error");
-        return;
-    }
+    // const snapshot = replaySystem.getSnapshotById(currentReplayId); // Assuming this method exists
+    // if (!snapshot) {
+    //     showNotification("Snapshot not found", "error");
+    //     return;
+    // }
 
-    const analysis = generateSnapshotAnalysis(snapshot);
+    // const analysis = generateSnapshotAnalysis(snapshot);
+    showNotification("Analysis feature is currently disabled.", "error");
     
     const resultsContainer = document.getElementById("analysis-results");
     if (resultsContainer) {
         resultsContainer.innerHTML = `
             <div class="analysis-report">
-                <h3>Snapshot Analysis: ${snapshot.id}</h3>
-                ${analysis}
+                <h3>Snapshot Analysis</h3>
+                <p>This feature is temporarily disabled.</p>
             </div>
         `;
     }

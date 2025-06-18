@@ -6,14 +6,20 @@
 
 "use strict";
 
-import { IMPACT_LEVELS, getPauseDurationForImpact } from "./utils_impact_level.js";
+const IMPACT_LEVELS = {
+    LOW: "low",
+    MEDIUM: "medium",
+    HIGH: "high",
+    CRITICAL: "critical"
+};
+const DEFAULT_PAUSE_MS = 500;
 
 /**
  * Default animation event structure
  */
 const createBaseAnimationEvent = (event) => ({
     text: event.text || "",
-    pauseAfter: event.pauseAfter || getPauseDurationForImpact(IMPACT_LEVELS.LOW)
+    pauseAfter: event.pauseAfter || DEFAULT_PAUSE_MS
 });
 
 /**
