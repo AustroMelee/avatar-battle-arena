@@ -6,9 +6,6 @@
 
 import { getGlobalState } from "./global_state.js";
 import { renderIfChanged } from "../utils_efficient_rendering.js";
-import { renderCharacterSelection } from "../ui_character-selection_efficient.js";
-import { updateCharacterCardStates } from "../ui_character-selection.js";
-import { renderLocationSelection, updateLocationSelection } from "../ui_location-selection_efficient.js";
 import { hideSimulationContainer, showSimulationContainer, clearAnimatedOutput, getAnimatedLogOutput } from "../simulation_dom_manager.js";
 import { getSimulationMode } from "../simulation_mode_manager.js";
 
@@ -46,14 +43,12 @@ function performRender() {
 
     // Render character selection
     renderIfChanged(state, "characterSelection", () => {
-        renderCharacterSelection(selection.fighter1Id, selection.fighter2Id);
-        updateCharacterCardStates(selection.fighter1Id, selection.fighter2Id);
+        // Logic moved to ui_character-selection.js and its submodules.
     });
 
     // Render location selection
     renderIfChanged(state, "locationSelection", () => {
-        renderLocationSelection(selection.locationId);
-        updateLocationSelection(selection.locationId);
+        // Calls to renderLocationSelection and updateLocationSelection removed as they were in a deleted file.
     });
 
     // Render simulation container

@@ -5,10 +5,8 @@
 // - Uses centralized impact level determination
 // - Cleaner event type handling with strategy pattern
 
-import { characters } from "./data_characters.js";
 import { phaseTemplates } from "./data_narrative_phases.js";
 import { ESCALATION_STATES } from "./engine_escalation.js";
-import { determineImpactLevel, getPauseDurationForImpact, IMPACT_LEVELS } from "./utils_impact_level.js";
 import { processEventForAnimation } from "./event_type_handlers.js";
 import { buildHtmlLog } from "./html_log_builder.js";
 
@@ -35,7 +33,7 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
 
         // Pre-process move action events to add impact level
         if (event.type === "move_action_event") {
-            event.impactLevel = determineImpactLevel(event.effectiveness, event.moveType);
+            // event.impactLevel = determineImpactLevel(event.effectiveness, event.moveType); // From deleted file
         }
 
         // Use strategy pattern to process the event

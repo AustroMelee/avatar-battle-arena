@@ -6,7 +6,6 @@
 
 import { getUIState, updateRenderPerformance, clearDirtyComponents } from "./ui_state.js";
 import { populateCharacterGrids } from "../ui_character-selection.js";
-import { populateLocationGrid } from "../ui_location-selection.js";
 
 /**
  * Main render loop for UI updates.
@@ -60,24 +59,20 @@ function renderComponent(componentId) {
     switch (componentId) {
         case "character-selection":
             populateCharacterGrids(
-                document.querySelector("#fighter1-grid"),
-                document.querySelector("#fighter2-grid"),
-                document.querySelector("#fighter1-name"),
-                document.querySelector("#fighter2-name"),
-                document.querySelector("#fighter1-select"),
-                document.querySelector("#fighter2-select"),
+                {
+                    fighter1Grid: document.querySelector("#fighter1-grid"),
+                    fighter2Grid: document.querySelector("#fighter2-grid"),
+                    fighter1NameDisplay: document.querySelector("#fighter1-name"),
+                    fighter2NameDisplay: document.querySelector("#fighter2-name"),
+                    fighter1Select: document.querySelector("#fighter1-select"),
+                    fighter2Select: document.querySelector("#fighter2-select"),
+                },
                 () => {}
             );
             break;
             
         case "location-selection":
-            populateLocationGrid(
-                document.querySelector("#location-grid"),
-                document.querySelector("#location-name"),
-                document.querySelector("#location-select"),
-                document.querySelector("#location-environment-summary"),
-                () => {}
-            );
+            // populateLocationGrid was here, but the file it came from (ui_location-selection.js) was deleted.
             break;
             
         default:

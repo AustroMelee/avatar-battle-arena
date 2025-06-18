@@ -4,7 +4,7 @@
 
 "use strict";
 
-import { processTurn } from "../engine_turn-processor.js";
+import { processTurn } from "../../engine_turn-processor.js";
 import { checkBattleTermination } from "./termination.js";
 import { createBattleResult } from "./results.js";
 
