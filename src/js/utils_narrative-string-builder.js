@@ -2,7 +2,7 @@
 
 import { getRandomElementSeeded, seededRandom } from "./utils_seeded_random.js";
 import { USE_DETERMINISTIC_RANDOM } from "./config_game.js";
-import { executeFilterChain } from "./utils_narrative-filters.js";
+import { executeFilterChain } from "./narrative/narrative_filter_registry.js";
 import { EFFECTIVENESS_FLAVORS, ENVIRONMENTAL_NARRATIVES } from "./data_effectiveness-flavors.js";
 
 // Centralized Tag/Context Registry (Fixed: now supports rich metadata)
