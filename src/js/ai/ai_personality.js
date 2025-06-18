@@ -7,8 +7,18 @@
 
 "use strict";
 
-import { clamp } from "../utils_math.js";
 import { getPhaseAIModifiers } from "../engine_battle-phase.js";
+
+/**
+ * Clamps a number between a minimum and maximum value.
+ * @param {number} value The number to clamp.
+ * @param {number} min The minimum value.
+ * @param {number} max The maximum value.
+ * @returns {number} The clamped number.
+ */
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max));
+}
 
 /**
  * Default personality traits for AI characters
