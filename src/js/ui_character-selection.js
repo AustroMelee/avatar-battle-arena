@@ -4,15 +4,15 @@
 
 "use strict";
 
-import { characters } from "../../data_characters.js";
-import { initializeState } from "./character_selection/state.js";
-import { populateGrid } from "./character_selection/dom.js";
-import { addCardEventListeners } from "./character_selection/events.js";
+import { getCharacterRegistry } from "./data_characters.js";
+import { initializeState } from "./ui/character_selection/state.js";
+import { populateGrid } from "./ui/character_selection/dom.js";
+import { addCardEventListeners } from "./ui/character_selection/events.js";
 
 /**
- * @typedef {import('./types.js').Character} Character
- * @typedef {import('./character_selection/types.js').SelectionChangeCallback} SelectionChangeCallback
- * @typedef {import('./character_selection/types.js').SelectionElements} SelectionElements
+ * @typedef {import('./types/character.js').CharacterTemplate} Character
+ * @typedef {import('./ui/character_selection/types.js').SelectionChangeCallback} SelectionChangeCallback
+ * @typedef {import('./ui/character_selection/types.js').SelectionElements} SelectionElements
  */
 
 /**
@@ -23,7 +23,8 @@ import { addCardEventListeners } from "./character_selection/events.js";
 export function populateCharacterGrids(elements, onSelectionChange) {
     initializeState(onSelectionChange);
 
-    const characterList = Object.values(characters)
+    const characterRegistry = getCharacterRegistry();
+    const characterList = Object.values(characterRegistry.templates)
         .filter(c => c && c.id && c.name)
         .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 

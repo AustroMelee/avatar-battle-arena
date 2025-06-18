@@ -4,19 +4,20 @@
 
 "use strict";
 
-import { replaySystem } from "../../utils_deterministic_replay.js";
+// import { replaySystem } from "../../utils_deterministic_replay.js";
 import { showNotification } from "./notifications.js"; // Assuming notifications are also modularized
 import { selectSnapshotForReplay } from "./playback.js";
 
 /**
- * @typedef {import('../../utils_deterministic_replay.js').BattleSnapshot} BattleSnapshot
+ * @typedef {object} BattleSnapshot
  */
 
 /**
  * Updates the list of available snapshots in the UI.
  */
 export function updateSnapshotList() {
-    const snapshots = /** @type {BattleSnapshot[]} */ (replaySystem.getAllSnapshots());
+    // const snapshots = /** @type {BattleSnapshot[]} */ (replaySystem.getAllSnapshots());
+    const snapshots = []; // Mock empty array to prevent errors
     const listContainer = document.getElementById("snapshot-list");
     
     if (!listContainer) return;
@@ -71,10 +72,10 @@ function attachSnapshotActionListeners() {
 export function createCurrentSnapshot() {
     try {
         // This needs integration with the main battle state
-        const dummyBattleState = { turn: 0, phaseState: {}, fighters: {} };
-        const snapshot = replaySystem.snapshotBattleState(dummyBattleState, 0, { location: "Test" });
-        updateSnapshotList();
-        showNotification(`Snapshot created: ${snapshot.id}`, "success");
+        // const dummyBattleState = { turn: 0, phaseState: {}, fighters: {} };
+        // const snapshot = replaySystem.snapshotBattleState(dummyBattleState, 0, { location: "Test" });
+        // updateSnapshotList();
+        showNotification(`Snapshot feature is currently disabled.`, "error");
     } catch (error) {
         showNotification(`Failed to create snapshot: ${error.message}`, "error");
     }
@@ -86,10 +87,10 @@ export function createCurrentSnapshot() {
  */
 export async function importSnapshotFile(file) {
     try {
-        const text = await file.text();
-        const snapshotId = replaySystem.importSnapshot(text);
-        updateSnapshotList();
-        showNotification(`Snapshot imported: ${snapshotId}`, "success");
+        // const text = await file.text();
+        // const snapshotId = replaySystem.importSnapshot(text);
+        // updateSnapshotList();
+        showNotification(`Snapshot import is currently disabled.`, "error");
     } catch (error) {
         showNotification(`Failed to import snapshot: ${error.message}`, "error");
     }
@@ -101,17 +102,17 @@ export async function importSnapshotFile(file) {
  */
 export function exportSnapshot(snapshotId) {
     try {
-        const jsonData = replaySystem.exportSnapshot(snapshotId);
-        const blob = new Blob([jsonData], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
+        // const jsonData = replaySystem.exportSnapshot(snapshotId);
+        // const blob = new Blob([jsonData], { type: "application/json" });
+        // const url = URL.createObjectURL(blob);
         
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${snapshotId}.json`;
-        a.click();
+        // const a = document.createElement("a");
+        // a.href = url;
+        // a.download = `${snapshotId}.json`;
+        // a.click();
         
-        URL.revokeObjectURL(url);
-        showNotification(`Snapshot exported: ${snapshotId}`, "success");
+        // URL.revokeObjectURL(url);
+        showNotification(`Snapshot export is currently disabled: ${snapshotId}`, "error");
     } catch (error) {
         showNotification(`Failed to export snapshot: ${error.message}`, "error");
     }
@@ -123,8 +124,8 @@ export function exportSnapshot(snapshotId) {
  */
 export function deleteSnapshot(snapshotId) {
     if (confirm(`Are you sure you want to delete snapshot ${snapshotId}?`)) {
-        replaySystem.deleteSnapshot(snapshotId);
-        updateSnapshotList();
-        showNotification(`Snapshot deleted: ${snapshotId}`, "info");
+        // replaySystem.deleteSnapshot(snapshotId);
+        // updateSnapshotList();
+        showNotification(`Snapshot deletion is currently disabled: ${snapshotId}`, "error");
     }
 } 

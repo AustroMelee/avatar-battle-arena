@@ -3,10 +3,6 @@
 
 // Version 1.1: Null-Safety Pass
 
-// --- NEW IMPORT ---
-import { getCharacterImageFromUI as getCharacterImage } from "./ui.js";
-import { getEmojiForMove } from "./utils_impact_level.js";
-// --- END NEW IMPORT ---
 import { focusOnLatestMessage } from "./camera_control.js"; // camera_control.js should be robust
 
 const TYPEWRITER_SPEED_MS = 25;
@@ -19,12 +15,6 @@ let animationQueueInternal = [];
 let currentMessageIndex = 0;
 let simulationContainerElement = null;
 let onStepCompleteCallbackInternal = null; // Renamed to avoid conflict
-
-// --- NEW FUNCTION: getCharacterImage ---
-// This function was originally expected from ui.js but wasn't exported.
-// Adding it here for a self-contained fix within animated_text_engine.
-// --- END NEW FUNCTION ---
-
 
 export function stopCurrentAnimation() {
     if (currentTimeoutId) {
@@ -248,16 +238,11 @@ function animateEmoji(emojiElement, impactLevel) {
     const level = typeof impactLevel === "string" ? impactLevel.toLowerCase() : "low";
 
     switch (level) {
-        case "critical":
         case "high":
-            animationClass = "emoji-animate-high";
-            break;
-        case "strong": // Keep existing behavior for 'strong'
-             animationClass = "emoji-animate-high";
+            animationClass = "emoji-high-impact";
             break;
         case "medium":
-        case "normal":
-            animationClass = "emoji-animate-medium";
+            animationClass = "emoji-medium-impact";
             break;
         case "low":
             animationClass = "emoji-animate-low";
@@ -268,9 +253,5 @@ function animateEmoji(emojiElement, impactLevel) {
     emojiElement.classList.add(animationClass);
     setTimeout(() => {
         emojiElement.classList.remove(animationClass);
-          }, EMOJI_ANIMATION_DURATION_MS);
-  }
-
-function getEmojiForMoveType(moveType, effectivenessLabel) {
-    return getEmojiForMove(moveType, effectivenessLabel);
+    }, EMOJI_ANIMATION_DURATION_MS);
 }
