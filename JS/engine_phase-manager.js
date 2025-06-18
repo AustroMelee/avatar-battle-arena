@@ -7,9 +7,9 @@
  * and generating the associated narrative.
  */
 
-import { checkAndTransitionPhase, phaseDefinitions } from './engine_battle-phase.js';
+import { checkAndTransitionPhase } from './engine_battle-phase.js';
 import { generateLogEvent } from './utils_log_event.js';
-import { phaseTemplates } from './data_narrative_phases.js';
+import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases.js';
 import { findNarrativeQuote, generateTurnNarrationObjects } from './engine_narrative-engine.js';
 
 
