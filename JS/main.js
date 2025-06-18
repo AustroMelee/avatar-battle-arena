@@ -26,7 +26,6 @@ import {
 import { initializeEfficientCharacterSelection } from './ui_character-selection_efficient.js';
 import { initializeEfficientLocationSelection } from './ui_location-selection_efficient.js';
 
-const battleBtn = document.getElementById('battleBtn');
 let currentSimMode = "animated";
 
 function handleModeSelectionChange(event) {
@@ -76,9 +75,13 @@ function init() {
         defaultModeRadio.checked = true;
     }
 
+    // Get battle button after DOM is loaded
+    const battleBtn = document.getElementById('battleBtn');
+    console.log('[MAIN] Battle button found:', !!battleBtn);
+    
     if (battleBtn) {
         battleBtn.addEventListener('click', () => {
-            console.log('[MAIN] Battle simulation initiated');
+            console.log('[MAIN] ⚔️ FIGHT button clicked! Battle simulation initiated');
             const f1Id = 'aang-airbending-only';
             const f2Id = 'azula';
             const locId = 'fire-nation-capital';
