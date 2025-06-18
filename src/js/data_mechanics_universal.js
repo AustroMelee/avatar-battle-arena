@@ -1,5 +1,5 @@
 // FILE: data_mechanics_universal.js
-'use strict';
+"use strict";
 
 // Universal mechanics and rules applicable across all characters and locations.
 

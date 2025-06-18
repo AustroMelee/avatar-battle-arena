@@ -4,12 +4,12 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { locations } from '../locations.js';
-import { EFFECT_TYPES } from '../data_mechanics_definitions.js';
-import { getRandomElementSeeded } from '../utils_seeded_random.js';
-import { generateLogEvent } from '../utils_log_event.js';
+import { locations } from "../locations.js";
+import { EFFECT_TYPES } from "../data_mechanics_definitions.js";
+import { getRandomElementSeeded } from "../utils_seeded_random.js";
+import { generateLogEvent } from "../utils_log_event.js";
 
 /**
  * @constant {object} ENVIRONMENTAL_IMPACT_SEVERITY
@@ -17,12 +17,12 @@ import { generateLogEvent } from '../utils_log_event.js';
  * Higher numbers indicate greater severity.
  */
 const ENVIRONMENTAL_IMPACT_SEVERITY = {
-    'subtle': 1,
-    'minor': 2,
-    'moderate': 3,
-    'significant': 4,
-    'widespread': 5,
-    'critical': 6,
+    "subtle": 1,
+    "minor": 2,
+    "moderate": 3,
+    "significant": 4,
+    "widespread": 5,
+    "critical": 6,
 };
 
 /**
@@ -42,7 +42,7 @@ export function getEnvironmentImpactLine(locationId, environmentState, isCrit = 
     const highestImpactSeverityInPhase = ENVIRONMENTAL_IMPACT_SEVERITY[environmentState.highestImpactLevelThisPhase] || 0;
     const usedLinesInPhase = environmentState.environmentalImpactsThisPhase.map(e => e.line);
 
-    let candidatePools = [];
+    const candidatePools = [];
 
     // Build pools from highest severity to lowest
     if (isCrit && loc.envImpactCritical) candidatePools.push({ pool: loc.envImpactCritical, severity: ENVIRONMENTAL_IMPACT_SEVERITY.critical });
@@ -88,11 +88,11 @@ export function generateCollateralDamageEvent(move, actor, result, environmentSt
         return null; // No environmental damage occurred.
     }
 
-    let currentImpactLevelKey = 'subtle';
-    if (envDamageEffect.value > 80) currentImpactLevelKey = 'critical';
-    else if (envDamageEffect.value > 50) currentImpactLevelKey = 'widespread';
-    else if (envDamageEffect.value > 20) currentImpactLevelKey = 'significant';
-    else if (envDamageEffect.value > 0) currentImpactLevelKey = 'minor';
+    let currentImpactLevelKey = "subtle";
+    if (envDamageEffect.value > 80) currentImpactLevelKey = "critical";
+    else if (envDamageEffect.value > 50) currentImpactLevelKey = "widespread";
+    else if (envDamageEffect.value > 20) currentImpactLevelKey = "significant";
+    else if (envDamageEffect.value > 0) currentImpactLevelKey = "minor";
 
     const currentSeverity = ENVIRONMENTAL_IMPACT_SEVERITY[currentImpactLevelKey];
     const highestSeverityThisPhase = ENVIRONMENTAL_IMPACT_SEVERITY[environmentState.highestImpactLevelThisPhase] || 0;
@@ -101,7 +101,7 @@ export function generateCollateralDamageEvent(move, actor, result, environmentSt
         environmentState.highestImpactLevelThisPhase = currentImpactLevelKey;
     }
 
-    const isCrit = result.effectiveness.label === 'Critical';
+    const isCrit = result.effectiveness.label === "Critical";
     const collateralPhrase = getEnvironmentImpactLine(battleState.locationId, environmentState, isCrit);
 
     if (!collateralPhrase) {
@@ -119,7 +119,7 @@ export function generateCollateralDamageEvent(move, actor, result, environmentSt
     const htmlContent = `<p class="environmental-impact-text">${collateralPhrase}</p>`;
 
     return generateLogEvent(battleState, {
-        type: 'collateral_damage_event',
+        type: "collateral_damage_event",
         actorId: actor.id,
         characterName: actor.name,
         text: collateralPhrase,
@@ -145,20 +145,20 @@ export function generateEnvironmentalSummaryEvent(battleState, environmentState)
     let headerPhrase = "The environment bears the marks of the conflict."; // Default
 
     switch (highestImpactLevel) {
-        case 'critical':
+        case "critical":
             headerPhrase = "The very ground is rent by the battle's fury.";
             break;
-        case 'widespread':
+        case "widespread":
             headerPhrase = "Widespread destruction scars the landscape.";
             break;
-        case 'significant':
+        case "significant":
             headerPhrase = "The environment visibly reels from the clash.";
             break;
-        case 'moderate':
+        case "moderate":
             headerPhrase = "The arena bears moderate new scars.";
             break;
-        case 'minor':
-        case 'subtle':
+        case "minor":
+        case "subtle":
             headerPhrase = "The environment shows subtle signs of the fight.";
             break;
     }
@@ -172,12 +172,12 @@ export function generateEnvironmentalSummaryEvent(battleState, environmentState)
     const htmlContent = `
         <div class="environmental-summary">
             <p class="environmental-summary-header">${headerPhrase}</p>
-            ${distinctImpact ? `<p class="environmental-summary-detail">Notably, ${distinctImpact.charAt(0).toLowerCase() + distinctImpact.slice(1)}</p>` : ''}
+            ${distinctImpact ? `<p class="environmental-summary-detail">Notably, ${distinctImpact.charAt(0).toLowerCase() + distinctImpact.slice(1)}</p>` : ""}
         </div>`;
 
     return generateLogEvent(battleState, {
-        type: 'environmental_summary_event',
-        text: `${headerPhrase} ${distinctImpact || ''}`,
+        type: "environmental_summary_event",
+        text: `${headerPhrase} ${distinctImpact || ""}`,
         html_content: htmlContent,
         isEnvironmental: true,
         summaryLevel: highestImpactLevel

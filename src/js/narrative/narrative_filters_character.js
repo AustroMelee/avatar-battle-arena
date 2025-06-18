@@ -5,10 +5,10 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { seededRandom } from '../utils_seeded_random.js';
-import { USE_DETERMINISTIC_RANDOM } from '../config_game.js';
+import { seededRandom } from "../utils_seeded_random.js";
+import { USE_DETERMINISTIC_RANDOM } from "../config_game.js";
 
 /**
  * Filter for personality-based matches.
@@ -42,15 +42,15 @@ export function situationalFilter(variants, context, reasons) {
     const matches = variants.filter(v => {
         if (v.tags) {
             if (v.tags.includes(NARRATIVE_TAGS.FINISHER) && turnContext?.isFinisherAttempt) {
-                reasons.push('Finisher Intent');
+                reasons.push("Finisher Intent");
                 return true;
             }
             if (v.tags.includes(NARRATIVE_TAGS.COMEBACK) && turnContext?.isComebackSituation) {
-                reasons.push('Comeback Situation');
+                reasons.push("Comeback Situation");
                 return true;
             }
             if (v.tags.includes(NARRATIVE_TAGS.METAPHOR) && (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random()) < 0.2) {
-                reasons.push('Random Metaphor Boost');
+                reasons.push("Random Metaphor Boost");
                 return true;
             }
         }

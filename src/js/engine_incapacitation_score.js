@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 export const INCAPACITATION_SCORE_VERSION = "1.1";
 
@@ -48,17 +48,17 @@ export function calculateIncapacitationScore(fighter, opponent) {
         score += incapacitationScoreWeights.StunnedDuration * fighter.stunDuration;
     }
     if (fighter.tacticalState) {
-        if (fighter.tacticalState.name === 'Pinned') score += incapacitationScoreWeights.Pinned;
-        if (fighter.tacticalState.name === 'Outmaneuvered') score += incapacitationScoreWeights.Outmaneuvered;
-        if (fighter.tacticalState.name === 'Exposed') score += incapacitationScoreWeights.Exposed;
-        if (fighter.tacticalState.name === 'Off-Balance') score += incapacitationScoreWeights.OffBalance;
+        if (fighter.tacticalState.name === "Pinned") score += incapacitationScoreWeights.Pinned;
+        if (fighter.tacticalState.name === "Outmaneuvered") score += incapacitationScoreWeights.Outmaneuvered;
+        if (fighter.tacticalState.name === "Exposed") score += incapacitationScoreWeights.Exposed;
+        if (fighter.tacticalState.name === "Off-Balance") score += incapacitationScoreWeights.OffBalance;
     }
 
     if (fighter.mentalState) {
         switch (fighter.mentalState.level) {
-            case 'stressed': score += incapacitationScoreWeights.MentalState_Stressed; break;
-            case 'shaken': score += incapacitationScoreWeights.MentalState_Shaken; break;
-            case 'broken': score += incapacitationScoreWeights.MentalState_Broken; break;
+            case "stressed": score += incapacitationScoreWeights.MentalState_Stressed; break;
+            case "shaken": score += incapacitationScoreWeights.MentalState_Shaken; break;
+            case "broken": score += incapacitationScoreWeights.MentalState_Broken; break;
         }
     }
 
@@ -71,8 +71,8 @@ export function calculateIncapacitationScore(fighter, opponent) {
     }
 
     // Ensure momentum values are numbers before comparison
-    const fighterMomentum = typeof fighter.momentum === 'number' && !isNaN(fighter.momentum) ? fighter.momentum : 0;
-    const opponentMomentum = typeof opponent.momentum === 'number' && !isNaN(opponent.momentum) ? opponent.momentum : 0;
+    const fighterMomentum = typeof fighter.momentum === "number" && !isNaN(fighter.momentum) ? fighter.momentum : 0;
+    const opponentMomentum = typeof opponent.momentum === "number" && !isNaN(opponent.momentum) ? opponent.momentum : 0;
 
     const momentumDelta = opponentMomentum - fighterMomentum;
     if (momentumDelta >= 5) {

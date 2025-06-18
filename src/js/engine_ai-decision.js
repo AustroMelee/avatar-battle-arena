@@ -6,7 +6,7 @@
  */
 
 // FILE: engine_ai-decision.js
-'use strict';
+"use strict";
 
 // ===== COMPATIBILITY LAYER =====
 // This file maintains backward compatibility while the system transitions to modular AI
@@ -20,7 +20,7 @@ import {
     selectFromDistribution as selectFromDistributionModular,
     DEFAULT_PERSONALITY_PROFILE,
     DEFAULT_AI_MEMORY
-} from './ai/index.js';
+} from "./ai/index.js";
 
 // Re-export the modular functions for backward compatibility
 export const adaptPersonality = adaptPersonalityModular;

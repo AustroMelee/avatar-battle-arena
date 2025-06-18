@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Analyzes a complete battle result with detailed breakdown.
@@ -19,11 +19,11 @@
  * analyzeBattle(result);
  */
 export function analyzeBattle(battleResult) {
-    console.group('🔍 Battle Analysis');
+    console.group("🔍 Battle Analysis");
     
     // Basic battle info
-    console.log('📊 Battle Overview');
-    console.log(`Winner: ${battleResult.winnerId || 'Draw'}`);
+    console.log("📊 Battle Overview");
+    console.log(`Winner: ${battleResult.winnerId || "Draw"}`);
     console.log(`Total Events: ${battleResult.log.length}`);
     console.log(`Battle Duration: ${calculateBattleDuration(battleResult.log)}ms`);
     
@@ -48,7 +48,7 @@ export function analyzeBattle(battleResult) {
  * @param {Array} battleLog - Array of battle events
  */
 export function analyzeEventTypes(battleLog) {
-    console.log('📈 Event Type Analysis');
+    console.log("📈 Event Type Analysis");
     
     const eventTypes = {};
     const actorActions = {};
@@ -80,18 +80,18 @@ export function analyzeEventTypes(battleLog) {
  * @param {Object} battleResult - Complete battle result
  */
 export function analyzeCharacterPerformance(battleResult) {
-    console.log('⚔️ Character Performance');
+    console.log("⚔️ Character Performance");
     
     const { finalState } = battleResult;
     
     Object.entries(finalState).forEach(([key, fighter]) => {
-        if (key.startsWith('fighter')) {
+        if (key.startsWith("fighter")) {
             console.group(`${fighter.name} Performance`);
             console.log(`Final HP: ${fighter.hp}/100`);
             console.log(`Final Energy: ${fighter.energy}/100`);
             console.log(`Final Momentum: ${fighter.momentum}`);
             console.log(`Moves Used: ${fighter.moveHistory?.length || 0}`);
-            console.log(`Mental State: ${fighter.mentalState?.level || 'unknown'}`);
+            console.log(`Mental State: ${fighter.mentalState?.level || "unknown"}`);
             
             // Analyze move effectiveness
             if (fighter.moveHistory && fighter.moveHistory.length > 0) {
@@ -99,7 +99,7 @@ export function analyzeCharacterPerformance(battleResult) {
                 fighter.moveHistory.forEach(move => {
                     effectiveness[move.effectiveness] = (effectiveness[move.effectiveness] || 0) + 1;
                 });
-                console.log('Move Effectiveness:', effectiveness);
+                console.log("Move Effectiveness:", effectiveness);
             }
             
             console.groupEnd();
@@ -113,12 +113,12 @@ export function analyzeCharacterPerformance(battleResult) {
  * @param {Array} battleLog - Array of battle events
  */
 export function analyzePhases(battleLog) {
-    console.log('🔄 Phase Analysis');
+    console.log("🔄 Phase Analysis");
     
-    const phaseTransitions = battleLog.filter(event => event.type === 'phase_header_event');
+    const phaseTransitions = battleLog.filter(event => event.type === "phase_header_event");
     const phaseDurations = {};
     
-    let currentPhase = 'opening';
+    let currentPhase = "opening";
     let phaseStartTurn = 0;
     
     phaseTransitions.forEach(transition => {
@@ -142,12 +142,12 @@ export function analyzePhases(battleLog) {
  * @param {Array} battleLog - Array of battle events
  */
 export function analyzePerformance(battleLog) {
-    console.log('⚡ Performance Analysis');
+    console.log("⚡ Performance Analysis");
     
-    const performanceEvents = battleLog.filter(e => e.type === 'performance');
+    const performanceEvents = battleLog.filter(e => e.type === "performance");
     
     if (performanceEvents.length === 0) {
-        console.log('No performance events found');
+        console.log("No performance events found");
         return;
     }
     
@@ -193,7 +193,7 @@ export function calculateBattleDuration(battleLog) {
     
     const timestamps = battleLog
         .map(e => e.performanceTimestamp)
-        .filter(t => typeof t === 'number');
+        .filter(t => typeof t === "number");
     
     if (timestamps.length === 0) return 0;
     

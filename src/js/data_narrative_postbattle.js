@@ -1,5 +1,5 @@
 // FILE: data_narrative_postbattle.js
-'use strict';
+"use strict";
 
 // Defines phrases for post-battle victory summaries.
 

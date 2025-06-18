@@ -9,7 +9,7 @@
  * @version 2.0.0 - Refactored to modular architecture
  */
 
-'use strict';
+"use strict";
 
 // Import from focused modules
 import { 
@@ -22,7 +22,7 @@ import {
     hideCancelButton,
     clearAnimatedOutput,
     getAnimatedLogOutput
-} from './simulation_dom_manager.js';
+} from "./simulation_dom_manager.js";
 
 import {
     setSimulationMode as setMode,
@@ -36,14 +36,14 @@ import {
     getCompletionCallback,
     setCompletionCallback,
     resetState
-} from './simulation_state_manager.js';
+} from "./simulation_state_manager.js";
 
 // Import other dependencies
-import { startAnimationSequence, stopCurrentAnimation } from './animated_text_engine.js';
-import { resetCamera, enableCameraControls, disableCameraControls } from './camera_control.js';
+import { startAnimationSequence, stopCurrentAnimation } from "./animated_text_engine.js";
+import { resetCamera, enableCameraControls, disableCameraControls } from "./camera_control.js";
 
 // Re-export functions for backward compatibility
-export { setSimulationMode, getSimulationMode } from './simulation_state_manager.js';
+export { setSimulationMode, getSimulationMode } from "./simulation_state_manager.js";
 
 export function initializeSimulationManagerDOM(domRefs) {
     initDOM(domRefs);
@@ -58,7 +58,7 @@ export function startSimulation(eventQueue, battleResult, onCompleteCallback) {
     // If mode is instant, immediately call callback without animation
     if (getMode() === "instant") {
         console.log("Sim Manager (startSimulation): Running in instant mode. Skipping animation.");
-        if (typeof onCompleteCallback === 'function') {
+        if (typeof onCompleteCallback === "function") {
             onCompleteCallback(battleResult, false); // false indicates success (no animation needed)
         }
         return;
@@ -67,7 +67,7 @@ export function startSimulation(eventQueue, battleResult, onCompleteCallback) {
     // Check for essential DOM elements before proceeding with animated mode
     if (!DOM.simulationContainer || !DOM.animatedLogOutput) {
         console.error("Sim Manager (startSimulation): Critical DOM elements not initialized for animated mode. Cannot start animated simulation.");
-        if (typeof onCompleteCallback === 'function') {
+        if (typeof onCompleteCallback === "function") {
             onCompleteCallback(battleResult, true); // true indicates fallback to instant/error
         }
         return;
@@ -93,7 +93,7 @@ export function startSimulation(eventQueue, battleResult, onCompleteCallback) {
     resetCamera(getAnimatedLogOutput());
     enableCameraControls(getAnimatedLogOutput());
 
-    console.log('Starting animation sequence with queue:', getAnimationQueue());
+    console.log("Starting animation sequence with queue:", getAnimationQueue());
     startAnimationSequence(getAnimationQueue(), getAnimatedLogOutput(), simulationStepCompleted);
 }
 

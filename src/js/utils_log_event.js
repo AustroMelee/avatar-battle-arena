@@ -4,7 +4,7 @@
  * @version 2.0.0
  */
 
-'use strict';
+"use strict";
 
 //# sourceURL=utils_log_event.js
 
@@ -68,29 +68,29 @@ import {
     createDiceRollEvent, 
     createPerformanceEvent as moduleCreatePerformanceEvent, 
     createErrorEvent as moduleCreateErrorEvent 
-} from './battle_logging/battle_event_factory.js';
+} from "./battle_logging/battle_event_factory.js";
 
 import { 
     validateLogEvent as moduleValidateLogEvent,
     validateBattleState,
     validateRollData 
-} from './battle_logging/battle_event_validators.js';
+} from "./battle_logging/battle_event_validators.js";
 
-import { writeEvent } from './battle_logging/battle_log_writer.js';
-import { logEventToConsole } from './battle_logging/battle_log_debug.js';
+import { writeEvent } from "./battle_logging/battle_log_writer.js";
+import { logEventToConsole } from "./battle_logging/battle_log_debug.js";
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
 /** @type {string[]} */
-const VALID_ROLL_TYPES = ['accuracy', 'damage', 'critical', 'defense', 'special'];
+const VALID_ROLL_TYPES = ["accuracy", "damage", "critical", "defense", "special"];
 
 /** @type {string[]} */
-const VALID_ROLL_OUTCOMES = ['success', 'failure', 'critical_success', 'critical_failure'];
+const VALID_ROLL_OUTCOMES = ["success", "failure", "critical_success", "critical_failure"];
 
 /** @type {string[]} */
-const VALID_ERROR_SEVERITIES = ['low', 'medium', 'high', 'critical'];
+const VALID_ERROR_SEVERITIES = ["low", "medium", "high", "critical"];
 
 /** @type {number} */
 const PERFORMANCE_THRESHOLD_MS = 100;
@@ -127,20 +127,20 @@ const MAX_EVENT_METADATA_SIZE = 1000;
  */
 export function generateLogEvent(battleState, eventOptions) {
     // Input validation
-    if (!battleState || typeof battleState !== 'object') {
-        throw new TypeError('generateLogEvent: battleState must be an object');
+    if (!battleState || typeof battleState !== "object") {
+        throw new TypeError("generateLogEvent: battleState must be an object");
     }
 
-    if (!eventOptions || typeof eventOptions !== 'object') {
-        throw new TypeError('generateLogEvent: eventOptions must be an object');
+    if (!eventOptions || typeof eventOptions !== "object") {
+        throw new TypeError("generateLogEvent: eventOptions must be an object");
     }
 
-    if (typeof eventOptions.type !== 'string' || eventOptions.type.length === 0) {
-        throw new Error('generateLogEvent: eventOptions.type is required and must be a non-empty string');
+    if (typeof eventOptions.type !== "string" || eventOptions.type.length === 0) {
+        throw new Error("generateLogEvent: eventOptions.type is required and must be a non-empty string");
     }
 
-    if (typeof eventOptions.actorId !== 'string' || eventOptions.actorId.length === 0) {
-        throw new Error('generateLogEvent: eventOptions.actorId is required and must be a non-empty string');
+    if (typeof eventOptions.actorId !== "string" || eventOptions.actorId.length === 0) {
+        throw new Error("generateLogEvent: eventOptions.actorId is required and must be a non-empty string");
     }
 
     console.debug(`[Log Event] Creating event of type: ${eventOptions.type} (enhanced version)`);
@@ -185,7 +185,7 @@ export function generateLogEvent(battleState, eventOptions) {
         
         // Validate event structure
         try {
-            validateLogEvent(event);
+            moduleValidateLogEvent(event);
         } catch (validationError) {
             console.warn(`[Log Event] Event validation failed: ${validationError.message}`);
             event.metadata = { ...event.metadata, validationWarning: validationError.message };
@@ -234,36 +234,36 @@ export function generateLogEvent(battleState, eventOptions) {
 export function logRoll({ battleLog, rollData, battleState }) {
     // Input validation
     if (!Array.isArray(battleLog)) {
-        throw new TypeError('logRoll: battleLog must be an array');
+        throw new TypeError("logRoll: battleLog must be an array");
     }
 
-    if (!rollData || typeof rollData !== 'object') {
-        throw new TypeError('logRoll: rollData must be an object');
+    if (!rollData || typeof rollData !== "object") {
+        throw new TypeError("logRoll: rollData must be an object");
     }
 
-    if (!battleState || typeof battleState !== 'object') {
-        throw new TypeError('logRoll: battleState must be an object');
+    if (!battleState || typeof battleState !== "object") {
+        throw new TypeError("logRoll: battleState must be an object");
     }
 
     // Validate roll data structure
-    if (typeof rollData.rollType !== 'string' || !VALID_ROLL_TYPES.includes(rollData.rollType)) {
-        throw new Error(`logRoll: rollType must be one of: ${VALID_ROLL_TYPES.join(', ')}`);
+    if (typeof rollData.rollType !== "string" || !VALID_ROLL_TYPES.includes(rollData.rollType)) {
+        throw new Error(`logRoll: rollType must be one of: ${VALID_ROLL_TYPES.join(", ")}`);
     }
 
-    if (typeof rollData.actorId !== 'string' || rollData.actorId.length === 0) {
-        throw new Error('logRoll: actorId is required and must be a non-empty string');
+    if (typeof rollData.actorId !== "string" || rollData.actorId.length === 0) {
+        throw new Error("logRoll: actorId is required and must be a non-empty string");
     }
 
-    if (typeof rollData.roll !== 'number' || rollData.roll < 0 || rollData.roll > 1) {
-        throw new RangeError('logRoll: roll must be a number between 0 and 1 (inclusive)');
+    if (typeof rollData.roll !== "number" || rollData.roll < 0 || rollData.roll > 1) {
+        throw new RangeError("logRoll: roll must be a number between 0 and 1 (inclusive)");
     }
 
-    if (typeof rollData.threshold !== 'number' || rollData.threshold < 0 || rollData.threshold > 1) {
-        throw new RangeError('logRoll: threshold must be a number between 0 and 1 (inclusive)');
+    if (typeof rollData.threshold !== "number" || rollData.threshold < 0 || rollData.threshold > 1) {
+        throw new RangeError("logRoll: threshold must be a number between 0 and 1 (inclusive)");
     }
 
-    if (typeof rollData.outcome !== 'string' || !VALID_ROLL_OUTCOMES.includes(rollData.outcome)) {
-        throw new Error(`logRoll: outcome must be one of: ${VALID_ROLL_OUTCOMES.join(', ')}`);
+    if (typeof rollData.outcome !== "string" || !VALID_ROLL_OUTCOMES.includes(rollData.outcome)) {
+        throw new Error(`logRoll: outcome must be one of: ${VALID_ROLL_OUTCOMES.join(", ")}`);
     }
 
     console.debug(`[Log Event] Logging dice roll: ${rollData.rollType} for ${rollData.actorId} (enhanced version)`);
@@ -325,9 +325,9 @@ export function createErrorEvent(battleState, error, context, additionalData = {
 }
 
 // Add deprecation warnings for development
-if (typeof console !== 'undefined' && console.warn) {
+if (typeof console !== "undefined" && console.warn) {
     console.warn(
-        '[DEPRECATION WARNING] utils_log_event.js is now a compatibility layer. ' +
-        'Please migrate to the new modular system: import from "./battle_logging/index.js"'
+        "[DEPRECATION WARNING] utils_log_event.js is now a compatibility layer. " +
+        "Please migrate to the new modular system: import from \"./battle_logging/index.js\""
     );
 } 

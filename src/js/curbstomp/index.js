@@ -4,21 +4,21 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 // --- CORE MODULES ---
-export * from './curbstomp_state.js';
-export * from './curbstomp_rule_registry.js';
-export * from './curbstomp_rule_engine.js';
-export * from './curbstomp_victim_selector.js';
-export * from './curbstomp_narrative.js';
+export * from "./curbstomp_state.js";
+export * from "./curbstomp_rule_registry.js";
+export * from "./curbstomp_rule_engine.js";
+export * from "./curbstomp_victim_selector.js";
+export * from "./curbstomp_narrative.js";
 
 // --- NAMESPACED EXPORTS ---
-import * as CurbstompState from './curbstomp_state.js';
-import * as CurbstompRuleRegistry from './curbstomp_rule_registry.js';
-import * as CurbstompRuleEngine from './curbstomp_rule_engine.js';
-import * as CurbstompVictimSelector from './curbstomp_victim_selector.js';
-import * as CurbstompNarrative from './curbstomp_narrative.js';
+import * as CurbstompState from "./curbstomp_state.js";
+import * as CurbstompRuleRegistry from "./curbstomp_rule_registry.js";
+import * as CurbstompRuleEngine from "./curbstomp_rule_engine.js";
+import * as CurbstompVictimSelector from "./curbstomp_victim_selector.js";
+import * as CurbstompNarrative from "./curbstomp_narrative.js";
 
 export {
     CurbstompState,
@@ -33,20 +33,20 @@ export {
 export {
     applyCurbstompRules,
     checkCurbstompConditions
-} from './curbstomp_rule_engine.js';
+} from "./curbstomp_rule_engine.js";
 
 export {
     resetCurbstompState
-} from './curbstomp_state.js';
+} from "./curbstomp_state.js";
 
 export {
     charactersMarkedForDefeat,
     markCharacterForDefeat,
     isCharacterMarkedForDefeat
-} from './curbstomp_state.js';
+} from "./curbstomp_state.js";
 
 export {
     getAllCurbstompRulesForBattle,
     getCharacterCurbstompRules,
     getLocationCurbstompRules
-} from './curbstomp_rule_registry.js'; 
+} from "./curbstomp_rule_registry.js"; 

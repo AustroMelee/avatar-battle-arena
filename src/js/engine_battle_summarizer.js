@@ -1,13 +1,13 @@
 // FILE: js/engine_battle_summarizer.js
-'use strict';
+"use strict";
 
 // This module is responsible for generating the final summary and conclusion
 // events for the battle log after the main simulation loop has ended.
 
-import { phaseTemplates } from './data_narrative_phases.js';
-import { getFinalVictoryLine, substituteTokens } from './engine_narrative-engine.js';
-import { charactersMarkedForDefeat } from './engine_curbstomp_manager.js';
-import { MAX_TOTAL_TURNS } from './config_game.js';
+import { phaseTemplates } from "./data_narrative_phases.js";
+import { getFinalVictoryLine, substituteTokens } from "./engine_narrative-engine.js";
+import { charactersMarkedForDefeat } from "./engine_curbstomp_manager.js";
+import { MAX_TOTAL_TURNS } from "./config_game.js";
 
 /**
  * Generates the final summary events and text for the battle result object.
@@ -25,7 +25,7 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
 
     if (isStalemate) {
         battleResult.log.push({
-            type: 'stalemate_result_event',
+            type: "stalemate_result_event",
             text: "The battle ends in a STALEMATE!",
             html_content: phaseTemplates.stalemateResult
         });
@@ -34,7 +34,7 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
     } else if (finalWinnerFull && finalLoserFull) {
         const isKOByHp = finalLoserFull.hp <= 0;
         const isTimeoutVictory = turnCount >= MAX_TOTAL_TURNS && !isKOByHp;
-        const lastCurbstompEvent = battleResult.log.slice().reverse().find(e => e.type === 'curbstomp_event' && !e.isEscape && e.isMajorEvent);
+        const lastCurbstompEvent = battleResult.log.slice().reverse().find(e => e.type === "curbstomp_event" && !e.isEscape && e.isMajorEvent);
 
         if (lastCurbstompEvent && charactersMarkedForDefeat.has(finalLoserFull.id) && lastCurbstompEvent.actualAttackerId === finalWinnerFull.id) {
             finalWinnerFull.summary = lastCurbstompEvent.text;
@@ -45,7 +45,7 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
                 .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
                 .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
             battleResult.log.push({
-                type: 'final_blow_event',
+                type: "final_blow_event",
                 text: finalBlowTextRaw,
                 html_content: finalBlowTextHtml,
                 isKOAction: true
@@ -58,7 +58,7 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
                 .replace(/{winnerName}/g, `<span class="char-${finalWinnerFull.id}">${finalWinnerFull.name}</span>`)
                 .replace(/{loserName}/g, `<span class="char-${finalLoserFull.id}">${finalLoserFull.name}</span>`);
             battleResult.log.push({
-                type: 'timeout_victory_event',
+                type: "timeout_victory_event",
                 text: timeoutTextRaw,
                 html_content: timeoutTextHtml
             });
@@ -79,41 +79,41 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
         const finalWords = getFinalVictoryLine(finalWinnerFull, finalLoserFull);
         const conclusionContext = { WinnerName: finalWinnerFull.name, LoserName: finalLoserFull.name };
         const conclusionTextRaw = substituteTokens(`${finalWinnerFull.name} stands victorious. ${finalWords}`, finalWinnerFull, finalLoserFull, conclusionContext);
-        const conclusionTextHtml = phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw);
+        const conclusionTextHtml = phaseTemplates.conclusion.replace("{endingNarration}", conclusionTextRaw);
         battleResult.log.push({
-            type: 'conclusion_event',
+            type: "conclusion_event",
             text: conclusionTextRaw,
             html_content: conclusionTextHtml
         });
     } else if (isStalemate) {
         const conclusionTextRaw = "The battle concludes. Neither could claim outright victory.";
         battleResult.log.push({
-            type: 'conclusion_event',
+            type: "conclusion_event",
             text: conclusionTextRaw,
-            html_content: phaseTemplates.conclusion.replace('{endingNarration}', conclusionTextRaw)
+            html_content: phaseTemplates.conclusion.replace("{endingNarration}", conclusionTextRaw)
         });
     }
 
     // Environmental Damage Analysis (NEW)
     const envDamageLevel = battleResult.environmentState.damageLevel;
-    const highestImpactLevelLogged = battleResult.environmentState.highestImpactLevelThisPhase || 'subtle'; // Get the highest level logged
+    const highestImpactLevelLogged = battleResult.environmentState.highestImpactLevelThisPhase || "subtle"; // Get the highest level logged
     let envSummaryText = "The environment remained largely untouched.";
 
     // Determine summary text based on the highest impact level actually logged
     switch (highestImpactLevelLogged) {
-        case 'critical':
+        case "critical":
             envSummaryText = "The landscape bears scars of widespread destruction, a testament to the battle's ferocity.";
             break;
-        case 'widespread':
+        case "widespread":
             envSummaryText = "Widespread destruction scarred the landscape, a testament to the battle's ferocity.";
             break;
-        case 'significant':
+        case "significant":
             envSummaryText = "Significant environmental disruption is evident across the arena.";
             break;
-        case 'minor':
+        case "minor":
             envSummaryText = "The environment sustained minimal noticeable damage.";
             break;
-        case 'subtle':
+        case "subtle":
         default:
             envSummaryText = "The environment remained largely untouched.";
             break;
@@ -123,7 +123,7 @@ export function generateFinalSummary(battleResult, fighter1, fighter2, turnCount
 
     // Add environmental summary event to the log
     battleResult.log.push({
-        type: 'environmental_final_summary_event',
+        type: "environmental_final_summary_event",
         text: `Environmental Damage: ${envDamageLevel}% ${envSummaryText}`,
         html_content: `<div class="final-environmental-summary"><p><strong>Environmental Damage:</strong> ${envDamageLevel}%</p><p>${envSummaryText}</p></div>`,
         isEnvironmental: true,

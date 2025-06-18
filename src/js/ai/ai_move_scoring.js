@@ -2,22 +2,37 @@
  * @fileoverview AI Move Scoring System
  * @description Calculates move weights based on personality, strategic intent, and battle conditions.
  * Pure scoring logic without randomness or selection.
- * @version 1.0
+ * @version 1.1.0
  */
 
-'use strict';
+"use strict";
 
-import { getAvailableMoves } from '../engine_move-resolution.js';
-import { BATTLE_PHASES } from '../engine_battle-phase.js';
-import { getEscalationAIWeights } from '../engine_escalation.js';
-import { getDynamicPersonality } from './ai_personality.js';
-import { STRATEGIC_INTENTS } from './ai_strategy_intent.js';
+import { getAvailableMoves } from "../engine_move_availability.js";
+import { BATTLE_PHASES } from "../engine_battle-phase.js";
+import { getEscalationAIWeights } from "../engine_escalation.js";
+import { getDynamicPersonality } from "./ai_personality.js";
+import { STRATEGIC_INTENTS } from "./ai_strategy_intent.js";
 
 /**
- * Safe getter for nested object properties
+ * @typedef {import('../types/battle.js').Fighter} Fighter
+ * @typedef {import('../types/battle.js').Move} Move
+ * @typedef {import('../types/ai.js').AiPersonality} AiPersonality
+ * @typedef {import('../types/ai.js').StrategicIntent} StrategicIntent
+ * @typedef {import('../types/ai.js').IntentMultipliers} IntentMultipliers
+ * @typedef {import('../types/engine.js').BattlePhase} BattlePhase
+ * @typedef {import('../types/ai.js').MoveEvaluation} MoveEvaluation
  */
-function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor') {
-    const value = path.split('.').reduce((acc, part) => acc && acc[part], obj);
+
+/**
+ * Safe getter for nested object properties.
+ * @template T
+ * @param {object} obj The object to access.
+ * @param {string} path The path to the property.
+ * @param {T} defaultValue The default value to return if the property is not found.
+ * @returns {T} The property value or the default value.
+ */
+function safeGet(obj, path, defaultValue) {
+    const value = path.split(".").reduce((acc, part) => acc && acc[part], obj);
     if (value === undefined || value === null) {
         return defaultValue;
     }
@@ -25,7 +40,8 @@ function safeGet(obj, path, defaultValue, actorName = 'Unknown Actor') {
 }
 
 /**
- * Intent-based multipliers for different move types and characteristics
+ * Intent-based multipliers for different move types and characteristics.
+ * @type {IntentMultipliers}
  */
 const INTENT_MULTIPLIERS = {
     [STRATEGIC_INTENTS.STANDARD_EXCHANGE]: { 
@@ -81,27 +97,31 @@ const INTENT_MULTIPLIERS = {
 };
 
 /**
- * Calculates base personality modifiers for a move
+ * Calculates base personality modifiers for a move.
+ * @param {Move} move The move to evaluate.
+ * @param {AiPersonality} profile The AI's personality profile.
+ * @param {Fighter} actor The AI fighter.
+ * @returns {{weight: number, reasons: string[]}} The modifier weight and reasons.
  */
 function calculatePersonalityModifiers(move, profile, actor) {
     let weight = 1.0;
-    let reasons = [];
+    const reasons = [];
 
     // Move type personality modifiers
     switch (move.type) {
-        case 'Offense':
+        case "Offense":
             weight *= (1 + profile.aggression);
             reasons.push(`Aggro:${profile.aggression.toFixed(2)}`);
             break;
-        case 'Defense':
+        case "Defense":
             weight *= (1 + profile.defensiveBias);
             reasons.push(`Def:${profile.defensiveBias.toFixed(2)}`);
             break;
-        case 'Utility':
+        case "Utility":
             weight *= (1 + profile.creativity);
             reasons.push(`Util:${profile.creativity.toFixed(2)}`);
             break;
-        case 'Finisher':
+        case "Finisher":
             weight *= (1 + profile.riskTolerance);
             // Finisher timing logic is handled in calculateContextualModifiers
             break;
@@ -111,67 +131,75 @@ function calculatePersonalityModifiers(move, profile, actor) {
     const signatureBias = safeGet(profile.signatureMoveBias, move.name, 1.0, actor.name);
     if (signatureBias !== 1.0) {
         weight *= signatureBias;
-        reasons.push(`SigMove`);
+        reasons.push("SigMove");
     }
 
     // Anti-repetition
     if (actor.lastMove?.name === move.name) {
         weight *= (1.0 - profile.antiRepeater);
-        reasons.push(`AntiRepeat`);
+        reasons.push("AntiRepeat");
     }
 
     return { weight, reasons };
 }
 
 /**
- * Calculates contextual modifiers based on battle state and opponent condition
+ * Calculates contextual modifiers based on battle state and opponent condition.
+ * @param {Move} move The move to evaluate.
+ * @param {Fighter} actor The AI fighter.
+ * @param {Fighter} defender The opponent fighter.
+ * @param {BattlePhase} currentPhase The current battle phase.
+ * @returns {{weight: number, reasons: string[]}} The modifier weight and reasons.
  */
 function calculateContextualModifiers(move, actor, defender, currentPhase) {
     let weight = 1.0;
-    let reasons = [];
+    const reasons = [];
 
     // Finisher timing logic
-    if (move.type === 'Finisher') {
-        const defenderHp = safeGet(defender, 'hp', 100, defender.name);
+    if (move.type === "Finisher") {
+        const defenderHp = safeGet(defender, "hp", 100);
         if (currentPhase === BATTLE_PHASES.LATE || defenderHp <= 30) {
             weight *= 2.5;
             weight = Math.max(weight, 10.0); // Finisher floor
-            reasons.push('FinisherFocus');
+            reasons.push("FinisherFocus");
         } else {
             weight *= 0.1; // Penalize finishers early
         }
     }
 
     // Azula's broken mental state effects
-    if (actor.id === 'azula' && actor.mentalState?.level === 'broken') {
+    if (actor.id === "azula" && actor.mentalState?.level === "broken") {
         // Prioritize high-risk, high-power moves
-        if (move.moveTags?.includes('highRisk') || (move.power || 0) >= 70) {
+        if (move.moveTags?.includes("highRisk") || (move.power || 0) >= 70) {
             weight *= 2.0;
-            reasons.push('AzulaBroken:HighRisk/Power');
+            reasons.push("AzulaBroken:HighRisk/Power");
         }
         
         // Boost collateral damage moves
-        if (move.collateralImpact && move.collateralImpact !== 'none') {
+        if (move.collateralImpact && move.collateralImpact !== "none") {
             weight *= 1.5;
-            reasons.push('AzulaBroken:CollateralBoost');
+            reasons.push("AzulaBroken:CollateralBoost");
         }
         
         // Additional aggression surge
         const profile = getDynamicPersonality(actor, currentPhase);
         weight *= (1 + profile.aggression * 0.5);
         weight *= (1 - profile.defensiveBias * 0.5);
-        reasons.push('AzulaBroken:AggressionSurge');
+        reasons.push("AzulaBroken:AggressionSurge");
     }
 
     return { weight, reasons };
 }
 
 /**
- * Applies intent-based multipliers to move weight
+ * Applies intent-based multipliers to move weight.
+ * @param {Move} move The move to evaluate.
+ * @param {StrategicIntent} intent The current strategic intent.
+ * @returns {{weight: number, reasons: string[]}} The modifier weight and reasons.
  */
 function applyIntentModifiers(move, intent) {
     let weight = 1.0;
-    let reasons = [];
+    const reasons = [];
 
     const multipliers = INTENT_MULTIPLIERS[intent] || {};
 
@@ -199,19 +227,25 @@ function applyIntentModifiers(move, intent) {
 }
 
 /**
- * Calculates weight for a single move based on all factors
+ * Calculates weight for a single move based on all factors.
+ * @param {Move} move The move to evaluate.
+ * @param {Fighter} actor The AI fighter.
+ * @param {Fighter} defender The opponent fighter.
+ * @param {StrategicIntent} intent The current strategic intent.
+ * @param {BattlePhase} currentPhase The current battle phase.
+ * @returns {MoveEvaluation} The evaluated move with its score and reasoning.
  */
 function calculateSingleMoveWeight(move, actor, defender, intent, currentPhase) {
     if (!move || !move.name) {
         return { 
-            move: { name: "Struggle" }, 
+            move,
             weight: 0.001, 
             reasons: ["InvalidMove"] 
         };
     }
 
     let totalWeight = 1.0;
-    let allReasons = [];
+    const allReasons = [];
 
     const profile = getDynamicPersonality(actor, currentPhase);
 
@@ -245,52 +279,60 @@ function calculateSingleMoveWeight(move, actor, defender, intent, currentPhase) 
 }
 
 /**
- * Calculates weights for all available moves
- * Returns array of move objects with weights and reasoning
+ * Calculates weights for all available moves.
+ * Returns array of move objects with weights and reasoning.
+ * @param {Fighter} actor The AI fighter.
+ * @param {Fighter} defender The opponent fighter.
+ * @param {StrategicIntent} intent The current strategic intent.
+ * @param {BattlePhase} currentPhase The current battle phase.
+ * @returns {MoveEvaluation[]} An array of evaluated moves.
  */
-export function calculateMoveWeights(actor, defender, conditions, intent, currentPhase) {
-    const availableMoves = getAvailableMoves(actor, conditions, currentPhase);
-    
-    return availableMoves.map(move => 
+export function calculateMoveWeights(actor, defender, intent, currentPhase) {
+    const availableMoves = getAvailableMoves(actor, currentPhase);
+    if (!availableMoves || availableMoves.length === 0) {
+        return [];
+    }
+
+    const weightedMoves = availableMoves.map(move => 
         calculateSingleMoveWeight(move, actor, defender, intent, currentPhase)
     );
+
+    return weightedMoves;
 }
 
 /**
- * Filters moves to only include those with positive weights
+ * Filters weighted moves to get only viable options (weight > 0).
+ * @param {MoveEvaluation[]} weightedMoves - Array of moves with weights.
+ * @returns {MoveEvaluation[]} Filtered array of viable moves.
  */
 export function getViableMoves(weightedMoves) {
-    return weightedMoves.filter(moveInfo => 
-        moveInfo.weight > 0 && 
-        moveInfo.move && 
-        moveInfo.move.name !== "Struggle"
-    );
+    return weightedMoves.filter(move => move.weight > 0);
 }
 
 /**
- * Gets the highest weighted move (for deterministic selection)
+ * Gets the top-scoring move from a weighted list.
+ * @param {MoveEvaluation[]} weightedMoves - Array of moves with weights.
+ * @returns {MoveEvaluation | null} The move with the highest weight, or null if empty.
  */
 export function getTopMove(weightedMoves) {
     if (!weightedMoves || weightedMoves.length === 0) {
         return null;
     }
-
-    return weightedMoves.reduce((best, current) => 
-        current.weight > best.weight ? current : best
-    );
+    return weightedMoves.reduce((top, current) => current.weight > top.weight ? current : top, weightedMoves[0]);
 }
 
 /**
- * Gets move weights summary for debugging
+ * Creates a summary string of the move weights for logging.
+ * @param {MoveEvaluation[]} weightedMoves - Array of moves with weights.
+ * @returns {string} A formatted string summarizing the move weights.
  */
 export function getMoveWeightsSummary(weightedMoves) {
+    if (!weightedMoves || weightedMoves.length === 0) {
+        return "No moves were weighted.";
+    }
+
     return weightedMoves
-        .filter(m => m.weight > 0)
         .sort((a, b) => b.weight - a.weight)
-        .slice(0, 5) // Top 5 moves
-        .map(m => ({
-            name: m.move.name,
-            weight: m.weight.toFixed(3),
-            reasons: m.reasons.join(', ')
-        }));
+        .map(m => `${m.move.name}: ${m.weight.toFixed(2)} (${m.reasons.join(", ")})`)
+        .join(" | ");
 } 

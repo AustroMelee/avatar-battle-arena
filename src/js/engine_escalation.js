@@ -11,16 +11,16 @@
  * @version 2.0.0 - Refactored to modular architecture
  */
 
-'use strict';
+"use strict";
 
 // Import from focused modules
-import { INCAPACITATION_SCORE_VERSION, incapacitationScoreWeights, calculateIncapacitationScore } from './engine_incapacitation_score.js';
-import { ESCALATION_STATES, determineEscalationState } from './engine_escalation_states.js';
-import { applyEscalationDamageModifier } from './engine_escalation_modifiers.js';
-import { getEscalationAIWeights } from './engine_escalation_ai.js';
+import { INCAPACITATION_SCORE_VERSION, incapacitationScoreWeights, calculateIncapacitationScore } from "./engine_incapacitation_score.js";
+import { ESCALATION_STATES, determineEscalationState } from "./engine_escalation_states.js";
+import { applyEscalationDamageModifier } from "./engine_escalation_modifiers.js";
+import { getEscalationAIWeights } from "./engine_escalation_ai.js";
 
 // Re-export all functions for backward compatibility
-export { INCAPACITATION_SCORE_VERSION, incapacitationScoreWeights, calculateIncapacitationScore } from './engine_incapacitation_score.js';
-export { ESCALATION_STATES, determineEscalationState } from './engine_escalation_states.js';
-export { applyEscalationDamageModifier } from './engine_escalation_modifiers.js';
-export { getEscalationAIWeights } from './engine_escalation_ai.js'; 
+export { INCAPACITATION_SCORE_VERSION, incapacitationScoreWeights, calculateIncapacitationScore } from "./engine_incapacitation_score.js";
+export { ESCALATION_STATES, determineEscalationState } from "./engine_escalation_states.js";
+export { applyEscalationDamageModifier } from "./engine_escalation_modifiers.js";
+export { getEscalationAIWeights } from "./engine_escalation_ai.js"; 

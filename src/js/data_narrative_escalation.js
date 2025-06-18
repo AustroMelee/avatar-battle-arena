@@ -1,5 +1,5 @@
 // FILE: data_narrative_escalation.js
-'use strict';
+"use strict";
 
 // Defines narrative phrases for escalation states.
 // This block contains flavor text for character status changes.
@@ -33,14 +33,9 @@ export const escalationStateNarratives = {
     ],
     
     // Character-specific escalation states
-    'azula': {
+    "azula": {
         PRESSURED: ["Azula's perfect facade shows the barest hint of a crack under the strain."],
         SEVERELY_INCAPACITATED: ["A flicker of genuine fear, quickly suppressed, crosses Azula's face as her control slips."],
         TERMINAL_COLLAPSE: ["Azula lets out a wild, desperate shriek, her blue fire becoming dangerously erratic!"]
-    },
-    'sokka': {
-        PRESSURED: ["Sokka's usual stream of witty banter slows as he focuses on just staying in the fight."],
-        SEVERELY_INCAPACITATED: ["'Just... a little... longer...' Sokka pants, his boomerang feeling impossibly heavy."],
-        TERMINAL_COLLAPSE: ["Sokka's eyes glaze over, his brilliant plans lost in a haze of exhaustion and pain."]
     }
 };

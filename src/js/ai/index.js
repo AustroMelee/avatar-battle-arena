@@ -5,17 +5,17 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 // --- MAIN INTERFACE ---
-export { selectMove, analyzeAiDecision, resetAiState, getAiSummary } from './ai_decision_engine.js';
+export { selectMove, analyzeAiDecision, resetAiState, getAiSummary } from "./ai_decision_engine.js";
 
 // --- FLAT EXPORTS (for direct import) ---
 export { 
     adaptPersonality, 
     getDynamicPersonality, 
     DEFAULT_PERSONALITY_PROFILE 
-} from './ai_personality.js';
+} from "./ai_personality.js";
 
 export { 
     updateAiMemory, 
@@ -24,7 +24,7 @@ export {
     getOpponentProfile, 
     resetMemoryAspect,
     DEFAULT_AI_MEMORY 
-} from './ai_memory.js';
+} from "./ai_memory.js";
 
 export { 
     determineStrategicIntent, 
@@ -32,14 +32,14 @@ export {
     isIntentAggressive, 
     isIntentDefensive,
     STRATEGIC_INTENTS 
-} from './ai_strategy_intent.js';
+} from "./ai_strategy_intent.js";
 
 export { 
     calculateMoveWeights, 
     getViableMoves, 
     getTopMove, 
     getMoveWeightsSummary 
-} from './ai_move_scoring.js';
+} from "./ai_move_scoring.js";
 
 export { 
     getSoftmaxProbabilities, 
@@ -48,7 +48,7 @@ export {
     calculateTemperature,
     getSelectionStats,
     validateProbabilities 
-} from './ai_move_selection.js';
+} from "./ai_move_selection.js";
 
 // --- NAMESPACED EXPORTS (for organized access) ---
 // Import all necessary functions for namespaced objects
@@ -56,7 +56,7 @@ import {
     adaptPersonality, 
     getDynamicPersonality, 
     DEFAULT_PERSONALITY_PROFILE 
-} from './ai_personality.js';
+} from "./ai_personality.js";
 
 import { 
     updateAiMemory, 
@@ -65,7 +65,7 @@ import {
     getOpponentProfile, 
     resetMemoryAspect,
     DEFAULT_AI_MEMORY 
-} from './ai_memory.js';
+} from "./ai_memory.js";
 
 import { 
     determineStrategicIntent, 
@@ -73,14 +73,14 @@ import {
     isIntentAggressive, 
     isIntentDefensive,
     STRATEGIC_INTENTS 
-} from './ai_strategy_intent.js';
+} from "./ai_strategy_intent.js";
 
 import { 
     calculateMoveWeights, 
     getViableMoves, 
     getTopMove, 
     getMoveWeightsSummary 
-} from './ai_move_scoring.js';
+} from "./ai_move_scoring.js";
 
 import { 
     getSoftmaxProbabilities, 
@@ -89,7 +89,7 @@ import {
     calculateTemperature,
     getSelectionStats,
     validateProbabilities 
-} from './ai_move_selection.js';
+} from "./ai_move_selection.js";
 
 export const AiPersonality = {
     adapt: adaptPersonality,
@@ -132,22 +132,22 @@ export const AiSelection = {
 
 // --- LEGACY COMPATIBILITY ---
 // For backward compatibility with the old monolithic engine_ai-decision.js
-export { selectMove as selectMoveCompat } from './ai_decision_engine.js';
-export { selectFromDistribution as selectFromDistributionCompat } from './ai_move_selection.js';
+export { selectMove as selectMoveCompat } from "./ai_decision_engine.js";
+export { selectFromDistribution as selectFromDistributionCompat } from "./ai_move_selection.js";
 
 /**
  * Module information for debugging and versioning
  */
 export const AI_MODULE_INFO = {
-    version: '1.0',
+    version: "1.0",
     modules: [
-        'ai_personality',
-        'ai_memory', 
-        'ai_strategy_intent',
-        'ai_move_scoring',
-        'ai_move_selection',
-        'ai_decision_engine'
+        "ai_personality",
+        "ai_memory", 
+        "ai_strategy_intent",
+        "ai_move_scoring",
+        "ai_move_selection",
+        "ai_decision_engine"
     ],
-    description: 'Modular AI decision system with separated concerns',
+    description: "Modular AI decision system with separated concerns",
     compatibilityLayer: true
 }; 

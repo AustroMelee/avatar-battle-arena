@@ -4,25 +4,25 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Creates and displays a progress bar for batch operations
  * @param {string} initialMessage - Initial message to display
  * @returns {Object} Progress bar controller with update and remove methods
  */
-export function createProgressBar(initialMessage = 'Starting...') {
-    const progressBar = document.createElement('div');
-    progressBar.style.position = 'fixed';
-    progressBar.style.bottom = '20px';
-    progressBar.style.right = '20px';
-    progressBar.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    progressBar.style.color = 'white';
-    progressBar.style.padding = '10px';
-    progressBar.style.borderRadius = '5px';
-    progressBar.style.zIndex = '1000';
-    progressBar.style.fontFamily = 'monospace';
-    progressBar.style.fontSize = '14px';
+export function createProgressBar(initialMessage = "Starting...") {
+    const progressBar = document.createElement("div");
+    progressBar.style.position = "fixed";
+    progressBar.style.bottom = "20px";
+    progressBar.style.right = "20px";
+    progressBar.style.backgroundColor = "rgba(0,0,0,0.8)";
+    progressBar.style.color = "white";
+    progressBar.style.padding = "10px";
+    progressBar.style.borderRadius = "5px";
+    progressBar.style.zIndex = "1000";
+    progressBar.style.fontFamily = "monospace";
+    progressBar.style.fontSize = "14px";
     progressBar.textContent = initialMessage;
     
     document.body.appendChild(progressBar);
@@ -47,39 +47,39 @@ export function createProgressBar(initialMessage = 'Starting...') {
  * @param {string} title - Title for the progress display
  * @returns {Object} Detailed progress controller
  */
-export function createDetailedProgress(title = 'Batch Operation') {
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.top = '20px';
-    container.style.right = '20px';
-    container.style.backgroundColor = 'rgba(0,0,0,0.9)';
-    container.style.color = 'white';
-    container.style.padding = '15px';
-    container.style.borderRadius = '8px';
-    container.style.zIndex = '1001';
-    container.style.fontFamily = 'monospace';
-    container.style.fontSize = '12px';
-    container.style.minWidth = '300px';
-    container.style.maxWidth = '400px';
+export function createDetailedProgress(title = "Batch Operation") {
+    const container = document.createElement("div");
+    container.style.position = "fixed";
+    container.style.top = "20px";
+    container.style.right = "20px";
+    container.style.backgroundColor = "rgba(0,0,0,0.9)";
+    container.style.color = "white";
+    container.style.padding = "15px";
+    container.style.borderRadius = "8px";
+    container.style.zIndex = "1001";
+    container.style.fontFamily = "monospace";
+    container.style.fontSize = "12px";
+    container.style.minWidth = "300px";
+    container.style.maxWidth = "400px";
     
-    const titleElement = document.createElement('h3');
+    const titleElement = document.createElement("h3");
     titleElement.textContent = title;
-    titleElement.style.margin = '0 0 10px 0';
-    titleElement.style.color = '#4CAF50';
+    titleElement.style.margin = "0 0 10px 0";
+    titleElement.style.color = "#4CAF50";
     
-    const statusElement = document.createElement('div');
-    statusElement.style.marginBottom = '8px';
+    const statusElement = document.createElement("div");
+    statusElement.style.marginBottom = "8px";
     
-    const progressElement = document.createElement('div');
-    progressElement.style.marginBottom = '8px';
+    const progressElement = document.createElement("div");
+    progressElement.style.marginBottom = "8px";
     
-    const errorElement = document.createElement('div');
-    errorElement.style.color = '#f44336';
-    errorElement.style.marginBottom = '8px';
+    const errorElement = document.createElement("div");
+    errorElement.style.color = "#f44336";
+    errorElement.style.marginBottom = "8px";
     
-    const detailsElement = document.createElement('div');
-    detailsElement.style.fontSize = '11px';
-    detailsElement.style.opacity = '0.8';
+    const detailsElement = document.createElement("div");
+    detailsElement.style.fontSize = "11px";
+    detailsElement.style.opacity = "0.8";
     
     container.appendChild(titleElement);
     container.appendChild(statusElement);
@@ -110,8 +110,8 @@ export function createDetailedProgress(title = 'Batch Operation') {
                     detailsElement.textContent = `Last error: ${lastError.error}`;
                 }
             } else {
-                errorElement.textContent = '';
-                detailsElement.textContent = '';
+                errorElement.textContent = "";
+                detailsElement.textContent = "";
             }
         },
         setDetails: (details) => {

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 //# sourceURL=config_game.js
 

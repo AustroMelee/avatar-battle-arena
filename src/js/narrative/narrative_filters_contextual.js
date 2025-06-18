@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Filter for strict context matches (Crit, Miss, Humor, etc.)
@@ -25,7 +25,7 @@ export function strictContextFilter(variants, context, reasons) {
             v.tags && strictContextTags.every(tag => v.tags.includes(tag))
         );
         if (matches.length > 0) {
-            reasons.push(`Strict context match: ${strictContextTags.join(', ')}`);
+            reasons.push(`Strict context match: ${strictContextTags.join(", ")}`);
             return matches;
         }
     }
@@ -44,7 +44,7 @@ export function environmentFilter(variants, context, reasons) {
         if (v.environmentTags && environment?.tags) {
             const commonTags = v.environmentTags.filter(tag => environment.tags.includes(tag));
             if (commonTags.length > 0) {
-                reasons.push(`Environment: ${commonTags.join(', ')}`);
+                reasons.push(`Environment: ${commonTags.join(", ")}`);
                 return true;
             }
         }

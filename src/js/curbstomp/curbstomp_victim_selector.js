@@ -4,10 +4,10 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { USE_DETERMINISTIC_RANDOM } from '../config_game.js';
-import { seededRandom } from '../utils_seeded_random.js';
+import { USE_DETERMINISTIC_RANDOM } from "../config_game.js";
+import { seededRandom } from "../utils_seeded_random.js";
 
 /**
  * Selects a victim for a curbstomp rule based on its weighting logic
@@ -22,7 +22,7 @@ import { seededRandom } from '../utils_seeded_random.js';
  */
 export function selectCurbstompVictim({ attacker, defender, rule, locationData, battleState, logCallback }) {
     // Handle function-based weighting logic
-    if (typeof rule.weightingLogic === 'function') {
+    if (typeof rule.weightingLogic === "function") {
         const weightedOutcome = rule.weightingLogic({ 
             attacker, 
             defender, 
@@ -47,17 +47,17 @@ export function selectCurbstompVictim({ attacker, defender, rule, locationData, 
  */
 function handleWeightedOutcome(weightedOutcome, attacker, defender, rule, logCallback) {
     // Direct victim ID return
-    if (typeof weightedOutcome === 'string') {
+    if (typeof weightedOutcome === "string") {
         return weightedOutcome;
     }
     
     // Probability-based selection
-    if (weightedOutcome && typeof weightedOutcome.victimId === 'string' && typeof weightedOutcome.probability === 'number') {
+    if (weightedOutcome && typeof weightedOutcome.victimId === "string" && typeof weightedOutcome.probability === "number") {
         return handleProbabilitySelection(weightedOutcome, attacker, rule, logCallback);
     }
     
     // Distribution-based selection
-    if (weightedOutcome && typeof weightedOutcome.probabilities === 'object') {
+    if (weightedOutcome && typeof weightedOutcome.probabilities === "object") {
         return handleDistributionSelection(weightedOutcome, attacker, defender, rule, logCallback);
     }
 
@@ -217,7 +217,7 @@ export function calculateSelectionWeights(attacker, defender, battleState) {
  * @returns {boolean} True if character miraculously survives
  */
 export function checkMiraculousSurvival(character, rule, survivalChance = 0.15) {
-    if (!rule.outcome?.type?.includes('instant_') && !rule.outcome?.type?.includes('environmental_kill')) {
+    if (!rule.outcome?.type?.includes("instant_") && !rule.outcome?.type?.includes("environmental_kill")) {
         return false;
     }
     

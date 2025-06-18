@@ -4,9 +4,9 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { createEffectContext } from './context.js';
+import { createEffectContext } from "./context.js";
 
 /**
  * Handles composite effects that trigger multiple sub-effects.
@@ -19,8 +19,8 @@ export function handleCompositeEffect(ctx, effectHandlers) {
     const results = [];
     
     if (!effect.effects || !Array.isArray(effect.effects)) {
-        ctx.log('Composite effect requires an effects array', 'error');
-        return { success: false, message: 'Invalid composite effect structure' };
+        ctx.log("Composite effect requires an effects array", "error");
+        return { success: false, message: "Invalid composite effect structure" };
     }
     
     ctx.log(`Processing composite effect with ${effect.effects.length} sub-effects`);
@@ -37,7 +37,7 @@ export function handleCompositeEffect(ctx, effectHandlers) {
             const result = handler.length > 1 ? handler(subCtx, effectHandlers) : handler(subCtx);
             results.push(result);
         } else {
-            ctx.log(`No handler found for sub-effect type: ${subEffect.type}`, 'warn');
+            ctx.log(`No handler found for sub-effect type: ${subEffect.type}`, "warn");
             results.push({ success: false, message: `Unknown sub-effect: ${subEffect.type}` });
         }
     }
@@ -47,7 +47,7 @@ export function handleCompositeEffect(ctx, effectHandlers) {
     
     return {
         success: allSuccessful,
-        message: effect.description || messages.join(' '),
+        message: effect.description || messages.join(" "),
         subResults: results
     };
 } 

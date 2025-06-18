@@ -4,10 +4,10 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { characterCurbstompRules } from '../data_mechanics_characters.js';
-import { locationCurbstompRules } from '../data_mechanics_locations.js';
+import { characterCurbstompRules } from "../data_mechanics_characters.js";
+import { locationCurbstompRules } from "../data_mechanics_locations.js";
 
 /**
  * Gets all curbstomp rules applicable to a specific battle configuration
@@ -71,7 +71,7 @@ export function filterApplicableRules(rules, fighter1, fighter2, battleState) {
         
         // Check if rule applies to faction (with negation support)
         if (rule.appliesToFaction) {
-            const isNegated = rule.appliesToFaction.startsWith('!');
+            const isNegated = rule.appliesToFaction.startsWith("!");
             const faction = isNegated ? rule.appliesToFaction.substring(1) : rule.appliesToFaction;
             
             if (isNegated) {
@@ -111,7 +111,7 @@ export function getRulesForFighter(rules, fighter, opponent, battleState) {
         } else if (rule.appliesToElement && fighter.element === rule.appliesToElement) {
             applies = true;
         } else if (rule.appliesToFaction) {
-            const isNegated = rule.appliesToFaction.startsWith('!');
+            const isNegated = rule.appliesToFaction.startsWith("!");
             const faction = isNegated ? rule.appliesToFaction.substring(1) : rule.appliesToFaction;
             applies = isNegated ? fighter.faction !== faction : fighter.faction === faction;
         } else if (rule.appliesToAll) {

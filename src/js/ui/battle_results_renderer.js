@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Creates a list item element for analysis display
@@ -14,14 +14,14 @@
  * @param {string} valueClass - CSS class for the value span
  * @returns {HTMLElement} The created list item element
  */
-export function createAnalysisListItem(text, value, valueClass = 'modifier-neutral') {
-    const li = document.createElement('li');
-    li.className = 'analysis-item';
+export function createAnalysisListItem(text, value, valueClass = "modifier-neutral") {
+    const li = document.createElement("li");
+    li.className = "analysis-item";
     
-    const spanReason = document.createElement('span');
+    const spanReason = document.createElement("span");
     spanReason.innerHTML = text;
     
-    const spanValue = document.createElement('span');
+    const spanValue = document.createElement("span");
     spanValue.textContent = String(value);
     spanValue.className = valueClass;
     
@@ -37,10 +37,10 @@ export function createAnalysisListItem(text, value, valueClass = 'modifier-neutr
  * @returns {HTMLElement|null} The created list item element or null if invalid text
  */
 export function createAnalysisSummaryItem(text) {
-    if (!text || typeof text !== 'string') return null;
+    if (!text || typeof text !== "string") return null;
     
-    const li = document.createElement('li');
-    li.className = 'analysis-summary';
+    const li = document.createElement("li");
+    li.className = "analysis-summary";
     li.innerHTML = `<em>${text.trim()}</em>`;
     
     return li;
@@ -51,8 +51,8 @@ export function createAnalysisSummaryItem(text) {
  * @returns {HTMLElement} The created spacer element
  */
 export function createAnalysisSpacerItem() {
-    const li = document.createElement('li');
-    li.className = 'analysis-item-spacer';
+    const li = document.createElement("li");
+    li.className = "analysis-item-spacer";
     return li;
 }
 
@@ -73,13 +73,13 @@ export function renderFighterAnalysis(fighterAnalysis) {
     ));
     
     // Fighter stats
-    elements.push(createAnalysisListItem('  • Health:', stats.health.display));
-    elements.push(createAnalysisListItem('  • Energy:', stats.energy.display));
-    elements.push(createAnalysisListItem('  • Mental State:', stats.mentalState.display));
-    elements.push(createAnalysisListItem('  • Momentum:', stats.momentum.display));
-    elements.push(createAnalysisListItem('  • Incapacitation Score:', stats.incapacitationScore.display));
+    elements.push(createAnalysisListItem("  • Health:", stats.health.display));
+    elements.push(createAnalysisListItem("  • Energy:", stats.energy.display));
+    elements.push(createAnalysisListItem("  • Mental State:", stats.mentalState.display));
+    elements.push(createAnalysisListItem("  • Momentum:", stats.momentum.display));
+    elements.push(createAnalysisListItem("  • Incapacitation Score:", stats.incapacitationScore.display));
     elements.push(createAnalysisListItem(
-        '  • Escalation State:', 
+        "  • Escalation State:", 
         stats.escalationState.display, 
         stats.escalationState.class
     ));
@@ -101,9 +101,9 @@ export function renderEnvironmentImpact(environmentAnalysis, damageDisplay, impa
     damageDisplay.className = `environmental-damage-level ${environmentAnalysis.damageClass}`;
     
     // Clear and populate impacts list
-    impactsList.innerHTML = '';
+    impactsList.innerHTML = "";
     environmentAnalysis.impacts.forEach(impact => {
-        const li = document.createElement('li');
+        const li = document.createElement("li");
         li.textContent = impact;
         impactsList.appendChild(li);
     });
@@ -119,13 +119,13 @@ export function renderBattleAnalysis(battleAnalysis, targetElement) {
         if (targetElement) {
             targetElement.innerHTML = battleAnalysis.error 
                 ? `<li>Error: ${battleAnalysis.error}</li>`
-                : '<li>Error: Invalid battle analysis data.</li>';
+                : "<li>Error: Invalid battle analysis data.</li>";
         }
         return;
     }
     
     // Clear target element
-    targetElement.innerHTML = '';
+    targetElement.innerHTML = "";
     
     // Add winner summary
     if (battleAnalysis.winner.message) {
@@ -154,5 +154,5 @@ export function renderBattleAnalysis(battleAnalysis, targetElement) {
  * @returns {string} HTML string ready for innerHTML
  */
 export function renderBattleLogContent(htmlLog) {
-    return htmlLog || '<p>No battle log available.</p>';
+    return htmlLog || "<p>No battle log available.</p>";
 } 

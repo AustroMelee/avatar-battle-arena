@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Sets up performance observer for monitoring resource loading and custom measures.
@@ -16,11 +16,11 @@
  * setupPerformanceObserver(performanceMetrics);
  */
 export function setupPerformanceObserver(performanceMetrics) {
-    if ('PerformanceObserver' in window) {
+    if ("PerformanceObserver" in window) {
         try {
             const observer = new PerformanceObserver((list) => {
                 list.getEntries().forEach((entry) => {
-                    if (entry.initiatorType === 'script' || entry.initiatorType === 'xmlhttprequest') {
+                    if (entry.initiatorType === "script" || entry.initiatorType === "xmlhttprequest") {
                         const metric = {
                             name: entry.name,
                             duration: entry.duration,
@@ -36,13 +36,13 @@ export function setupPerformanceObserver(performanceMetrics) {
                 });
             });
             
-            observer.observe({ entryTypes: ['resource', 'measure', 'navigation'] });
-            console.log('[Performance Tracking] Performance Observer initialized');
+            observer.observe({ entryTypes: ["resource", "measure", "navigation"] });
+            console.log("[Performance Tracking] Performance Observer initialized");
         } catch (error) {
-            console.warn('[Performance Tracking] Performance Observer setup failed:', error);
+            console.warn("[Performance Tracking] Performance Observer setup failed:", error);
         }
     } else {
-        console.warn('[Performance Tracking] PerformanceObserver not supported');
+        console.warn("[Performance Tracking] PerformanceObserver not supported");
     }
 }
 
@@ -53,7 +53,7 @@ export function setupPerformanceObserver(performanceMetrics) {
  * @returns {Object|null} Memory snapshot or null if not supported
  */
 export function takeMemorySnapshot(memorySnapshots) {
-    if ('memory' in performance) {
+    if ("memory" in performance) {
         const snapshot = {
             usedJSHeapSize: performance.memory.usedJSHeapSize,
             totalJSHeapSize: performance.memory.totalJSHeapSize,
@@ -69,7 +69,7 @@ export function takeMemorySnapshot(memorySnapshots) {
         memorySnapshots.push(snapshot);
         return snapshot;
     } else {
-        console.warn('[Performance Tracking] Memory API not supported');
+        console.warn("[Performance Tracking] Memory API not supported");
         return null;
     }
 }
@@ -96,7 +96,7 @@ export function startMemoryMonitoring(memorySnapshots, interval = 5000) {
  */
 export function stopMemoryMonitoring(intervalId) {
     clearInterval(intervalId);
-    console.log('[Performance Tracking] Memory monitoring stopped');
+    console.log("[Performance Tracking] Memory monitoring stopped");
 }
 
 /**
@@ -118,8 +118,8 @@ export function measureExecutionTime(fn, label, performanceMetrics) {
             name: label,
             duration: duration,
             startTime: start,
-            entryType: 'measure',
-            operation: 'function_execution',
+            entryType: "measure",
+            operation: "function_execution",
             timestamp: new Date().toISOString(),
             success: true
         };
@@ -135,8 +135,8 @@ export function measureExecutionTime(fn, label, performanceMetrics) {
             name: label,
             duration: duration,
             startTime: start,
-            entryType: 'measure',
-            operation: 'function_execution',
+            entryType: "measure",
+            operation: "function_execution",
             timestamp: new Date().toISOString(),
             success: false,
             error: error.message
@@ -170,7 +170,7 @@ export function analyzePerformanceMetrics(performanceMetrics) {
     let totalDuration = 0;
     
     performanceMetrics.forEach(metric => {
-        const name = metric.name || metric.operation || 'unknown';
+        const name = metric.name || metric.operation || "unknown";
         
         if (!operationStats[name]) {
             operationStats[name] = {
@@ -208,7 +208,7 @@ export function analyzePerformanceMetrics(performanceMetrics) {
         operationStats
     };
     
-    console.group('⚡ Performance Analysis');
+    console.group("⚡ Performance Analysis");
     console.log(`Total Metrics: ${analysis.totalMetrics}`);
     console.log(`Average Duration: ${analysis.averageDuration.toFixed(2)}ms`);
     console.table(operationStats);
@@ -225,11 +225,11 @@ export function analyzePerformanceMetrics(performanceMetrics) {
  * @private
  */
 function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 } 

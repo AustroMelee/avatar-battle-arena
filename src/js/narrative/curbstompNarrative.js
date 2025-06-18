@@ -4,10 +4,10 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { getRandomElementSeeded } from '../utils_seeded_random.js';
-import { generateLogEvent } from '../utils_log_event.js';
+import { getRandomElementSeeded } from "../utils_seeded_random.js";
+import { generateLogEvent } from "../utils_log_event.js";
 
 /**
  * Generates curbstomp narration for overwhelming victories.
@@ -27,7 +27,7 @@ export function generateCurbstompNarration(winner, loser, battleState) {
     const selectedPhrase = getRandomElementSeeded(curbstompPhrases);
     
     return generateLogEvent(battleState, {
-        type: 'curbstomp_narration_event',
+        type: "curbstomp_narration_event",
         actorId: winner.id,
         characterName: winner.name,
         text: selectedPhrase,

@@ -4,9 +4,9 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { ESCALATION_STATES } from './engine_escalation_states.js';
+import { ESCALATION_STATES } from "./engine_escalation_states.js";
 
 const EDM_MULTIPLIERS = { // Escalation Damage Modifiers
     [ESCALATION_STATES.NORMAL]: 1.0,

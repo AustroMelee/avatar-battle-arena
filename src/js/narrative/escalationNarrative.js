@@ -4,13 +4,13 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { escalationStateNarratives } from '../data_narrative_escalation.js';
-import { phaseTemplates } from '../data_narrative_phases.js';
-import { getRandomElementSeeded } from '../utils_seeded_random.js';
-import { generateLogEvent } from '../utils_log_event.js';
-import { substituteTokens } from './stringSubstitution.js';
+import { escalationStateNarratives } from "../data_narrative_escalation.js";
+import { phaseTemplates } from "../data_narrative_phases.js";
+import { getRandomElementSeeded } from "../utils_seeded_random.js";
+import { generateLogEvent } from "../utils_log_event.js";
+import { substituteTokens } from "./stringSubstitution.js";
 
 /**
  * Generates narrative for a change in a character's escalation state (e.g., Injured, Exhausted).
@@ -23,15 +23,15 @@ import { substituteTokens } from './stringSubstitution.js';
 export function generateEscalationNarrative(fighter, oldState, newState, battleState) {
     if (!fighter || !newState || oldState === newState) return null;
 
-    const flavorTextPool = escalationStateNarratives[newState] || [`{actorName}'s condition changes.`];
+    const flavorTextPool = escalationStateNarratives[newState] || ["{actorName}'s condition changes."];
     const flavorText = getRandomElementSeeded(flavorTextPool);
     const substitutedFlavorText = substituteTokens(flavorText, fighter, null);
 
     const htmlTemplate = phaseTemplates.escalationStateChangeTemplates[newState.toLowerCase()] || phaseTemplates.escalationStateChangeTemplates.general;
-    const htmlContent = substituteTokens(htmlTemplate, fighter, null, { '{escalationFlavorText}': substitutedFlavorText });
+    const htmlContent = substituteTokens(htmlTemplate, fighter, null, { "{escalationFlavorText}": substitutedFlavorText });
 
     return generateLogEvent(battleState, {
-        type: 'escalation_change_event',
+        type: "escalation_change_event",
         actorId: fighter.id,
         characterName: fighter.name,
         oldState,

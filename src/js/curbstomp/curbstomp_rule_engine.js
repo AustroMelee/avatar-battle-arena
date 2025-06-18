@@ -4,15 +4,15 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { USE_DETERMINISTIC_RANDOM, MIN_TURNS_BEFORE_CURBSTOMP, CURBSTOMP_HP_THRESHOLD, CURBSTOMP_MOMENTUM_THRESHOLD } from '../config_game.js';
-import { seededRandom } from '../utils_seeded_random.js';
-import { modifyMomentum } from '../engine_momentum.js';
-import { getAllCurbstompRulesForBattle, getRulesForFighter } from './curbstomp_rule_registry.js';
-import { selectCurbstompVictim, checkMiraculousSurvival } from './curbstomp_victim_selector.js';
-import { markCharacterForDefeat } from './curbstomp_state.js';
-import * as CurbstompNarrative from './curbstomp_narrative.js';
+import { USE_DETERMINISTIC_RANDOM, MIN_TURNS_BEFORE_CURBSTOMP, CURBSTOMP_HP_THRESHOLD, CURBSTOMP_MOMENTUM_THRESHOLD } from "../config_game.js";
+import { seededRandom } from "../utils_seeded_random.js";
+import { modifyMomentum } from "../engine_momentum.js";
+import { getAllCurbstompRulesForBattle, getRulesForFighter } from "./curbstomp_rule_registry.js";
+import { selectCurbstompVictim, checkMiraculousSurvival } from "./curbstomp_victim_selector.js";
+import { markCharacterForDefeat } from "./curbstomp_state.js";
+import * as CurbstompNarrative from "./curbstomp_narrative.js";
 
 /**
  * Evaluates and applies all relevant curbstomp rules for the current battle state
@@ -111,7 +111,7 @@ function findApplicableFighters(rule, fighter1, fighter2) {
         if (fighter1.element === rule.appliesToElement) applicableFighters.push(fighter1);
         if (fighter2.element === rule.appliesToElement) applicableFighters.push(fighter2);
     } else if (rule.appliesToFaction) {
-        const isNegated = rule.appliesToFaction.startsWith('!');
+        const isNegated = rule.appliesToFaction.startsWith("!");
         const faction = isNegated ? rule.appliesToFaction.substring(1) : rule.appliesToFaction;
         
         if (isNegated) {
@@ -143,29 +143,29 @@ function applyRuleOutcome(rule, protagonist, opponent, battleState, isPreBattle)
         );
         events.push(survivalEvent);
         
-        CurbstompNarrative.addCurbstompAiLog(protagonist, 'Survival', rule);
+        CurbstompNarrative.addCurbstompAiLog(protagonist, "Survival", rule);
         return events;
     }
     
     // Apply outcome based on type
     switch (outcome.type) {
-        case 'instant_win':
+        case "instant_win":
             events.push(...handleInstantWin(rule, protagonist, opponent, battleState, isPreBattle));
             break;
-        case 'instant_loss':
+        case "instant_loss":
             events.push(...handleInstantLoss(rule, protagonist, battleState, isPreBattle));
             break;
-        case 'environmental_kill':
+        case "environmental_kill":
             events.push(...handleEnvironmentalKill(rule, protagonist, battleState, isPreBattle));
             break;
-        case 'buff':
-        case 'debuff':
+        case "buff":
+        case "debuff":
             events.push(...handleBuffDebuff(rule, protagonist, battleState));
             break;
-        case 'advantage':
+        case "advantage":
             events.push(...handleAdvantage(rule, protagonist, opponent, battleState));
             break;
-        case 'external_intervention':
+        case "external_intervention":
             events.push(...handleExternalIntervention(rule, battleState));
             break;
     }
@@ -226,7 +226,7 @@ function handleBuffDebuff(rule, protagonist, battleState) {
     
     protagonist[property] = (protagonist[property] || 0) + value;
     
-    const eventType = rule.outcome.type === 'buff' ? 'Buff' : 'Debuff';
+    const eventType = rule.outcome.type === "buff" ? "Buff" : "Debuff";
     CurbstompNarrative.addCurbstompAiLog(protagonist, eventType, rule, { property, value });
     
     const event = CurbstompNarrative.generateBuffNarrative(battleState, protagonist, rule, property, value);
@@ -242,7 +242,7 @@ function handleAdvantage(rule, protagonist, opponent, battleState) {
     const momentumChange = rule.outcome.value * 100;
     
     modifyMomentum(target, momentumChange, `Curbstomp Rule: ${rule.id}`);
-    CurbstompNarrative.addCurbstompAiLog(target, 'Advantage', rule);
+    CurbstompNarrative.addCurbstompAiLog(target, "Advantage", rule);
     
     const event = CurbstompNarrative.generateMomentumAdvantageNarrative(battleState, target, rule, momentumChange);
     return [event];
@@ -296,7 +296,7 @@ export function checkCurbstompConditions(attacker, defender, locId, battleState)
         markCharacterForDefeat(defender.id);
         
         // Generate and log AI entries
-        CurbstompNarrative.addCurbstompAiLog(attacker, 'Overwhelming', { id: 'curbstomp_detection' }, {
+        CurbstompNarrative.addCurbstompAiLog(attacker, "Overwhelming", { id: "curbstomp_detection" }, {
             attackerName: attacker.name,
             hpRatio,
             momentumGap: metrics.momentumGap
@@ -305,6 +305,6 @@ export function checkCurbstompConditions(attacker, defender, locId, battleState)
         return { detected: true, metrics };
     }
     
-    console.debug(`[Curbstomp Engine] Curbstomp conditions not met - battle continues`);
+    console.debug("[Curbstomp Engine] Curbstomp conditions not met - battle continues");
     return { detected: false };
 } 

@@ -4,12 +4,12 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { charactersMarkedForDefeat } from '../engine_curbstomp_manager.js';
-import { seededRandom } from '../utils_seeded_random.js';
-import { USE_DETERMINISTIC_RANDOM } from '../config_game.js';
-import { clamp } from '../utils_math.js';
+import { charactersMarkedForDefeat } from "../engine_curbstomp_manager.js";
+import { seededRandom } from "../utils_seeded_random.js";
+import { USE_DETERMINISTIC_RANDOM } from "../config_game.js";
+import { clamp } from "../utils_math.js";
 
 /**
  * Handles INSTANT_KO effect using unified context.
@@ -20,7 +20,7 @@ export function handleInstantKo(ctx) {
     const { effect, primaryTarget } = ctx;
     
     if (!primaryTarget) {
-        return { success: false, message: 'Invalid target for instant KO effect.' };
+        return { success: false, message: "Invalid target for instant KO effect." };
     }
     
     charactersMarkedForDefeat.add(primaryTarget.id);
@@ -38,7 +38,7 @@ export function handleConditionalKoOrMercy(ctx) {
     const { effect, primaryTarget } = ctx;
     
     if (!primaryTarget) {
-        return { success: false, message: 'Invalid target for conditional KO or mercy effect.' };
+        return { success: false, message: "Invalid target for conditional KO or mercy effect." };
     }
     
     if (Math.random() < effect.mercyChance) {
@@ -63,7 +63,7 @@ export function handleConditionalKoOrSelfSabotage(ctx) {
     const { effect, actor, primaryTarget } = ctx;
     
     if (!primaryTarget || !actor) {
-        return { success: false, message: 'Invalid parameters for conditional KO or self-sabotage effect.' };
+        return { success: false, message: "Invalid parameters for conditional KO or self-sabotage effect." };
     }
     
     const mercyRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
@@ -80,7 +80,7 @@ export function handleConditionalKoOrSelfSabotage(ctx) {
     
     if (hasMercy) {
         ctx.addEvent({
-            type: 'narrative_event',
+            type: "narrative_event",
             text: `${primaryTarget.name} miraculously withstands what should have been a fatal blow!`,
             html_content: `<p class="narrative-survivor">${primaryTarget.name} miraculously withstands what should have been a fatal blow!</p>`,
         });
@@ -102,7 +102,7 @@ export function handleConditionalKoOrSelfSabotage(ctx) {
             const selfDamage = Math.floor(primaryTarget.maxHp * 0.3);
             primaryTarget.hp = clamp(primaryTarget.hp - selfDamage, 0, primaryTarget.maxHp);
             ctx.addEvent({
-                type: 'narrative_event',
+                type: "narrative_event",
                 text: effect.selfSabotageMessage || `${actor.name}'s attack backfires, causing self-harm!`,
                 html_content: `<p class="narrative-self-sabotage">${actor.name}'s attack backfires!</p>`,
             });
@@ -110,7 +110,7 @@ export function handleConditionalKoOrSelfSabotage(ctx) {
         } else {
             primaryTarget.hp = 0;
             ctx.addEvent({
-                type: 'final_blow_event',
+                type: "final_blow_event",
                 text: effect.successMessage || `${primaryTarget.name} is incapacitated!`,
                 html_content: `<p class="final-blow">${primaryTarget.name} is incapacitated!</p>`,
                 targetId: primaryTarget.id
@@ -130,7 +130,7 @@ export function handleTraitToggle(ctx) {
     const { effect, primaryTarget } = ctx;
     
     if (!primaryTarget || !(effect.traitName in primaryTarget)) {
-        ctx.log(`Trait '${effect.traitName}' not found on target for TRAIT_TOGGLE effect`, 'warn');
+        ctx.log(`Trait '${effect.traitName}' not found on target for TRAIT_TOGGLE effect`, "warn");
         return { success: false, message: `Trait '${effect.traitName}' not found on target.` };
     }
     
@@ -149,8 +149,8 @@ export function handleApplyCurbstompRule(ctx) {
     const { effect } = ctx;
     
     if (!effect.ruleId) {
-        ctx.log('APPLY_CURBSTOMP_RULE requires a ruleId', 'warn');
-        return { success: false, message: 'APPLY_CURBSTOMP_RULE requires a ruleId.' };
+        ctx.log("APPLY_CURBSTOMP_RULE requires a ruleId", "warn");
+        return { success: false, message: "APPLY_CURBSTOMP_RULE requires a ruleId." };
     }
     
     // Integration with curbstomp manager pending

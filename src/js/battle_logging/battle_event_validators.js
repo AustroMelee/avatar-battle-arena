@@ -4,9 +4,9 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
-import { EVENT_TYPES, ROLL_TYPES, REQUIRED_EVENT_FIELDS } from './battle_event_types.js';
+import { EVENT_TYPES, ROLL_TYPES, REQUIRED_EVENT_FIELDS } from "./battle_event_types.js";
 
 /**
  * Validates the basic structure of any log event
@@ -14,8 +14,8 @@ import { EVENT_TYPES, ROLL_TYPES, REQUIRED_EVENT_FIELDS } from './battle_event_t
  * @throws {Error} If validation fails
  */
 export function validateLogEvent(logEvent) {
-    if (!logEvent || typeof logEvent !== 'object') {
-        throw new Error('Log event must be an object');
+    if (!logEvent || typeof logEvent !== "object") {
+        throw new Error("Log event must be an object");
     }
 
     // Check required fields
@@ -26,19 +26,19 @@ export function validateLogEvent(logEvent) {
     }
     
     // Validate field types
-    if (typeof logEvent.type !== 'string') {
+    if (typeof logEvent.type !== "string") {
         throw new Error(`Field 'type' must be a string, got: ${typeof logEvent.type}`);
     }
     
-    if (typeof logEvent.turnNumber !== 'number') {
+    if (typeof logEvent.turnNumber !== "number") {
         throw new Error(`Field 'turnNumber' must be a number, got: ${typeof logEvent.turnNumber}`);
     }
 
-    if (typeof logEvent.eventId !== 'string') {
+    if (typeof logEvent.eventId !== "string") {
         throw new Error(`Field 'eventId' must be a string, got: ${typeof logEvent.eventId}`);
     }
 
-    if (typeof logEvent.timestamp !== 'string') {
+    if (typeof logEvent.timestamp !== "string") {
         throw new Error(`Field 'timestamp' must be a string, got: ${typeof logEvent.timestamp}`);
     }
 }
@@ -49,16 +49,16 @@ export function validateLogEvent(logEvent) {
  * @throws {TypeError} If validation fails
  */
 export function validateBattleState(battleState) {
-    if (!battleState || typeof battleState !== 'object') {
+    if (!battleState || typeof battleState !== "object") {
         throw new TypeError(`'battleState' must be an object, received: ${typeof battleState}`);
     }
     
     // Optional but recommended fields
-    if (battleState.turn !== undefined && typeof battleState.turn !== 'number') {
+    if (battleState.turn !== undefined && typeof battleState.turn !== "number") {
         throw new TypeError(`'battleState.turn' must be a number if provided, received: ${typeof battleState.turn}`);
     }
     
-    if (battleState.currentPhase !== undefined && typeof battleState.currentPhase !== 'string') {
+    if (battleState.currentPhase !== undefined && typeof battleState.currentPhase !== "string") {
         throw new TypeError(`'battleState.currentPhase' must be a string if provided, received: ${typeof battleState.currentPhase}`);
     }
 }
@@ -69,18 +69,18 @@ export function validateBattleState(battleState) {
  * @throws {Error} If validation fails
  */
 export function validateBaseEvent(baseEvent) {
-    if (!baseEvent || typeof baseEvent !== 'object') {
+    if (!baseEvent || typeof baseEvent !== "object") {
         throw new TypeError(`'baseEvent' must be an object, received: ${typeof baseEvent}`);
     }
     
-    if (!baseEvent.type || typeof baseEvent.type !== 'string') {
+    if (!baseEvent.type || typeof baseEvent.type !== "string") {
         throw new Error(`'baseEvent.type' is required and must be a string, received: ${typeof baseEvent.type} (${baseEvent.type})`);
     }
     
     // Validate event type is known
     const validTypes = Object.values(EVENT_TYPES);
     if (!validTypes.includes(baseEvent.type)) {
-        throw new Error(`Unknown event type: ${baseEvent.type}. Valid types: ${validTypes.join(', ')}`);
+        throw new Error(`Unknown event type: ${baseEvent.type}. Valid types: ${validTypes.join(", ")}`);
     }
 }
 
@@ -92,17 +92,17 @@ export function validateBaseEvent(baseEvent) {
 export function validateRollData(rollData) {
     const { rollType, roll, outcome } = rollData;
     
-    if (!rollType || typeof rollType !== 'string') {
+    if (!rollType || typeof rollType !== "string") {
         throw new TypeError(`'rollType' must be a non-empty string, received: ${typeof rollType} (${rollType})`);
     }
     
     // Validate roll type is known
     const validRollTypes = Object.values(ROLL_TYPES);
     if (!validRollTypes.includes(rollType)) {
-        throw new Error(`Unknown roll type: ${rollType}. Valid types: ${validRollTypes.join(', ')}`);
+        throw new Error(`Unknown roll type: ${rollType}. Valid types: ${validRollTypes.join(", ")}`);
     }
     
-    if (typeof roll !== 'number' || isNaN(roll)) {
+    if (typeof roll !== "number" || isNaN(roll)) {
         throw new TypeError(`'roll' must be a valid number, received: ${typeof roll} (${roll})`);
     }
     
@@ -110,12 +110,12 @@ export function validateRollData(rollData) {
         throw new RangeError(`'roll' must be between 0 and 1, received: ${roll}`);
     }
     
-    if (!outcome || typeof outcome !== 'string') {
+    if (!outcome || typeof outcome !== "string") {
         throw new TypeError(`'outcome' must be a non-empty string, received: ${typeof outcome} (${outcome})`);
     }
     
     if (rollData.threshold !== undefined) {
-        if (typeof rollData.threshold !== 'number' || isNaN(rollData.threshold)) {
+        if (typeof rollData.threshold !== "number" || isNaN(rollData.threshold)) {
             throw new TypeError(`'threshold' must be a valid number if provided, received: ${typeof rollData.threshold}`);
         }
         
@@ -132,11 +132,11 @@ export function validateRollData(rollData) {
  * @throws {TypeError} If validation fails
  */
 export function validatePerformanceData(operation, duration) {
-    if (!operation || typeof operation !== 'string') {
+    if (!operation || typeof operation !== "string") {
         throw new TypeError(`'operation' must be a non-empty string, received: ${typeof operation}`);
     }
     
-    if (typeof duration !== 'number' || isNaN(duration) || duration < 0) {
+    if (typeof duration !== "number" || isNaN(duration) || duration < 0) {
         throw new TypeError(`'duration' must be a non-negative number, received: ${typeof duration} (${duration})`);
     }
 }
@@ -148,11 +148,11 @@ export function validatePerformanceData(operation, duration) {
  * @throws {TypeError} If validation fails
  */
 export function validateErrorData(error, context) {
-    if (!(error instanceof Error) && (!error || typeof error.message !== 'string')) {
-        throw new TypeError(`'error' must be an Error object or error-like object with message property`);
+    if (!(error instanceof Error) && (!error || typeof error.message !== "string")) {
+        throw new TypeError("'error' must be an Error object or error-like object with message property");
     }
     
-    if (!context || typeof context !== 'string') {
+    if (!context || typeof context !== "string") {
         throw new TypeError(`'context' must be a non-empty string, received: ${typeof context}`);
     }
 }
@@ -189,15 +189,15 @@ export function comprehensiveEventValidation(event) {
     
     // Additional checks for completeness
     if (!event.text && !event.html_content) {
-        result.warnings.push('Event has no human-readable content (text or html_content)');
+        result.warnings.push("Event has no human-readable content (text or html_content)");
     }
     
     if (event.isMajorEvent && !event.debugData) {
-        result.warnings.push('Major event lacks debugging data');
+        result.warnings.push("Major event lacks debugging data");
     }
     
     if (event.type === EVENT_TYPES.DICE_ROLL && !event.rollAnalysis) {
-        result.warnings.push('Dice roll event lacks roll analysis');
+        result.warnings.push("Dice roll event lacks roll analysis");
     }
     
     return result;

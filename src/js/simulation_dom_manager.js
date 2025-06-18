@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 // DOM references are initialized by `initializeSimulationManagerDOM`
 const DOM = {
@@ -62,8 +62,8 @@ export function getDOMReferences() {
  * @param {Function} onCancel - Callback for cancel button
  */
 export function setupEventListeners(onCancel) {
-    if (DOM.cancelButton && typeof onCancel === 'function') {
-        DOM.cancelButton.addEventListener('click', onCancel);
+    if (DOM.cancelButton && typeof onCancel === "function") {
+        DOM.cancelButton.addEventListener("click", onCancel);
     } else {
         console.warn("Sim Manager (setupEventListeners): Cancel button not found or invalid callback.");
     }
@@ -74,7 +74,7 @@ export function setupEventListeners(onCancel) {
  */
 export function showSimulationContainer() {
     if (DOM.simulationContainer) {
-        DOM.simulationContainer.classList.remove('hidden');
+        DOM.simulationContainer.classList.remove("hidden");
     }
 }
 
@@ -83,7 +83,7 @@ export function showSimulationContainer() {
  */
 export function hideSimulationContainer() {
     if (DOM.simulationContainer) {
-        DOM.simulationContainer.classList.add('hidden');
+        DOM.simulationContainer.classList.add("hidden");
     }
 }
 
@@ -92,7 +92,7 @@ export function hideSimulationContainer() {
  */
 export function showCancelButton() {
     if (DOM.cancelButton) {
-        DOM.cancelButton.classList.remove('hidden');
+        DOM.cancelButton.classList.remove("hidden");
         DOM.cancelButton.disabled = false;
     }
 }
@@ -102,7 +102,7 @@ export function showCancelButton() {
  */
 export function hideCancelButton() {
     if (DOM.cancelButton) {
-        DOM.cancelButton.classList.add('hidden');
+        DOM.cancelButton.classList.add("hidden");
         DOM.cancelButton.disabled = true;
     }
 }
@@ -112,7 +112,7 @@ export function hideCancelButton() {
  */
 export function clearAnimatedOutput() {
     if (DOM.animatedLogOutput) {
-        DOM.animatedLogOutput.innerHTML = '';
+        DOM.animatedLogOutput.innerHTML = "";
     }
 }
 

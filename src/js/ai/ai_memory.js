@@ -2,10 +2,17 @@
  * @fileoverview AI Memory and Learning System
  * @description Manages AI working memory, opponent modeling, move effectiveness tracking, and learning.
  * Handles all "what the AI knows" without decision-making logic.
- * @version 1.0
+ * @version 1.1.0
  */
 
-'use strict';
+"use strict";
+
+/**
+ * @typedef {import('../types/battle.js').Fighter} Fighter
+ * @typedef {import('../types/ai.js').AiMemory} AiMemory
+ * @typedef {import('../types/ai.js').OpponentProfile} OpponentProfile
+ * @typedef {import('../types/ai.js').MemoryAspect} MemoryAspect
+ */
 
 /**
  * Default AI memory structure for new characters
@@ -25,6 +32,9 @@ export const DEFAULT_AI_MEMORY = {
 /**
  * Updates an AI's memory based on its last move and opponent's behavior
  * Modifies the learner's aiMemory in-place
+ * @param {Fighter} learner - The AI fighter whose memory is being updated.
+ * @param {Fighter} opponent - The opponent fighter.
+ * @returns {void}
  */
 export function updateAiMemory(learner, opponent) {
     if (!learner || !opponent || !learner.aiMemory || !opponent.moveHistory) {
@@ -48,10 +58,10 @@ export function updateAiMemory(learner, opponent) {
 
         // Convert effectiveness to numeric value
         const effectivenessValue = {
-            'Weak': -1,
-            'Normal': 1,
-            'Strong': 2,
-            'Critical': 3
+            "Weak": -1,
+            "Normal": 1,
+            "Strong": 2,
+            "Critical": 3
         }[learner.lastMoveEffectiveness] || 0;
 
         // Update effectiveness tracking
@@ -59,7 +69,7 @@ export function updateAiMemory(learner, opponent) {
         learner.aiMemory.selfMoveEffectiveness[name].uses++;
 
         // Set cooldown for weak moves
-        if (learner.lastMoveEffectiveness === 'Weak') {
+        if (learner.lastMoveEffectiveness === "Weak") {
             learner.aiMemory.moveSuccessCooldown[name] = 2;
         }
 
@@ -78,9 +88,9 @@ export function updateAiMemory(learner, opponent) {
     if (opponent.lastMove?.type) {
         const moveType = opponent.lastMove.type;
         
-        if (moveType === 'Offense' || moveType === 'Finisher') {
+        if (moveType === "Offense" || moveType === "Finisher") {
             learner.aiMemory.opponentModel.isAggressive = (learner.aiMemory.opponentModel.isAggressive || 0) + 1;
-        } else if (moveType === 'Defense') {
+        } else if (moveType === "Defense") {
             learner.aiMemory.opponentModel.isDefensive = (learner.aiMemory.opponentModel.isDefensive || 0) + 1;
         }
     }
@@ -92,6 +102,9 @@ export function updateAiMemory(learner, opponent) {
 /**
  * Gets the effectiveness score for a specific move from memory
  * Returns average effectiveness or 0 if no data
+ * @param {AiMemory} aiMemory - The AI's memory.
+ * @param {string} moveName - The name of the move to check.
+ * @returns {number} The average effectiveness score.
  */
 export function getMoveEffectivenessScore(aiMemory, moveName) {
     if (!aiMemory?.selfMoveEffectiveness?.[moveName]) {
@@ -106,6 +119,9 @@ export function getMoveEffectivenessScore(aiMemory, moveName) {
 
 /**
  * Checks if a move is on cooldown due to poor performance
+ * @param {AiMemory} aiMemory - The AI's memory.
+ * @param {string} moveName - The name of the move to check.
+ * @returns {boolean} True if the move is on cooldown, false otherwise.
  */
 export function isMoveOnCooldown(aiMemory, moveName) {
     return (aiMemory?.moveSuccessCooldown?.[moveName] || 0) > 0;
@@ -114,6 +130,8 @@ export function isMoveOnCooldown(aiMemory, moveName) {
 /**
  * Gets the opponent's behavioral tendencies from memory
  * Returns normalized scores for aggression and defensiveness
+ * @param {AiMemory} aiMemory - The AI's memory.
+ * @returns {OpponentProfile} The opponent's behavioral profile.
  */
 export function getOpponentProfile(aiMemory) {
     if (!aiMemory?.opponentModel) {
@@ -136,22 +154,25 @@ export function getOpponentProfile(aiMemory) {
 
 /**
  * Clears or resets specific aspects of AI memory
+ * @param {AiMemory} aiMemory - The AI's memory.
+ * @param {MemoryAspect} aspect - The aspect of memory to reset.
+ * @returns {void}
  */
 export function resetMemoryAspect(aiMemory, aspect) {
     if (!aiMemory) return;
 
     switch (aspect) {
-        case 'moveEffectiveness':
+        case "moveEffectiveness":
             aiMemory.selfMoveEffectiveness = {};
             break;
-        case 'opponentModel':
+        case "opponentModel":
             aiMemory.opponentModel = { isAggressive: 0, isDefensive: 0, isTurtling: false };
             break;
-        case 'cooldowns':
+        case "cooldowns":
             aiMemory.moveSuccessCooldown = {};
             aiMemory.repositionCooldown = 0;
             break;
-        case 'all':
+        case "all":
             Object.assign(aiMemory, DEFAULT_AI_MEMORY);
             break;
     }

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * @typedef {object} LocationEnvironmentalModifiers
@@ -62,8 +62,8 @@
  * @type {LocationData}
  */
 export const fireNationCapital = {
-    id: 'fire-nation-capital',
-    name: 'Fire Nation Capital',
+    id: "fire-nation-capital",
+    name: "Fire Nation Capital",
     description: "The heart of the Fire Nation, a city built in a volcanic caldera, teeming with industrial might and imperial architecture.",
     envDescription: "the grand, volcanic plaza of the Fire Nation Capital",
     envImpactVariants: [
@@ -110,13 +110,13 @@ export const fireNationCapital = {
         ranged_attack: { damage: 15, energy: -10, reason: "The wide-open plaza favors long-range attacks." }
     },
     characterMoveAdjustments: {
-        'aang-airbending-only': {
-            'Cyclone Vortex': { energyCostModifier: 0.5, description: "Aang's aversion to collateral damage makes large-scale airbending costly in the capital." }
+        "aang-airbending-only": {
+            "Cyclone Vortex": { energyCostModifier: 0.5, description: "Aang's aversion to collateral damage makes large-scale airbending costly in the capital." }
         },
-        'azula': {
-            'Lightning Generation': { energyCostModifier: 0.5, description: "Azula's desire to preserve her capital makes powerful, destructive lightning attacks taxing." },
-            'Tactical Reposition': { energyCostModifier: 0.7, description: "Azula fluidly navigates her home city, making tactical repositioning almost effortless." },
-            'Feinting Ember Step': { energyCostModifier: 0.7, description: "Azula uses the urban landscape to her advantage for swift, deceptive movements." }
+        "azula": {
+            "Lightning Generation": { energyCostModifier: 0.5, description: "Azula's desire to preserve her capital makes powerful, destructive lightning attacks taxing." },
+            "Tactical Reposition": { energyCostModifier: 0.7, description: "Azula fluidly navigates her home city, making tactical repositioning almost effortless." },
+            "Feinting Ember Step": { energyCostModifier: 0.7, description: "Azula uses the urban landscape to her advantage for swift, deceptive movements." }
         }
     },
     damageThresholds: {
@@ -126,5 +126,5 @@ export const fireNationCapital = {
         catastrophic: 75
     },
     fragility: 60,
-    background: 'img/img_caldera.jpg',
+    background: "img/img_caldera.jpg",
 }; 

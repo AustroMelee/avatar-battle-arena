@@ -4,9 +4,9 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { createMockContext } from './context.js';
+import { createMockContext } from "./context.js";
 
 /**
  * Tests an effect handler with mock data.
@@ -44,13 +44,13 @@ export function testEffectHandler(effectType, effectHandlers, customEffect = {})
  * @returns {object} Test results summary
  */
 export function runAllEffectHandlerTests(effectHandlers) {
-    console.log('[Effect Handlers] Running automated tests on all handlers...');
+    console.log("[Effect Handlers] Running automated tests on all handlers...");
     const results = {};
     let passed = 0;
     let failed = 0;
     
     for (const effectType of effectHandlers.keys()) {
-        if (effectType === 'COMPOSITE_EFFECT') continue; // Skip composite for auto-testing
+        if (effectType === "COMPOSITE_EFFECT") continue; // Skip composite for auto-testing
         
         const testResult = testEffectHandler(effectType, effectHandlers);
         results[effectType] = testResult;
@@ -81,7 +81,7 @@ export function runEffectTestSuite(effectType, effectHandlers, testScenarios = [
     
     // Default test scenario
     results.push({
-        scenario: 'default',
+        scenario: "default",
         result: testEffectHandler(effectType, effectHandlers)
     });
     

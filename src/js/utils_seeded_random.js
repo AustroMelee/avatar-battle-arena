@@ -4,7 +4,7 @@
  * @version 2.0.0
  */
 
-'use strict';
+"use strict";
 
 //# sourceURL=utils_seeded_random.js
 
@@ -70,16 +70,16 @@ let callCount = 0;
  */
 export function setSeed(newSeed) {
     // Input validation
-    if (typeof newSeed !== 'number') {
-        throw new TypeError('setSeed: newSeed must be a number');
+    if (typeof newSeed !== "number") {
+        throw new TypeError("setSeed: newSeed must be a number");
     }
 
     if (!Number.isFinite(newSeed)) {
-        throw new RangeError('setSeed: newSeed must be finite');
+        throw new RangeError("setSeed: newSeed must be finite");
     }
 
     if (newSeed < 1 || newSeed !== Math.floor(newSeed)) {
-        throw new RangeError('setSeed: newSeed must be a positive integer');
+        throw new RangeError("setSeed: newSeed must be a positive integer");
     }
 
     seed = newSeed;
@@ -143,11 +143,11 @@ export function seededRandom() {
 export function getRandomElementSeeded(arr, useSeeded = false) {
     // Input validation
     if (!Array.isArray(arr)) {
-        throw new TypeError('getRandomElementSeeded: arr must be an array');
+        throw new TypeError("getRandomElementSeeded: arr must be an array");
     }
 
-    if (typeof useSeeded !== 'boolean') {
-        throw new TypeError('getRandomElementSeeded: useSeeded must be a boolean');
+    if (typeof useSeeded !== "boolean") {
+        throw new TypeError("getRandomElementSeeded: useSeeded must be a boolean");
     }
 
     if (arr.length === 0) {
@@ -208,7 +208,7 @@ export function getGeneratorState() {
 export function resetGenerator() {
     seed = DEFAULT_SEED;
     callCount = 0;
-    console.debug('[Seeded Random] Generator reset to default state');
+    console.debug("[Seeded Random] Generator reset to default state");
 }
 
 /**
@@ -233,16 +233,16 @@ export function resetGenerator() {
  */
 export function randomIntInRange(min, max, useSeeded = true) {
     // Input validation
-    if (typeof min !== 'number' || typeof max !== 'number') {
-        throw new TypeError('randomIntInRange: min and max must be numbers');
+    if (typeof min !== "number" || typeof max !== "number") {
+        throw new TypeError("randomIntInRange: min and max must be numbers");
     }
 
     if (!Number.isFinite(min) || !Number.isFinite(max)) {
-        throw new RangeError('randomIntInRange: min and max must be finite numbers');
+        throw new RangeError("randomIntInRange: min and max must be finite numbers");
     }
 
     if (min > max) {
-        throw new RangeError('randomIntInRange: min cannot be greater than max');
+        throw new RangeError("randomIntInRange: min cannot be greater than max");
     }
 
     /** @type {number} */
@@ -281,20 +281,20 @@ export function validateRandomConfig(config) {
     /** @type {string[]} */
     const errors = [];
 
-    if (config && typeof config !== 'object') {
-        errors.push('Config must be an object');
+    if (config && typeof config !== "object") {
+        errors.push("Config must be an object");
     }
 
     if (config?.seed !== undefined) {
-        if (typeof config.seed !== 'number') {
-            errors.push('Seed must be a number');
+        if (typeof config.seed !== "number") {
+            errors.push("Seed must be a number");
         } else if (!Number.isFinite(config.seed) || config.seed < 1 || config.seed !== Math.floor(config.seed)) {
-            errors.push('Seed must be a positive integer');
+            errors.push("Seed must be a positive integer");
         }
     }
 
-    if (config?.useSeeded !== undefined && typeof config.useSeeded !== 'boolean') {
-        errors.push('useSeeded must be a boolean');
+    if (config?.useSeeded !== undefined && typeof config.useSeeded !== "boolean") {
+        errors.push("useSeeded must be a boolean");
     }
 
     return {

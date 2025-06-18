@@ -4,9 +4,9 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { generateLogEvent } from '../utils_log_event.js';
+import { generateLogEvent } from "../utils_log_event.js";
 
 /**
  * Generates narrative for rule trigger events
@@ -36,7 +36,7 @@ export function generateRuleTriggerNarrative(battleState, rule, didTrigger, roll
  */
 export function generateSurvivalMiracleNarrative(battleState, character, rule) {
     return generateLogEvent(battleState, {
-        type: 'narrative_event',
+        type: "narrative_event",
         text: `By some miracle, ${character.name} survives what should have been a fatal blow!`,
         html_content: `<p class="narrative-survivor">By some miracle, ${character.name} survives what should have been a fatal blow!</p>`,
         isMajorEvent: true,
@@ -55,7 +55,7 @@ export function generateSurvivalMiracleNarrative(battleState, character, rule) {
  */
 export function generateCurbstompDetectionNarrative(battleState, attacker, defender, metrics) {
     return generateLogEvent(battleState, {
-        type: 'curbstomp_event',
+        type: "curbstomp_event",
         attackerId: attacker.id,
         defenderId: defender.id,
         text: `${attacker.name} has completely overwhelmed ${defender.name}!`,
@@ -81,7 +81,7 @@ export function generateCurbstompDetectionNarrative(battleState, attacker, defen
  */
 export function generateInstantWinNarrative(battleState, winner, loser, rule) {
     return generateLogEvent(battleState, {
-        type: 'curbstomp_event',
+        type: "curbstomp_event",
         winnerId: winner.id,
         loserId: loser.id,
         text: `${winner.name} secured a decisive victory over ${loser.name} due to ${rule.description}.`,
@@ -100,7 +100,7 @@ export function generateInstantWinNarrative(battleState, winner, loser, rule) {
  */
 export function generateInstantLossNarrative(battleState, loser, rule) {
     return generateLogEvent(battleState, {
-        type: 'curbstomp_event',
+        type: "curbstomp_event",
         loserId: loser.id,
         text: `${loser.name} was decisively defeated due to ${rule.description}.`,
         html_content: `<p class="narrative-defeat char-${loser.id}">${loser.name} was decisively defeated due to ${rule.description}.</p>`,
@@ -118,7 +118,7 @@ export function generateInstantLossNarrative(battleState, loser, rule) {
  */
 export function generateEnvironmentalKillNarrative(battleState, victim, rule) {
     return generateLogEvent(battleState, {
-        type: 'curbstomp_event',
+        type: "curbstomp_event",
         victimId: victim.id,
         text: `The environment itself proved fatal for ${victim.name}.`,
         html_content: `<p class="narrative-environmental char-${victim.id}">The environment itself proved fatal for ${victim.name}.</p>`,
@@ -138,10 +138,10 @@ export function generateEnvironmentalKillNarrative(battleState, victim, rule) {
  */
 export function generateBuffNarrative(battleState, character, rule, property, value) {
     const isPositive = value > 0;
-    const effectType = isPositive ? 'enhancement' : 'hindrance';
+    const effectType = isPositive ? "enhancement" : "hindrance";
     
     return generateLogEvent(battleState, {
-        type: 'narrative_event',
+        type: "narrative_event",
         characterId: character.id,
         text: `${character.name} receives ${effectType} to ${property} from ${rule.description}.`,
         html_content: `<p class="narrative-${effectType} char-${character.id}">${character.name} receives ${effectType} to ${property} from ${rule.description}.</p>`,
@@ -160,10 +160,10 @@ export function generateBuffNarrative(battleState, character, rule, property, va
  * @returns {Object} Log event for momentum advantage
  */
 export function generateMomentumAdvantageNarrative(battleState, character, rule, momentumChange) {
-    const changeDescription = momentumChange > 0 ? 'gains significant momentum' : 'loses momentum';
+    const changeDescription = momentumChange > 0 ? "gains significant momentum" : "loses momentum";
     
     return generateLogEvent(battleState, {
-        type: 'narrative_event',
+        type: "narrative_event",
         characterId: character.id,
         text: `${character.name} ${changeDescription} due to ${rule.description}.`,
         html_content: `<p class="narrative-momentum char-${character.id}">${character.name} ${changeDescription} due to ${rule.description}.</p>`,
@@ -180,9 +180,9 @@ export function generateMomentumAdvantageNarrative(battleState, character, rule,
  */
 export function generateExternalInterventionNarrative(battleState, rule) {
     return generateLogEvent(battleState, {
-        type: 'narrative_event',
-        text: 'The fight was interrupted by outside forces, ending in a draw.',
-        html_content: '<p class="narrative-intervention">The fight was interrupted by outside forces, ending in a draw.</p>',
+        type: "narrative_event",
+        text: "The fight was interrupted by outside forces, ending in a draw.",
+        html_content: "<p class=\"narrative-intervention\">The fight was interrupted by outside forces, ending in a draw.</p>",
         isMajorEvent: true,
         ruleId: rule.id
     });
@@ -199,19 +199,19 @@ export function addCurbstompAiLog(character, eventType, rule, details = {}) {
     let logMessage = `[Curbstomp - ${eventType}]: `;
     
     switch (eventType) {
-        case 'Survival':
+        case "Survival":
             logMessage += `Miraculously survived rule '${rule.id}'.`;
             break;
-        case 'Buff':
+        case "Buff":
             logMessage += `Rule '${rule.id}' applied: ${details.property} modified by ${details.value}.`;
             break;
-        case 'Debuff':
+        case "Debuff":
             logMessage += `Rule '${rule.id}' applied: ${details.property} modified by ${details.value}.`;
             break;
-        case 'Advantage':
+        case "Advantage":
             logMessage += `Rule '${rule.id}' granted significant momentum boost.`;
             break;
-        case 'Overwhelming':
+        case "Overwhelming":
             logMessage += `${details.attackerName} has achieved a decisive advantage over ${character.name}. HP ratio: ${details.hpRatio?.toFixed(3)}, Momentum gap: ${details.momentumGap?.toFixed(1)}`;
             break;
         default:
@@ -229,20 +229,20 @@ export function addCurbstompAiLog(character, eventType, rule, details = {}) {
 export function generateComplexCurbstompNarrative(scenario) {
     const { attacker, defender, rule, outcome, context } = scenario;
     
-    let narrative = `In a dramatic turn of events, `;
+    let narrative = "In a dramatic turn of events, ";
     
     switch (outcome.type) {
-        case 'instant_win':
+        case "instant_win":
             narrative += `${attacker.name}'s overwhelming advantage proves decisive against ${defender.name}. `;
             break;
-        case 'environmental_kill':
+        case "environmental_kill":
             narrative += `the very battlefield turns against ${defender.name}, sealing their fate. `;
             break;
-        case 'external_intervention':
-            narrative += `outside forces intervene, bringing an unexpected end to the confrontation. `;
+        case "external_intervention":
+            narrative += "outside forces intervene, bringing an unexpected end to the confrontation. ";
             break;
         default:
-            narrative += `the balance of power shifts dramatically. `;
+            narrative += "the balance of power shifts dramatically. ";
     }
     
     if (context.location) {

@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Configuration for phase transition thresholds
@@ -49,8 +49,8 @@ export const PHASE_TRANSITION_THRESHOLDS = {
  * Mental state conditions that can trigger phase transitions
  */
 export const MENTAL_STATE_TRIGGERS = {
-    EARLY_TO_MID: ['stressed'],
-    MID_TO_LATE: ['shaken', 'broken']
+    EARLY_TO_MID: ["stressed"],
+    MID_TO_LATE: ["shaken", "broken"]
 };
 
 /**
@@ -68,7 +68,7 @@ export const STALEMATE_CONFIG = {
     MIN_TURN_FOR_DETECTION: 2,        // Minimum turn before stalemate can be detected
     CONSECUTIVE_DEFENSIVE_TURNS: 3,    // Consecutive defensive turns by both fighters
     HP_DIFFERENCE_THRESHOLD: 15,      // Max HP difference for stalemate consideration
-    EXCLUDED_PHASES: ['EARLY']        // Phases where stalemate cannot occur
+    EXCLUDED_PHASES: ["EARLY"]        // Phases where stalemate cannot occur
 };
 
 /**

@@ -1,12 +1,12 @@
 // FILE: engine_reactive-defense.js
-'use strict';
+"use strict";
 
 // Version 1.2: Implemented full redirection success/failure logic with detailed return object.
 
 // --- UPDATED IMPORT ---
-import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
+import { effectivenessLevels } from "./data_narrative_effectiveness.js"; // Corrected import path
 // --- END UPDATED IMPORT ---
-import { attemptLightningRedirection } from './engine_lightning-redirection.js';
+import { attemptLightningRedirection } from "./engine_lightning-redirection.js";
 
 /**
  * Checks for and attempts to execute any relevant reactive defenses for the defender.
@@ -32,7 +32,7 @@ export function checkReactiveDefense(attacker, defender, move, battleState = {},
     // Lightning Redirection Check
     if (move.moveTags.includes("lightning_attack") &&
         defender.specialTraits?.canRedirectLightning &&
-        (attacker.id === 'azula' || attacker.id === 'ozai-not-comet-enhanced')) { // Specific to Zuko vs Azula/Ozai
+        (attacker.id === "azula" || attacker.id === "ozai-not-comet-enhanced")) { // Specific to Zuko vs Azula/Ozai
 
         // Pass modifyMomentum to attemptLightningRedirection
         const redirectionResult = attemptLightningRedirection(attacker, defender, move, battleState, interactionLog, modifyMomentum);
@@ -43,7 +43,7 @@ export function checkReactiveDefense(attacker, defender, move, battleState = {},
         if (redirectionResult.attempted) { // Check if an attempt was made, successful or not
             return {
                 reacted: true,
-                type: 'lightning_redirection',
+                type: "lightning_redirection",
                 ...redirectionResult // Spread all properties from attemptLightningRedirection
             };
         }

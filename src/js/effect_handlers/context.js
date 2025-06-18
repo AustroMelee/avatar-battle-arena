@@ -4,10 +4,10 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { generateLogEvent } from '../utils_log_event.js';
-import { generateStatusChangeEvent } from '../engine_narrative-engine.js';
+import { generateLogEvent } from "../utils_log_event.js";
+import { generateStatusChangeEvent } from "../engine_narrative-engine.js";
 
 /**
  * Creates a unified context object for all effect handlers.
@@ -30,7 +30,7 @@ export function createEffectContext(effect, actor, target, primaryTarget, battle
         oldValues,
         generatedEvents,
         // Centralized logging/error handling
-        log: (message, level = 'info') => {
+        log: (message, level = "info") => {
             console[level](`[Effect Handler] ${message}`);
         },
         addEvent: (eventData) => {
@@ -51,8 +51,8 @@ export function createEffectContext(effect, actor, target, primaryTarget, battle
  */
 export function createMockContext(effectType, customEffect = {}) {
     const mockCharacter = {
-        id: 'test-character',
-        name: 'Test Character',
+        id: "test-character",
+        name: "Test Character",
         hp: 50,
         energy: 50,
         momentum: 0,
@@ -76,9 +76,9 @@ export function createMockContext(effectType, customEffect = {}) {
     
     return createEffectContext(
         mockEffect,
-        { ...mockCharacter, id: 'actor' },
-        { ...mockCharacter, id: 'target' },
-        { ...mockCharacter, id: 'primary-target' },
+        { ...mockCharacter, id: "actor" },
+        { ...mockCharacter, id: "target" },
+        { ...mockCharacter, id: "primary-target" },
         mockBattleState,
         { oldHp: 50, oldEnergy: 50, oldMomentum: 0 },
         []

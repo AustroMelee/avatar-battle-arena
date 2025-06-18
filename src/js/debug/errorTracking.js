@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Sets up global error handling for debugging.
@@ -18,11 +18,11 @@
  */
 export function setupGlobalErrorHandling(errorLog) {
     // Handle standard JavaScript errors
-    window.addEventListener('error', (event) => {
+    window.addEventListener("error", (event) => {
         const errorInfo = {
-            type: 'javascript_error',
-            message: event.error?.message || 'Unknown error',
-            stack: event.error?.stack || 'No stack trace',
+            type: "javascript_error",
+            message: event.error?.message || "Unknown error",
+            stack: event.error?.stack || "No stack trace",
             filename: event.filename,
             lineno: event.lineno,
             colno: event.colno,
@@ -31,13 +31,13 @@ export function setupGlobalErrorHandling(errorLog) {
         };
         
         errorLog.push(errorInfo);
-        console.error('[Global Error]', errorInfo);
+        console.error("[Global Error]", errorInfo);
     });
     
     // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener("unhandledrejection", (event) => {
         const errorInfo = {
-            type: 'unhandled_rejection',
+            type: "unhandled_rejection",
             reason: event.reason,
             promise: event.promise,
             timestamp: new Date().toISOString(),
@@ -45,10 +45,10 @@ export function setupGlobalErrorHandling(errorLog) {
         };
         
         errorLog.push(errorInfo);
-        console.error('[Unhandled Promise Rejection]', errorInfo);
+        console.error("[Unhandled Promise Rejection]", errorInfo);
     });
     
-    console.log('[Error Tracking] Global error handling initialized');
+    console.log("[Error Tracking] Global error handling initialized");
 }
 
 /**
@@ -63,16 +63,16 @@ export function setupGlobalErrorHandling(errorLog) {
  */
 export function logError(errorLog, error, context = null) {
     const errorInfo = {
-        type: 'custom_error',
+        type: "custom_error",
         message: error.message || error.toString(),
-        stack: error.stack || 'No stack trace',
+        stack: error.stack || "No stack trace",
         context: context,
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent
     };
     
     errorLog.push(errorInfo);
-    console.error('[Custom Error]', errorInfo);
+    console.error("[Custom Error]", errorInfo);
 }
 
 /**
@@ -99,7 +99,7 @@ export function analyzeErrors(errorLog) {
         errorTypes[error.type] = (errorTypes[error.type] || 0) + 1;
         
         // Count by error message
-        const message = error.message || 'Unknown';
+        const message = error.message || "Unknown";
         errorMessages[message] = (errorMessages[message] || 0) + 1;
     });
     
@@ -121,10 +121,10 @@ export function analyzeErrors(errorLog) {
         lastError: errorLog[errorLog.length - 1]
     };
     
-    console.group('🚨 Error Analysis');
+    console.group("🚨 Error Analysis");
     console.log(`Total Errors: ${analysis.totalErrors}`);
     console.table(errorTypes);
-    console.log('Most Common Errors:', commonErrors);
+    console.log("Most Common Errors:", commonErrors);
     console.groupEnd();
     
     return analysis;
@@ -140,10 +140,10 @@ export function serializeErrorLog(errorLog) {
     try {
         return JSON.stringify(errorLog, null, 2);
     } catch (error) {
-        console.error('[Error Tracking] Failed to serialize error log:', error);
+        console.error("[Error Tracking] Failed to serialize error log:", error);
         return JSON.stringify([{
-            type: 'serialization_error',
-            message: 'Failed to serialize error log',
+            type: "serialization_error",
+            message: "Failed to serialize error log",
             timestamp: new Date().toISOString()
         }], null, 2);
     }
@@ -156,5 +156,5 @@ export function serializeErrorLog(errorLog) {
  */
 export function clearErrorLog(errorLog) {
     errorLog.length = 0;
-    console.log('[Error Tracking] Error log cleared');
+    console.log("[Error Tracking] Error log cleared");
 } 

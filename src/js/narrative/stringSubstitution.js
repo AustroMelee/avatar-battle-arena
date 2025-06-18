@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Substitutes placeholder tokens in a template string with dynamic data.
@@ -15,41 +15,41 @@
  * @returns {string} The template with tokens replaced by values.
  */
 export function substituteTokens(template, primaryActor, secondaryActor, additionalContext = {}) {
-    if (typeof template !== 'string' || !template) {
-        console.warn('substituteTokens received an invalid template:', template);
-        return '';
+    if (typeof template !== "string" || !template) {
+        console.warn("substituteTokens received an invalid template:", template);
+        return "";
     }
 
     const safeActor = primaryActor || {};
     const safeOpponent = secondaryActor || {};
 
-    const safeActorPronouns = safeActor.pronouns || { s: 'they', p: 'their', o: 'them' };
-    const safeOpponentPronouns = safeOpponent.pronouns || { s: 'they', p: 'their', o: 'them' };
+    const safeActorPronouns = safeActor.pronouns || { s: "they", p: "their", o: "them" };
+    const safeOpponentPronouns = safeOpponent.pronouns || { s: "they", p: "their", o: "them" };
 
     const winnerPronouns = (additionalContext.WinnerName === safeActor.name) ? safeActorPronouns : safeOpponentPronouns;
     const loserPronouns = (additionalContext.LoserName === safeActor.name) ? safeActorPronouns : safeOpponentPronouns;
 
     const replacements = {
-        '{actorName}': additionalContext.attackerName || safeActor.name || 'A fighter',
-        '{opponentName}': additionalContext.targetName || safeOpponent.name || 'their opponent',
-        '{targetName}': additionalContext.targetName || safeOpponent.name || 'their opponent',
-        '{attackerName}': additionalContext.attackerName || safeActor.name || 'A fighter',
-        '{WinnerName}': additionalContext.WinnerName || 'The victor',
-        '{LoserName}': additionalContext.LoserName || 'The fallen',
-        '{characterName}': additionalContext.characterName || safeActor.name || 'A fighter',
-        '{actor.s}': safeActorPronouns.s,
-        '{actor.p}': safeActorPronouns.p,
-        '{actor.o}': safeActorPronouns.o,
-        '{opponent.s}': safeOpponentPronouns.s,
-        '{opponent.p}': safeOpponentPronouns.p,
-        '{opponent.o}': safeOpponentPronouns.o,
-        '{WinnerPronounS}': winnerPronouns.s,
-        '{WinnerPronounP}': winnerPronouns.p,
-        '{WinnerPronounO}': winnerPronouns.o,
-        '{LoserPronounS}': loserPronouns.s,
-        '{LoserPronounP}': loserPronouns.p,
-        '{LoserPronounO}': loserPronouns.o,
-        '{possessive}': safeActorPronouns.p,
+        "{actorName}": additionalContext.attackerName || safeActor.name || "A fighter",
+        "{opponentName}": additionalContext.targetName || safeOpponent.name || "their opponent",
+        "{targetName}": additionalContext.targetName || safeOpponent.name || "their opponent",
+        "{attackerName}": additionalContext.attackerName || safeActor.name || "A fighter",
+        "{WinnerName}": additionalContext.WinnerName || "The victor",
+        "{LoserName}": additionalContext.LoserName || "The fallen",
+        "{characterName}": additionalContext.characterName || safeActor.name || "A fighter",
+        "{actor.s}": safeActorPronouns.s,
+        "{actor.p}": safeActorPronouns.p,
+        "{actor.o}": safeActorPronouns.o,
+        "{opponent.s}": safeOpponentPronouns.s,
+        "{opponent.p}": safeOpponentPronouns.p,
+        "{opponent.o}": safeOpponentPronouns.o,
+        "{WinnerPronounS}": winnerPronouns.s,
+        "{WinnerPronounP}": winnerPronouns.p,
+        "{WinnerPronounO}": winnerPronouns.o,
+        "{LoserPronounS}": loserPronouns.s,
+        "{LoserPronounP}": loserPronouns.p,
+        "{LoserPronounO}": loserPronouns.o,
+        "{possessive}": safeActorPronouns.p,
         ...additionalContext
     };
 
@@ -57,7 +57,7 @@ export function substituteTokens(template, primaryActor, secondaryActor, additio
     for (const [token, value] of Object.entries(replacements)) {
         if (value !== undefined && value !== null) {
             // Capitalize if it's the start of the string
-            text = text.replace(new RegExp(token.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), String(value));
+            text = text.replace(new RegExp(token.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"), "g"), String(value));
         }
     }
     return text.charAt(0).toUpperCase() + text.slice(1);

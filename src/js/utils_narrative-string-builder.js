@@ -1,56 +1,56 @@
-'use strict';
+"use strict";
 
-import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
-import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
-import { executeFilterChain } from './utils_narrative-filters.js';
-import { EFFECTIVENESS_FLAVORS, ENVIRONMENTAL_NARRATIVES } from './data_effectiveness-flavors.js';
+import { getRandomElementSeeded, seededRandom } from "./utils_seeded_random.js";
+import { USE_DETERMINISTIC_RANDOM } from "./config_game.js";
+import { executeFilterChain } from "./utils_narrative-filters.js";
+import { EFFECTIVENESS_FLAVORS, ENVIRONMENTAL_NARRATIVES } from "./data_effectiveness-flavors.js";
 
 // Centralized Tag/Context Registry (Fixed: now supports rich metadata)
 const NARRATIVE_TAGS = {
-    CRIT: 'crit',
-    MISS: 'miss',
-    HUMOR: 'humor',
-    METAPHOR: 'metaphor',
-    FINISHER: 'finisher',
-    COMEBACK: 'comeback',
-    DESPERATE: 'desperate',
-    EARLY_PHASE: 'early_phase',
-    MID_PHASE: 'mid_phase',
-    LATE_PHASE: 'late_phase',
-    AGGRESSIVE: 'aggressive',
-    DEFENSIVE: 'defensive',
-    SKILL: 'skill',
-    CONTROL: 'control',
-    AOE: 'aoe',
-    EVASIVE: 'evasive',
-    REPOSITION: 'reposition',
-    DECEPTIVE: 'deceptive',
-    TENSION: 'tension',
-    FAIL: 'fail',
-    DARK: 'dark',
-    STRONG_HIT: 'strong_hit',
-    BENDING_FLOURISH: 'bending_flourish',
-    ENVIRONMENT_INTERACTION: 'environment_interaction',
+    CRIT: "crit",
+    MISS: "miss",
+    HUMOR: "humor",
+    METAPHOR: "metaphor",
+    FINISHER: "finisher",
+    COMEBACK: "comeback",
+    DESPERATE: "desperate",
+    EARLY_PHASE: "early_phase",
+    MID_PHASE: "mid_phase",
+    LATE_PHASE: "late_phase",
+    AGGRESSIVE: "aggressive",
+    DEFENSIVE: "defensive",
+    SKILL: "skill",
+    CONTROL: "control",
+    AOE: "aoe",
+    EVASIVE: "evasive",
+    REPOSITION: "reposition",
+    DECEPTIVE: "deceptive",
+    TENSION: "tension",
+    FAIL: "fail",
+    DARK: "dark",
+    STRONG_HIT: "strong_hit",
+    BENDING_FLOURISH: "bending_flourish",
+    ENVIRONMENT_INTERACTION: "environment_interaction",
     // Environmental tags (can be dynamically added based on location data)
-    ICY: 'icy',
-    WATERY: 'watery',
-    DENSE: 'dense',
-    OPEN: 'open',
-    VERTICAL: 'vertical',
-    CRAMPED: 'cramped',
-    HAS_COVER: 'has_cover',
-    SACRED: 'sacred'
+    ICY: "icy",
+    WATERY: "watery",
+    DENSE: "dense",
+    OPEN: "open",
+    VERTICAL: "vertical",
+    CRAMPED: "cramped",
+    HAS_COVER: "has_cover",
+    SACRED: "sacred"
 };
 
 // Rich narrative tag definitions for buildDescription method
 const NARRATIVE_TAG_DEFINITIONS = [
-    { name: 'crit', description: 'A critical strike that finds the perfect opening.' },
-    { name: 'miss', description: 'An attack that fails to connect.' },
-    { name: 'humor', description: 'A moment of levity in the heat of battle.' },
-    { name: 'metaphor', description: 'A poetic description of the action.' },
-    { name: 'finisher', description: 'A decisive blow meant to end the fight.' },
-    { name: 'comeback', description: 'A desperate attempt to turn the tide.' },
-    { name: 'desperate', description: 'An action born of desperation.' },
+    { name: "crit", description: "A critical strike that finds the perfect opening." },
+    { name: "miss", description: "An attack that fails to connect." },
+    { name: "humor", description: "A moment of levity in the heat of battle." },
+    { name: "metaphor", description: "A poetic description of the action." },
+    { name: "finisher", description: "A decisive blow meant to end the fight." },
+    { name: "comeback", description: "A desperate attempt to turn the tide." },
+    { name: "desperate", description: "An action born of desperation." },
     // Add more as needed
 ];
 
@@ -86,9 +86,9 @@ export class NarrativeStringBuilder {
     }
 
     addArticle(word) {
-        if (!word) return '';
+        if (!word) return "";
         // Simple English rule for 'a'/'an'
-        const vowels = ['a', 'e', 'i', 'o', 'u'];
+        const vowels = ["a", "e", "i", "o", "u"];
         if (vowels.includes(word.toLowerCase()[0])) {
             return `an ${word}`;
         } else {
@@ -100,31 +100,31 @@ export class NarrativeStringBuilder {
         // Data-driven placeholder replacement
         const placeholders = {
             // Actor placeholders
-            actorName: this.actor?.name || 'The Fighter',
-            actorPronounS: this.actor?.pronouns?.s || 'he',
-            actorPronounO: this.actor?.pronouns?.o || 'him',
-            actorId: this.actor?.id || 'unknown-actor',
-            actorElement: this.actor?.element || 'energy',
+            actorName: this.actor?.name || "The Fighter",
+            actorPronounS: this.actor?.pronouns?.s || "he",
+            actorPronounO: this.actor?.pronouns?.o || "him",
+            actorId: this.actor?.id || "unknown-actor",
+            actorElement: this.actor?.element || "energy",
             
             // Target placeholders
-            targetName: this.target?.name || 'The Opponent',
-            targetPronounS: this.target?.pronouns?.s || 'he',
-            targetPronounO: this.target?.pronouns?.o || 'him',
-            targetId: this.target?.id || 'unknown-target',
+            targetName: this.target?.name || "The Opponent",
+            targetPronounS: this.target?.pronouns?.s || "he",
+            targetPronounO: this.target?.pronouns?.o || "him",
+            targetId: this.target?.id || "unknown-target",
             
             // Environment placeholders
-            environmentName: this.environment?.name || 'the surroundings',
-            envKeyword: getRandomElementSeeded(this.environment?.tags || ['area']) || 'the area',
+            environmentName: this.environment?.name || "the surroundings",
+            envKeyword: getRandomElementSeeded(this.environment?.tags || ["area"]) || "the area",
             
             // Move placeholders
-            moveName: this.move?.name || 'a move',
-            moveElement: this.move?.element || 'neutral'
+            moveName: this.move?.name || "a move",
+            moveElement: this.move?.element || "neutral"
         };
         
         // Replace all placeholders in a single pass
         let processedText = text;
         for (const [key, value] of Object.entries(placeholders)) {
-            const regex = new RegExp(`\\$\\{${key}\\}`, 'g');
+            const regex = new RegExp(`\\$\\{${key}\\}`, "g");
             processedText = processedText.replace(regex, value);
         }
         
@@ -220,24 +220,26 @@ export class NarrativeStringBuilder {
         let narrative = "";
         
         // Data-driven approach: look up narrative template from ENVIRONMENTAL_NARRATIVES
-        const narrativeData = ENVIRONMENTAL_NARRATIVES[eventType] || ENVIRONMENTAL_NARRATIVES['default'];
+        const narrativeData = ENVIRONMENTAL_NARRATIVES[eventType] || ENVIRONMENTAL_NARRATIVES["default"];
         
         switch (eventType) {
-            case 'activation':
+            case "activation":
                 narrative = narrativeData.base(this.environment.name);
                 if (details?.impacts?.length > 0) {
                     narrative += narrativeData.withImpacts(details.impacts);
                 }
                 break;
-            case 'damage':
-                const damagedEntities = details.entities.map(e => e.name).join(' and ');
+            case "damage": {
+                const damagedEntities = details.entities.map(e => e.name).join(" and ");
                 const damageFlavor = getRandomElementSeeded(narrativeData.flavors);
                 narrative = damageFlavor(damagedEntities) + narrativeData.suffix(details.damageAmount);
                 break;
-            case 'change':
+            }
+            case "change": {
                 const changeFlavor = getRandomElementSeeded(narrativeData.flavors);
                 narrative = changeFlavor(this.environment.name) + narrativeData.suffix(details.newState);
                 break;
+            }
             default:
                 narrative = narrativeData.base();
         }

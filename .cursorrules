@@ -1,6 +1,11 @@
-# Cursor Ruleset Hack: Nano/Sed Mode (Hardened)
+# Cursor Ruleset: Smart ESLint + Shell Safety Mode
 
 rules:
+  # 🧠 Before editing any .js file, auto-fix just that file using ESLint
+  - when: file_extension == "js"
+    run_shell_command: npx eslint '{path}' --fix
+
+  # 🛠 Fallback mode: bypass model edits using shell overwrite (for large/complex files)
   - when: always
     apply_edit_with_shell: true
     edit_file_shell_command: |

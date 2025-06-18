@@ -4,10 +4,10 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
-import { DebugUtils } from './debugUtils.js';
-import { DEBUG_CONFIG } from './debugConfig.js';
+import { DebugUtils } from "./debugUtils.js";
+import { DEBUG_CONFIG } from "./debugConfig.js";
 
 /**
  * Initialize and attach debug utilities to the global window object.
@@ -18,12 +18,12 @@ function initializeGlobalDebug() {
     const isDevelopment = DEBUG_CONFIG.enableConsoleLogging;
     
     if (!isDevelopment) {
-        console.log('[Debug Global] Debug utilities disabled in production mode');
+        console.log("[Debug Global] Debug utilities disabled in production mode");
         return;
     }
 
     // Create global debug instance
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
         window.DEBUG = new DebugUtils();
         
         // Add convenience methods to window for quick access
@@ -52,36 +52,36 @@ function initializeGlobalDebug() {
         };
         
         // Console introduction
-        console.log('%c🔧 Avatar Battle Arena Debug Utilities Loaded', 'font-weight: bold; color: #00ff00;');
-        console.log('%cVersion 1.0.0 - Modular Debug System', 'color: #888;');
-        console.log('');
-        console.log('Available commands:');
-        console.log('%c  DEBUG.analyzeBattle(result)%c - Analyze battle results', 'color: #00aaff;', 'color: inherit;');
-        console.log('%c  DEBUG.generateReport()%c - Generate debug report', 'color: #00aaff;', 'color: inherit;');
-        console.log('%c  DEBUG.exportDebugData()%c - Export debug data', 'color: #00aaff;', 'color: inherit;');
-        console.log('%c  DEBUG.clearDebugData()%c - Clear all debug data', 'color: #00aaff;', 'color: inherit;');
-        console.log('');
-        console.log('Quick shortcuts (DEBUG_QUICK):');
-        console.log('%c  DEBUG_QUICK.analyze(result)%c - Quick battle analysis', 'color: #ffaa00;', 'color: inherit;');
-        console.log('%c  DEBUG_QUICK.performance()%c - Quick performance analysis', 'color: #ffaa00;', 'color: inherit;');
-        console.log('%c  DEBUG_QUICK.memory()%c - Take memory snapshot', 'color: #ffaa00;', 'color: inherit;');
-        console.log('%c  DEBUG_QUICK.export()%c - Quick export', 'color: #ffaa00;', 'color: inherit;');
-        console.log('%c  DEBUG_QUICK.status()%c - System status', 'color: #ffaa00;', 'color: inherit;');
-        console.log('');
-        console.log('For full API documentation, see the individual module files.');
+        console.log("%c🔧 Avatar Battle Arena Debug Utilities Loaded", "font-weight: bold; color: #00ff00;");
+        console.log("%cVersion 1.0.0 - Modular Debug System", "color: #888;");
+        console.log("");
+        console.log("Available commands:");
+        console.log("%c  DEBUG.analyzeBattle(result)%c - Analyze battle results", "color: #00aaff;", "color: inherit;");
+        console.log("%c  DEBUG.generateReport()%c - Generate debug report", "color: #00aaff;", "color: inherit;");
+        console.log("%c  DEBUG.exportDebugData()%c - Export debug data", "color: #00aaff;", "color: inherit;");
+        console.log("%c  DEBUG.clearDebugData()%c - Clear all debug data", "color: #00aaff;", "color: inherit;");
+        console.log("");
+        console.log("Quick shortcuts (DEBUG_QUICK):");
+        console.log("%c  DEBUG_QUICK.analyze(result)%c - Quick battle analysis", "color: #ffaa00;", "color: inherit;");
+        console.log("%c  DEBUG_QUICK.performance()%c - Quick performance analysis", "color: #ffaa00;", "color: inherit;");
+        console.log("%c  DEBUG_QUICK.memory()%c - Take memory snapshot", "color: #ffaa00;", "color: inherit;");
+        console.log("%c  DEBUG_QUICK.export()%c - Quick export", "color: #ffaa00;", "color: inherit;");
+        console.log("%c  DEBUG_QUICK.status()%c - System status", "color: #ffaa00;", "color: inherit;");
+        console.log("");
+        console.log("For full API documentation, see the individual module files.");
         
         // Add keyboard shortcuts for common operations
         setupKeyboardShortcuts();
         
         // Set up automatic memory monitoring in development
         if (DEBUG_CONFIG.enableMemoryTracking) {
-            console.log('[Debug Global] Starting automatic memory monitoring...');
+            console.log("[Debug Global] Starting automatic memory monitoring...");
             window.DEBUG.startMemoryMonitoring(10000); // Every 10 seconds
         }
         
-        console.log('[Debug Global] Global debug utilities initialized successfully');
+        console.log("[Debug Global] Global debug utilities initialized successfully");
     } else {
-        console.warn('[Debug Global] Window object not available - running in non-browser environment');
+        console.warn("[Debug Global] Window object not available - running in non-browser environment");
     }
 }
 
@@ -90,41 +90,41 @@ function initializeGlobalDebug() {
  * @private
  */
 function setupKeyboardShortcuts() {
-    if (typeof document === 'undefined') return;
+    if (typeof document === "undefined") return;
     
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener("keydown", (event) => {
         // Ctrl+Shift+D: Quick debug status
-        if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+        if (event.ctrlKey && event.shiftKey && event.key === "D") {
             event.preventDefault();
-            console.log('🔧 Debug Status:', window.DEBUG.getStatus());
+            console.log("🔧 Debug Status:", window.DEBUG.getStatus());
         }
         
         // Ctrl+Shift+M: Take memory snapshot
-        if (event.ctrlKey && event.shiftKey && event.key === 'M') {
+        if (event.ctrlKey && event.shiftKey && event.key === "M") {
             event.preventDefault();
             const snapshot = window.DEBUG.takeMemorySnapshot();
-            console.log('📸 Memory Snapshot:', snapshot);
+            console.log("📸 Memory Snapshot:", snapshot);
         }
         
         // Ctrl+Shift+E: Export debug data
-        if (event.ctrlKey && event.shiftKey && event.key === 'E') {
+        if (event.ctrlKey && event.shiftKey && event.key === "E") {
             event.preventDefault();
             window.DEBUG.exportDebugData();
         }
         
         // Ctrl+Shift+C: Clear debug data
-        if (event.ctrlKey && event.shiftKey && event.key === 'C') {
+        if (event.ctrlKey && event.shiftKey && event.key === "C") {
             event.preventDefault();
             window.DEBUG.clearDebugData();
-            console.log('🗑️ Debug data cleared');
+            console.log("🗑️ Debug data cleared");
         }
     });
     
-    console.log('[Debug Global] Keyboard shortcuts registered:');
-    console.log('  Ctrl+Shift+D - Debug status');
-    console.log('  Ctrl+Shift+M - Memory snapshot');
-    console.log('  Ctrl+Shift+E - Export data');
-    console.log('  Ctrl+Shift+C - Clear data');
+    console.log("[Debug Global] Keyboard shortcuts registered:");
+    console.log("  Ctrl+Shift+D - Debug status");
+    console.log("  Ctrl+Shift+M - Memory snapshot");
+    console.log("  Ctrl+Shift+E - Export data");
+    console.log("  Ctrl+Shift+C - Clear data");
 }
 
 /**
@@ -132,11 +132,11 @@ function setupKeyboardShortcuts() {
  * Should be called when shutting down the application.
  */
 function cleanupGlobalDebug() {
-    if (typeof window !== 'undefined' && window.DEBUG) {
+    if (typeof window !== "undefined" && window.DEBUG) {
         window.DEBUG.destroy();
         delete window.DEBUG;
         delete window.DEBUG_QUICK;
-        console.log('[Debug Global] Global debug utilities cleaned up');
+        console.log("[Debug Global] Global debug utilities cleaned up");
     }
 }
 
@@ -144,8 +144,8 @@ function cleanupGlobalDebug() {
 initializeGlobalDebug();
 
 // Cleanup on page unload
-if (typeof window !== 'undefined') {
-    window.addEventListener('beforeunload', cleanupGlobalDebug);
+if (typeof window !== "undefined") {
+    window.addEventListener("beforeunload", cleanupGlobalDebug);
 }
 
 // Export functions for manual control

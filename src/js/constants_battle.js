@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Battle System Configuration
@@ -92,4 +92,42 @@ export const EFFECTIVENESS_CONFIG = {
     // Energy recovery
     CRITICAL_HIT_ENERGY_RECOVERY: 5,
     COUNTER_ATTACK_ENERGY_BONUS: 3
-}; 
+};
+
+export const MAX_ENERGY = 100;
+export const STARTING_MOMENTUM = 0;
+export const MAX_MOMENTUM = 100;
+export const MIN_MOMENTUM = -100;
+
+export const CRITICAL_HIT_MULTIPLIER = 1.5;
+export const CRITICAL_HIT_BASE_CHANCE = 0.05;
+export const GLANCING_BLOW_MULTIPLIER = 0.5;
+export const GLANCING_BLOW_CHANCE = 0.1;
+export const DEFAULT_ACCURACY = 0.85;
+export const MIN_ACCURACY = 0.05;
+export const MAX_ACCURACY = 0.95;
+export const MAX_DAMAGE_VARIANCE = 0.2;
+export const MIN_DAMAGE_VARIANCE = -0.2;
+export const MAX_BASE_DAMAGE = 50;
+export const MIN_BASE_DAMAGE = 1;
+
+export const MOVE_TYPE_MODIFIERS = {
+    "offensive": 1.0,
+    "defensive": 0.7,
+    "utility": 0.5,
+    "special": 1.2,
+    "ultimate": 1.5,
+    "passive": 0.3
+};
+
+export const ELEMENTAL_EFFECTIVENESS = {
+    "fire": { "water": 0.5, "earth": 1.5, "air": 1.0, "spirit": 0.8, "physical": 1.0 },
+    "water": { "fire": 1.5, "earth": 1.0, "air": 0.8, "spirit": 1.2, "physical": 1.0 },
+    "earth": { "fire": 0.5, "water": 1.2, "air": 1.5, "spirit": 0.9, "physical": 1.1 },
+    "air": { "fire": 1.2, "water": 1.0, "earth": 0.5, "spirit": 1.5, "physical": 0.9 },
+    "spirit": { "fire": 1.3, "water": 0.8, "earth": 1.1, "air": 0.7, "physical": 1.8 },
+    "physical": { "fire": 1.0, "water": 1.0, "earth": 0.9, "air": 1.1, "spirit": 0.6 }
+};
+
+export const VALID_MOVE_TYPES = Object.keys(MOVE_TYPE_MODIFIERS);
+export const VALID_ELEMENTS = Object.keys(ELEMENTAL_EFFECTIVENESS); 

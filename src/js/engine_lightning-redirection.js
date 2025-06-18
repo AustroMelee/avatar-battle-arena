@@ -1,14 +1,14 @@
 // FILE: engine_lightning-redirection.js
-'use strict';
+"use strict";
 
 // Version 1.2: Implemented full redirection success/failure logic with detailed return object.
 
 // --- UPDATED IMPORT ---
-import { effectivenessLevels } from './data_narrative_effectiveness.js'; // Corrected import path
-import { EFFECT_TYPES } from './data_mechanics_definitions.js';
-import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js'; // NEW: Import for deterministic random
-import { USE_DETERMINISTIC_RANDOM } from './config_game.js'; // NEW: Import for config
-import { generateLogEvent } from './utils_log_event.js'; // NEW: Import generateLogEvent
+import { effectivenessLevels } from "./data_narrative_effectiveness.js"; // Corrected import path
+import { EFFECT_TYPES } from "./data_mechanics_definitions.js";
+import { getRandomElementSeeded, seededRandom } from "./utils_seeded_random.js"; // NEW: Import for deterministic random
+import { USE_DETERMINISTIC_RANDOM } from "./config_game.js"; // NEW: Import for config
+import { generateLogEvent } from "./utils_log_event.js"; // NEW: Import generateLogEvent
 // --- END UPDATED IMPORT ---
 
 // --- LIGHTNING REDIRECTION CONSTANTS ---
@@ -50,12 +50,12 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
     }
     if (defender.hp < LIGHTNING_REDIRECTION_HP_THRESHOLD_LOW) { // Additional flat penalty for very low HP
         successChance -= 0.15;
-        logMessage += `Critically low HP flat penalty (-0.15). `;
+        logMessage += "Critically low HP flat penalty (-0.15). ";
     }
 
 
     // Mental State Factor
-    const mentalState = defender.mentalState?.level || 'stable';
+    const mentalState = defender.mentalState?.level || "stable";
     const mentalPenalty = LIGHTNING_REDIRECTION_MENTAL_STATE_PENALTY[mentalState] || 0;
     if (mentalPenalty > 0) {
         successChance -= mentalPenalty;
@@ -80,20 +80,20 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         // Successful Redirection
         console.log(`[REDIRECTION SUCCESS]: ${defender.name} redirected lightning!`);
         interactionLog.push(`[REDIRECTION SUCCESS]: ${defender.name} successfully redirects the lightning!`);
-        defender.aiLog.push(`[Redirection Result]: SUCCESS!`);
+        defender.aiLog.push("[Redirection Result]: SUCCESS!");
         attacker.aiLog.push(`[Redirection Result]: Lightning successfully redirected by ${defender.name}!`);
 
         narrativeEvents.push(
-            { quote: { type: 'action', line: `${defender.name} skillfully catches ${attacker.name}'s lightning, channeling its immense power!` }, actor: defender, isMoveExecutionQuote: false }
+            { quote: { type: "action", line: `${defender.name} skillfully catches ${attacker.name}'s lightning, channeling its immense power!` }, actor: defender, isMoveExecutionQuote: false }
         );
         narrativeEvents.push(
-            { quote: { type: 'action', line: `With a defiant roar, ${defender.name} unleashes the redirected energy back at a stunned ${attacker.name}!` }, actor: defender, isMoveExecutionQuote: false }
+            { quote: { type: "action", line: `With a defiant roar, ${defender.name} unleashes the redirected energy back at a stunned ${attacker.name}!` }, actor: defender, isMoveExecutionQuote: false }
         );
         
         momentumChangeDefender = 3;
         momentumChangeAttacker = -2;
 
-        modifyMomentum(defender, momentumChangeDefender, `Successful lightning redirection`);
+        modifyMomentum(defender, momentumChangeDefender, "Successful lightning redirection");
         modifyMomentum(attacker, momentumChangeAttacker, `Lightning redirected by ${defender.name}`);
 
         return {
@@ -111,20 +111,20 @@ export function attemptLightningRedirection(attacker, defender, move, battleStat
         // Failed Redirection
         console.log(`[REDIRECTION FAILED]: ${defender.name} fails to fully redirect the lightning.`);
         interactionLog.push(`[REDIRECTION FAIL]: ${defender.name} fails to fully redirect the lightning.`);
-        defender.aiLog.push(`[Redirection Result]: FAILED!`);
+        defender.aiLog.push("[Redirection Result]: FAILED!");
         attacker.aiLog.push(`[Redirection Result]: ${defender.name} failed to redirect the lightning! Attack proceeds.`);
 
         narrativeEvents.push(
-            { quote: { type: 'action', line: `${defender.name} attempts to intercept the lightning, but its power is overwhelming!` }, actor: defender, isMoveExecutionQuote: false }
+            { quote: { type: "action", line: `${defender.name} attempts to intercept the lightning, but its power is overwhelming!` }, actor: defender, isMoveExecutionQuote: false }
         );
         narrativeEvents.push(
-            { quote: { type: 'action', line: `Though some energy is deflected, ${defender.name} is struck by the fierce attack, staggering from the blow!` }, actor: defender, isMoveExecutionQuote: false }
+            { quote: { type: "action", line: `Though some energy is deflected, ${defender.name} is struck by the fierce attack, staggering from the blow!` }, actor: defender, isMoveExecutionQuote: false }
         );
 
         momentumChangeDefender = -1;
         momentumChangeAttacker = 1;
 
-        modifyMomentum(defender, momentumChangeDefender, `Failed lightning redirection`);
+        modifyMomentum(defender, momentumChangeDefender, "Failed lightning redirection");
         modifyMomentum(attacker, momentumChangeAttacker, `Lightning not redirected by ${defender.name}`);
 
         return {

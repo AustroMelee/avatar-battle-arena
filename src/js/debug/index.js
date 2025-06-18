@@ -4,16 +4,17 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 // Configuration exports
-export { DEBUG_CONFIG, DEBUG_FLAGS, LOG_LEVELS } from './debugConfig.js';
+export { DEBUG_CONFIG, DEBUG_FLAGS, LOG_LEVELS } from "./debugConfig.js";
 
 // Main class export
-export { DebugUtils } from './debugUtils.js';
+import { DebugUtils } from "./debugUtils.js";
+export { DebugUtils };
 
 // Global initialization
-export { initializeGlobalDebug, cleanupGlobalDebug } from './debugGlobal.js';
+export { initializeGlobalDebug, cleanupGlobalDebug } from "./debugGlobal.js";
 
 // Flat exports for individual functions
 export {
@@ -23,7 +24,7 @@ export {
     analyzePhases,
     analyzePerformance,
     calculateBattleDuration
-} from './battleAnalysis.js';
+} from "./battleAnalysis.js";
 
 export {
     setupGlobalErrorHandling,
@@ -31,7 +32,7 @@ export {
     analyzeErrors,
     serializeErrorLog,
     clearErrorLog
-} from './errorTracking.js';
+} from "./errorTracking.js";
 
 export {
     setupPerformanceObserver,
@@ -40,21 +41,21 @@ export {
     stopMemoryMonitoring,
     measureExecutionTime,
     analyzePerformanceMetrics
-} from './performanceTracking.js';
+} from "./performanceTracking.js";
 
 export {
     generateReport,
     exportDebugData,
     exportPerformanceCSV,
     clearDebugData
-} from './reporting.js';
+} from "./reporting.js";
 
 // Namespaced exports for organized access
-import * as BattleAnalysis from './battleAnalysis.js';
-import * as ErrorTracking from './errorTracking.js';
-import * as PerformanceTracking from './performanceTracking.js';
-import * as Reporting from './reporting.js';
-import * as Config from './debugConfig.js';
+import * as BattleAnalysis from "./battleAnalysis.js";
+import * as ErrorTracking from "./errorTracking.js";
+import * as PerformanceTracking from "./performanceTracking.js";
+import * as Reporting from "./reporting.js";
+import * as Config from "./debugConfig.js";
 
 export {
     BattleAnalysis,
@@ -108,7 +109,7 @@ export function quickAnalyzeBattle(battleResult) {
 /**
  * Version information for the debug utilities.
  */
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.0";
 
 /**
  * Module information for debugging the debug system itself.
@@ -116,14 +117,14 @@ export const VERSION = '1.0.0';
 export const MODULE_INFO = {
     version: VERSION,
     modules: [
-        'debugConfig',
-        'debugUtils',
-        'debugGlobal',
-        'battleAnalysis',
-        'errorTracking',
-        'performanceTracking',
-        'reporting'
+        "debugConfig",
+        "debugUtils",
+        "debugGlobal",
+        "battleAnalysis",
+        "errorTracking",
+        "performanceTracking",
+        "reporting"
     ],
-    description: 'Modular debug utilities for Avatar Battle Arena',
-    author: 'Battle Arena Development Team'
+    description: "Modular debug utilities for Avatar Battle Arena",
+    author: "Battle Arena Development Team"
 }; 

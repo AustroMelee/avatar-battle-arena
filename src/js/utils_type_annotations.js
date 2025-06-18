@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * @typedef {Object} TypeAnnotationConfig
@@ -70,12 +70,12 @@ export const COMMON_UTILITY_IMPORTS = [
  */
 export function generateTypeImports(typeNames) {
     if (!Array.isArray(typeNames) || typeNames.length === 0) {
-        return '';
+        return "";
     }
 
     const imports = typeNames.map(typeName => 
         ` * @typedef {import('./types.js').${typeName}} ${typeName}`
-    ).join('\n');
+    ).join("\n");
 
     return `/**\n${imports}\n */`;
 }
@@ -109,25 +109,25 @@ export function generateTypeImports(typeNames) {
 export function generateFunctionAnnotation(
     functionName, 
     parameters = [], 
-    returnType = 'void', 
-    returnDescription = '',
+    returnType = "void", 
+    returnDescription = "",
     throwsTypes = [],
-    description = '',
-    version = '1.0',
+    description = "",
+    version = "1.0",
     isPublic = true
 ) {
     // Input validation
-    if (typeof functionName !== 'string') {
-        throw new TypeError('functionName must be a string');
+    if (typeof functionName !== "string") {
+        throw new TypeError("functionName must be a string");
     }
     if (!Array.isArray(parameters)) {
-        throw new TypeError('parameters must be an array');
+        throw new TypeError("parameters must be an array");
     }
-    if (typeof returnType !== 'string') {
-        throw new TypeError('returnType must be a string');
+    if (typeof returnType !== "string") {
+        throw new TypeError("returnType must be a string");
     }
 
-    const lines = ['/**'];
+    const lines = ["/**"];
     
     // Description
     if (description) {
@@ -136,18 +136,18 @@ export function generateFunctionAnnotation(
     
     // Parameters
     parameters.forEach(param => {
-        const optional = param.optional ? '[]' : '';
+        const optional = param.optional ? "[]" : "";
         const typeAnnotation = `{${param.type}} ${optional}`;
         const desc = param.description || `${param.name} parameter`;
         lines.push(` * @param ${typeAnnotation} ${param.name} - ${desc}`);
     });
     
     // Return type
-    if (returnType !== 'void') {
+    if (returnType !== "void") {
         const retDesc = returnDescription || `${returnType} result`;
         lines.push(` * @returns {${returnType}} ${retDesc}`);
     } else {
-        lines.push(' * @returns {void}');
+        lines.push(" * @returns {void}");
     }
     
     // Throws
@@ -156,16 +156,16 @@ export function generateFunctionAnnotation(
     });
     
     // Example placeholder
-    lines.push(' * @example');
+    lines.push(" * @example");
     lines.push(` * // Example usage of ${functionName}`);
-    lines.push(` * const result = ${functionName}(${parameters.map(p => p.name).join(', ')});`);
+    lines.push(` * const result = ${functionName}(${parameters.map(p => p.name).join(", ")});`);
     
     // Metadata
     lines.push(` * @since ${version}`);
-    lines.push(` * @${isPublic ? 'public' : 'private'}`);
-    lines.push(' */');
+    lines.push(` * @${isPublic ? "public" : "private"}`);
+    lines.push(" */");
     
-    return lines.join('\n');
+    return lines.join("\n");
 }
 
 /**
@@ -187,9 +187,9 @@ export function generateFunctionAnnotation(
  *   { name: 'damage', type: 'number' }
  * ], 'dealDamage');
  */
-export function generateInputValidation(parameters, functionName = 'function') {
+export function generateInputValidation(parameters, functionName = "function") {
     if (!Array.isArray(parameters)) {
-        return '';
+        return "";
     }
 
     /** @type {string[]} */
@@ -201,34 +201,34 @@ export function generateInputValidation(parameters, functionName = 'function') {
             validationLines.push(`    if (${param.name} !== undefined) {`);
         }
 
-        const indent = param.optional ? '        ' : '    ';
+        const indent = param.optional ? "        " : "    ";
         
         switch (param.type.toLowerCase()) {
-            case 'string':
+            case "string":
                 validationLines.push(`${indent}if (typeof ${param.name} !== 'string' || ${param.name}.length === 0) {`);
                 validationLines.push(`${indent}    throw new TypeError('${functionName}: ${param.name} must be a non-empty string');`);
                 validationLines.push(`${indent}}`);
                 break;
                 
-            case 'number':
+            case "number":
                 validationLines.push(`${indent}if (typeof ${param.name} !== 'number' || isNaN(${param.name})) {`);
                 validationLines.push(`${indent}    throw new TypeError('${functionName}: ${param.name} must be a valid number');`);
                 validationLines.push(`${indent}}`);
                 break;
                 
-            case 'boolean':
+            case "boolean":
                 validationLines.push(`${indent}if (typeof ${param.name} !== 'boolean') {`);
                 validationLines.push(`${indent}    throw new TypeError('${functionName}: ${param.name} must be a boolean');`);
                 validationLines.push(`${indent}}`);
                 break;
                 
-            case 'array':
+            case "array":
                 validationLines.push(`${indent}if (!Array.isArray(${param.name})) {`);
                 validationLines.push(`${indent}    throw new TypeError('${functionName}: ${param.name} must be an array');`);
                 validationLines.push(`${indent}}`);
                 break;
                 
-            case 'object':
+            case "object":
                 validationLines.push(`${indent}if (!${param.name} || typeof ${param.name} !== 'object') {`);
                 validationLines.push(`${indent}    throw new TypeError('${functionName}: ${param.name} must be an object');`);
                 validationLines.push(`${indent}}`);
@@ -240,7 +240,7 @@ export function generateInputValidation(parameters, functionName = 'function') {
                 }
                 break;
                 
-            case 'function':
+            case "function":
                 validationLines.push(`${indent}if (typeof ${param.name} !== 'function') {`);
                 validationLines.push(`${indent}    throw new TypeError('${functionName}: ${param.name} must be a function');`);
                 validationLines.push(`${indent}}`);
@@ -248,13 +248,13 @@ export function generateInputValidation(parameters, functionName = 'function') {
         }
         
         if (param.optional) {
-            validationLines.push('    }');
+            validationLines.push("    }");
         }
         
-        validationLines.push(''); // Empty line for readability
+        validationLines.push(""); // Empty line for readability
     });
     
-    return validationLines.join('\n');
+    return validationLines.join("\n");
 }
 
 /**
@@ -267,27 +267,27 @@ export function generateInputValidation(parameters, functionName = 'function') {
  * 
  * @returns {string} Generated module header
  */
-export function generateModuleHeader(fileName, description, typeImports, version = '1.0') {
+export function generateModuleHeader(fileName, description, typeImports, version = "1.0") {
     const header = [
-        '/**',
+        "/**",
         ` * @fileoverview ${fileName}`,
         ` * @description ${description}`,
         ` * @version ${version}`,
-        ' */',
-        '',
+        " */",
+        "",
         "'use strict';",
-        '',
-        '//# sourceURL=' + fileName,
-        ''
+        "",
+        "//# sourceURL=" + fileName,
+        ""
     ];
     
     if (typeImports && typeImports.length > 0) {
-        header.push('// --- TYPE IMPORTS ---');
+        header.push("// --- TYPE IMPORTS ---");
         header.push(generateTypeImports(typeImports));
-        header.push('');
+        header.push("");
     }
     
-    return header.join('\n');
+    return header.join("\n");
 }
 
 /**
@@ -299,25 +299,25 @@ export const MODULE_CONFIGS = {
         commonImports: COMMON_BATTLE_IMPORTS,
         addInputValidation: true,
         addExamples: true,
-        modulePrefix: '[Battle Engine]'
+        modulePrefix: "[Battle Engine]"
     },
     ui: {
         commonImports: COMMON_UI_IMPORTS,
         addInputValidation: true,
         addExamples: true,
-        modulePrefix: '[UI]'
+        modulePrefix: "[UI]"
     },
     utility: {
         commonImports: COMMON_UTILITY_IMPORTS,
         addInputValidation: true,
         addExamples: true,
-        modulePrefix: '[Utility]'
+        modulePrefix: "[Utility]"
     },
     data: {
         commonImports: [],
         addInputValidation: false,
         addExamples: false,
-        modulePrefix: '[Data]'
+        modulePrefix: "[Data]"
     }
 };
 
@@ -327,14 +327,14 @@ export const MODULE_CONFIGS = {
  */
 export const QUICK_ANNOTATIONS = {
     // Common parameter patterns
-    fighter: '@param {Fighter} fighter - Fighter object',
-    battleState: '@param {BattleState} battleState - Current battle state',
-    moveResult: '@returns {MoveResult} Move execution result',
+    fighter: "@param {Fighter} fighter - Fighter object",
+    battleState: "@param {BattleState} battleState - Current battle state",
+    moveResult: "@returns {MoveResult} Move execution result",
     
     // Common validation patterns
-    stringValidation: 'if (typeof param !== "string") throw new TypeError("Expected string");',
-    numberValidation: 'if (typeof param !== "number") throw new TypeError("Expected number");',
-    objectValidation: 'if (!param || typeof param !== "object") throw new TypeError("Expected object");'
+    stringValidation: "if (typeof param !== \"string\") throw new TypeError(\"Expected string\");",
+    numberValidation: "if (typeof param !== \"number\") throw new TypeError(\"Expected number\");",
+    objectValidation: "if (!param || typeof param !== \"object\") throw new TypeError(\"Expected object\");"
 };
 
 // Export the module

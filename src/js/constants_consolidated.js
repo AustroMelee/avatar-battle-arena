@@ -11,19 +11,19 @@
  * @version 2.0.0 - Refactored to modular architecture
  */
 
-'use strict';
+"use strict";
 
 // Import from focused modules
-import { BATTLE_CONFIG, MENTAL_STATE_CONFIG, EFFECTIVENESS_CONFIG } from './constants_battle.js';
-import { AI_CONFIG } from './constants_ai.js';
-import { ENVIRONMENT_CONFIG, CURBSTOMP_CONFIG } from './constants_environment.js';
-import { ANIMATION_CONFIG } from './constants_animation.js';
+import { BATTLE_CONFIG, MENTAL_STATE_CONFIG, EFFECTIVENESS_CONFIG } from "./constants_battle.js";
+import { AI_CONFIG } from "./constants_ai.js";
+import { ENVIRONMENT_CONFIG, CURBSTOMP_CONFIG } from "./constants_environment.js";
+import { ANIMATION_CONFIG } from "./constants_animation.js";
 
 // Re-export all constants for backward compatibility
-export { BATTLE_CONFIG, MENTAL_STATE_CONFIG, EFFECTIVENESS_CONFIG } from './constants_battle.js';
-export { AI_CONFIG } from './constants_ai.js';
-export { ENVIRONMENT_CONFIG, CURBSTOMP_CONFIG } from './constants_environment.js';
-export { ANIMATION_CONFIG } from './constants_animation.js';
+export { BATTLE_CONFIG, MENTAL_STATE_CONFIG, EFFECTIVENESS_CONFIG } from "./constants_battle.js";
+export { AI_CONFIG } from "./constants_ai.js";
+export { ENVIRONMENT_CONFIG, CURBSTOMP_CONFIG } from "./constants_environment.js";
+export { ANIMATION_CONFIG } from "./constants_animation.js";
 
 // Legacy helper functions for backward compatibility
 export function clampValue(value, min, max) {

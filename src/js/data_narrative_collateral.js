@@ -1,5 +1,5 @@
 // FILE: data_narrative_collateral.js
-'use strict';
+"use strict";
 
 // Defines phrases for collateral damage impacts.
 

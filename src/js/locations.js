@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
 // Import individual location condition objects
-import { allLocations } from './data_locations_index.js';
+import { allLocations } from "./data_locations_index.js";
 
 /**
  * A comprehensive list of all available battle locations.

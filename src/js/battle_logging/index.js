@@ -4,31 +4,31 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 // Export event types and constants
-export * from './battle_event_types.js';
+export * from "./battle_event_types.js";
 
 // Export factory functions for creating events
-export * from './battle_event_factory.js';
+export * from "./battle_event_factory.js";
 
 // Export validation functions
-export * from './battle_event_validators.js';
+export * from "./battle_event_validators.js";
 
 // Export log writing functionality
-export * from './battle_log_writer.js';
+export * from "./battle_log_writer.js";
 
 // Export formatting utilities
-export * from './battle_log_formatters.js';
+export * from "./battle_log_formatters.js";
 
 // Export debug utilities
-export * from './battle_log_debug.js';
+export * from "./battle_log_debug.js";
 
 // Re-export commonly used combinations for convenience
-import { createBaseEvent, createDiceRollEvent, createPerformanceEvent, createErrorEvent } from './battle_event_factory.js';
-import { writeEvent, writeEvents } from './battle_log_writer.js';
-import { validateLogEvent, validateBattleState } from './battle_event_validators.js';
-import { logEventToConsole } from './battle_log_debug.js';
+import { createBaseEvent, createDiceRollEvent, createPerformanceEvent, createErrorEvent } from "./battle_event_factory.js";
+import { writeEvent, writeEvents } from "./battle_log_writer.js";
+import { validateLogEvent, validateBattleState } from "./battle_event_validators.js";
+import { logEventToConsole } from "./battle_log_debug.js";
 
 /**
  * High-level convenience function that creates and logs an event
@@ -93,12 +93,12 @@ export function createAndLogError(battleLog, battleState, error, context, additi
 /**
  * Namespace object for organized access to all functionality
  */
-import * as types from './battle_event_types.js';
-import * as factory from './battle_event_factory.js';
-import * as validators from './battle_event_validators.js';
-import * as writer from './battle_log_writer.js';
-import * as formatters from './battle_log_formatters.js';
-import * as debug from './battle_log_debug.js';
+import * as types from "./battle_event_types.js";
+import * as factory from "./battle_event_factory.js";
+import * as validators from "./battle_event_validators.js";
+import * as writer from "./battle_log_writer.js";
+import * as formatters from "./battle_log_formatters.js";
+import * as debug from "./battle_log_debug.js";
 
 export const BattleLogging = {
     // Types and constants

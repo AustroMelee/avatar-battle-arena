@@ -1,9 +1,9 @@
 // FILE: ui_momentum-escalation-display.js
-'use strict';
+"use strict";
 
 // State-driven momentum and escalation display - delegates to centralized state manager
 
-import { updateMomentumDisplay, updateEscalationDisplay } from './state_manager.js';
+import { updateMomentumDisplay, updateEscalationDisplay } from "./state_manager.js";
 
 // Re-export state manager functions for backward compatibility
 export { updateMomentumDisplay, updateEscalationDisplay };

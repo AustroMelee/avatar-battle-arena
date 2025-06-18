@@ -436,4 +436,32 @@ When adding new utilities:
 4. **Write Tests**: Unit tests for all functions
 5. **Document Examples**: Include usage examples in JSDoc
 6. **Performance Considerations**: Optimize for common use cases
-7. **Error Handling**: Provide meaningful error messages and recovery 
+7. **Error Handling**: Provide meaningful error messages and recovery
+
+This module provides a robust set of utilities for handling numbers, ensuring type safety, and performing common mathematical operations.
+
+### Key Files
+- `utils/validation/number_validator.js`: Core validation functions (`validateNumber`, `validateInteger`, `validateRange`).
+- `utils/validation/number_sanitizer.js`: Functions for sanitizing numbers (`sanitizeRange`, `sanitizePrecision`).
+- `utils/validation/number_checker.js`: Simple boolean checks for numbers (`isPositiveNumber`, `isInRange`).
+- `utils/validation/number_utils.js`: Specialized utilities and converters (`validatePercentage`, `percentageToRatio`).
+- `utils_math.js`: Core mathematical functions like `clamp`, `normalize`, etc.
+- `utils_random.js`: Utilities for generating random numbers and probabilities.
+
+### Usage Example
+
+```javascript
+import { validateRange } from './validation/number_validator.js';
+import { sanitizeRange } from './validation/number_sanitizer.js';
+
+// Validate that a value is within a specific range
+const { isValid, errors } = validateRange(newHP, { min: 0, max: 100 });
+if (!isValid) {
+    console.error('HP validation failed:', errors);
+}
+
+// Sanitize a number to ensure it falls within a range
+const sanitizedHP = sanitizeRange(userInput, { min: 0, max: 100 });
+```
+
+## State Management (`state_manager.js`) 

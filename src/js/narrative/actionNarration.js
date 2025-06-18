@@ -4,14 +4,14 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { locations } from '../locations.js';
-import { effectivenessLevels } from '../data_narrative_effectiveness.js';
-import { NarrativeStringBuilder } from '../utils_narrative-string-builder.js';
-import { generateLogEvent } from '../utils_log_event.js';
-import { formatQuoteEvent } from './quoteEngine.js';
-import { generateCollateralDamageEvent } from './environmentNarrative.js';
+import { locations } from "../locations.js";
+import { effectivenessLevels } from "../data_narrative_effectiveness.js";
+import { NarrativeStringBuilder } from "../utils_narrative-string-builder.js";
+import { generateLogEvent } from "../utils_log_event.js";
+import { formatQuoteEvent } from "./quoteEngine.js";
+import { generateCollateralDamageEvent } from "./environmentNarrative.js";
 
 /**
  * Generates the primary narrative description for a move action.
@@ -27,13 +27,13 @@ export function generateActionDescriptionObject(move, actor, defender, result, b
     const locationData = locations[battleState.locationId];
 
     const builder = new NarrativeStringBuilder(actor, defender, move, effectivenessLevels, locationData, {
-        isCrit: effectiveness === 'Critical'
+        isCrit: effectiveness === "Critical"
     });
 
     const { actionSentence, htmlSentence } = builder.buildActionDescription(effectiveness);
 
     return generateLogEvent(battleState, {
-        type: 'move_action_event',
+        type: "move_action_event",
         actorId: actor.id,
         characterName: actor.name,
         moveName: move.name,
@@ -83,13 +83,13 @@ export function generateTurnNarrationObjects(events, move, actor, opponent, resu
     
     // Handle move action description
     if (move && result && !isInitialBanter) {
-        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, battleState || { turn: 0, currentPhase: currentPhaseKey, locationId: 'unknown' });
+        const actionEvent = generateActionDescriptionObject(move, actor, opponent, result, battleState || { turn: 0, currentPhase: currentPhaseKey, locationId: "unknown" });
         if (actionEvent) {
             narrativeObjects.push(actionEvent);
         }
         
         // Generate collateral damage if applicable
-        const collateralEvent = generateCollateralDamageEvent(move, actor, result, environmentState, battleState || { turn: 0, currentPhase: currentPhaseKey, locationId: 'unknown' });
+        const collateralEvent = generateCollateralDamageEvent(move, actor, result, environmentState, battleState || { turn: 0, currentPhase: currentPhaseKey, locationId: "unknown" });
         if (collateralEvent) {
             narrativeObjects.push(collateralEvent);
         }

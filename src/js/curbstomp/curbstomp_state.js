@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 // This Set tracks characters marked for defeat
 let charactersMarkedForDefeat = new Set();

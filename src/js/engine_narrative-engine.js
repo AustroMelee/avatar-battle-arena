@@ -5,10 +5,10 @@
  * @deprecated Use direct imports from js/narrative/ modules for better performance and maintainability
  */
 
-'use strict';
+"use strict";
 
 // Re-export all functions from the modular narrative system
-export * from './narrative/index.js';
+export * from "./narrative/index.js";
 
 // This file is kept for backward compatibility.
 // New code should import directly from:
@@ -22,4 +22,4 @@ export * from './narrative/index.js';
 // - js/narrative/statusChange.js
 // - js/narrative/index.js (for all functions)
 
-console.warn('[Deprecated] engine_narrative-engine.js is deprecated. Please import directly from js/narrative/ modules.');
+console.warn("[Deprecated] engine_narrative-engine.js is deprecated. Please import directly from js/narrative/ modules.");

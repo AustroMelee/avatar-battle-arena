@@ -1,5 +1,5 @@
 // FILE: engine_phase-manager.js
-'use strict';
+"use strict";
 
 /**
  * @file Phase Manager
@@ -7,10 +7,10 @@
  * and generating the associated narrative.
  */
 
-import { checkAndTransitionPhase } from './engine_battle-phase.js';
-import { generateLogEvent } from './utils_log_event.js';
-import { phaseTemplates, battlePhases as phaseDefinitions } from './data_narrative_phases.js';
-import { findNarrativeQuote, generateTurnNarrationObjects } from './engine_narrative-engine.js';
+import { checkAndTransitionPhase } from "./engine_battle-phase.js";
+import { generateLogEvent } from "./utils_log_event.js";
+import { phaseTemplates, battlePhases as phaseDefinitions } from "./data_narrative_phases.js";
+import { findNarrativeQuote, generateTurnNarrationObjects } from "./engine_narrative-engine.js";
 
 
 export function managePhaseTransition(phaseState, attacker, defender, battleState) {
@@ -20,26 +20,26 @@ export function managePhaseTransition(phaseState, attacker, defender, battleStat
         // Reset environmental state for the new phase
         battleState.environmentState.environmentalImpactCount = 0;
         battleState.environmentState.environmentalImpactsThisPhase = [];
-        battleState.environmentState.highestImpactLevelThisPhase = 'subtle';
+        battleState.environmentState.highestImpactLevelThisPhase = "subtle";
         battleState.environmentState.narrativeTriggeredThisPhase = false;
 
         const currentPhaseInfo = phaseDefinitions.find(p => p.key === phaseState.currentPhase);
         if (currentPhaseInfo) {
             // Add phase header event
-            const headerTemplate = phaseTemplates.header || '<h2>{phaseDisplayName} {phaseEmoji}</h2>';
+            const headerTemplate = phaseTemplates.header || "<h2>{phaseDisplayName} {phaseEmoji}</h2>";
             phaseEvents.push(generateLogEvent(battleState, {
-                type: 'phase_header_event',
+                type: "phase_header_event",
                 phaseName: currentPhaseInfo.name,
                 phaseEmoji: currentPhaseInfo.emoji,
                 phaseKey: phaseState.currentPhase,
-                text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji || ''}`,
+                text: `${currentPhaseInfo.name} ${currentPhaseInfo.emoji || ""}`,
                 html_content: headerTemplate
-                    .replace('{phaseDisplayName}', currentPhaseInfo.name)
-                    .replace('{phaseEmoji}', currentPhaseInfo.emoji || '')
+                    .replace("{phaseDisplayName}", currentPhaseInfo.name)
+                    .replace("{phaseEmoji}", currentPhaseInfo.emoji || "")
             }));
             
             // Add transition-specific dialogue
-            const quote1 = findNarrativeQuote(attacker, defender, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState });
+            const quote1 = findNarrativeQuote(attacker, defender, "phaseTransition", phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState });
             if (quote1) phaseEvents.push(...generateTurnNarrationObjects(
                 [{ quote: quote1, actor: attacker }], 
                 null, 
@@ -54,7 +54,7 @@ export function managePhaseTransition(phaseState, attacker, defender, battleStat
                 battleState
             ));
 
-            const quote2 = findNarrativeQuote(defender, attacker, 'phaseTransition', phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState });
+            const quote2 = findNarrativeQuote(defender, attacker, "phaseTransition", phaseState.currentPhase, { currentPhaseKey: phaseState.currentPhase, battleState });
             if (quote2) phaseEvents.push(...generateTurnNarrationObjects(
                 [{ quote: quote2, actor: defender }], 
                 null, 

@@ -1,5 +1,5 @@
 // FILE: js/camera_control.js
-'use strict';
+"use strict";
 
 // Version 1.1: Null-Safety Pass
 
@@ -21,7 +21,7 @@ export function initializeCameraControls(container, zInBtn, zOutBtn) {
     zoomOutButton = zOutBtn;
 
     if (simulationContainer) {
-        simulationContainer.addEventListener('scroll', () => {
+        simulationContainer.addEventListener("scroll", () => {
             isUserScrolling = true;
             clearTimeout(scrollTimeoutId); // Clear existing timeout
             scrollTimeoutId = setTimeout(() => {
@@ -33,12 +33,12 @@ export function initializeCameraControls(container, zInBtn, zOutBtn) {
     }
 
     if (zoomInButton) {
-        zoomInButton.addEventListener('click', handleZoomIn);
+        zoomInButton.addEventListener("click", handleZoomIn);
     } else {
         // console.warn("Camera Control: Zoom-in button not provided.");
     }
     if (zoomOutButton) {
-        zoomOutButton.addEventListener('click', handleZoomOut);
+        zoomOutButton.addEventListener("click", handleZoomOut);
     } else {
         // console.warn("Camera Control: Zoom-out button not provided.");
     }
@@ -102,7 +102,7 @@ function applyZoom() {
     if (simulationContainer) {
         // Ensure style object exists
         if (simulationContainer.style) {
-            simulationContainer.style.transformOrigin = 'top left';
+            simulationContainer.style.transformOrigin = "top left";
             simulationContainer.style.transform = `scale(${zoomLevel})`;
         } else {
             // console.warn("Camera Control (applyZoom): simulationContainer.style is undefined.");

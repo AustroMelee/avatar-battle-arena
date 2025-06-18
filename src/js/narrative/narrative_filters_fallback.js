@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Fallback filter for generic variants.

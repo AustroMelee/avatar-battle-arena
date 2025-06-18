@@ -1,13 +1,13 @@
 // FILE: js/animated_text_engine.js
-'use strict';
+"use strict";
 
 // Version 1.1: Null-Safety Pass
 
 // --- NEW IMPORT ---
-import { getCharacterImageFromUI as getCharacterImage } from './ui.js';
-import { getEmojiForMove } from './utils_impact_level.js';
+import { getCharacterImageFromUI as getCharacterImage } from "./ui.js";
+import { getEmojiForMove } from "./utils_impact_level.js";
 // --- END NEW IMPORT ---
-import { focusOnLatestMessage } from './camera_control.js'; // camera_control.js should be robust
+import { focusOnLatestMessage } from "./camera_control.js"; // camera_control.js should be robust
 
 const TYPEWRITER_SPEED_MS = 25;
 const EMOJI_ANIMATION_DURATION_MS = 500;
@@ -38,7 +38,7 @@ export function startAnimationSequence(queue, container, onComplete) {
     animationQueueInternal = Array.isArray(queue) ? [...queue] : []; // Ensure queue is an array
     currentMessageIndex = 0;
     simulationContainerElement = container; // Assume container is valid HTMLElement if passed
-    onStepCompleteCallbackInternal = typeof onComplete === 'function' ? onComplete : null;
+    onStepCompleteCallbackInternal = typeof onComplete === "function" ? onComplete : null;
 
     if (!simulationContainerElement) {
         console.error("Animated Text Engine: Simulation container is null. Cannot start animation.");
@@ -71,7 +71,7 @@ function processNextMessage() {
     const message = animationQueueInternal[currentMessageIndex];
     currentMessageIndex++;
 
-    if (!message || typeof message.text !== 'string') { // Basic validation of message object
+    if (!message || typeof message.text !== "string") { // Basic validation of message object
         console.warn("Animated Text Engine: Skipping invalid message object:", message);
         // Schedule next message processing to keep the queue moving
         currentTimeoutId = setTimeout(() => {
@@ -92,22 +92,22 @@ function processAndAnimateEvent(event) {
             return null;
         }
         
-        if (typeof event !== 'object') {
+        if (typeof event !== "object") {
             console.warn("[Animated Text Engine] Event is not an object:", typeof event);
             return null;
         }
         
-        if (!event.type || typeof event.type !== 'string') {
+        if (!event.type || typeof event.type !== "string") {
             console.warn("[Animated Text Engine] Event missing or invalid type property:", event);
             return null;
         }
 
-    let lineClass = '';
-    let htmlContent = '';
+    let lineClass = "";
+    let htmlContent = "";
 
     switch (event.type) {
-        case 'turn_marker':
-            lineClass = 'turn-marker-simulated';
+        case "turn_marker": {
+            lineClass = "turn-marker-simulated";
             const { portrait, characterName, turn } = event;
             const nameSpan = `<span class="turn-marker-name char-${event.actorId}">${characterName}</span>`;
             const turnSpan = `<span class="turn-marker-turn">Turn ${turn}</span>`;
@@ -119,40 +119,41 @@ function processAndAnimateEvent(event) {
                 </div>
             `;
             break;
+        }
 
-        case 'move_action_event':
-            lineClass = 'move-action-simulated';
+        case "move_action_event":
+            lineClass = "move-action-simulated";
             htmlContent = event.html_content;
             break;
-        case 'dialogue_event':
-            lineClass = 'dialogue-simulated';
+        case "dialogue_event":
+            lineClass = "dialogue-simulated";
             htmlContent = event.html_content;
             break;
-        case 'environmental_summary_event':
-            lineClass = 'environmental-simulated';
+        case "environmental_summary_event":
+            lineClass = "environmental-simulated";
             htmlContent = event.html_content;
             break;
-        case 'phase_header_event':
-            lineClass = 'phase-header-simulated';
+        case "phase_header_event":
+            lineClass = "phase-header-simulated";
             htmlContent = event.html_content;
             break;
-        case 'final_blow_event':
-        case 'conclusion_event':
-        case 'stalemate_result_event':
-            lineClass = 'phase-header-simulated'; // Use a similar prominent style
+        case "final_blow_event":
+        case "conclusion_event":
+        case "stalemate_result_event":
+            lineClass = "phase-header-simulated"; // Use a similar prominent style
             htmlContent = event.html_content;
             break;
         default:
             // For simple text events or unknown types, render them plainly.
             if (event.text) {
-                lineClass = 'narrative-info'; // A generic class
+                lineClass = "narrative-info"; // A generic class
                 htmlContent = `<p>${event.text}</p>`;
             } else {
                 return null; // Don't render anything if we can't process it.
             }
     }
 
-        const lineElement = document.createElement('div');
+        const lineElement = document.createElement("div");
         lineElement.className = `simulation-line ${lineClass}`;
         lineElement.innerHTML = htmlContent;
 
@@ -160,9 +161,9 @@ function processAndAnimateEvent(event) {
     } catch (error) {
         console.error("[Animated Text Engine] Error processing event:", error, event);
         // Return a safe fallback element
-        const fallbackElement = document.createElement('div');
-        fallbackElement.className = 'simulation-line narrative-info';
-        fallbackElement.innerHTML = '<p>Error processing event</p>';
+        const fallbackElement = document.createElement("div");
+        fallbackElement.className = "simulation-line narrative-info";
+        fallbackElement.innerHTML = "<p>Error processing event</p>";
         return fallbackElement;
     }
 }
@@ -182,7 +183,7 @@ function renderMessage(message) { // message is already validated by processNext
 
     if (simulationContainerElement) { // Ensure container still exists
         // Use DocumentFragment for efficient DOM operations
-        import('./utils_efficient_rendering.js').then(({ batchAppendElements }) => {
+        import("./utils_efficient_rendering.js").then(({ batchAppendElements }) => {
             batchAppendElements(simulationContainerElement, [lineElement]);
             focusOnLatestMessage(simulationContainerElement, lineElement); // focusOnLatestMessage should be robust
         }).catch(() => {
@@ -203,37 +204,37 @@ function renderMessage(message) { // message is already validated by processNext
 }
 
 function typeMessage(element, text, onFinished) {
-    if (!element || typeof text !== 'string') { // Basic validation
+    if (!element || typeof text !== "string") { // Basic validation
         console.warn("Animated Text Engine (typeMessage): Invalid element or text.", { element, text });
-        if (typeof onFinished === 'function') onFinished();
+        if (typeof onFinished === "function") onFinished();
         return;
     }
 
     let i = 0;
-    const existingEmoji = element.querySelector('.simulation-move-emoji');
+    const existingEmoji = element.querySelector(".simulation-move-emoji");
     let textContentTarget = element;
 
     if (existingEmoji) {
-        let actualTextSpan = element.querySelector('.typewriter-target');
+        let actualTextSpan = element.querySelector(".typewriter-target");
         if (!actualTextSpan) {
-            actualTextSpan = document.createElement('span');
-            actualTextSpan.className = 'typewriter-target';
+            actualTextSpan = document.createElement("span");
+            actualTextSpan.className = "typewriter-target";
             element.appendChild(actualTextSpan);
         }
         textContentTarget = actualTextSpan;
     }
-    textContentTarget.innerHTML = ''; // Clear only the target span
+    textContentTarget.innerHTML = ""; // Clear only the target span
 
     function type() {
         if (currentTimeoutId === null && i > 0) return; // Animation was stopped
 
         if (i < text.length) {
-            textContentTarget.insertAdjacentText('beforeend', text.charAt(i));
+            textContentTarget.insertAdjacentText("beforeend", text.charAt(i));
             i++;
             currentTimeoutId = setTimeout(type, TYPEWRITER_SPEED_MS);
         } else {
             currentTimeoutId = null; // Clear ID as this typing session is done
-            if (typeof onFinished === 'function') onFinished();
+            if (typeof onFinished === "function") onFinished();
         }
     }
     type();
@@ -242,24 +243,24 @@ function typeMessage(element, text, onFinished) {
 function animateEmoji(emojiElement, impactLevel) {
     if (!emojiElement) return; // Guard against null element
 
-    let animationClass = '';
+    let animationClass = "";
     // Safe access to impactLevel and toLowerCase
-    const level = typeof impactLevel === 'string' ? impactLevel.toLowerCase() : 'low';
+    const level = typeof impactLevel === "string" ? impactLevel.toLowerCase() : "low";
 
     switch (level) {
-        case 'critical':
-        case 'high':
-            animationClass = 'emoji-animate-high';
+        case "critical":
+        case "high":
+            animationClass = "emoji-animate-high";
             break;
-        case 'strong': // Keep existing behavior for 'strong'
-             animationClass = 'emoji-animate-high';
+        case "strong": // Keep existing behavior for 'strong'
+             animationClass = "emoji-animate-high";
             break;
-        case 'medium':
-        case 'normal':
-            animationClass = 'emoji-animate-medium';
+        case "medium":
+        case "normal":
+            animationClass = "emoji-animate-medium";
             break;
-        case 'low':
-            animationClass = 'emoji-animate-low';
+        case "low":
+            animationClass = "emoji-animate-low";
             break;
         default:
             return; // No animation for unknown levels

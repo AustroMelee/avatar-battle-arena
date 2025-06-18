@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 let currentSimulationMode = null; // Default to null, will be set by main.js
 let isSimulationRunning = false;
@@ -95,7 +95,7 @@ export function getCompletionCallback() {
  * @param {Function} callback - Completion callback
  */
 export function setCompletionCallback(callback) {
-    onSimulationCompleteCallback = typeof callback === 'function' ? callback : null;
+    onSimulationCompleteCallback = typeof callback === "function" ? callback : null;
 }
 
 /**

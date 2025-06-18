@@ -4,24 +4,24 @@
  * @version 2.0
  */
 
-'use strict';
+"use strict";
 
 // Import core modules
-import { createEffectContext } from './context.js';
-import { handleStatChange } from './statChangeConfig.js';
+import { createEffectContext } from "./context.js";
+import { handleStatChange } from "./statChangeConfig.js";
 
 // Import handler modules
-import * as statHandlers from './statHandlers.js';
-import * as modifierHandlers from './modifierHandlers.js';
-import * as outcomeHandlers from './outcomeHandlers.js';
-import * as narrativeHandlers from './narrativeHandlers.js';
-import { handleCompositeEffect } from './compositeHandler.js';
+import * as statHandlers from "./statHandlers.js";
+import * as modifierHandlers from "./modifierHandlers.js";
+import * as outcomeHandlers from "./outcomeHandlers.js";
+import * as narrativeHandlers from "./narrativeHandlers.js";
+import { handleCompositeEffect } from "./compositeHandler.js";
 
 // Import testing utilities
-import { testEffectHandler, runAllEffectHandlerTests, runEffectTestSuite } from './test.js';
+import { testEffectHandler, runAllEffectHandlerTests, runEffectTestSuite } from "./test.js";
 
 // Import effect type definitions
-import { EFFECT_TYPES } from '../data_mechanics_definitions.js';
+import { EFFECT_TYPES } from "../data_mechanics_definitions.js";
 
 /**
  * Map of effect types to their corresponding handler functions.
@@ -58,8 +58,8 @@ export const effectHandlers = new Map([
     [EFFECT_TYPES.NARRATIVE_ONLY, narrativeHandlers.handleNarrativeOnly],
     
     // Special handlers
-    ['COMPOSITE_EFFECT', (ctx) => handleCompositeEffect(ctx, effectHandlers)],
-    ['STAT_CHANGE', handleStatChange], // Generic stat change handler
+    ["COMPOSITE_EFFECT", (ctx) => handleCompositeEffect(ctx, effectHandlers)],
+    ["STAT_CHANGE", handleStatChange], // Generic stat change handler
 ]);
 
 /**
@@ -69,8 +69,8 @@ export const effectHandlers = new Map([
  * @throws {Error} If handler is not a function
  */
 export function registerEffectHandler(effectType, handler) {
-    if (typeof handler !== 'function') {
-        throw new Error('Handler must be a function');
+    if (typeof handler !== "function") {
+        throw new Error("Handler must be a function");
     }
     effectHandlers.set(effectType, handler);
     console.log(`[Effect Handlers] Registered handler for effect type: ${effectType}`);
@@ -133,4 +133,4 @@ export { testEffectHandler, runAllEffectHandlerTests, runEffectTestSuite };
 export { statHandlers, modifierHandlers, outcomeHandlers, narrativeHandlers };
 
 // Export config for external customization
-export { statChangeConfig } from './statChangeConfig.js'; 
+export { statChangeConfig } from "./statChangeConfig.js"; 

@@ -4,10 +4,10 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 // Import configuration
-import { DEBUG_CONFIG, DEBUG_FLAGS } from './debugConfig.js';
+import { DEBUG_CONFIG, DEBUG_FLAGS } from "./debugConfig.js";
 
 // Import specialized modules
 import { 
@@ -17,7 +17,7 @@ import {
     analyzePhases, 
     analyzePerformance, 
     calculateBattleDuration 
-} from './battleAnalysis.js';
+} from "./battleAnalysis.js";
 
 import { 
     setupGlobalErrorHandling, 
@@ -25,7 +25,7 @@ import {
     analyzeErrors, 
     serializeErrorLog, 
     clearErrorLog 
-} from './errorTracking.js';
+} from "./errorTracking.js";
 
 import { 
     setupPerformanceObserver, 
@@ -34,14 +34,14 @@ import {
     stopMemoryMonitoring, 
     measureExecutionTime, 
     analyzePerformanceMetrics 
-} from './performanceTracking.js';
+} from "./performanceTracking.js";
 
 import { 
     generateReport, 
     exportDebugData, 
     exportPerformanceCSV, 
     clearDebugData 
-} from './reporting.js';
+} from "./reporting.js";
 
 /**
  * Main debug utility class providing comprehensive debugging tools.
@@ -69,8 +69,8 @@ export class DebugUtils {
         // Store monitoring interval ID
         this.memoryMonitoringId = null;
         
-        console.log('[Debug Utils] Initialized - Version 1.0.0');
-        console.log('[Debug Utils] Available modules: Battle Analysis, Error Tracking, Performance Tracking, Reporting');
+        console.log("[Debug Utils] Initialized - Version 1.0.0");
+        console.log("[Debug Utils] Available modules: Battle Analysis, Error Tracking, Performance Tracking, Reporting");
         
         // Initialize subsystems based on configuration
         this._initializeSubsystems();
@@ -103,7 +103,7 @@ export class DebugUtils {
      */
     analyzeBattle(battleResult) {
         if (!DEBUG_FLAGS.BATTLE_ANALYSIS) {
-            console.warn('[Debug Utils] Battle analysis is disabled');
+            console.warn("[Debug Utils] Battle analysis is disabled");
             return;
         }
         
@@ -182,7 +182,7 @@ export class DebugUtils {
      */
     startMemoryMonitoring(interval = 5000) {
         if (this.memoryMonitoringId) {
-            console.warn('[Debug Utils] Memory monitoring already active');
+            console.warn("[Debug Utils] Memory monitoring already active");
             return this.memoryMonitoringId;
         }
         
@@ -247,7 +247,7 @@ export class DebugUtils {
      */
     exportDebugData(filename) {
         if (!DEBUG_FLAGS.EXPORT_FEATURES) {
-            console.warn('[Debug Utils] Export features are disabled');
+            console.warn("[Debug Utils] Export features are disabled");
             return;
         }
         
@@ -260,7 +260,7 @@ export class DebugUtils {
      */
     exportPerformanceCSV(filename) {
         if (!DEBUG_FLAGS.EXPORT_FEATURES) {
-            console.warn('[Debug Utils] Export features are disabled');
+            console.warn("[Debug Utils] Export features are disabled");
             return;
         }
         
@@ -284,7 +284,7 @@ export class DebugUtils {
     /**
      * Adds a custom log entry.
      */
-    log(message, level = 'debug', data = null) {
+    log(message, level = "debug", data = null) {
         const logEntry = {
             message,
             level,
@@ -338,6 +338,6 @@ export class DebugUtils {
      */
     destroy() {
         this.stopMemoryMonitoring();
-        console.log('[Debug Utils] Debug utilities shut down');
+        console.log("[Debug Utils] Debug utilities shut down");
     }
 } 

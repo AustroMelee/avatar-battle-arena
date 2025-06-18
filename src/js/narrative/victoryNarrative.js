@@ -4,11 +4,11 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { postBattleVictoryPhrases } from '../narrative-flavor.js';
-import { getRandomElementSeeded } from '../utils_seeded_random.js';
-import { substituteTokens } from './stringSubstitution.js';
+import { postBattleVictoryPhrases } from "../narrative-flavor.js";
+import { getRandomElementSeeded } from "../utils_seeded_random.js";
+import { substituteTokens } from "./stringSubstitution.js";
 
 /**
  * Generates the final victory line for the battle's conclusion.
@@ -22,8 +22,8 @@ export function getFinalVictoryLine(winner, loser) {
         return "The battle is over.";
     }
 
-    const winnerStyle = winner.victoryStyle || 'default';
-    const phraseCategory = (winner.hp / winner.maxHp > 0.75) ? 'dominant' : 'narrow';
+    const winnerStyle = winner.victoryStyle || "default";
+    const phraseCategory = (winner.hp / winner.maxHp > 0.75) ? "dominant" : "narrow";
 
     const phrasePool = postBattleVictoryPhrases[winnerStyle]?.[phraseCategory] || postBattleVictoryPhrases.default[phraseCategory];
     const phraseTemplate = getRandomElementSeeded(phrasePool);

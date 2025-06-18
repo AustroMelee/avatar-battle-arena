@@ -1,8 +1,8 @@
 // FILE: location-battle-conditions.js
-'use strict';
+"use strict";
 
 // Import individual location condition objects
-import { allLocations } from './data_locations_index.js';
+import { allLocations } from "./data_locations_index.js";
 
 /**
  * A map of location IDs to their battle conditions.

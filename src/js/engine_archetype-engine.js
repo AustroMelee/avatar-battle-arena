@@ -1,26 +1,26 @@
 // FILE: js/engine_archetype-engine.js
-'use strict';
+"use strict";
 
 // Import all individual character archetype data files
-import { characters } from './data_characters.js';
-import { locations } from './locations.js';
-import { allArchetypes } from './data_archetypes_index.js';
+import { characters } from "./data_characters.js";
+import { locations } from "./locations.js";
+import { allArchetypes } from "./data_archetypes_index.js";
 
-import { aangArchetypeData } from './data_archetype_aang.js';
-import { azulaArchetypeData } from './data_archetype_azula.js';
+import { aangArchetypeData } from "./data_archetype_aang.js";
+import { azulaArchetypeData } from "./data_archetype_azula.js";
 
 // Combine all imported archetype data into a single map.
 // The structure will be: { fighterA_id: { fighterB_id: { location_id: {label, introA, introB} } } }
 const combinedArchetypeMap = {
-    'aang-airbending-only': aangArchetypeData,
-    'azula': azulaArchetypeData,
+    "aang-airbending-only": aangArchetypeData,
+    "azula": azulaArchetypeData,
 };
 
 // Global Fallback (if Fighter A's data isn't even in combinedArchetypeMap)
 const GLOBAL_DEFAULT_ARCHETYPE = {
     label: "An Epic Confrontation Awaits",
-    introA: (name1) => `${name1 || 'A skilled fighter'} prepares for battle.`,
-    introB: (name2) => `${name2 || 'An unknown challenger'} steps into the arena.`,
+    introA: (name1) => `${name1 || "A skilled fighter"} prepares for battle.`,
+    introB: (name2) => `${name2 || "An unknown challenger"} steps into the arena.`,
     error: "Global default matchup."
 };
 
@@ -67,12 +67,12 @@ export function resolveArchetypeLabel(fighter1Id, fighter2Id, locationId, fighte
             entry = fighterAData[fighter2Id][locationId];
         }
         // Fallback 1: [F1_Data][F2][_DEFAULT_LOCATION_]
-        else if (fighterAData[fighter2Id] && fighterAData[fighter2Id]['_DEFAULT_LOCATION_']) {
-            entry = fighterAData[fighter2Id]['_DEFAULT_LOCATION_'];
+        else if (fighterAData[fighter2Id] && fighterAData[fighter2Id]["_DEFAULT_LOCATION_"]) {
+            entry = fighterAData[fighter2Id]["_DEFAULT_LOCATION_"];
         }
         // Fallback 2: [F1_Data][_DEFAULT_OPPONENT_][_DEFAULT_LOCATION_] (Default within Fighter A's data)
-        else if (fighterAData['_DEFAULT_OPPONENT_'] && fighterAData['_DEFAULT_OPPONENT_']['_DEFAULT_LOCATION_']) {
-            entry = fighterAData['_DEFAULT_OPPONENT_']['_DEFAULT_LOCATION_'];
+        else if (fighterAData["_DEFAULT_OPPONENT_"] && fighterAData["_DEFAULT_OPPONENT_"]["_DEFAULT_LOCATION_"]) {
+            entry = fighterAData["_DEFAULT_OPPONENT_"]["_DEFAULT_LOCATION_"];
             // Specific default intros using names if possible
             if (entry) {
                 entry = {

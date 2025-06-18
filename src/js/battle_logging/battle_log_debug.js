@@ -4,16 +4,16 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
-import { EVENT_TYPES } from './battle_event_types.js';
+import { EVENT_TYPES } from "./battle_event_types.js";
 
 /**
  * Debug configuration
  */
 const DEBUG_CONFIG = {
     enableConsoleLogging: true,
-    logLevel: 'INFO', // DEBUG, INFO, WARN, ERROR
+    logLevel: "INFO", // DEBUG, INFO, WARN, ERROR
     enablePerformanceLogging: true,
     enableErrorReporting: true,
     enableExtremeRollWarnings: true,
@@ -74,7 +74,7 @@ export class BattleLogDebugger {
      * Sends event to external monitor if configured
      */
     sendToExternalMonitor(event) {
-        if (this.config.externalMonitor && typeof this.config.externalMonitor.log === 'function') {
+        if (this.config.externalMonitor && typeof this.config.externalMonitor.log === "function") {
             this.config.externalMonitor.log(event);
         }
     }
@@ -86,13 +86,13 @@ export class BattleLogDebugger {
     getEventLogLevel(event) {
         switch (event.type) {
             case EVENT_TYPES.ERROR:
-                return 'ERROR';
+                return "ERROR";
             case EVENT_TYPES.PERFORMANCE:
-                return event.metadata?.isSlowOperation ? 'WARN' : 'DEBUG';
+                return event.metadata?.isSlowOperation ? "WARN" : "DEBUG";
             case EVENT_TYPES.DICE_ROLL:
-                return event.rollAnalysis?.isExtreme ? 'WARN' : 'DEBUG';
+                return event.rollAnalysis?.isExtreme ? "WARN" : "DEBUG";
             default:
-                return event.isMajorEvent ? 'INFO' : 'DEBUG';
+                return event.isMajorEvent ? "INFO" : "DEBUG";
         }
     }
 
@@ -114,13 +114,13 @@ export class BattleLogDebugger {
         const message = this.formatConsoleMessage(event);
 
         switch (logLevel) {
-            case 'ERROR':
+            case "ERROR":
                 console.error(message);
                 break;
-            case 'WARN':
+            case "WARN":
                 console.warn(message);
                 break;
-            case 'INFO':
+            case "INFO":
                 console.info(message);
                 break;
             default:
@@ -136,7 +136,7 @@ export class BattleLogDebugger {
         const parts = [
             `[${event.type.toUpperCase()}]`,
             `Turn ${event.turnNumber}:`,
-            event.text || 'No description'
+            event.text || "No description"
         ];
 
         if (event.type === EVENT_TYPES.PERFORMANCE) {
@@ -147,7 +147,7 @@ export class BattleLogDebugger {
             parts.push(`(EXTREME: ${event.result})`);
         }
 
-        return parts.join(' ');
+        return parts.join(" ");
     }
 
     /**

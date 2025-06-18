@@ -1,5 +1,5 @@
 // FILE: data_mechanics_characters.js
-'use strict';
+"use strict";
 
 // Refined Curb Stomp Mechanics (v2) for Direct Engine Integration
 
@@ -32,13 +32,13 @@
  * @type {object.<string, CurbstompRule[]>}
  */
 export const characterCurbstompRules = {
-    'azula': [
+    "azula": [
         {
             id: "azula_sane_precision_lightning",
             description: "When calm and focused, Azula's lightning is surgically precise. Auto-KO vs. conductive targets (metal, wet), with a 95% hit rate. Fails if emotionally unstable or charge is interrupted.",
             triggerChance: 0.75,
             canTriggerPreBattle: false,
-            severity: 'lethal',
+            severity: "lethal",
             conditionLogic: (azula, opponent, battleState) => {
                 return !azula.mentalState.isInsane && (opponent.specialTraits?.hasMetalArmor || opponent.specialTraits?.isWet);
             },
@@ -52,7 +52,7 @@ export const characterCurbstompRules = {
             description: "In open space, Azula can spiral her fire into a searing vortex. Instant-KO if target is mid-cast or grounded. High risk, high reward.",
             triggerChance: 0.55,
             canTriggerPreBattle: false,
-            severity: 'lethal',
+            severity: "lethal",
             conditionLogic: (azula, opponent, battleState) => {
                 return !azula.mentalState.isInsane && battleState.isOpenTerrain;
             },
@@ -67,9 +67,9 @@ export const characterCurbstompRules = {
             triggerChance: 0.60, // 60% chance to be an instant kill
             selfSabotageChance: 0.40, // 40% chance it backfires
             canTriggerPreBattle: false,
-            severity: 'lethal',
+            severity: "lethal",
             conditionLogic: (azula, opponent, battleState) => {
-                return azula.mentalState.level === 'broken'; // simplified from isInsane
+                return azula.mentalState.level === "broken"; // simplified from isInsane
             },
             outcome: { 
                 type: "conditional_ko_or_self_sabotage", 
@@ -82,7 +82,7 @@ export const characterCurbstompRules = {
             description: "Her blue fire burns hotter, overriding basic defenses. Applies to all fire-based attacks.",
             triggerChance: 1.0,
             canTriggerPreBattle: true,
-            severity: 'buff',
+            severity: "buff",
             outcome: { 
                 type: "damage_modifier", 
                 value: 0.25,
@@ -90,13 +90,13 @@ export const characterCurbstompRules = {
             }
         }
     ],
-    'aang': [
+    "aang": [
         {
             id: "aang_mobility_edge",
             description: "Aang's mastery of airbending gives him a significant defensive advantage against grounded attacks.",
             triggerChance: 0.60,
             canTriggerPreBattle: true,
-            severity: 'buff',
+            severity: "buff",
             outcome: { 
                 type: "evasion_modifier",
                 value: 0.60,

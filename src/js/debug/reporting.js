@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Generates a comprehensive debug report.
@@ -22,7 +22,7 @@ export function generateReport(performanceMetrics, memorySnapshots, errorLog, lo
     const report = {
         metadata: {
             timestamp: new Date().toISOString(),
-            reportVersion: '1.0.0',
+            reportVersion: "1.0.0",
             userAgent: navigator.userAgent,
             url: window.location.href,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -69,7 +69,7 @@ export function generateReport(performanceMetrics, memorySnapshots, errorLog, lo
         } : null
     };
     
-    console.log('[Debug Report] Generated comprehensive report');
+    console.log("[Debug Report] Generated comprehensive report");
     return report;
 }
 
@@ -86,9 +86,9 @@ export function generateReport(performanceMetrics, memorySnapshots, errorLog, lo
 export function exportDebugData(report, filename) {
     try {
         const dataStr = JSON.stringify(report, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const dataBlob = new Blob([dataStr], { type: "application/json" });
         
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = URL.createObjectURL(dataBlob);
         link.download = filename || `debug-report-${Date.now()}.json`;
         
@@ -102,10 +102,10 @@ export function exportDebugData(report, filename) {
         
         console.log(`[Debug Export] Data exported as ${link.download}`);
     } catch (error) {
-        console.error('[Debug Export] Failed to export debug data:', error);
+        console.error("[Debug Export] Failed to export debug data:", error);
         
         // Fallback: log the report to console
-        console.log('[Debug Export] Report data (copy from console):', report);
+        console.log("[Debug Export] Report data (copy from console):", report);
     }
 }
 
@@ -117,26 +117,26 @@ export function exportDebugData(report, filename) {
  */
 export function exportPerformanceCSV(performanceMetrics, filename) {
     if (performanceMetrics.length === 0) {
-        console.warn('[Debug Export] No performance metrics to export');
+        console.warn("[Debug Export] No performance metrics to export");
         return;
     }
     
     try {
         // CSV Headers
-        const headers = ['Name', 'Duration (ms)', 'Start Time', 'Entry Type', 'Timestamp'];
+        const headers = ["Name", "Duration (ms)", "Start Time", "Entry Type", "Timestamp"];
         const csvContent = [
-            headers.join(','),
+            headers.join(","),
             ...performanceMetrics.map(metric => [
-                `"${metric.name || 'Unknown'}"`,
+                `"${metric.name || "Unknown"}"`,
                 metric.duration || 0,
                 metric.startTime || 0,
-                `"${metric.entryType || 'Unknown'}"`,
-                `"${metric.timestamp || ''}"`
-            ].join(','))
-        ].join('\n');
+                `"${metric.entryType || "Unknown"}"`,
+                `"${metric.timestamp || ""}"`
+            ].join(","))
+        ].join("\n");
         
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const link = document.createElement('a');
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = filename || `performance-metrics-${Date.now()}.csv`;
         
@@ -147,7 +147,7 @@ export function exportPerformanceCSV(performanceMetrics, filename) {
         URL.revokeObjectURL(link.href);
         console.log(`[Debug Export] Performance CSV exported as ${link.download}`);
     } catch (error) {
-        console.error('[Debug Export] Failed to export performance CSV:', error);
+        console.error("[Debug Export] Failed to export performance CSV:", error);
     }
 }
 
@@ -165,7 +165,7 @@ export function clearDebugData(performanceMetrics, memorySnapshots, errorLog, lo
     errorLog.length = 0;
     logs.length = 0;
     
-    console.log('[Debug Data] All debug data cleared');
+    console.log("[Debug Data] All debug data cleared");
 }
 
 /**
@@ -186,7 +186,7 @@ function summarizePerformanceMetrics(performanceMetrics) {
         };
     }
     
-    const durations = performanceMetrics.map(m => m.duration).filter(d => typeof d === 'number');
+    const durations = performanceMetrics.map(m => m.duration).filter(d => typeof d === "number");
     const totalDuration = durations.reduce((sum, d) => sum + d, 0);
     const averageDuration = totalDuration / durations.length;
     
@@ -218,7 +218,7 @@ function summarizeMemoryUsage(memorySnapshots) {
         };
     }
     
-    const usages = memorySnapshots.map(s => s.usedJSHeapSize).filter(u => typeof u === 'number');
+    const usages = memorySnapshots.map(s => s.usedJSHeapSize).filter(u => typeof u === "number");
     const averageUsage = usages.reduce((sum, u) => sum + u, 0) / usages.length;
     const peakUsage = Math.max(...usages);
     const currentUsage = usages[usages.length - 1];
@@ -249,7 +249,7 @@ function summarizeErrors(errorLog) {
     
     const errorTypes = {};
     errorLog.forEach(error => {
-        const type = error.type || 'unknown';
+        const type = error.type || "unknown";
         errorTypes[type] = (errorTypes[type] || 0) + 1;
     });
     
@@ -268,11 +268,11 @@ function summarizeErrors(errorLog) {
  * @private
  */
 function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 } 

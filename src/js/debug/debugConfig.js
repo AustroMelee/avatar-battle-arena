@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Global debug configuration object.
@@ -15,7 +15,7 @@ export const DEBUG_CONFIG = {
     enablePerformanceTracking: true,
     enableMemoryTracking: true,
     enableErrorTracking: true,
-    logLevel: 'debug', // 'debug', 'info', 'warn', 'error'
+    logLevel: "debug", // 'debug', 'info', 'warn', 'error'
     maxLogEntries: 1000
 };
 
@@ -34,8 +34,8 @@ export const DEBUG_FLAGS = {
  * Debug logging levels enumeration.
  */
 export const LOG_LEVELS = {
-    DEBUG: 'debug',
-    INFO: 'info',
-    WARN: 'warn',
-    ERROR: 'error'
+    DEBUG: "debug",
+    INFO: "info",
+    WARN: "warn",
+    ERROR: "error"
 }; 

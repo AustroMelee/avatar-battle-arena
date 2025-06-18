@@ -1,5 +1,6 @@
 ---
-description:
-globs:
-alwaysApply: false
+description: 
+globs: 
+alwaysApply: true
 ---
+Always update the existing changelog after response is generated, even if task is on-going. This keeps a record of everything Cursor does to the codebase or any chats between cursor and user.

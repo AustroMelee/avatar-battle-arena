@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Sets up toggle functionality for battle logs
@@ -14,24 +14,24 @@
  */
 export function setupToggleLogControl(toggleBtn, logContent) {
     if (!toggleBtn || !logContent) {
-        console.warn('Toggle log control setup failed: missing elements');
+        console.warn("Toggle log control setup failed: missing elements");
         return;
     }
 
     // Ensure initial state is collapsed
-    if (!logContent.classList.contains('collapsed')) {
-        logContent.classList.add('collapsed');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.textContent = 'Show Detailed Battle Logs ►';
+    if (!logContent.classList.contains("collapsed")) {
+        logContent.classList.add("collapsed");
+        toggleBtn.setAttribute("aria-expanded", "false");
+        toggleBtn.textContent = "Show Detailed Battle Logs ►";
     }
 
     // Set up toggle event
     toggleBtn.onclick = () => {
-        const isCollapsed = logContent.classList.toggle('collapsed');
-        toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
+        const isCollapsed = logContent.classList.toggle("collapsed");
+        toggleBtn.setAttribute("aria-expanded", String(!isCollapsed));
         toggleBtn.textContent = isCollapsed 
-            ? 'Show Detailed Battle Logs ►' 
-            : 'Hide Detailed Battle Logs ▼';
+            ? "Show Detailed Battle Logs ►" 
+            : "Hide Detailed Battle Logs ▼";
     };
 }
 
@@ -42,33 +42,33 @@ export function setupToggleLogControl(toggleBtn, logContent) {
  */
 export function setupCopyLogControl(copyBtn, logContent) {
     if (!copyBtn || !logContent) {
-        console.warn('Copy log control setup failed: missing elements');
+        console.warn("Copy log control setup failed: missing elements");
         return;
     }
 
     copyBtn.onclick = async () => {
         try {
             // Dynamically import copyToClipboard to avoid circular dependency
-            const { copyToClipboard } = await import('../utils_clipboard.js');
-            await copyToClipboard(logContent.textContent || '');
+            const { copyToClipboard } = await import("../utils_clipboard.js");
+            await copyToClipboard(logContent.textContent || "");
             
             // Update button feedback
             const originalText = copyBtn.textContent;
-            copyBtn.textContent = '📋 Copied!';
+            copyBtn.textContent = "📋 Copied!";
             
             setTimeout(() => {
-                copyBtn.textContent = originalText || '📋 Copy Battle Logs';
+                copyBtn.textContent = originalText || "📋 Copy Battle Logs";
             }, 2000);
             
         } catch (err) {
-            console.error('Failed to copy detailed logs:', err);
+            console.error("Failed to copy detailed logs:", err);
             
             // Update button with error feedback
             const originalText = copyBtn.textContent;
-            copyBtn.textContent = 'Error Copying';
+            copyBtn.textContent = "Error Copying";
             
             setTimeout(() => {
-                copyBtn.textContent = originalText || '📋 Copy Battle Logs';
+                copyBtn.textContent = originalText || "📋 Copy Battle Logs";
             }, 2000);
         }
     };
@@ -93,18 +93,18 @@ export function setupBattleLogControls(toggleBtn, copyBtn, logContent) {
  */
 export function resetBattleLogControls(toggleBtn, copyBtn, logContent) {
     if (logContent) {
-        logContent.innerHTML = '';
-        if (!logContent.classList.contains('collapsed')) {
-            logContent.classList.add('collapsed');
+        logContent.innerHTML = "";
+        if (!logContent.classList.contains("collapsed")) {
+            logContent.classList.add("collapsed");
         }
     }
 
     if (toggleBtn) {
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.textContent = 'Show Detailed Battle Logs ►';
+        toggleBtn.setAttribute("aria-expanded", "false");
+        toggleBtn.textContent = "Show Detailed Battle Logs ►";
     }
 
     if (copyBtn) {
-        copyBtn.textContent = '📋 Copy Battle Logs';
+        copyBtn.textContent = "📋 Copy Battle Logs";
     }
 } 

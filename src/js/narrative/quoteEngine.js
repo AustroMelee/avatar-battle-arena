@@ -4,12 +4,12 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { allArchetypes } from '../data_archetypes_index.js';
-import { getRandomElementSeeded } from '../utils_seeded_random.js';
-import { generateLogEvent } from '../utils_log_event.js';
-import { substituteTokens } from './stringSubstitution.js';
+import { allArchetypes } from "../data_archetypes_index.js";
+import { getRandomElementSeeded } from "../utils_seeded_random.js";
+import { generateLogEvent } from "../utils_log_event.js";
+import { substituteTokens } from "./stringSubstitution.js";
 
 /**
  * Retrieves a narrative quote for a character based on context.
@@ -22,7 +22,7 @@ import { substituteTokens } from './stringSubstitution.js';
  */
 export function findNarrativeQuote(actor, recipient, type, phase, context) {
     if (!actor || !actor.id) {
-        console.warn('findNarrativeQuote called with invalid actor.');
+        console.warn("findNarrativeQuote called with invalid actor.");
         return null;
     }
 
@@ -33,7 +33,7 @@ export function findNarrativeQuote(actor, recipient, type, phase, context) {
     }
 
     const narrativeData = archetype.narrative;
-    const currentPhaseKey = phase || 'Generic';
+    const currentPhaseKey = phase || "Generic";
     const poolsToTry = [];
 
     // 1. Most specific: Relationship-based quotes for the current phase
@@ -56,11 +56,11 @@ export function findNarrativeQuote(actor, recipient, type, phase, context) {
     for (const pool of poolsToTry) {
         if (pool && Array.isArray(pool) && pool.length > 0) {
             const selectedElement = getRandomElementSeeded(pool);
-            if (typeof selectedElement === 'string') {
-                return { type: 'spoken', line: selectedElement }; // Default to spoken
+            if (typeof selectedElement === "string") {
+                return { type: "spoken", line: selectedElement }; // Default to spoken
             }
-            if (typeof selectedElement === 'object' && selectedElement.line) {
-                return { type: selectedElement.type || 'spoken', line: selectedElement.line };
+            if (typeof selectedElement === "object" && selectedElement.line) {
+                return { type: selectedElement.type || "spoken", line: selectedElement.line };
             }
         }
     }
@@ -78,30 +78,30 @@ export function findNarrativeQuote(actor, recipient, type, phase, context) {
  * @returns {object|null} A formatted log event or null if invalid.
  */
 export function formatQuoteEvent(quote, actor, opponent, context) {
-    if (!quote || typeof quote.line !== 'string') return null;
+    if (!quote || typeof quote.line !== "string") return null;
 
     const { type, line } = quote;
     const substitutedLine = substituteTokens(line, actor, opponent, context);
-    let htmlContent = '';
+    let htmlContent = "";
     let baseEvent = {};
 
     switch (type) {
-        case 'spoken':
+        case "spoken":
             htmlContent = `<p class="dialogue-line char-${actor.id}">${actor.name}: "<em>${substitutedLine}</em>"</p>`;
-            baseEvent = { type: 'dialogue_event', text: `${actor.name} says, "${substitutedLine}"`, isDialogue: true };
+            baseEvent = { type: "dialogue_event", text: `${actor.name} says, "${substitutedLine}"`, isDialogue: true };
             break;
-        case 'internal':
+        case "internal":
             htmlContent = `<p class="dialogue-line internal-thought char-${actor.id}"><em>(${substitutedLine})</em></p>`;
-            baseEvent = { type: 'internal_thought_event', text: `(${actor.name} thinks: ${substitutedLine})`, isInternalThought: true };
+            baseEvent = { type: "internal_thought_event", text: `(${actor.name} thinks: ${substitutedLine})`, isInternalThought: true };
             break;
-        case 'action':
+        case "action":
              htmlContent = `<p class="action-line char-${actor.id}">${substitutedLine}</p>`;
-             baseEvent = { type: 'action_narrative_event', text: substitutedLine };
+             baseEvent = { type: "action_narrative_event", text: substitutedLine };
              break;
         default:
              console.warn(`Unknown quote type: ${type}. Treating as generic narrative.`);
              htmlContent = `<p class="narrative-event">${substitutedLine}</p>`;
-             baseEvent = { type: 'generic_narrative_event', text: substitutedLine };
+             baseEvent = { type: "generic_narrative_event", text: substitutedLine };
              break;
     }
 

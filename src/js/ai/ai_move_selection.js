@@ -5,19 +5,19 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { safeGet } from '../utils_safe_accessor.js';
+import { safeGet } from "../utils_safe_accessor.js";
 
 /**
  * Default struggle move for fallback cases
  */
 const STRUGGLE_MOVE = {
     name: "Struggle",
-    verb: 'struggle',
-    type: 'Offense',
+    verb: "struggle",
+    type: "Offense",
     power: 10,
-    element: 'physical',
+    element: "physical",
     moveTags: []
 };
 
@@ -75,7 +75,7 @@ export function selectFromDistribution(movesWithProbs) {
     if (!movesWithProbs || movesWithProbs.length === 0) {
         return {
             move: STRUGGLE_MOVE,
-            reasons: ['EmergencyFallback'],
+            reasons: ["EmergencyFallback"],
             probability: 1.0
         };
     }
@@ -106,11 +106,11 @@ export function calculateTemperature(predictability) {
 /**
  * Selects the highest weighted move deterministically
  */
-export function selectDeterministicMove(weightedMoves) {
+function selectDeterministicMove(weightedMoves) {
     if (!weightedMoves || weightedMoves.length === 0) {
         return {
             move: STRUGGLE_MOVE,
-            reasons: ['NoMovesAvailable'],
+            reasons: ["NoMovesAvailable"],
             weight: 0.001
         };
     }
@@ -120,7 +120,7 @@ export function selectDeterministicMove(weightedMoves) {
     if (validMoves.length === 0) {
         return {
             move: STRUGGLE_MOVE,
-            reasons: ['NoValidMoves'],
+            reasons: ["NoValidMoves"],
             weight: 0.001
         };
     }
@@ -133,14 +133,14 @@ export function selectDeterministicMove(weightedMoves) {
 /**
  * Performs weighted random selection with temperature-based randomness
  */
-export function selectRandomizedMove(weightedMoves, predictability) {
+function selectRandomizedMove(weightedMoves, predictability) {
     const validMoves = weightedMoves.filter(m => m.weight > 0 && m.move?.name !== "Struggle");
 
     if (validMoves.length === 0) {
         return {
             move: STRUGGLE_MOVE,
             weight: 1.0,
-            reasons: ['FallbackOnlyStruggle'],
+            reasons: ["FallbackOnlyStruggle"],
             probability: 1.0
         };
     }
@@ -157,7 +157,7 @@ export function selectMoveFromWeights(weightedMoves, predictability, forceRandom
     if (!weightedMoves || weightedMoves.length === 0) {
         return {
             move: STRUGGLE_MOVE,
-            reasons: ['NoInputMoves'],
+            reasons: ["NoInputMoves"],
             probability: 1.0,
             weight: 0.001
         };
@@ -202,8 +202,8 @@ export function getSelectionStats(movesWithProbs) {
     return {
         totalMoves,
         entropy: entropy.toFixed(3),
-        topProbability: (topProbability * 100).toFixed(1) + '%',
-        averageProbability: (1 / totalMoves * 100).toFixed(1) + '%'
+        topProbability: (topProbability * 100).toFixed(1) + "%",
+        averageProbability: (1 / totalMoves * 100).toFixed(1) + "%"
     };
 }
 

@@ -1,7 +1,7 @@
 // FILE: js/engine_mental-state.js
-'use strict';
+"use strict";
 
-import { generateStatusChangeEvent } from './engine_narrative-engine.js';
+import { generateStatusChangeEvent } from "./engine_narrative-engine.js";
 
 const MENTAL_STATE_THRESHOLDS = {
     broken: 100,
@@ -28,21 +28,21 @@ const STRESS_EVENTS = {
 
 // --- NEW: Location-specific and situational stress modifiers ---
 const SITUATIONAL_STRESS = {
-    'foggy-swamp': {
-        susceptibleCharacter: 'mai', // Mai is uniquely affected
+    "foggy-swamp": {
+        susceptibleCharacter: "mai", // Mai is uniquely affected
         stressPerTurn: 15,
         reason: "Mai's phobia of the swamp is overwhelming."
     },
-    'si-wong-desert': {
+    "si-wong-desert": {
         turnThreshold: 15, // Stress applies after this many turns
         stressPerTurn: 5,
         reason: "The endless, scorching desert sun drains morale."
     },
     // NEW: Waterbender-specific stress conditions
-    'waterbender_low_supply': {
+    "waterbender_low_supply": {
         stressPerTurn: 10,
         reason: "Lack of sufficient water source diminishes a Waterbender's resolve.",
-        locations: ['si-wong-desert', 'fire-nation-capital', 'boiling-rock'], // Locations with low water
+        locations: ["si-wong-desert", "fire-nation-capital", "boiling-rock"], // Locations with low water
         hpThreshold: 0.4, // Apply if HP is below 40%
         momentumThreshold: -30 // Apply if momentum is very low
     }
@@ -68,15 +68,15 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
     // Apply stress from the move outcome
     if (moveResult.wasAttacker === false) { // The fighter was the defender
         switch (moveResult.effectiveness.label) {
-            case 'Critical': applyStress(fighter, 'TAKE_CRITICAL_HIT', battleState); break;
-            case 'Strong': applyStress(fighter, 'TAKE_STRONG_HIT', battleState); break;
-            case 'Normal': applyStress(fighter, 'TAKE_NORMAL_HIT', battleState); break;
-            case 'Weak': applyStress(fighter, 'TAKE_WEAK_HIT', battleState); break;
+            case "Critical": applyStress(fighter, "TAKE_CRITICAL_HIT", battleState); break;
+            case "Strong": applyStress(fighter, "TAKE_STRONG_HIT", battleState); break;
+            case "Normal": applyStress(fighter, "TAKE_NORMAL_HIT", battleState); break;
+            case "Weak": applyStress(fighter, "TAKE_WEAK_HIT", battleState); break;
         }
-        if (moveResult.isDodged) applyStress(fighter, 'MOVE_BLOCKED', battleState);
+        if (moveResult.isDodged) applyStress(fighter, "MOVE_BLOCKED", battleState);
     } else { // The fighter was the attacker
-        if (moveResult.effectiveness.label === 'Ineffective') applyStress(fighter, 'MOVE_FAILED', battleState);
-        if (moveResult.isDodged) applyStress(fighter, 'MOVE_DODGED', battleState);
+        if (moveResult.effectiveness.label === "Ineffective") applyStress(fighter, "MOVE_FAILED", battleState);
+        if (moveResult.isDodged) applyStress(fighter, "MOVE_DODGED", battleState);
     }
 
     // --- NEW: Apply situational stress from location and character-specific conditions ---
@@ -102,9 +102,9 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
     }
 
     // NEW: Azula's Perfection High Bar
-    if (fighter.id === 'azula') {
+    if (fighter.id === "azula") {
         let azulaStressGain = 0;
-        let reason = [];
+        const reason = [];
 
         // Condition 1: Low HP
         if (fighter.hp < fighter.maxHp * 0.5) { // Increased sensitivity from 0.4 to 0.5
@@ -140,20 +140,20 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
             const resilience = fighter.mentalResilience || 1.0;
             azulaStressGain /= resilience;
             fighter.mentalState.stress += Math.round(azulaStressGain);
-            fighter.aiLog.push(`[Azula Perfectionist Stress]: +${Math.round(azulaStressGain)} stress from ${reason.join(', ')}. Total: ${fighter.mentalState.stress}`);
+            fighter.aiLog.push(`[Azula Perfectionist Stress]: +${Math.round(azulaStressGain)} stress from ${reason.join(", ")}. Total: ${fighter.mentalState.stress}`);
         }
     }
 
     // NEW: Mai's LOS/Swamp stress
-    if (fighter.id === 'mai' && (locId === 'foggy-swamp' || fighter.criticalHitsTaken >= 1)) {
+    if (fighter.id === "mai" && (locId === "foggy-swamp" || fighter.criticalHitsTaken >= 1)) {
         const stressGain = 15 / (fighter.mentalResilience || 1.0);
         fighter.mentalState.stress += Math.round(stressGain);
         fighter.aiLog.push(`[Mai Stress]: +${Math.round(stressGain)} stress from poor LOS/swamp. Total: ${fighter.mentalState.stress}`);
     }
 
     // NEW: Waterbender specific stress
-    const waterbenderLowSupplyRule = SITUATIONAL_STRESS['waterbender_low_supply'];
-    if (fighter.element === 'water' && waterbenderLowSupplyRule.locations.includes(locId) && 
+    const waterbenderLowSupplyRule = SITUATIONAL_STRESS["waterbender_low_supply"];
+    if (fighter.element === "water" && waterbenderLowSupplyRule.locations.includes(locId) && 
         (fighter.hp < fighter.maxHp * waterbenderLowSupplyRule.hpThreshold || fighter.momentum < waterbenderLowSupplyRule.momentumThreshold)) {
         const stressGain = waterbenderLowSupplyRule.stressPerTurn / (fighter.mentalResilience || 1.0);
         fighter.mentalState.stress += Math.round(stressGain);
@@ -164,13 +164,13 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
     fighter.mentalState.stress = Math.min(fighter.mentalState.stress, 150);
 
     // Determine new mental state level
-    let newLevel = 'stable';
+    let newLevel = "stable";
     if (fighter.mentalState.stress >= MENTAL_STATE_THRESHOLDS.broken) {
-        newLevel = 'broken';
+        newLevel = "broken";
     } else if (fighter.mentalState.stress >= MENTAL_STATE_THRESHOLDS.shaken) {
-        newLevel = 'shaken';
+        newLevel = "shaken";
     } else if (fighter.mentalState.stress >= MENTAL_STATE_THRESHOLDS.stressed) {
-        newLevel = 'stressed';
+        newLevel = "stressed";
     }
 
     if (newLevel !== originalLevel) {
@@ -179,7 +179,7 @@ export function updateMentalState(fighter, opponent, moveResult, environmentStat
         fighter.aiLog.push(`[Mental State Change]: ${fighter.name} is now ${newLevel.toUpperCase()}. (Stress: ${fighter.mentalState.stress})`);
 
         // NEW: Log mental state change event
-        const mentalStateEvent = generateStatusChangeEvent(battleState, fighter, 'mental_state_change', originalLevel, newLevel, 'mentalState');
+        const mentalStateEvent = generateStatusChangeEvent(battleState, fighter, "mental_state_change", originalLevel, newLevel, "mentalState");
         if (mentalStateEvent) return mentalStateEvent; // Return the event instead of pushing
     }
     return null; // Return null if no state change occurred

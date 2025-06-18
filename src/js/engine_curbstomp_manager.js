@@ -5,7 +5,7 @@
  * @version 2.0 - Refactored to use modular system
  */
 
-'use strict';
+"use strict";
 
 // Import from the new modular curbstomp system
 import { 
@@ -16,7 +16,7 @@ import {
     markCharacterForDefeat,
     isCharacterMarkedForDefeat,
     CurbstompNarrative
-} from './curbstomp/index.js';
+} from "./curbstomp/index.js";
 
 // Re-export the main API for backward compatibility
 export { 
@@ -50,7 +50,7 @@ export function checkCurbstompConditionsWithNarrative(attacker, defender, locId,
         battleEventLog.push(curbstompEvent);
         
         // Add AI log entry
-        CurbstompNarrative.addCurbstompAiLog(attacker, 'Overwhelming', { id: 'curbstomp_detection' }, {
+        CurbstompNarrative.addCurbstompAiLog(attacker, "Overwhelming", { id: "curbstomp_detection" }, {
             attackerName: attacker.name,
             hpRatio: result.metrics.hpRatio,
             momentumGap: result.metrics.momentumGap
@@ -106,12 +106,12 @@ export function applyCurbstompRulesAdvanced(fighter1, fighter2, battleState, bat
         charactersMarkedBefore: initialMarkedCount,
         charactersMarkedAfter: newMarkedCount,
         newlyMarked: newMarkedCount - initialMarkedCount,
-        battlePhase: battleState.currentPhase || 'unknown',
+        battlePhase: battleState.currentPhase || "unknown",
         turn: battleState.turn
     };
     
     if (options.verbose) {
-        console.log(`[Curbstomp Manager] Rule application complete:`, results);
+        console.log("[Curbstomp Manager] Rule application complete:", results);
     }
     
     return results;
@@ -119,9 +119,9 @@ export function applyCurbstompRulesAdvanced(fighter1, fighter2, battleState, bat
 
 // For debugging and testing purposes
 export const CurbstompSystemModules = {
-    State: () => import('./curbstomp/curbstomp_state.js'),
-    RuleRegistry: () => import('./curbstomp/curbstomp_rule_registry.js'),
-    RuleEngine: () => import('./curbstomp/curbstomp_rule_engine.js'),
-    VictimSelector: () => import('./curbstomp/curbstomp_victim_selector.js'),
-    Narrative: () => import('./curbstomp/curbstomp_narrative.js')
+    State: () => import("./curbstomp/curbstomp_state.js"),
+    RuleRegistry: () => import("./curbstomp/curbstomp_rule_registry.js"),
+    RuleEngine: () => import("./curbstomp/curbstomp_rule_engine.js"),
+    VictimSelector: () => import("./curbstomp/curbstomp_victim_selector.js"),
+    Narrative: () => import("./curbstomp/curbstomp_narrative.js")
 };

@@ -12,21 +12,21 @@
  * @since 1.0.0
  */
 
-'use strict';
+"use strict";
 
 // Import from focused modules
-import { runBatchSimulation, getDefaultMatchups } from './dev_batch_simulator.js';
-import { formatSingleBattleLog, formatAiLogForOutput, compileBattleLogs } from './dev_log_formatter.js';
-import { createProgressBar, createDetailedProgress } from './dev_progress_ui.js';
-import { copyToClipboard } from './utils_clipboard.js';
+import { runBatchSimulation, getDefaultMatchups } from "./dev_batch_simulator.js";
+import { formatSingleBattleLog, formatAiLogForOutput, compileBattleLogs } from "./dev_log_formatter.js";
+import { createProgressBar, createDetailedProgress } from "./dev_progress_ui.js";
+import { copyToClipboard } from "./utils_clipboard.js";
 
 // Re-export all functions for backward compatibility
-export { runBatchSimulation, getDefaultMatchups } from './dev_batch_simulator.js';
-export { formatSingleBattleLog, formatAiLogForOutput, compileBattleLogs } from './dev_log_formatter.js';
-export { createProgressBar, createDetailedProgress } from './dev_progress_ui.js';
+export { runBatchSimulation, getDefaultMatchups } from "./dev_batch_simulator.js";
+export { formatSingleBattleLog, formatAiLogForOutput, compileBattleLogs } from "./dev_log_formatter.js";
+export { createProgressBar, createDetailedProgress } from "./dev_progress_ui.js";
 
 // Legacy constants and state management
-const DEV_MODE_ENABLED = window.location.search.includes('dev=true');
+const DEV_MODE_ENABLED = window.location.search.includes("dev=true");
 let devModeCompiledLogs = [];
 
 /**
@@ -42,7 +42,7 @@ export async function runDevModeBatch() {
     console.log("--- Starting Dev Mode Batch Simulation ---");
     devModeCompiledLogs = [];
     
-    const progressBar = createProgressBar('Starting simulation...');
+    const progressBar = createProgressBar("Starting simulation...");
     
     try {
         const results = await runBatchSimulation(
@@ -68,7 +68,7 @@ export async function runDevModeBatch() {
             alert(`⚠ Batch Complete: ${results.completed} simulations processed. ${results.errors} errors. Failed to copy logs to clipboard.`);
         }
     } catch (error) {
-        console.error('Dev Mode Batch Error:', error);
+        console.error("Dev Mode Batch Error:", error);
         alert(`❌ Batch failed: ${error.message}`);
     } finally {
         progressBar.remove();
@@ -81,13 +81,13 @@ export async function runDevModeBatch() {
  * @deprecated Handle UI initialization directly
  */
 export function initializeDevModeUI() {
-    const devModeButton = document.getElementById('runDevModeBatchBtn');
+    const devModeButton = document.getElementById("runDevModeBatchBtn");
     if (devModeButton) {
         if (DEV_MODE_ENABLED) {
-            devModeButton.style.display = 'inline-block';
+            devModeButton.style.display = "inline-block";
             devModeButton.onclick = runDevModeBatch;
         } else {
-            devModeButton.style.display = 'none';
+            devModeButton.style.display = "none";
         }
     }
 } 

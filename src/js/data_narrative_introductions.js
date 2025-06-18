@@ -1,5 +1,5 @@
 // FILE: data_narrative_introductions.js
-'use strict';
+"use strict";
 
 // Defines introductory phrases and adverbs for narrative generation.
 
@@ -38,12 +38,12 @@ export const introductoryPhrases = {
 
 export const adverbPool = {
     offensive: [
-        'with relentless precision', 'in a swift blur', 'with unyielding force', 'with deadly accuracy',
-        'with ferocious intensity', 'in a calculated strike', 'with overwhelming power', 'with unerring focus',
-        'with devastating speed', 'in a relentless assault', 'with pinpoint accuracy', 'in a fierce onslaught',
-        'with blazing speed', 'in a masterful flourish', 'with unshakable resolve', 'with decisive force',
-        'with methodical grace', 'in a sudden burst of power', 'without a moment of hesitation', 'in a perfectly timed maneuver',
-        'with brutal efficiency', 'in a show of absolute dominance', 'with terrifying speed'
+        "with relentless precision", "in a swift blur", "with unyielding force", "with deadly accuracy",
+        "with ferocious intensity", "in a calculated strike", "with overwhelming power", "with unerring focus",
+        "with devastating speed", "in a relentless assault", "with pinpoint accuracy", "in a fierce onslaught",
+        "with blazing speed", "in a masterful flourish", "with unshakable resolve", "with decisive force",
+        "with methodical grace", "in a sudden burst of power", "without a moment of hesitation", "in a perfectly timed maneuver",
+        "with brutal efficiency", "in a show of absolute dominance", "with terrifying speed"
     ],
-    defensive: ['with calculated timing', 'in a deft maneuver', 'with steady resolve', 'in a display of flawless technique', 'with impeccable form'],
+    defensive: ["with calculated timing", "in a deft maneuver", "with steady resolve", "in a display of flawless technique", "with impeccable form"],
 };

@@ -1,15 +1,15 @@
 // FILE: data_mechanics_locations.js
-'use strict';
+"use strict";
 
 // Refined Environmental Curb Stomp Mechanics (v2) for Direct Engine Integration
 
 export const locationCurbstompRules = {
-    'fire-nation-capital': [
+    "fire-nation-capital": [
         {
             id: "fnc_royal_power",
-            description: "Ozai and Azula are at the seat of their power.",
+            description: "Azula is at the seat of her power.",
             triggerChance: 1.0,
-            appliesToCharacters: ["ozai", "azula"],
+            appliesToCharacters: ["azula"],
             outcome: { type: "buff", property: "power", value: 0.50 }
         },
         {

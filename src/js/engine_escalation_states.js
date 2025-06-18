@@ -4,13 +4,13 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 export const ESCALATION_STATES = {
-    NORMAL: 'Normal',
-    PRESSURED: 'Pressured',
-    SEVERELY_INCAPACITATED: 'Severely Incapacitated',
-    TERMINAL_COLLAPSE: 'Terminal Collapse'
+    NORMAL: "Normal",
+    PRESSURED: "Pressured",
+    SEVERELY_INCAPACITATED: "Severely Incapacitated",
+    TERMINAL_COLLAPSE: "Terminal Collapse"
 };
 
 const ESCALATION_THRESHOLDS = {

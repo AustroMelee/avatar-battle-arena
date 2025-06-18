@@ -1,16 +1,16 @@
 // FILE: battle_log_transformer.js
-'use strict';
+"use strict";
 
 // Version 3.0: Refactored to use shared utilities and improved modularity
 // - Uses centralized impact level determination
 // - Cleaner event type handling with strategy pattern
 
-import { characters } from './data_characters.js';
-import { phaseTemplates } from './data_narrative_phases.js';
-import { ESCALATION_STATES } from './engine_escalation.js';
-import { determineImpactLevel, getPauseDurationForImpact, IMPACT_LEVELS } from './utils_impact_level.js';
-import { processEventForAnimation } from './event_type_handlers.js';
-import { buildHtmlLog } from './html_log_builder.js';
+import { characters } from "./data_characters.js";
+import { phaseTemplates } from "./data_narrative_phases.js";
+import { ESCALATION_STATES } from "./engine_escalation.js";
+import { determineImpactLevel, getPauseDurationForImpact, IMPACT_LEVELS } from "./utils_impact_level.js";
+import { processEventForAnimation } from "./event_type_handlers.js";
+import { buildHtmlLog } from "./html_log_builder.js";
 
 /**
  * Transforms a structured log of battle events into a queue for the animated text engine.
@@ -29,12 +29,12 @@ export function transformEventsToAnimationQueue(structuredLogEvents) {
         if (!event || !event.type) return;
 
         // Prevent conclusion from appearing twice if it follows a KO
-        if (lastEventWasKOAction && event.type === 'conclusion_event') return;
+        if (lastEventWasKOAction && event.type === "conclusion_event") return;
 
-        lastEventWasKOAction = (event.type === 'final_blow_event' || (event.type === 'curbstomp_event' && event.isMajorEvent && !event.isEscape));
+        lastEventWasKOAction = (event.type === "final_blow_event" || (event.type === "curbstomp_event" && event.isMajorEvent && !event.isEscape));
 
         // Pre-process move action events to add impact level
-        if (event.type === 'move_action_event') {
+        if (event.type === "move_action_event") {
             event.impactLevel = determineImpactLevel(event.effectiveness, event.moveType);
         }
 

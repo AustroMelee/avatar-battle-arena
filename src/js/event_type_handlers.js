@@ -4,15 +4,15 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { IMPACT_LEVELS, getPauseDurationForImpact } from './utils_impact_level.js';
+import { IMPACT_LEVELS, getPauseDurationForImpact } from "./utils_impact_level.js";
 
 /**
  * Default animation event structure
  */
 const createBaseAnimationEvent = (event) => ({
-    text: event.text || '',
+    text: event.text || "",
     pauseAfter: event.pauseAfter || getPauseDurationForImpact(IMPACT_LEVELS.LOW)
 });
 
@@ -22,7 +22,7 @@ const createBaseAnimationEvent = (event) => ({
 function handlePhaseHeaderEvent(event) {
     return {
         ...createBaseAnimationEvent(event),
-        text: `${event.phaseName || 'New Phase'} ${event.phaseEmoji || '⚔️'}`,
+        text: `${event.phaseName || "New Phase"} ${event.phaseEmoji || "⚔️"}`,
         isPhaseHeader: true,
         pauseAfter: 1200
     };
@@ -111,15 +111,15 @@ function handleDefaultEvent(event) {
  * Maps event types to their corresponding handler functions
  */
 export const EVENT_TYPE_HANDLERS = {
-    'phase_header_event': handlePhaseHeaderEvent,
-    'dialogue_event': handleDialogueEvent,
-    'internal_thought_event': handleDialogueEvent, // Same handler as dialogue
-    'move_action_event': handleMoveActionEvent,
-    'escalation_change_event': handleEscalationChangeEvent,
-    'curbstomp_event': handleMajorBattleEvent,
-    'final_blow_event': handleMajorBattleEvent,
-    'conclusion_event': handleMajorBattleEvent,
-    'stalemate_result_event': handleStalemateResultEvent
+    "phase_header_event": handlePhaseHeaderEvent,
+    "dialogue_event": handleDialogueEvent,
+    "internal_thought_event": handleDialogueEvent, // Same handler as dialogue
+    "move_action_event": handleMoveActionEvent,
+    "escalation_change_event": handleEscalationChangeEvent,
+    "curbstomp_event": handleMajorBattleEvent,
+    "final_blow_event": handleMajorBattleEvent,
+    "conclusion_event": handleMajorBattleEvent,
+    "stalemate_result_event": handleStalemateResultEvent
 };
 
 /**
@@ -132,23 +132,23 @@ export function processEventForAnimation(event) {
     try {
         // Defensive Programming: Comprehensive input validation
         if (!event) {
-            console.warn('[Event Handler] Event is null or undefined');
-            return handleDefaultEvent({ text: 'Unknown event' });
+            console.warn("[Event Handler] Event is null or undefined");
+            return handleDefaultEvent({ text: "Unknown event" });
         }
         
-        if (typeof event !== 'object') {
-            console.warn('[Event Handler] Event is not an object:', typeof event);
-            return handleDefaultEvent({ text: 'Invalid event' });
+        if (typeof event !== "object") {
+            console.warn("[Event Handler] Event is not an object:", typeof event);
+            return handleDefaultEvent({ text: "Invalid event" });
         }
         
         if (!event.type) {
-            console.warn('[Event Handler] Event missing type property:', event);
-            return handleDefaultEvent({ text: 'Event missing type' });
+            console.warn("[Event Handler] Event missing type property:", event);
+            return handleDefaultEvent({ text: "Event missing type" });
         }
         
-        if (typeof event.type !== 'string') {
-            console.warn('[Event Handler] Event type is not a string:', typeof event.type);
-            return handleDefaultEvent({ text: 'Invalid event type' });
+        if (typeof event.type !== "string") {
+            console.warn("[Event Handler] Event type is not a string:", typeof event.type);
+            return handleDefaultEvent({ text: "Invalid event type" });
         }
         
         console.debug(`[Event Handler] Processing event type: ${event.type}`);
@@ -160,7 +160,7 @@ export function processEventForAnimation(event) {
             return handleDefaultEvent(event);
         }
         
-        if (typeof handler !== 'function') {
+        if (typeof handler !== "function") {
             console.error(`[Event Handler] Handler for "${event.type}" is not a function:`, typeof handler);
             return handleDefaultEvent(event);
         }
@@ -169,16 +169,16 @@ export function processEventForAnimation(event) {
         const result = handler(event);
         
         // Validate handler result
-        if (!result || typeof result !== 'object') {
+        if (!result || typeof result !== "object") {
             console.warn(`[Event Handler] Handler for "${event.type}" returned invalid result:`, result);
             return handleDefaultEvent(event);
         }
         
         return result;
     } catch (error) {
-        console.error(`[Event Handler] Critical error processing event:`, error, event);
+        console.error("[Event Handler] Critical error processing event:", error, event);
         return handleDefaultEvent({ 
-            text: 'Error processing event',
+            text: "Error processing event",
             error: error.message 
         });
     }
@@ -192,8 +192,8 @@ export function processEventForAnimation(event) {
  * @returns {boolean} True if successfully registered
  */
 export function registerEventHandler(eventType, handlerFunction) {
-    if (typeof handlerFunction !== 'function') {
-        console.error('[Event Handler] Handler must be a function');
+    if (typeof handlerFunction !== "function") {
+        console.error("[Event Handler] Handler must be a function");
         return false;
     }
     

@@ -4,89 +4,89 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Core event types used throughout the battle system
  */
 export const EVENT_TYPES = {
     // Combat Events
-    DAMAGE: 'damage',
-    HEALING: 'healing',
-    CRITICAL_HIT: 'critical_hit',
-    MISS: 'miss',
-    BLOCK: 'block',
-    COUNTER: 'counter',
+    DAMAGE: "damage",
+    HEALING: "healing",
+    CRITICAL_HIT: "critical_hit",
+    MISS: "miss",
+    BLOCK: "block",
+    COUNTER: "counter",
     
     // Dice Roll Events
-    DICE_ROLL: 'dice_roll',
+    DICE_ROLL: "dice_roll",
     
     // Battle Flow Events
-    BATTLE_START: 'battle_start',
-    BATTLE_END: 'battle_end',
-    TURN_START: 'turn_start',
-    TURN_END: 'turn_end',
-    PHASE_CHANGE: 'phase_change',
+    BATTLE_START: "battle_start",
+    BATTLE_END: "battle_end",
+    TURN_START: "turn_start",
+    TURN_END: "turn_end",
+    PHASE_CHANGE: "phase_change",
     
     // AI Events
-    AI_DECISION: 'ai_decision',
-    AI_STRATEGY_CHANGE: 'ai_strategy_change',
+    AI_DECISION: "ai_decision",
+    AI_STRATEGY_CHANGE: "ai_strategy_change",
     
     // Environmental Events
-    ENVIRONMENTAL_EFFECT: 'environmental_effect',
-    LOCATION_EFFECT: 'location_effect',
+    ENVIRONMENTAL_EFFECT: "environmental_effect",
+    LOCATION_EFFECT: "location_effect",
     
     // System Events
-    PERFORMANCE: 'performance',
-    ERROR: 'error',
-    DEBUG: 'debug',
-    TIMEOUT_EVENT: 'timeout_event',
+    PERFORMANCE: "performance",
+    ERROR: "error",
+    DEBUG: "debug",
+    TIMEOUT_EVENT: "timeout_event",
     
     // Narrative Events
-    QUOTE: 'quote',
-    NARRATION: 'narration',
-    ESCALATION: 'escalation',
+    QUOTE: "quote",
+    NARRATION: "narration",
+    ESCALATION: "escalation",
     
     // Special Events
-    CURBSTOMP: 'curbstomp',
-    MOMENTUM_SHIFT: 'momentum_shift',
-    STALEMATE: 'stalemate'
+    CURBSTOMP: "curbstomp",
+    MOMENTUM_SHIFT: "momentum_shift",
+    STALEMATE: "stalemate"
 };
 
 /**
  * Roll types for dice roll events
  */
 export const ROLL_TYPES = {
-    CRIT_CHECK: 'critCheck',
-    EVASION_CHECK: 'evasionCheck',
-    ACCURACY_CHECK: 'accuracyCheck',
-    DAMAGE_VARIANCE: 'damageVariance',
-    BLOCK_CHECK: 'blockCheck',
-    COUNTER_CHECK: 'counterCheck',
-    ENVIRONMENTAL_CHECK: 'environmentalCheck',
-    AI_RANDOMNESS: 'aiRandomness'
+    CRIT_CHECK: "critCheck",
+    EVASION_CHECK: "evasionCheck",
+    ACCURACY_CHECK: "accuracyCheck",
+    DAMAGE_VARIANCE: "damageVariance",
+    BLOCK_CHECK: "blockCheck",
+    COUNTER_CHECK: "counterCheck",
+    ENVIRONMENTAL_CHECK: "environmentalCheck",
+    AI_RANDOMNESS: "aiRandomness"
 };
 
 /**
  * Outcome types for events
  */
 export const OUTCOME_TYPES = {
-    SUCCESS: 'success',
-    FAIL: 'fail',
-    CRITICAL: 'critical',
-    NORMAL: 'normal',
-    EXTREME: 'extreme',
-    PARTIAL: 'partial'
+    SUCCESS: "success",
+    FAIL: "fail",
+    CRITICAL: "critical",
+    NORMAL: "normal",
+    EXTREME: "extreme",
+    PARTIAL: "partial"
 };
 
 /**
  * Required fields for all log events
  */
 export const REQUIRED_EVENT_FIELDS = [
-    'type',
-    'eventId', 
-    'timestamp',
-    'turnNumber'
+    "type",
+    "eventId", 
+    "timestamp",
+    "turnNumber"
 ];
 
 /**

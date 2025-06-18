@@ -1,249 +1,126 @@
 /**
  * @fileoverview Avatar Battle Arena - State Initialization Engine
- * @description Handles initialization of fighter and battle states with defensive programming
- * @version 2.0.0
+ * @description Creates the initial `BattleState` required to run a simulation.
+ * It combines character and location data to construct a valid state object.
+ * @version 3.0.0
  */
 
-'use strict';
+"use strict";
 
 //# sourceURL=engine_state_initializer.js
 
 // --- TYPE IMPORTS ---
 /**
- * @typedef {import('./types.js').Fighter} Fighter
- * @typedef {import('./types.js').BattleState} BattleState
- * @typedef {import('./types.js').EnvironmentState} EnvironmentState
- * @typedef {import('./types.js').LocationConditions} LocationConditions
- * @typedef {import('./types.js').MentalState} MentalState
- * @typedef {import('./types.js').FighterTraits} FighterTraits
- * @typedef {import('./types.js').FighterModifiers} FighterModifiers
- * @typedef {import('./types.js').FighterStats} FighterStats
+ * @typedef {import('./types/battle.js').Fighter} Fighter
+ * @typedef {import('./types/battle.js').BattleState} BattleState
+ * @typedef {import('./types/battle.js').EnvironmentState} EnvironmentState
+ * @typedef {import('./types/battle.js').Move} Move
  */
 
-import { characters } from './data_characters.js';
-import { locations } from './locations.js';
+import { getCharacterRegistry } from "./data_characters.js";
+import { locations } from "./locations.js";
 
 /**
- * Initializes a fighter's complete state for battle
+ * Initializes a single fighter's state from a character template.
  * 
- * @param {string} fighterId - Unique identifier for the fighter
- * @param {string} opponentId - Unique identifier for the opponent
- * @param {boolean} emotionalMode - Whether emotional mode is enabled
- * 
- * @returns {Fighter} Complete fighter state object
- * 
- * @throws {TypeError} When fighterId is not a string
- * @throws {Error} When fighter not found in character data
- * @throws {Error} When character data is invalid
- * 
- * @example
- * // Initialize a fighter for battle
- * const aang = initializeFighterState('aang-airbending-only', 'azula', true);
- * console.log(aang.hp); // 100
- * 
- * @since 2.0.0
- * @public
+ * @param {string} fighterId - The unique identifier for the character template.
+ * @param {string} opponentId - The unique identifier of the opponent.
+ * @returns {Fighter} A complete fighter state object ready for battle.
+ * @throws {TypeError} If `fighterId` or `opponentId` are not non-empty strings.
+ * @throws {Error} If the character template is not found or is invalid.
+ * @private
  */
-export function initializeFighterState(fighterId, opponentId, emotionalMode) {
+function initializeFighterState(fighterId, opponentId) {
     // Input validation
-    if (typeof fighterId !== 'string' || fighterId.length === 0) {
+    if (typeof fighterId !== "string" || fighterId.length === 0) {
         throw new TypeError(`initializeFighterState: fighterId must be a non-empty string, received: ${typeof fighterId}`);
     }
     
-    if (typeof opponentId !== 'string' || opponentId.length === 0) {
+    if (typeof opponentId !== "string" || opponentId.length === 0) {
         throw new TypeError(`initializeFighterState: opponentId must be a non-empty string, received: ${typeof opponentId}`);
     }
-    
-    if (typeof emotionalMode !== 'boolean') {
-        throw new TypeError(`initializeFighterState: emotionalMode must be a boolean, received: ${typeof emotionalMode}`);
-    }
 
-    console.log(`[State Init] Initializing fighter: ${fighterId}`);
-
-    // Find character data
     /** @type {any} */
-    const characterData = characters[fighterId];
+    const characterData = (/** @type {any} */ (getCharacterRegistry())).templates[fighterId];
     if (!characterData) {
         throw new Error(`initializeFighterState: Fighter '${fighterId}' not found in character data`);
     }
 
-    // Validate required character properties
-    if (!characterData.name || typeof characterData.name !== 'string') {
+    if (!characterData.name || typeof characterData.name !== "string") {
         throw new Error(`initializeFighterState: Invalid character name for fighter '${fighterId}'`);
     }
 
-    /** @type {MentalState} */
-    const mentalState = {
-        confidence: 50,
-        focus: 50,
-        desperation: 0,
-        rage: 0,
-        dominantEmotion: 'calm',
-        emotionalHistory: {}
-    };
-
-    /** @type {FighterTraits} */
-    const traits = {
-        canFly: characterData.canFly || false,
-        canRedirectLightning: characterData.canRedirectLightning || false,
-        isProdigy: characterData.isProdigy || false,
-        hasFirebending: characterData.hasFirebending || false,
-        hasAirbending: characterData.hasAirbending || false,
-        hasEarthbending: characterData.hasEarthbending || false,
-        hasWaterbending: characterData.hasWaterbending || false,
-        isAgile: characterData.isAgile || false,
-        isPowerful: characterData.isPowerful || false,
-        isTactical: characterData.isTactical || false
-    };
-
-    /** @type {FighterModifiers} */
-    const modifiers = {
-        damageModifier: 1.0,
-        evasionModifier: 0.0,
-        energyRegenModifier: 1.0,
-        accuracyModifier: 0.0,
-        elementalResistance: {},
-        temporaryEffects: {}
-    };
-
-    /** @type {FighterStats} */
-    const stats = {
-        damageDealt: 0,
-        damageReceived: 0,
-        movesUsed: 0,
-        criticalHits: 0,
-        missedAttacks: 0,
-        energySpent: 0,
-        moveHistory: {}
-    };
-
-    /** @type {Fighter} */
-    const fighter = {
+    return {
         id: fighterId,
         name: characterData.name,
         archetype: characterData.archetype || fighterId,
-        hp: 100,
-        maxHp: 100,
-        energy: 100,
-        maxEnergy: 100,
+        hp: characterData.maxHp || 100,
+        maxHp: characterData.maxHp || 100,
+        energy: characterData.maxEnergy || 100,
+        maxEnergy: characterData.maxEnergy || 100,
         momentum: 0,
         stunDuration: 0,
-        opponentId: opponentId,
-        mentalState: mentalState,
-        traits: traits,
-        modifiers: modifiers,
-        stats: stats
+        opponentID: opponentId,
+        moves: characterData.moves || [],
+        mentalState: { confidence: 50, focus: 50, desperation: 0, rage: 0, dominantEmotion: "calm" },
+        traits: { canFly: !!characterData.canFly, canRedirectLightning: !!characterData.canRedirectLightning, isProdigy: !!characterData.isProdigy },
+        modifiers: { damageModifier: 1.0, evasionModifier: 0.0, elementalResistance: {} },
+        stats: { damageDealt: 0, damageReceived: 0, movesUsed: 0 },
+        moveCooldowns: {},
+        statusEffects: [],
+        incapacitationScore: 0,
+        escalationState: "stable",
     };
-
-    console.log(`[State Init] Fighter '${fighter.name}' initialized successfully`);
-    return fighter;
 }
 
 /**
- * Initializes the complete battle state
+ * Initializes the complete `BattleState` for a new simulation.
+ * This is the main public function of this module.
  * 
- * @param {string} f1Id - First fighter identifier
- * @param {string} f2Id - Second fighter identifier
- * @param {string} locId - Location identifier
- * @param {string} timeOfDay - Time of day setting ('day', 'night', etc.)
- * @param {boolean} emotionalMode - Whether emotional mode is enabled
- * 
- * @returns {BattleState} Complete battle state object
- * 
- * @throws {TypeError} When required parameters are not strings or boolean
- * @throws {Error} When location not found
- * @throws {Error} When location data is invalid
- * 
- * @example
- * // Initialize battle state
- * const battleState = initializeBattleState('aang', 'azula', 'fire-nation-capital', 'day', true);
- * console.log(battleState.locationId); // 'fire-nation-capital'
- * 
- * @since 2.0.0
+ * @param {string} fighter1Id - The first fighter's identifier.
+ * @param {string} fighter2Id - The second fighter's identifier.
+ * @param {string} locationId - The location's identifier.
+ * @returns {BattleState} A complete and valid `BattleState` object.
+ * @throws {TypeError} If any ID is not a non-empty string.
+ * @throws {Error} If the location is not found or is invalid.
  * @public
  */
-export function initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode) {
+export function initializeBattleState(fighter1Id, fighter2Id, locationId) {
     // Input validation
-    if (typeof f1Id !== 'string' || f1Id.length === 0) {
-        throw new TypeError(`initializeBattleState: f1Id must be a non-empty string, received: ${typeof f1Id}`);
+    if (typeof fighter1Id !== "string" || fighter1Id.length === 0) {
+        throw new TypeError(`initializeBattleState: fighter1Id must be a non-empty string.`);
     }
-    
-    if (typeof f2Id !== 'string' || f2Id.length === 0) {
-        throw new TypeError(`initializeBattleState: f2Id must be a non-empty string, received: ${typeof f2Id}`);
+    if (typeof fighter2Id !== "string" || fighter2Id.length === 0) {
+        throw new TypeError(`initializeBattleState: fighter2Id must be a non-empty string.`);
     }
-    
-    if (typeof locId !== 'string' || locId.length === 0) {
-        throw new TypeError(`initializeBattleState: locId must be a non-empty string, received: ${typeof locId}`);
-    }
-    
-    if (typeof timeOfDay !== 'string' || timeOfDay.length === 0) {
-        throw new TypeError(`initializeBattleState: timeOfDay must be a non-empty string, received: ${typeof timeOfDay}`);
-    }
-    
-    if (typeof emotionalMode !== 'boolean') {
-        throw new TypeError(`initializeBattleState: emotionalMode must be a boolean, received: ${typeof emotionalMode}`);
+    if (typeof locationId !== "string" || locationId.length === 0) {
+        throw new TypeError(`initializeBattleState: locationId must be a non-empty string.`);
     }
 
-    console.log(`[State Init] Initializing battle state for location: ${locId}`);
-
-    // Find location data
     /** @type {any} */
-    const locationData = locations[locId];
+    const locationData = /** @type {any} */ (locations)[locationId];
     if (!locationData) {
-        throw new Error(`initializeBattleState: Location '${locId}' not found in location data`);
+        throw new Error(`initializeBattleState: Location '${locationId}' not found.`);
+    }
+    if (!locationData.name || typeof locationData.name !== "string") {
+        throw new Error(`initializeBattleState: Invalid name for location '${locationId}'.`);
     }
 
-    // Validate location data
-    if (!locationData.name || typeof locationData.name !== 'string') {
-        throw new Error(`initializeBattleState: Invalid location name for location '${locId}'`);
-    }
-
-    /** @type {EnvironmentState} */
-    const environmentState = {
-        totalDamage: 0,
-        impactLevel: 0,
-        damageLevel: 'pristine',
-        impactDescriptions: [],
-        elementalDamage: {},
-        isDestroyed: false
-    };
-
-    /** @type {LocationConditions} */
-    const locationConditions = {
-        modifiers: locationData.modifiers || {},
-        specialFeatures: locationData.specialFeatures || [],
-        elevation: locationData.elevation || 0,
-        terrain: locationData.terrain || 'normal',
-        customProperties: {}
-    };
+    const fighter1 = initializeFighterState(fighter1Id, fighter2Id);
+    const fighter2 = initializeFighterState(fighter2Id, fighter1Id);
 
     /** @type {BattleState} */
     const battleState = {
-        locationId: locId,
-        timeOfDay: timeOfDay,
-        turn: 0,
-        currentPhase: 'opening',
-        emotionalMode: emotionalMode,
-        environmentState: environmentState,
-        locationConditions: locationConditions,
-        weatherConditions: {
-            type: 'clear',
-            intensity: 0,
-            modifiers: {},
-            effects: []
-        },
-        metadata: {
-            battleId: `battle_${Date.now()}`,
-            startTime: Date.now(),
-            version: '2.0.0',
-            config: {
-                emotionalMode: emotionalMode,
-                timeOfDay: timeOfDay
-            },
-            flags: []
-        }
+        locationId: locationId,
+        turn: 1,
+        currentPhase: "opening",
+        environment: { totalDamage: 0, impactDescriptions: [] },
+        fighter1,
+        fighter2,
+        log: [],
+        winnerId: null,
     };
 
-    console.log(`[State Init] Battle state initialized for '${locationData.name}'`);
+    console.log(`[State Init] Battle state initialized for '${fighter1.name}' vs '${fighter2.name}' at '${locationData.name}'`);
     return battleState;
 } 

@@ -1,5 +1,5 @@
 // FILE: data_narrative_outcomes.js
-'use strict';
+"use strict";
 
 // Defines phrases for move outcomes (weak, normal, strong, critical) and finishing blows.
 

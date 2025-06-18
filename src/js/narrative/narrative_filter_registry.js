@@ -5,26 +5,26 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 // --- CONTEXTUAL FILTERS ---
 import { 
     strictContextFilter,
     environmentFilter,
     phaseFilter
-} from './narrative_filters_contextual.js';
+} from "./narrative_filters_contextual.js";
 
 // --- CHARACTER FILTERS ---
 import {
     personalityFilter,
     situationalFilter
-} from './narrative_filters_character.js';
+} from "./narrative_filters_character.js";
 
 // --- FALLBACK FILTERS ---
 import {
     genericFilter,
     ultimateFallbackFilter
-} from './narrative_filters_fallback.js';
+} from "./narrative_filters_fallback.js";
 
 /**
  * Chain of Responsibility: Array of filter strategies in priority order.
@@ -50,8 +50,8 @@ export function executeFilterChain(variants, context) {
     const reasons = [];
     
     // Fail-fast validation
-    if (!Array.isArray(variants) || (variants.length > 0 && typeof variants[0]?.text !== 'string')) {
-        throw new Error("Malformed actionVariants structure for move: " + (context.move?.name || 'Unknown Move') + ". Expected array of objects with 'text' property.");
+    if (!Array.isArray(variants) || (variants.length > 0 && typeof variants[0]?.text !== "string")) {
+        throw new Error("Malformed actionVariants structure for move: " + (context.move?.name || "Unknown Move") + ". Expected array of objects with 'text' property.");
     }
     
     // Execute filter chain

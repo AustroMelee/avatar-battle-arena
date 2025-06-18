@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Individual personality trigger evaluator functions
@@ -19,7 +19,7 @@ function evaluateProvoked(character, opponent, battleState) {
     
     return opponentLandedCriticalHit || 
            opponentTaunted || 
-           (allyTargeted && ally && ['ty-lee', 'zuko'].includes(ally.id));
+           (allyTargeted && ally && ["ty-lee", "zuko"].includes(ally.id));
 }
 
 /**
@@ -47,7 +47,7 @@ function evaluateUnderestimated(character, opponent, battleState) {
     const { opponentTauntedAgeOrStrategy } = battleState;
     
     return opponentTauntedAgeOrStrategy || 
-           (opponent.lastMoveEffectiveness === 'Weak' && opponent.lastMove?.power > 50);
+           (opponent.lastMoveEffectiveness === "Weak" && opponent.lastMove?.power > 50);
 }
 
 /**
@@ -58,7 +58,7 @@ function evaluateInControl(character, opponent, battleState) {
     
     return (character.hp > character.maxHp * 0.5) && 
            !characterReceivedCriticalHit && 
-           (opponent.mentalState?.level === 'stable' || opponent.mentalState?.level === 'stressed');
+           (opponent.mentalState?.level === "stable" || opponent.mentalState?.level === "stressed");
 }
 
 /**
@@ -68,9 +68,9 @@ function evaluateDesperateBroken(character, opponent, battleState) {
     const { allyDowned } = battleState;
     
     return (character.hp < character.maxHp * 0.3) || 
-           (character.mentalState?.level === 'broken') || 
-           (character.id === 'katara' && allyDowned) || 
-           (character.id === 'katara' && character.criticalHitsTaken >= 2);
+           (character.mentalState?.level === "broken") || 
+           (character.id === "katara" && allyDowned) || 
+           (character.id === "katara" && character.criticalHitsTaken >= 2);
 }
 
 /**
@@ -125,7 +125,7 @@ function evaluateSkillChallenged(character, opponent, battleState) {
 function evaluateDisrespected(character, opponent, battleState) {
     const { locationId, opponentTauntedAgeOrStrategy } = battleState;
     
-    return locationId === 'omashu' && opponentTauntedAgeOrStrategy;
+    return locationId === "omashu" && opponentTauntedAgeOrStrategy;
 }
 
 /**
@@ -133,18 +133,18 @@ function evaluateDisrespected(character, opponent, battleState) {
  * Maps trigger IDs to their evaluator functions
  */
 export const PERSONALITY_TRIGGER_EVALUATORS = {
-    'provoked': evaluateProvoked,
-    'serious_fight': evaluateSeriousFight,
-    'authority_challenged': evaluateAuthorityChallenge,
-    'underestimated': evaluateUnderestimated,
-    'in_control': evaluateInControl,
-    'desperate_broken': evaluateDesperateBroken,
-    'doubted': evaluateDoubted,
-    'mortal_danger': evaluateMortalDanger,
-    'honor_violated': evaluateHonorViolated,
-    'confident_stance': evaluateConfidentStance,
-    'skill_challenged': evaluateSkillChallenged,
-    'disrespected': evaluateDisrespected
+    "provoked": evaluateProvoked,
+    "serious_fight": evaluateSeriousFight,
+    "authority_challenged": evaluateAuthorityChallenge,
+    "underestimated": evaluateUnderestimated,
+    "in_control": evaluateInControl,
+    "desperate_broken": evaluateDesperateBroken,
+    "doubted": evaluateDoubted,
+    "mortal_danger": evaluateMortalDanger,
+    "honor_violated": evaluateHonorViolated,
+    "confident_stance": evaluateConfidentStance,
+    "skill_challenged": evaluateSkillChallenged,
+    "disrespected": evaluateDisrespected
 };
 
 /**
@@ -160,7 +160,7 @@ export const PERSONALITY_TRIGGER_EVALUATORS = {
 export function evaluatePersonalityTrigger(triggerId, character, opponent, battleState) {
     // Input validation
     if (!triggerId || !character || !opponent || !battleState) {
-        console.warn('[Personality Triggers] Invalid inputs provided:', { triggerId, character: !!character, opponent: !!opponent, battleState: !!battleState });
+        console.warn("[Personality Triggers] Invalid inputs provided:", { triggerId, character: !!character, opponent: !!opponent, battleState: !!battleState });
         return false;
     }
     
@@ -208,8 +208,8 @@ export function hasPersonalityTrigger(triggerId) {
  * @returns {boolean} True if successfully added
  */
 export function addPersonalityTrigger(triggerId, evaluatorFunction) {
-    if (typeof evaluatorFunction !== 'function') {
-        console.error('[Personality Triggers] Evaluator must be a function');
+    if (typeof evaluatorFunction !== "function") {
+        console.error("[Personality Triggers] Evaluator must be a function");
         return false;
     }
     

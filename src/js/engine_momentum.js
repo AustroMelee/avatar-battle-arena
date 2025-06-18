@@ -4,7 +4,7 @@
  * @version 2.0.0
  */
 
-'use strict';
+"use strict";
 
 //# sourceURL=engine_momentum.js
 
@@ -52,15 +52,15 @@ const MOMENTUM_VALIDATION_TOLERANCE = 0.001;
 
 /** @type {string[]} */
 const VALID_MOMENTUM_REASONS = [
-    'General change',
-    'Move success',
-    'Move failure',
-    'Damage taken',
-    'Critical hit',
-    'Block successful',
-    'Counter attack',
-    'Environmental effect',
-    'Reset'
+    "General change",
+    "Move success",
+    "Move failure",
+    "Damage taken",
+    "Critical hit",
+    "Block successful",
+    "Counter attack",
+    "Environmental effect",
+    "Reset"
 ];
 
 // ============================================================================
@@ -90,22 +90,22 @@ const VALID_MOMENTUM_REASONS = [
  * @since 2.0.0
  * @public
  */
-export function modifyMomentum(actor, delta, reason = 'General change') {
+export function modifyMomentum(actor, delta, reason = "General change") {
     // Input validation
-    if (!actor || typeof actor !== 'object') {
-        throw new TypeError('modifyMomentum: actor must be a valid fighter object');
+    if (!actor || typeof actor !== "object") {
+        throw new TypeError("modifyMomentum: actor must be a valid fighter object");
     }
 
-    if (typeof delta !== 'number') {
-        throw new TypeError('modifyMomentum: delta must be a number');
+    if (typeof delta !== "number") {
+        throw new TypeError("modifyMomentum: delta must be a number");
     }
 
-    if (typeof reason !== 'string') {
-        throw new TypeError('modifyMomentum: reason must be a string');
+    if (typeof reason !== "string") {
+        throw new TypeError("modifyMomentum: reason must be a string");
     }
 
     if (!Number.isFinite(delta)) {
-        throw new RangeError('modifyMomentum: delta must be a finite number');
+        throw new RangeError("modifyMomentum: delta must be a finite number");
     }
 
     // Validate actor structure
@@ -113,7 +113,7 @@ export function modifyMomentum(actor, delta, reason = 'General change') {
 
     // Ensure momentum and delta are numbers; default to 0 if NaN or undefined
     /** @type {number} */
-    const currentMomentum = typeof actor.momentum === 'number' && !isNaN(actor.momentum) ? actor.momentum : 0;
+    const currentMomentum = typeof actor.momentum === "number" && !isNaN(actor.momentum) ? actor.momentum : 0;
     
     /** @type {number} */
     const numericDelta = Number(delta);
@@ -143,7 +143,7 @@ export function modifyMomentum(actor, delta, reason = 'General change') {
         // Signal UI update (UI module will pick this up)
         actor.momentumChanged = true;
 
-        console.debug(`[Momentum] ${actor.name || actor.id}: ${currentMomentum} → ${newMomentum} (${actualDelta > 0 ? '+' : ''}${actualDelta}) - ${reason}`);
+        console.debug(`[Momentum] ${actor.name || actor.id}: ${currentMomentum} → ${newMomentum} (${actualDelta > 0 ? "+" : ""}${actualDelta}) - ${reason}`);
         
     } else if (Math.abs(numericDelta) > MOMENTUM_VALIDATION_TOLERANCE) {
         // Log if momentum change was attempted but capped
@@ -178,21 +178,21 @@ export function modifyMomentum(actor, delta, reason = 'General change') {
  * @since 2.0.0
  * @public
  */
-export function resetMomentum(actor, reason = 'Reset') {
+export function resetMomentum(actor, reason = "Reset") {
     // Input validation
-    if (!actor || typeof actor !== 'object') {
-        throw new TypeError('resetMomentum: actor must be a valid fighter object');
+    if (!actor || typeof actor !== "object") {
+        throw new TypeError("resetMomentum: actor must be a valid fighter object");
     }
 
-    if (typeof reason !== 'string') {
-        throw new TypeError('resetMomentum: reason must be a string');
+    if (typeof reason !== "string") {
+        throw new TypeError("resetMomentum: reason must be a string");
     }
 
     // Validate actor structure
     validateActorForMomentum(actor);
 
     /** @type {number} */
-    const currentMomentum = typeof actor.momentum === 'number' && !isNaN(actor.momentum) ? actor.momentum : 0;
+    const currentMomentum = typeof actor.momentum === "number" && !isNaN(actor.momentum) ? actor.momentum : 0;
 
     if (Math.abs(currentMomentum) > MOMENTUM_VALIDATION_TOLERANCE) {
         /** @type {number} */
@@ -234,8 +234,8 @@ export function resetMomentum(actor, reason = 'Reset') {
  */
 export function getMomentumCritModifier(actor) {
     // Input validation
-    if (!actor || typeof actor !== 'object') {
-        throw new TypeError('getMomentumCritModifier: actor must be a valid fighter object');
+    if (!actor || typeof actor !== "object") {
+        throw new TypeError("getMomentumCritModifier: actor must be a valid fighter object");
     }
 
     // Validate actor structure
@@ -243,7 +243,7 @@ export function getMomentumCritModifier(actor) {
 
     // Ensure actor.momentum is a number; default to 0 if NaN or undefined
     /** @type {number} */
-    const currentMomentum = typeof actor.momentum === 'number' && !isNaN(actor.momentum) ? actor.momentum : 0;
+    const currentMomentum = typeof actor.momentum === "number" && !isNaN(actor.momentum) ? actor.momentum : 0;
 
     /** @type {number} */
     const modifier = currentMomentum * MOMENTUM_CRIT_MODIFIER_PER_POINT;
@@ -275,21 +275,21 @@ export function getMomentumCritModifier(actor) {
  */
 export function getMomentumState(actor) {
     // Input validation
-    if (!actor || typeof actor !== 'object') {
-        throw new TypeError('getMomentumState: actor must be a valid fighter object');
+    if (!actor || typeof actor !== "object") {
+        throw new TypeError("getMomentumState: actor must be a valid fighter object");
     }
 
     /** @type {number} */
-    const current = typeof actor.momentum === 'number' && !isNaN(actor.momentum) ? actor.momentum : 0;
+    const current = typeof actor.momentum === "number" && !isNaN(actor.momentum) ? actor.momentum : 0;
     
     /** @type {number} */
-    const previous = typeof actor.previousMomentum === 'number' && !isNaN(actor.previousMomentum) ? actor.previousMomentum : current;
+    const previous = typeof actor.previousMomentum === "number" && !isNaN(actor.previousMomentum) ? actor.previousMomentum : current;
 
     return {
         current,
         previous,
         delta: current - previous,
-        lastReason: actor.lastMomentumReason || 'Unknown',
+        lastReason: actor.lastMomentumReason || "Unknown",
         hasChanged: actor.momentumChanged || false
     };
 }
@@ -315,28 +315,28 @@ export function getMomentumState(actor) {
  * @public
  */
 export function validateMomentumConfig(config) {
-    if (!config || typeof config !== 'object') {
-        throw new TypeError('validateMomentumConfig: config must be an object');
+    if (!config || typeof config !== "object") {
+        throw new TypeError("validateMomentumConfig: config must be an object");
     }
 
-    if (typeof config.maxMomentum !== 'number' || !Number.isFinite(config.maxMomentum)) {
-        throw new TypeError('validateMomentumConfig: maxMomentum must be a finite number');
+    if (typeof config.maxMomentum !== "number" || !Number.isFinite(config.maxMomentum)) {
+        throw new TypeError("validateMomentumConfig: maxMomentum must be a finite number");
     }
 
-    if (typeof config.minMomentum !== 'number' || !Number.isFinite(config.minMomentum)) {
-        throw new TypeError('validateMomentumConfig: minMomentum must be a finite number');
+    if (typeof config.minMomentum !== "number" || !Number.isFinite(config.minMomentum)) {
+        throw new TypeError("validateMomentumConfig: minMomentum must be a finite number");
     }
 
     if (config.maxMomentum <= config.minMomentum) {
-        throw new RangeError('validateMomentumConfig: maxMomentum must be greater than minMomentum');
+        throw new RangeError("validateMomentumConfig: maxMomentum must be greater than minMomentum");
     }
 
-    if (typeof config.critModifier !== 'number' || !Number.isFinite(config.critModifier)) {
-        throw new TypeError('validateMomentumConfig: critModifier must be a finite number');
+    if (typeof config.critModifier !== "number" || !Number.isFinite(config.critModifier)) {
+        throw new TypeError("validateMomentumConfig: critModifier must be a finite number");
     }
 
     if (config.critModifier < 0 || config.critModifier > 1) {
-        throw new RangeError('validateMomentumConfig: critModifier must be between 0 and 1');
+        throw new RangeError("validateMomentumConfig: critModifier must be between 0 and 1");
     }
 
     return true;
@@ -360,7 +360,7 @@ export function validateMomentumConfig(config) {
  */
 function validateActorForMomentum(actor) {
     if (!actor.id && !actor.name) {
-        throw new TypeError('validateActorForMomentum: actor must have an id or name property');
+        throw new TypeError("validateActorForMomentum: actor must have an id or name property");
     }
 
     // Initialize aiLog if it doesn't exist
@@ -369,6 +369,6 @@ function validateActorForMomentum(actor) {
     }
 
     if (!Array.isArray(actor.aiLog)) {
-        throw new TypeError('validateActorForMomentum: actor.aiLog must be an array');
+        throw new TypeError("validateActorForMomentum: actor.aiLog must be an array");
     }
 }

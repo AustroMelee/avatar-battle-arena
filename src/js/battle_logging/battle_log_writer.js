@@ -4,9 +4,9 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
-import { validateBattleLog, validateLogEvent } from './battle_event_validators.js';
+import { validateBattleLog, validateLogEvent } from "./battle_event_validators.js";
 
 /**
  * Default configuration for log management
@@ -84,7 +84,7 @@ export class BattleLogWriter {
         validateBattleLog(battleLog);
         
         if (!Array.isArray(events)) {
-            throw new TypeError('Events must be an array');
+            throw new TypeError("Events must be an array");
         }
 
         const result = {

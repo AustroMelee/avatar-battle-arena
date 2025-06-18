@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 // Cache for DOM elements
 let domCache = {};
@@ -15,16 +15,16 @@ let isInitialized = false;
  * Element IDs configuration
  */
 const ELEMENT_IDS = {
-    results: 'results',
-    environmentDamageDisplay: 'environment-damage-display',
-    environmentImpactsList: 'environment-impacts-list',
-    battleStory: 'battle-story',
-    analysisList: 'analysis-list',
-    winnerName: 'winner-name',
-    winProbability: 'win-probability',
-    detailedBattleLogsContent: 'detailed-battle-logs-content',
-    toggleDetailedLogsBtn: 'toggle-detailed-logs-btn',
-    copyDetailedLogsBtn: 'copy-detailed-logs-btn'
+    results: "results",
+    environmentDamageDisplay: "environment-damage-display",
+    environmentImpactsList: "environment-impacts-list",
+    battleStory: "battle-story",
+    analysisList: "analysis-list",
+    winnerName: "winner-name",
+    winProbability: "win-probability",
+    detailedBattleLogsContent: "detailed-battle-logs-content",
+    toggleDetailedLogsBtn: "toggle-detailed-logs-btn",
+    copyDetailedLogsBtn: "copy-detailed-logs-btn"
 };
 
 /**
@@ -79,11 +79,11 @@ export function getAllDOMElements() {
  */
 export function getBattleResultsElements() {
     return {
-        resultsSection: getDOMElement('results'),
-        analysisList: getDOMElement('analysisList'),
-        winnerName: getDOMElement('winnerName'),
-        winProbability: getDOMElement('winProbability'),
-        battleStory: getDOMElement('battleStory')
+        resultsSection: getDOMElement("results"),
+        analysisList: getDOMElement("analysisList"),
+        winnerName: getDOMElement("winnerName"),
+        winProbability: getDOMElement("winProbability"),
+        battleStory: getDOMElement("battleStory")
     };
 }
 
@@ -93,8 +93,8 @@ export function getBattleResultsElements() {
  */
 export function getEnvironmentElements() {
     return {
-        damageDisplay: getDOMElement('environmentDamageDisplay'),
-        impactsList: getDOMElement('environmentImpactsList')
+        damageDisplay: getDOMElement("environmentDamageDisplay"),
+        impactsList: getDOMElement("environmentImpactsList")
     };
 }
 
@@ -104,9 +104,9 @@ export function getEnvironmentElements() {
  */
 export function getBattleLogElements() {
     return {
-        logContent: getDOMElement('detailedBattleLogsContent'),
-        toggleBtn: getDOMElement('toggleDetailedLogsBtn'),
-        copyBtn: getDOMElement('copyDetailedLogsBtn')
+        logContent: getDOMElement("detailedBattleLogsContent"),
+        toggleBtn: getDOMElement("toggleDetailedLogsBtn"),
+        copyBtn: getDOMElement("copyDetailedLogsBtn")
     };
 }
 
@@ -122,7 +122,7 @@ export function validateRequiredElements(requiredElements) {
 
     const missing = requiredElements.filter(key => !domCache[key]);
     if (missing.length > 0) {
-        console.error(`Missing required DOM elements: ${missing.join(', ')}`);
+        console.error(`Missing required DOM elements: ${missing.join(", ")}`);
         return false;
     }
     return true;

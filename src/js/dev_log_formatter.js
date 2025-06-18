@@ -4,10 +4,10 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { characters } from './data_characters.js';
-import { locations } from './locations.js';
+import { characters } from "./data_characters.js";
+import { locations } from "./locations.js";
 
 /**
  * Formats a single battle result into a human-readable string for dev logs.
@@ -26,35 +26,35 @@ export function formatSingleBattleLog(result, fighter1Id, fighter2Id, locationId
     
     if (result.error) {
         logOutput += `STATUS: ERROR - ${result.error}\n`;
-        logOutput += `Error Details: ${result.errorMessage || 'No specific error message.'}\n`;
+        logOutput += `Error Details: ${result.errorMessage || "No specific error message."}\n`;
     } else {
-        logOutput += `STATUS: ${result.isDraw ? 'DRAW' : `${characters[result.winnerId]?.name || result.winnerId} WINS`}\n`;
-        logOutput += `Winner ID: ${result.winnerId || 'N/A'}\n`;
-        logOutput += `Loser ID: ${result.loserId || 'N/A'}\n\n`;
-        logOutput += `--- FINAL STATES ---\n`;
+        logOutput += `STATUS: ${result.isDraw ? "DRAW" : `${characters[result.winnerId]?.name || result.winnerId} WINS`}\n`;
+        logOutput += `Winner ID: ${result.winnerId || "N/A"}\n`;
+        logOutput += `Loser ID: ${result.loserId || "N/A"}\n\n`;
+        logOutput += "--- FINAL STATES ---\n";
         const f1Final = result.finalState.fighter1;
         const f2Final = result.finalState.fighter2;
 
         logOutput += `${f1Name} (F1):\n`;
-        logOutput += `  HP: ${f1Final.hp.toFixed(0)} | Energy: ${f1Final.energy.toFixed(0)} | Momentum: ${isNaN(f1Final.momentum) ? 'N/A' : f1Final.momentum} | Mental: ${f1Final.mentalState.level} | Escalation: ${f1Final.escalationState} | Incapacitation Score: ${f1Final.incapacitationScore.toFixed(1)}\n`;
+        logOutput += `  HP: ${f1Final.hp.toFixed(0)} | Energy: ${f1Final.energy.toFixed(0)} | Momentum: ${isNaN(f1Final.momentum) ? "N/A" : f1Final.momentum} | Mental: ${f1Final.mentalState.level} | Escalation: ${f1Final.escalationState} | Incapacitation Score: ${f1Final.incapacitationScore.toFixed(1)}\n`;
         logOutput += `  Summary: "${f1Final.summary}"\n`;
 
         logOutput += `${f2Name} (F2):\n`;
-        logOutput += `  HP: ${f2Final.hp.toFixed(0)} | Energy: ${f2Final.energy.toFixed(0)} | Momentum: ${isNaN(f2Final.momentum) ? 'N/A' : f2Final.momentum} | Mental: ${f2Final.mentalState.level} | Escalation: ${f2Final.escalationState} | Incapacitation Score: ${f2Final.incapacitationScore.toFixed(1)}\n`;
+        logOutput += `  HP: ${f2Final.hp.toFixed(0)} | Energy: ${f2Final.energy.toFixed(0)} | Momentum: ${isNaN(f2Final.momentum) ? "N/A" : f2Final.momentum} | Mental: ${f2Final.mentalState.level} | Escalation: ${f2Final.escalationState} | Incapacitation Score: ${f2Final.incapacitationScore.toFixed(1)}\n`;
         logOutput += `  Summary: "${f2Final.summary}"\n`;
 
         logOutput += `Environment Damage: ${result.environmentState.damageLevel.toFixed(0)}%\n`;
         if (result.environmentState.specificImpacts && result.environmentState.specificImpacts.size > 0) {
-            logOutput += `  Specific Impacts: ${Array.from(result.environmentState.specificImpacts).join('; ')}\n`;
+            logOutput += `  Specific Impacts: ${Array.from(result.environmentState.specificImpacts).join("; ")}\n`;
         }
 
-        logOutput += `\n--- AI LOGS ---\n`;
+        logOutput += "\n--- AI LOGS ---\n";
         logOutput += `--- ${f1Name} AI Log ---\n`;
         logOutput += formatAiLogForOutput(f1Final.aiLog);
         logOutput += `--- ${f2Name} AI Log ---\n`;
         logOutput += formatAiLogForOutput(f2Final.aiLog);
     }
-    logOutput += `\n=======================================================\n`;
+    logOutput += "\n=======================================================\n";
     return logOutput;
 }
 
@@ -66,16 +66,16 @@ export function formatSingleBattleLog(result, fighter1Id, fighter2Id, locationId
 export function formatAiLogForOutput(aiLog) {
     if (!aiLog || aiLog.length === 0) return " (No AI log entries)\n";
     return aiLog.map(entry => {
-        if (typeof entry === 'object' && entry !== null) {
-            let parts = [];
-            if (entry.turn !== undefined) parts.push(`${entry.characterName || 'Unknown'}-T${entry.turn}`);
+        if (typeof entry === "object" && entry !== null) {
+            const parts = [];
+            if (entry.turn !== undefined) parts.push(`${entry.characterName || "Unknown"}-T${entry.turn}`);
             if (entry.phase) parts.push(`Phase:${entry.phase}`);
             if (entry.intent) parts.push(`Intent:${entry.intent}`);
             if (entry.chosenMove) parts.push(`Move:${entry.chosenMove}`);
             if (entry.finalProb) parts.push(`Prob:${entry.finalProb}`);
             if (entry.actorState) {
                 const as = entry.actorState;
-                parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${isNaN(as.momentum) ? 'N/A' : as.momentum}`);
+                parts.push(`HP:${as.hp?.toFixed(0)} E:${as.energy?.toFixed(0)} M:${isNaN(as.momentum) ? "N/A" : as.momentum}`);
                 if (as.previousMental && as.mental !== as.previousMental) {
                     parts.push(`MS:${as.previousMental.toUpperCase()}->${as.mental.toUpperCase()} 🔔`);
                 } else {
@@ -90,23 +90,23 @@ export function formatAiLogForOutput(aiLog) {
                 parts.push(`Pred:${entry.prediction}`);
             }
             if (entry.consideredMoves && Array.isArray(entry.consideredMoves)) {
-                const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name}(${m.prob})`).join(', ');
+                const topConsiderations = entry.consideredMoves.slice(0, 3).map(m => `${m.name}(${m.prob})`).join(", ");
                 if (topConsiderations) parts.push(`Considered:[${topConsiderations}]`);
             }
             if (entry.reasons) {
                 parts.push(`Reasons:[${entry.reasons}]`);
             }
             if (entry.isEscalationFinisherAttempt) {
-                parts.push(`[FINISHER ATTEMPT!]`);
+                parts.push("[FINISHER ATTEMPT!]");
             }
             // Highlight Critical Hits or other significant effectiveness
-            if (entry.effectiveness && (entry.effectiveness === 'Critical' || entry.effectiveness === 'Strong')) {
+            if (entry.effectiveness && (entry.effectiveness === "Critical" || entry.effectiveness === "Strong")) {
                 parts.push(`[${entry.effectiveness.toUpperCase()}]`);
             }
-            return `- ${parts.join(' | ')}`;
+            return `- ${parts.join(" | ")}`;
         }
         return `- ${String(entry)}`; // For plain string log entries
-    }).join('\n') + '\n';
+    }).join("\n") + "\n";
 }
 
 /**
@@ -115,5 +115,5 @@ export function formatAiLogForOutput(aiLog) {
  * @returns {string} Combined log output
  */
 export function compileBattleLogs(battleLogs) {
-    return battleLogs.join('');
+    return battleLogs.join("");
 } 

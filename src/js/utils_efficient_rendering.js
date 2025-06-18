@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
 //# sourceURL=utils_efficient_rendering.js
 
@@ -23,7 +23,7 @@ export function deepEqual(oldState, newState) {
     
     if (typeof oldState !== typeof newState) return false;
     
-    if (typeof oldState !== 'object') return false;
+    if (typeof oldState !== "object") return false;
     
     if (Array.isArray(oldState) !== Array.isArray(newState)) return false;
     
@@ -90,8 +90,8 @@ export function renderIfChanged(oldState, newState, renderFn, useDeepComparison 
  * @returns {DocumentFragment} The created fragment (for testing/inspection)
  */
 export function batchDOMOperations(targetElement, operationFn) {
-    if (!targetElement || typeof operationFn !== 'function') {
-        console.warn('[Efficient Rendering] Invalid parameters for batchDOMOperations');
+    if (!targetElement || typeof operationFn !== "function") {
+        console.warn("[Efficient Rendering] Invalid parameters for batchDOMOperations");
         return null;
     }
     
@@ -102,7 +102,7 @@ export function batchDOMOperations(targetElement, operationFn) {
         targetElement.appendChild(fragment);
         return fragment;
     } catch (error) {
-        console.error('[Efficient Rendering] Error in batchDOMOperations:', error);
+        console.error("[Efficient Rendering] Error in batchDOMOperations:", error);
         return null;
     }
 }
@@ -115,7 +115,7 @@ export function batchDOMOperations(targetElement, operationFn) {
  */
 export function batchAppendElements(targetElement, elements) {
     if (!targetElement || !Array.isArray(elements)) {
-        console.warn('[Efficient Rendering] Invalid parameters for batchAppendElements');
+        console.warn("[Efficient Rendering] Invalid parameters for batchAppendElements");
         return false;
     }
     
@@ -138,12 +138,12 @@ export function batchAppendElements(targetElement, elements) {
  */
 export function batchReplaceContent(targetElement, newElements) {
     if (!targetElement) {
-        console.warn('[Efficient Rendering] Invalid target element for batchReplaceContent');
+        console.warn("[Efficient Rendering] Invalid target element for batchReplaceContent");
         return false;
     }
     
     // Clear existing content efficiently
-    targetElement.innerHTML = '';
+    targetElement.innerHTML = "";
     
     if (!newElements || newElements.length === 0) return true;
     
@@ -168,11 +168,11 @@ export function batchCreateElements(elementSpecs) {
         // Set attributes
         if (spec.attributes) {
             Object.entries(spec.attributes).forEach(([key, value]) => {
-                if (key === 'className') {
+                if (key === "className") {
                     element.className = value;
-                } else if (key === 'textContent') {
+                } else if (key === "textContent") {
                     element.textContent = value;
-                } else if (key === 'innerHTML') {
+                } else if (key === "innerHTML") {
                     element.innerHTML = value;
                 } else {
                     element.setAttribute(key, value);
@@ -283,8 +283,8 @@ export function efficientRender(options) {
     } = options;
     
     // Validate inputs
-    if (!targetElement || typeof renderFn !== 'function') {
-        console.warn('[Efficient Rendering] Invalid parameters for efficientRender');
+    if (!targetElement || typeof renderFn !== "function") {
+        console.warn("[Efficient Rendering] Invalid parameters for efficientRender");
         return Promise.resolve(false);
     }
     
@@ -297,7 +297,7 @@ export function efficientRender(options) {
                     const elements = renderFn(newState, oldState);
                     return batchReplaceContent(targetElement, elements);
                 } catch (error) {
-                    console.error('[Efficient Rendering] Error in render function:', error);
+                    console.error("[Efficient Rendering] Error in render function:", error);
                     return false;
                 }
             }, useDeepComparison);

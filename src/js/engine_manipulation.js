@@ -1,21 +1,21 @@
 // FILE: js/engine_manipulation.js
-'use strict';
+"use strict";
 
 // This module handles the logic for psychological manipulation attempts,
 // a special trait for characters like Azula.
 
-import { BATTLE_PHASES } from './engine_battle-phase.js';
-import { getRandomElementSeeded, seededRandom } from './utils_seeded_random.js';
-import { USE_DETERMINISTIC_RANDOM } from './config_game.js';
-import { generateLogEvent } from './utils_log_event.js';
-import { safeGet } from './utils_safe_accessor.js';
+import { BATTLE_PHASES } from "./engine_battle-phase.js";
+import { getRandomElementSeeded, seededRandom } from "./utils_seeded_random.js";
+import { USE_DETERMINISTIC_RANDOM } from "./config_game.js";
+import { generateLogEvent } from "./utils_log_event.js";
+import { safeGet } from "./utils_safe_accessor.js";
 
 const MANIPULATION_BASE_CHANCE = 0.4; // Base chance to attempt a manipulation
 const MANIPULATION_SUCCESS_MODIFIERS = {
-    'stable': 0.5,
-    'stressed': 1.0,
-    'shaken': 1.5,
-    'broken': 0.2
+    "stable": 0.5,
+    "stressed": 1.0,
+    "shaken": 1.5,
+    "broken": 0.2
 };
 
 /**
@@ -31,12 +31,12 @@ export function attemptManipulation(manipulator, target, battleState, battleEven
         return { success: false };
     }
 
-    const manipTrait = safeGet(manipulator, 'specialTraits.manipulative', 0);
+    const manipTrait = safeGet(manipulator, "specialTraits.manipulative", 0);
     if (manipTrait === 0) return { success: false };
 
-    const mentalStateLevel = safeGet(target.mentalState, 'level', 'stable');
+    const mentalStateLevel = safeGet(target.mentalState, "level", "stable");
     const mentalStateModifier = MANIPULATION_SUCCESS_MODIFIERS[mentalStateLevel] || 0.5;
-    const resilience = safeGet(target, 'specialTraits.resilientToManipulation', 0);
+    const resilience = safeGet(target, "specialTraits.resilientToManipulation", 0);
     const attemptChance = manipTrait * mentalStateModifier * (1 - resilience);
 
     const manipulationRoll = (USE_DETERMINISTIC_RANDOM ? seededRandom() : Math.random());
@@ -52,12 +52,12 @@ export function attemptManipulation(manipulator, target, battleState, battleEven
     }));
 
     if (success) {
-        const effect = getRandomElementSeeded(['Exposed', 'Shaken'], USE_DETERMINISTIC_RANDOM);
-        const manipulatorName = manipulator.name || 'Manipulator';
-        const manipulatorId = manipulator.id || 'unknown-manipulator';
-        const targetName = target.name || 'Target';
-        const targetId = target.id || 'unknown-target';
-        const targetPronounO = target.pronouns.o || 'them';
+        const effect = getRandomElementSeeded(["Exposed", "Shaken"], USE_DETERMINISTIC_RANDOM);
+        const manipulatorName = manipulator.name || "Manipulator";
+        const manipulatorId = manipulator.id || "unknown-manipulator";
+        const targetName = target.name || "Target";
+        const targetId = target.id || "unknown-target";
+        const targetPronounO = target.pronouns.o || "them";
 
         const manipulatorSpan = `<span class="char-${manipulatorId}">${manipulatorName}</span>`;
         const targetSpan = `<span class="char-${targetId}">${targetName}</span>`;

@@ -2,33 +2,39 @@
  * @fileoverview AI Strategic Intent Determination
  * @description Analyzes battle state and determines strategic intent - the "why" behind AI decisions.
  * Pure strategic analysis without move selection or weighting.
- * @version 1.0
+ * @version 1.1.0
  */
 
-'use strict';
+"use strict";
 
-import { BATTLE_PHASES } from '../engine_battle-phase.js';
-import { ESCALATION_STATES } from '../engine_escalation.js';
-import { isInControl, isDesperateBroken } from '../utils_condition_evaluator.js';
-import { getDynamicPersonality } from './ai_personality.js';
-import { safeGet } from '../utils_safe_accessor.js';
+import { BATTLE_PHASES } from "../engine_battle-phase.js";
+import { ESCALATION_STATES } from "../engine_escalation.js";
+import { isInControl, isDesperateBroken } from "../utils_condition_evaluator.js";
+import { getDynamicPersonality } from "./ai_personality.js";
+import { safeGet } from "../utils_safe_accessor.js";
+
+/**
+ * @typedef {import('../types/battle.js').Fighter} Fighter
+ * @typedef {import('../types/engine.js').BattlePhase} BattlePhase
+ * @typedef {import('../types/ai.js').StrategicIntent} StrategicIntent
+ */
 
 /**
  * All possible strategic intents the AI can have
  */
 export const STRATEGIC_INTENTS = {
-    NARRATIVE_ONLY: 'NarrativeOnly',
-    OPENING_MOVES: 'OpeningMoves',
-    POKING_PHASE_TACTICS: 'PokingPhaseTactics',
-    STANDARD_EXCHANGE: 'StandardExchange',
-    CAUTIOUS_DEFENSE: 'CautiousDefense',
-    PRESS_ADVANTAGE: 'PressAdvantage',
-    CAPITALIZE_ON_OPENING: 'CapitalizeOnOpening',
-    DESPERATE_GAMBIT: 'DesperateGambit',
-    FINISHING_BLOW_ATTEMPT: 'FinishingBlowAttempt',
-    CONSERVE_ENERGY: 'ConserveEnergy',
-    OVERWHELM_OFFENSE: 'OverwhelmOffense',
-    RECKLESS_OFFENSE: 'RecklessOffense'
+    NARRATIVE_ONLY: "NarrativeOnly",
+    OPENING_MOVES: "OpeningMoves",
+    POKING_PHASE_TACTICS: "PokingPhaseTactics",
+    STANDARD_EXCHANGE: "StandardExchange",
+    CAUTIOUS_DEFENSE: "CautiousDefense",
+    PRESS_ADVANTAGE: "PressAdvantage",
+    CAPITALIZE_ON_OPENING: "CapitalizeOnOpening",
+    DESPERATE_GAMBIT: "DesperateGambit",
+    FINISHING_BLOW_ATTEMPT: "FinishingBlowAttempt",
+    CONSERVE_ENERGY: "ConserveEnergy",
+    OVERWHELM_OFFENSE: "OverwhelmOffense",
+    RECKLESS_OFFENSE: "RecklessOffense"
 };
 
 /**
@@ -41,8 +47,8 @@ export function determineStrategicIntent(actor, defender, turn, currentPhase) {
     }
 
     const profile = getDynamicPersonality(actor, currentPhase);
-    const actorHp = safeGet(actor, 'hp', 100, actor.name);
-    const defenderHp = safeGet(defender, 'hp', 100, defender.name);
+    const actorHp = safeGet(actor, "hp", 100, actor.name);
+    const defenderHp = safeGet(defender, "hp", 100, defender.name);
 
     // Phase-specific intents (highest priority)
     if (currentPhase === BATTLE_PHASES.PRE_BANTER) {
@@ -74,7 +80,7 @@ export function determineStrategicIntent(actor, defender, turn, currentPhase) {
     }
 
     // Opponent vulnerability analysis
-    const defenderEscalation = safeGet(defender, 'escalationState', ESCALATION_STATES.NORMAL, defender.name);
+    const defenderEscalation = safeGet(defender, "escalationState", ESCALATION_STATES.NORMAL, defender.name);
     if (defenderEscalation === ESCALATION_STATES.SEVERELY_INCAPACITATED || 
         defenderEscalation === ESCALATION_STATES.TERMINAL_COLLAPSE) {
         if (profile.opportunism > 0.5 || profile.aggression > 0.7) {
@@ -83,8 +89,8 @@ export function determineStrategicIntent(actor, defender, turn, currentPhase) {
     }
 
     // Tactical opening analysis
-    const defenderIsVulnerable = safeGet(defender, 'stunDuration', 0, defender.name) > 0 || 
-                                  safeGet(defender, 'tacticalState.isPositive', true, defender.name) === false;
+    const defenderIsVulnerable = safeGet(defender, "stunDuration", 0, defender.name) > 0 || 
+                                  safeGet(defender, "tacticalState.isPositive", true, defender.name) === false;
     if (profile.opportunism > 0.7 && defenderIsVulnerable) {
         return STRATEGIC_INTENTS.CAPITALIZE_ON_OPENING;
     }

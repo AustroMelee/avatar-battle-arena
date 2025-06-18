@@ -4,7 +4,7 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
 /**
  * Handles all modifier effects using unified context.
@@ -15,8 +15,8 @@
 export function handleModifier(ctx) {
     const { effect, actor, primaryTarget } = ctx;
     
-    ctx.log(`Applying modifier ${effect.type} with value ${effect.value} to ${primaryTarget?.name || 'global'}`);
-    const message = `${primaryTarget?.name || 'Target'} gains ${effect.type.replace('_', ' ').toLowerCase()} modifier.`;
+    ctx.log(`Applying modifier ${effect.type} with value ${effect.value} to ${primaryTarget?.name || "global"}`);
+    const message = `${primaryTarget?.name || "Target"} gains ${effect.type.replace("_", " ").toLowerCase()} modifier.`;
     
     // Add to character's active modifiers
     if (primaryTarget && !primaryTarget.activeModifiers) primaryTarget.activeModifiers = [];

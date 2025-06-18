@@ -4,9 +4,9 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
-import { EVENT_TYPES } from './battle_event_types.js';
+import { EVENT_TYPES } from "./battle_event_types.js";
 
 /**
  * Converts log events to HTML format
@@ -25,13 +25,13 @@ export function toHTML(events, options = {}) {
 
     const filteredEvents = filterEvents(events, config);
     
-    let html = '<div class="battle-log">\n';
+    let html = "<div class=\"battle-log\">\n";
     
     for (const event of filteredEvents) {
         html += formatEventAsHTML(event, config);
     }
     
-    html += '</div>';
+    html += "</div>";
     return html;
 }
 
@@ -57,7 +57,7 @@ export function toTextSummary(events, options = {}) {
         lines.push(formatEventAsText(event, config));
     }
     
-    return lines.join('\n');
+    return lines.join("\n");
 }
 
 /**
@@ -74,17 +74,17 @@ export function toCSV(events, options = {}) {
     };
 
     if (events.length === 0) {
-        return '';
+        return "";
     }
 
     // Determine columns from first event and options
     const columns = getCSVColumns(events[0], config);
     
-    let csv = columns.join(',') + '\n';
+    let csv = columns.join(",") + "\n";
     
     for (const event of events) {
         const row = columns.map(col => formatCSVCell(getNestedValue(event, col)));
-        csv += row.join(',') + '\n';
+        csv += row.join(",") + "\n";
     }
     
     return csv;
@@ -143,7 +143,7 @@ export function toDebugFormat(events, options = {}) {
         lines.push(formatEventAsDebug(event, config));
     }
     
-    return lines.join('\n');
+    return lines.join("\n");
 }
 
 /**
@@ -227,9 +227,9 @@ function filterEvents(events, config) {
  * @private
  */
 function formatEventAsHTML(event, config) {
-    const cssClass = config.cssClasses ? ` class="event-${event.type}"` : '';
-    const timestamp = config.timestamps ? `<span class="timestamp">[${event.timestamp}]</span> ` : '';
-    const content = event.html_content || escapeHTML(event.text || 'No description');
+    const cssClass = config.cssClasses ? ` class="event-${event.type}"` : "";
+    const timestamp = config.timestamps ? `<span class="timestamp">[${event.timestamp}]</span> ` : "";
+    const content = event.html_content || escapeHTML(event.text || "No description");
     
     return `  <div${cssClass}>${timestamp}${content}</div>\n`;
 }
@@ -249,12 +249,12 @@ function formatEventAsText(event, config) {
         parts.push(`Turn ${event.turnNumber}:`);
     }
     
-    parts.push(event.text || 'No description');
+    parts.push(event.text || "No description");
     
-    let line = parts.join(' ');
+    let line = parts.join(" ");
     
     if (config.maxWidth && line.length > config.maxWidth) {
-        line = line.substring(0, config.maxWidth - 3) + '...';
+        line = line.substring(0, config.maxWidth - 3) + "...";
     }
     
     return line;
@@ -277,15 +277,15 @@ function formatEventAsDebug(event, config) {
     
     // Debug data in verbose mode
     if (config.verboseMode && event.debugData) {
-        lines.push(`  Debug: ${JSON.stringify(event.debugData, null, 2).replace(/\n/g, '\n    ')}`);
+        lines.push(`  Debug: ${JSON.stringify(event.debugData, null, 2).replace(/\n/g, "\n    ")}`);
     }
     
     // Stack traces for errors
     if (config.includeStackTraces && event.error && event.error.stack) {
-        lines.push(`  Stack: ${event.error.stack.replace(/\n/g, '\n    ')}`);
+        lines.push(`  Stack: ${event.error.stack.replace(/\n/g, "\n    ")}`);
     }
     
-    return lines.join('\n');
+    return lines.join("\n");
 }
 
 /**
@@ -293,16 +293,16 @@ function formatEventAsDebug(event, config) {
  * @private
  */
 function escapeHTML(text) {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
 }
 
 function getCSVColumns(sampleEvent, config) {
-    const baseColumns = ['eventId', 'type', 'turnNumber', 'timestamp', 'text'];
+    const baseColumns = ["eventId", "type", "turnNumber", "timestamp", "text"];
     
     if (config.includeDebugData) {
-        baseColumns.push('debugData');
+        baseColumns.push("debugData");
     }
     
     return baseColumns;
@@ -310,27 +310,27 @@ function getCSVColumns(sampleEvent, config) {
 
 function formatCSVCell(value) {
     if (value === null || value === undefined) {
-        return '';
+        return "";
     }
     
-    const str = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    const str = typeof value === "object" ? JSON.stringify(value) : String(value);
     
     // Escape quotes and wrap in quotes if contains comma or quote
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-        return `"${str.replace(/"/g, '""')}"`;
+    if (str.includes(",") || str.includes("\"") || str.includes("\n")) {
+        return `"${str.replace(/"/g, "\"\"")}"`;
     }
     
     return str;
 }
 
 function getNestedValue(obj, path) {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+    return path.split(".").reduce((current, key) => current?.[key], obj);
 }
 
 function removeEmptyFields(obj) {
     const result = {};
     for (const [key, value] of Object.entries(obj)) {
-        if (value !== null && value !== undefined && value !== '') {
+        if (value !== null && value !== undefined && value !== "") {
             result[key] = value;
         }
     }

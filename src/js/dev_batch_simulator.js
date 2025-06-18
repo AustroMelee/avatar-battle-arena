@@ -4,10 +4,11 @@
  * @version 1.0
  */
 
-'use strict';
+"use strict";
 
-import { simulateBattle } from './engine_battle-engine-core.js';
-import { devModeMatchups } from './data_dev_mode_matchups.js';
+import { executeBattle } from "./engine_battle-engine-core.js";
+import { initializeBattleState } from "./engine_state_initializer.js";
+import { devModeMatchups } from "./data_dev_mode_matchups.js";
 
 const MAX_LOG_LENGTH = 1000000; // Cap compiled log size to prevent browser/clipboard issues
 
@@ -30,13 +31,12 @@ export async function runBatchSimulation(matchups = devModeMatchups, onProgress 
     for (const matchup of matchups) {
         let result;
         try {
-            result = simulateBattle(
+            const initialState = initializeBattleState(
                 matchup.fighter1,
                 matchup.fighter2,
-                matchup.location,
-                matchup.timeOfDay,
-                true // Always run emotional mode in dev batch for consistency
+                matchup.location
             );
+            result = await executeBattle(initialState);
             
             result.matchupConfig = matchup;
             results.completed++;
@@ -69,7 +69,7 @@ export async function runBatchSimulation(matchups = devModeMatchups, onProgress 
         }
 
         // Check for size limits
-        if (results.logs.join('').length > MAX_LOG_LENGTH) {
+        if (results.logs.join("").length > MAX_LOG_LENGTH) {
             console.warn(`Batch Simulation: Compiled logs exceeded ${MAX_LOG_LENGTH} characters. Truncating further logs.`);
             results.logs.push(`\n--- LOG TRUNCATED DUE TO SIZE LIMIT (${MAX_LOG_LENGTH} CHARS) ---\n`);
             break;

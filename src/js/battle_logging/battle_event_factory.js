@@ -4,9 +4,9 @@
  * @version 1.0.0
  */
 
-'use strict';
+"use strict";
 
-import { EVENT_TYPES, ROLL_TYPES, OUTCOME_TYPES } from './battle_event_types.js';
+import { EVENT_TYPES, ROLL_TYPES, OUTCOME_TYPES } from "./battle_event_types.js";
 
 /**
  * Creates a base log event with standard metadata
@@ -23,11 +23,11 @@ export function createBaseEvent(battleState, baseEvent) {
         turnNumber: battleState.turn || 0,
         timestamp: new Date().toISOString(),
         performanceTimestamp: performance.now(),
-        phase: battleState.currentPhase || 'unknown',
+        phase: battleState.currentPhase || "unknown",
         
         metadata: {
-            createdBy: 'battle_event_factory',
-            version: '1.0.0',
+            createdBy: "battle_event_factory",
+            version: "1.0.0",
             battleStateSnapshot: {
                 turn: battleState.turn,
                 phase: battleState.currentPhase,
@@ -182,8 +182,8 @@ export function createNarrativeEvent(battleState, eventType, narrativeData = {})
  * @private
  */
 function generateRollDescription(rollType, actorId, roll, threshold, outcome, moveName) {
-    const actor = actorId || 'Unknown';
-    const move = moveName ? ` for ${moveName}` : '';
+    const actor = actorId || "Unknown";
+    const move = moveName ? ` for ${moveName}` : "";
     const rollPercent = Math.round(roll * 100);
     const thresholdPercent = threshold ? Math.round(threshold * 100) : null;
     
