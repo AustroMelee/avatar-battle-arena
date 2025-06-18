@@ -49,7 +49,7 @@ function createAiLogEntry(actor, defender, turn, currentPhase, intent, chosenMov
         phase: currentPhase,
         intent: intent,
         intentDescription: getIntentDescription(intent),
-        chosenMove: chosenMoveInfo.move.name,
+        chosenMove: chosenMoveInfo.move?.name || 'Unknown Move',
         finalProb: finalProb,
         temperature: chosenMoveInfo.temperature || 'N/A',
         actorState: {
