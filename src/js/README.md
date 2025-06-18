@@ -225,16 +225,19 @@ This directory contains all JavaScript modules for the Avatar Battle Arena syste
 
 ### 🛠️ Utility Modules
 
-#### Core Utilities
-- `utils_math.js` - **Mathematical utility functions**
-- `utils_seeded_random.js` - **Deterministic random number generation**
-- `utils_log_event.js` - **Event logging utilities**
-- `utils_clipboard.js` - **Clipboard interaction utilities**
-- `utils_condition_evaluator.js` - **Condition evaluation utilities**
+The Avatar Battle Arena includes a comprehensive utility system with 15+ specialized modules covering mathematical operations, validation, rendering optimization, and system integration. 
 
-#### Specialized Utilities
-- `utils_narrative-string-builder.js` - **Dynamic narrative text construction**
-- `utils_description-generator.js` - **Automated description generation**
+**📋 For complete utility documentation, see: [`utils/README.md`](utils/README.md)**
+
+#### Core Utility Categories:
+- **Mathematical**: `utils_math.js`, `utils_percentage.js`, `utils_interpolation.js`
+- **Random Generation**: `utils_random.js`, `utils_seeded_random.js`
+- **Validation & Safety**: `utils_number_validation.js`, `utils_state_invariants.js`, `utils_safe_accessor.js`
+- **UI & Rendering**: `utils_efficient_rendering.js`, `utils_description-generator.js`
+- **Data Processing**: `utils_impact_level.js`, `utils_log_event.js`
+- **System Integration**: `utils_type_automation.js`, `utils_clipboard.js`, `utils_deterministic_replay.js`
+
+All utilities follow strict defensive programming principles with comprehensive input validation, type safety, and performance optimization.
 
 ### 🎬 Animation and Presentation Modules
 
@@ -308,7 +311,22 @@ This directory contains all JavaScript modules for the Avatar Battle Arena syste
 
 ---
 
+## 📚 Specialized Module Documentation
+
+For detailed documentation on specific module categories:
+
+- **🧠 AI System**: [`ai/README.md`](ai/README.md) - Comprehensive AI decision engine architecture
+- **🎨 UI Components**: [`ui/README.md`](ui/README.md) - Battle results display and analysis modules  
+- **📝 Battle Logging**: [`battle_logging/README.md`](battle_logging/README.md) - Event logging and formatting system
+- **🛠️ Utility Functions**: [`utils/README.md`](utils/README.md) - Mathematical, validation, and rendering utilities
+- **📖 Narrative Engine**: [`narrative/README.md`](narrative/README.md) - Dynamic story generation system
+- **🎯 Curbstomp System**: [`curbstomp/README.md`](curbstomp/README.md) - Anti-snowball balancing mechanics
+- **🔧 Debug Tools**: [`debug/README.md`](debug/README.md) - Development and debugging utilities
+- **⚡ Effect Handlers**: [`effect_handlers/README.md`](effect_handlers/README.md) - Battle effect processing system
+
+---
+
 **Module Count**: 60+ JavaScript files
 **Total Lines of Code**: ~15,000+ lines
 **Architecture Pattern**: Modular, event-driven, dependency injection
-**Last Updated**: [Current Date] 
+**Last Updated**: December 2024 

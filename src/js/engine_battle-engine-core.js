@@ -503,7 +503,7 @@ export function calculateBattleStatistics(battleResult) {
  * @since 2.0.0
  * @public
  */
-export function isValidBattleResult(result) {
+function isValidBattleResult(result) {
     if (!result || typeof result !== 'object') {
         return false;
     }
