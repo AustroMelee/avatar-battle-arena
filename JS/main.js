@@ -7,6 +7,7 @@
 'use strict';
 
 console.log('[MAIN] Avatar Battle Arena - Application loaded successfully');
+console.log('[MAIN] Module imports starting...');
 
 import { simulateBattle } from './engine_battle-engine-core.js';
 import { 
@@ -162,4 +163,9 @@ if (typeof window !== 'undefined') {
 }
 
 // Kick off app initialization on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', init);
+// Initialize when DOM is ready
+console.log('[MAIN] Setting up DOMContentLoaded listener...');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('[MAIN] DOMContentLoaded event fired!');
+    init();
+});
