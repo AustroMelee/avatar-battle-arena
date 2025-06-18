@@ -72,12 +72,16 @@ function init() {
     }
 
     if (battleBtn) {
+        console.log('[MAIN] Battle button found, adding click listener');
         battleBtn.addEventListener('click', () => {
+            console.log('[MAIN] ⚔️ FIGHT button clicked! Starting battle...');
             const f1Id = 'aang-airbending-only';
             const f2Id = 'azula';
             const locId = 'fire-nation-capital';
             const timeOfDay = 'day';
             const emotionalMode = true; // Hardcoded
+
+            console.log('[MAIN] Battle parameters:', { f1Id, f2Id, locId, timeOfDay, emotionalMode });
 
             // Reset state and show loading - all through centralized state
             resetGlobalUI();
@@ -85,12 +89,15 @@ function init() {
 
             setTimeout(() => {
                 try {
+                    console.log('[MAIN] Calling simulateBattle...');
                     const battleResult = simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode);
+                    console.log('[MAIN] Battle simulation completed successfully');
                     // Pass location ID to the result display
                     battleResult.locationId = locId;
                     showResultsState(battleResult, currentSimMode);
                 } catch (error) {
-                     console.error("An error occurred during battle simulation:", error);
+                     console.error("[MAIN] An error occurred during battle simulation:", error);
+                     console.error("[MAIN] Error stack:", error.stack);
                      alert("A critical error occurred. Please check the console and refresh.");
                      // Use state-driven error handling
                      updateGameState({ 
@@ -102,6 +109,8 @@ function init() {
                 }
             }, 100);
         });
+    } else {
+        console.error('[MAIN] Battle button not found! Cannot attach click listener.');
     }
 
     setupDetailedLogControls();
