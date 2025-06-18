@@ -6,9 +6,15 @@
 
 "use strict";
 
-import { postBattleVictoryPhrases } from "../narrative-flavor.js";
 import { getRandomElementSeeded } from "../utils_seeded_random.js";
 import { substituteTokens } from "./stringSubstitution.js";
+
+const postBattleVictoryPhrases = {
+    default: {
+        dominant: ["{WinnerName} has defeated {LoserName}!"],
+        narrow: ["{WinnerName} has narrowly defeated {LoserName}!"]
+    }
+};
 
 /**
  * Generates the final victory line for the battle's conclusion.

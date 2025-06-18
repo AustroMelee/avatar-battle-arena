@@ -9,9 +9,30 @@
 
 import { BATTLE_PHASES } from "../engine_battle-phase.js";
 import { ESCALATION_STATES } from "../engine_escalation.js";
-import { isInControl, isDesperateBroken } from "../utils_condition_evaluator.js";
 import { getDynamicPersonality } from "./ai_personality.js";
 import { safeGet } from "../utils_safe_accessor.js";
+
+/**
+ * Placeholder for a deleted utility function.
+ * @param {any} _actor
+ * @param {any} _defender
+ * @param {any} _options
+ * @returns {boolean}
+ */
+function isInControl(_actor, _defender, _options) {
+    return false;
+}
+
+/**
+ * Placeholder for a deleted utility function.
+ * @param {any} _actor
+ * @param {any} _defender
+ * @param {any} _options
+ * @returns {boolean}
+ */
+function isDesperateBroken(_actor, _defender, _options) {
+    return false;
+}
 
 /**
  * @typedef {import('../types/battle.js').Fighter} Fighter

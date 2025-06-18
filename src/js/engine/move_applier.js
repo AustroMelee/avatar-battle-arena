@@ -16,7 +16,17 @@
  */
 
 import { generateLogEvent } from "../utils_log_event.js";
-import { clamp } from "../utils_math.js";
+
+/**
+ * Clamps a number between a minimum and maximum value.
+ * @param {number} value The number to clamp.
+ * @param {number} min The minimum value.
+ * @param {number} max The maximum value.
+ * @returns {number} The clamped number.
+ */
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max));
+}
 
 /**
  * Applies the effects of a move to the battle state.
