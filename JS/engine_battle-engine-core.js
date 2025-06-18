@@ -1,11 +1,9 @@
 /**
- * @fileoverview Avatar Battle Arena - Core Battle Engine (Refactored)
- * @description Primary battle simulation orchestrator. It initializes the battle,
- * manages the main turn loop by delegating to specialized processors, and finalizes the result.
- * @version 3.0
+ * @fileoverview Avatar Battle Arena - Core Battle Engine
+ * @description Implements turn-based battle system with state management and move resolution
+ * @version 2.0.0
  */
 
-// FILE: engine_battle-engine-core.js
 'use strict';
 
 //# sourceURL=engine_battle-engine-core.js
@@ -14,307 +12,550 @@
 /**
  * @typedef {import('./types.js').Fighter} Fighter
  * @typedef {import('./types.js').BattleState} BattleState
- * @typedef {import('./types.js').PhaseState} PhaseState
- * @typedef {import('./types.js').BattleEvent} BattleEvent
  * @typedef {import('./types.js').BattleResult} BattleResult
+ * @typedef {import('./types.js').BattleEvent} BattleEvent
+ * @typedef {import('./types.js').Move} Move
+ * @typedef {import('./types.js').MoveResult} MoveResult
  * @typedef {import('./types.js').EnvironmentState} EnvironmentState
+ * @typedef {import('./types.js').PhaseState} PhaseState
+ * @typedef {import('./types.js').MentalState} MentalState
+ * @typedef {import('./types.js').FighterStats} FighterStats
  */
 
-// --- DATA & CONFIG IMPORTS ---
+/**
+ * @typedef {Object} BattleEngineOptions
+ * @description Configuration options for battle engine
+ * @property {number} [maxTurns=50] - Maximum number of turns before draw
+ * @property {boolean} [enableNarrative=true] - Enable narrative generation
+ * @property {boolean} [enableDebugLogging=false] - Enable debug logging
+ * @property {string} [seed] - Random seed for deterministic battles
+ */
+
+// ============================================================================
+// IMPORTS
+// ============================================================================
+
+import { processTurn } from './engine_turn-processor.js';
+import { initializeBattleState, initializeFighter } from './engine_state_initializer.js';
 import { characters } from './data_characters.js';
 import { locations } from './locations.js';
-import { MAX_TOTAL_TURNS, USE_DETERMINISTIC_RANDOM, RANDOM_SEED } from './config_game.js';
+import { engineLogger } from './battle_logging/index.js';
 
-// --- STATE & RULE ENGINE IMPORTS ---
-import { initializeFighterState, initializeBattleState } from './engine_state_initializer.js';
-import { evaluateTerminalState } from './engine_terminal_state.js';
-import { generateFinalSummary } from './engine_battle_summarizer.js';
-import { applyCurbstompRules, resetCurbstompState, checkCurbstompConditions } from './engine_curbstomp_manager.js';
-import { initializeBattlePhaseState } from './engine_battle-phase.js';
-import { managePhaseTransition } from './engine_phase-manager.js'; // NEW
-import { processTurn } from './engine_turn-processor.js'; // NEW
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 
-// --- UTILITY IMPORTS ---
-import { setSeed } from './utils_seeded_random.js';
-import { generateLogEvent } from './utils_log_event.js';
-import { assertBattleStateInvariants } from './utils_state_invariants.js';
-import { findNarrativeQuote, generateTurnNarrationObjects } from './engine_narrative-engine.js';
+/** @type {number} */
+const DEFAULT_MAX_TURNS = 50;
 
-/**
- * @typedef {Object} TerminalState
- * @description Terminal state evaluation result
- * @property {boolean} battleOver - Whether battle has ended
- * @property {string} [winnerId] - ID of winning fighter
- * @property {string} [loserId] - ID of losing fighter
- * @property {boolean} isStalemate - Whether battle is a stalemate
- */
+/** @type {number} */
+const TERMINAL_INCAPACITATION_THRESHOLD = 100;
+
+// ============================================================================
+// CORE BATTLE ENGINE
+// ============================================================================
 
 /**
- * Handles the pre-battle setup, including initial banter and rules checks.
+ * Executes a complete battle simulation between two fighters
  * 
- * @param {Fighter} fighter1 - First fighter state
- * @param {Fighter} fighter2 - Second fighter state
- * @param {BattleState} battleState - Current battle state
- * @param {PhaseState} phaseState - Current phase state
- * @param {BattleEvent[]} battleEventLog - Battle event log array
+ * @param {string} fighter1Id - First fighter identifier
+ * @param {string} fighter2Id - Second fighter identifier
+ * @param {string} locationId - Battle location identifier
+ * @param {BattleEngineOptions} [options={}] - Engine configuration options
  * 
- * @returns {TerminalState} Terminal state evaluation result
+ * @returns {Promise<BattleResult>} Complete battle result with winner, logs, and final state
  * 
- * @private
- * @since 3.0
+ * @throws {TypeError} When fighter IDs or location ID are not strings
+ * @throws {Error} When fighters or location are not found
+ * @throws {Error} When battle state initialization fails
+ * 
+ * @example
+ * // Execute a battle
+ * const result = await executeBattle(
+ *   'aang-avatar-state',
+ *   'azula-comet-enhanced',
+ *   'fire-nation-capital',
+ *   { maxTurns: 30, enableNarrative: true }
+ * );
+ * 
+ * @since 2.0.0
+ * @public
  */
-function handlePreBattle(fighter1, fighter2, battleState, phaseState, battleEventLog) {
-    console.debug(`[Battle Engine] Running Pre-Battle setup...`);
-    
+export async function executeBattle(fighter1Id, fighter2Id, locationId, options = {}) {
     // Input validation
-    if (!fighter1 || !fighter2) {
-        throw new Error('handlePreBattle: fighter1 and fighter2 are required');
-    }
-    if (!battleState) {
-        throw new Error('handlePreBattle: battleState is required');
-    }
-    if (!phaseState) {
-        throw new Error('handlePreBattle: phaseState is required');
-    }
-    if (!Array.isArray(battleEventLog)) {
-        throw new Error('handlePreBattle: battleEventLog must be an array');
+    if (typeof fighter1Id !== 'string') {
+        throw new TypeError('executeBattle: fighter1Id must be a string');
     }
     
-    const locId = battleState.locationId;
+    if (typeof fighter2Id !== 'string') {
+        throw new TypeError('executeBattle: fighter2Id must be a string');
+    }
+    
+    if (typeof locationId !== 'string') {
+        throw new TypeError('executeBattle: locationId must be a string');
+    }
+    
+    if (typeof options !== 'object' || options === null) {
+        throw new TypeError('executeBattle: options must be an object');
+    }
 
-    // Generate pre-battle banter
-    const banter1 = findNarrativeQuote(fighter1, fighter2, 'battleStart', phaseState.currentPhase, { 
-        currentPhaseKey: phaseState.currentPhase, 
-        locationId: locId, 
-        battleState 
+    console.log('[Battle Engine] Starting battle:', {
+        fighter1Id,
+        fighter2Id,
+        locationId,
+        options
     });
-    
-    if (banter1) {
-        const narrationObjects = generateTurnNarrationObjects(
-            [{ quote: banter1, actor: fighter1 }], 
-            null, 
-            fighter1, 
-            fighter2, 
-            null, 
-            battleState.environmentState, 
-            battleState.locationConditions, 
-            phaseState.currentPhase, 
-            true, 
-            null, 
-            battleState
-        );
-        battleEventLog.push(...narrationObjects);
-    }
 
-    const banter2 = findNarrativeQuote(fighter2, fighter1, 'battleStart', phaseState.currentPhase, { 
-        currentPhaseKey: phaseState.currentPhase, 
-        locationId: locId, 
-        battleState 
-    });
-    
-    if (banter2) {
-        const narrationObjects = generateTurnNarrationObjects(
-            [{ quote: banter2, actor: fighter2 }], 
-            null, 
-            fighter2, 
-            fighter1, 
-            null, 
-            battleState.environmentState, 
-            battleState.locationConditions, 
-            phaseState.currentPhase, 
-            true, 
-            null, 
-            battleState
-        );
-        battleEventLog.push(...narrationObjects);
-    }
+    /** @type {number} */
+    const startTime = performance.now();
 
-    // Apply any initial "curbstomp" rules (e.g., for lore-based mismatches)
-    applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog, true);
-    
-    return evaluateTerminalState(fighter1, fighter2, false);
+    try {
+        // Validate fighter and location existence
+        validateBattleParameters(fighter1Id, fighter2Id, locationId);
+
+        // Initialize battle state
+        /** @type {BattleState} */
+        const initialState = await initializeBattleState(fighter1Id, fighter2Id, locationId, options);
+
+        // Execute battle turns
+        /** @type {BattleResult} */
+        const battleResult = await runBattleLoop(initialState, options);
+
+        /** @type {number} */
+        const executionTime = performance.now() - startTime;
+        
+        console.log(`[Battle Engine] Battle completed in ${executionTime.toFixed(2)}ms`);
+        console.log('[Battle Engine] Final result:', {
+            winnerId: battleResult.winnerId,
+            turnCount: battleResult.turnCount,
+            eventCount: battleResult.log.length
+        });
+
+        return battleResult;
+
+    } catch (error) {
+        console.error('[Battle Engine] Battle execution failed:', error);
+        throw error;
+    }
 }
 
 /**
- * Handles the post-battle wrap-up, determining the final winner and generating a summary.
+ * Validates battle parameters before execution
  * 
- * @param {BattleResult} battleResult - Mutable battle result object
- * @param {Fighter} fighter1 - First fighter final state
- * @param {Fighter} fighter2 - Second fighter final state
- * @param {number} turn - Final turn number
+ * @param {string} fighter1Id - First fighter identifier
+ * @param {string} fighter2Id - Second fighter identifier
+ * @param {string} locationId - Location identifier
  * 
  * @returns {void}
  * 
+ * @throws {Error} When fighters or location are not found
+ * @throws {Error} When fighters are identical
+ * 
  * @private
- * @since 3.0
+ * @since 2.0.0
  */
-function handlePostBattle(battleResult, fighter1, fighter2, turn) {
-    console.debug(`[Battle Engine] Running Post-Battle wrap-up...`);
-    
-    // Input validation
-    if (!battleResult || typeof battleResult !== 'object') {
-        throw new Error('handlePostBattle: battleResult must be an object');
-    }
-    if (!fighter1 || !fighter2) {
-        throw new Error('handlePostBattle: fighter1 and fighter2 are required');
-    }
-    if (typeof turn !== 'number' || turn < 0) {
-        throw new Error('handlePostBattle: turn must be a non-negative number');
+function validateBattleParameters(fighter1Id, fighter2Id, locationId) {
+    // Check fighter existence
+    if (!characters[fighter1Id]) {
+        throw new Error(`executeBattle: Fighter '${fighter1Id}' not found in character database`);
     }
     
-    // Check for timeout condition if battle ended due to max turns
-    if (!battleResult.winnerId && !battleResult.isDraw && turn >= MAX_TOTAL_TURNS) {
-        const timeoutEvent = generateLogEvent({}, { 
-            type: 'timeout_event', 
-            text: 'The battle timed out!' 
-        });
-        battleResult.log.push(timeoutEvent);
-        
-        if (fighter1.hp === fighter2.hp) {
-            battleResult.isDraw = true;
-        } else {
-            battleResult.winnerId = (fighter1.hp > fighter2.hp) ? fighter1.id : fighter2.id;
-            battleResult.loserId = (battleResult.winnerId === fighter1.id) ? fighter2.id : fighter1.id;
-        }
+    if (!characters[fighter2Id]) {
+        throw new Error(`executeBattle: Fighter '${fighter2Id}' not found in character database`);
     }
     
-    generateFinalSummary(battleResult, fighter1, fighter2, turn);
+    // Check location existence
+    if (!locations[locationId]) {
+        throw new Error(`executeBattle: Location '${locationId}' not found in location database`);
+    }
+    
+    // Check for identical fighters
+    if (fighter1Id === fighter2Id) {
+        throw new Error('executeBattle: Cannot battle identical fighters');
+    }
 }
 
 /**
- * Simulates a complete battle between two fighters.
- * This is the primary entry point for the battle simulation.
+ * Runs the main battle loop until victory or maximum turns
  * 
- * @param {string} f1Id - First fighter identifier
- * @param {string} f2Id - Second fighter identifier  
- * @param {string} locId - Battle location identifier
- * @param {string} timeOfDay - Time of day setting
- * @param {boolean} [emotionalMode=false] - Whether to enable emotional mode
+ * @param {BattleState} initialState - Initial battle state
+ * @param {BattleEngineOptions} options - Engine configuration
  * 
- * @returns {BattleResult} Complete battle result with log, winner, and final states
+ * @returns {Promise<BattleResult>} Battle result with winner and final state
  * 
- * @throws {Error} When required parameters are invalid
- * @throws {Error} When fighters or location cannot be found
- * @throws {Error} When battle initialization fails
+ * @throws {Error} When battle loop encounters unrecoverable error
  * 
- * @example
- * // Basic battle simulation
- * const result = simulateBattle('aang', 'azula', 'fire-nation-capital', 'noon');
- * console.log(`Winner: ${result.winnerId}`);
- * 
- * @example
- * // Battle with emotional mode
- * const emotionalResult = simulateBattle('aang', 'azula', 'fire-nation-capital', 'noon', true);
- * 
- * @since 3.0
- * @public
+ * @private
+ * @since 2.0.0
  */
-export function simulateBattle(f1Id, f2Id, locId, timeOfDay, emotionalMode = false) {
-    console.log(`[Battle Engine] ===== BATTLE SIMULATION START v3.0 =====`);
-    console.log(`[Battle Engine] ${f1Id} vs ${f2Id} at ${locId} (${timeOfDay})`);
-
-    // === INPUT VALIDATION ===
-    if (!f1Id || typeof f1Id !== 'string') {
-        throw new Error(`simulateBattle: f1Id must be a non-empty string, received: ${typeof f1Id} (${f1Id})`);
-    }
-    if (!f2Id || typeof f2Id !== 'string') {
-        throw new Error(`simulateBattle: f2Id must be a non-empty string, received: ${typeof f2Id} (${f2Id})`);
-    }
-    if (!locId || typeof locId !== 'string') {
-        throw new Error(`simulateBattle: locId must be a non-empty string, received: ${typeof locId} (${locId})`);
-    }
-    if (!timeOfDay || typeof timeOfDay !== 'string') {
-        throw new Error(`simulateBattle: timeOfDay must be a non-empty string, received: ${typeof timeOfDay} (${timeOfDay})`);
-    }
-    if (typeof emotionalMode !== 'boolean') {
-        throw new Error(`simulateBattle: emotionalMode must be a boolean, received: ${typeof emotionalMode} (${emotionalMode})`);
-    }
-
-    // === 1. INITIALIZATION ===
-    if (USE_DETERMINISTIC_RANDOM) {
-        setSeed(RANDOM_SEED);
-    }
-    resetCurbstompState();
+async function runBattleLoop(initialState, options) {
+    /** @type {BattleState} */
+    let currentState = { ...initialState };
+    
+    /** @type {number} */
+    const maxTurns = options.maxTurns || DEFAULT_MAX_TURNS;
     
     /** @type {BattleEvent[]} */
-    const battleEventLog = [];
-    
-    /** @type {Fighter} */
-    let fighter1 = initializeFighterState(f1Id, f2Id, emotionalMode);
-    
-    /** @type {Fighter} */
-    let fighter2 = initializeFighterState(f2Id, f1Id, emotionalMode);
-    
-    /** @type {BattleState} */
-    let battleState = initializeBattleState(f1Id, f2Id, locId, timeOfDay, emotionalMode);
-    
-    /** @type {PhaseState} */
-    let phaseState = initializeBattlePhaseState(battleState, battleEventLog);
-    
-    // Cross-reference setup
-    fighter1.opponentId = fighter2.id;
-    fighter2.opponentId = fighter1.id;
-    
-    let turn = 0;
-    let battleOver = false;
-    /** @type {string | null} */
-    let winnerId = null;
-    /** @type {string | null} */
-    let loserId = null;
-    let isStalemate = false;
+    const battleLog = [];
 
-    // === 2. PRE-BATTLE PHASE ===
-    /** @type {TerminalState} */
-    let terminalOutcome = handlePreBattle(fighter1, fighter2, battleState, phaseState, battleEventLog);
-    if (terminalOutcome.battleOver) {
-        ({ battleOver, winnerId, loserId, isStalemate } = terminalOutcome);
-    }
+    console.log(`[Battle Engine] Starting battle loop (max ${maxTurns} turns)`);
 
-    // === 3. MAIN BATTLE LOOP ===
-    /** @type {Fighter} */
-    let currentAttacker = fighter1;
-    /** @type {Fighter} */
-    let currentDefender = fighter2;
+    // Main battle loop
+    for (let turnNumber = 1; turnNumber <= maxTurns; turnNumber++) {
+        try {
+            if (options.enableDebugLogging) {
+                console.debug(`[Battle Engine] Processing turn ${turnNumber}`);
+            }
 
-    while (turn < MAX_TOTAL_TURNS && !battleOver) {
-        battleState.turn = turn;
-        battleState.currentPhase = phaseState.currentPhase;
+            // Process the turn
+            /** @type {BattleState} */
+            const turnResult = await processTurn(currentState, {
+                turnNumber,
+                enableNarrative: options.enableNarrative !== false,
+                enableDebugLogging: options.enableDebugLogging || false
+            });
 
-        // A. Manage Phase Transitions
-        const phaseEvents = managePhaseTransition(phaseState, currentAttacker, currentDefender, battleState);
-        battleEventLog.push(...phaseEvents);
+            // Add turn events to battle log
+            if (turnResult.events && turnResult.events.length > 0) {
+                battleLog.push(...turnResult.events);
+            }
 
-        // B. Process the Current Attacker's Turn
-        const turnEvents = processTurn(currentAttacker, currentDefender, battleState, phaseState);
-        battleEventLog.push(...turnEvents);
-        
-        // C. Check for End-of-Turn Terminal State
-        terminalOutcome = evaluateTerminalState(fighter1, fighter2, false);
-        if (terminalOutcome.battleOver) {
-            ({ battleOver, winnerId, loserId, isStalemate } = terminalOutcome);
+            // Update current state
+            currentState = turnResult;
+
+            // Check for battle termination
+            /** @type {string | null} */
+            const winnerId = checkBattleTermination(currentState);
+            
+            if (winnerId) {
+                console.log(`[Battle Engine] Battle ended on turn ${turnNumber}, winner: ${winnerId}`);
+                
+                return createBattleResult(
+                    currentState,
+                    winnerId,
+                    turnNumber,
+                    battleLog,
+                    false
+                );
+            }
+
+        } catch (error) {
+            console.error(`[Battle Engine] Error on turn ${turnNumber}:`, error);
+            
+            // Add error event to log
+            battleLog.push({
+                type: 'ERROR',
+                turn: turnNumber,
+                data: {
+                    message: error.message,
+                    stack: error.stack
+                },
+                timestamp: new Date().toISOString()
+            });
+            
+            throw new Error(`Battle loop failed on turn ${turnNumber}: ${error.message}`);
         }
-
-        // D. Prepare for Next Turn
-        [currentAttacker, currentDefender] = [currentDefender, currentAttacker];
-        turn++;
     }
 
-    // === 4. POST-BATTLE & SUMMARY ===
+    // Battle ended in draw (maximum turns reached)
+    console.log(`[Battle Engine] Battle ended in draw after ${maxTurns} turns`);
+    
+    return createBattleResult(
+        currentState,
+        null,
+        maxTurns,
+        battleLog,
+        true
+    );
+}
+
+/**
+ * Checks if battle should terminate due to victory conditions
+ * 
+ * @param {BattleState} state - Current battle state
+ * 
+ * @returns {string | null} Winner ID if battle should end, null if continuing
+ * 
+ * @throws {TypeError} When state is invalid
+ * 
+ * @private
+ * @since 2.0.0
+ */
+function checkBattleTermination(state) {
+    // Input validation
+    if (!state || typeof state !== 'object') {
+        throw new TypeError('checkBattleTermination: state must be a valid battle state object');
+    }
+
+    if (!state.fighter1 || !state.fighter2) {
+        throw new TypeError('checkBattleTermination: state must contain both fighters');
+    }
+
+    /** @type {Fighter} */
+    const fighter1 = state.fighter1;
+    /** @type {Fighter} */
+    const fighter2 = state.fighter2;
+
+    // Check terminal incapacitation
+    /** @type {boolean} */
+    const fighter1Incapacitated = (fighter1.incapacitationScore || 0) >= TERMINAL_INCAPACITATION_THRESHOLD;
+    /** @type {boolean} */
+    const fighter2Incapacitated = (fighter2.incapacitationScore || 0) >= TERMINAL_INCAPACITATION_THRESHOLD;
+
+    if (fighter1Incapacitated && fighter2Incapacitated) {
+        // Both incapacitated - draw
+        return null;
+    }
+    
+    if (fighter1Incapacitated) {
+        return fighter2.id;
+    }
+    
+    if (fighter2Incapacitated) {
+        return fighter1.id;
+    }
+
+    // Check explicit victory flags
+    if (state.winnerId) {
+        return state.winnerId;
+    }
+
+    // Check escalation states for terminal collapse
+    if (fighter1.escalationState === 'Terminal Collapse') {
+        return fighter2.id;
+    }
+    
+    if (fighter2.escalationState === 'Terminal Collapse') {
+        return fighter1.id;
+    }
+
+    // Continue battle
+    return null;
+}
+
+/**
+ * Creates the final battle result object
+ * 
+ * @param {BattleState} finalState - Final battle state
+ * @param {string | null} winnerId - Winner ID or null for draw
+ * @param {number} turnCount - Number of turns executed
+ * @param {BattleEvent[]} battleLog - Complete battle event log
+ * @param {boolean} isDraw - Whether battle ended in draw
+ * 
+ * @returns {BattleResult} Complete battle result
+ * 
+ * @throws {TypeError} When required parameters are invalid
+ * 
+ * @private
+ * @since 2.0.0
+ */
+function createBattleResult(finalState, winnerId, turnCount, battleLog, isDraw) {
+    // Input validation
+    if (!finalState || typeof finalState !== 'object') {
+        throw new TypeError('createBattleResult: finalState must be a valid battle state object');
+    }
+    
+    if (winnerId !== null && typeof winnerId !== 'string') {
+        throw new TypeError('createBattleResult: winnerId must be a string or null');
+    }
+    
+    if (typeof turnCount !== 'number' || turnCount < 0) {
+        throw new TypeError('createBattleResult: turnCount must be a non-negative number');
+    }
+    
+    if (!Array.isArray(battleLog)) {
+        throw new TypeError('createBattleResult: battleLog must be an array');
+    }
+    
+    if (typeof isDraw !== 'boolean') {
+        throw new TypeError('createBattleResult: isDraw must be a boolean');
+    }
+
+    /** @type {string | null} */
+    const loserId = isDraw ? null : (winnerId === finalState.fighter1.id ? finalState.fighter2.id : finalState.fighter1.id);
+
     /** @type {BattleResult} */
-    const finalBattleResult = {
-        log: battleEventLog,
+    const result = {
         winnerId,
         loserId,
-        isDraw: isStalemate,
-        finalState: { 
-            fighter1: { ...fighter1 }, 
-            fighter2: { ...fighter2 } 
-        },
-        environmentState: battleState.environmentState,
-        phaseSummary: phaseState.phaseSummaryLog
+        isDraw,
+        turnCount,
+        finalState,
+        log: battleLog,
+        locationId: finalState.environment.locationId,
+        timestamp: new Date().toISOString(),
+        metadata: {
+            engineVersion: '2.0.0',
+            totalEvents: battleLog.length,
+            finalScores: {
+                fighter1: finalState.fighter1.incapacitationScore || 0,
+                fighter2: finalState.fighter2.incapacitationScore || 0
+            },
+            finalMomentum: {
+                fighter1: finalState.fighter1.momentum || 0,
+                fighter2: finalState.fighter2.momentum || 0
+            },
+            escalationStates: {
+                fighter1: finalState.fighter1.escalationState || 'Normal',
+                fighter2: finalState.fighter2.escalationState || 'Normal'
+            }
+        }
     };
-    
-    handlePostBattle(finalBattleResult, fighter1, fighter2, turn);
-    console.log(`[Battle Engine] ===== BATTLE SIMULATION END =====`);
-    return finalBattleResult;
+
+    // Log battle summary
+    console.log('[Battle Engine] Battle Result Summary:', {
+        winner: winnerId || 'Draw',
+        turns: turnCount,
+        events: battleLog.length,
+        fighter1Score: result.metadata.finalScores.fighter1,
+        fighter2Score: result.metadata.finalScores.fighter2
+    });
+
+    return result;
 }
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Calculates battle statistics from result
+ * 
+ * @param {BattleResult} battleResult - Battle result to analyze
+ * 
+ * @returns {Object} Battle statistics object
+ * 
+ * @throws {TypeError} When battleResult is invalid
+ * 
+ * @example
+ * // Calculate statistics
+ * const stats = calculateBattleStatistics(battleResult);
+ * console.log(stats.averageTurnLength);
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function calculateBattleStatistics(battleResult) {
+    // Input validation
+    if (!battleResult || typeof battleResult !== 'object') {
+        throw new TypeError('calculateBattleStatistics: battleResult must be an object');
+    }
+    
+    if (!Array.isArray(battleResult.log)) {
+        throw new TypeError('calculateBattleStatistics: battleResult.log must be an array');
+    }
+
+    /** @type {BattleEvent[]} */
+    const events = battleResult.log;
+    
+    /** @type {Object} */
+    const eventTypeCount = {};
+    
+    /** @type {number} */
+    let totalDamageDealt = 0;
+    
+    /** @type {number} */
+    let totalMovesExecuted = 0;
+
+    // Analyze events
+    events.forEach(/** @type {BattleEvent} */ (event) => {
+        // Count event types
+        eventTypeCount[event.type] = (eventTypeCount[event.type] || 0) + 1;
+        
+        // Sum damage
+        if (event.type === 'MOVE_EXECUTED' && event.data && typeof event.data.damage === 'number') {
+            totalDamageDealt += event.data.damage;
+        }
+        
+        // Count moves
+        if (event.type === 'MOVE_EXECUTED') {
+            totalMovesExecuted++;
+        }
+    });
+
+    return {
+        totalEvents: events.length,
+        totalTurns: battleResult.turnCount,
+        totalDamage: totalDamageDealt,
+        totalMoves: totalMovesExecuted,
+        averageTurnLength: events.length / battleResult.turnCount,
+        averageDamagePerMove: totalMovesExecuted > 0 ? totalDamageDealt / totalMovesExecuted : 0,
+        eventTypeDistribution: eventTypeCount,
+        battleDuration: battleResult.turnCount,
+        winnerFinalScore: battleResult.metadata.finalScores[battleResult.winnerId === battleResult.finalState.fighter1.id ? 'fighter1' : 'fighter2'],
+        loserFinalScore: battleResult.metadata.finalScores[battleResult.winnerId === battleResult.finalState.fighter1.id ? 'fighter2' : 'fighter1']
+    };
+}
+
+/**
+ * Validates a battle result object structure
+ * 
+ * @param {any} result - Object to validate as battle result
+ * 
+ * @returns {boolean} True if valid battle result
+ * 
+ * @example
+ * // Validate battle result
+ * if (isValidBattleResult(result)) {
+ *   console.log('Valid battle result');
+ * }
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function isValidBattleResult(result) {
+    if (!result || typeof result !== 'object') {
+        return false;
+    }
+
+    // Check required properties
+    /** @type {string[]} */
+    const requiredProps = ['winnerId', 'loserId', 'isDraw', 'turnCount', 'finalState', 'log', 'locationId', 'timestamp'];
+    
+    for (const prop of requiredProps) {
+        if (!(prop in result)) {
+            console.warn(`[Battle Engine] Invalid battle result: missing property '${prop}'`);
+            return false;
+        }
+    }
+
+    // Validate types
+    if (result.winnerId !== null && typeof result.winnerId !== 'string') {
+        return false;
+    }
+    
+    if (result.loserId !== null && typeof result.loserId !== 'string') {
+        return false;
+    }
+    
+    if (typeof result.isDraw !== 'boolean') {
+        return false;
+    }
+    
+    if (typeof result.turnCount !== 'number' || result.turnCount < 0) {
+        return false;
+    }
+    
+    if (!Array.isArray(result.log)) {
+        return false;
+    }
+    
+    if (typeof result.locationId !== 'string') {
+        return false;
+    }
+
+    return true;
+}
+
+// ============================================================================
+// EXPORTS
+// ============================================================================
+
+// Export main functions
+export { executeBattle, calculateBattleStatistics, isValidBattleResult };
+
+// Export for testing
+export { checkBattleTermination, createBattleResult };
+
+// Legacy compatibility
+export { executeBattle as runBattle };

@@ -1,28 +1,81 @@
 /**
- * @fileoverview State Invariant Assertions - NASA-Level Runtime Validation
- * @description Validates critical assumptions about battle state during runtime to prevent
- * silent corruption. Used in spacecraft flight software to validate system state every tick.
- * @version 1.0
+ * @fileoverview Avatar Battle Arena - State Invariant Validation System
+ * @description NASA-level runtime validation for critical battle state assumptions to prevent silent corruption
+ * @version 2.0.0
  */
 
 'use strict';
 
 //# sourceURL=utils_state_invariants.js
 
+// ============================================================================
+// TYPE IMPORTS
+// ============================================================================
+
 /**
- * @typedef {Object} InvariantViolation
- * @property {string} invariantName - Name of violated invariant
- * @property {string} message - Description of violation
- * @property {*} actualValue - Actual value that violated invariant
- * @property {*} expectedValue - Expected value or range
- * @property {string} severity - Severity level (critical, error, warning)
+ * @typedef {import('./types.js').Fighter} Fighter
+ * @typedef {import('./types.js').BattleState} BattleState
+ * @typedef {import('./types.js').PhaseState} PhaseState
+ * @typedef {import('./types.js').EnvironmentState} EnvironmentState
  */
 
 /**
- * Configuration for invariant checking behavior
+ * @typedef {Object} InvariantViolation
+ * @description Describes a violated state invariant
+ * @property {string} invariantName - Name of violated invariant
+ * @property {string} message - Description of violation
+ * @property {any} actualValue - Actual value that violated invariant
+ * @property {any} expectedValue - Expected value or range
+ * @property {string} severity - Severity level ('critical', 'error', 'warning')
+ * @property {string} [context] - Additional context about the violation
+ * @property {number} timestamp - When the violation was detected
  */
+
+/**
+ * @typedef {Object} InvariantConfig
+ * @description Configuration for invariant checking behavior
+ * @property {boolean} throwOnCritical - Whether to throw on critical violations
+ * @property {boolean} throwOnError - Whether to throw on error violations
+ * @property {boolean} throwOnWarning - Whether to throw on warning violations
+ * @property {boolean} enableHealthChecks - Enable fighter health validation
+ * @property {boolean} enableEnergyChecks - Enable fighter energy validation
+ * @property {boolean} enableStateChecks - Enable general state validation
+ * @property {boolean} enablePhaseChecks - Enable battle phase validation
+ * @property {boolean} enableEnvironmentalChecks - Enable environment validation
+ * @property {boolean} enableAiChecks - Enable AI state validation
+ * @property {boolean} skipInvariantsInProduction - Skip checks in production
+ * @property {number} maxViolationsPerCheck - Maximum violations to report per check
+ */
+
+/**
+ * @typedef {Object} ValidationResult
+ * @description Result of validation check
+ * @property {boolean} isValid - Whether validation passed
+ * @property {InvariantViolation[]} violations - List of violations found
+ * @property {number} checkDuration - Time taken for validation in ms
+ * @property {string} context - Context where validation was performed
+ * @property {number} checkCount - Sequential check number
+ */
+
+/**
+ * @typedef {Object} InvariantStatistics
+ * @description Statistics about invariant checking
+ * @property {number} totalChecks - Total number of checks performed
+ * @property {number} totalViolations - Total violations detected
+ * @property {number} criticalViolations - Critical violations detected
+ * @property {number} errorViolations - Error violations detected
+ * @property {number} warningViolations - Warning violations detected
+ * @property {number} averageCheckDuration - Average check duration in ms
+ * @property {Object<string, number>} violationsByType - Violations grouped by type
+ */
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** @type {InvariantConfig} */
 const INVARIANT_CONFIG = {
-    // Controls whether invariant violations should throw errors or just log
+    // Error handling behavior
     throwOnCritical: true,
     throwOnError: false,
     throwOnWarning: false,
@@ -40,60 +93,182 @@ const INVARIANT_CONFIG = {
     maxViolationsPerCheck: 10
 };
 
+/** @type {string[]} */
+const VALID_SEVERITIES = ['critical', 'error', 'warning'];
+
+/** @type {string[]} */
+const REQUIRED_FIGHTER_PROPERTIES = ['id', 'name', 'hp', 'maxHp', 'energy', 'maxEnergy'];
+
+/** @type {string[]} */
+const REQUIRED_BATTLE_STATE_PROPERTIES = ['fighter1', 'fighter2', 'turn', 'events'];
+
+/** @type {number} */
+const MIN_HP = 0;
+
+/** @type {number} */
+const MAX_HP = 100;
+
+/** @type {number} */
+const MIN_ENERGY = 0;
+
+/** @type {number} */
+const MAX_ENERGY = 100;
+
+/** @type {number} */
+const MIN_TURN = 0;
+
+/** @type {number} */
+const MAX_TURN = 1000;
+
+// ============================================================================
+// STATE INVARIANT SYSTEM CLASS
+// ============================================================================
+
 /**
- * Main State Invariant Assertion System
+ * Main State Invariant Assertion System for runtime validation
+ * 
+ * @class
+ * @since 2.0.0
+ * @public
  */
 class StateInvariantSystem {
-    constructor() {
+    /**
+     * Creates a new StateInvariantSystem instance
+     * 
+     * @param {InvariantConfig} [config={}] - Configuration options
+     * 
+     * @throws {TypeError} When config is not an object
+     * 
+     * @since 2.0.0
+     * @public
+     */
+    constructor(config = {}) {
+        if (typeof config !== 'object' || config === null) {
+            throw new TypeError('StateInvariantSystem: config must be an object');
+        }
+
+        /** @type {InvariantConfig} */
+        this.config = { ...INVARIANT_CONFIG, ...config };
+
+        /** @type {InvariantViolation[]} */
         this.violations = [];
+
+        /** @type {number} */
         this.checkCount = 0;
+
+        /** @type {boolean} */
         this.isEnabled = true;
+
+        /** @type {number} */
+        this.totalCheckDuration = 0;
+
+        /** @type {Object<string, number>} */
+        this.violationCounts = {};
+
+        console.debug('[State Invariants] System initialized with config:', this.config);
     }
 
     /**
      * Assert all battle state invariants
-     * @param {Object} battleState - Complete battle state to validate
-     * @param {string} context - Context where validation is called (e.g., "after_move", "battle_start")
+     * 
+     * @param {BattleState} battleState - Complete battle state to validate
+     * @param {string} [context='unknown'] - Context where validation is called
+     * 
+     * @returns {ValidationResult} Validation result with violations and metadata
+     * 
+     * @throws {TypeError} When battleState is not an object
+     * @throws {Error} When critical violations are found and throwOnCritical is true
+     * 
+     * @example
+     * // Validate battle state
+     * const result = invariantSystem.assertBattleStateInvariants(battleState, 'after_move');
+     * if (!result.isValid) {
+     *   console.warn('State validation failed:', result.violations);
+     * }
+     * 
+     * @since 2.0.0
+     * @public
      */
     assertBattleStateInvariants(battleState, context = 'unknown') {
-        if (!this.isEnabled || INVARIANT_CONFIG.skipInvariantsInProduction) {
-            return;
+        // Input validation
+        if (!battleState || typeof battleState !== 'object') {
+            throw new TypeError('assertBattleStateInvariants: battleState must be an object');
+        }
+
+        if (typeof context !== 'string') {
+            throw new TypeError('assertBattleStateInvariants: context must be a string');
+        }
+
+        if (!this.isEnabled || (this.config as InvariantConfig).skipInvariantsInProduction) {
+            return {
+                isValid: true,
+                violations: [],
+                checkDuration: 0,
+                context,
+                checkCount: this.checkCount
+            };
         }
 
         this.checkCount++;
+        /** @type {number} */
+        const startTime = performance.now();
+
+        /** @type {InvariantViolation[]} */
         const violations = [];
 
         try {
-            // Clear previous violations for this check
-            const startTime = performance.now();
-
             // Core state validation
-            if (INVARIANT_CONFIG.enableHealthChecks) {
+            if ((this.config as InvariantConfig).enableHealthChecks) {
                 violations.push(...this.assertFighterHealthInvariants(battleState));
             }
             
-            if (INVARIANT_CONFIG.enableEnergyChecks) {
+            if ((this.config as InvariantConfig).enableEnergyChecks) {
                 violations.push(...this.assertEnergyInvariants(battleState));
             }
             
-            if (INVARIANT_CONFIG.enableStateChecks) {
+            if ((this.config as InvariantConfig).enableStateChecks) {
                 violations.push(...this.assertGeneralStateInvariants(battleState));
             }
             
-            if (INVARIANT_CONFIG.enablePhaseChecks) {
+            if ((this.config as InvariantConfig).enablePhaseChecks) {
                 violations.push(...this.assertPhaseInvariants(battleState));
             }
             
-            if (INVARIANT_CONFIG.enableEnvironmentalChecks) {
+            if ((this.config as InvariantConfig).enableEnvironmentalChecks) {
                 violations.push(...this.assertEnvironmentalInvariants(battleState));
             }
             
-            if (INVARIANT_CONFIG.enableAiChecks) {
+            if ((this.config as InvariantConfig).enableAiChecks) {
                 violations.push(...this.assertAiStateInvariants(battleState));
             }
 
+            // Limit violations if configured
+            if ((this.config as InvariantConfig).maxViolationsPerCheck > 0 && violations.length > (this.config as InvariantConfig).maxViolationsPerCheck) {
+                violations.splice(this.config.maxViolationsPerCheck);
+                violations.push({
+                    invariantName: 'max_violations_exceeded',
+                    message: `Maximum violations per check exceeded (${this.config.maxViolationsPerCheck})`,
+                    actualValue: violations.length,
+                    expectedValue: this.config.maxViolationsPerCheck,
+                    severity: 'warning',
+                    timestamp: Date.now()
+                });
+            }
+
+            /** @type {number} */
             const endTime = performance.now();
+            /** @type {number} */
             const checkDuration = endTime - startTime;
+            this.totalCheckDuration += checkDuration;
+
+            /** @type {ValidationResult} */
+            const result = {
+                isValid: violations.length === 0,
+                violations,
+                checkDuration,
+                context,
+                checkCount: this.checkCount
+            };
 
             // Process violations
             if (violations.length > 0) {
@@ -102,18 +277,40 @@ class StateInvariantSystem {
 
             console.debug(`[State Invariants] Check ${this.checkCount} completed in ${checkDuration.toFixed(2)}ms. Context: ${context}. Violations: ${violations.length}`);
 
+            return result;
+
         } catch (error) {
             console.error('[State Invariants] Invariant checking failed:', error);
-            // Don't let invariant checking break the game
+            
+            return {
+                isValid: false,
+                violations: [{
+                    invariantName: 'invariant_check_error',
+                    message: `Invariant checking failed: ${error.message}`,
+                    actualValue: error,
+                    expectedValue: 'successful check',
+                    severity: 'critical',
+                    timestamp: Date.now()
+                }],
+                checkDuration: performance.now() - startTime,
+                context,
+                checkCount: this.checkCount
+            };
         }
     }
 
     /**
      * Validate fighter health and HP-related invariants
-     * @param {Object} battleState - Battle state
-     * @returns {InvariantViolation[]} List of violations
+     * 
+     * @param {BattleState} battleState - Battle state to validate
+     * 
+     * @returns {InvariantViolation[]} List of health-related violations
+     * 
+     * @private
+     * @since 2.0.0
      */
     assertFighterHealthInvariants(battleState) {
+        /** @type {InvariantViolation[]} */
         const violations = [];
 
         if (!battleState.fighter1 || !battleState.fighter2) {
@@ -122,46 +319,52 @@ class StateInvariantSystem {
                 message: 'Both fighters must exist',
                 actualValue: { f1: !!battleState.fighter1, f2: !!battleState.fighter2 },
                 expectedValue: { f1: true, f2: true },
-                severity: 'critical'
+                severity: 'critical',
+                timestamp: Date.now()
             });
             return violations; // Can't check further without fighters
         }
 
+        /** @type {Fighter[]} */
         const fighters = [battleState.fighter1, battleState.fighter2];
 
         fighters.forEach((fighter, index) => {
+            /** @type {string} */
             const fighterName = `fighter${index + 1}`;
 
             // HP bounds checking
-            if (typeof fighter.hp !== 'number' || fighter.hp < 0 || fighter.hp > 100) {
+            if (typeof fighter.hp !== 'number' || fighter.hp < MIN_HP || fighter.hp > MAX_HP) {
                 violations.push({
                     invariantName: 'hp_bounds',
-                    message: `${fighterName} HP must be between 0 and 100`,
+                    message: `${fighterName} HP must be between ${MIN_HP} and ${MAX_HP}`,
                     actualValue: fighter.hp,
-                    expectedValue: '0 <= hp <= 100',
-                    severity: 'critical'
+                    expectedValue: `${MIN_HP} <= hp <= ${MAX_HP}`,
+                    severity: 'critical',
+                    timestamp: Date.now()
                 });
             }
 
             // Max HP consistency
-            if (typeof fighter.maxHp !== 'number' || fighter.maxHp <= 0 || fighter.maxHp > 100) {
+            if (typeof fighter.maxHp !== 'number' || fighter.maxHp <= 0 || fighter.maxHp > MAX_HP) {
                 violations.push({
                     invariantName: 'max_hp_valid',
-                    message: `${fighterName} maxHp must be a positive number <= 100`,
+                    message: `${fighterName} maxHp must be a positive number <= ${MAX_HP}`,
                     actualValue: fighter.maxHp,
-                    expectedValue: '0 < maxHp <= 100',
-                    severity: 'error'
+                    expectedValue: `0 < maxHp <= ${MAX_HP}`,
+                    severity: 'error',
+                    timestamp: Date.now()
                 });
             }
 
             // HP should not exceed maxHp
-            if (fighter.hp > fighter.maxHp) {
+            if (typeof fighter.hp === 'number' && typeof fighter.maxHp === 'number' && fighter.hp > fighter.maxHp) {
                 violations.push({
                     invariantName: 'hp_not_exceed_max',
                     message: `${fighterName} HP cannot exceed maxHp`,
                     actualValue: { hp: fighter.hp, maxHp: fighter.maxHp },
                     expectedValue: 'hp <= maxHp',
-                    severity: 'critical'
+                    severity: 'critical',
+                    timestamp: Date.now()
                 });
             }
         });
@@ -419,21 +622,21 @@ class StateInvariantSystem {
             switch (violation.severity) {
                 case 'critical':
                     console.error(logMessage, { violation, battleState });
-                    if (INVARIANT_CONFIG.throwOnCritical) {
+                    if (this.config.throwOnCritical) {
                         throw new Error(`Critical invariant violation: ${violation.message}`);
                     }
                     break;
                 
                 case 'error':
                     console.error(logMessage, { violation });
-                    if (INVARIANT_CONFIG.throwOnError) {
+                    if (this.config.throwOnError) {
                         throw new Error(`Invariant violation: ${violation.message}`);
                     }
                     break;
                 
                 case 'warning':
                     console.warn(logMessage, { violation });
-                    if (INVARIANT_CONFIG.throwOnWarning) {
+                    if (this.config.throwOnWarning) {
                         throw new Error(`Invariant warning: ${violation.message}`);
                     }
                     break;

@@ -1,676 +1,853 @@
 /**
- * @fileoverview Centralized State Manager for State-Driven UI
- * @description Implements centralized state object, unified rendering, and RAF batching with efficient rendering
- * @version 2.0
+ * @fileoverview Avatar Battle Arena - Centralized State Management
+ * @description Manages global application state with efficient rendering and UI synchronization
+ * @version 2.0.0
  */
 
 'use strict';
 
 //# sourceURL=state_manager.js
 
-import { 
-    deepEqual, 
-    shallowEqual, 
-    renderIfChanged,
-    batchDOMOperations,
-    batchAppendElements,
-    batchReplaceContent,
-    createDebouncedStateUpdater,
-    createDebouncedResizeHandler,
-    performanceMonitor
-} from './utils_efficient_rendering.js';
+// --- TYPE IMPORTS ---
+/**
+ * @typedef {import('./types.js').GameState} GameState
+ * @typedef {import('./types.js').UIState} UIState
+ * @typedef {import('./types.js').BattleState} BattleState
+ * @typedef {import('./types.js').Fighter} Fighter
+ * @typedef {import('./types.js').BattleResult} BattleResult
+ * @typedef {import('./types.js').SelectionState} SelectionState
+ * @typedef {import('./types.js').RenderState} RenderState
+ * @typedef {import('./types.js').AnimationQueueItem} AnimationQueueItem
+ */
 
-// === CENTRALIZED GAME STATE ===
-let gameState = {
-    battle: {
-        isActive: false,
-        currentTurn: 0,
-        phase: 'PRE_BATTLE',
-        winnerId: null,
-        loserId: null,
-        isDraw: false,
-        battleLog: []
-    },
-    fighters: {
-        fighter1: null,
-        fighter2: null
-    },
+import { 
+    populateCharacterGrids,
+    updateCharacterCardStates,
+    getCharacterSelectionState 
+} from './ui_character-selection.js';
+
+import { 
+    populateLocationGrid,
+    updateLocationCardStates,
+    getLocationSelectionState 
+} from './ui_location-selection.js';
+
+import { 
+    renderCharacterSelection,
+    setupCharacterSelectionEvents,
+    updateCharacterSelection 
+} from './ui_character-selection_efficient.js';
+
+import { 
+    renderLocationSelection,
+    setupLocationSelectionEvents,
+    updateLocationSelection 
+} from './ui_location-selection_efficient.js';
+
+import { 
+    hideSimulationContainer,
+    showSimulationContainer,
+    clearAnimatedOutput,
+    getAnimatedLogOutput 
+} from './simulation_dom_manager.js';
+
+import { 
+    setAnimationQueue,
+    setRunning,
+    setBattleResult,
+    resetState as resetSimulationState 
+} from './simulation_state_manager.js';
+
+import { 
+    setSimulationMode,
+    getSimulationMode 
+} from './simulation_mode_manager.js';
+
+import { transformEventsToAnimationQueue } from './battle_log_transformer.js';
+import { renderIfChanged } from './utils_efficient_rendering.js';
+
+/**
+ * @typedef {Object} StateManagerOptions
+ * @description Configuration options for state manager
+ * @property {boolean} [enableDebugLogging=false] - Enable debug logging
+ * @property {boolean} [enablePerformanceTracking=false] - Enable performance tracking
+ * @property {number} [renderThrottleMs=16] - Render throttle in milliseconds
+ */
+
+// ============================================================================
+// GLOBAL STATE CONTAINER
+// ============================================================================
+
+/** @type {GameState} */
+let globalState = {
     ui: {
-        mode: 'instant', // 'animated' or 'instant'
-        loading: false,
-        resultsVisible: false,
-        simulationRunning: false,
-        momentum: {
-            fighter1: 0,
-            fighter2: 0
+        currentScreen: 'selection',
+        selection: {
+            fighter1Id: '',
+            fighter2Id: '',
+            locationId: '',
+            timeOfDay: 'day',
+            gameMode: 'battle',
+            emotionalMode: false
         },
-        escalation: {
-            fighter1: { score: 0, state: 'Normal' },
-            fighter2: { score: 0, state: 'Normal' }
-        }
+        rendering: {
+            needsUpdate: false,
+            lastRendered: {},
+            dirtyComponents: [],
+            lastRenderTime: 0,
+            performance: {
+                averageRenderTime: 0,
+                maxRenderTime: 0,
+                totalRenders: 0,
+                skippedRenders: 0,
+                componentTimes: {}
+            }
+        },
+        animation: {
+            queue: [],
+            isPlaying: false,
+            currentIndex: 0,
+            speed: 'normal',
+            isPaused: false
+        },
+        interaction: {
+            isInteracting: false,
+            activeElement: '',
+            disabledElements: {},
+            history: [],
+            preferences: {}
+        },
+        cache: {}
     },
-    environment: {
-        locationId: null,
-        damageLevel: 0,
-        impacts: []
+    config: {
+        debugMode: false,
+        performanceTracking: false,
+        logLevel: 'info',
+        maxTurns: 50,
+        deterministicRandom: false,
+        customSettings: {}
     },
-    simulation: {
-        animationQueue: [],
-        currentAnimation: null,
-        isRunning: false
-    }
+    cache: {}
 };
 
-// === RENDER BATCHING WITH RAF AND STATE COMPARISON ===
-let pendingRender = false;
-let renderScheduled = false;
-let previousStateSnapshot = null;
+/** @type {boolean} */
+let isInitialized = false;
+
+/** @type {Function[]} */
+const stateChangeListeners = [];
+
+// ============================================================================
+// STATE ACCESS METHODS
+// ============================================================================
 
 /**
- * Schedules a render using requestAnimationFrame with state comparison
+ * Gets the current global state
+ * 
+ * @returns {GameState} Current game state
+ * 
+ * @example
+ * // Access current state
+ * const state = getGlobalState();
+ * console.log(state.ui.currentScreen); // 'selection'
+ * 
+ * @since 2.0.0
+ * @public
  */
-function scheduleRender() {
-    if (renderScheduled) return;
-    
-    renderScheduled = true;
-    requestAnimationFrame(() => {
-        const startTime = performanceMonitor.startTiming();
-        
-        // Only render if state has actually changed
-        if (previousStateSnapshot === null || !deepEqual(previousStateSnapshot, gameState)) {
-            render();
-            previousStateSnapshot = JSON.parse(JSON.stringify(gameState)); // Deep clone for comparison
-            performanceMonitor.endTiming(startTime, false);
-        } else {
-            performanceMonitor.endTiming(startTime, true); // Render was skipped
-        }
-        
-        renderScheduled = false;
-    });
+export function getGlobalState() {
+    return globalState;
 }
 
 /**
- * Central render function that updates DOM based on state
+ * Gets the UI state portion of global state
+ * 
+ * @returns {UIState} Current UI state
+ * 
+ * @example
+ * // Access UI state
+ * const uiState = getUIState();
+ * console.log(uiState.selection.fighter1Id);
+ * 
+ * @since 2.0.0
+ * @public
  */
-function render() {
-    renderBattleStatus();
-    renderFighterStats();
-    renderUIControls();
-    renderSimulationState();
-    renderEnvironment();
+export function getUIState() {
+    return globalState.ui;
 }
 
 /**
- * Renders battle status components
+ * Gets current character and location selections
+ * 
+ * @returns {SelectionState} Current selection state
+ * 
+ * @example
+ * // Get current selections
+ * const selections = getSelectionState();
+ * console.log(selections.fighter1Id, selections.locationId);
+ * 
+ * @since 2.0.0
+ * @public
  */
-function renderBattleStatus() {
-    const { battle } = gameState;
-    
-    // Winner display
-    const winnerNameEl = document.getElementById('winner-name');
-    const winProbabilityEl = document.getElementById('win-probability'); 
-    
-    if (winnerNameEl) {
-        if (battle.isDraw) {
-            winnerNameEl.textContent = 'A Stalemate!';
-        } else if (battle.winnerId) {
-            const winnerName = gameState.fighters[`fighter${battle.winnerId === gameState.fighters.fighter1?.id ? '1' : '2'}`]?.name || 'Unknown';
-            winnerNameEl.textContent = `${winnerName} Wins!`;
-        } else {
-            winnerNameEl.textContent = 'Battle in Progress...';
-        }
-    }
-    
-    if (winProbabilityEl) {
-        if (battle.isDraw) {
-            winProbabilityEl.textContent = 'The battle ends in a draw.';
-        } else if (battle.winnerId) {
-            winProbabilityEl.textContent = 'A decisive victory.';
-        } else {
-            winProbabilityEl.textContent = '';
-        }
-    }
+export function getSelectionState() {
+    return globalState.ui.selection;
 }
 
-/**
- * Renders fighter statistics
- */
-function renderFighterStats() {
-    const { fighters, ui } = gameState;
-    
-    // Momentum displays with CSS classes
-    const f1MomentumEl = document.getElementById('fighter1-momentum-value');
-    const f2MomentumEl = document.getElementById('fighter2-momentum-value');
-    
-    if (f1MomentumEl) {
-        const f1Momentum = ui.momentum.fighter1;
-        const displayValue = typeof f1Momentum === 'number' && !isNaN(f1Momentum) ? f1Momentum : 'N/A';
-        f1MomentumEl.textContent = String(displayValue);
-        
-        // Apply momentum CSS classes
-        f1MomentumEl.classList.remove('momentum-positive', 'momentum-negative', 'momentum-neutral');
-        if (typeof f1Momentum === 'number' && !isNaN(f1Momentum)) {
-            if (f1Momentum > 0) f1MomentumEl.classList.add('momentum-positive');
-            else if (f1Momentum < 0) f1MomentumEl.classList.add('momentum-negative');
-            else f1MomentumEl.classList.add('momentum-neutral');
-        }
-    }
-    
-    if (f2MomentumEl) {
-        const f2Momentum = ui.momentum.fighter2;
-        const displayValue = typeof f2Momentum === 'number' && !isNaN(f2Momentum) ? f2Momentum : 'N/A';
-        f2MomentumEl.textContent = String(displayValue);
-        
-        // Apply momentum CSS classes
-        f2MomentumEl.classList.remove('momentum-positive', 'momentum-negative', 'momentum-neutral');
-        if (typeof f2Momentum === 'number' && !isNaN(f2Momentum)) {
-            if (f2Momentum > 0) f2MomentumEl.classList.add('momentum-positive');
-            else if (f2Momentum < 0) f2MomentumEl.classList.add('momentum-negative');
-            else f2MomentumEl.classList.add('momentum-neutral');
-        }
-    }
-    
-    // Escalation displays
-    const f1EscalationEl = document.getElementById('fighter1-escalation-state');
-    const f2EscalationEl = document.getElementById('fighter2-escalation-state');
-    const f1ScoreEl = document.getElementById('fighter1-incapacitation-score');
-    const f2ScoreEl = document.getElementById('fighter2-incapacitation-score');
-    
-    if (f1EscalationEl) {
-        f1EscalationEl.textContent = `Escalation: ${ui.escalation.fighter1.state}`;
-        f1EscalationEl.className = 'escalation-status'; // Reset classes
-        
-        // Apply escalation state classes
-        const state = ui.escalation.fighter1.state;
-        if (state === 'Pressured') {
-            f1EscalationEl.classList.add('escalation-pressured');
-        } else if (state === 'Severely Incapacitated') {
-            f1EscalationEl.classList.add('escalation-severe');
-        } else if (state === 'Terminal Collapse') {
-            f1EscalationEl.classList.add('escalation-terminal');
-        } else {
-            f1EscalationEl.classList.add('escalation-normal');
-        }
-    }
-    
-    if (f2EscalationEl) {
-        f2EscalationEl.textContent = `Escalation: ${ui.escalation.fighter2.state}`;
-        f2EscalationEl.className = 'escalation-status'; // Reset classes
-        
-        // Apply escalation state classes
-        const state = ui.escalation.fighter2.state;
-        if (state === 'Pressured') {
-            f2EscalationEl.classList.add('escalation-pressured');
-        } else if (state === 'Severely Incapacitated') {
-            f2EscalationEl.classList.add('escalation-severe');
-        } else if (state === 'Terminal Collapse') {
-            f2EscalationEl.classList.add('escalation-terminal');
-        } else {
-            f2EscalationEl.classList.add('escalation-normal');
-        }
-    }
-    
-    if (f1ScoreEl) f1ScoreEl.textContent = `Incap. Score: ${ui.escalation.fighter1.score !== undefined ? ui.escalation.fighter1.score.toFixed(1) : 'N/A'}`;
-    if (f2ScoreEl) f2ScoreEl.textContent = `Incap. Score: ${ui.escalation.fighter2.score !== undefined ? ui.escalation.fighter2.score.toFixed(1) : 'N/A'}`;
-}
+// ============================================================================
+// STATE UPDATE METHODS
+// ============================================================================
 
 /**
- * Renders UI control states
+ * Updates the global state with new values
+ * 
+ * @param {Partial<GameState>} newState - Partial state updates to apply
+ * @param {boolean} [triggerRender=true] - Whether to trigger UI re-render
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When newState is not an object
+ * 
+ * @example
+ * // Update UI state
+ * updateGameState({
+ *   ui: { currentScreen: 'battle' }
+ * });
+ * 
+ * @since 2.0.0
+ * @public
  */
-function renderUIControls() {
-    const { ui } = gameState;
-    
-    // Battle button state
-    const battleBtn = document.getElementById('battleBtn');
-    if (battleBtn) {
-        battleBtn.disabled = ui.loading || ui.simulationRunning;
+export function updateGameState(newState, triggerRender = true) {
+    // Input validation
+    if (!newState || typeof newState !== 'object') {
+        throw new TypeError('updateGameState: newState must be an object');
     }
     
-    // Results section visibility
-    const resultsSection = document.getElementById('results');
-    if (resultsSection) {
-        if (ui.resultsVisible) {
-            console.log('[STATE] Showing results dialog...');
-            // Handle dialog element properly
-            if (resultsSection.tagName.toLowerCase() === 'dialog') {
-                try {
-                    resultsSection.showModal();
-                    console.log('[STATE] Dialog showModal() called successfully');
-                } catch (err) {
-                    console.error('[STATE] Error calling showModal():', err);
-                    resultsSection.style.display = 'block';
-                }
-            } else {
-                resultsSection.style.display = 'block';
-                void resultsSection.offsetWidth; // Force reflow
-                resultsSection.classList.add('show');
-            }
-        } else {
-            if (resultsSection.tagName.toLowerCase() === 'dialog') {
-                resultsSection.close();
-            } else {
-                resultsSection.style.display = 'none';
-                resultsSection.classList.remove('show');
-            }
-        }
+    if (typeof triggerRender !== 'boolean') {
+        throw new TypeError('updateGameState: triggerRender must be a boolean');
+    }
+
+    console.debug('[State Manager] Updating global state:', newState);
+
+    /** @type {GameState} */
+    const oldState = JSON.parse(JSON.stringify(globalState));
+    
+    // Deep merge new state
+    globalState = deepMerge(globalState, newState);
+    
+    // Track performance
+    if (globalState.config.performanceTracking) {
+        /** @type {number} */
+        const updateTime = performance.now();
+        console.debug(`[State Manager] State update took ${updateTime}ms`);
     }
     
-    // Loading spinner
-    const loadingSpinner = document.getElementById('loading');
-    if (loadingSpinner) {
-        if (ui.loading) {
-            loadingSpinner.classList.remove('hidden');
-        } else {
-            loadingSpinner.classList.add('hidden');
-        }
-    }
+    // Notify listeners
+    notifyStateChangeListeners(oldState, globalState);
     
-    // Battle results container
-    const battleResultsContainer = document.getElementById('battle-results');
-    if (battleResultsContainer) {
-        if (ui.resultsVisible) {
-            battleResultsContainer.classList.remove('hidden');
-        } else {
-            battleResultsContainer.classList.add('hidden');
-        }
-    }
-    
-    // VS divider clash animation
-    const vsDivider = document.getElementById('vsDivider');
-    if (vsDivider) {
-        if (ui.loading) {
-            vsDivider.classList.add('clash');
-        } else {
-            vsDivider.classList.remove('clash');
-        }
-    }
-    
-    // Animated log output for loading
-    if (ui.mode === 'animated' && ui.loading) {
-        const animatedLogOutput = document.getElementById('animated-log-output');
-        if (animatedLogOutput) {
-            animatedLogOutput.innerHTML = `<div class="loading"><div class="spinner"></div><p>Preparing animated simulation...</p></div>`;
-            const simContainer = animatedLogOutput.closest('.simulation-mode-container');
-            if (simContainer) simContainer.classList.remove('hidden');
-        }
+    // Trigger render if requested
+    if (triggerRender) {
+        requestRender();
     }
 }
 
 /**
- * Renders simulation state
+ * Updates UI state specifically
+ * 
+ * @param {Partial<UIState>} uiUpdates - UI state updates to apply
+ * @param {boolean} [triggerRender=true] - Whether to trigger UI re-render
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When uiUpdates is not an object
+ * 
+ * @example
+ * // Update UI selection
+ * updateUIState({
+ *   selection: { fighter1Id: 'aang' }
+ * });
+ * 
+ * @since 2.0.0
+ * @public
  */
-function renderSimulationState() {
-    const { simulation, ui, battle } = gameState;
-    
-    const simulationContainer = document.getElementById('simulation-mode-container');
-    if (simulationContainer) {
-        // Show container for animated mode when running OR when results are available,
-        // AND for instant mode when results are available
-        const shouldShow = (ui.mode === 'animated' && (simulation.isRunning || (ui.resultsVisible && battle.battleLog && battle.battleLog.length > 0))) || 
-                          (ui.mode === 'instant' && ui.resultsVisible && battle.battleLog && battle.battleLog.length > 0);
-        
-        if (shouldShow) {
-            simulationContainer.classList.remove('hidden');
-            console.log('[STATE] Simulation container shown for mode:', ui.mode);
-            
-            // For both modes, populate the log output with the battle results when available
-            if (ui.resultsVisible && battle.battleLog && battle.battleLog.length > 0) {
-                const animatedLogOutput = document.getElementById('animated-log-output');
-                if (animatedLogOutput) {
-                    // Transform battle log to HTML for display
-                    import('./log_to_html.js').then(({ transformEventsToHtmlLog }) => {
-                        const htmlLog = transformEventsToHtmlLog(battle.battleLog);
-                        animatedLogOutput.innerHTML = htmlLog || '<p>No battle log available.</p>';
-                        console.log(`[STATE] ${ui.mode} mode battle log populated in simulation container`);
-                    }).catch(err => {
-                        console.warn(`[STATE] Could not load log_to_html for ${ui.mode} mode:`, err);
-                        animatedLogOutput.innerHTML = '<p>Battle completed. Check the results dialog for details.</p>';
-                    });
-                }
-            }
-        } else {
-            simulationContainer.classList.add('hidden');
-        }
+export function updateUIState(uiUpdates, triggerRender = true) {
+    // Input validation
+    if (!uiUpdates || typeof uiUpdates !== 'object') {
+        throw new TypeError('updateUIState: uiUpdates must be an object');
+    }
+
+    updateGameState({ ui: uiUpdates }, triggerRender);
+}
+
+/**
+ * Updates character selection in the state
+ * 
+ * @param {string} fighterId - Fighter identifier
+ * @param {string} slotKey - Selection slot ('fighter1Id' or 'fighter2Id')
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When parameters are not strings
+ * @throws {Error} When slotKey is invalid
+ * 
+ * @example
+ * // Select first fighter
+ * updateCharacterSelection('aang-airbending-only', 'fighter1Id');
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function updateCharacterSelection(fighterId, slotKey) {
+    // Input validation
+    if (typeof fighterId !== 'string') {
+        throw new TypeError('updateCharacterSelection: fighterId must be a string');
     }
     
-    const cancelBtn = document.getElementById('cancel-simulation');
-    if (cancelBtn) {
-        if (simulation.isRunning) {
-            cancelBtn.style.display = 'block';
-        } else {
-            cancelBtn.style.display = 'none';
-        }
+    if (typeof slotKey !== 'string') {
+        throw new TypeError('updateCharacterSelection: slotKey must be a string');
     }
-}
-
-/**
- * Renders environment state
- */
-function renderEnvironment() {
-    const { environment } = gameState;
     
-    // Environment damage display would go here
-    // This is a placeholder for environmental state rendering
-}
-
-// === STATE MUTATION FUNCTIONS ===
-
-// === DEBOUNCED STATE UPDATES ===
-const debouncedScheduleRender = createDebouncedStateUpdater(scheduleRender, 100);
-
-/**
- * Updates game state and triggers render
- * @param {Object} updates - State updates to apply
- * @param {boolean} immediate - Skip debouncing for immediate render
- */
-export function updateGameState(updates, immediate = false) {
-    // Deep merge updates into gameState
-    Object.keys(updates).forEach(key => {
-        if (typeof updates[key] === 'object' && updates[key] !== null && !Array.isArray(updates[key])) {
-            gameState[key] = { ...gameState[key], ...updates[key] };
-        } else {
-            gameState[key] = updates[key];
-        }
-    });
-    
-    // Use debounced render for rapid state changes, immediate for critical updates
-    if (immediate) {
-        scheduleRender();
-    } else {
-        debouncedScheduleRender();
+    if (!['fighter1Id', 'fighter2Id'].includes(slotKey)) {
+        throw new Error(`updateCharacterSelection: slotKey must be 'fighter1Id' or 'fighter2Id', received: ${slotKey}`);
     }
-}
 
-/**
- * Gets current game state (read-only)
- * @returns {Object} Current game state
- */
-export function getGameState() {
-    return { ...gameState };
-}
+    console.debug(`[State Manager] Updating character selection: ${slotKey} = ${fighterId}`);
 
-/**
- * Resets game state to initial values
- */
-export function resetGameState() {
-    gameState = {
-        battle: {
-            isActive: false,
-            currentTurn: 0,
-            phase: 'PRE_BATTLE',
-            winnerId: null,
-            loserId: null,
-            isDraw: false,
-            battleLog: []
-        },
-        fighters: {
-            fighter1: null,
-            fighter2: null
-        },
-        ui: {
-            mode: 'instant',
-            loading: false,
-            resultsVisible: false,
-            simulationRunning: false,
-            momentum: {
-                fighter1: 0,
-                fighter2: 0
-            },
-            escalation: {
-                fighter1: { score: 0, state: 'Normal' },
-                fighter2: { score: 0, state: 'Normal' }
-            }
-        },
-        environment: {
-            locationId: null,
-            damageLevel: 0,
-            impacts: []
-        },
-        simulation: {
-            animationQueue: [],
-            currentAnimation: null,
-            isRunning: false
-        }
-    };
-    
-    scheduleRender();
-}
-
-/**
- * Forces an immediate render (for initialization)
- */
-export function forceRender() {
-    render();
-}
-
-// === LEGACY COMPATIBILITY FUNCTIONS ===
-
-/**
- * Updates momentum display (compatibility function)
- * @param {string} fighterKey - 'fighter1' or 'fighter2'
- * @param {number} momentum - Momentum value
- */
-export function updateMomentumDisplay(fighterKey, momentum) {
-    updateGameState({
-        ui: {
-            momentum: {
-                [fighterKey]: momentum
-            }
+    updateUIState({
+        selection: {
+            ...globalState.ui.selection,
+            [slotKey]: fighterId
         }
     });
 }
 
 /**
- * Updates escalation display (compatibility function)
- * @param {string} fighterKey - 'fighter1' or 'fighter2' 
- * @param {number} score - Incapacitation score
- * @param {string} state - Escalation state
+ * Updates location selection in the state
+ * 
+ * @param {string} locationId - Location identifier
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When locationId is not a string
+ * 
+ * @example
+ * // Select battle location
+ * updateLocationSelection('fire-nation-capital');
+ * 
+ * @since 2.0.0
+ * @public
  */
-export function updateEscalationDisplay(fighterKey, score, state) {
-    updateGameState({
-        ui: {
-            escalation: {
-                [fighterKey]: { score, state }
-            }
+export function updateLocationSelection(locationId) {
+    // Input validation
+    if (typeof locationId !== 'string') {
+        throw new TypeError('updateLocationSelection: locationId must be a string');
+    }
+
+    console.debug(`[State Manager] Updating location selection: ${locationId}`);
+
+    updateUIState({
+        selection: {
+            ...globalState.ui.selection,
+            locationId: locationId
         }
     });
 }
 
+// ============================================================================
+// UI STATE MANAGEMENT
+// ============================================================================
+
 /**
- * Shows loading state (compatibility function)
- * @param {string} mode - Simulation mode
+ * Shows the loading state for battle simulation
+ * 
+ * @param {string} mode - Simulation mode ('animated', 'instant', etc.)
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When mode is not a string
+ * 
+ * @example
+ * // Show loading for animated mode
+ * showLoadingState('animated');
+ * 
+ * @since 2.0.0
+ * @public
  */
 export function showLoadingState(mode) {
-    updateGameState({
-        ui: {
-            mode,
-            loading: true,
-            resultsVisible: false
+    // Input validation
+    if (typeof mode !== 'string') {
+        throw new TypeError('showLoadingState: mode must be a string');
+    }
+
+    console.debug(`[State Manager] Showing loading state for mode: ${mode}`);
+
+    updateUIState({
+        currentScreen: 'loading',
+        interaction: {
+            ...globalState.ui.interaction,
+            isInteracting: true,
+            disabledElements: {
+                battleBtn: true,
+                characterSelection: true,
+                locationSelection: true
+            }
         }
     });
+
+    // Show simulation container for animated mode
+    if (mode === 'animated') {
+        showSimulationContainer();
+        setRunning(true);
+    }
 }
 
 /**
- * Shows results state (compatibility function)
- * @param {Object} battleResult - Battle result data
- * @param {string} mode - Simulation mode
+ * Shows the results state after battle completion
+ * 
+ * @param {BattleResult} battleResult - Complete battle result
+ * @param {string} mode - Simulation mode that was used
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When required parameters are invalid
+ * 
+ * @example
+ * // Show battle results
+ * showResultsState(battleResult, 'animated');
+ * 
+ * @since 2.0.0
+ * @public
  */
 export function showResultsState(battleResult, mode) {
-    if (!battleResult || !battleResult.finalState) {
-        console.error("Invalid battleResult passed to showResultsState", battleResult);
-        updateGameState({
-            ui: {
-                loading: false,
-                simulationRunning: false,
-                resultsVisible: false
-            },
-            battle: {
-                winnerId: null,
-                isDraw: false
+    // Input validation
+    if (!battleResult || typeof battleResult !== 'object') {
+        throw new TypeError('showResultsState: battleResult must be an object');
+    }
+    
+    if (typeof mode !== 'string') {
+        throw new TypeError('showResultsState: mode must be a string');
+    }
+
+    console.debug('[State Manager] Showing results state');
+
+    // Store battle result in simulation state
+    setBattleResult(battleResult);
+
+    // Process animations for animated mode
+    if (mode === 'animated' && battleResult.log) {
+        /** @type {AnimationQueueItem[]} */
+        const animationQueue = transformEventsToAnimationQueue(battleResult.log);
+        setAnimationQueue(animationQueue);
+        
+        updateUIState({
+            animation: {
+                ...globalState.ui.animation,
+                queue: animationQueue,
+                isPlaying: false,
+                currentIndex: 0
             }
         });
+    }
+
+    updateUIState({
+        currentScreen: 'results',
+        interaction: {
+            ...globalState.ui.interaction,
+            isInteracting: false,
+            disabledElements: {}
+        }
+    });
+
+    setRunning(false);
+}
+
+/**
+ * Resets the global state to initial values
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * // Reset application state
+ * resetGameState();
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function resetGameState() {
+    console.debug('[State Manager] Resetting global state');
+
+    globalState = {
+        ui: {
+            currentScreen: 'selection',
+            selection: {
+                fighter1Id: '',
+                fighter2Id: '',
+                locationId: '',
+                timeOfDay: 'day',
+                gameMode: 'battle',
+                emotionalMode: false
+            },
+            rendering: {
+                needsUpdate: true,
+                lastRendered: {},
+                dirtyComponents: [],
+                lastRenderTime: 0,
+                performance: {
+                    averageRenderTime: 0,
+                    maxRenderTime: 0,
+                    totalRenders: 0,
+                    skippedRenders: 0,
+                    componentTimes: {}
+                }
+            },
+            animation: {
+                queue: [],
+                isPlaying: false,
+                currentIndex: 0,
+                speed: 'normal',
+                isPaused: false
+            },
+            interaction: {
+                isInteracting: false,
+                activeElement: '',
+                disabledElements: {},
+                history: [],
+                preferences: {}
+            },
+            cache: {}
+        },
+        config: {
+            debugMode: false,
+            performanceTracking: false,
+            logLevel: 'info',
+            maxTurns: 50,
+            deterministicRandom: false,
+            customSettings: {}
+        },
+        cache: {}
+    };
+
+    // Reset simulation state
+    resetSimulationState();
+    
+    // Trigger full re-render
+    requestRender();
+}
+
+// ============================================================================
+// RENDERING MANAGEMENT
+// ============================================================================
+
+/**
+ * Requests a UI render on the next frame
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * // Request render after state change
+ * requestRender();
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function requestRender() {
+    if (!globalState.ui.rendering.needsUpdate) {
+        globalState.ui.rendering.needsUpdate = true;
+        requestAnimationFrame(performRender);
+    }
+}
+
+/**
+ * Forces an immediate render regardless of state changes
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * // Force immediate render
+ * forceRender();
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function forceRender() {
+    globalState.ui.rendering.needsUpdate = true;
+    performRender();
+}
+
+/**
+ * Performs the actual UI rendering
+ * 
+ * @returns {void}
+ * 
+ * @private
+ * @since 2.0.0
+ */
+function performRender() {
+    if (!globalState.ui.rendering.needsUpdate) {
         return;
     }
 
-    // Update fighter momentum and escalation from battle results
-    const momentum1 = battleResult.finalState?.fighter1?.momentum || 0;
-    const momentum2 = battleResult.finalState?.fighter2?.momentum || 0;
-    const escalation1Score = battleResult.finalState?.fighter1?.incapacitationScore || 0;
-    const escalation1State = battleResult.finalState?.fighter1?.escalationState || 'Normal';
-    const escalation2Score = battleResult.finalState?.fighter2?.incapacitationScore || 0;
-    const escalation2State = battleResult.finalState?.fighter2?.escalationState || 'Normal';
+    /** @type {number} */
+    const startTime = performance.now();
 
-    updateGameState({
-        battle: {
-            isActive: false,
-            winnerId: battleResult.winnerId,
-            loserId: battleResult.loserId,
-            isDraw: battleResult.isDraw,
-            battleLog: battleResult.log
-        },
-        fighters: {
-            fighter1: battleResult.finalState?.fighter1,
-            fighter2: battleResult.finalState?.fighter2
-        },
-        ui: {
-            mode,
-            loading: false,
-            resultsVisible: true,
-            simulationRunning: false,
-            momentum: {
-                fighter1: momentum1,
-                fighter2: momentum2
-            },
-            escalation: {
-                fighter1: { score: escalation1Score, state: escalation1State },
-                fighter2: { score: escalation2Score, state: escalation2State }
+    try {
+        console.debug('[State Manager] Performing UI render');
+
+        // Track render attempt
+        globalState.ui.rendering.performance.totalRenders++;
+
+        // Get current state
+        /** @type {UIState} */
+        const currentUIState = globalState.ui;
+        /** @type {Object} */
+        const lastRendered = globalState.ui.rendering.lastRendered;
+
+        // Check if character selection needs update
+        /** @type {boolean} */
+        const characterSelectionChanged = renderIfChanged(
+            lastRendered.characterSelection,
+            currentUIState.selection,
+            () => {
+                renderCharacterSelection(
+                    currentUIState.selection.fighter1Id,
+                    currentUIState.selection.fighter2Id
+                );
+                return true;
             }
-        },
-        environment: {
-            locationId: battleResult.locationId,
-            damageLevel: battleResult.environmentState?.damageLevel || 0
-        }
-    });
+        );
 
-    // Handle additional UI elements that need special handling
-    handleBattleLogDisplay(battleResult, mode);
-    
-    // Populate winner information
-    const winnerNameEl = document.getElementById('winner-name');
-    const winProbabilityEl = document.getElementById('win-probability');
-    if (winnerNameEl && winProbabilityEl) {
-        if (battleResult.isDraw) {
-            winnerNameEl.textContent = 'Draw';
-            winProbabilityEl.textContent = 'The battle ended in a stalemate';
-        } else {
-            // Get character data for winner display
-            import('./data_characters.js').then(({ characters }) => {
-                const winnerName = characters[battleResult.winnerId]?.name || battleResult.winnerId;
-                winnerNameEl.textContent = `${winnerName} Wins!`;
-                winProbabilityEl.textContent = `Victory achieved through superior strategy`;
-                console.log('[STATE] Winner information populated:', winnerName);
-            }).catch(err => {
-                console.warn('[STATE] Could not load character data:', err);
-                winnerNameEl.textContent = `${battleResult.winnerId} Wins!`;
-                winProbabilityEl.textContent = `Victory achieved`;
-            });
+        // Check if location selection needs update  
+        /** @type {boolean} */
+        const locationSelectionChanged = renderIfChanged(
+            lastRendered.locationSelection,
+            { 
+                locationId: currentUIState.selection.locationId,
+                timeOfDay: currentUIState.selection.timeOfDay 
+            },
+            () => {
+                renderLocationSelection(currentUIState.selection.locationId);
+                return true;
+            }
+        );
+
+        // Update render tracking
+        if (characterSelectionChanged) {
+            lastRendered.characterSelection = { ...currentUIState.selection };
         }
-    } else {
-        console.warn('[STATE] Winner display elements not found');
+        
+        if (locationSelectionChanged) {
+            lastRendered.locationSelection = {
+                locationId: currentUIState.selection.locationId,
+                timeOfDay: currentUIState.selection.timeOfDay
+            };
+        }
+
+        // Mark render as complete
+        globalState.ui.rendering.needsUpdate = false;
+        globalState.ui.rendering.lastRenderTime = performance.now();
+
+        // Track performance
+        /** @type {number} */
+        const renderTime = performance.now() - startTime;
+        updateRenderPerformance(renderTime);
+
+        console.debug(`[State Manager] Render completed in ${renderTime.toFixed(2)}ms`);
+
+    } catch (error) {
+        console.error('[State Manager] Error during render:', error);
+        globalState.ui.rendering.needsUpdate = false;
     }
 }
 
 /**
- * Handles battle log display (special handling for HTML content)
- * @param {Object} battleResult - Battle result data
- * @param {string} mode - Simulation mode
+ * Updates render performance metrics
+ * 
+ * @param {number} renderTime - Time taken for render in milliseconds
+ * 
+ * @returns {void}
+ * 
+ * @throws {TypeError} When renderTime is not a number
+ * 
+ * @private
+ * @since 2.0.0
  */
-function handleBattleLogDisplay(battleResult, mode) {
-    console.log('[STATE] handleBattleLogDisplay called with mode:', mode);
-    console.log('[STATE] Battle result log length:', battleResult.log?.length || 0);
-
-    // Import transformEventsToHtmlLog for battle story
-    import('./log_to_html.js').then(({ transformEventsToHtmlLog }) => {
-        const battleStoryEl = document.getElementById('battle-story');
-        if (battleStoryEl && battleResult.log) {
-            const htmlLog = transformEventsToHtmlLog(battleResult.log);
-            battleStoryEl.innerHTML = htmlLog;
-            console.log('[STATE] Battle story populated successfully');
-        } else {
-            console.warn('[STATE] Battle story element or log missing');
-        }
-    }).catch(err => {
-        console.warn('Could not load battle log transformer:', err);
-    });
-
-    // Handle detailed logs content - populate with the full log data
-    const detailedLogsEl = document.getElementById('detailed-battle-logs-content');
-    const toggleBtn = document.getElementById('toggle-detailed-logs-btn');
-    
-    if (detailedLogsEl && battleResult.log) {
-        console.log('[STATE] Populating detailed battle logs...');
-        
-        // Import the battle log transformer
-        import('./battle_log_transformer.js').then(({ transformEventsToHtmlLog }) => {
-            const detailedHtmlLog = transformEventsToHtmlLog(battleResult.log, {
-                fighter1: battleResult.finalState?.fighter1,
-                fighter2: battleResult.finalState?.fighter2,
-                location: battleResult.locationId
-            });
-            detailedLogsEl.innerHTML = detailedHtmlLog || '<p>No detailed battle log available.</p>';
-            console.log('[STATE] Detailed battle logs populated successfully');
-            
-            // Set up the toggle controls
-            import('./ui/battle_log_controls.js').then(({ setupBattleLogControls }) => {
-                const copyBtn = document.getElementById('copy-detailed-logs-btn');
-                setupBattleLogControls(toggleBtn, copyBtn, detailedLogsEl);
-                console.log('[STATE] Battle log controls set up successfully');
-            }).catch(err => {
-                console.warn('[STATE] Could not set up battle log controls:', err);
-            });
-            
-        }).catch(err => {
-            console.warn('[STATE] Could not load battle_log_transformer:', err);
-            // Fallback to basic HTML transformation
-            import('./log_to_html.js').then(({ transformEventsToHtmlLog }) => {
-                const fallbackHtml = transformEventsToHtmlLog(battleResult.log);
-                detailedLogsEl.innerHTML = fallbackHtml || '<p>No detailed battle log available.</p>';
-                console.log('[STATE] Detailed battle logs populated with fallback');
-            }).catch(fallbackErr => {
-                console.error('[STATE] Both battle log transformers failed:', fallbackErr);
-                detailedLogsEl.innerHTML = '<p>Error loading battle logs.</p>';
-            });
-        });
-        
-        // Handle detailed logs visibility for instant mode
-        if (mode === 'instant') {
-            detailedLogsEl.classList.remove('hidden', 'collapsed');
-            if (toggleBtn) {
-                toggleBtn.textContent = 'Hide Detailed Battle Logs ▼';
-                toggleBtn.setAttribute('aria-expanded', 'true');
-            }
-        } else {
-            // For animated mode, keep collapsed by default
-            detailedLogsEl.classList.add('collapsed');
-            if (toggleBtn) {
-                toggleBtn.textContent = 'Show Detailed Battle Logs ►';
-                toggleBtn.setAttribute('aria-expanded', 'false');
-            }
-        }
-    } else {
-        console.warn('[STATE] Detailed logs element or battle log missing');
+function updateRenderPerformance(renderTime) {
+    // Input validation
+    if (typeof renderTime !== 'number' || isNaN(renderTime)) {
+        throw new TypeError('updateRenderPerformance: renderTime must be a valid number');
     }
 
-    // Handle analysis display
-    import('./ui_battle-results.js').then(({ displayFinalAnalysis }) => {
-        if (typeof displayFinalAnalysis === 'function') {
-            displayFinalAnalysis(battleResult);
-            console.log('[STATE] Final analysis display completed');
+    /** @type {RenderState} */
+    const renderState = globalState.ui.rendering;
+    
+    // Update performance metrics
+    renderState.performance.maxRenderTime = Math.max(
+        renderState.performance.maxRenderTime,
+        renderTime
+    );
+    
+    /** @type {number} */
+    const totalRenders = renderState.performance.totalRenders;
+    /** @type {number} */
+    const currentAverage = renderState.performance.averageRenderTime;
+    
+    renderState.performance.averageRenderTime = 
+        (currentAverage * (totalRenders - 1) + renderTime) / totalRenders;
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Deep merges two objects
+ * 
+ * @param {Object} target - Target object to merge into
+ * @param {Object} source - Source object to merge from
+ * 
+ * @returns {Object} Merged object
+ * 
+ * @throws {TypeError} When parameters are not objects
+ * 
+ * @private
+ * @since 2.0.0
+ */
+function deepMerge(target, source) {
+    // Input validation
+    if (!target || typeof target !== 'object') {
+        throw new TypeError('deepMerge: target must be an object');
+    }
+    
+    if (!source || typeof source !== 'object') {
+        throw new TypeError('deepMerge: source must be an object');
+    }
+
+    /** @type {Object} */
+    const result = { ...target };
+
+    for (const key in source) {
+        if (source.hasOwnProperty(key)) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                result[key] = deepMerge(result[key] || {}, source[key]);
+            } else {
+                result[key] = source[key];
+            }
         }
-    }).catch(err => {
-        console.warn('Could not load battle results module:', err);
+    }
+
+    return result;
+}
+
+/**
+ * Notifies all state change listeners
+ * 
+ * @param {GameState} oldState - Previous state
+ * @param {GameState} newState - New state
+ * 
+ * @returns {void}
+ * 
+ * @private
+ * @since 2.0.0
+ */
+function notifyStateChangeListeners(oldState, newState) {
+    stateChangeListeners.forEach(/** @type {Function} */ (listener) => {
+        try {
+            listener(oldState, newState);
+        } catch (error) {
+            console.error('[State Manager] Error in state change listener:', error);
+        }
     });
 }
 
-// Initialize state on module load
-resetGameState(); 
+/**
+ * Adds a state change listener
+ * 
+ * @param {Function} listener - Listener function to add
+ * 
+ * @returns {Function} Unsubscribe function
+ * 
+ * @throws {TypeError} When listener is not a function
+ * 
+ * @example
+ * // Add state listener
+ * const unsubscribe = addStateChangeListener((oldState, newState) => {
+ *   console.log('State changed:', newState);
+ * });
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function addStateChangeListener(listener) {
+    // Input validation
+    if (typeof listener !== 'function') {
+        throw new TypeError('addStateChangeListener: listener must be a function');
+    }
+
+    stateChangeListeners.push(listener);
+
+    // Return unsubscribe function
+    return () => {
+        /** @type {number} */
+        const index = stateChangeListeners.indexOf(listener);
+        if (index > -1) {
+            stateChangeListeners.splice(index, 1);
+        }
+    };
+}
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+/**
+ * Initializes the state manager
+ * 
+ * @param {StateManagerOptions} [options] - Configuration options
+ * 
+ * @returns {void}
+ * 
+ * @example
+ * // Initialize with debug logging
+ * initializeStateManager({ enableDebugLogging: true });
+ * 
+ * @since 2.0.0
+ * @public
+ */
+export function initializeStateManager(options = {}) {
+    if (isInitialized) {
+        console.warn('[State Manager] Already initialized');
+        return;
+    }
+
+    console.debug('[State Manager] Initializing...');
+
+    // Apply configuration
+    if (options.enableDebugLogging) {
+        globalState.config.debugMode = true;
+    }
+    
+    if (options.enablePerformanceTracking) {
+        globalState.config.performanceTracking = true;
+    }
+
+    // Setup initial UI event listeners
+    try {
+        setupCharacterSelectionEvents();
+        setupLocationSelectionEvents();
+    } catch (error) {
+        console.warn('[State Manager] Could not setup UI events (DOM may not be ready):', error);
+    }
+
+    isInitialized = true;
+    console.debug('[State Manager] Initialization complete');
+}
+
+// ============================================================================
+// EXPORTS FOR BACKWARD COMPATIBILITY
+// ============================================================================
+
+// Re-export commonly used functions for backward compatibility
+export { hideSimulationContainer, showSimulationContainer } from './simulation_dom_manager.js';
+export { setSimulationMode, getSimulationMode } from './simulation_mode_manager.js';
+
+// Initialize on module load if in browser environment
+if (typeof window !== 'undefined' && document.readyState !== 'loading') {
+    initializeStateManager();
+}
