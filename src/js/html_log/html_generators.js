@@ -4,7 +4,7 @@
 
 "use strict";
 
-import { characters } from "../data_characters.js";
+import { getCharacterTemplate } from "../data_characters.js";
 import { safeGet } from "../utils_safe_accessor.js";
 
 /**
@@ -25,7 +25,8 @@ export function getEventHtml(event) {
 }
 
 function generateDiceRollHtml(event) {
-    const actorName = event.actorId ? safeGet(characters, `${event.actorId}.name`, event.actorId) : "";
+    const actorTemplate = event.actorId ? getCharacterTemplate(event.actorId) : null;
+    const actorName = actorTemplate ? actorTemplate.name : event.actorId;
     const actorInfo = actorName ? `(${actorName}) ` : "";
     const threshold = event.threshold ? ` vs ${event.threshold.toFixed(2)}` : "";
     const moveName = event.moveName ? ` (for ${event.moveName})` : "";

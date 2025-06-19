@@ -7,7 +7,7 @@
 "use strict";
 
 import { modifyMomentum } from "../engine_momentum.js";
-import { clamp } from "../utils_math.js";
+import { clampValue } from "../constants_consolidated.js";
 
 /**
  * Configuration for simple stat change handlers.
@@ -65,12 +65,16 @@ export function handleStatChange(ctx) {
     if (config.customHandler) {
         newValue = config.customHandler(primaryTarget, effect.value, ctx);
     } else {
-        newValue = clamp(oldValue + effect.value, config.clampMin, config.clampMax);
+        if (effect.value > 0) {
+            newValue = clampValue(oldValue + effect.value, config.clampMin, config.clampMax);
+        } else {
+            newValue = clampValue(oldValue - Math.abs(effect.value), config.clampMin, config.clampMax);
+        }
         primaryTarget[effect.stat] = newValue;
     }
     
     const message = config.messageTemplate(primaryTarget.name, effect.value, effect.value > 0);
-    ctx.addStatusEvent(config.eventType, oldValue, newValue, config.statName);
+    ctx.addStatusEvent(config.eventType, oldValue, newValue);
     
     return { success: true, message };
 } 

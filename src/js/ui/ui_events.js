@@ -72,17 +72,25 @@ function handleKeyboardShortcuts(event) {
     }
 }
 
-function handleWindowResize() {
-    /** @type {import('../types/ui.js').UIState} */
-    const uiState = getUIState();
-    const requiredElements = Object.keys(uiState.rendering.componentStates);
-    markAllComponentsDirty(requiredElements);
-
-    clearTimeout(handleWindowResize.timeout);
-    handleWindowResize.timeout = setTimeout(() => {
-        updateLayout();
-    }, 250);
+function handleSelection(event) {
+    const target = /** @type {HTMLElement} */ (event.target);
+    const card = target.closest(".char-card");
+    if (card) {
+        // ... existing code ...
+    }
 }
+
+const debouncedResize = (function() {
+    let timeout;
+    return function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            console.log("Window resized");
+        }, 250);
+    }
+})();
+
+window.addEventListener("resize", debouncedResize);
 
 /**
  * @param {ErrorEvent} event
@@ -98,6 +106,6 @@ export function setupEventHandlers() {
     if (uiConfig.enableKeyboardShortcuts) {
         document.addEventListener("keydown", handleKeyboardShortcuts);
     }
-    window.addEventListener("resize", handleWindowResize);
+    window.addEventListener("resize", debouncedResize);
     window.addEventListener("error", handleGlobalError);
 } 

@@ -6,10 +6,10 @@
  */
 
 /**
- * @typedef {kordegovernment(./types/character.js').CharacterTemplate} CharacterTemplate
- * @typedef {kordegovernment(./types/character.js').CharacterStats} CharacterStats
- * @typedef {kordegovernment(./types/character.js').CharacterCreationOptions} CharacterCreationOptions
- * @typedef {kordegovernment(./types/ai.js').AiPersonality} AiPersonality
+ * @typedef {import('./types/character.js').CharacterTemplate} CharacterTemplate
+ * @typedef {import('./types/character.js').CharacterStats} CharacterStats
+ * @typedef {import('./types/character.js').CharacterCreationOptions} CharacterCreationOptions
+ * @typedef {import('./types/ai.js').AiPersonality} AiPersonality
  */
 
 const MAX_CHARACTER_LEVEL = 100;

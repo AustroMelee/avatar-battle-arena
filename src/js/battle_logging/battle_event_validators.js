@@ -148,8 +148,8 @@ export function validatePerformanceData(operation, duration) {
  * @throws {TypeError} If validation fails
  */
 export function validateErrorData(error, context) {
-    if (!(error instanceof Error) && (!error || typeof error.message !== "string")) {
-        throw new TypeError("'error' must be an Error object or error-like object with message property");
+    if (!error || typeof error.message !== 'string') {
+        throw new TypeError("'error' must be an Error object or error-like object with a message property");
     }
     
     if (!context || typeof context !== "string") {
@@ -182,7 +182,7 @@ export function comprehensiveEventValidation(event) {
     
     try {
         validateLogEvent(event);
-    } catch (error) {
+    } catch (/** @type {any} */ error) {
         result.isValid = false;
         result.errors.push(error.message);
     }

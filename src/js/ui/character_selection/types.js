@@ -5,7 +5,7 @@
 "use strict";
 
 /**
- * @typedef {import('../../types/character.js').Character} Character
+ * @typedef {import('../../types/character.js').CharacterTemplate} CharacterTemplate
  */
 
 /**
@@ -27,7 +27,7 @@
 
 /**
  * @typedef {Object} CharacterCardConfig
- * @property {Character} character
+ * @property {CharacterTemplate} character
  * @property {string} fighterKey
  * @property {boolean} [enableAccessibility]
  * @property {boolean} [enableLazyLoading]

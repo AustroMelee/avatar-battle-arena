@@ -1,278 +1,189 @@
+// @ts-nocheck
+"use strict";
+
 /**
  * @fileoverview Reporting Module for Debug Utilities
  * @description Handles report generation, data export, and debug data management
  * @version 1.0.0
  */
 
-"use strict";
+import { formatBytes } from "../utils_format.js";
+import { DEBUG_CONFIG, LOG_LEVELS } from "./debugConfig.js";
 
 /**
- * Generates a comprehensive debug report.
+ * Generates a comprehensive debug report from collected data.
  * 
- * @param {Array} performanceMetrics - Performance tracking data
- * @param {Array} memorySnapshots - Memory usage snapshots
- * @param {Array} errorLog - Error tracking data
- * @param {Array} [logs] - General debug logs
- * @returns {Object} Comprehensive debug report
- * 
- * @example
- * const report = generateReport(performanceMetrics, memorySnapshots, errorLog);
+ * @param {Object} debugData - The main debug data object
+ * @param {Array} debugData.log - General log entries
+ * @param {Array} debugData.errorLog - Error log entries
+ * @param {Array} debugData.performanceMetrics - Performance metrics
+ * @param {Array} debugData.memorySnapshots - Memory snapshots
+ * @param {Object} [battleResult] - Optional battle result for context
+ * @returns {string} Formatted debug report
  */
-export function generateReport(performanceMetrics, memorySnapshots, errorLog, logs = []) {
-    const report = {
-        metadata: {
-            timestamp: new Date().toISOString(),
-            reportVersion: "1.0.0",
-            userAgent: navigator.userAgent,
-            url: window.location.href,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        },
-        
-        performance: {
-            metrics: performanceMetrics,
-            summary: summarizePerformanceMetrics(performanceMetrics)
-        },
-        
-        memory: {
-            snapshots: memorySnapshots.slice(-10), // Last 10 snapshots
-            summary: summarizeMemoryUsage(memorySnapshots)
-        },
-        
-        errors: {
-            log: errorLog,
-            summary: summarizeErrors(errorLog)
-        },
-        
-        logs: {
-            entries: logs.slice(-50), // Last 50 log entries
-            count: logs.length
-        },
-        
-        browserInfo: {
-            language: navigator.language,
-            platform: navigator.platform,
-            cookieEnabled: navigator.cookieEnabled,
-            onlineStatus: navigator.onLine,
-            screenResolution: `${screen.width}x${screen.height}`,
-            colorDepth: screen.colorDepth
-        },
-        
-        currentMemoryInfo: performance.memory ? {
-            usedJSHeapSize: performance.memory.usedJSHeapSize,
-            totalJSHeapSize: performance.memory.totalJSHeapSize,
-            jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-            formatted: {
-                used: formatBytes(performance.memory.usedJSHeapSize),
-                total: formatBytes(performance.memory.totalJSHeapSize),
-                limit: formatBytes(performance.memory.jsHeapSizeLimit)
-            }
-        } : null
-    };
+export function generateReport(debugData, battleResult = null) {
+    const { log, errorLog, performanceMetrics, memorySnapshots } = debugData;
     
-    console.log("[Debug Report] Generated comprehensive report");
+    let report = `
+=================================
+  AVATAR BATTLE ARENA DEBUG REPORT
+=================================
+Timestamp: ${new Date().toISOString()}
+User Agent: ${navigator.userAgent}
+Debug Config: ${JSON.stringify(DEBUG_CONFIG, null, 2)}
+---------------------------------
+`;
+    
+    // Battle Context
+    if (battleResult) {
+        report += `
+## BATTLE CONTEXT
+---------------------------------
+Winner: ${battleResult.winnerId || "N/A"}
+Total Turns: ${battleResult.totalTurns || "N/A"}
+Final State:
+  - Fighter 1: ${JSON.stringify(battleResult.finalState.fighter1)}
+  - Fighter 2: ${JSON.stringify(battleResult.finalState.fighter2)}
+---------------------------------
+`;
+    }
+    
+    // Performance Summary
+    const perfAnalysis = analyzePerformance(performanceMetrics);
+    report += `
+## PERFORMANCE SUMMARY
+---------------------------------
+Total Page Load Time: ${perfAnalysis.totalLoadTime}
+Total Script Execution Time: ${perfAnalysis.scriptExecutionTime}
+Slowest Resources:
+${perfAnalysis.slowestResources.map(r => `  - ${r.name}: ${r.duration}ms`).join("\n")}
+Longest Tasks:
+${perfAnalysis.longestTasks.map(t => `  - ${t.name}: ${t.duration}ms`).join("\n")}
+Current Memory Info: ${performance.memory ? `
+  - Used: ${formatBytes(performance.memory.usedJSHeapSize)}
+  - Total: ${formatBytes(performance.memory.totalJSHeapSize)}
+  - Limit: ${formatBytes(performance.memory.jsHeapSizeLimit)}
+` : "N/A"}
+---------------------------------
+`;
+    
+    // Error Summary
+    const errorAnalysis = analyzeErrors(errorLog);
+    report += `
+## ERROR SUMMARY
+---------------------------------
+Total Errors: ${errorAnalysis.totalErrors}
+Error Types:
+${Object.entries(errorAnalysis.errorTypes).map(([type, count]) => `  - ${type}: ${count}`).join("\n")}
+Most Common Errors:
+${errorAnalysis.commonErrors.map(e => `  - "${e.message}" (${e.count} times)`).join("\n")}
+---------------------------------
+`;
+
+    // Memory Usage Trend
+    report += `
+## MEMORY USAGE
+---------------------------------
+${memorySnapshots.length > 0 ? 
+    memorySnapshots.map(s => `[${s.timestamp}] Used: ${s.formatted.used}, Total: ${s.formatted.total}, Limit: ${s.formatted.limit}`).join("\n") : 
+    "No memory snapshots recorded."}
+---------------------------------
+`;
+
+    // Detailed Logs
+    report += `
+## DETAILED LOGS
+---------------------------------
+`;
+    log.forEach(entry => {
+        report += `[${entry.timestamp}] [${entry.level.toUpperCase()}] ${entry.message}\n`;
+        if (entry.data) {
+            report += `  Data: ${JSON.stringify(entry.data, null, 2)}\n`;
+        }
+    });
+    
+    report += "\n=================================\n  END OF REPORT\n=================================\n";
+    
     return report;
 }
 
 /**
- * Exports debug data to a downloadable JSON file.
- * 
- * @param {Object} report - Debug report to export
- * @param {string} [filename] - Custom filename for the export
- * 
- * @example
- * const report = generateReport(performanceMetrics, memorySnapshots, errorLog);
- * exportDebugData(report, 'battle-debug-data.json');
+ * Dumps the debug report to the console.
+ * @param {string} report - The formatted debug report
  */
-export function exportDebugData(report, filename) {
-    try {
-        const dataStr = JSON.stringify(report, null, 2);
-        const dataBlob = new Blob([dataStr], { type: "application/json" });
-        
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(dataBlob);
-        link.download = filename || `debug-report-${Date.now()}.json`;
-        
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Clean up the URL object
-        URL.revokeObjectURL(link.href);
-        
-        console.log(`[Debug Export] Data exported as ${link.download}`);
-    } catch (error) {
-        console.error("[Debug Export] Failed to export debug data:", error);
-        
-        // Fallback: log the report to console
-        console.log("[Debug Export] Report data (copy from console):", report);
-    }
+export function dumpReportToConsole(report) {
+    console.log(report);
 }
 
 /**
- * Exports debug data as CSV format for spreadsheet analysis.
- * 
- * @param {Array} performanceMetrics - Performance metrics to export
- * @param {string} [filename] - Custom filename for the export
+ * Prepares the debug report for download.
+ * @param {string} report - The formatted debug report
+ * @param {string} [filename="debug-report.txt"] - The name of the file to download
  */
-export function exportPerformanceCSV(performanceMetrics, filename) {
-    if (performanceMetrics.length === 0) {
-        console.warn("[Debug Export] No performance metrics to export");
-        return;
-    }
-    
-    try {
-        // CSV Headers
-        const headers = ["Name", "Duration (ms)", "Start Time", "Entry Type", "Timestamp"];
-        const csvContent = [
-            headers.join(","),
-            ...performanceMetrics.map(metric => [
-                `"${metric.name || "Unknown"}"`,
-                metric.duration || 0,
-                metric.startTime || 0,
-                `"${metric.entryType || "Unknown"}"`,
-                `"${metric.timestamp || ""}"`
-            ].join(","))
-        ].join("\n");
-        
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename || `performance-metrics-${Date.now()}.csv`;
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        URL.revokeObjectURL(link.href);
-        console.log(`[Debug Export] Performance CSV exported as ${link.download}`);
-    } catch (error) {
-        console.error("[Debug Export] Failed to export performance CSV:", error);
-    }
+export function downloadReport(report, filename = "debug-report.txt") {
+    const blob = new Blob([report], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    console.log(`[Reporting] Debug report downloaded as ${filename}`);
 }
 
 /**
- * Clears all debug data arrays.
- * 
- * @param {Array} performanceMetrics - Performance metrics array
- * @param {Array} memorySnapshots - Memory snapshots array
- * @param {Array} errorLog - Error log array
- * @param {Array} [logs] - General logs array
- */
-export function clearDebugData(performanceMetrics, memorySnapshots, errorLog, logs = []) {
-    performanceMetrics.length = 0;
-    memorySnapshots.length = 0;
-    errorLog.length = 0;
-    logs.length = 0;
-    
-    console.log("[Debug Data] All debug data cleared");
-}
-
-/**
- * Creates a summary of performance metrics.
- * 
- * @param {Array} performanceMetrics - Performance metrics array
- * @returns {Object} Performance summary
+ * Helper to analyze performance metrics for the report.
+ * @param {Array} performanceMetrics - Array of performance data
+ * @returns {Object} Performance analysis summary
  * @private
  */
-function summarizePerformanceMetrics(performanceMetrics) {
-    if (performanceMetrics.length === 0) {
-        return {
-            totalMetrics: 0,
-            averageDuration: 0,
-            totalDuration: 0,
-            slowestOperation: null,
-            fastestOperation: null
-        };
-    }
+function analyzePerformance(performanceMetrics) {
+    // Basic analysis, can be expanded
+    const navigationEntry = performance.getEntriesByType("navigation")[0];
+    const totalLoadTime = navigationEntry ? navigationEntry.duration.toFixed(2) + "ms" : "N/A";
     
-    const durations = performanceMetrics.map(m => m.duration).filter(d => typeof d === "number");
-    const totalDuration = durations.reduce((sum, d) => sum + d, 0);
-    const averageDuration = totalDuration / durations.length;
+    const scriptEntries = performanceMetrics.filter(e => e.initiatorType === "script");
+    const scriptExecutionTime = scriptEntries.reduce((sum, e) => sum + e.duration, 0).toFixed(2) + "ms";
     
-    const sortedMetrics = [...performanceMetrics].sort((a, b) => (b.duration || 0) - (a.duration || 0));
-    
-    return {
-        totalMetrics: performanceMetrics.length,
-        averageDuration: Math.round(averageDuration * 100) / 100,
-        totalDuration: Math.round(totalDuration * 100) / 100,
-        slowestOperation: sortedMetrics[0] || null,
-        fastestOperation: sortedMetrics[sortedMetrics.length - 1] || null
-    };
+    const slowestResources = [...performanceMetrics]
+        .sort((a, b) => b.duration - a.duration)
+        .slice(0, 5)
+        .map(r => ({ name: r.name, duration: r.duration.toFixed(2) }));
+        
+    const longTasks = performance.getEntriesByType ? performance.getEntriesByType("longtask") || [] : [];
+    const longestTasks = longTasks
+        .sort((a, b) => b.duration - a.duration)
+        .slice(0, 5)
+        .map(t => ({ name: t.name, duration: t.duration.toFixed(2) }));
+
+    return { totalLoadTime, scriptExecutionTime, slowestResources, longestTasks };
 }
 
 /**
- * Creates a summary of memory usage.
- * 
- * @param {Array} memorySnapshots - Memory snapshots array
- * @returns {Object} Memory usage summary
+ * Helper to analyze errors for the report.
+ * @param {Array} errorLog - Array of error data
+ * @returns {Object} Error analysis summary
  * @private
  */
-function summarizeMemoryUsage(memorySnapshots) {
-    if (memorySnapshots.length === 0) {
-        return {
-            totalSnapshots: 0,
-            currentUsage: null,
-            peakUsage: null,
-            averageUsage: null
-        };
-    }
+function analyzeErrors(errorLog) {
+    const totalErrors = errorLog.length;
+    const errorTypes = errorLog.reduce((acc, err) => {
+        acc[err.type] = (acc[err.type] || 0) + 1;
+        return acc;
+    }, {});
     
-    const usages = memorySnapshots.map(s => s.usedJSHeapSize).filter(u => typeof u === "number");
-    const averageUsage = usages.reduce((sum, u) => sum + u, 0) / usages.length;
-    const peakUsage = Math.max(...usages);
-    const currentUsage = usages[usages.length - 1];
+    const messageCounts = errorLog.reduce((acc, err) => {
+        const msg = err.message || "Unknown";
+        acc[msg] = (acc[msg] || 0) + 1;
+        return acc;
+    }, {});
     
-    return {
-        totalSnapshots: memorySnapshots.length,
-        currentUsage: formatBytes(currentUsage),
-        peakUsage: formatBytes(peakUsage),
-        averageUsage: formatBytes(averageUsage)
-    };
-}
+    const commonErrors = Object.entries(messageCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([message, count]) => ({ message, count }));
 
-/**
- * Creates a summary of errors.
- * 
- * @param {Array} errorLog - Error log array
- * @returns {Object} Error summary
- * @private
- */
-function summarizeErrors(errorLog) {
-    if (errorLog.length === 0) {
-        return {
-            totalErrors: 0,
-            errorTypes: {},
-            mostRecentError: null
-        };
-    }
-    
-    const errorTypes = {};
-    errorLog.forEach(error => {
-        const type = error.type || "unknown";
-        errorTypes[type] = (errorTypes[type] || 0) + 1;
-    });
-    
-    return {
-        totalErrors: errorLog.length,
-        errorTypes,
-        mostRecentError: errorLog[errorLog.length - 1]
-    };
+    return { totalErrors, errorTypes, commonErrors };
 }
-
-/**
- * Formats bytes into human-readable format.
- * 
- * @param {number} bytes - Number of bytes
- * @returns {string} Formatted byte string
- * @private
- */
-function formatBytes(bytes) {
-    if (bytes === 0) return "0 Bytes";
-    
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-} 

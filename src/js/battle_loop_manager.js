@@ -12,12 +12,12 @@ import { generateBattleResult } from "./battle_loop/results.js";
 import { handleLoopError } from "./battle_loop/error_handler.js";
 
 /**
- * @typedef {import('./types.js').Fighter} Fighter
- * @typedef {import('./types.js').BattleState} BattleState
- * @typedef {import('./types.js').BattleResult} BattleResult
- * @typedef {import('./types.js').BattleLoopConfig} BattleLoopConfig
- * @typedef {import('./types.js').BattleLoopState} BattleLoopState
- * @typedef {import('./types.js').LoopMetrics} LoopMetrics
+ * @typedef {import('./types/battle.js').Fighter} Fighter
+ * @typedef {import('./types/battle.js').BattleState} BattleState
+ * @typedef {import('./types/battle.js').BattleResult} BattleResult
+ * @typedef {import('./types/battle_loop.js').BattleLoopConfig} BattleLoopConfig
+ * @typedef {import('./types/battle_loop.js').BattleLoopState} BattleLoopState
+ * @typedef {import('./types/battle_loop.js').LoopMetrics} LoopMetrics
  */
 
 export class BattleLoopManager {

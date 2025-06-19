@@ -6,7 +6,7 @@
 
 "use strict";
 
-import { characterCurbstompRules } from "../data_mechanics_characters.js";
+import { CHARACTER_CURBSTOMP_RULES } from "../data_mechanics_characters.js";
 import { locationCurbstompRules } from "../data_mechanics_locations.js";
 
 /**
@@ -18,8 +18,8 @@ import { locationCurbstompRules } from "../data_mechanics_locations.js";
  */
 export function getAllCurbstompRulesForBattle(fighter1, fighter2, locationId) {
     const allRules = [
-        ...(characterCurbstompRules[fighter1.id] || []),
-        ...(characterCurbstompRules[fighter2.id] || []),
+        ...(CHARACTER_CURBSTOMP_RULES[fighter1.id] || []),
+        ...(CHARACTER_CURBSTOMP_RULES[fighter2.id] || []),
         ...(locationCurbstompRules[locationId] || [])
     ];
     
@@ -32,7 +32,7 @@ export function getAllCurbstompRulesForBattle(fighter1, fighter2, locationId) {
  * @returns {Array} Array of character-specific rules
  */
 export function getCharacterCurbstompRules(characterId) {
-    return characterCurbstompRules[characterId] || [];
+    return CHARACTER_CURBSTOMP_RULES[characterId] || [];
 }
 
 /**
@@ -148,4 +148,10 @@ export function getRulesByTriggerChance(rules, minChance = 0, maxChance = 1) {
         const chance = rule.triggerChance || 1.0;
         return chance >= minChance && chance <= maxChance;
     });
-} 
+}
+
+export const CHARACTER_RULES = CHARACTER_CURBSTOMP_RULES;
+
+/**
+ * A map of all registered curbstomp rules, indexed by their ID.
+ */ 

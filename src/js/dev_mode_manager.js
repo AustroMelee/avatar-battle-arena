@@ -18,7 +18,7 @@
 import { runBatchSimulation, getDefaultMatchups } from "./dev_batch_simulator.js";
 import { formatSingleBattleLog, formatAiLogForOutput, compileBattleLogs } from "./dev_log_formatter.js";
 import { createProgressBar, createDetailedProgress } from "./dev_progress_ui.js";
-import { copyToClipboard } from "./utils_clipboard.js";
+// import { copyToClipboard } from "./utils_clipboard.js";
 
 // Re-export all functions for backward compatibility
 export { runBatchSimulation, getDefaultMatchups } from "./dev_batch_simulator.js";
@@ -61,12 +61,13 @@ export async function runDevModeBatch() {
         console.log("--- Compiled Logs (also copied to clipboard): ---");
         console.log(finalCompiledLog);
         
-        const copySuccess = await copyToClipboard(finalCompiledLog);
-        if (copySuccess) {
-            alert(`✔ Batch Complete: ${results.completed} simulations processed. ${results.errors} errors. Logs copied to clipboard.`);
-        } else {
-            alert(`⚠ Batch Complete: ${results.completed} simulations processed. ${results.errors} errors. Failed to copy logs to clipboard.`);
-        }
+        // const copySuccess = await copyToClipboard(finalCompiledLog);
+        // if (copySuccess) {
+        //     alert(`✔ Batch Complete: ${results.completed} simulations processed. ${results.errors} errors. Logs copied to clipboard.`);
+        // } else {
+        //     alert(`⚠ Batch Complete: ${results.completed} simulations processed. ${results.errors} errors. Failed to copy logs to clipboard.`);
+        // }
+        alert(`✔ Batch Complete: ${results.completed} simulations processed. ${results.errors} errors.`);
     } catch (error) {
         console.error("Dev Mode Batch Error:", error);
         alert(`❌ Batch failed: ${error.message}`);

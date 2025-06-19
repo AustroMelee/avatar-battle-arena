@@ -36,8 +36,8 @@ export function createEffectContext(effect, actor, target, primaryTarget, battle
         addEvent: (eventData) => {
             generatedEvents.push(generateLogEvent(battleState, eventData));
         },
-        addStatusEvent: (eventType, oldValue, newValue, statName) => {
-            const statusEvent = generateStatusChangeEvent(battleState, primaryTarget, eventType, oldValue, newValue, statName);
+        addStatusEvent: (eventType, oldValue, newValue) => {
+            const statusEvent = generateStatusChangeEvent(battleState, primaryTarget, eventType, oldValue, newValue);
             if (statusEvent) generatedEvents.push(statusEvent);
         }
     };
@@ -83,4 +83,4 @@ export function createMockContext(effectType, customEffect = {}) {
         { oldHp: 50, oldEnergy: 50, oldMomentum: 0 },
         []
     );
-} 
+}

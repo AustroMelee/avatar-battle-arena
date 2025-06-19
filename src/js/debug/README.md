@@ -1,24 +1,64 @@
-# Debug Utilities - Modular Debug System
-
-A comprehensive, modular debugging toolkit for the Avatar Battle Arena project.
+# Debug Module
 
 ## Overview
 
-The debug utilities have been refactored from a monolithic "debug god object" into a modular system that follows Single Responsibility Principle and supports collaborative development.
+The Debug module provides a comprehensive, modular toolkit for introspection, analysis, and debugging of the Avatar Battle Arena application. It is designed for developers to monitor performance, track errors, analyze battle outcomes, and export detailed reports.
 
-## Architecture
+This system is built to be used in a development environment and can be completely excluded from a production build to avoid any performance overhead. When active, it attaches a global `DEBUG` object to the `window` for easy console access.
 
+## Architectural Constraints
+
+- This module should have **no dependencies** on other major game modules like `engine` or `ai`. It is a standalone utility that analyzes the *output* of those systems (e.g., the `battleResult` object).
+- It is designed to be attached to the global `window` object but can also be used modularly without global pollution.
+- It should be configured via `debugConfig.js` and can be enabled or disabled with feature flags.
+
+## Files
+
+-   **`index.js`**: The main entry point for the module. It provides barrel exports for all other files, offering flat and namespaced access patterns (e.g., `BattleAnalysis.analyzeBattle()`). It also provides a factory function `createDebugUtils()` for creating isolated instances.
+-   **`debugUtils.js`**: Contains the main `DebugUtils` class that orchestrates all the other modules. This class holds the debug state (logs, metrics, errors) and provides a unified API to access all debugging functionalities.
+-   **`debugGlobal.js`**: Responsible for attaching the `DebugUtils` instance to the global `window.DEBUG` object. It also creates the `DEBUG_QUICK` helper and sets up keyboard shortcuts (`Ctrl+Shift+D` for status, etc.) for ease of use during development. This is the primary file to import for browser-based debugging.
+-   **`debugConfig.js`**: A centralized location for all debug-related configuration. It contains the main `DEBUG_CONFIG` object and `DEBUG_FLAGS` to enable or disable features like performance tracking or error monitoring.
+-   **`battleAnalysis.js`**: A pure analysis module that takes a completed `battleResult` object and prints a detailed breakdown to the console. It includes functions to analyze event frequency, character performance, phase durations, and performance bottlenecks. Exports `analyzeBattle()`.
+-   **`errorTracking.js`**: Sets up global error handlers (`window.addEventListener`) to automatically catch and log JavaScript errors and unhandled promise rejections. Exports `setupGlobalErrorHandling()` and `logError()`.
+-   **`performanceTracking.js`**: Handles performance and memory monitoring. It uses the `PerformanceObserver` API to track resource loading and custom measurements, and provides functions for taking and analyzing memory snapshots. Exports `setupPerformanceObserver()` and `takeMemorySnapshot()`.
+-   **`reporting.js`**: Contains functions for generating and exporting debug data. `generateReport()` compiles all collected data into a single object, and `exportDebugData()` can save that report as a JSON file for offline analysis.
+-   **`example-usage.js`**: Contains example code demonstrating how to use the debug module in various ways (via the main class, individual functions, or namespaced objects).
+
+## Usage
+
+The easiest way to use the debug module in a browser is to import the `debugGlobal.js` file once in your main application entry point.
+
+```javascript
+// In main.js, for development builds only
+import './js/debug/debugGlobal.js';
 ```
-js/debug/
-├── debugConfig.js          # Configuration and flags
-├── debugUtils.js           # Main orchestrator class
-├── debugGlobal.js          # Global window attachment
-├── battleAnalysis.js       # Battle result analysis
-├── errorTracking.js        # Error logging and analysis
-├── performanceTracking.js  # Performance monitoring
-├── reporting.js            # Report generation and export
-├── index.js                # Barrel exports
-└── README.md               # This file
+
+Once loaded, you can access the debug tools from the browser's developer console:
+
+```javascript
+// Run a full battle simulation
+const battleResult = await runFullBattle(fighter1, fighter2);
+
+// --- In the console: ---
+
+// Get a detailed, multi-part analysis of the last battle
+DEBUG.analyzeBattle(battleResult);
+
+// Take a snapshot of the current JavaScript heap memory usage
+DEBUG.takeMemorySnapshot();
+
+// Get the current status of the debug system
+DEBUG.getStatus();
+
+// Generate a complete report of all captured data
+const report = DEBUG.generateReport();
+console.log(report);
+
+// Export the full report to a downloadable JSON file
+DEBUG.exportDebugData('my-battle-report.json');
+
+// Clear all collected debug data to start fresh
+DEBUG.clearDebugData();
 ```
 
 ## Features
@@ -47,65 +87,6 @@ js/debug/
 - JSON and CSV export options
 - Data visualization helpers
 - Automated cleanup
-
-## Usage
-
-### Basic Usage
-
-```javascript
-// Import the main class
-import { DebugUtils } from './debug/debugUtils.js';
-
-// Create an instance
-const debug = new DebugUtils();
-
-// Analyze a battle
-const battleResult = simulateBattle('aang', 'azula', 'fire-nation-capital', 'noon');
-debug.analyzeBattle(battleResult);
-```
-
-### Global Usage (Browser)
-
-```javascript
-// Import global setup (auto-initializes)
-import './debug/debugGlobal.js';
-
-// Use global DEBUG object
-DEBUG.analyzeBattle(battleResult);
-DEBUG.generateReport();
-DEBUG.exportDebugData();
-
-// Use quick shortcuts
-DEBUG_QUICK.analyze(battleResult);
-DEBUG_QUICK.memory();
-DEBUG_QUICK.export();
-```
-
-### Modular Usage
-
-```javascript
-// Import specific modules
-import { analyzeBattle } from './debug/battleAnalysis.js';
-import { takeMemorySnapshot } from './debug/performanceTracking.js';
-import { generateReport } from './debug/reporting.js';
-
-// Use individual functions
-analyzeBattle(battleResult);
-const snapshot = takeMemorySnapshot([]);
-const report = generateReport([], [], []);
-```
-
-### Namespaced Usage
-
-```javascript
-// Import namespaced modules
-import { BattleAnalysis, PerformanceTracking, Reporting } from './debug/index.js';
-
-// Use namespaced functions
-BattleAnalysis.analyzeBattle(battleResult);
-PerformanceTracking.takeMemorySnapshot(snapshots);
-Reporting.generateReport(metrics, snapshots, errors);
-```
 
 ## Configuration
 

@@ -37,10 +37,8 @@ import {
 } from "./performanceTracking.js";
 
 import { 
-    generateReport, 
-    exportDebugData, 
-    exportPerformanceCSV, 
-    clearDebugData 
+    generateReport,
+    downloadReport
 } from "./reporting.js";
 
 /**
@@ -233,58 +231,61 @@ export class DebugUtils {
     /**
      * Generates a comprehensive debug report.
      */
-    generateReport() {
-        return generateReport(
-            this.performanceMetrics, 
-            this.memorySnapshots, 
-            this.errorLog, 
-            this.logs
-        );
+    generateReport(battleResult = null) {
+        const debugData = {
+            log: this.logs,
+            errorLog: this.errorLog,
+            performanceMetrics: this.performanceMetrics,
+            memorySnapshots: this.memorySnapshots
+        };
+        return generateReport(debugData, battleResult);
     }
 
     /**
-     * Exports debug data to a downloadable JSON file.
+     * Exports debug data to a downloadable file.
      */
     exportDebugData(filename) {
         if (!DEBUG_FLAGS.EXPORT_FEATURES) {
             console.warn("[Debug Utils] Export features are disabled");
             return;
         }
-        
         const report = this.generateReport();
-        return exportDebugData(report, filename);
+        downloadReport(report, filename);
     }
 
     /**
-     * Exports performance metrics as CSV.
+     * @deprecated This function is no longer supported.
      */
-    exportPerformanceCSV(filename) {
-        if (!DEBUG_FLAGS.EXPORT_FEATURES) {
-            console.warn("[Debug Utils] Export features are disabled");
-            return;
-        }
-        
-        return exportPerformanceCSV(this.performanceMetrics, filename);
+    exportPerformanceCSV() {
+        console.warn("[Debug Utils] exportPerformanceCSV is deprecated and no longer functions.");
     }
 
     /**
-     * Clears all debug data.
+     * Clears all collected debug data.
      */
     clearDebugData() {
-        return clearDebugData(
-            this.performanceMetrics, 
-            this.memorySnapshots, 
-            this.errorLog, 
-            this.logs
-        );
+        this.logs.length = 0;
+        this.performanceMetrics.length = 0;
+        this.memorySnapshots.length = 0;
+        clearErrorLog(this.errorLog); // errorTracking has its own clear function
+        console.log("[Debug Utils] All debug data cleared.");
     }
 
-    // === UTILITY METHODS ===
+    // === GENERAL & UTILITY METHODS ===
     
     /**
-     * Adds a custom log entry.
+     * General purpose logging utility.
+     * Logs messages to internal log array and console if enabled.
+     * 
+     * @param {string} message - The log message
+     * @param {string} [level="debug"] - Log level ('debug', 'info', 'warn', 'error')
+     * @param {Object} [data=null] - Optional data to log
      */
     log(message, level = "debug", data = null) {
+        if (this.logs.length >= DEBUG_CONFIG.maxLogEntries) {
+            this.logs.shift(); // Remove oldest entry
+        }
+        
         const logEntry = {
             message,
             level,
@@ -294,50 +295,42 @@ export class DebugUtils {
         
         this.logs.push(logEntry);
         
-        // Respect max log entries limit
-        if (this.logs.length > DEBUG_CONFIG.maxLogEntries) {
-            this.logs.shift(); // Remove oldest entry
-        }
-        
-        // Console output based on log level and config
         if (DEBUG_CONFIG.enableConsoleLogging) {
             const consoleMethod = console[level] || console.log;
-            consoleMethod(`[Debug Log] ${message}`, data);
+            consoleMethod(`[${level.toUpperCase()}] ${message}`, data || "");
         }
     }
 
     /**
-     * Gets current debug configuration.
+     * Gets the current debug configuration.
+     * @returns {Object}
      */
     getConfig() {
-        return { ...DEBUG_CONFIG, ...DEBUG_FLAGS };
+        return { ...DEBUG_CONFIG };
     }
 
     /**
-     * Gets current status of all debug systems.
+     * Gets a summary of the current debug state.
      */
     getStatus() {
         return {
-            config: this.getConfig(),
-            dataStats: {
-                logs: this.logs.length,
-                performanceMetrics: this.performanceMetrics.length,
-                memorySnapshots: this.memorySnapshots.length,
-                errors: this.errorLog.length
-            },
-            memoryMonitoring: {
-                active: this.memoryMonitoringId !== null,
-                intervalId: this.memoryMonitoringId
-            },
-            lastSnapshot: this.memorySnapshots[this.memorySnapshots.length - 1] || null
+            logCount: this.logs.length,
+            errorCount: this.errorLog.length,
+            performanceMetricCount: this.performanceMetrics.length,
+            memorySnapshotCount: this.memorySnapshots.length,
+            isMemoryMonitoring: !!this.memoryMonitoringId,
+            lastLog: this.logs.slice(-1)[0],
+            lastError: this.errorLog.slice(-1)[0]
         };
     }
 
     /**
-     * Cleanup method for proper shutdown.
+     * Destroys the debug instance and cleans up resources.
      */
     destroy() {
         this.stopMemoryMonitoring();
-        console.log("[Debug Utils] Debug utilities shut down");
+        this.clearDebugData();
+        console.log("[Debug Utils] Instance destroyed, resources cleaned up.");
+        // We might need to un-register global error handlers if this is ever used dynamically
     }
-} 
+}

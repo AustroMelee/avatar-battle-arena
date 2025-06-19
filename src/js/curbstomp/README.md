@@ -1,104 +1,90 @@
-# Curbstomp System - Modular Architecture
+# Curbstomp System Module
 
 ## Overview
-The Avatar Battle Arena Curbstomp System has been refactored from a monolithic structure into a clean, modular architecture that follows the Single Responsibility Principle. This modular approach provides better maintainability, testability, and extensibility.
 
-## Architecture
+The Curbstomp System is a specialized narrative and mechanics module designed to handle one-sided battles. It implements a set of rules that can trigger instant-win/loss conditions, apply significant buffs or debuffs, or introduce other dramatic, battle-altering events when a fight is determined to be a mismatch.
 
-### Core Modules
+This system ensures that predictable or uninteresting battles are resolved quickly and narratively, preventing long, drawn-out fights where the outcome is already clear. It is a key component for managing game pacing and enhancing storytelling.
 
-#### 1. `curbstomp_state.js` - State Management
-**Responsibility:** Purely tracks who's marked for defeat
-- Manages the `charactersMarkedForDefeat` Set
-- Provides reset, query, and serialization functionality
-- No side effects or business logic
+## Architectural Constraints
 
-**Key Functions:**
-- `resetCurbstompState()` - Clear all marked characters
-- `markCharacterForDefeat(characterId)` - Mark a character
-- `isCharacterMarkedForDefeat(characterId)` - Check mark status
-- `serializeState()` / `restoreState()` - Save/load support
+- This module sits alongside the `engine` and is typically called by a higher-level manager (`battle_loop` or the main game manager).
+- It reads rule data from `/src/js/data_mechanics_*.js` files.
+- It writes events to the log using the `battle_logging` module (or a provided callback).
+- It should not have dependencies on `ai` or `ui`.
 
-#### 2. `curbstomp_rule_registry.js` - Rule Data Management
-**Responsibility:** Loads/organizes rules from data files
-- Imports from `data_mechanics_characters.js` and `data_mechanics_locations.js`
-- Provides filtering and lookup helpers
-- No rule evaluation logic
+## Module Interaction
 
-**Key Functions:**
-- `getAllCurbstompRulesForBattle(fighter1, fighter2, locationId)` - Get applicable rules
-- `filterApplicableRules(rules, fighter1, fighter2, battleState)` - Filter by criteria
-- `getRulesForFighter(rules, fighter, opponent, battleState)` - Fighter-specific rules
+```mermaid
+graph TD
+    A[Battle Loop] --> B{Curbstomp System}
+    B --> C[Data Files]
+    B --> D[Battle Logging]
+    B --> E[Battle State]
 
-#### 3. `curbstomp_rule_engine.js` - Core Logic Engine
-**Responsibility:** Evaluates/applies rules, no side effects
-- Determines which rules trigger
-- Orchestrates rule application
-- Delegates all narrative and logging to other modules
+    subgraph Curbstomp System
+        F[curbstomp_rule_engine.js]
+        G[curbstomp_rule_registry.js]
+        H[curbstomp_victim_selector.js]
+        I[curbstomp_narrative.js]
+    end
 
-**Key Functions:**
-- `applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog, isPreBattle)` - Main entry point
-- `checkCurbstompConditions(attacker, defender, locId, battleState)` - Overwhelming advantage detection
+    F --> G
+    F --> H
+    F --> I
 
-#### 4. `curbstomp_victim_selector.js` - Victim Selection Logic
-**Responsibility:** Who gets curbstomped?
-- Handles weighting logic and randomness
-- Supports complex probability distributions
-- Includes miraculous survival checks
+    C -- Rules --> G
+    I -- Log Events --> D
+    F -- Modifies --> E
+```
+- **Battle Loop**: The loop manager calls `applyCurbstompRules()` at the start of a turn or before the battle begins.
+- **Data Files**: The `curbstomp_rule_registry.js` loads all curbstomp rules from the static data files.
+- **Battle State**: The `curbstomp_rule_engine.js` reads the current `BattleState` to evaluate rule conditions and modifies the state (e.g., by marking a character for defeat) when a rule is applied.
+- **Battle Logging**: The `curbstomp_narrative.js` module generates descriptive log events that are passed back to the main battle log.
 
-**Key Functions:**
-- `selectCurbstompVictim(options)` - Main victim selection
-- `calculateSelectionWeights(attacker, defender, battleState)` - Weight calculation
-- `checkMiraculousSurvival(character, rule, survivalChance)` - Miracle survival
+## Files
 
-#### 5. `curbstomp_narrative.js` - Narrative Generation
-**Responsibility:** Only for generating narrative/logging events
-- Keeps text, HTML, and debug output separate from logic
-- Provides specialized narrative generators for different event types
-- Manages AI log entries
+-   **`index.js`**: The main entry point for the module. It provides barrel exports for all other files, offering both flat and namespaced access patterns (e.g., `CurbstompRuleEngine.applyCurbstompRules()`).
+-   **`curbstomp_rule_engine.js`**: The core logic engine. Its main function, `applyCurbstompRules()`, orchestrates the entire process. It gets applicable rules, evaluates their trigger conditions, applies their outcomes, and coordinates with the narrative and state modules.
+-   **`curbstomp_rule_registry.js`**: Responsible for loading and organizing all curbstomp rules. It imports rules from `data_mechanics_characters.js` and `data_mechanics_locations.js` and provides helper functions like `getAllCurbstompRulesForBattle()` to filter them for a specific fight.
+-   **`curbstomp_narrative.js`**: A pure narrative generation module. It contains functions that create detailed, human-readable log events for every possible curbstomp outcome (e.g., `generateInstantWinNarrative()`, `generateSurvivalMiracleNarrative()`). It keeps all text and logging separate from the core rule logic.
+-   **`curbstomp_state.js`**: Manages the state of which characters have been marked for defeat. It uses a `Set` to track victims and provides simple, pure functions like `markCharacterForDefeat()` and `isCharacterMarkedForDefeat()` to modify and query this state.
+-   **`curbstomp_victim_selector.js`**: Handles the complex logic of deciding *who* is affected by a rule. It supports weighted randomness, probability distributions, and miraculous survival checks (`checkMiraculousSurvival()`), ensuring that outcomes have a degree of unpredictability.
 
-**Key Functions:**
-- `generateRuleTriggerNarrative()` - Rule trigger events
-- `generateCurbstompDetectionNarrative()` - Overwhelming advantage
-- `generateInstantWinNarrative()` - Victory outcomes
-- `addCurbstompAiLog()` - AI log management
+## Usage
 
-#### 6. `index.js` - Barrel Exports
-**Responsibility:** Public API coordination
-- Provides both flat and namespaced exports
-- Convenience re-exports for common functions
-- Tree-shaking friendly
+Here is a typical example of how the system would be used within a battle loop.
 
-## Usage Examples
-
-### Basic Usage (Backward Compatible)
 ```javascript
-import { resetCurbstompState, applyCurbstompRules, checkCurbstompConditions } from './curbstomp/index.js';
+import { applyCurbstompRules, isCharacterMarkedForDefeat, resetCurbstompState } from './js/curbstomp/index.js';
 
-// Same API as before
+// Before a battle begins
 resetCurbstompState();
-applyCurbstompRules(fighter1, fighter2, battleState, battleEventLog, false);
-const isOverwhelming = checkCurbstompConditions(attacker, defender, locationId, battleState);
-```
 
-### Modular Usage (New Capabilities)
-```javascript
-import { CurbstompRuleRegistry, CurbstompVictimSelector } from './curbstomp/index.js';
+async function runBattleTurn(battleState, battleLog) {
+    // At the start of a turn, check for curbstomp conditions
+    applyCurbstompRules(
+        battleState.fighters.fighter1,
+        battleState.fighters.fighter2,
+        battleState,
+        battleLog,
+        false // This is not a pre-battle check
+    );
 
-// Get rules for specific fighters
-const rules = CurbstompRuleRegistry.getRulesForFighter(allRules, fighter, opponent, battleState);
+    // Check if the rules resulted in a character being defeated
+    if (isCharacterMarkedForDefeat(battleState.fighters.fighter1.id)) {
+        // End the battle, fighter1 has lost
+        endBattle(battleState.fighters.fighter2, battleState.fighters.fighter1);
+        return;
+    }
+    if (isCharacterMarkedForDefeat(battleState.fighters.fighter2.id)) {
+        // End the battle, fighter2 has lost
+        endBattle(battleState.fighters.fighter1, battleState.fighters.fighter2);
+        return;
+    }
 
-// Calculate selection weights
-const weights = CurbstompVictimSelector.calculateSelectionWeights(attacker, defender, battleState);
-```
-
-### Namespaced Usage
-```javascript
-import { CurbstompNarrative } from './curbstomp/index.js';
-
-// Generate specific narrative types
-const survivalEvent = CurbstompNarrative.generateSurvivalMiracleNarrative(battleState, character, rule);
-const winEvent = CurbstompNarrative.generateInstantWinNarrative(battleState, winner, loser, rule);
+    // ... proceed with the normal turn logic if no one was defeated.
+}
 ```
 
 ## Benefits of Modular Architecture

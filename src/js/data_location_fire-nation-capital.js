@@ -53,8 +53,13 @@
  * @property {string[]} envImpactCritical - Critical phrases describing environmental impacts within this location.
  * @property {string[]} envTags - An array of tags describing the environment (e.g., 'urban', 'fiery').
  * @property {LocationEnvironmentalModifiers} environmentalModifiers - Modifiers applied to moves based on element or move type.
+ * @property {number} volatility - A numerical value indicating how often environmental events occur.
  * @property {number} fragility - A numerical value representing how easily the environment takes collateral damage.
- * @property {string} background - URL to a background image for the location.
+ * @property {string} [background] - URL to a background image for the location.
+ * @property {string[]} [availableCharacters]
+ * @property {object} [environmentalEffects]
+ * @property {object} [characterMoveAdjustments]
+ * @property {object} [damageThresholds]
  */
 
 /**
@@ -125,6 +130,9 @@ export const fireNationCapital = {
         severe: 50,
         catastrophic: 75
     },
+    volatility: 40,
     fragility: 60,
-    background: "img/img_caldera.jpg",
-}; 
+    background: "src/assets/images/img_caldera.jpg",
+    availableCharacters: ["aang", "azula"],
+    environmentalEffects: {},
+};

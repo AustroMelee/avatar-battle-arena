@@ -340,8 +340,8 @@ function removeEmptyFields(obj) {
 function calculateBattleDuration(events) {
     if (events.length === 0) return 0;
     
-    const first = new Date(events[0].timestamp);
-    const last = new Date(events[events.length - 1].timestamp);
+    const first = new Date(events[0].timestamp).getTime();
+    const last = new Date(events[events.length - 1].timestamp).getTime();
     return last - first;
 }
 

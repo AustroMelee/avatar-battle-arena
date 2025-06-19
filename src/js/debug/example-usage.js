@@ -44,7 +44,8 @@ debug.takeMemorySnapshot();
 
 // Generate and export a report
 const report = debug.generateReport();
-console.log("Report generated:", report.metadata.timestamp);
+console.log("Report generated, see below:");
+console.log(report);
 
 // Example 2: Using individual modules
 import { analyzeBattle } from "./battleAnalysis.js";
@@ -54,7 +55,7 @@ import { generateReport } from "./reporting.js";
 // Use individual functions
 analyzeBattle(mockBattleResult);
 takeMemorySnapshot([]);
-generateReport([], [], []);
+generateReport({ log: [], errorLog: [], performanceMetrics: [], memorySnapshots: [] });
 
 // Example 3: Using namespaced imports
 import { BattleAnalysis, PerformanceTracking } from "./index.js";

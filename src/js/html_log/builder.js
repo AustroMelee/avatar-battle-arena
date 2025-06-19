@@ -9,6 +9,11 @@ import { resetBuilder, finalizeBuilder } from "./state.js";
 import { getErrorMessage, getDefaultMessage } from "./html_generators.js";
 
 export class HtmlLogBuilder {
+    htmlLog = "";
+    currentTurnDivOpen = false;
+    currentPhaseDivOpen = false;
+    currentTurn = -1;
+
     constructor() {
         this.reset();
     }

@@ -6,8 +6,8 @@
 
 "use strict";
 
-import { clamp } from "../utils_math.js";
-import { generateCollateralDamageEvent } from "../engine_narrative-engine.js";
+import { clampValue } from "../constants_consolidated.js";
+import { generateCollateralDamageEvent } from "../narrative/environmentNarrative.js";
 import { handleStatChange } from "./statChangeConfig.js";
 
 /**
@@ -16,7 +16,10 @@ import { handleStatChange } from "./statChangeConfig.js";
  * @returns {object} Handler result
  */
 export function handleDamage(ctx) {
-    return handleStatChange({ ...ctx, effect: { ...ctx.effect, stat: "hp", value: -ctx.effect.value } });
+    const { effect, primaryTarget } = ctx;
+    if (!primaryTarget) return { success: false, message: "Invalid target." };
+    primaryTarget.damageLevel = clampValue(primaryTarget.damageLevel + effect.value, 0, 100);
+    return { success: true, message: `${primaryTarget.name} takes ${effect.value} damage.` };
 }
 
 /**
@@ -102,18 +105,16 @@ export function handleEnvironmentalDamage(ctx) {
         return { success: false, message: "Invalid target for environmental damage effect." };
     }
     
-    primaryTarget.damageLevel = clamp(primaryTarget.damageLevel + effect.value, 0, 100);
+    primaryTarget.damageLevel = clampValue(primaryTarget.damageLevel + effect.value, 0, 100);
     const message = `Environmental damage increases by ${effect.value}.`;
     
     // Trigger detailed environmental narrative event
     const collateralEvent = generateCollateralDamageEvent(
         effect.sourceMove, 
         actor, 
-        target, 
-        primaryTarget, 
+        { effectiveness: { label: "Normal" }, effects: [effect] },
         battleState.locationConditions, 
-        battleState, 
-        { effectiveness: { label: "Normal" }, effects: [effect] }
+        battleState
     );
     if (collateralEvent) ctx.generatedEvents.push(collateralEvent);
     

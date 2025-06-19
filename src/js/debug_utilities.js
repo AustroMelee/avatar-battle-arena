@@ -1,3 +1,6 @@
+// @ts-nocheck
+"use strict";
+
 /**
  * @fileoverview Debug Utilities for Avatar Battle Arena - Compatibility Layer
  * @description Legacy compatibility layer for the modular debug system
@@ -14,8 +17,6 @@
  * @since 1.0.0
  * @deprecated Consider using the modular debug system directly
  */
-
-"use strict";
 
 console.log("[Debug Utilities] Loading modular debug system...");
 

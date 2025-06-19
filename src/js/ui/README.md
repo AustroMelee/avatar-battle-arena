@@ -1,209 +1,129 @@
-# Battle Results UI Module
+# 🖼️ UI Module
 
-**Modular architecture for battle results display, analysis, and controls.**
+## 📜 Purpose
 
-## 🏗️ Architecture Overview
+The UI module is the presentation layer of the Avatar Battle Arena. It is responsible for all direct DOM manipulation, rendering application state to the screen, and handling all user interactions, from character selection to displaying final battle results. It acts as the primary interface between the user and the underlying game engine, ensuring a clear separation of concerns by never containing any core game logic itself.
 
-This module splits the previously monolithic `ui_battle-results.js` into focused, single-responsibility modules following clean architecture principles.
+The module is designed to be state-driven. It listens for changes in the application's central state and re-renders components as needed. It also captures user input (like character selections or button clicks) and dispatches actions to update the state, but does not directly invoke engine functions.
 
-## 📁 Module Structure
+## 🗂️ Files & Exports
 
+The UI module is composed of a main controller and several specialized sub-modules for handling specific UI concerns like battle analysis, character selection, and replaying battles.
+
+### Core UI Files
+
+-   **`ui.js`**: The central UI orchestrator.
+    -   `initializeUI()`: Sets up all UI components, event listeners, and the main render loop.
+    -   `updateSelection()`: Updates the user's fighter/location selection state.
+    -   `getCurrentSelection()`: Retrieves the current selection state.
+    -   `displayBattleResults()`: Coordinates the process of showing the post-battle analysis screen.
+-   **`index.js`**: A barrel file that exports the primary functions from `ui.js` and re-exports functionality from other UI modules for easy access.
+-   **`ui_module.js`**: Contains low-level, reusable UI functions for managing component state, screen transitions, and the render loop.
+-   **`ui_state.js`**: Manages the internal state of the UI, including component visibility, user selections, and global UI configurations like themes.
+-   **`dom_elements.js`**: A DOM registry that caches references to frequently accessed elements to improve performance and centralize DOM queries.
+-   **`ui_renderer.js`**: Handles the actual rendering logic, taking state and converting it into DOM updates.
+-   **`ui_events.js`**: Centralizes all UI-related event handling.
+
+### Battle Results & Analysis
+
+-   **`battle_results.js`**: Orchestrates the analysis and rendering of the final battle results screen.
+    -   `displayCompleteBattleResults()`: The main entry point to show the results.
+-   **`battle_results_renderer.js`**: A pure rendering module that creates HTML elements from analyzed battle data without performing direct DOM manipulation.
+-   **`battle_analysis.js`**: The entry point for the analysis sub-module.
+    -   `analyzeBattleResults()`: Takes a raw `BattleResult` object and produces a structured `BattleAnalysisResult`.
+-   **`./analysis/`**: A subdirectory containing specialized analysis functions for the winner, fighters, and environment.
+
+### Other UI Components
+
+-   **`./character_selection/`**: A sub-module dedicated to the logic and state of the character selection screen.
+-   **`./replay/`**: A sub-module containing all logic for the battle replay system, including playback controls and state snapshot management.
+-   **`battle_log_controls.js`**: Provides standalone functions for managing the interactive elements of the detailed battle log (toggling visibility, copying content).
+
+## 🧩 Module Interactions
+
+The UI module is the top-level consumer of application state and the primary source of user-driven actions. It sits between the user and the rest of the application.
+
+```mermaid
+graph TD
+    subgraph User
+        direction LR
+        A[User Interaction]
+    end
+
+    subgraph UI Module (src/js/ui)
+        direction TB
+        B(ui.js / ui_events.js) --> C{State Update Request};
+        D(ui_renderer.js) --> E[DOM Update];
+    end
+
+    subgraph State Management
+        direction TB
+        F(state_manager.js) -->|Notifies| D;
+    end
+
+    subgraph Engine (src/js/engine)
+        direction TB
+        G(engine_battle-engine-core.js)
+    end
+    
+    subgraph Data (src/js/data)
+        H(Character/Location Data)
+    end
+
+    A --> B;
+    C --> F;
+    F --> G;
+    G --> H;
+    G --> F;
 ```
-js/ui/
-├── battle_analysis.js       # Pure data analysis functions
-├── battle_results_renderer.js  # DOM element creation & rendering
-├── battle_log_controls.js   # Event handling for log controls
-├── dom_elements.js          # Centralized DOM element management
-├── index.js                 # Barrel exports & convenience functions
-└── README.md               # This documentation
-```
 
-## 🔧 Core Modules
+1.  **User -> UI**: The user interacts with the DOM (e.g., clicks a character).
+2.  **UI -> State**: The UI event handlers in `ui_events.js` or `ui.js` capture this interaction and request a state change via `state_manager.js`.
+3.  **State -> Engine**: The `main.js` application loop detects the state change (e.g., a "start battle" action) and invokes the `engine` with the current state.
+4.  **Engine -> State**: After the battle simulation, the engine returns a result, which is used to update the central state.
+5.  **State -> UI**: The `state_manager` notifies its listeners (including the UI) of the state change.
+6.  **UI -> DOM**: The `ui_renderer.js` observes the new state and updates the DOM to reflect it (e.g., showing the battle results screen).
 
-### `battle_analysis.js`
-**Pure data analysis with no DOM manipulation**
-- `analyzeBattleResults(battleResult)` - Converts raw battle data to structured analysis
-- `analyzeBattleWinner()` - Determines winner and outcome
-- `analyzeFighterStatus()` - Processes individual fighter stats
-- `analyzeEnvironmentalImpact()` - Calculates environment damage
+## 📝 Architectural Constraints
+
+From `.cursorcontext`:
+-   **UI Layer (`src/js/ui/*.js`)**:
+    -   **Purpose**: DOM manipulation, animations, rendering logic.
+    -   **Can import from**: `/utils`.
+    -   **MUST NOT import from**: `/engine` or `/ai`.
+
+This is a critical architectural rule. The UI must remain decoupled from game logic. It should be "dumb," only reacting to state changes and dispatching user intentions. All battle calculations and AI decisions must happen outside this module.
+
+## Usage Example
+
+Initializing the UI and handling a user's selection to start a battle is managed in the main application entry point (`main.js`), but the core UI functions are exported from this module.
 
 ```javascript
-import { analyzeBattleResults } from './ui/battle_analysis.js';
+// In main.js
 
-const analysis = analyzeBattleResults(battleResult);
-// Returns: { isValid, winner, fighters, environment, summary }
-```
+import { initializeUI, getCurrentSelection } from './ui.js';
+import { initializeBattleState } from './engine_state_initializer.js';
+import { executeBattle } from './engine_battle-engine-core.js';
+import { setGlobalState, getGlobalState } from './state_manager.js';
 
-### `battle_results_renderer.js`
-**DOM element creation without direct manipulation**
-- `renderBattleAnalysis(analysis, targetElement)` - Renders complete analysis
-- `renderEnvironmentImpact(envData, damageEl, impactsEl)` - Environment display
-- `createAnalysisListItem(text, value, class)` - Creates formatted list items
-
-```javascript
-import { renderBattleAnalysis } from './ui/battle_results_renderer.js';
-
-const analysisElement = document.getElementById('analysis-list');
-renderBattleAnalysis(analysis, analysisElement);
-```
-
-### `battle_log_controls.js`
-**Event handling for log toggle/copy functionality**
-- `setupBattleLogControls(toggleBtn, copyBtn, logContent)` - Complete setup
-- `setupToggleLogControl(toggleBtn, logContent)` - Toggle functionality
-- `setupCopyLogControl(copyBtn, logContent)` - Copy functionality
-- `resetBattleLogControls()` - Reset to initial state
-
-```javascript
-import { setupBattleLogControls } from './ui/battle_log_controls.js';
-
-setupBattleLogControls(toggleButton, copyButton, logContentDiv);
-```
-
-### `dom_elements.js`
-**Centralized DOM element caching and access**
-- `initializeDOMElements()` - Caches all battle results elements
-- `getDOMElement(key)` - Gets specific cached element
-- `getBattleResultsElements()` - Gets analysis-related elements
-- `getEnvironmentElements()` - Gets environment display elements
-- `getBattleLogElements()` - Gets log control elements
-
-```javascript
-import { getBattleResultsElements } from './ui/dom_elements.js';
-
-const { analysisList, winnerName } = getBattleResultsElements();
-```
-
-## 🚀 High-Level API
-
-### Quick Usage
-```javascript
-import { displayCompleteBattleResults, resetCompleteBattleResults } from './ui/index.js';
-
-// Display complete battle results
-displayCompleteBattleResults(battleResult, locationId);
-
-// Reset all UI components
-resetCompleteBattleResults();
-```
-
-### Namespace Access
-```javascript
-import { BattleResultsUI } from './ui/index.js';
-
-const analysis = BattleResultsUI.analyzeBattleResults(battleResult);
-BattleResultsUI.renderBattleAnalysis(analysis, targetElement);
-```
-
-### Individual Module Access
-```javascript
-// Import specific functions
-import { analyzeBattleResults } from './ui/battle_analysis.js';
-import { renderBattleAnalysis } from './ui/battle_results_renderer.js';
-
-// Or import everything from a module
-import * as BattleAnalysis from './ui/battle_analysis.js';
-```
-
-## 🎯 Benefits
-
-### ✅ Single Responsibility Principle
-- **Analysis**: Pure data transformation
-- **Rendering**: DOM element creation
-- **Controls**: Event handling
-- **DOM Management**: Element caching
-
-### ✅ Testability
-Each module can be unit tested in isolation:
-```javascript
-// Test analysis without DOM
-const analysis = analyzeBattleResults(mockBattleResult);
-assert(analysis.isValid);
-
-// Test rendering with mock elements
-const mockElement = document.createElement('div');
-renderBattleAnalysis(analysis, mockElement);
-```
-
-### ✅ Framework Independence
-- Rendering functions return elements/HTML strings
-- No direct DOM mutation in analysis
-- Easy migration to React/Vue/Svelte
-
-### ✅ Performance Optimized
-- Lazy DOM element initialization
-- Cached element access
-- Tree-shakable imports
-
-### ✅ Development Friendly
-- Clear module boundaries for team development
-- AI/Cursor editing optimized with smaller files
-- Hot-swappable components for A/B testing
-
-## 🔄 Migration Guide
-
-### From Old `ui_battle-results.js`
-```javascript
-// OLD: Monolithic approach
-import { displayFinalAnalysis, setupDetailedLogControls } from './ui_battle-results.js';
-displayFinalAnalysis(battleResult);
-setupDetailedLogControls();
-
-// NEW: Modular approach
-import { displayCompleteBattleResults } from './ui/index.js';
-displayCompleteBattleResults(battleResult, locationId);
-```
-
-### Backward Compatibility
-The refactored `ui_battle-results.js` maintains the same public API while internally using the new modules.
-
-## 🧪 Testing Strategy
-
-### Unit Testing
-```javascript
-// Test individual modules
-describe('BattleAnalysis', () => {
-  test('analyzes battle results correctly', () => {
-    const result = analyzeBattleResults(mockData);
-    expect(result.isValid).toBe(true);
-  });
+// 1. Initialize the entire UI system on page load
+await initializeUI({
+    theme: 'dark',
+    enableAnimations: true,
 });
-```
 
-### Integration Testing
-```javascript
-// Test module interactions
-describe('BattleResultsUI Integration', () => {
-  test('complete workflow', () => {
-    displayCompleteBattleResults(battleResult, locationId);
-    // Assert DOM changes
-  });
+// 2. An event listener for the 'FIGHT' button would trigger the battle
+document.getElementById('start-battle-button').addEventListener('click', async () => {
+    // 3. Get the fighter and location IDs from the UI's state
+    const selection = getCurrentSelection();
+
+    // 4. The main application logic (not the UI) calls the engine
+    const initialState = initializeBattleState(selection.fighter1Id, selection.fighter2Id, selection.locationId);
+    const battleResult = await executeBattle(initialState);
+
+    // 5. Update the global state with the results
+    setGlobalState({ battleResult: battleResult, view: 'results' });
+
+    // The UI will automatically react to this state change and display the results.
 });
-```
-
-## 🔮 Future Extensibility
-
-This architecture enables easy addition of:
-- **Analytics Dashboard**: Import analysis module for data visualization
-- **Export System**: Use renderer for PDF/CSV generation
-- **Replay System**: Extend log controls for playback
-- **Theme System**: Modular rendering for different UI themes
-- **Plugin Architecture**: Hot-swappable renderer components
-
-## 🏁 Getting Started
-
-1. **Import the convenience function** for quick usage:
-   ```javascript
-   import { displayCompleteBattleResults } from './ui/index.js';
-   ```
-
-2. **Or import specific modules** for granular control:
-   ```javascript
-   import { analyzeBattleResults } from './ui/battle_analysis.js';
-   import { renderBattleAnalysis } from './ui/battle_results_renderer.js';
-   ```
-
-3. **Use the namespace** for organized access:
-   ```javascript
-   import { BattleResultsUI } from './ui/index.js';
-   ``` 
+``` 

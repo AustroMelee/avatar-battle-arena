@@ -10,9 +10,11 @@
 // TYPE IMPORTS
 // ============================================================================
 /**
- * @typedef {import('../../types.js').Move} Move
- * @typedef {import('../../types.js').DecisionContext} DecisionContext
- * @typedef {import('../../types.js').AiAnalysis} AiAnalysis
+ * @typedef {import('../../types/battle.js').Fighter} Fighter
+ * @typedef {import('../../types/ai.js').ThreatAssessment} ThreatAssessment
+ * @typedef {import('../../types/ai.js').AiAnalysis} AiAnalysis
+ * @typedef {import('../../types/battle.js').Move} Move
+ * @typedef {import('../../types/ai.js').DecisionContext} DecisionContext
  */
 
 // ============================================================================

@@ -1,215 +1,116 @@
-# AI Decision System - Modular Architecture
+# AI Module
 
-The Avatar Battle Arena AI system has been completely refactored from a monolithic 301-line file into a clean, modular architecture with separated concerns.
+## Overview
 
-## Architecture Overview
+The AI module is responsible for all non-player character (NPC) decision-making in the Avatar Battle Arena. It features a modular architecture that separates different aspects of AI logic—such as personality, memory, strategy, and move selection—into distinct, testable components. This design allows for complex and believable AI behavior that can be easily extended and debugged.
 
-### Previous Issues (Monolithic `engine_ai-decision.js`)
-- **Multiple responsibilities mixed together**: personality, memory, strategy, scoring, selection
-- **Heavy parameter passing** with nested structures
-- **Difficult unit testing** - couldn't test components in isolation
-- **Adding features became increasingly fragile** as complexity grew
-- **AI logging and randomness mixed with core logic**
+The primary entry point for this module is `selectMove()` from `ai_decision_engine.js`, which orchestrates the various sub-modules to produce a final, reasoned move selection.
 
-### New Modular Structure
+## Architectural Constraints
 
+This module adheres to the following rules defined in `.cursorcontext`:
+- **CAN** import from `/data`, `/utils`, and `/engine`.
+- **MUST NOT** import from `/ui` or `/css`.
+- All logic is pure JavaScript (ES2020) with JSDoc type annotations.
+
+## Module Interaction
+
+```mermaid
+graph TD
+    A[AI Module] --> B[Engine Module]
+    A --> C[Data Module]
+    A --> D[Utils Module]
+
+    subgraph AI Module
+        E[ai_decision_engine.js]
+        F[ai_move_scoring.js]
+        G[ai_strategy_intent.js]
+    end
+
+    E --> F
+    E --> G
+    F --> G
+
+    B -- Battle State --> A
+    C -- Character/Move Data --> A
+    D -- Utility Functions --> A
+    A -- Selected Move --> B
 ```
-js/ai/
-├── ai_personality.js        # Personality profiles & adaptation
-├── ai_memory.js            # Working memory & opponent modeling  
-├── ai_strategy_intent.js   # Strategic intent determination
-├── ai_move_scoring.js      # Move weight calculation
-├── ai_move_selection.js    # Randomization & selection
-├── ai_decision_engine.js   # Top-level orchestrator
-├── index.js               # Barrel exports
-└── README.md              # This file
-```
 
-## Module Responsibilities
+- **Engine**: The AI module is primarily called by the `engine` during an AI-controlled character's turn. It receives the current `BattleState` and returns the chosen `Move`.
+- **Data**: It reads from the `/data` modules to get information about character archetypes, movesets, and other static game data.
+- **Utils**: It uses shared functions from `/utils` for tasks like cloning and validation.
 
-### `ai_personality.js` - Character Traits & Adaptation
-- **Pure personality state management**
-- Handles trait adaptation based on battle results
-- Calculates dynamic personality modifiers
-- No decision logic - just personality data
+## Files
+
+### Core AI Logic (`/src/js/ai/`)
+
+-   **`index.js`**: The main entry point for the AI module. It provides barrel exports for all other files, offering both flat and namespaced access patterns (e.g., `AiStrategy.determineIntent()`).
+-   **`ai_decision_engine.js`**: The central orchestrator. Its `makeAIDecision()` function coordinates all sub-modules to analyze the battle, score potential moves, and select the final action.
+-   **`ai_memory.js`**: Manages the AI's "working memory." It tracks move effectiveness, opponent patterns, and cooldowns to enable learning and adaptation. Exports `updateAiMemory()`, `getMoveEffectivenessScore()`, and `getOpponentProfile()`.
+-   **`ai_move_scoring.js`**: Pure scoring logic. It calculates weights for available moves based on personality, strategic intent, and contextual modifiers without any randomness. Exports `calculateMoveWeights()`.
+-   **`ai_move_selection.js`**: Handles all randomness and probability. It converts move weights into probabilities (using softmax) and selects the final move. Exports `selectMoveFromWeights()`.
+-   **`ai_personality.js`**: Manages AI personality profiles. It handles dynamic traits that adapt based on battle events (e.g., aggression, risk tolerance). Exports `getDynamicPersonality()` and `adaptPersonality()`.
+-   **`ai_scoring_utils.js`**: Contains helper functions for the scoring process, such as applying personality/memory modifiers and generating human-readable reasons for a decision.
+-   **`ai_strategy_intent.js`**: Determines the AI's high-level goal for the current turn (e.g., "PressAdvantage", "DesperateGambit"). This "intent" guides the move scoring process. Exports `determineStrategicIntent()`.
+-   **`ai_utils.js`**: A collection of shared utility functions used across the AI module, such as `getElementalEffectiveness()` and `getAvailableMoves()`.
+
+### Sub-modules
+
+#### `/analysis/`
+- **`threat_assessment.js`**: Provides functions to analyze the opponent's threat level and the overall risk of the current situation. Exports `assessThreatLevel()`.
+
+#### `/decision/`
+This sub-module contains the building blocks for constructing and validating a decision.
+- **`analysis.js`**: Analyzes the decision context to create a strategic approach. Exports `analyzeDecisionContext()`.
+- **`bias.js`**: Defines character-specific biases (e.g., Azula's tendency for overkill) to add flavor to AI decisions. Exports `getCharacterBias()`.
+- **`condition_evaluator.js`**: Centralizes complex conditional logic, like determining if a character is "in control" or "desperate."
+- **`context.js`**: Builds the comprehensive `DecisionContext` object that is passed through the AI system. Exports `buildDecisionContext()`.
+- **`fallback.js`**: Provides a safe fallback decision (`Struggle` or the first available move) if the main AI logic fails. Exports `createFallbackDecision()`.
+- **`phase.js`**: Determines the current battle phase (e.g., "opening", "mid", "late"). Exports `determineBattlePhase()`.
+- **`threat_analysis.js`**: Quantifies the immediate survival risk for the AI to trigger defensive pivots. Exports `analyzeThreatLevel()`.
+- **`validation.js`**: Contains functions to validate the inputs and outputs of the decision engine, preventing invalid data flow. Exports `validateInputs()` and `validateDecision()`.
+
+#### `/evaluation/`
+- **`move_evaluator.js`**: Evaluates all available moves and assigns a score to each, now driven by simulation. Exports `evaluateAvailableMoves()`.
+- **`scoring_calculators.js`**: Provides functions to calculate individual components of a move's score (damage, accuracy, risk).
+
+#### `/goals/`
+- **`goal_setting.js`**: Determines the AI's primary goal for the turn (e.g., "survive", "finish_opponent") and calculates decision weights. Exports `determinePrimaryGoal()`.
+
+#### `/simulation/`
+- **`turn_simulator.js`**: Provides functionality to predict the outcome of a move by simulating a future turn, allowing for more strategic lookahead. Exports `simulateTurn()`.
+
+## Usage
+
+Here is a typical example of how the `engine` would use this module:
 
 ```javascript
-import { adaptPersonality, getDynamicPersonality } from './ai/ai_personality.js';
+import { makeAIDecision } from './ai/index.js';
 
-// Adapt based on recent failures/successes
-adaptPersonality(actor);
+// Inside the battle loop, when it's the AI's turn...
+async function processAiTurn(aiFighter, opponentFighter, battleState) {
+    try {
+        const decisionOptions = {
+            timeLimit: 3000,
+            enableDebug: true,
+        };
+        
+        const decision = await makeAIDecision(
+            aiFighter,
+            opponentFighter,
+            battleState,
+            decisionOptions
+        );
 
-// Get personality modified by phase/mental state
-const profile = getDynamicPersonality(actor, currentPhase);
-```
+        console.log(`AI chose: ${decision.moveId} with ${decision.confidence.toFixed(2)} confidence.`);
+        console.log(`Reasoning: ${decision.reasoning}`);
 
-### `ai_memory.js` - Learning & Opponent Modeling
-- **AI "working memory" without decision logic**
-- Tracks move effectiveness and opponent patterns
-- Manages cooldowns and learning data
-- Pure data management with helper queries
+        // The engine would then apply the chosen move...
+        // applyMove(decision.moveId);
 
-```javascript
-import { updateAiMemory, getMoveEffectivenessScore } from './ai/ai_memory.js';
-
-// Learn from recent battle events
-updateAiMemory(learner, opponent);
-
-// Query learned effectiveness
-const score = getMoveEffectivenessScore(actor.aiMemory, 'Lightning Bolt');
-```
-
-### `ai_strategy_intent.js` - Strategic Analysis
-- **Determines "why should I do this?" logic**
-- Analyzes battle state to determine strategic intent
-- Pure analysis without move weighting or selection
-- Returns intent strings that drive scoring
-
-```javascript
-import { determineStrategicIntent, STRATEGIC_INTENTS } from './ai/ai_strategy_intent.js';
-
-const intent = determineStrategicIntent(actor, defender, turn, phase);
-// Returns: 'PressAdvantage', 'DesperateGambit', 'FinishingBlowAttempt', etc.
-```
-
-### `ai_move_scoring.js` - Weight Calculation
-- **Pure scoring logic based on personality + intent**
-- Calculates move weights from multiple factors
-- No randomness - deterministic scoring only
-- Separates personality, contextual, and intent modifiers
-
-```javascript
-import { calculateMoveWeights, getViableMoves } from './ai/ai_move_scoring.js';
-
-const weightedMoves = calculateMoveWeights(actor, defender, conditions, intent, phase);
-const viableMoves = getViableMoves(weightedMoves);
-```
-
-### `ai_move_selection.js` - Randomization & Probability
-- **Handles all randomness and probability math**
-- Softmax probability conversion with temperature
-- Distribution sampling and fallback handling
-- Pure selection logic without game state
-
-```javascript
-import { selectMoveFromWeights, getSoftmaxProbabilities } from './ai/ai_move_selection.js';
-
-const chosenMove = selectMoveFromWeights(weightedMoves, predictability);
-const probabilities = getSoftmaxProbabilities(weightedMoves, temperature);
-```
-
-### `ai_decision_engine.js` - Top-Level Orchestrator
-- **Composes all modules for the main `selectMove` interface**
-- Handles logging, state updates, and error cases
-- Maintains backward compatibility
-- Coordinates between subsystems
-
-```javascript
-import { selectMove } from './ai/ai_decision_engine.js';
-
-// Main interface - same signature as before
-const result = selectMove(actor, defender, conditions, turn, currentPhase);
-```
-
-## Usage Patterns
-
-### Simple Usage (Main Interface)
-```javascript
-import { selectMove } from './ai/index.js';
-
-// Same interface as the old monolithic system
-const { move, aiLogEntryFromSelectMove } = selectMove(actor, defender, conditions, turn, phase);
-```
-
-### Modular Usage (Individual Components)
-```javascript
-import { AiStrategy, AiScoring, AiSelection } from './ai/index.js';
-
-// Use components individually for testing/analysis
-const intent = AiStrategy.determineIntent(actor, defender, turn, phase);
-const weights = AiScoring.calculateWeights(actor, defender, conditions, intent, phase);
-const choice = AiSelection.select(weights, predictability);
-```
-
-### Analysis & Debugging
-```javascript
-import { analyzeAiDecision, getAiSummary } from './ai/index.js';
-
-// Get detailed analysis without making a decision
-const analysis = analyzeAiDecision(actor, defender, conditions, turn, phase);
-
-// Post-battle AI performance summary
-const summary = getAiSummary(actor);
-```
-
-## Benefits of Modular Architecture
-
-### 🧪 **Enhanced Testability**
-- Each module can be unit tested in isolation
-- Mock different components for focused testing
-- Test personality changes without full AI pipeline
-
-### 🚀 **Development Velocity**
-- Team members can work on different modules simultaneously
-- Clear ownership boundaries prevent merge conflicts
-- Easier to reason about and debug individual components
-
-### 🔧 **AI/Cursor Friendly**
-- Smaller files are easier for AI to understand and edit
-- Clear separation of concerns guides AI suggestions
-- Focused context reduces hallucination
-
-### ⚡ **Performance Optimized**
-- Tree-shaking eliminates unused code
-- Selective imports reduce bundle size
-- Hot-swappable modules for A/B testing
-
-### 🔮 **Future-Proofed**
-- Easy to add new AI personalities or intents
-- Modular scoring allows experimentation
-- Clean interfaces support rule editors and analytics
-
-### 🛠 **Production Ready**
-- Conditional loading based on build flags
-- CLI/Node.js compatible for automation
-- Enhanced error handling and validation
-
-## Migration from Old System
-
-The refactor maintains **100% backward compatibility**. Existing code continues to work:
-
-```javascript
-// OLD (still works)
-import { selectMove } from './engine_ai-decision.js';
-
-// NEW (recommended)
-import { selectMove } from './ai/index.js';
-```
-
-For advanced usage, gradually migrate to modular imports:
-
-```javascript
-// Migration path: start using individual modules
-import { AiPersonality, AiMemory } from './ai/index.js';
-```
-
-## Architecture Principles
-
-1. **Single Responsibility Principle** - Each module has one clear purpose
-2. **Dependency Injection** - Modules receive data, don't fetch it
-3. **Pure Functions** - Most functions avoid side effects when possible  
-4. **Explicit Dependencies** - Clear imports show module relationships
-5. **Backward Compatibility** - Existing code continues working during transition
-
-## Adding New Features
-
-### New AI Personality Trait
-Add to `ai_personality.js` without touching other modules.
-
-### New Strategic Intent
-Add to `STRATEGIC_INTENTS` in `ai_strategy_intent.js` and corresponding multipliers in `ai_move_scoring.js`.
-
-### New Selection Algorithm
-Implement in `ai_move_selection.js` without affecting scoring logic.
-
-The modular architecture makes the AI system **maintainable, testable, and extensible** while preserving all existing functionality. 
+    } catch (error) {
+        console.error("AI decision process failed:", error);
+        // Handle error, maybe use a fallback move
+    }
+} 

@@ -6,7 +6,7 @@
 
 "use strict";
 
-import { characters } from "./data_characters.js";
+import { getCharacterTemplate } from "./data_characters.js";
 import { locations } from "./locations.js";
 
 /**
@@ -19,8 +19,8 @@ import { locations } from "./locations.js";
  * @returns {string} Formatted battle log string.
  */
 export function formatSingleBattleLog(result, fighter1Id, fighter2Id, locationId, timeOfDay) {
-    const f1Name = characters[fighter1Id]?.name || fighter1Id;
-    const f2Name = characters[fighter2Id]?.name || fighter2Id;
+    const f1Name = getCharacterTemplate(fighter1Id)?.name || fighter1Id;
+    const f2Name = getCharacterTemplate(fighter2Id)?.name || fighter2Id;
     const locName = locations[locationId]?.name || locationId;
     let logOutput = `\n===== MATCHUP: ${f1Name} vs ${f2Name} @ ${locName} (${timeOfDay}) =====\n`;
     
@@ -28,7 +28,7 @@ export function formatSingleBattleLog(result, fighter1Id, fighter2Id, locationId
         logOutput += `STATUS: ERROR - ${result.error}\n`;
         logOutput += `Error Details: ${result.errorMessage || "No specific error message."}\n`;
     } else {
-        logOutput += `STATUS: ${result.isDraw ? "DRAW" : `${characters[result.winnerId]?.name || result.winnerId} WINS`}\n`;
+        logOutput += `STATUS: ${result.isDraw ? "DRAW" : `${getCharacterTemplate(result.winnerId)?.name || result.winnerId} WINS`}\n`;
         logOutput += `Winner ID: ${result.winnerId || "N/A"}\n`;
         logOutput += `Loser ID: ${result.loserId || "N/A"}\n\n`;
         logOutput += "--- FINAL STATES ---\n";

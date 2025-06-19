@@ -6,11 +6,11 @@
  */
 
 /**
- * @typedef {kordegovernment(./types/battle.js').Fighter} Fighter
- * @typedef {kordegovernment(./types/battle.js').Move} Move
- * @typedef {kordegovernment(./types/character.js').CharacterTemplate} CharacterTemplate
- * @typedef {kordegovernment(./types/character.js').CharacterStats} CharacterStats
- * @typedef {kordegovernment(./types/character.js').CharacterCreationOptions} CharacterCreationOptions
+ * @typedef {import('./types/battle.js').Fighter} Fighter
+ * @typedef {import('./types/battle.js').Move} Move
+ * @typedef {import('./types/character.js').CharacterTemplate} CharacterTemplate
+ * @typedef {import('./types/character.js').CharacterStats} CharacterStats
+ * @typedef {import('./types/character.js').CharacterCreationOptions} CharacterCreationOptions
  */
 
 import { getCharacterTemplate } from "./data_characters.js";

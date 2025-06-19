@@ -9,7 +9,9 @@
 import { charactersMarkedForDefeat } from "../engine_curbstomp_manager.js";
 import { seededRandom } from "../utils_seeded_random.js";
 import { USE_DETERMINISTIC_RANDOM } from "../config_game.js";
-import { clamp } from "../utils_math.js";
+import { clampValue } from "../constants_consolidated.js";
+import { generateLogEvent, logRoll } from "../utils_log_event.js";
+import { randomChance } from "../utils_random.js";
 
 /**
  * Handles INSTANT_KO effect using unified context.
@@ -43,7 +45,7 @@ export function handleConditionalKoOrMercy(ctx) {
     
     if (Math.random() < effect.mercyChance) {
         // Mercy: incapacitate but not kill
-        primaryTarget.hp = clamp(primaryTarget.hp - 80, 0, 100);
+        primaryTarget.hp = clampValue(primaryTarget.hp - 80, 0, 100);
         primaryTarget.stunDuration = (primaryTarget.stunDuration || 0) + 3;
         const message = effect.mercyMessage || `${primaryTarget.name} is incapacitated, spared by a moment of mercy.`;
         return { success: true, message };
@@ -99,8 +101,8 @@ export function handleConditionalKoOrSelfSabotage(ctx) {
         });
         
         if (isSelfSabotage) {
-            const selfDamage = Math.floor(primaryTarget.maxHp * 0.3);
-            primaryTarget.hp = clamp(primaryTarget.hp - selfDamage, 0, primaryTarget.maxHp);
+            const selfDamage = Math.round(primaryTarget.maxHp * 0.1);
+            primaryTarget.hp = clampValue(primaryTarget.hp - selfDamage, 0, primaryTarget.maxHp);
             ctx.addEvent({
                 type: "narrative_event",
                 text: effect.selfSabotageMessage || `${actor.name}'s attack backfires, causing self-harm!`,
@@ -155,5 +157,43 @@ export function handleApplyCurbstompRule(ctx) {
     
     // Integration with curbstomp manager pending
     const message = `Applying specific curbstomp rule: ${effect.ruleId}. (Integration pending)`;
+    return { success: true, message };
+}
+
+/**
+ * Handles HEAL effect using unified context.
+ * @param {object} ctx - The unified effect context
+ * @returns {object} Handler result
+ */
+export function handleHeal(ctx) {
+    const { effect, primaryTarget } = ctx;
+    
+    if (!primaryTarget) {
+        return { success: false, message: "Invalid target for HEAL effect." };
+    }
+    
+    const healAmount = effect.value;
+    primaryTarget.hp = clampValue(primaryTarget.hp + healAmount, 0, primaryTarget.maxHp);
+    const message = `${primaryTarget.name} heals ${healAmount} HP.`;
+    
+    return { success: true, message };
+}
+
+/**
+ * Handles DAMAGE effect using unified context.
+ * @param {object} ctx - The unified effect context
+ * @returns {object} Handler result
+ */
+export function handleDamage(ctx) {
+    const { effect, primaryTarget } = ctx;
+    
+    if (!primaryTarget) {
+        return { success: false, message: "Invalid target for DAMAGE effect." };
+    }
+    
+    const damageAmount = effect.value;
+    primaryTarget.hp = clampValue(primaryTarget.hp - damageAmount, 0, primaryTarget.maxHp);
+    const message = `${primaryTarget.name} takes ${damageAmount} damage.`;
+    
     return { success: true, message };
 } 

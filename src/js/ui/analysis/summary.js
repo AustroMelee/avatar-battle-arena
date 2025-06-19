@@ -7,7 +7,7 @@
 /**
  * @typedef {import('../../types/battle.js').Fighter} Fighter
  * @typedef {import('../../types/battle.js').BattleResult} BattleResult
- * @typedef {import('../../types/analysis.js').BattleSummary} BattleSummary
+ * @typedef {import('../../types/ui_analysis.js').BattleSummary} BattleSummary
  */
 
 /**
@@ -48,4 +48,16 @@ function calculateBattleIntensity(fighter1, fighter2, totalTurns) {
     const totalDamage = (fighter1.damageDealt || 0) + (fighter2.damageDealt || 0);
     const intensity = (totalDamage / totalTurns) * 2;
     return Math.min(100, Math.round(intensity));
+}
+
+/**
+ * @returns {BattleSummary}
+ */
+export function createBattleSummary(battleResult, fighter1, fighter2) {
+    return {
+        winnerName: battleResult.winnerId === fighter1.id ? fighter1.name : fighter2.name,
+        loserName: battleResult.loserId === fighter1.id ? fighter1.name : fighter2.name,
+        totalTurns: battleResult.turnCount,
+        victoryCondition: battleResult.victoryCondition || "Incapacitation",
+    };
 } 

@@ -1,77 +1,85 @@
-# Narrative Engine - Modular Architecture
+# Narrative Module
 
 ## Overview
 
-The Avatar Battle Arena narrative engine has been refactored from a monolithic "kitchen sink" file into a focused, modular architecture. Each module handles a single responsibility, making the system more maintainable, testable, and AI-editing friendly.
+The Narrative module is responsible for generating all the descriptive text, dialogue, and flavor that brings a battle to life. It translates the raw, mechanical events from the `engine` (like "HP -10") into engaging, story-driven content (like "Aang unleashes a powerful gust of wind, staggering Azula!").
 
-## Architecture
+This module is a collection of specialized sub-systems, each handling a different aspect of narration, from character quotes to environmental descriptions. The core of the module is the `stringSubstitution.js` engine, which takes template strings and dynamically populates them with context-aware data.
 
-### Module Breakdown
+## Architectural Constraints
 
+- This is a high-level module that is primarily called by the `engine` to enrich the battle log with narrative events.
+- It can have dependencies on `/data` (for quote and narrative text) and `/utils`.
+- It must **not** have dependencies on `ai` or `ui`.
+
+## Module Interaction
+
+```mermaid
+graph TD
+    A[Engine] --> B{Narrative Module}
+    B --> C[Data Module]
+    B --> D[Enriched Battle Log Events]
+    D --> A
+
+    subgraph Narrative Module
+        E[index.js]
+        F[quoteEngine.js]
+        G[actionNarration.js]
+        H[stringSubstitution.js]
+        I[Filter Registry]
+    end
+
+    A -- "Generate narrative for move" --> B
+    B --> F & G
+    F & G --> H & I
+    C -- "Character quotes, narrative templates" --> B
 ```
-js/narrative/
-├── index.js                  # Barrel export (central coordinator)
-├── stringSubstitution.js     # Token replacement engine
-├── quoteEngine.js           # Character dialogue & quote system
-├── actionNarration.js       # Move action descriptions
-├── environmentNarrative.js  # Environmental damage & impact
-├── escalationNarrative.js   # Character state changes
-├── curbstompNarrative.js    # Overwhelming victory narratives
-├── victoryNarrative.js      # Final victory lines
-├── statusChange.js          # HP/energy/momentum/stun narratives
-└── README.md               # This documentation
-```
+- **Engine**: The `engine` calls this module at various points (e.g., after resolving a move, when a character's state changes) to generate descriptive log events.
+- **Data**: The module heavily relies on the `/data` directory, pulling from `data_narrative_*` files that contain templates for quotes, action descriptions, and more.
+- **Output**: The module produces structured `log_event` objects, which are added to the `battleLog`. These events contain both plain text and pre-formatted HTML for display in the UI.
 
-### Separation of Concerns
+## Files
 
-| Module | Responsibility | Key Functions |
-|--------|---------------|---------------|
-| **stringSubstitution** | Token replacement in templates | `substituteTokens()` |
-| **quoteEngine** | Finding and formatting character quotes | `findNarrativeQuote()`, `formatQuoteEvent()` |
-| **actionNarration** | Action descriptions and turn narration | `generateActionDescriptionObject()`, `generateTurnNarrationObjects()` |
-| **environmentNarrative** | Environmental damage and impact lines | `generateCollateralDamageEvent()`, `generateEnvironmentalSummaryEvent()`, `getEnvironmentImpactLine()` |
-| **escalationNarrative** | Character escalation state changes | `generateEscalationNarrative()` |
-| **curbstompNarrative** | Overwhelming victory descriptions | `generateCurbstompNarration()` |
-| **victoryNarrative** | Final battle conclusion lines | `getFinalVictoryLine()` |
-| **statusChange** | All status change narratives | `generateStatusChangeEvent()` |
+-   **`index.js`**: The main barrel export for the module. It re-exports all functions from the other files, providing flat and namespaced access patterns.
+-   **`stringSubstitution.js`**: The core utility of the module. Its `substituteTokens` function replaces placeholders like `{actorName}` or `{opponentName}` in a template string with the correct character names and pronouns.
+-   **`quoteEngine.js`**: Finds and formats character dialogue. `findNarrativeQuote` searches through a character's archetype data for contextually appropriate quotes (e.g., a specific line to say to a specific opponent during the "Climax" phase).
+-   **`actionNarration.js`**: Generates the main description of a move being used, like "Aang attacks Azula with a blast of air."
+-   **`statusChange.js`**: Generates narrative for changes in a character's stats, such as "Azula's energy is draining!" or "Aang recovers some health."
+-   **`environmentNarrative.js`**: Describes how the battle is affecting the location, generating text for collateral damage like "A stray fire blast scorches the nearby temple wall."
+-   **`escalationNarrative.js`**: Creates narrative when a character's overall state changes, for example, from "Healthy" to "Injured."
+-   **`victoryNarrative.js` & `curbstompNarrative.js`**: These handle the end-of-battle descriptions, providing different text for a close victory versus a one-sided "curbstomp."
+-   **Narrative Filters (`narrative_filter_*.js`)**: A collection of files implementing a Chain of Responsibility pattern. When a move has multiple possible descriptions, these filters (`strictContextFilter`, `personalityFilter`, etc.) are used in sequence to select the most appropriate one based on the current battle context. `narrative_filter_registry.js` assembles the chain.
 
-## Usage Patterns
+## Usage
 
-### Option 1: Flat Imports (Recommended for specific functions)
+The `engine` uses this module to create a narrative event.
 
 ```javascript
-import { substituteTokens } from './narrative/stringSubstitution.js';
-import { findNarrativeQuote, formatQuoteEvent } from './narrative/quoteEngine.js';
-import { generateActionDescriptionObject } from './narrative/actionNarration.js';
-```
+import { generateActionDescriptionObject } from './js/narrative/actionNarration.js';
+import { findNarrativeQuote, formatQuoteEvent } from './js/narrative/quoteEngine.js';
 
-### Option 2: Barrel Import (Convenient for multiple functions)
+function narrateMoveAction(move, actor, defender, moveResult, battleState) {
+    const narrativeEvents = [];
 
-```javascript
-import { 
-    substituteTokens, 
-    findNarrativeQuote, 
-    generateActionDescriptionObject,
-    generateCollateralDamageEvent 
-} from './narrative/index.js';
-```
+    // 1. Find a pre-action quote
+    const quote = findNarrativeQuote(actor, defender, 'before_attack', battleState.currentPhase);
+    if (quote) {
+        narrativeEvents.push(formatQuoteEvent(quote, actor, defender, { battleState }));
+    }
 
-### Option 3: Namespaced Imports (Best for organization)
+    // 2. Generate the description of the action itself
+    const actionDescription = generateActionDescriptionObject(
+        move,
+        actor,
+        defender,
+        moveResult,
+        battleState
+    );
+    narrativeEvents.push(actionDescription);
 
-```javascript
-import { QuoteEngine, ActionNarration, EnvironmentNarrative } from './narrative/index.js';
-
-// Usage:
-const quote = QuoteEngine.findNarrativeQuote(actor, recipient, type, phase, context);
-const action = ActionNarration.generateActionDescriptionObject(move, actor, defender, result, battleState);
-const envEvent = EnvironmentNarrative.generateCollateralDamageEvent(move, actor, result, envState, battleState);
-```
-
-### Option 4: Backward Compatibility
-
-```javascript
-// Still works - re-exported from old file for compatibility
-import { findNarrativeQuote } from './engine_narrative-engine.js';
+    // These events are now ready to be added to the battle log.
+    return narrativeEvents;
+}
 ```
 
 ## Key Benefits

@@ -4,10 +4,13 @@
 
 "use strict";
 
+import { initializeMetrics } from "./metrics.js";
+
 /**
- * @typedef {import('../types.js').BattleLoopState} BattleLoopState
- * @typedef {import('../types.js').Fighter} Fighter
- * @typedef {import('../types.js').BattleState} BattleState
+ * @typedef {import('../types/battle_loop.js').BattleLoopState} BattleLoopState
+ * @typedef {import('../types/battle.js').Fighter} Fighter
+ * @typedef {import('../types/battle.js').BattleState} BattleState
+ * @typedef {import('../types/engine.js').TurnExecutionResult} TurnExecutionResult
  */
 
 /**
@@ -18,25 +21,32 @@
  */
 export function initializeLoopState(fighter1, fighter2) {
     return {
+        isRunning: true,
+        status: "initializing",
         turn: 0,
-        battleOver: false,
+        winner: null,
+        loser: null,
         winnerId: null,
         loserId: null,
+        isDraw: false,
         isStalemate: false,
+        battleOver: false,
         battleEventLog: [],
+        metrics: initializeMetrics(),
         metadata: {
             fighter1Id: fighter1.id,
             fighter2Id: fighter2.id,
         },
         executionStartTime: performance.now(),
-        status: "initializing",
+        executionEndTime: 0,
+        errorLog: [],
     };
 }
 
 /**
  * Updates the loop state after a turn.
  * @param {BattleLoopState} currentState
- * @param {import('../types.js').TurnExecutionResult} turnResult
+ * @param {TurnExecutionResult} turnResult
  * @returns {BattleLoopState}
  */
 export function updateLoopState(currentState, turnResult) {

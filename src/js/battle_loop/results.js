@@ -5,9 +5,9 @@
 "use strict";
 
 /**
- * @typedef {import('../types.js').BattleResult} BattleResult
- * @typedef {import('../types.js').BattleState} BattleState
- * @typedef {import('../types.js').BattleLoopState} BattleLoopState
+ * @typedef {import('../types/battle.js').BattleResult} BattleResult
+ * @typedef {import('../types/battle.js').BattleState} BattleState
+ * @typedef {import('../types/battle_loop.js').BattleLoopState} BattleLoopState
  */
 
 /**

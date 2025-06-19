@@ -5,7 +5,7 @@
 "use strict";
 
 /**
- * @typedef {import('../../types.js').Character} Character
+ * @typedef {import('../../types/character.js').CharacterTemplate} CharacterTemplate
  * @typedef {import('./types.js').SelectionElements} SelectionElements
  * @typedef {import('./types.js').CharacterCardConfig} CharacterCardConfig
  * @typedef {import('./types.js').ElementClass} ElementClass
@@ -84,4 +84,40 @@ export function populateGrid(gridElement, characters, fighterKey, onCardCreated)
 function getElementClass(character) {
     const element = character.element || (character.techniques && character.techniques[0] ? character.techniques[0].element : undefined);
     return ELEMENT_CLASS_MAP[/**@type {string}*/(element)] || DEFAULT_ELEMENT_CLASS;
+}
+
+/**
+ * Renders the character selection screen.
+ * @param {Object<string, CharacterTemplate>} characters - A map of character templates.
+ * @param {SelectionElements} elements - The DOM elements for the selection screen.
+ */
+export function renderCharacterSelection(characters, elements) {
+    elements.grid.innerHTML = ""; // Clear existing
+    for (const characterId in characters) {
+        const character = characters[characterId];
+        const card = createCharacterCard(character, { isSelectable: true });
+        elements.grid.appendChild(card);
+    }
+}
+
+/**
+ * Creates a single character card element.
+ * @param {CharacterTemplate} character - The character to display.
+ * @param {CharacterCardConfig} config - Configuration for the card.
+ * @returns {HTMLElement} The character card element.
+ */
+export function createCharacterCard(character, config) {
+    const card = document.createElement("div");
+    card.className = `char-card ${config.isSelectable ? 'selectable' : ''}`;
+    card.dataset.charId = character.id;
+
+    const img = document.createElement("img");
+    img.src = character.image || 'path/to/default/image.png';
+    img.alt = character.name;
+
+    const name = document.createElement("h3");
+    name.textContent = character.name;
+
+    card.append(img, name);
+    return card;
 } 

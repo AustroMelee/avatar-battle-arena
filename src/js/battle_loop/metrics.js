@@ -5,8 +5,8 @@
 "use strict";
 
 /**
- * @typedef {import('../types.js').LoopMetrics} LoopMetrics
- * @typedef {import('../types.js').BattleLoopState} BattleLoopState
+ * @typedef {import('../types/battle_loop.js').LoopMetrics} LoopMetrics
+ * @typedef {import('../types/battle_loop.js').BattleLoopState} BattleLoopState
  */
 
 /**
@@ -15,7 +15,7 @@
  */
 export function initializeMetrics() {
     return {
-        totalExecutionTime: 0,
+        executionTime: 0,
         averageTurnTime: 0,
         totalTurns: 0,
         totalEvents: 0,
@@ -34,7 +34,7 @@ export function updateFinalMetrics(currentMetrics, finalState) {
     const totalTime = finalState.executionEndTime - finalState.executionStartTime;
     const totalTurns = finalState.turn;
 
-    currentMetrics.totalExecutionTime = totalTime;
+    currentMetrics.executionTime = totalTime;
     currentMetrics.totalTurns = totalTurns;
     currentMetrics.totalEvents = finalState.battleEventLog.length;
     currentMetrics.averageTurnTime = totalTurns > 0 ? totalTime / totalTurns : 0;

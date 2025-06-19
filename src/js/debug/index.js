@@ -45,9 +45,7 @@ export {
 
 export {
     generateReport,
-    exportDebugData,
-    exportPerformanceCSV,
-    clearDebugData
+    downloadReport
 } from "./reporting.js";
 
 // Namespaced exports for organized access

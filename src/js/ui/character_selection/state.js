@@ -5,7 +5,7 @@
 "use strict";
 
 /**
- * @typedef {import('../../types.js').Character} Character
+ * @typedef {import('../../types/character.js').CharacterTemplate} CharacterTemplate
  * @typedef {import('./types.js').CharacterSelectionState} CharacterSelectionState
  * @typedef {import('./types.js').SelectionChangeCallback} SelectionChangeCallback
  */

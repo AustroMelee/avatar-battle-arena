@@ -120,4 +120,11 @@
  * @description The different phases of a battle.
  */
 
+/**
+ * @typedef {Object} TurnExecutionResult
+ * @property {number} turnNumber
+ * @property {any[]} newEvents
+ * @property {BattleState} battleState
+ */
+
 export {}; 

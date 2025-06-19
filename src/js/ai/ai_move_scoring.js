@@ -19,8 +19,8 @@ import { STRATEGIC_INTENTS } from "./ai_strategy_intent.js";
  * @typedef {import('../types/ai.js').AiPersonality} AiPersonality
  * @typedef {import('../types/ai.js').StrategicIntent} StrategicIntent
  * @typedef {import('../types/ai.js').IntentMultipliers} IntentMultipliers
- * @typedef {import('../types/engine.js').BattlePhase} BattlePhase
  * @typedef {import('../types/ai.js').MoveEvaluation} MoveEvaluation
+ * @typedef {import('../types/engine.js').BattlePhase} BattlePhase
  */
 
 /**
@@ -128,7 +128,7 @@ function calculatePersonalityModifiers(move, profile, actor) {
     }
 
     // Signature move bias
-    const signatureBias = safeGet(profile.signatureMoveBias, move.name, 1.0, actor.name);
+    const signatureBias = safeGet(profile.signatureMoveBias, move.name, 1.0);
     if (signatureBias !== 1.0) {
         weight *= signatureBias;
         reasons.push("SigMove");

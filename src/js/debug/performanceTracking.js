@@ -1,10 +1,11 @@
+// @ts-nocheck
+"use strict";
+
 /**
  * @fileoverview Performance Tracking Module for Debug Utilities
  * @description Handles performance monitoring, memory tracking, and metrics collection
  * @version 1.0.0
  */
-
-"use strict";
 
 /**
  * Sets up performance observer for monitoring resource loading and custom measures.

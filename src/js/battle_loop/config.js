@@ -5,7 +5,7 @@
 "use strict";
 
 /**
- * @typedef {import('../types.js').BattleLoopConfig} BattleLoopConfig
+ * @typedef {import('../types/battle_loop.js').BattleLoopConfig} BattleLoopConfig
  */
 
 const DEFAULT_MAX_TURNS = 50;

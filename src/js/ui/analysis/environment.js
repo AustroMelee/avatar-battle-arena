@@ -8,7 +8,7 @@ import { locationConditions } from "../../location-battle-conditions.js";
 
 /**
  * @typedef {import('../../types/battle.js').EnvironmentState} EnvironmentState
- * @typedef {import('../../types/analysis.js').EnvironmentAnalysis} EnvironmentAnalysis
+ * @typedef {import('../../types/ui_analysis.js').EnvironmentAnalysis} EnvironmentAnalysis
  */
 
 /**

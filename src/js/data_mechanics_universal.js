@@ -35,17 +35,32 @@
  */
 
 /**
- * Universal mechanics that apply globally or based on specific character/environmental interactions.
- * @type {object.<string, UniversalMechanicRule>}
+ * Defines universal game mechanics that apply to all characters.
+ * These are fundamental rules of the simulation, such as fatigue,
+ * diminishing returns on status effects, etc.
+ * @type {Object.<string, UniversalMechanicRule>}
  */
-export const universalMechanics = {
+export const UNIVERSAL_MECHANICS = {
+    "fatigue": {
+        id: "fatigue",
+        description: "Fatigue from continuous use",
+        characterId: "",
+        conditions: [
+            { type: "location_property", value: "cramped", modifier: 0.10 }
+        ],
+        maxChance: 0.85,
+        counteredBy: ["rest", "area_denial_projectile"],
+        personalityTrigger: "tired",
+        canTriggerPreBattle: false,
+        outcome: { type: "fatigue", duration: 1, successMessage: "Fatigue sets in", failureMessage: "You feel refreshed" }
+    },
     maiKnifeAdvantage: {
         id: "mai_knife_advantage",
         description: "Mai's uncanny precision with knives.",
         characterId: "mai",
         conditions: [
             { type: "target_technique_speed", value: "slow", triggerChance: 0.85 },
-            { type: "location_property", property: "cramped", modifier: 0.10 }
+            { type: "location_property", value: "cramped", modifier: 0.10 }
         ],
         maxChance: 0.85,
         counteredBy: ["fast_defensive_move", "area_denial_projectile"],
@@ -58,7 +73,7 @@ export const universalMechanics = {
         description: "Ty Lee's ability to paralyze with precise strikes.",
         characterId: "ty-lee",
         conditions: [
-            { type: "location_property", property: "cramped", triggerChance: 0.60 },
+            { type: "location_property", value: "cramped", triggerChance: 0.60 },
         ],
         maxChance: 0.85,
         counteredBy: ["projectile_attack", "area_denial_move"],

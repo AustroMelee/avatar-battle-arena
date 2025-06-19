@@ -10,9 +10,11 @@
 // TYPE IMPORTS
 // ============================================================================
 /**
- * @typedef {import('../types.js').Fighter} Fighter
- * @typedef {import('../types.js').BattleState} BattleState
- * @typedef {import('../types.js').Move} Move
+ * @typedef {import('../types/battle.js').Fighter} Fighter
+ * @typedef {import('../types/battle.js').BattleState} BattleState
+ * @typedef {import('../types/battle.js').Move} Move
+ * @typedef {import('../types/ai.js').AiPersonality} AiPersonality
+ * @typedef {import('../types/engine.js').BattlePhase} BattlePhase
  */
 
 // ============================================================================

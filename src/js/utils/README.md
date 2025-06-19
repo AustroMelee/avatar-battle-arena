@@ -1,6 +1,118 @@
-# Utility Functions - Modular Architecture
+# 🛠️ Utility Module
 
-The Avatar Battle Arena utility system provides a comprehensive set of reusable, type-safe utility functions that support all core systems. These utilities follow strict defensive programming principles with comprehensive input validation and error handling.
+## 📜 Purpose
+
+The Utility module (`src/js/utils/` and related `src/js/utils_*.js` files) is the foundational layer of the application, providing a collection of reusable, cross-cutting functions that support all other modules. These utilities are designed to be pure, standalone, and highly reliable, following strict defensive programming principles.
+
+The primary goal of this module is to abstract common tasks (like deep cloning, safe object access, and random number generation), prevent code duplication, and enforce runtime stability through comprehensive validation and state invariant checks.
+
+## 🗂️ Files & Exports
+
+The utility functions are organized into standalone files based on their category.
+
+### Core Utilities
+
+-   **`utils_safe_accessor.js`**: Provides functions to safely access nested properties of objects without throwing errors on null or undefined intermediate values.
+    -   `safeGet()`: Safely retrieves a property using a dot-notation string path, with a fallback to a default value.
+-   **`utils/cloning.js`**: Contains a robust deep-cloning utility.
+    -   `safeClone()`: Deep-clones an object while handling cyclical references and enforcing a maximum depth to prevent infinite loops.
+-   **`utils_random.js`**: A barrel file that aggregates and exports all random number generation functions from the `src/js/random/` subdirectory, which includes:
+    -   Numeric, boolean, and collection-based randomness.
+    -   Seeded random number generation for deterministic, replayable results.
+-   **`utils_narrative-string-builder.js`**: A utility for constructing dynamic narrative strings from templates and data.
+
+### State Validation & Logging
+
+-   **`utils_state_invariants.js`**: Exports a powerful, "NASA-level" runtime validation system. It checks the entire `battleState` against a set of predefined rules (invariants) to catch data corruption and logical errors during execution. It is highly configurable and provides detailed reports on violations.
+    -   `assertBattleStateInvariants()`: The main function to run all checks.
+    -   This system relies on the specialized check functions defined in the `utils/validation/invariants/` subdirectory.
+-   **`utils/validation/invariants/`**: This subdirectory contains the specific invariant checks for different parts of the battle state, such as `fighter_health.js`, `battle_phase.js`, and `ai_state.js`.
+-   **`utils_log_event.js`**: A facade that simplifies the creation of structured, validated battle log events. It uses the `src/js/battle_logging/` module internally to handle the detailed work of creating, validating, and writing log entries.
+    -   `generateLogEvent()`: Creates a standard battle event.
+    -   `logRoll()`: Creates a specialized event for dice rolls.
+
+## 🧩 Module Interactions
+
+The Utility module is a foundational layer, meaning it is imported by almost every other module in the application but should not have dependencies on them.
+
+```mermaid
+graph TD
+    subgraph Application Modules
+        direction LR
+        A[Engine]
+        B[AI]
+        C[UI]
+        D[Data]
+    end
+
+    subgraph Utility Layer
+        E(utils_safe_accessor.js)
+        F(utils/cloning.js)
+        G(utils_random.js)
+        H(utils_state_invariants.js)
+    end
+
+    A --> E;
+    A --> F;
+    A --> G;
+    A --> H;
+
+    B --> E;
+    B --> G;
+    B --> H;
+
+    C --> G;
+    C --> E;
+
+    D --> F;
+```
+
+-   **Engine**: Heavily uses `utils_state_invariants` to validate state between turns, `cloning` for simulations, and `random` for calculations.
+-   **AI**: Uses `random` for decision-making, `cloning` to simulate future states, and `safe_accessor` to read the battle state.
+-   **UI**: Uses `random` for cosmetic effects and `safe_accessor` to read from state objects without risking crashes.
+-   **Data**: May use `cloning` to create unique instances of character templates.
+
+## 📝 Architectural Constraints
+
+From `.cursorcontext`:
+-   **Utils Layer (`src/js/utils/*.js`)**:
+    -   **Purpose**: Shared utility functions across modules.
+    -   **Should not import from anything except other `/utils` files.**
+
+This is the most important rule for this module. Utilities must remain generic and self-contained to be truly reusable and to prevent circular dependencies. A utility function should never know about the specific business logic of the `engine` or `ui`.
+
+## Usage Example
+
+Using the state invariant system to ensure data integrity after a complex operation in the engine.
+
+```javascript
+// In a file like src/js/engine_turn-processor.js
+
+import { assertBattleStateInvariants } from '../utils_state_invariants.js';
+
+/**
+ * Processes a full turn in the battle.
+ * @param {BattleState} battleState
+ * @returns {BattleState} The new battle state.
+ */
+export function processTurn(battleState) {
+    // ... complex logic to apply moves, effects, etc. ...
+    const nextState = applyAllTurnEffects(battleState);
+    
+    // After all modifications, validate the new state.
+    // This will throw a detailed error if, for example, a fighter's HP is
+    // negative or a status effect has an invalid duration.
+    try {
+        assertBattleStateInvariants(nextState, 'end_of_turn');
+    } catch (error) {
+        console.error("A critical state corruption was detected!", error);
+        // Potentially halt the battle or revert to a safe state.
+        return battleState; // Return original state on failure
+    }
+
+    return nextState;
+}
+```
 
 ## 🏗️ Architecture Overview
 

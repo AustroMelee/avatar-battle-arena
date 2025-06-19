@@ -107,4 +107,20 @@ export function resetBattleLogControls(toggleBtn, copyBtn, logContent) {
     if (copyBtn) {
         copyBtn.textContent = "📋 Copy Battle Logs";
     }
+}
+
+export function initializeBattleLogControls() {
+    // ...
+    // Copy to clipboard functionality
+    // const copyButton = document.getElementById("copy-log-button");
+    // copyButton.addEventListener("click", async () => {
+    //     const logContent = document.getElementById("battle-log-content");
+    //     if (logContent) {
+    //         // Dynamically import copyToClipboard to avoid circular dependency
+    //         // const { copyToClipboard } = await import("../utils_clipboard.js");
+    //         // await copyToClipboard(logContent.textContent || "");
+    //         // copyButton.textContent = "Copied!";
+    //         // setTimeout(() => (copyButton.textContent = "Copy Log"), 2000);
+    //     }
+    // });
 } 

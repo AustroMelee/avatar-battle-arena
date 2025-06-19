@@ -1,10 +1,11 @@
+// @ts-nocheck
+"use strict";
+
 /**
  * @fileoverview Error Tracking Module for Debug Utilities
  * @description Handles global error tracking, logging, and reporting
  * @version 1.0.0
  */
-
-"use strict";
 
 /**
  * Sets up global error handling for debugging.

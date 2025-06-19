@@ -5,12 +5,12 @@
 "use strict";
 
 import { processTurn } from "../engine_turn-processor.js";
-import { checkTerminalState } from "../engine_terminal_state.js";
+import { checkBattleTermination } from "../engine/core/termination.js";
 
 /**
- * @typedef {import('../types.js').BattleState} BattleState
- * @typedef {import('../types.js').BattleLoopConfig} BattleLoopConfig
- * @typedef {import('../types.js').BattleLoopState} BattleLoopState
+ * @typedef {import('../types/battle.js').BattleState} BattleState
+ * @typedef {import('../types/battle_loop.js').BattleLoopConfig} BattleLoopConfig
+ * @typedef {import('../types/battle_loop.js').BattleLoopState} BattleLoopState
  */
 
 /**
@@ -40,11 +40,11 @@ export async function executeMainLoop(initialBattleState, config, loopState) {
         loopState.battleEventLog.push(...turnResult.newEvents);
         loopState.turn = i;
 
-        const terminalState = checkTerminalState(currentState);
-        if (terminalState.isTerminal) {
+        const winnerId = checkBattleTermination(currentState);
+        if (winnerId) {
             loopState.battleOver = true;
-            loopState.winnerId = terminalState.winnerId;
-            loopState.loserId = terminalState.loserId;
+            loopState.winnerId = winnerId;
+            loopState.loserId = winnerId === currentState.fighter1.id ? currentState.fighter2.id : currentState.fighter1.id;
             break;
         }
     }

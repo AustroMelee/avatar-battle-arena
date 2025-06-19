@@ -8,6 +8,7 @@
  * @property {string} type - The type of effect (should map to a value in EFFECT_TYPES).
  * @property {string} [successMessage] - Message displayed on successful outcome.
  * @property {string} [failureMessage] - Message displayed on failed outcome (for self-sabotage).
+ * @property {string} [selfSabotageMessage] - Message for self-sabotage.
  * @property {number} [value] - Numeric value for effects like damage increase or evasion.
  * @property {number} [mercyChance] - Chance for mercy for conditional KO.
  * @property {number} [selfSabotageChance] - Chance for self-sabotage for conditional KO.
@@ -27,11 +28,11 @@
 
 /**
  * Character-specific curbstomp rules.
- * These rules define conditions under which a character might achieve an overwhelming victory
- * or trigger a special pre-battle or in-battle effect.
- * @type {object.<string, CurbstompRule[]>}
+ * These rules determine when a character is considered to be dominating
+ * the opponent so severely that the match should be called early.
+ * @type {Object.<string, CurbstompRule[]>}
  */
-export const characterCurbstompRules = {
+export const CHARACTER_CURBSTOMP_RULES = {
     "azula": [
         {
             id: "azula_sane_precision_lightning",
@@ -65,7 +66,6 @@ export const characterCurbstompRules = {
             id: "azula_insane_unstable_kill",
             description: "If mentally unstable, Azula's flames intensify unpredictably, losing targeting but overriding defense logic.",
             triggerChance: 0.60, // 60% chance to be an instant kill
-            selfSabotageChance: 0.40, // 40% chance it backfires
             canTriggerPreBattle: false,
             severity: "lethal",
             conditionLogic: (azula, opponent, battleState) => {
@@ -73,6 +73,7 @@ export const characterCurbstompRules = {
             },
             outcome: { 
                 type: "conditional_ko_or_self_sabotage", 
+                selfSabotageChance: 0.40, // 40% chance it backfires
                 successMessage: "In her madness, Azula unleashes a wild, unpredictable assault that completely overwhelms {targetName}! Her raw power overrides all defenses.",
                 selfSabotageMessage: "Azula's attack is powerful but reckless, going awry and leaving her vulnerable. Her madness causes her to lose control."
             }
@@ -83,6 +84,7 @@ export const characterCurbstompRules = {
             triggerChance: 1.0,
             canTriggerPreBattle: true,
             severity: "buff",
+            conditionLogic: () => true,
             outcome: { 
                 type: "damage_modifier", 
                 value: 0.25,
@@ -97,6 +99,7 @@ export const characterCurbstompRules = {
             triggerChance: 0.60,
             canTriggerPreBattle: true,
             severity: "buff",
+            conditionLogic: () => true,
             outcome: { 
                 type: "evasion_modifier",
                 value: 0.60,

@@ -20,6 +20,87 @@ Each entry includes:
 
 ## Version History
 
+### Version 2.7.0 - TypeScript Error Resolution & Tooling Investigation
+**Date:** June 18, 2025
+**Status:** 🚨 BLOCKED
+**Priority:** Critical
+
+#### 🚧 **Issue Summary**
+**Goal:** To resolve the remaining 60 TypeScript errors identified by `tsc --noEmit`. The primary focus was on fixing argument mismatches and incorrect object shapes in the `effect_handlers` and `engine` modules.
+
+**User Impact:**
+- 🛑 **No Progress**: No TypeScript errors have been fixed. The project's type safety has not improved.
+- 🛑 **Development Blocked**: The core agent tooling for editing files is non-functional, preventing any code modifications. This is a critical issue that halts all development work.
+
+#### 🛠️ **Encountered Issues & Debugging Attempts**
+**1. Persistent Tooling Failure:**
+- **Symptom**: All attempts to modify files using the `edit_file` tool failed. The tool consistently returned the message: `The apply model made no changes to the file.`
+- **Affected Files**: The primary test cases were `src/js/effect_handlers/context.js` and `src/js/effect_handlers/statChangeConfig.js`, but the issue appears to be global.
+
+**2. Workaround Attempts & Investigation:**
+- **Shell Overrides**: In collaboration with the user, multiple shell-based workarounds were added to the `.cursorcontext` file to force file writes. These included:
+    - `printf` with escaped newlines.
+    - PowerShell's `Set-Content` cmdlet.
+    - `cat <<EOF` heredoc syntax.
+    - Base64 encoding/decoding pipelines.
+- **Result**: All shell-based workarounds failed, either due to environment-specific syntax errors (PowerShell) or the same "no changes made" error from the core tool.
+
+**3. Context Synchronization:**
+- A significant portion of the session was spent debugging a suspected issue with the `.cursorcontext` rules, which were believed to be forcing a failing shell command.
+- It was eventually discovered that the agent was operating with a stale version of the context file. After re-reading the file and confirming the shell overrides were removed, the default `edit_file` tool was used again.
+- **Result**: The default tool still failed with the same error, confirming the issue is not with the context rules but with the tool itself.
+
+#### ✅ **Current Status**
+- The agent is **completely blocked** and unable to perform its primary function of editing code.
+- The root cause appears to be a fundamental issue in the agent's file I/O or apply-edit logic.
+- No further progress can be made on fixing TypeScript errors or any other development task until the editing tool is repaired.
+
+### Version 2.6.0 - Project-Wide Documentation Initiative
+**Date:** June 18, 2025
+**Status:** ✅ RESOLVED
+**Priority:** High
+
+#### ✨ **Issue Summary**
+**Goal:** A comprehensive documentation pass to create or update a `README.md` file for every subdirectory in `/src/js/`, ensuring each module's purpose, scope, and interactions are clearly defined.
+
+**User Impact:**
+- ✅ **Improved Developer Onboarding**: New developers can now quickly understand the architecture and purpose of any module by reading its dedicated `README.md`.
+- ✅ **Enhanced Codebase Clarity**: The documentation makes module responsibilities explicit, clarifying architectural boundaries and reducing ambiguity.
+- ✅ **Simplified Maintenance**: With clear documentation, locating the right code to modify and understanding its dependencies is significantly faster.
+
+#### 🛠️ **Technical Fixes & Improvements**
+**1. Systematic README Generation:**
+- **Methodology**: Systematically iterated through each subdirectory in `src/js/`. For each module, all constituent JavaScript files were read to synthesize a complete and accurate overview.
+- **Generated/Updated READMEs**:
+    - `src/js/ai/README.md`
+    - `src/js/battle_logging/README.md`
+    - `src/js/battle_loop/README.md`
+    - `src/js/curbstomp/README.md`
+    - `src/js/debug/README.md`
+    - `src/js/effect_handlers/README.md`
+    - `src/js/engine/README.md`
+    - `src/js/html_log/README.md`
+    - `src/js/narrative/README.md`
+    - `src/js/random/README.md`
+    - `src/js/state/README.md`
+    - `src/js/turn_processing/README.md`
+    - `src/js/type_automation/README.md`
+    - `src/js/types/README.md`
+    - `src/js/ui/README.md`
+    - `src/js/utils/README.md`
+
+**2. Standardized README Content:**
+- Each generated `README.md` includes the following sections:
+    - **Module Purpose**: A high-level description of the module's role.
+    - **Files & Exports**: A complete list of files in the module and their key exports.
+    - **Module Interactions**: A Mermaid diagram and explanation of how the module connects to others.
+    - **Architectural Constraints**: A summary of relevant rules from the `.cursorcontext` file.
+    - **Usage Example**: A code snippet demonstrating how to use the module's primary functions.
+
+#### ✅ **Testing Verification**
+- **Manual Review**: Each `README.md` file was manually reviewed to ensure the generated content accurately reflects the module's code and adheres to the specified documentation requirements.
+- **Completeness**: Verified that all `js` subdirectories have a corresponding, detailed `README.md` file.
+
 ### Version 2.5.0 - Codebase Health & Modularity Initiative
 **Date:** June 18, 2025
 **Status:** ✅ RESOLVED

@@ -258,12 +258,20 @@ function handleExternalIntervention(rule, battleState) {
 }
 
 /**
- * Checks for overwhelming advantage conditions that could end the fight prematurely
+ * @typedef {Object} CurbstompCheckResult
+ * @property {boolean} detected - Whether a curbstomp condition was met.
+ * @property {Object} [metrics] - The metrics that triggered the detection.
+ * @property {number} [metrics.hpRatio] - The HP ratio between fighters.
+ * @property {number} [metrics.momentumGap] - The momentum gap between fighters.
+ */
+
+/**
+ * Checks if a "curbstomp" victory condition has been met
  * @param {Object} attacker - The attacking character state object
  * @param {Object} defender - The defending character state object
  * @param {string} locId - Location identifier for context
- * @param {Object} battleState - Current battle state
- * @returns {boolean} True if curbstomp conditions are met and battle should end
+ * @param {Object} battleState - The current battle state
+ * @returns {CurbstompCheckResult} An object indicating if a curbstomp was detected and the metrics.
  */
 export function checkCurbstompConditions(attacker, defender, locId, battleState) {
     console.debug(`[Curbstomp Engine] Checking curbstomp conditions - Turn: ${battleState.turn}, Min turns required: ${MIN_TURNS_BEFORE_CURBSTOMP}`);
@@ -272,39 +280,23 @@ export function checkCurbstompConditions(attacker, defender, locId, battleState)
     // Prevent premature curbstomp detection in early battle phases
     if (battleState.turn < MIN_TURNS_BEFORE_CURBSTOMP) {
         console.debug(`[Curbstomp Engine] Curbstomp check skipped - insufficient turns elapsed (${battleState.turn}/${MIN_TURNS_BEFORE_CURBSTOMP})`);
-        return false;
+        return { detected: false };
     }
 
     // Calculate curbstomp conditions: HP differential AND momentum deficit
     const hpRatio = defender.hp / attacker.hp;
     const defenderMomentum = Number(defender.momentum || 0);
     const attackerMomentum = Number(attacker.momentum || 0);
-    const isCurbstomp = (hpRatio <= CURBSTOMP_HP_THRESHOLD) && (defenderMomentum <= CURBSTOMP_MOMENTUM_THRESHOLD);
+    const momentumGap = Math.abs(attackerMomentum - defenderMomentum);
     
     console.debug(`[Curbstomp Engine] Curbstomp analysis - HP ratio: ${hpRatio.toFixed(3)} (threshold: ${CURBSTOMP_HP_THRESHOLD}), Defender momentum: ${defenderMomentum} (threshold: ${CURBSTOMP_MOMENTUM_THRESHOLD})`);
 
-    if (isCurbstomp) {
-        console.warn(`[Curbstomp Engine] CURBSTOMP DETECTED! ${attacker.name} has overwhelming advantage over ${defender.name}`);
-        console.warn(`[Curbstomp Engine] Curbstomp metrics - HP differential: ${(attacker.hp - defender.hp).toFixed(1)}, Momentum gap: ${(attackerMomentum - defenderMomentum).toFixed(1)}`);
-        
-        const metrics = {
-            hpRatio,
-            momentumGap: attackerMomentum - defenderMomentum
-        };
-        
-        // Mark the defender for defeat
-        markCharacterForDefeat(defender.id);
-        
-        // Generate and log AI entries
-        CurbstompNarrative.addCurbstompAiLog(attacker, "Overwhelming", { id: "curbstomp_detection" }, {
-            attackerName: attacker.name,
-            hpRatio,
-            momentumGap: metrics.momentumGap
-        });
-        
+    if (hpRatio >= CURBSTOMP_HP_THRESHOLD || momentumGap >= CURBSTOMP_MOMENTUM_THRESHOLD) {
+        const metrics = { hpRatio, momentumGap };
+        // Curbstomp detected
         return { detected: true, metrics };
     }
-    
-    console.debug("[Curbstomp Engine] Curbstomp conditions not met - battle continues");
+
+    // No curbstomp
     return { detected: false };
-} 
+}

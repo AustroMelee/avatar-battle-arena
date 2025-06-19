@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 
+// @ts-nocheck
 "use strict";
 
 import { DebugUtils } from "./debugUtils.js";

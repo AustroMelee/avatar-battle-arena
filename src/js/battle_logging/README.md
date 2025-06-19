@@ -1,123 +1,104 @@
-# Battle Logging System
+# Battle Logging Module
 
-A modular battle event logging system with clean separation of concerns, designed for the Avatar Battle Arena project.
+## Overview
 
-## Architecture Overview
+The Battle Logging module provides a robust, centralized system for creating, validating, formatting, and writing all events that occur within a battle. It is designed to be the single source of truth for "what happened" in a simulation, converting raw game actions into a structured, queryable log.
 
-The battle logging system has been refactored from a monolithic `utils_log_event.js` file into 6 specialized modules:
+This module is critical for debugging, generating user-facing battle reports (in HTML), creating battle summaries, and potentially for building a replay system in the future.
 
+## Architectural Constraints
+
+- This module is a low-level utility and **should not** have dependencies on high-level modules like `engine` or `ai`.
+- It can be imported by any module that needs to log an event.
+- All functions within this module should be as pure as possible. The `battle_log_writer.js` contains the only stateful logic for managing the log array itself.
+
+## Module Interaction
+
+```mermaid
+graph TD
+    A[Engine, AI, UI, etc.] --> B{Battle Logging Module}
+    
+    subgraph Battle Logging Module
+        C[index.js]
+        D[battle_event_factory.js]
+        E[battle_event_validators.js]
+        F[battle_log_writer.js]
+        G[battle_log_formatters.js]
+    end
+
+    B --> C
+    C --> D
+    C --> E
+    C --> F
+    C --> G
+
+    subgraph Output
+        H[Battle Log (Array)]
+        I[Console Debug]
+        J[HTML Report]
+        K[Data (CSV/JSON)]
+    end
+
+    F --> H
+    B --> I
+    G --> J
+    G --> K
 ```
-js/battle_logging/
-├── battle_event_types.js     # Event type constants and structure definitions
-├── battle_event_factory.js   # Pure event construction functions (no side effects)
-├── battle_event_validators.js # Validation logic for all event types
-├── battle_log_writer.js      # Log writing, rotation, and batch operations
-├── battle_log_formatters.js  # Convert events to HTML, CSV, JSON, debug formats
-├── battle_log_debug.js       # Console output and external monitoring
-└── index.js                  # Barrel exports and convenience functions
-```
+- **Other Modules** (Engine, AI, etc.): Call `createAndLogEvent()` or other convenience functions from `index.js` to add events to the battle log.
+- **Log Array**: The `battle_log_writer.js` is responsible for pushing events into the global `battleLog` array.
+- **Outputs**: The `battle_log_formatters.js` can then take this `battleLog` array and convert it into various formats like HTML for the UI or CSV for analysis.
 
-## Key Benefits
+## Files
 
-- **Single Responsibility**: Each module has one clear purpose
-- **Testability**: Isolated functions are easy to unit test
-- **Maintainability**: Changes to one concern don't affect others
-- **Performance**: Tree-shaking and selective imports
-- **Extensibility**: Easy to add new event types or output formats
+-   **`index.js`**: The main entry point for the module. It provides barrel exports for all other files and offers high-level convenience functions like `createAndLogEvent()`, `createAndLogRoll()`, and `createAndLogPerformance()` which combine creation, validation, writing, and console debugging into a single call.
+-   **`battle_event_factory.js`**: Contains pure functions for constructing event objects. Each function (`createBaseEvent`, `createDiceRollEvent`, etc.) takes battle state and data, and returns a fully formed, validated event object without any side effects.
+-   **`battle_event_types.js`**: A centralized registry of constants. It defines all valid event types (`EVENT_TYPES`), roll types (`ROLL_TYPES`), and outcome types (`OUTCOME_TYPES`). It also includes JSDoc `@typedef`s for the structure of different event objects.
+-   **`battle_event_validators.js`**: Provides functions to validate the structure and data types of event objects. `validateLogEvent()` and `validateRollData()` ensure that only correctly formed events enter the log, preventing data corruption.
+-   **`battle_log_writer.js`**: Manages the battle log array itself. The `BattleLogWriter` class handles writing events, batching for performance, and log rotation (culling old events to prevent the log from growing indefinitely).
+-   **`battle_log_formatters.js`**: Contains a suite of functions to transform the raw event log into human-readable or machine-readable formats. Exports `toHTML()`, `toCSV()`, `toJSON()`, and `toBattleSummary()`.
+-   **`battle_log_debug.js`**: Controls all console output. The `BattleLogDebugger` class can filter logs by severity (`INFO`, `WARN`, `ERROR`), format them for readability, and send them to an external monitor.
+-   **`test.js`**: A simple test script to verify that the core functionalities of the logging system are working as expected.
 
-## Usage Examples
+## Usage
 
-### Basic Event Creation and Logging
+Here is a typical example of how the `engine` would log a damage event.
 
 ```javascript
-import { createAndLogEvent } from './battle_logging/index.js';
+// Any file that needs to log an event
+import { createAndLogEvent, EVENT_TYPES } from './js/battle_logging/index.js';
 
-// Simple event
-createAndLogEvent(battleLog, battleState, {
-    type: 'damage',
-    actorId: 'aang',
-    text: 'Aang takes 15 damage'
-});
+// Assume 'battleLog' and 'battleState' are available in the current scope.
+function applyDamage(actor, amount) {
+    // ... logic to apply damage ...
+
+    // Create a structured log event for this action.
+    createAndLogEvent(
+        battleLog,      // The global battle log array
+        battleState,    // The current state of the battle
+        {
+            type: EVENT_TYPES.DAMAGE,
+            actorId: actor.id,
+            text: `${actor.name} takes ${amount} damage.`,
+            damage: amount,
+            isMajorEvent: true, // This is a significant event
+        }
+    );
+}
 ```
 
-### Dice Roll Logging
+To generate an HTML report from the log:
 
 ```javascript
-import { createAndLogRoll } from './battle_logging/index.js';
+import { toHTML } from './js/battle_logging/index.js';
 
-createAndLogRoll(battleLog, battleState, {
-    rollType: 'critCheck',
-    actorId: 'azula',
-    roll: 0.95,
-    threshold: 0.9,
-    outcome: 'success',
-    moveName: 'Blue Fire Blast'
-});
-```
-
-### Performance Tracking
-
-```javascript
-import { createAndLogPerformance } from './battle_logging/index.js';
-
-const startTime = performance.now();
-// ... perform operation ...
-const duration = performance.now() - startTime;
-
-createAndLogPerformance(battleLog, battleState, 'AI Decision', duration);
-```
-
-### Advanced Usage - Individual Modules
-
-```javascript
-// Direct module imports for advanced usage
-import { createDiceRollEvent } from './battle_logging/battle_event_factory.js';
-import { writeEvent } from './battle_logging/battle_log_writer.js';
-import { toHTML } from './battle_logging/battle_log_formatters.js';
-import { validateRollData } from './battle_logging/battle_event_validators.js';
-
-// Validate data before creating event
-validateRollData(rollData);
-
-// Create event without side effects
-const rollEvent = createDiceRollEvent(battleState, rollData);
-
-// Write to log
-writeEvent(battleLog, rollEvent);
-
-// Export to HTML
-const htmlOutput = toHTML(battleLog, { includeMajorOnly: true });
-```
-
-### Formatting and Output
-
-```javascript
-import { toHTML, toCSV, toBattleSummary } from './battle_logging/battle_log_formatters.js';
-
-// Generate HTML for UI display
-const html = toHTML(battleLog, { 
-    includeMajorOnly: true,
-    cssClasses: true 
+// After the battle is over...
+const battleReportHtml = toHTML(battleLog, { 
+    includeMajorOnly: false, // Show all events
+    cssClasses: true,        // Add CSS classes for styling
 });
 
-// Export data for analysis
-const csv = toCSV(battleLog);
-
-// Create battle summary report
-const summary = toBattleSummary(battleLog, {
-    includePerformanceData: true,
-    includeTimeline: true
-});
-```
-
-### Debug Control
-
-```javascript
-import { setDebugLevel, enableConsoleLogging } from './battle_logging/battle_log_debug.js';
-
-// Control debug output
-setDebugLevel('WARN'); // Only warnings and errors
-enableConsoleLogging(false); // Disable console output
+// This HTML can then be injected into the DOM.
+document.getElementById('battle-report-container').innerHTML = battleReportHtml;
 ```
 
 ## Event Types

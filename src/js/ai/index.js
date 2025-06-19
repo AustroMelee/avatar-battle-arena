@@ -2,13 +2,14 @@
  * @fileoverview AI Decision System - Module Index
  * @description Barrel exports for the modular AI decision system.
  * Provides both flat exports and namespaced access patterns.
- * @version 1.0
+ * @version 2.1.0
  */
 
 "use strict";
 
 // --- MAIN INTERFACE ---
-export { selectMove, analyzeAiDecision, resetAiState, getAiSummary } from "./ai_decision_engine.js";
+// export { selectMove, analyzeAiDecision, resetAiState, getAiSummary } from "./ai_decision_engine.js";
+export { makeAIDecision } from "./ai_decision_engine.js";
 
 // --- FLAT EXPORTS (for direct import) ---
 export { 
@@ -132,14 +133,14 @@ export const AiSelection = {
 
 // --- LEGACY COMPATIBILITY ---
 // For backward compatibility with the old monolithic engine_ai-decision.js
-export { selectMove as selectMoveCompat } from "./ai_decision_engine.js";
+// export { selectMove as selectMoveCompat } from "./ai_decision_engine.js";
 export { selectFromDistribution as selectFromDistributionCompat } from "./ai_move_selection.js";
 
 /**
  * Module information for debugging and versioning
  */
 export const AI_MODULE_INFO = {
-    version: "1.0",
+    version: "2.1.0",
     modules: [
         "ai_personality",
         "ai_memory", 

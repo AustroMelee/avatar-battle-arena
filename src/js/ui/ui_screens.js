@@ -92,4 +92,11 @@ async function hideScreen(screenName, options = {}) {
     }
     
     setComponentState(screenName, { visible: false });
+}
+
+export function hideAllScreens() {
+    const screens = document.querySelectorAll(".screen");
+    screens.forEach(screen => {
+        /** @type {HTMLElement} */ (screen).style.display = "none";
+    });
 } 

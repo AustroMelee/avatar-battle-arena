@@ -7,7 +7,7 @@
 "use strict";
 
 import { generateLogEvent } from "../utils_log_event.js";
-import { clamp } from "../utils_math.js";
+import { clampValue } from "../constants_consolidated.js";
 
 /**
  * Handles TRIGGER_NARRATIVE_EVENT effect using unified context.
@@ -42,10 +42,11 @@ export function handleAdjustAiProfile(ctx) {
     
     Object.keys(effect.adjustments).forEach(trait => {
         if (trait in primaryTarget.personalityProfile) {
-            primaryTarget.personalityProfile[trait] = clamp(
-                primaryTarget.personalityProfile[trait] + effect.adjustments[trait], 
-                0, 
-                1
+            const oldValue = primaryTarget.personalityProfile[trait];
+            primaryTarget.personalityProfile[trait] = clampValue(
+                oldValue + effect.adjustments[trait],
+                0,
+                2
             );
         }
     });

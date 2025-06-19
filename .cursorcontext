@@ -1,80 +1,204 @@
+from pathlib import Path
+
+cursor_rules_text = """
 /*
   🧠 Cursor Context Ruleset for Avatar Battle Arena
   📁 File: .cursorcontext
-  📄 Purpose: Architectural enforcement for AI coding assistants (e.g., Cursor, ChatGPT) in a vanilla HTML/CSS/JS codebase.
+  📄 Purpose: Architectural enforcement for AI coding assistants (Cursor, ChatGPT, etc.) in a pure HTML/CSS/JS codebase.
 */
 
+
+
+# Cursor Ruleset: Smart ESLint + Shell Safety Mode
+
+
 # === SYSTEM OVERVIEW ===
-STACK: Pure JS (ES2020), HTML5, CSS3
+STACK: Pure JavaScript (ES2020+), HTML5, CSS3
 MODULE FORMAT: ESM (ECMAScript Modules)
 TYPECHECKING: JSDoc + jsconfig.json
-LINTING: ESLint (strict mode), Dependency-Cruiser (modular boundaries)
+LINTING: ESLint (strict), Dependency-Cruiser (module integrity)
 
 # === GLOBAL RULES ===
-- Do not use any framework (React, Vue, etc.). This is a pure JavaScript codebase.
-- Do not use TypeScript. Use JSDoc types only for annotations.
-- Assume all imports follow ES Module syntax with clean paths from /src.
-- All modules must be under /src/js, /src/css, /src/html or /src/assets.
+- ❌ No frameworks (e.g., React, Vue, Angular)
+- ❌ No TypeScript
+- ✅ Use JSDoc exclusively for typing
+- ✅ All imports use relative ESM paths (e.g., `../utils/logger.js`)
+- ✅ Source files must reside in /src
+  - /src/js
+  - /src/css
+  - /src/html
+  - /src/assets
 
-# === MODULE RULES ===
-## ENGINE LAYER (src/js/engine/*.js)
-- Purpose: Game mechanics, battle resolution, turn simulation.
-- MUST NOT import from /ui or /css.
-- Can import from /data, /utils, /ai.
-- Public API defined in: src/js/engine/index.js
-
-## UI LAYER (src/js/ui/*.js)
-- Purpose: DOM manipulation, animations, rendering logic.
-- Can import from /utils.
-- MUST NOT import from /engine or /ai.
-- Public API defined in: src/js/ui/index.js
-
-## AI LAYER (src/js/ai/*.js)
-- Purpose: Decision making for CPU-controlled characters.
-- Can import from /engine, /data, /utils.
-- MUST NOT import from /ui.
-
-## DATA LAYER (src/js/data/*.js)
-- Purpose: Static definitions for characters, maps, movesets.
-- MUST NOT import from /engine, /ui, or /ai.
-- Can import from /utils or define plain data objects.
-
-## UTILS LAYER (src/js/utils/*.js)
-- Purpose: Shared utility functions across modules.
-- Should not import from anything except other /utils files.
-
-# === FILE SIZE LIMITS ===
-- 🚫 No file should exceed 500 lines.
-- Split long files into focused modules (e.g., /battle_core, /battle_log, /turn_handler).
+# === FILE SIZE & STRUCTURE ===
+- 📏 MAX: 500 lines per module
+- 📦 Split responsibilities into focused modules (e.g., `/battle_log`, `/turn_handler`)
+- 🧠 Use `/index.js` files as public APIs for each layer
 
 # === NAMING CONVENTIONS ===
-- Filenames: kebab-case (e.g., battle-log.js)
+- Filenames: kebab-case
 - Functions: camelCase
 - Constants: UPPER_SNAKE_CASE
-- Types: PascalCase (via @typedef in JSDoc)
+- Types (JSDoc): PascalCase via `@typedef`
 
-# === TYPES ===
-- All public functions MUST include @param and @returns JSDoc annotations.
-- All custom types should be defined in /src/js/types/*.js and imported via JSDoc (not ESM).
+# === LAYERED MODULE BOUNDARIES ===
+## ENGINE (src/js/engine)
+- Handles game mechanics, battle logic, simulation
+- ❌ Cannot import from /ui or /css
+- ✅ Can import from /utils, /data, /ai
 
-# === AI INSTRUCTIONS ===
-When editing or generating code, always:
-1. Preserve architectural boundaries defined above.
-2. Adhere strictly to module responsibilities.
-3. Avoid breaking linting or typechecking rules.
-4. Use existing utility functions before creating new ones.
-5. Prefer composition over deep conditionals in battle logic.
-6. Document public APIs with JSDoc.
+## UI (src/js/ui)
+- Handles rendering, DOM updates, animations
+- ✅ Can import from /utils
+- ❌ Cannot import from /engine or /ai
 
-# === EXAMPLE LINT ENFORCEMENT COMMENT ===
-/* eslint-disable no-fallthrough */
-// For intentional switch fallthrough only
+## AI (src/js/ai)
+- CPU decision trees, combat behavior
+- ✅ Can import from /engine, /utils, /data
+- ❌ Cannot import from /ui
 
-# === OPTIONAL FILES ===
-- README_LOGIC.md → Summarizes domain logic (game rules, simulation flow)
-- .eslintrc.js → Lint config
-- .dependency-cruiser.js → Architecture validator
-- jsconfig.json → Enables type checking
+## DATA (src/js/data)
+- Character definitions, movesets, static maps
+- ✅ Can import from /utils
+- ❌ Must not import from /engine, /ui, or /ai
 
-# === END OF CONTEXT ===
-// AI Tools: Load this context on every run to follow core design rules.
+## UTILS (src/js/utils)
+- Reusable pure functions, random number helpers, loggers
+- ✅ Can only import other /utils
+
+# === TYPE ANNOTATIONS ===
+- ✅ All exported functions must use `@param`, `@returns`
+- ✅ All domain types live in `/src/js/types`
+- ❌ No ESM imports for types; use `@typedef` or `@import` in JSDoc
+
+# === INLINE DOCUMENTATION ===
+
+## PURPOSE
+Explain "why" the code exists, not "what" it does. Avoid rephrasing syntax—highlight decisions, assumptions, and risks.
+
+## REQUIRED LOCATIONS
+- Top of all exported functions (with JSDoc)
+- Above multi-branch logic, edge-case handling
+- Around all magic numbers/constants
+- At any known workaround, hack, or legacy patch
+- Where performance concerns influence implementation
+
+## FORMATTING RULES
+- ✅ Full punctuation and sentences
+- ✅ Block comments for flow logic (`/** */`)
+- ❌ No end-of-line `//` comments unless extremely short
+- ✅ Use `/** JSDoc */` for functions and public utilities
+
+## BANNED PRACTICES
+- ❌ No commented-out code (`git` remembers)
+- ❌ No historical notes like “was using this”
+- ❌ No restating variable names (e.g., `i++ // increment i`)
+- ❌ No humor or sarcasm in inline comments
+
+## EXAMPLES
+
+❌ Bad:
+    i++; // increment i
+
+✅ Good:
+    i++; // Skip placeholder at index 0
+
+✅ JSDoc:
+/**
+ * Calculates final attack value after elemental bonuses.
+ * Assumes base damage has already been scaled by momentum.
+ *
+ * @param {Fighter} attacker
+ * @param {Fighter} defender
+ * @returns {number}
+ */
+
+# === AI REFACTORING INSTRUCTIONS ===
+
+## Universal AI Prompt Format (for ChatGPT or Cursor)
+You are now operating under the Avatar Battle Arena architecture rules.
+All modules must remain under 500 lines. If refactoring, move logic to a new file under the correct layer, update imports/exports globally, and ensure nothing breaks.
+Respect existing layering constraints and verify JSDoc + lint compatibility.
+
+If fixing inline documentation:
+- Preserve all domain logic
+- Remove outdated notes
+- Convert end-of-line comments to block headers where appropriate
+- Use full JSDoc for public functions
+
+Example JSDoc for all exported functions is required. Use @typedef from /types files where needed.
+
+## Cursor Refactoring Rule:
+Refactor logic in [FILE A] into a new module [FILE B], under the correct layer. Update all `import`/`export` paths. Verify that:
+1. Each function is properly exported and imported
+2. Original file is trimmed and no longer exports the moved logic
+3. JSDoc annotations are preserved or improved
+4. All inline comments follow formatting rules
+5. No file exceeds 500 lines
+
+# === DIAGNOSTIC PROMPTS ===
+
+## Check and Fix Inline Comments (Cursor)
+Scan this file for inline comments that:
+1. Restate obvious logic
+2. Are outdated, redundant, or misleading
+3. Violate formatting or tone rules
+
+Rewrite valid comments using full sentences and technical tone.
+Add JSDoc annotations for all exported functions.
+
+## Check All Inline Comments in Project
+    grep -R "//" ./src | less
+"""
+
+# Write to file
+file_path = Path("/mnt/data/cursor_rules.txt")
+file_path.write_text(cursor_rules_text.strip())
+
+file_path
+
+
+# === TEMPORARY FIXES & BANDAIDS POLICY ===
+
+All provisional solutions (hacks, workarounds, bandaids) MUST:
+
+1. ✅ Be explicitly **flagged in code comments** using `// TEMP_FIX:` or `// FIXME:` at the top of the block.
+2. ✅ Include a clear description of:
+    - WHY the fix was necessary (technical blocker, time constraint, etc.)
+    - WHAT the ideal long-term solution would be.
+    - WHEN or under what condition it should be revisited.
+3. ✅ Be included in the module’s `README.md` under a `## Known Workarounds` section.
+4. ✅ Be **automatically surfaced to the user**, if possible, during AI editing (e.g., as a notice: "This function contains a TEMP_FIX. Consider resolving it post-deployment.")
+5. ✅ Be written in clean, maintainable style even if temporary—no rushed or obfuscated logic.
+
+🧠 Soft Rule of Thumb:
+If you had to add a TODO, conditional, or mutation that feels wrong—assume it's a TEMP_FIX and document accordingly.
+
+🛠️ Example:
+```js
+// TEMP_FIX: Bypassing deep clone because circular references crash `safeClone`.
+// TODO: Implement a clone strategy with reference map support.
+const shallowCopy = { ...battleState };
+❌ Forbidden:
+
+Undocumented temp fixes or silent hacks
+
+Leaving bandaids in production without surfacing the issue
+
+Using // TODO alone without rationale and resolution plan
+
+
+# DRY (Don't Repeat Yourself) principle. 
+
+Look for:
+- Duplicated code blocks or similar function bodies across different files or components
+- Repeated literals or constants that should be extracted
+- Any logic that's duplicated with slight variations
+- Potential helper functions that could be abstracted
+- Multiple re-implementations of the same functionality (e.g., date formatting, input validation)
+
+Flag each instance and suggest:
+- A refactor strategy (e.g., extract a function, centralize constants)
+- A common module or location where the logic should live
+- How many lines would be saved by applying the refactor
+
+Do not focus on formatting or linting issues. Just DRY-related patterns.
