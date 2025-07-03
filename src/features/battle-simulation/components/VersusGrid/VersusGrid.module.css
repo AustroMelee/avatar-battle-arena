@@ -1,0 +1,139 @@
+.versusGrid {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 60px;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.playerColumn {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.playerColumn:first-child {
+  justify-content: flex-end;
+}
+
+.playerColumn:last-child {
+  justify-content: flex-start;
+}
+
+.vsDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 16px;
+  position: relative;
+  min-width: 80px;
+}
+
+.vsText {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--highlight-color);
+  letter-spacing: 2px;
+  filter: drop-shadow(0 0 8px #f59e0b66);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 2;
+}
+
+.vsDivider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, var(--highlight-color) 0%, transparent 70%);
+  opacity: 0.1;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.vsDivider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent 0%, var(--highlight-color) 20%, var(--highlight-color) 80%, transparent 100%);
+  opacity: 0.3;
+  z-index: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .versusGrid {
+    gap: 30px;
+    margin-top: 40px;
+  }
+  
+  .vsDivider {
+    margin: 0 12px;
+    min-width: 60px;
+  }
+  
+  .vsText {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .versusGrid {
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    margin-top: 30px;
+  }
+  
+  .playerColumn {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .playerColumn:first-child,
+  .playerColumn:last-child {
+    justify-content: center;
+  }
+  
+  .vsDivider {
+    margin: 18px 0;
+    min-width: 60px;
+  }
+  
+  .vsText {
+    font-size: 1.8rem;
+  }
+  
+  .vsDivider::after {
+    height: 60px;
+  }
+}
+
+@media (max-width: 600px) {
+  .versusGrid {
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .vsDivider {
+    margin: 12px 0;
+  }
+  
+  .vsText {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+} 

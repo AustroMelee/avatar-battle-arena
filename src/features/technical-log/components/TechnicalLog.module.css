@@ -1,0 +1,21 @@
+.container {
+  background-color: #0d0d0d;
+  padding: var(--spacing-medium);
+  border-radius: 8px;
+  border: 1px solid var(--border-color-inactive);
+  height: 250px;
+  overflow-y: auto;
+}
+
+.title {
+  margin-top: 0;
+  text-align: center;
+}
+
+.logContent {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+} 

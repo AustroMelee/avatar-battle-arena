@@ -1,50 +1,47 @@
-import js from "@eslint/js";
-import globals from "globals";
-import eslintComments from "eslint-plugin-eslint-comments";
-import { defineConfig } from "eslint/config";
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
 
-export default defineConfig([
-  // 🔧 Base rules for all JavaScript files
+export default [
+  js.configs.recommended,
   {
-    files: ["**/*.{js,mjs,cjs}"],
-    plugins: {
-      js,
-      "eslint-comments": eslintComments
-    },
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
       globals: {
         ...globals.browser,
-        ...globals.node
-      }
+        ...globals.node,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
     },
     rules: {
-      ...js.configs.recommended.rules,
-
-      // 👁️ General style/safety
-      "no-unused-vars": ["warn", { vars: "all", args: "after-used", argsIgnorePattern: "^_" }],
-      "no-console": "off",
-      "no-var": "error",
-      "prefer-const": "warn",
-      "eqeqeq": ["warn", "smart"],
-      "quotes": ["warn", "double"],
-      "semi": ["warn", "always"],
-      "no-redeclare": "error",
-      "no-shadow": "warn",
-      "consistent-return": "warn",
-
-      // 🔐 Prevent bad comment-based rule suppression
-      "eslint-comments/no-unused-disable": "error",
-      "eslint-comments/no-use": "error"
-    }
+      ...tseslint.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'prefer-const': 'error',
+      'no-var': 'error',
+    },
   },
-
-  // 🎯 Phase-specific override
   {
-    files: ["src/js/engine/phases/*.js"],
-    rules: {
-      "no-case-declarations": "off"
-    }
-  }
-]);
+    ignores: ['node_modules/**', 'dist/**', 'build/**'],
+  },
+];

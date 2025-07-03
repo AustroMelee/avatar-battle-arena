@@ -1,0 +1,45 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-large);
+  position: relative;
+}
+
+.winnerOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.winnerOverlay h2 {
+  font-family: var(--font-heading);
+  font-size: 6em;
+  font-weight: 900;
+  color: var(--highlight-color);
+  text-shadow: 0 0 24px var(--highlight-color), 0 0 48px #000;
+  animation: winner-reveal 0.5s ease-out;
+  margin-top: 32px;
+}
+
+@keyframes winner-reveal {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.logContainer {
+  /* No specific styles needed, just a wrapper */
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5em;
+} 

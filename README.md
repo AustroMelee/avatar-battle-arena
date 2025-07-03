@@ -1,155 +1,73 @@
-# Avatar Battle Arena
+# Avatar: Battle Simulator
 
-A comprehensive turn-based battle simulation system featuring characters from Avatar: The Last Airbender with advanced AI, dynamic storytelling, and immersive combat mechanics.
+A React + TypeScript battle simulation system featuring characters from Avatar: The Last Airbender with advanced AI, dynamic storytelling, and immersive combat mechanics.
 
-## ⚔️ **Features**
+## 🚀 Getting Started
 
-- **Dynamic Battle System** - Turn-based combat with environmental interactions
-- **Advanced AI** - Intelligent decision-making with personality adaptation  
-- **Rich Storytelling** - Dynamic narrative generation during battles
-- **Character Variety** - Multiple fighters with unique abilities and archetypes
-- **Environmental Effects** - Location-based modifiers and escalating damage
-- **Type Safety** - 99th percentile JavaScript type safety with comprehensive validation
-- **Modular Architecture** - Clean, maintainable codebase with 60+ modules
-
-## 🚀 **Quick Start**
-
-1. **Clone the repository**
+1. Install dependencies:
    ```bash
-   git clone <repository-url>
-   cd avatar-battle-arena
+   npm install
    ```
 
-2. **Open in browser**
+2. Start the development server:
    ```bash
-   # Simply open index.html in your preferred browser
-   open index.html
+   npm run dev
    ```
 
-3. **Start battling!**
-   - Select your fighters
-   - Choose battle location
-   - Watch the epic confrontation unfold
+3. Open your browser to the URL provided by Vite (usually `http://localhost:5173`)
 
-## 📁 **Project Structure**
+## 🏗️ Project Structure
+
+This project follows the **AI-Agentic Cursor & SRP Guide** with a feature-based architecture:
 
 ```
-AVATAR-BATTLE-ARENA/
-├── 📁 src/                    # Source code
-│   ├── 📁 js/                 # JavaScript modules (60+ files)
-│   ├── 📁 css/                # Stylesheets
-│   └── 📁 assets/             # Images and media
-├── 📁 docs/                   # Documentation
-│   ├── 📁 api/                # API documentation
-│   ├── 📁 development/        # Development guides
-│   ├── 📁 implementation/     # Implementation details
-│   └── 📁 guides/             # User guides
-├── 📁 tools/                  # Development tools
-├── 📁 tests/                  # Test files (future)
-├── 📄 index.html              # Main application
-├── 📄 jsconfig.json           # TypeScript configuration
-└── 📄 README.md               # This file
+src/
+├── common/                    # Shared components and types
+│   ├── components/           # Reusable UI components
+│   └── types/               # Shared TypeScript interfaces
+├── features/                 # Feature modules (Domain-Driven)
+│   ├── character-selection/  # Character selection feature
+│   ├── location-selection/   # Location selection feature
+│   ├── battle-simulation/    # Core battle logic
+│   ├── battle-log/          # Human-readable battle events
+│   └── technical-log/       # AI/technical debugging info
+├── styles/                   # Global styles and CSS variables
+├── App.tsx                  # Main application component
+└── main.tsx                 # React entry point
 ```
 
-## 🛠️ **Technology Stack**
+## 🎯 Features
 
-- **Frontend**: Vanilla JavaScript (ES6+), HTML5, CSS3
-- **Type Safety**: JSDoc with TypeScript checking
-- **Architecture**: Modular ES6 modules with dependency injection
-- **Development**: Zero external dependencies, browser-ready
+- **Character Selection**: Choose from Avatar characters with visual cards
+- **Location Selection**: Pick battle environments with different effects
+- **Battle Simulation**: AI-powered battle engine with realistic outcomes
+- **Dual Logging**: Human-readable narrative + technical debugging logs
+- **Responsive Design**: Modern UI with CSS Modules for zero-conflict styling
 
-## 📚 **Documentation**
+## 🛠️ Development
 
-Comprehensive documentation is available in the [`docs/`](docs/) directory:
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development
+- **Styling**: CSS Modules (as per rule 4.1)
+- **Architecture**: Feature-based with strict separation of concerns
+- **Linting**: ESLint with TypeScript and React rules
 
-### **For Developers**
-- **[API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
-- **[Development Guide](docs/development/DEVELOPMENT_GUIDE.md)** - Setup and contribution guide
-- **[JSDoc Conventions](docs/development/JSDOC_CONVENTIONS.md)** - Code documentation standards
-- **[Band-Aid Fix Guidelines](docs/development/BAND_AID_FIX_GUIDELINES.md)** - Technical debt management
+### Available Scripts
 
-### **For Implementation**
-- **[Implementation Checklist](docs/implementation/IMPLEMENTATION_CHECKLIST.md)** - Project completion status
-- **[Type Safety Implementation](docs/implementation/TYPE_SAFETY_IMPLEMENTATION.md)** - Type system details
-- **[Refactoring Summary](docs/implementation/REFACTORING_SUMMARY.md)** - Architecture evolution
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-### **For Users**
-- **[Documentation Overview](docs/guides/DOCUMENTATION_OVERVIEW.md)** - Guide to all documentation
-- **[Accessibility Improvements](docs/guides/ACCESSIBILITY_IMPROVEMENT_PLAN.md)** - Accessibility features
-- **[Simulator Changelog](docs/guides/SIMULATOR_CHANGELOG.md)** - Version history
+## 🔧 Scalability
 
-## 🎮 **Core Systems**
+This structure is designed for growth:
 
-### **Battle Engine**
-- Turn-based combat with momentum system
-- Environmental escalation and location effects
-- Terminal state detection and victory conditions
-- Comprehensive battle logging and replay system
+- **Adding Characters/Locations**: Simply add to the data files
+- **Improving AI**: Replace battle logic in `battleSimulator.service.ts`
+- **New Features**: Create new feature folders under `src/features/`
+- **LLM Integration**: Add prompts directory for AI-powered narratives
 
-### **AI System** 
-- Modular AI decision engine with multiple components
-- Memory system for learning opponent patterns
-- Personality adaptation based on battle outcomes
-- Strategic intent analysis and move scoring
+## 📝 License
 
-### **User Interface**
-- Character selection with accessibility support
-- Real-time battle visualization
-- Comprehensive battle analysis and statistics
-- Responsive design with efficient rendering
-
-### **Utility Systems**
-- Mathematical operations with defensive programming
-- Random number generation (standard and seeded)
-- State validation and invariant checking
-- Performance monitoring and optimization
-
-## 🔧 **Development**
-
-### **Prerequisites**
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Text editor with JavaScript support
-- Optional: VS Code with TypeScript checking
-
-### **Development Workflow**
-1. **Code Organization** - Follow modular architecture patterns
-2. **Type Safety** - Use comprehensive JSDoc annotations
-3. **Testing** - Validate with defensive programming principles
-4. **Documentation** - Maintain up-to-date API documentation
-
-### **Key Development Files**
-- [`jsconfig.json`](jsconfig.json) - TypeScript checking configuration
-- [`tools/DEBUG_TEST.html`](tools/DEBUG_TEST.html) - Development testing interface
-- [`.cursorrules`](.cursorrules) - AI assistant configuration
-
-## 🎯 **Architecture Highlights**
-
-- **99th Percentile Type Safety** - Machine-verified JavaScript types
-- **Modular Design** - 60+ focused modules with clear responsibilities
-- **Defensive Programming** - Comprehensive input validation and error handling
-- **Performance Optimized** - Efficient rendering and state management
-- **Zero Dependencies** - No external libraries or frameworks required
-
-## 🏆 **Project Status**
-
-- ✅ **Code Structure & Modularity** (100% Complete)
-- ✅ **Type Safety Implementation** (100% Complete) 
-- ✅ **Documentation** (100% Complete)
-- ✅ **Core Battle Systems** (100% Complete)
-- ⚠️ **Testing Infrastructure** (Planned)
-- ⚠️ **Advanced Features** (In Development)
-
-## 🤝 **Contributing**
-
-1. Read the [Development Guide](docs/development/DEVELOPMENT_GUIDE.md)
-2. Follow [JSDoc Conventions](docs/development/JSDOC_CONVENTIONS.md)
-3. Use [Band-Aid Fix Guidelines](docs/development/BAND_AID_FIX_GUIDELINES.md) for temporary code
-4. Reference [API Documentation](docs/api/API_DOCUMENTATION.md) for integration
-
-## 📄 **License**
-
-This project is for educational and demonstration purposes. All Avatar: The Last Airbender characters and concepts are property of Nickelodeon and their respective creators.
-
----
-
-**Ready to experience epic Avatar battles? Open `index.html` and let the adventure begin!** ⚔️🔥💨🌊 
+MIT 

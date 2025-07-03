@@ -1,204 +1,295 @@
-from pathlib import Path
+AI-Agentic Cursor & SRP Guide
 
-cursor_rules_text = """
-/*
-  🧠 Cursor Context Ruleset for Avatar Battle Arena
-  📁 File: .cursorcontext
-  📄 Purpose: Architectural enforcement for AI coding assistants (Cursor, ChatGPT, etc.) in a pure HTML/CSS/JS codebase.
-*/
+1. AI-Agentic Cursor Context
 
+A codebase optimized for LLMs, with strict separation of concerns, zero-conflict architecture, and autonomous self-healing logic.
 
+1A. Environment
 
-# Cursor Ruleset: Smart ESLint + Shell Safety Mode
+Shell: powershell.exe on Win32 (Windows path style)
 
+normalizePaths: true
 
-# === SYSTEM OVERVIEW ===
-STACK: Pure JavaScript (ES2020+), HTML5, CSS3
-MODULE FORMAT: ESM (ECMAScript Modules)
-TYPECHECKING: JSDoc + jsconfig.json
-LINTING: ESLint (strict), Dependency-Cruiser (module integrity)
+1B. Proactive Autonomy
 
-# === GLOBAL RULES ===
-- ❌ No frameworks (e.g., React, Vue, Angular)
-- ❌ No TypeScript
-- ✅ Use JSDoc exclusively for typing
-- ✅ All imports use relative ESM paths (e.g., `../utils/logger.js`)
-- ✅ Source files must reside in /src
-  - /src/js
-  - /src/css
-  - /src/html
-  - /src/assets
+Self-Diagnose & Fix: On any error or misconfiguration, Cursor must:
 
-# === FILE SIZE & STRUCTURE ===
-- 📏 MAX: 500 lines per module
-- 📦 Split responsibilities into focused modules (e.g., `/battle_log`, `/turn_handler`)
-- 🧠 Use `/index.js` files as public APIs for each layer
+Detect root cause
 
-# === NAMING CONVENTIONS ===
-- Filenames: kebab-case
-- Functions: camelCase
-- Constants: UPPER_SNAKE_CASE
-- Types (JSDoc): PascalCase via `@typedef`
+Apply the fix automatically
 
-# === LAYERED MODULE BOUNDARIES ===
-## ENGINE (src/js/engine)
-- Handles game mechanics, battle logic, simulation
-- ❌ Cannot import from /ui or /css
-- ✅ Can import from /utils, /data, /ai
+Explain the change and its intent
 
-## UI (src/js/ui)
-- Handles rendering, DOM updates, animations
-- ✅ Can import from /utils
-- ❌ Cannot import from /engine or /ai
+Re-run linters, type-checkers, and tests to validate fix
 
-## AI (src/js/ai)
-- CPU decision trees, combat behavior
-- ✅ Can import from /engine, /utils, /data
-- ❌ Cannot import from /ui
+Iterate until resolved or externally blocked
 
-## DATA (src/js/data)
-- Character definitions, movesets, static maps
-- ✅ Can import from /utils
-- ❌ Must not import from /engine, /ui, or /ai
+No User Delegation: Never ask the user to troubleshoot.
 
-## UTILS (src/js/utils)
-- Reusable pure functions, random number helpers, loggers
-- ✅ Can only import other /utils
+1C. General Principles
 
-# === TYPE ANNOTATIONS ===
-- ✅ All exported functions must use `@param`, `@returns`
-- ✅ All domain types live in `/src/js/types`
-- ❌ No ESM imports for types; use `@typedef` or `@import` in JSDoc
+Scan First: Always read relevant code before asking questions.
 
-# === INLINE DOCUMENTATION ===
+Code for AI: Prioritize clarity, redundancy, and explicit structure.
 
-## PURPOSE
-Explain "why" the code exists, not "what" it does. Avoid rephrasing syntax—highlight decisions, assumptions, and risks.
+No Dev Server: Never run unless explicitly requested.
 
-## REQUIRED LOCATIONS
-- Top of all exported functions (with JSDoc)
-- Above multi-branch logic, edge-case handling
-- Around all magic numbers/constants
-- At any known workaround, hack, or legacy patch
-- Where performance concerns influence implementation
+1D. File Structure Rules
 
-## FORMATTING RULES
-- ✅ Full punctuation and sentences
-- ✅ Block comments for flow logic (`/** */`)
-- ❌ No end-of-line `//` comments unless extremely short
-- ✅ Use `/** JSDoc */` for functions and public utilities
+Max File Size: ≤500 lines or 6K characters
 
-## BANNED PRACTICES
-- ❌ No commented-out code (`git` remembers)
-- ❌ No historical notes like “was using this”
-- ❌ No restating variable names (e.g., `i++ // increment i`)
-- ❌ No humor or sarcasm in inline comments
+One Responsibility: Each file implements a single domain concept.
 
-## EXAMPLES
+Domain Folders Only: Organize by feature/domain (e.g., features/auth/components/LoginForm.tsx) not flat categories.
 
-❌ Bad:
-    i++; // increment i
+1E. TypeScript Practices
 
-✅ Good:
-    i++; // Skip placeholder at index 0
+Use type over interface unless extending libraries.
 
-✅ JSDoc:
-/**
- * Calculates final attack value after elemental bonuses.
- * Assumes base damage has already been scaled by momentum.
- *
- * @param {Fighter} attacker
- * @param {Fighter} defender
- * @returns {number}
- */
+Name all types explicitly and uniquely (e.g., ButtonProps, TalentNode).
 
-# === AI REFACTORING INSTRUCTIONS ===
+Keep types simple—avoid deeply nested generics.
 
-## Universal AI Prompt Format (for ChatGPT or Cursor)
-You are now operating under the Avatar Battle Arena architecture rules.
-All modules must remain under 500 lines. If refactoring, move logic to a new file under the correct layer, update imports/exports globally, and ensure nothing breaks.
-Respect existing layering constraints and verify JSDoc + lint compatibility.
+Never redefine or shadow type names.
 
-If fixing inline documentation:
-- Preserve all domain logic
-- Remove outdated notes
-- Convert end-of-line comments to block headers where appropriate
-- Use full JSDoc for public functions
+1F. Function Design
 
-Example JSDoc for all exported functions is required. Use @typedef from /types files where needed.
+Use VerbNoun names (e.g., loadUser, fetchReport).
 
-## Cursor Refactoring Rule:
-Refactor logic in [FILE A] into a new module [FILE B], under the correct layer. Update all `import`/`export` paths. Verify that:
-1. Each function is properly exported and imported
-2. Original file is trimmed and no longer exports the moved logic
-3. JSDoc annotations are preserved or improved
-4. All inline comments follow formatting rules
-5. No file exceeds 500 lines
+Max 3–4 parameters: prefer object destructuring.
 
-# === DIAGNOSTIC PROMPTS ===
+Explicit return types with named shapes.
 
-## Check and Fix Inline Comments (Cursor)
-Scan this file for inline comments that:
-1. Restate obvious logic
-2. Are outdated, redundant, or misleading
-3. Violate formatting or tone rules
+Pure by default. Side effects require clear names (e.g., logAndSend).
 
-Rewrite valid comments using full sentences and technical tone.
-Add JSDoc annotations for all exported functions.
+1G. Naming & Semantics
 
-## Check All Inline Comments in Project
-    grep -R "//" ./src | less
-"""
+No single-letter variables or vague names.
 
-# Write to file
-file_path = Path("/mnt/data/cursor_rules.txt")
-file_path.write_text(cursor_rules_text.strip())
+Extract magic values into named constants.
 
-file_path
+1H. Comments & Docblocks
 
+All exports must have doc comments.
 
-# === TEMPORARY FIXES & BANDAIDS POLICY ===
+Annotate complex logic with intent-driven inline comments.
 
-All provisional solutions (hacks, workarounds, bandaids) MUST:
+1I. Modules & Dependency Rules
 
-1. ✅ Be explicitly **flagged in code comments** using `// TEMP_FIX:` or `// FIXME:` at the top of the block.
-2. ✅ Include a clear description of:
-    - WHY the fix was necessary (technical blocker, time constraint, etc.)
-    - WHAT the ideal long-term solution would be.
-    - WHEN or under what condition it should be revisited.
-3. ✅ Be included in the module’s `README.md` under a `## Known Workarounds` section.
-4. ✅ Be **automatically surfaced to the user**, if possible, during AI editing (e.g., as a notice: "This function contains a TEMP_FIX. Consider resolving it post-deployment.")
-5. ✅ Be written in clean, maintainable style even if temporary—no rushed or obfuscated logic.
+No Circular Imports.
 
-🧠 Soft Rule of Thumb:
-If you had to add a TODO, conditional, or mutation that feels wrong—assume it's a TEMP_FIX and document accordingly.
+Explicit Imports Only: No star or side-effect imports.
 
-🛠️ Example:
-```js
-// TEMP_FIX: Bypassing deep clone because circular references crash `safeClone`.
-// TODO: Implement a clone strategy with reference map support.
-const shallowCopy = { ...battleState };
-❌ Forbidden:
+Layering Rule: High-level modules may not import from lower-level ones.
 
-Undocumented temp fixes or silent hacks
+Use Dependency Cruiser to verify module boundaries.
 
-Leaving bandaids in production without surfacing the issue
+1J. Error Handling
 
-Using // TODO alone without rationale and resolution plan
+No empty catch blocks.
 
+All errors must be contextual and actionable.
 
-# DRY (Don't Repeat Yourself) principle. 
+1K. LLM Editability Guarantees
 
-Look for:
-- Duplicated code blocks or similar function bodies across different files or components
-- Repeated literals or constants that should be extracted
-- Any logic that's duplicated with slight variations
-- Potential helper functions that could be abstracted
-- Multiple re-implementations of the same functionality (e.g., date formatting, input validation)
+Break complex logic into named subfunctions.
 
-Flag each instance and suggest:
-- A refactor strategy (e.g., extract a function, centralize constants)
-- A common module or location where the logic should live
-- How many lines would be saved by applying the refactor
+Tag unstable code with // FIXME: or // TEMP:.
 
-Do not focus on formatting or linting issues. Just DRY-related patterns.
+Never hide logic in nested closures.
+
+1L. Main Contextual Pillars (MCPs) & Context7 Limits
+
+Limit to 7 logical domains per session.
+
+Use inline tags: // CONTEXT: Auth, // FOCUS: TokenValidation
+
+1M. Sequential Prompt Flow
+
+@plan → outline steps
+
+@explain → describe behavior
+
+@rewrite → apply refactor
+
+2. Single Responsibility Principle (SRP)
+
+Each file/module must have one reason to change.
+
+2A. Core Module Types
+
+features/ – feature modules (auth, user-profile, etc.)
+
+common/ – shared hooks/components/utils
+
+tests/ – all unit/integration tests
+
+2B. Folder Structure Example
+
+src/
+├── features/
+│   ├── authentication/
+│   │   ├── prompts/
+│   │   ├── validation/
+│   │   ├── services.ts
+│   │   ├── controller.ts
+│   │   └── components/
+│   │       ├── LoginForm.tsx
+│   │       └── LoginForm.module.css
+│   └── user-profile/
+├── common/
+│   ├── components/
+│   └── hooks/
+└── tests/
+
+2C. SRP Checklist
+
+One-sentence responsibility
+
+No unrelated imports
+
+File name matches role
+
+Testable with mocks/stubs
+
+2D. Refactor Rules
+
+Preserve existing behavior
+
+Extract, don’t reinvent
+
+Small, atomic commits
+
+Separate feature, fix, and refactor changes
+
+3. Operational Practices
+
+3.1 Prompt Versioning
+
+Metadata tags: version, author, summary
+
+Maintain changelogs alongside templates
+
+3.2 Metrics & Cost Tracking
+
+Log token usage, latency, and errors
+
+Add cost alerts/dashboards
+
+3.3 Security & Privacy
+
+Redact PII in all inputs/outputs
+
+Run sanitizer before every LLM call
+
+Ban unsafe or unmaintained SDKs
+
+3.4 CI/CD
+
+Lint & format prompts
+
+Stub LLM calls for contract testing
+
+Full pipeline from prompt → UI
+
+3.5 Collaboration
+
+All prompt/parser changes via PR with peer review
+
+Use docs(prompt): commit style
+
+3.6 Observability
+
+Centralize model errors & logs
+
+Track parse error rates & latencies
+
+3.7 Testing
+
+Golden-prompt integration tests
+
+JSON Schema validation for parsed outputs
+
+4. UI, CSS, and Conflict Prevention
+
+4.1 Style Application Conflicts
+
+Never reuse class names across modules
+
+Use CSS Modules only
+
+All classes must be locally scoped and imported as named bindings
+
+Avoid generic classes like .tooltip; use .talent-tooltip
+
+Confirm CSS variable availability at build time
+
+4.2 Load Order & Source Conflicts
+
+If using HTML <link> tags without a bundler:
+
+<link rel="stylesheet" href="/styles/variables.css">
+<link rel="stylesheet" href="/styles/grid.css">
+<link rel="stylesheet" href="/styles/nodes.css">
+<link rel="stylesheet" href="/styles/tooltip.css">
+
+Otherwise, prefer JS-based import statements handled by bundlers (Vite, Webpack)
+
+Never mix <link> and import styles in the same project unless explicitly separated
+
+4.3 Visual Pathfinding (for Connectors)
+
+All visual edge logic must use real graph data, even if progression filters apply elsewhere
+
+Don’t exclude nodes from visual traversals unless connections are direct
+
+Validate all connector renders after progression rule changes
+
+4.4 CSS Debugging Practices
+
+Match class names to component names exactly
+
+Use DevTools to inspect active rules and specificity
+
+Centralize all colors/spacings in variables.css
+
+Use stylelint in CI to catch typos, duplicates
+
+4.5 Overflow & Scrolling (Critical)
+
+Never apply overflow: hidden to a parent of a scrollable UI
+
+Use overflow-x: auto
+
+Audit overflow clipping when horizontal scroll breaks
+
+5. Feature Integration Protocol (Cursor-Specific)
+
+5.1 Cursor Must:
+
+Log all modified files
+
+Detect type, style, and dependency conflicts before writing
+
+Never modify >3 files per request unless explicitly authorized
+
+5.2 When implementing external LLM snippets:
+
+Translate snippet to existing folder structure
+
+Refactor imports, types, and styles to avoid shadowing
+
+Stop and warn if any rule above is in conflict
+
+5.3 Dependency Checks (Mandatory)
+
+All CSS variable usages must resolve
+
+All TypeScript type names must be globally unique
+
+All public types/interfaces must be colocated or namespaced
+
+Use Dependency Cruiser for every major change
+
+This Cursor context governs all behavior across the AI-assisted workflow. Any violation, conflict, or ambiguity must trigger a halt and explain sequence. Cursor is expected to act with architectural awareness and full policy compliance at all times.
+

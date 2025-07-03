@@ -1,0 +1,66 @@
+.container {
+  background-color: var(--card-background-color);
+  padding: var(--spacing-medium);
+  border-radius: 12px;
+  border: 1px solid var(--border-color-inactive);
+  display: flex;
+  flex-direction: column;
+  height: 280px;
+}
+
+.title {
+  margin: 0 0 var(--spacing-medium) 0;
+  padding-bottom: var(--spacing-small);
+  border-bottom: 2px solid var(--highlight-color);
+  font-family: var(--font-heading);
+  font-size: 1.4em;
+  font-weight: 700;
+  color: var(--highlight-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title::before {
+  content: '📜';
+  font-size: 1.2em;
+}
+
+.logListContainer {
+  flex-grow: 1;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 1em;
+}
+
+.logList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.logEntry {
+  padding: 8px 4px;
+  border-bottom: 1px dashed #4b556355;
+  color: var(--text-color-secondary);
+  transition: all 0.5s;
+}
+
+.logEntry:last-child {
+  border-bottom: none;
+}
+
+/* A. Highlight the Current Action in the Log */
+.latest {
+  color: var(--highlight-color);
+  font-weight: 700;
+  background: #f59e0b11;
+  border-left: 4px solid var(--highlight-color);
+  padding-left: 8px;
+  animation: flash 0.7s ease-out;
+}
+
+@keyframes flash {
+  from { background-color: #f59e0b55; }
+  to { background-color: #f59e0b11; }
+} 

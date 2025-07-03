@@ -1,37 +1,26 @@
 {
   "compilerOptions": {
-    "checkJs": true,
-    "allowJs": true,
-    "noEmit": true,
-    "strict": false, // ⛳ Disable full TS rigidity
-    "target": "ES2022",
+    "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
-    "lib": ["ES2022", "DOM"],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "baseUrl": "./src",
-    "paths": {
-      "js/*": ["./js/*"],
-      "css/*": ["./css/*"],
-      "assets/*": ["./assets/*"]
-    }
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve"
   },
   "include": [
-    "src/js/**/*.js",
-    "src/css/**/*.css",
+    "src/**/*",
     "*.js",
-    "*.html"
+    "*.mjs"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "build"
-  ],
-  "typeAcquisition": {
-    "enable": true,
-    "include": ["dom", "es6"]
-  }
+  ]
 }

@@ -1,0 +1,45 @@
+/* CONTEXT: Global Styles */
+/* Defines all shared design tokens for the application. */
+:root {
+  /* Fonts */
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Thematic Colors */
+  --background-color-dark: #0F172A; /* Slate 900 */
+  --background-color-light: #1E293B; /* Slate 800 */
+  --card-background-color: #334155; /* Slate 700 */
+  --parchment-background: #F1E9D7;
+  
+  --text-color-primary: #F8FAFC; /* Slate 50 */
+  --text-color-secondary: #94A3B8; /* Slate 400 */
+  --text-on-parchment: #422F1B;
+  --text-color: var(--text-color-primary); /* Alias for consistency */
+  
+  --border-color-soft: #475569; /* Slate 600 */
+  
+  --player-1-color: #3B82F6; /* Blue 500 */
+  --player-2-color: #EF4444; /* Red 500 */
+  
+  /* Player Border Colors for Battle Scene */
+  --border-color-p1: var(--player-1-color);
+  --border-color-p2: var(--player-2-color);
+  --border-color-inactive: #64748B; /* Slate 500 */
+  
+  --highlight-color: #F59E0B; /* Amber 500 */
+
+  /* Bending Colors */
+  --color-air: #38BDF8;   /* Sky Blue */
+  --color-fire: #F87171;  /* Light Red */
+  --color-water: #60A5FA; /* Blue */
+  --color-earth: #A16207; /* Brown/Yellow */
+
+  /* Spacing */
+  --spacing-small: 8px;
+  --spacing-medium: 16px;
+  --spacing-large: 24px;
+  --spacing-xl: 32px;
+
+  --button-background-color: var(--highlight-color);
+} 
