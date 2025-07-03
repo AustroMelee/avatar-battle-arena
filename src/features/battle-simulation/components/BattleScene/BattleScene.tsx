@@ -42,7 +42,13 @@ export function BattleScene({ state, onPlayerChange }: BattleSceneProps) {
       )}
       <VersusGrid player1={player1Props} player2={player2Props} />
       <div className={styles.logContainer}>
-        <BattleLog logEntries={state.log} />
+        <BattleLog 
+          logEntries={state.log} 
+          battleLog={state.battleLog}
+          aiLog={state.aiLog}
+          detailLevel="battle"
+          showCopyButton={true}
+        />
       </div>
     </div>
   );

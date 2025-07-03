@@ -8,10 +8,23 @@
   height: 280px;
 }
 
-.title {
-  margin: 0 0 var(--spacing-medium) 0;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-medium);
   padding-bottom: var(--spacing-small);
   border-bottom: 2px solid var(--highlight-color);
+}
+
+.headerControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+}
+
+.title {
+  margin: 0;
   font-family: var(--font-heading);
   font-size: 1.4em;
   font-weight: 700;
@@ -26,11 +39,50 @@
   font-size: 1.2em;
 }
 
+.copyButtons {
+  display: flex;
+  gap: var(--spacing-small);
+}
+
+.copyButton {
+  background-color: var(--button-background-color);
+  color: var(--button-text-color);
+  border: 1px solid var(--border-color-active);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-mono);
+}
+
+.copyButton:hover {
+  background-color: var(--button-hover-background-color);
+  border-color: var(--highlight-color);
+  transform: translateY(-1px);
+}
+
+.copyButton.copied {
+  background-color: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+}
+
+.aiCopyButton {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.aiCopyButton:hover {
+  background-color: var(--accent-hover-color);
+}
+
 .logListContainer {
   flex-grow: 1;
   overflow-y: auto;
   font-family: var(--font-mono);
-  font-size: 1em;
+  font-size: 0.9em;
 }
 
 .logList {
@@ -48,6 +100,43 @@
 
 .logEntry:last-child {
   border-bottom: none;
+}
+
+.logHeader {
+  display: flex;
+  gap: var(--spacing-small);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.turnNumber {
+  color: var(--accent-color);
+  font-size: 0.9em;
+  min-width: 60px;
+}
+
+.actor {
+  color: var(--highlight-color);
+  font-weight: 700;
+}
+
+.action {
+  color: var(--text-color-primary);
+  font-style: italic;
+}
+
+.logResult {
+  color: var(--text-color-secondary);
+  margin-left: 60px;
+}
+
+.logNarrative {
+  color: var(--text-color-muted);
+  font-style: italic;
+  margin-top: 4px;
+  margin-left: 60px;
+  font-size: 0.9em;
+  line-height: 1.4;
 }
 
 /* A. Highlight the Current Action in the Log */

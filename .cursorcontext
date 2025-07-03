@@ -1,3 +1,190 @@
+// .cursorcontext (v1.1, Last updated: 2025-07-03)
+
+/**
+ * SOLO DEVELOPER FRONTEND: TypeScript + React Maximum Strictness & AI Autonomy
+ * Purpose: Instruct Cursor to generate, maintain, and refactor a bulletproof codebase—zero technical debt, maximum reliability, and rapid solo development.
+ */
+
+/*==========================================
+=            CORE PRINCIPLES               =
+==========================================*/
+
+/**
+ * 1. MUST use TypeScript for all React code. No `.js` or `.jsx` files allowed for logic/UI.
+ * 2. MUST enable strictest settings in tsconfig.json:
+ *    {
+ *      "strict": true,
+ *      "noImplicitAny": true,
+ *      "strictNullChecks": true,
+ *      "noFallthroughCasesInSwitch": true,
+ *      "esModuleInterop": true,
+ *      "jsx": "react-jsx"
+ *    }
+ * 3. MUST NOT use `any` or `unknown` except with `// @ts-expect-error` + justification.
+ * 4. MUST use `.tsx` extension for all files containing JSX.
+ * 5. SHOULD colocate all types in `types.ts` in each component folder. Shared types/interfaces in `/src/types`.
+ * 6. MUST prefer functional components and hooks; no class components.
+ * 7. MUST NOT use magic strings/numbers—prefer `enum`, `const`, or discriminated unions in `/src/constants` or `/src/types/enums.ts`.
+ * 8. MUST use PascalCase for component/type names, camelCase for hooks/utilities, kebab-case for files.
+ */
+
+/*==========================================
+=          COMPONENT GUIDELINES            =
+==========================================*/
+
+/**
+ * 9. MUST fully type all component props, state, refs, and event handlers.
+ * 10. MUST use `React.FC<Props>` or `({ prop }: Props) => JSX.Element` for components.
+ * 11. MUST declare `children: React.ReactNode` if component renders children.
+ * 12. MUST use named interfaces/type aliases for complex props.
+ * 13. MUST type all DOM event handlers, e.g.:
+ *      const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => { ... }
+ * 14. MUST colocate reusable types in `types.ts`.
+ * 15. MUST use JSDoc for all exported/public components and utilities.
+ */
+
+/*==========================================
+=            HOOKS & STATE                 =
+==========================================*/
+
+/**
+ * 16. All custom hooks MUST:
+ *     - Start with `use` prefix
+ *     - Have explicitly typed parameter and return values.
+ *     - Example: function useUserData(userId: string): { loading: boolean; user: User | null } { ... }
+ * 17. MUST explicitly type `useState`, `useReducer`:
+ *      const [value, setValue] = useState<ValueType>(initial)
+ * 18. MUST always declare all dependencies in `useEffect` and `useCallback`.
+ * 19. Cursor MUST enable or auto-insert `eslint-plugin-react-hooks` for exhaustive-deps enforcement.
+ * 20. All global/shared state (Context, Zustand, etc.) MUST be typed with interfaces in `/src/types/state.ts`.
+ */
+
+/*==========================================
+=               API & DATA                 =
+==========================================*/
+
+/**
+ * 21. MUST strongly type all API boundaries (fetch, axios, react-query, etc).
+ *     - DO NOT assume response shapes—cast and/or validate.
+ *     - Prefer Zod for runtime schema validation.
+ *     - Example:
+ *         const userSchema = z.object({ id: z.string(), name: z.string() });
+ *         const user: User = userSchema.parse(await res.json());
+ * 22. MUST type all form models, e.g.:
+ *      type LoginForm = { email: string; password: string };
+ * 23. MUST NOT use untyped third-party library responses.
+ */
+
+/*==========================================
+=           FILE ORGANIZATION              =
+==========================================*/
+
+/**
+ * 24. Each component folder SHOULD follow this structure:
+ *   /component-name
+ *      index.ts
+ *      component-name.tsx
+ *      types.ts
+ *      styles.module.css
+ *      component-name.test.tsx
+ * 25. Shared folders:
+ *      /src/types      // interfaces, enums, unions
+ *      /src/utils      // generic functions
+ *      /src/hooks      // shared custom hooks
+ *      /src/constants  // design tokens, enums, config
+ * 26. MUST NOT export reusable types inline from component files—extract to types.ts.
+ */
+
+/*==========================================
+=        EVENTS, REFS, FORMS, ERRORS       =
+==========================================*/
+
+/**
+ * 27. MUST type all event handlers and on* props using React types.
+ * 28. MUST always specify a type for `useRef`, e.g.:
+ *      const inputRef = useRef<HTMLInputElement>(null)
+ * 29. All root-level UI trees MUST wrap in error boundaries and provide Suspense fallback types.
+ *      Prefer `react-error-boundary`:
+ *      <ErrorBoundary fallback={<ErrorFallback />}>
+ *        <Suspense fallback={<LoadingSpinner />}>
+ *          <App />
+ *        </Suspense>
+ *      </ErrorBoundary>
+ * 30. All UI components MUST pass accessibility linting (axe, eslint-plugin-jsx-a11y) and include ARIA labels for interactive elements.
+ */
+
+/*==========================================
+=             PERFORMANCE                  =
+==========================================*/
+
+/**
+ * 31. Cursor SHOULD suggest:
+ *      - useMemo for expensive calculations in render
+ *      - useCallback when passing stable function refs as props
+ *      - React.memo for pure stateless components
+ *      - splitting any component >200 LOC into smaller files
+ *      - Avoiding over-memoization for trivial values
+ */
+
+/*==========================================
+=                TESTING                   =
+==========================================*/
+
+/**
+ * 32. All new components/hooks MUST have matching test files using @testing-library/react and @testing-library/jest-dom.
+ * 33. All tests MUST import type definitions from component types, not duplicate type logic.
+ * 34. Tests MUST mock API/network calls with typed utilities (e.g., msw or jest.mock).
+ * 35. Solo projects MUST target at least 80% coverage for exported functions/components.
+ */
+
+/*==========================================
+=             AI AUTONOMY & CI             =
+==========================================*/
+
+/**
+ * 36. Cursor MUST auto-fix: missing types, untyped event handlers, untested components, missing Suspense/error boundaries, or missing ARIA labels when generating or refactoring code.
+ * 37. When encountering legacy JavaScript or untyped code, Cursor MUST generate a migration plan and suggest incremental typing steps (e.g., start with prop types, state, then API boundaries).
+ * 38. Code MUST NOT be marked ready/complete unless all type, lint, and test checks pass.
+ * 39. All code MUST pass ESLint and Prettier checks (standard or project config).
+ * 40. Cursor MUST prefer type-safe, self-documenting code—even if initial typing feels verbose.
+ */
+
+/*==========================================
+=          EXAMPLES OF GOOD CODE           =
+==========================================*/
+
+// ✅ Fully typed Button component
+type ButtonProps = {
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+};
+const Button: React.FC<ButtonProps> = ({ label, onClick, disabled }) => (
+  <button onClick={onClick} disabled={disabled}>{label}</button>
+);
+
+// ✅ Custom hook with typed input/output
+function useUser(userId: string): { loading: boolean; user: User | null } { /* ... */ }
+
+// ✅ API fetch with runtime validation
+const userSchema = z.object({ id: z.string(), name: z.string() });
+const user: User = userSchema.parse(await res.json());
+
+// ✅ useRef with explicit type
+const inputRef = useRef<HTMLInputElement>(null);
+
+// ✅ Test importing types and mocking fetch
+import type { ButtonProps } from './types';
+// ... test logic ...
+
+/*
+  Adhering to this context ensures:
+    - Cursor can generate, refactor, and migrate code autonomously and safely.
+    - Your solo codebase remains bug-resistant, accessible, and future-proof.
+    - Maintenance and iteration are frictionless, even months or years later.
+*/
+
+
 AI-Agentic Cursor & SRP Guide
 
 1. AI-Agentic Cursor Context
@@ -292,4 +479,28 @@ All public types/interfaces must be colocated or namespaced
 Use Dependency Cruiser for every major change
 
 This Cursor context governs all behavior across the AI-assisted workflow. Any violation, conflict, or ambiguity must trigger a halt and explain sequence. Cursor is expected to act with architectural awareness and full policy compliance at all times.
+
+4.6 Visual Collision & Layout Integrity (Critical)
+
+All visually adjacent elements (cards, containers, panels, etc.) must be guaranteed to never overlap—including all visual effects (box-shadow, glow, outline, blur, or animated effect)—at all viewport sizes and breakpoints.
+
+Cursor must:
+
+Detect and prevent all card or container overlaps, including any visual effect extending outside the element's bounding box.
+
+Enforce a minimum gap or margin between elements equal to the maximum visual bleed radius.
+
+Apply and test these rules across all layout modes (flex, grid, float).
+
+Audit layouts at desktop, tablet, and mobile breakpoints and halt/alert on any overlap or bleed.
+
+4.7 Responsive Layout & Regression Verification
+
+For any layout-affecting UI change, Cursor must:
+
+Generate and compare snapshots or computed box models at multiple breakpoints.
+
+Halt and flag on any visual overlap or collision.
+
+Ensure that all containers use explicit gap or padding values, never relying on default spacing.
 

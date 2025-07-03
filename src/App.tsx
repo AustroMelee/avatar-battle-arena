@@ -6,6 +6,7 @@ import { LocationSelection } from './features/location-selection/components/Loca
 import { useBattleSimulator } from './features/battle-simulation/controllers/useBattleSimulator.controller';
 import { Button } from './common/components/Button/Button';
 import { BattleScene } from './features/battle-simulation/components/BattleScene/BattleScene';
+import { LoggingDemo } from './features/battle-simulation/components/LoggingDemo/LoggingDemo';
 
 /**
  * @description The root component that orchestrates the entire application state and renders feature modules.
@@ -31,7 +32,7 @@ function App() {
     resetBattle();
   };
 
-  const handlePlayerChange = (_playerIndex: number) => {
+  const handlePlayerChange = () => {
     // Reset to character selection when a player wants to change
     resetBattle();
   };
@@ -84,6 +85,7 @@ function App() {
         ) : (
           <>
             <BattleScene state={battleState} onPlayerChange={handlePlayerChange} />
+            <LoggingDemo battleState={battleState} />
             <div className={styles.simulateSection}>
               {battleState.isFinished && (
                   <Button onClick={handleReset}>

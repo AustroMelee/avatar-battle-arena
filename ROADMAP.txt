@@ -1,0 +1,970 @@
+Next Step in Your AI Logic
+**1. Implement Battle State Awareness
+Each agent should be able to “see” current HP, opponent’s last action, active buffs/debuffs, and their own available moves.
+
+
+Let’s turn **Battle State Awareness** from a vague principle into concrete, architecturally sound, LLM-friendly code—**actual thinking, not just random button-mashing**. Here’s how to scaffold this in a modern, SRP-respecting TypeScript/React project.
+
+---
+
+## **1. BATTLE STATE AWARENESS**
+
+*“Each agent sees the full tactical field—HP, buffs, cooldowns, last actions, the whole board.”*
+
+---
+
+### **A. Define Battle State Models**
+
+Battle Awareness Completion Checklist
+1. Full-State Perception
+ AI Receives Perceived State:
+Every AI decision function receives a single PerceivedBattleState object (or equivalent), containing:
+
+Both agents’ HP, max HP, defense, chi/resources.
+
+Active buffs & debuffs (by name, ideally with effect).
+
+Cooldowns (all relevant abilities, with remaining turns).
+
+Last move, move history for both agents.
+
+Turn number, and (optionally) a window of recent battleLog entries.
+
+2. State Is Accurate and Timely
+ No Stale Data:
+The perceived state always reflects the true, latest game state at the moment the AI chooses a move.
+(Not old state from the previous turn, not partial updates.)
+
+3. Separation of Concerns
+ State Construction Is Modular:
+The code responsible for building PerceivedBattleState is a clear, dedicated module or utility—not mixed in with scoring or move selection logic.
+
+4. Testing & Debugging Hooks
+ Debug Print/Test Passes:
+You can log or print the AI’s perceived state and see a true snapshot of the current battle from either agent’s view, at any turn, without surprises.
+
+ Unit Test:
+If you hand-construct a test state, the output matches expectations for all fields.
+
+5. Used by AI (and Only AI)
+ All AI Decisions Use Perceived State:
+The AI pipeline ONLY reasons over the passed-in battle state object (not via global access, not by directly peeking at raw engine variables).
+
+ Human or UI code does not depend on it:
+This state object is for AI/internal logic, not for UI rendering, ensuring clarity of role.
+
+When all above are green-checked, you have “Battle Awareness” locked.
+Only THEN do you move on to higher-level tactical logic (e.g., intent modeling, threat analysis, counter-move planning, etc).
+
+#### **`types/BattleState.ts`**
+
+```ts
+export type PlayerId = 'player1' | 'player2';
+
+export interface PlayerState {
+  id: PlayerId;
+  name: string;
+  hp: number;
+  maxHp: number;
+  defense: number;
+  agility: number;
+  intelligence: number;
+  power: number;
+  activeBuffs: Buff[];
+  activeDebuffs: Debuff[];
+  availableMoves: MoveInstance[];
+  cooldowns: Record<string, number>;
+  lastMove?: string;
+  moveHistory: string[];
+}
+
+export interface MoveInstance {
+  id: string;
+  name: string;
+  cooldown: number;
+  resourceCost?: number;
+  tags?: string[];
+}
+
+export interface Buff {
+  id: string;
+  name: string;
+  value: number;
+  duration: number;
+}
+
+export interface Debuff {
+  id: string;
+  name: string;
+  value: number;
+  duration: number;
+}
+
+export interface BattleState {
+  turn: number;
+  players: Record<PlayerId, PlayerState>;
+  log: string[];
+  environment: {
+    location: string;
+    modifiers?: string[];
+  }
+}
+```
+
+---
+
+### **B. Battle State in React Context (Single Source of Truth)**
+
+#### **`context/BattleContext.tsx`**
+
+```tsx
+import React, { createContext, useContext, useReducer } from 'react';
+import type { BattleState } from '../types/BattleState';
+
+const initialBattleState: BattleState = {
+  turn: 1,
+  players: { /* ...filled with PlayerState for p1/p2 */ },
+  log: [],
+  environment: { location: "Fire Nation Capital" }
+};
+
+const BattleContext = createContext<[BattleState, React.Dispatch<any>]>(null as any);
+
+export const useBattle = () => useContext(BattleContext);
+
+function battleReducer(state: BattleState, action: any): BattleState {
+  // Handle state transitions: 'MOVE', 'BUFF', 'DAMAGE', etc.
+  // Example:
+  switch (action.type) {
+    case 'APPLY_MOVE':
+      // custom logic here
+      return { ...state, /* updated */ };
+    // ... more cases
+    default:
+      return state;
+  }
+}
+
+export function BattleProvider({ children }: { children: React.ReactNode }) {
+  const value = useReducer(battleReducer, initialBattleState);
+  return <BattleContext.Provider value={value}>{children}</BattleContext.Provider>;
+}
+```
+
+---
+
+### **C. Tactical AI: Context-Aware Move Selection**
+
+#### **`ai/selectMove.ts`**
+
+```ts
+import { PlayerState, BattleState, MoveInstance } from '../types/BattleState';
+
+export function selectMove(player: PlayerState, state: BattleState): MoveInstance {
+  // Example: defensive logic
+  const lowHp = player.hp < player.maxHp * 0.3;
+  const shieldAvailable = player.availableMoves.some(m => m.tags?.includes('defensive') && !player.cooldowns[m.id]);
+  const lastEnemyMove = state.players[player.id === 'player1' ? 'player2' : 'player1'].lastMove;
+
+  if (lowHp && shieldAvailable) {
+    return player.availableMoves.find(m => m.tags?.includes('defensive'))!;
+  }
+  if (lastEnemyMove === 'Shield' && player.availableMoves.some(m => m.tags?.includes('piercing'))) {
+    return player.availableMoves.find(m => m.tags?.includes('piercing'))!;
+  }
+  // Weighted attack with randomness to avoid loops
+  const attackMoves = player.availableMoves.filter(m => m.tags?.includes('attack') && !player.cooldowns[m.id]);
+  return attackMoves[Math.floor(Math.random() * attackMoves.length)];
+}
+```
+
+---
+
+### **D. Hooking It Up: React Battle Loop**
+
+#### **`components/BattleRunner.tsx`**
+
+```tsx
+import React from 'react';
+import { useBattle } from '../context/BattleContext';
+import { selectMove } from '../ai/selectMove';
+
+export function BattleRunner() {
+  const [battle, dispatch] = useBattle();
+
+  React.useEffect(() => {
+    if (/* check if battle is ongoing */) {
+      const p1 = battle.players.player1;
+      const p2 = battle.players.player2;
+
+      const p1Move = selectMove(p1, battle);
+      const p2Move = selectMove(p2, battle);
+
+      // Dispatch moves for both players
+      dispatch({ type: 'APPLY_MOVE', playerId: 'player1', move: p1Move });
+      dispatch({ type: 'APPLY_MOVE', playerId: 'player2', move: p2Move });
+    }
+  }, [battle.turn]);
+
+  return <div>{/* Battle log and UI */}</div>;
+}
+```
+
+---
+
+## **E. Using State in UI (Battle Log, Health Bars, etc.)**
+
+* Anywhere in your React tree, just call `const [battle] = useBattle();`
+* Show move history, current buffs/debuffs, live HP, etc.
+* Make the UI reactive to the actual tactical situation—not just to some dumb number in a reducer.
+
+---
+
+## **Summary**
+
+**True battle state awareness** means every combatant and every component “sees” the entire tactical situation:
+
+* Player HP, defense, buffs, cooldowns, available moves
+* Recent move history for context-sensitive decisions
+* Global environment modifiers (location, weather, terrain)
+
+**With this pattern:**
+
+* Your AI can react with *intelligence*
+* The UI can show rich context and flavor
+* You eliminate infinite mindless loops
+* You lay the groundwork for emergent narrative (“Azula targets Aang’s weakened defense after repeated Lightning strikes…”)
+
+
+Want a specific reducer example? A test battle simulation? Let me know how hard you want to go.
+
+
+**2. Add Cooldowns, Limited Use, or Resource Costs
+Azula can’t just “Lightning” every turn; put it on a 3-turn cooldown or attach a chi cost.
+
+Aang’s “Air Shield” stacks? Put a cap or diminishing returns, or require him to attack or reposition sometimes.
+
+
+Here’s how you implement and enforce that system-wide with robust TypeScript/React patterns:
+
+A. Model Cooldowns, Uses, and Resources
+1. Extend MoveInstance and PlayerState
+types/BattleState.ts
+
+ts
+Copy
+Edit
+export interface MoveInstance {
+  id: string;
+  name: string;
+  tags?: string[];                // 'attack', 'defensive', etc.
+  cooldown?: number;              // Number of turns required after use
+  maxUses?: number;               // If move is limited (e.g. 3 Lightning bolts per battle)
+  resourceCost?: number;          // Chi, mana, etc.
+}
+
+export interface PlayerState {
+  // ...existing fields...
+  availableMoves: MoveInstance[];
+  cooldowns: Record<string, number>;      // move.id → turns left
+  usesLeft: Record<string, number>;       // move.id → uses remaining
+  resources: {
+    chi: number;                          // Example: Azula has 10 chi, Lightning costs 3
+  };
+}
+B. Applying and Reducing Cooldowns
+1. When a Move is Used
+Check if cooldown is zero (or undefined), usesLeft > 0, and resources are enough
+
+After move, set cooldown and decrement uses/resources
+
+reducers/battleReducer.ts
+
+ts
+Copy
+Edit
+case 'APPLY_MOVE': {
+  const { playerId, move } = action;
+  const player = state.players[playerId];
+
+  // Enforce move limits
+  const cooldownLeft = player.cooldowns[move.id] || 0;
+  const usesLeft = player.usesLeft[move.id] ?? Infinity;
+  const cost = move.resourceCost ?? 0;
+
+  if (cooldownLeft > 0 || usesLeft <= 0 || player.resources.chi < cost) {
+    // Illegal move: skip, log error, or pick fallback
+    return state;
+  }
+
+  // Apply move effects, e.g. damage, buffs, etc. (not shown)
+  // Set cooldown
+  const newCooldowns = { ...player.cooldowns, [move.id]: move.cooldown ?? 0 };
+  // Decrement uses
+  const newUsesLeft = { ...player.usesLeft };
+  if (move.maxUses) newUsesLeft[move.id] = usesLeft - 1;
+  // Spend resource
+  const newResources = { ...player.resources, chi: player.resources.chi - cost };
+
+  // Update state
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...player,
+        cooldowns: newCooldowns,
+        usesLeft: newUsesLeft,
+        resources: newResources,
+        lastMove: move.name,
+        moveHistory: [...player.moveHistory, move.name]
+      }
+    },
+    // ...log, other updates
+  };
+}
+2. At End of Turn: Reduce Cooldowns
+reducers/battleReducer.ts
+
+ts
+Copy
+Edit
+case 'END_TURN': {
+  const updatedPlayers = {} as Record<PlayerId, PlayerState>;
+  for (const [id, player] of Object.entries(state.players)) {
+    // Decrement each move cooldown if above zero
+    const newCooldowns = Object.fromEntries(
+      Object.entries(player.cooldowns).map(([mid, turns]) => [mid, Math.max(0, turns - 1)])
+    );
+    updatedPlayers[id as PlayerId] = { ...player, cooldowns: newCooldowns };
+  }
+  return { ...state, players: updatedPlayers, turn: state.turn + 1 };
+}
+C. AI Move Selection: Only Legal Moves
+ai/selectMove.ts
+
+ts
+Copy
+Edit
+export function selectMove(player: PlayerState, state: BattleState): MoveInstance {
+  // Filter for moves not on cooldown, with uses/resources left
+  const legalMoves = player.availableMoves.filter(m => {
+    const cd = player.cooldowns[m.id] || 0;
+    const uses = player.usesLeft[m.id] ?? Infinity;
+    const cost = m.resourceCost ?? 0;
+    return cd === 0 && uses > 0 && player.resources.chi >= cost;
+  });
+  // ...rest of AI logic
+  return legalMoves.length ? legalMoves[0] : player.availableMoves[0]; // fallback
+}
+D. UI Feedback: Show Move States
+components/MoveButton.tsx
+
+tsx
+Copy
+Edit
+type MoveButtonProps = {
+  move: MoveInstance;
+  player: PlayerState;
+  onClick: () => void;
+};
+
+export function MoveButton({ move, player, onClick }: MoveButtonProps) {
+  const cooldown = player.cooldowns[move.id] || 0;
+  const uses = player.usesLeft[move.id] ?? Infinity;
+  const cost = move.resourceCost ?? 0;
+  const canUse = cooldown === 0 && uses > 0 && player.resources.chi >= cost;
+  return (
+    <button disabled={!canUse} onClick={onClick} title={
+      cooldown > 0 ? `Cooldown: ${cooldown}` :
+      uses <= 0 ? "No uses left" :
+      player.resources.chi < cost ? "Not enough chi" : "Ready!"
+    }>
+      {move.name}
+      {cooldown > 0 && <span> (CD: {cooldown})</span>}
+      {uses !== Infinity && <span> ({uses} left)</span>}
+      {cost > 0 && <span> (Chi: {cost})</span>}
+    </button>
+  );
+}
+E. Example Move Definitions
+ts
+Copy
+Edit
+const azulaMoves: MoveInstance[] = [
+  { id: 'blueFire', name: 'Blue Fire', tags: ['attack'], cooldown: 0, resourceCost: 1 },
+  { id: 'lightning', name: 'Lightning', tags: ['attack', 'piercing'], cooldown: 3, maxUses: 3, resourceCost: 4 },
+  // ...other moves
+];
+Summary: You Get…
+No more infinite “Lightning” spam.
+
+Moves become tactical choices—when do you burn your best?
+
+“Azula is out of chi!” “Lightning is on cooldown!”—now the sim generates drama, not just numbers.
+
+AI and UI both know which moves are legal at all times.
+
+Flexibly extend to “healing potion” limits, elemental combo meters, etc.
+
+**3. Introduce Conditional Behavior Trees
+If (HP < 30%) and (Air Shield available) → Defend
+
+If (opponent just used Shield) → Use piercing attack
+
+If (Lightning available) and (Aang has no shield) → Use Lightning
+
+If (Azula’s HP < 10) → Consider ‘all-in’ attack or defensive feint
+
+
+A. Core: Simple Behavior Tree/Decision Rule Engine
+1. Define Condition & Action Types
+types/AIBehavior.ts
+
+ts
+Copy
+Edit
+export type GameCondition = (state: BattleState, self: PlayerState, opponent: PlayerState) => boolean;
+export type MoveSelector = (state: BattleState, self: PlayerState, opponent: PlayerState) => MoveInstance | null;
+
+export interface AIRule {
+  name: string; // e.g. "Low HP Defend"
+  when: GameCondition;
+  then: MoveSelector;
+}
+B. Write Your AI Rules as “If...Then...”
+Example: Azula AI Rules
+ts
+Copy
+Edit
+// Condition: HP < 30%
+const lowHP: GameCondition = (state, self) => self.health / self.maxHealth < 0.3;
+
+// Condition: Opponent just used Shield
+const oppJustShielded: GameCondition = (state, self, opp) =>
+  opp.moveHistory.slice(-1)[0]?.toLowerCase().includes("shield");
+
+// Condition: Lightning available
+const lightningReady: GameCondition = (state, self) =>
+  self.availableMoves.some(m => m.id === "lightning" && (self.cooldowns[m.id] ?? 0) === 0 && self.resources.chi >= (m.resourceCost ?? 0));
+
+// Condition: Opponent unshielded
+const oppNotShielded: GameCondition = (state, self, opp) => !opp.statuses?.includes("shielded");
+
+// ...add more
+
+const azulaAIRules: AIRule[] = [
+  {
+    name: "Defend at Low HP",
+    when: (s, self, opp) => lowHP(s, self) && self.availableMoves.some(m => m.id === "fireShield" && (self.cooldowns[m.id] ?? 0) === 0),
+    then: (s, self) => self.availableMoves.find(m => m.id === "fireShield") ?? null
+  },
+  {
+    name: "Pierce When Opponent Shields",
+    when: (s, self, opp) => oppJustShielded(s, self, opp) && self.availableMoves.some(m => m.tags?.includes("piercing") && (self.cooldowns[m.id] ?? 0) === 0),
+    then: (s, self) => self.availableMoves.find(m => m.tags?.includes("piercing") && (self.cooldowns[m.id] ?? 0) === 0) ?? null
+  },
+  {
+    name: "Lightning When Safe",
+    when: (s, self, opp) => lightningReady(s, self) && oppNotShielded(s, self, opp),
+    then: (s, self) => self.availableMoves.find(m => m.id === "lightning") ?? null
+  },
+  {
+    name: "Desperation All-In",
+    when: (s, self) => self.health < 10,
+    then: (s, self) => self.availableMoves.find(m => m.tags?.includes("high-damage") && (self.cooldowns[m.id] ?? 0) === 0) ?? null
+  },
+  // Default fallback—just basic attack
+  {
+    name: "Default Attack",
+    when: () => true,
+    then: (s, self) => self.availableMoves.find(m => m.tags?.includes("attack") && (self.cooldowns[m.id] ?? 0) === 0) ?? null
+  }
+];
+C. The Decision Engine: First-Match Rule
+ai/selectMove.ts
+
+ts
+Copy
+Edit
+export function decideMove(
+  rules: AIRule[],
+  state: BattleState,
+  self: PlayerState,
+  opponent: PlayerState
+): MoveInstance {
+  for (const rule of rules) {
+    if (rule.when(state, self, opponent)) {
+      const move = rule.then(state, self, opponent);
+      if (move) return move;
+    }
+  }
+  // fallback
+  return self.availableMoves[0];
+}
+D. Plug Into Battle Loop
+battleManager.ts
+
+ts
+Copy
+Edit
+function aiTurn(playerId: PlayerId, state: BattleState) {
+  const self = state.players[playerId];
+  const opp = state.players[getOpponentId(playerId)];
+  const aiRules = (playerId === "azula" ? azulaAIRules : aangAIRules); // etc
+  const move = decideMove(aiRules, state, self, opp);
+  dispatch({ type: 'APPLY_MOVE', playerId, move });
+}
+E. Debug & Expand: Richer Rules, Real Context
+Add a priority field to AIRule and sort, if you want priority instead of order.
+
+Make then more sophisticated: chain moves, set up combos (“if shield is up, next turn use pierce”).
+
+Add “knowledge state” for tracking what the AI thinks the opponent might do.
+
+F. UI Feedback (for debugging/teaching)
+components/AIThoughtBubble.tsx
+
+tsx
+Copy
+Edit
+export function AIThoughtBubble({rule}: {rule: AIRule}) {
+  return <span className="ai-thought">{rule.name}</span>;
+}
+Show which rule triggered the AI’s move—great for debugging and “explainable AI.”
+
+G. Example: Azula Decision Snapshots
+Aang shields:
+Azula’s rules notice shield in moveHistory → select Lightning (piercing).
+
+Azula at 8 HP:
+All-in desperation triggers → chooses Blue Fire Burst.
+
+Aang has no shield, Lightning ready:
+Zap him.
+
+Otherwise:
+Use regular blue fire to chip.
+
+Summary:
+You’re not just scripting a fight.
+You’re scripting a mind—one that reacts, baits, counter-attacks, and goes all-in when on the ropes.
+
+
+
+
+**4. Track and Display Battle Log/History
+So each agent can reference what’s already happened this round/battle.
+
+A. Data Shape: Rich, Structured Events (Not Strings)
+types/BattleLog.ts
+
+ts
+Copy
+Edit
+export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO';
+
+export interface BattleLogEvent {
+  id: string; // uuid or sequential
+  turn: number;
+  actor: PlayerId;
+  type: LogEventType;
+  moveId?: string;
+  targetId?: PlayerId;
+  value?: number;
+  desc: string; // For plain rendering
+  meta?: Record<string, unknown>;
+  timestamp: number;
+}
+This shape lets you filter, query, and search log events, not just render a chatbox.
+
+B. Logging Actions in the Engine
+battleEngine.ts
+
+ts
+Copy
+Edit
+function logMove({
+  state,
+  actor,
+  move,
+  target,
+  value
+}: {
+  state: BattleState,
+  actor: PlayerId,
+  move: MoveInstance,
+  target: PlayerId,
+  value: number
+}) {
+  state.battleLog.push({
+    id: createEventId(),
+    turn: state.turn,
+    actor,
+    type: 'MOVE',
+    moveId: move.id,
+    targetId: target,
+    value,
+    desc: `${state.players[actor].name} uses ${move.displayName}! It hits ${state.players[target].name}, dealing ${value} damage.`,
+    timestamp: Date.now(),
+    meta: { crit: move.crit, blocked: move.blocked }
+  });
+}
+Add similar log entries for status changes, KOs, round start, etc.
+
+C. Displaying the Log (React)
+components/BattleLogPanel.tsx
+
+tsx
+Copy
+Edit
+import { BattleLogEvent } from "../types/BattleLog";
+
+export function BattleLogPanel({ log }: { log: BattleLogEvent[] }) {
+  return (
+    <div className="battle-log-panel">
+      <h3>Battle Log</h3>
+      <ul>
+        {log.slice(-20).map(event =>
+          <li key={event.id} className={`event-${event.type.toLowerCase()}`}>
+            <span className="log-turn">{event.turn}</span>{" "}
+            <span className="log-actor">{event.actor}</span>{" "}
+            <span className="log-desc">{event.desc}</span>
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}
+Optionally style events by type (damage = red, buffs = blue, etc).
+
+Show turn number, actor, action.
+
+D. AI: Querying the Battle Log for Decision-Making
+ai/behavior.ts
+
+ts
+Copy
+Edit
+function aiShouldDefend(log: BattleLogEvent[], self: PlayerState): boolean {
+  // If the last 2 moves targeted me with high damage, consider defending
+  const recentHits = log
+    .filter(e => e.type === "MOVE" && e.targetId === self.id)
+    .slice(-2);
+  return recentHits.some(e => (e.value ?? 0) > 4);
+}
+
+function didOpponentJustShield(log: BattleLogEvent[], opponentId: PlayerId): boolean {
+  const lastEvent = [...log].reverse().find(e => e.actor === opponentId && e.type === "MOVE");
+  return lastEvent?.moveId === "airShield";
+}
+Your rules/behavior tree can check recent log entries to adapt tactics (“He’s been spamming shield; time to break through”).
+
+Enables more human, memory-like behavior.
+
+E. Enabling Advanced Features
+Timeline View: Scroll, filter by turn, see highlights (e.g. crits, turning points).
+
+Replay: Re-run the battle step-by-step using the log (great for debugging AI).
+
+Stat Extraction: Compute stats on-the-fly (“Azula landed 8/10 Lightnings, avg. dmg 3.4”).
+
+Conditional Moves: “If I’ve used ‘Wind Gust’ three times, use ‘Air Blast’ next.”
+
+F. Implementation Gotchas
+Never store log as just plain text. Always structure it, then derive display.
+
+Use log.length or unique IDs to guarantee proper ordering for time-travel/replay.
+
+For performance, prune or paginate old logs in long battles.
+
+G. Sample Usage In Battle Loop
+ts
+Copy
+Edit
+// On move application
+applyMove(state, playerId, move) {
+  // ...effect logic
+  logMove({
+    state,
+    actor: playerId,
+    move,
+    target,
+    value: calculatedDamage
+  });
+  // ...AI and next turn logic
+}
+H. UI: Player & AI Reference
+Player: See what just happened, strategize, spot patterns.
+
+AI: Query log for “how many turns since last shield?” “Did opponent repeat move?” “Was last move a crit?”
+
+
+
+
+**5. Add Tactical Randomness and Weighted Choice
+Each turn, agents weigh best move vs risk vs random variation (to avoid boring patterns).
+
+**6. Victory/Draw/Escape/Desperation Triggers
+At critical HP, trigger unique behaviors (“Azula unleashes a wild, desperate lightning arc…”)
+
+If both are at 1 HP and both on cooldowns, force narrative resolution or escape.
+
+
+5. Tactical Randomness and Weighted Choice
+What to fix:
+
+Current AI always chooses the mathematically “best” move.
+
+Outcome: Boring, repetitive, robot-fight loops.
+
+You want drama: unpredictability, feints, occasional human mistakes, psychological “yomi” layers.
+
+A. Weighted Move Selection
+Key: Assign each move a weight based on context—NOT just “is it off cooldown?” or “does it do the most damage?”
+Add randomness but bias it towards the best choice.
+
+Types:
+ts
+Copy
+Edit
+type MoveId = string;
+type MoveWeightFn = (state: BattleState, self: PlayerState, opp: PlayerState, log: BattleLogEvent[]) => number;
+type MoveAIData = { id: MoveId, label: string, weightFn: MoveWeightFn };
+
+const azulaAIMoves: MoveAIData[] = [
+  {
+    id: 'lightning',
+    label: 'Lightning',
+    weightFn: (state, self, opp, log) =>
+      (self.cooldowns.lightning === 0 && self.chi >= 5 && opp.hasShield === false)
+        ? 12 // top weight if “kill move” and available
+        : self.cooldowns.lightning === 0
+        ? 4  // lower weight if shielded
+        : 0  // unavailable
+  },
+  {
+    id: 'blueFire',
+    label: 'Blue Fire',
+    weightFn: (state, self, opp, log) =>
+      opp.hp < 10 ? 8 : 5 // more likely to finish off a weak foe
+  },
+  // …other moves
+];
+Weighted Random Pick:
+ts
+Copy
+Edit
+function weightedRandomChoice<T>(items: T[], getWeight: (item: T) => number): T | undefined {
+  const total = items.reduce((sum, item) => sum + getWeight(item), 0);
+  if (total === 0) return undefined;
+  let threshold = Math.random() * total;
+  for (const item of items) {
+    threshold -= getWeight(item);
+    if (threshold <= 0) return item;
+  }
+  return items[items.length - 1];
+}
+
+// In AI move select:
+const move = weightedRandomChoice(azulaAIMoves, m => m.weightFn(state, self, opp, log));
+Extras:
+Add “mistake” weights:
+Occasionally, a sub-optimal move gets a small base weight, so Azula sometimes wastes a turn showboating or feinting.
+
+Behavior tweaks:
+If AI lost last round to X move, slightly upweight counter-move.
+
+B. Risk/Bluff Factor
+Weights can consider not just game state, but predicted opponent next move (“If Aang almost always shields after taking Lightning, maybe Azula waits and fakes with Blue Fire”).
+
+Add “read the log” rules for meta behavior.
+
+6. Victory/Draw/Escape/Desperation Triggers
+What to fix:
+
+Your battle engine ends in a dull way if both parties are stuck on cooldown or at 1 HP.
+
+Want: Last-ditch all-ins, unique dialogue/animation, rare “draw” or “escape” states.
+
+A. State Checks and Triggers
+In your main turn loop, before normal move selection:
+
+ts
+Copy
+Edit
+// Check for desperate state (Azula HP <= 10, special move not yet used)
+if (azula.hp <= 10 && !azula.usedDesperation) {
+  return {
+    move: 'desperateLightningArc',
+    flavor: 'Azula’s eyes blaze wild: “I won’t lose to a child!”',
+    set: azula.usedDesperation = true,
+  };
+}
+
+// Draw/escape logic
+if (
+  aang.hp <= 1 && azula.hp <= 1 &&
+  allMovesOnCooldown(aang) && allMovesOnCooldown(azula)
+) {
+  // Can trigger a draw, mutual surrender, or “sudden death” resolution
+  return {
+    move: 'drawEvent',
+    flavor: 'Both warriors collapse, their strength spent—the duel ends in a draw.'
+  };
+}
+Victory/Narrative Closure
+On true victory, trigger not just “Azula wins!” but flavor:
+
+Azula: “That was too easy.”
+
+Aang: “I’ll train harder next time!”
+
+Types:
+ts
+Copy
+Edit
+type BattleResolution = 'victory' | 'draw' | 'escape' | 'mutualKO';
+
+interface BattleEndEvent {
+  type: BattleResolution;
+  winner?: PlayerId;
+  desc: string;
+  flavor: string;
+  timestamp: number;
+}
+B. Making It Human
+Desperation attacks: Once per battle, a losing AI “breaks the rules” (e.g., tries a double move, or risks self-harm for huge damage).
+
+Draw/escape: If both can’t act for X turns, show narrative outro rather than stalling (“They stare each other down, neither able to continue…”).
+
+Victory flavor: Trigger character-specific post-battle lines, UI effects, or even reward unlocks for rare outcomes.
+
+C. Practical Patterns
+Always check “special case” triggers before normal move logic.
+
+Log these events in the battle log (see previous answer) for full replayability.
+
+Unit test these states so you never soft-lock a match.
+
+
+
+
+7. UI/Narrative Hooks (with Prewritten Richness)
+Goal:
+Make every action, reaction, and phase in your battle engine come alive with character, not just stats.
+
+Pattern:
+For each move, state, or battle event, associate prewritten narrative hooks—short, punchy lines and flavor text—that:
+
+React to context (first blood, desperate comeback, a clutch shield, a taunt).
+
+Change depending on which agent is speaking, what move is used, and battle state.
+
+Feed into both the UI and the battle log for replay/immersion.
+
+A. Narrative Data Structure
+ts
+Copy
+Edit
+// For each move, special event, or state, create hooks
+type NarrativeHook = {
+  when: (ctx: BattleContext) => boolean;
+  speaker: PlayerId | "Narrator";
+  text: (ctx: BattleContext) => string;
+};
+
+// Example
+const narrativeHooks: NarrativeHook[] = [
+  {
+    // Azula lands Lightning when Aang < 20 HP
+    when: ({ move, actor, target }) =>
+      move.id === 'lightning' && actor.id === 'azula' && target.hp < 20,
+    speaker: 'azula',
+    text: ({ target }) => `Azula's lips curl into a wicked smile. "Feeling shocked, Avatar?" she taunts as ${target.name} staggers.`
+  },
+  {
+    // Aang shields at 1 HP
+    when: ({ move, actor }) => move.id === 'airShield' && actor.hp === 1,
+    speaker: 'aang',
+    text: () => 'Aang grits his teeth, summoning the last of his strength to conjure a swirling barrier. "I won’t give up..."'
+  },
+  {
+    // Desperation move
+    when: ({ actor }) => actor.desperationMode,
+    speaker: 'Narrator',
+    text: ({ actor }) => `${actor.name}'s eyes burn with wild resolve—a cornered animal, fighting for survival.`
+  },
+  {
+    // First blood
+    when: ({ turnIndex }) => turnIndex === 1,
+    speaker: 'Narrator',
+    text: () => `The first blow lands, shattering the stillness of the capital’s plaza.`
+  },
+  // ...add more hooks per move, per battle phase, per reversal, etc.
+];
+B. Emitting Hooks in Battle Loop
+Each turn, after move execution:
+
+ts
+Copy
+Edit
+function emitNarrativeHooks(ctx: BattleContext) {
+  return narrativeHooks
+    .filter(hook => hook.when(ctx))
+    .map(hook => ({ speaker: hook.speaker, text: hook.text(ctx) }));
+}
+These lines feed into the UI, popping up as dialog bubbles, floating text, or log entries.
+
+C. Example Output/UI Integration
+Battle Log Example:
+
+rust
+Copy
+Edit
+Azula uses Lightning! It hits Aang, dealing 5 damage.
+Azula's lips curl into a wicked smile. "Feeling shocked, Avatar?" she taunts as Aang staggers.
+
+Aang uses Air Shield! Aang's defense rises.
+Aang grits his teeth, summoning the last of his strength to conjure a swirling barrier. "I won’t give up..."
+UI:
+
+Show Azula’s dialogue in a right-aligned speech bubble.
+
+Show Aang’s dialogue in a left-aligned bubble.
+
+Narrator lines float above, in gold, mid-screen.
+
+Let the player mouse-over or tap the log for full event context.
+
+D. Advanced: Variants, Mood, Voice
+For each hook, provide multiple variants, randomly pick for variety.
+
+Add “mood” (victorious, desperate, smug, defeated) to change voice and portrait pose.
+
+Allow each agent to have unique catchphrases or taunt styles, not generic “Azula attacks.”
+
+ts
+Copy
+Edit
+const azulaTaunts = [
+  `"Is that all the great Avatar can manage?"`,
+  `"You’re slower than I expected, Aang."`,
+  `"Don’t blink, or you’ll miss your chance to surrender."`
+];
+
+text: ({ actor }) => azulaTaunts[Math.floor(Math.random() * azulaTaunts.length)];
+E. Narrative-Driven Triggers
+Special lines on KO, draw, low-HP survival, shield breaks, comeback streaks, missed attacks.
+
+Use log/context to detect and emit only once per event, not every turn.
+
+Summary
+Your engine becomes a living duel, not a dry log.
+The UI breathes with the narrative:
+
+“Azula grins, seeing the Avatar weaken.”
+
+“Aang’s hope flickers, but his spirit endures.”
+
+“Blue fire arcs—Azula’s trump card, unleashed in a storm of fury.”

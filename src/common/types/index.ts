@@ -6,6 +6,9 @@ export type Ability = {
   type: 'attack' | 'defense_buff';
   power: number; // Potency of the ability
   description: string;
+  cooldown?: number; // Number of turns required after use (optional)
+  chiCost?: number; // Resource cost for future extensibility (optional)
+  tags?: string[]; // For future categorization (e.g., 'piercing', 'defensive')
 };
 
 /**

@@ -1,0 +1,23 @@
+## **1. BATTLE STATE AWARENESS**
+
+*“Each agent sees the full tactical field—HP, buffs, cooldowns, last actions, the whole board.”*
+
+---
+
+### **A. Define Battle State Models**
+
+Battle Awareness Completion Checklist
+1. Full-State Perception
+ AI Receives Perceived State:
+Every AI decision function receives a single PerceivedBattleState object (or equivalent), containing:
+
+Both agents’ HP, max HP, defense, chi/resources.
+
+Active buffs & debuffs (by name, ideally with effect).
+
+Cooldowns (all relevant abilities, with remaining turns).
+
+Last move, move history for both agents.
+
+Turn number, and (optionally) a window of recent battleLog entries.
+

@@ -4,7 +4,6 @@ import { availableCharacters } from '../data/characterData';
 import styles from './CharacterSelection.module.css';
 import { PlayerCardHorizontal } from '../../battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal';
 import { CharacterPortrait } from './CharacterPortrait';
-import { Button } from '@/common/components/Button/Button';
 
 /**
  * @description Props for the CharacterSelection component.
@@ -36,7 +35,16 @@ export function CharacterSelection({
         // STATE 2: Display the selected character's detailed card
         <div className={styles.displayCardContainer}>
           <PlayerCardHorizontal
-            character={{ ...selectedCharacter, currentHealth: 100, currentDefense: selectedCharacter.stats.defense }}
+            character={{ 
+              ...selectedCharacter, 
+              currentHealth: 100, 
+              currentDefense: selectedCharacter.stats.defense,
+              cooldowns: {},
+              moveHistory: [],
+              resources: { chi: 10 },
+              activeBuffs: [],
+              activeDebuffs: []
+            }}
             isActive={true}
             playerColor={playerColor}
             onChange={() => onSelectCharacter(null)}
