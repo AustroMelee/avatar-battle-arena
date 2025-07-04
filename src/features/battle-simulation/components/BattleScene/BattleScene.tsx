@@ -1,7 +1,7 @@
 // CONTEXT: BattleSimulation, // FOCUS: UIRendering
-import { BattleLog } from '@/features/battle-log/components/BattleLog';
 import { BattleState } from '../../types';
 import { VersusGrid } from '../VersusGrid/VersusGrid';
+import { UnifiedBattleLog } from '../UnifiedBattleLog';
 import type { TriggeredNarrative } from '../../services/narrative/types';
 import styles from './BattleScene.module.css';
 
@@ -48,12 +48,10 @@ export function BattleScene({
       )}
       <VersusGrid player1={player1Props} player2={player2Props} />
       <div className={styles.logContainer}>
-        <BattleLog 
-          logEntries={state.log} 
+        <UnifiedBattleLog 
           battleLog={state.battleLog}
           aiLog={state.aiLog}
-          detailLevel="battle"
-          showCopyButton={true}
+          maxEntries={50}
         />
       </div>
     </div>

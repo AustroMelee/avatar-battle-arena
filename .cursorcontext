@@ -10,7 +10,11 @@
 ==========================================*/
 
 /**
- * 1. MUST use TypeScript for all React code. No `.js` or `.jsx` files allowed for logic/UI.
+ * 1.
+ 1b) YOU ARE FORBIDDEN FROM STARTING NEW DEV SERVERS/PORTS UNLESS ASKED.
+ 1c) YOU ARE FORBIDDEN FROM CREATING TEMP SCRIPTS/DEMOS UNLESS SPECIFICALLY ASKED.
+
+  MUST use TypeScript for all React code. No `.js` or `.jsx` files allowed for logic/UI.
  * 2. MUST enable strictest settings in tsconfig.json:
  *    {
  *      "strict": true,
@@ -147,6 +151,136 @@
  * 38. Code MUST NOT be marked ready/complete unless all type, lint, and test checks pass.
  * 39. All code MUST pass ESLint and Prettier checks (standard or project config).
  * 40. Cursor MUST prefer type-safe, self-documenting code—even if initial typing feels verbose.
+ */
+
+/*==========================================
+=         PARAMETER & IMPORT RULES         =
+==========================================*/
+
+/**
+ * 41. MUST prefix unused parameters with underscore (_state, _props) to indicate intentional non-use.
+ * 42. MUST remove unused imports immediately - never leave commented-out imports.
+ * 43. MUST validate all function signatures match their type definitions exactly.
+ * 44. MUST NOT declare parameters that are never used - prefer optional parameters or function overloading.
+ * 45. When implementing interface functions, MUST use all required parameters or explicitly mark as unused.
+ */
+
+/*==========================================
+=        TYPE SAFETY VALIDATION            =
+==========================================*/
+
+/**
+ * 46. MUST run `npx tsc --noEmit` before any commit to catch type mismatches.
+ * 47. MUST validate example files use complete type definitions matching production interfaces.
+ * 48. MUST ensure all exported types are actually used or explicitly marked as unused.
+ * 49. MUST verify type compatibility between related interfaces (e.g., Character vs BattleCharacter).
+ * 50. MUST use exact type matching - no structural typing unless explicitly intended.
+ */
+
+/*==========================================
+=        ERROR HANDLING & SUSPENSE         =
+==========================================*/
+
+/**
+ * 51. MUST wrap all root-level components in ErrorBoundary and Suspense.
+ * 52. MUST separate error boundary components into dedicated files (not inline in main.tsx).
+ * 53. MUST provide meaningful fallback components with proper accessibility attributes.
+ * 54. MUST handle both synchronous and asynchronous errors appropriately.
+ * 55. MUST test error boundaries with intentional error conditions.
+ */
+
+/*==========================================
+=         AI & RULE SYSTEM RULES           =
+==========================================*/
+
+/**
+ * 56. MUST ensure all AI rule functions use their declared parameters or mark as unused.
+ * 57. MUST validate weight functions conform to WeightFunction type signature exactly.
+ * 58. MUST ensure rule conditions and actions have matching parameter counts.
+ * 59. MUST use consistent parameter naming across all rule implementations.
+ * 60. MUST validate that example AI behavior matches actual implementation types.
+ */
+
+/*==========================================
+=        PRE-COMMIT VALIDATION             =
+==========================================*/
+
+/**
+ * 61. MUST run complete validation before marking work as complete:
+ *     - npm run lint (zero warnings)
+ *     - npx tsc --noEmit (zero errors)
+ *     - npm run build (successful compilation)
+ *     - All type imports resolve correctly
+ * 62. MUST verify no circular dependencies exist.
+ * 63. MUST ensure all exported types are properly documented.
+ * 64. MUST validate that example files compile without type errors.
+ * 65. MUST confirm error boundaries are properly implemented.
+ */
+
+/*==========================================
+=         IMPORT/EXPORT HYGIENE            =
+==========================================*/
+
+/**
+ * 66. MUST use explicit imports - no wildcard imports except for types.
+ * 67. MUST validate that all imported types are actually used in the file.
+ * 68. MUST ensure import paths are correct and files exist.
+ * 69. MUST use consistent import ordering (React, external libs, internal modules, types).
+ * 70. MUST remove unused imports immediately when refactoring.
+ */
+
+/*==========================================
+=         EXAMPLE FILE STANDARDS            =
+==========================================*/
+
+/**
+ * 71. MUST ensure example files use complete type definitions matching production interfaces.
+ * 72. MUST validate that example objects have all required properties.
+ * 73. MUST test example files compile without type errors.
+ * 74. MUST use realistic but minimal data in examples.
+ * 75. MUST document any intentional simplifications in example files.
+ */
+
+/*==========================================
+=        AUTOMATIC FIX PROTOCOLS           =
+==========================================*/
+
+/**
+ * 76. When encountering unused parameter warnings, MUST fix by:
+ *     - Adding underscore prefix for intentionally unused parameters
+ *     - Removing parameters if truly unnecessary
+ *     - Updating type definitions if signatures are wrong
+ * 77. When encountering type mismatches, MUST:
+ *     - Identify the root cause (missing properties, wrong types)
+ *     - Fix the type definition or the implementation
+ *     - Validate the fix resolves all related errors
+ * 78. MUST never leave type errors or warnings unresolved.
+ */
+
+/*==========================================
+=      DEVELOPMENT ENVIRONMENT             =
+==========================================*/
+
+/**
+ * 79. MUST ensure development server runs without warnings.
+ * 80. MUST validate that fast-refresh works correctly.
+ * 81. MUST confirm that error boundaries don't interfere with development workflow.
+ * 82. MUST ensure all TypeScript strict settings are enabled and enforced.
+ * 83. MUST validate that ESLint configuration catches all intended issues.
+ */
+
+/*==========================================
+=         CODE QUALITY GATES               =
+==========================================*/
+
+/**
+ * 84. MUST achieve zero warnings before considering work complete.
+ * 85. MUST validate that all type definitions are actually used.
+ * 86. MUST ensure no dead code or unused exports exist.
+ * 87. MUST confirm that all error handling paths are properly typed.
+ * 88. MUST validate that all async operations have proper error boundaries.
+ * 89. MUST ensure that all UI components have proper accessibility attributes.
+ * 90. MUST confirm that all state management is properly typed.
  */
 
 /*==========================================
@@ -343,7 +477,7 @@ Testable with mocks/stubs
 
 Preserve existing behavior
 
-Extract, don’t reinvent
+Extract, don't reinvent
 
 Small, atomic commits
 
@@ -428,7 +562,7 @@ Never mix <link> and import styles in the same project unless explicitly separat
 
 All visual edge logic must use real graph data, even if progression filters apply elsewhere
 
-Don’t exclude nodes from visual traversals unless connections are direct
+Don't exclude nodes from visual traversals unless connections are direct
 
 Validate all connector renders after progression rule changes
 
@@ -503,4 +637,246 @@ Generate and compare snapshots or computed box models at multiple breakpoints.
 Halt and flag on any visual overlap or collision.
 
 Ensure that all containers use explicit gap or padding values, never relying on default spacing.
+
+/*==========================================
+=        INTEGRATION & SIGNATURE VALIDATION =
+==========================================*/
+
+/**
+ * 91. Function Signature Validation (CRITICAL)
+ * MUST validate all function signatures before implementation:
+ *     - Check actual function definition, not assumed signature
+ *     - Verify parameter count and types match exactly
+ *     - Test function calls with actual parameters
+ *     - Never assume function signatures from usage patterns
+ * 
+ * 92. Cross-Module Integration Testing
+ * MUST test integration points between modules:
+ *     - Validate imports/exports work correctly
+ *     - Test function calls between different modules
+ *     - Verify type compatibility across module boundaries
+ *     - Check for circular dependencies
+ * 
+ * 93. Service Creation Pattern Validation
+ * MUST validate service creation patterns:
+ *     - Check if service factories take parameters or not
+ *     - Verify service instantiation matches factory signature
+ *     - Test service methods with actual parameters
+ *     - Ensure service state is properly initialized
+ * 
+ * 94. Architecture Consistency Enforcement
+ * MUST maintain consistency across architectural changes:
+ *     - Update all related components when changing interfaces
+ *     - Verify all call sites match new function signatures
+ *     - Test integration points after architectural changes
+ *     - Ensure no orphaned or inconsistent implementations
+ * 
+ * 95. Rapid Development Safety Protocols
+ * MUST implement safety checks during rapid development:
+ *     - Validate function signatures before each implementation
+ *     - Test integration points after each major change
+ *     - Clean up unused code immediately, not later
+ *     - Verify type safety across all modified files
+ * 
+ * 96. Function Call Validation Protocol
+ * MUST validate all function calls:
+ *     - Check parameter count matches function signature
+ *     - Verify parameter types are compatible
+ *     - Test function calls with actual data
+ *     - Never assume function behavior from usage patterns
+ * 
+ * 97. Service Integration Testing Protocol
+ * MUST test service integrations:
+ *     - Validate service creation and initialization
+ *     - Test service method calls with real parameters
+ *     - Verify service state management
+ *     - Check for proper error handling
+ * 
+ * 98. Type Safety Validation Protocol
+ * MUST ensure type safety across all changes:
+ *     - Run TypeScript checks after each modification
+ *     - Validate all type imports and exports
+ *     - Check for type compatibility issues
+ *     - Ensure no type mismatches exist
+ * 
+ * 99. Cleanup and Maintenance Protocols
+ * MUST maintain clean codebase:
+ *     - Remove unused imports immediately
+ *     - Clean up unused variables and parameters
+ *     - Remove dead code and unused exports
+ *     - Maintain consistent naming conventions
+ * 
+ * 100. Integration Testing Requirements
+ * MUST perform integration testing:
+ *     - Test all module interactions
+ *     - Validate data flow between components
+ *     - Check for proper error handling
+ *     - Verify performance characteristics
+ */
+
+/*==========================================
+=        ERROR PREVENTION PROTOCOLS        =
+==========================================*/
+
+/**
+ * 101. Function Signature Mismatch Prevention
+ * MUST prevent function signature mismatches:
+ *     - Always read function definitions before calling
+ *     - Validate parameter types and counts
+ *     - Test function calls with actual data
+ *     - Never assume function signatures
+ * 
+ * 102. Unused Code Prevention
+ * MUST prevent unused code accumulation:
+ *     - Remove unused imports immediately
+ *     - Clean up unused variables and parameters
+ *     - Remove dead code during refactoring
+ *     - Maintain clean, minimal codebase
+ * 
+ * 103. Import/Export Consistency
+ * MUST maintain import/export consistency:
+ *     - Validate all import paths exist
+ *     - Check for circular dependencies
+ *     - Ensure proper export/import matching
+ *     - Test module loading and resolution
+ * 
+ * 104. Type Safety Enforcement
+ * MUST enforce type safety:
+ *     - Run TypeScript checks frequently
+ *     - Validate all type definitions
+ *     - Check for type compatibility
+ *     - Ensure no type errors exist
+ * 
+ * 105. Integration Point Validation
+ * MUST validate integration points:
+ *     - Test all module interactions
+ *     - Validate data flow between components
+ *     - Check for proper error handling
+ *     - Verify performance characteristics
+ */
+
+/*==========================================
+=        DEVELOPMENT WORKFLOW ENFORCEMENT  =
+==========================================*/
+
+/**
+ * 106. Pre-Implementation Validation
+ * MUST validate before implementation:
+ *     - Read all related function signatures
+ *     - Check existing type definitions
+ *     - Validate import/export patterns
+ *     - Test integration points
+ * 
+ * 107. Post-Implementation Testing
+ * MUST test after implementation:
+ *     - Run TypeScript type checking
+ *     - Test all function calls
+ *     - Validate integration points
+ *     - Check for unused code
+ * 
+ * 108. Refactoring Safety Protocols
+ * MUST ensure safe refactoring:
+ *     - Update all related components
+ *     - Test all integration points
+ *     - Validate type safety
+ *     - Clean up unused code
+ * 
+ * 109. Architecture Evolution Safety
+ * MUST ensure safe architecture evolution:
+ *     - Update all related components
+ *     - Test all integration points
+ *     - Validate type safety
+ *     - Maintain consistency
+ * 
+ * 110. Code Quality Gates
+ * MUST enforce code quality gates:
+ *     - Zero TypeScript errors
+ *     - Zero unused imports/variables
+ *     - All integration points tested
+ *     - All function signatures validated
+ */
+
+/*==========================================
+=        TYPE SYSTEM EVOLUTION PREVENTION  =
+==========================================*/
+
+/**
+ * 111. Type Evolution Safety Protocols (CRITICAL)
+ * MUST prevent type system evolution errors:
+ *     - NEVER add required properties to existing types without migration plan
+ *     - Use optional properties (?) for new features initially
+ *     - Create type factories for complex object construction
+ *     - Provide default values for all new required properties
+ *     - Update all call sites when changing function signatures
+ * 
+ * 112. Type Factory Pattern Enforcement
+ * MUST use type factories for complex object construction:
+ *     - Create factory functions for BattleCharacter, PerceivedState, etc.
+ *     - Never manually construct complex objects inline
+ *     - Use factories to ensure all required properties are provided
+ *     - Example: createBattleCharacter(character: Character): BattleCharacter
+ * 
+ * 113. Breaking Change Prevention
+ * MUST prevent breaking changes in type definitions:
+ *     - Use optional properties when adding new features
+ *     - Create migration helpers for required property additions
+ *     - Maintain backward compatibility for at least one version
+ *     - Use union types for gradual feature rollouts
+ * 
+ * 114. Function Signature Stability
+ * MUST maintain function signature stability:
+ *     - Use optional parameters for new functionality
+ *     - Provide default values for all parameters
+ *     - Never change existing parameter types without migration
+ *     - Use function overloading for multiple signatures
+ * 
+ * 115. Development Environment Guards
+ * MUST set up development environment guards:
+ *     - Run "npx tsc --noEmit" before any commit
+ *     - Use pre-commit hooks for type checking
+ *     - Set up CI/CD pipeline with type validation
+ *     - Configure IDE to show type errors immediately
+ * 
+ * 116. Experimental Code Isolation
+ * MUST isolate experimental code:
+ *     - Use /sandbox/ folder for incomplete features
+ *     - Mark experimental code with // TODO: EXPERIMENTAL
+ *     - Don't import experimental code into production modules
+ *     - Use feature flags for incomplete functionality
+ * 
+ * 117. Type Migration Patterns
+ * MUST follow safe type migration patterns:
+ *     - Phase 1: Add optional properties with defaults
+ *     - Phase 2: Update all call sites to use new properties
+ *     - Phase 3: Make properties required after full migration
+ *     - Phase 4: Remove old properties and update types
+ * 
+ * 118. Code Organization for Type Safety
+ * MUST organize code for type safety:
+ *     - Keep related types in same file/module
+ *     - Use barrel exports (index.ts) for type re-exports
+ *     - Separate stable types from experimental types
+ *     - Use namespacing for complex type hierarchies
+ * 
+ * 119. Proactive Type Validation
+ * MUST validate types proactively:
+ *     - Check type compatibility before implementation
+ *     - Validate all object constructions match type definitions
+ *     - Test type factories with various inputs
+ *     - Ensure type definitions are self-documenting
+ * 
+ * 120. Legacy Code Type Migration
+ * MUST migrate legacy code safely:
+ *     - Start with prop types and state management
+ *     - Gradually add type annotations to functions
+ *     - Use type assertions only when absolutely necessary
+ *     - Create migration scripts for large-scale changes
+ */
+
+/*
+  Adhering to this context ensures:
+    - Cursor can generate, refactor, and migrate code autonomously and safely.
+    - Your solo codebase remains bug-resistant, accessible, and future-proof.
+    - Maintenance and iteration are frictionless, even months or years later.
+*/
 

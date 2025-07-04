@@ -43,6 +43,20 @@ src/
 - **Battle Simulation**: AI-powered battle engine with realistic outcomes
 - **Dual Logging**: Human-readable narrative + technical debugging logs
 - **Responsive Design**: Modern UI with CSS Modules for zero-conflict styling
+- **Advanced AI**: Context-aware decision making with pattern recognition
+- **Battle Mechanics**: Cooldowns, desperation moves, finishers, critical hits
+- **Dynamic Narrative**: Character-specific dialogue and battle commentary
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs/) folder:
+
+- **[Simulator Mechanics](./docs/SIMULATOR_MECHANICS.md)** - Complete system overview and completion status
+- **[AI System](./docs/AI_SYSTEM.md)** - Advanced AI decision-making guide
+- **[Cooldown System](./docs/COOLDOWN_SYSTEM.md)** - Battle mechanics implementation
+- **[Development Roadmap](./docs/ROADMAP.txt)** - Project direction and milestones
+
+**Overall Completion: 87%** - The simulator is production-ready with advanced features and robust type safety.
 
 ## 🛠️ Development
 

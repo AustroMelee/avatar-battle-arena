@@ -2,7 +2,6 @@
 // RESPONSIBILITY: Demonstrate how to use the battle state awareness system
 import { getPerceivedBattleState, getBattleTacticalContext } from './battleStateAwareness';
 import { BattleCharacter, BattleLogEntry } from '../../types';
-import { Character } from '@/common/types';
 
 /**
  * @description Example of how to integrate battle state awareness into AI decision making.
@@ -25,11 +24,21 @@ export function demonstrateBattleStateAwareness(): void {
     currentHealth: 65,
     currentDefense: 15,
     cooldowns: { 'Air Slice': 1 },
+    usesLeft: { 'Air Slice': 2, 'Air Shield': 3 },
     moveHistory: ['Air Slice', 'Air Shield', 'Air Slice'],
     lastMove: 'Air Slice',
     resources: { chi: 6 },
     activeBuffs: [{ id: 'shield', name: 'Air Shield', duration: 2, description: 'Defense buff', source: 'Air Shield' }],
-    activeDebuffs: []
+    activeDebuffs: [],
+    flags: {},
+    diminishingEffects: {},
+    position: 'neutral',
+    chargeProgress: 0,
+    isCharging: false,
+    repositionAttempts: 0,
+    chargeInterruptions: 0,
+    lastPositionChange: undefined,
+    positionHistory: []
   };
 
   const zuko: BattleCharacter = {
@@ -46,18 +55,30 @@ export function demonstrateBattleStateAwareness(): void {
     currentHealth: 80,
     currentDefense: 30,
     cooldowns: {},
+    usesLeft: { 'Fire Blast': 2, 'Defense Stance': 3 },
     moveHistory: ['Fire Blast', 'Defense Stance', 'Defense Stance'],
     lastMove: 'Defense Stance',
     resources: { chi: 4 },
     activeBuffs: [{ id: 'stance', name: 'Defense Stance', duration: 1, description: 'Defense buff', source: 'Defense Stance' }],
-    activeDebuffs: []
+    activeDebuffs: [],
+    flags: {},
+    diminishingEffects: {},
+    position: 'neutral',
+    chargeProgress: 0,
+    isCharging: false,
+    repositionAttempts: 0,
+    chargeInterruptions: 0,
+    lastPositionChange: undefined,
+    positionHistory: []
   };
 
   // Create example battle log
   const battleLog: BattleLogEntry[] = [
     {
+      id: 'turn1_aang_air_slice',
       turn: 1,
       actor: 'Aang',
+      type: 'MOVE',
       action: 'Air Slice',
       target: 'Zuko',
       result: 'Dealt 20 damage',
@@ -66,8 +87,10 @@ export function demonstrateBattleStateAwareness(): void {
       timestamp: Date.now() - 3000
     },
     {
+      id: 'turn2_zuko_fire_blast',
       turn: 2,
       actor: 'Zuko',
+      type: 'MOVE',
       action: 'Fire Blast',
       target: 'Aang',
       result: 'Dealt 25 damage',
@@ -76,8 +99,10 @@ export function demonstrateBattleStateAwareness(): void {
       timestamp: Date.now() - 2000
     },
     {
+      id: 'turn3_aang_air_shield',
       turn: 3,
       actor: 'Aang',
+      type: 'MOVE',
       action: 'Air Shield',
       target: 'Self',
       result: 'Increased defense by 25',
@@ -85,8 +110,10 @@ export function demonstrateBattleStateAwareness(): void {
       timestamp: Date.now() - 1000
     },
     {
+      id: 'turn4_zuko_defense_stance',
       turn: 4,
       actor: 'Zuko',
+      type: 'MOVE',
       action: 'Defense Stance',
       target: 'Self',
       result: 'Increased defense by 30',
@@ -99,23 +126,23 @@ export function demonstrateBattleStateAwareness(): void {
 
   // Get complete battle state awareness
   console.log('1. Getting Perceived Battle State...');
-  const perceivedState = getPerceivedBattleState(currentTurn, aang, zuko, battleLog);
+  getPerceivedBattleState(currentTurn, aang, zuko, battleLog);
   
   console.log('Aang\'s State:');
-  console.log(`  Health: ${perceivedState.self.currentHealth}/${perceivedState.self.maxHealth}`);
-  console.log(`  Defense: ${perceivedState.self.currentDefense}`);
-  console.log(`  Chi: ${perceivedState.self.resources.chi}`);
-  console.log(`  Buffs: ${perceivedState.self.buffs.join(', ') || 'None'}`);
-  console.log(`  Cooldowns: ${Object.keys(perceivedState.self.cooldowns).join(', ') || 'None'}`);
-  console.log(`  Last Move: ${perceivedState.self.lastMove}`);
+  console.log(`  Health: ${aang.currentHealth}/100`);
+  console.log(`  Defense: ${aang.currentDefense}`);
+  console.log(`  Chi: ${aang.resources.chi}`);
+  console.log(`  Buffs: ${aang.activeBuffs.map(b => b.name).join(', ') || 'None'}`);
+  console.log(`  Cooldowns: ${Object.keys(aang.cooldowns).join(', ') || 'None'}`);
+  console.log(`  Last Move: ${aang.lastMove}`);
   
   console.log('\nZuko\'s State:');
-  console.log(`  Health: ${perceivedState.enemy.currentHealth}/${perceivedState.enemy.maxHealth}`);
-  console.log(`  Defense: ${perceivedState.enemy.currentDefense}`);
-  console.log(`  Chi: ${perceivedState.enemy.resources.chi}`);
-  console.log(`  Buffs: ${perceivedState.enemy.buffs.join(', ') || 'None'}`);
-  console.log(`  Cooldowns: ${Object.keys(perceivedState.enemy.cooldowns).join(', ') || 'None'}`);
-  console.log(`  Last Move: ${perceivedState.enemy.lastMove}`);
+  console.log(`  Health: ${zuko.currentHealth}/100`);
+  console.log(`  Defense: ${zuko.currentDefense}`);
+  console.log(`  Chi: ${zuko.resources.chi}`);
+  console.log(`  Buffs: ${zuko.activeBuffs.map(b => b.name).join(', ') || 'None'}`);
+  console.log(`  Cooldowns: ${Object.keys(zuko.cooldowns).join(', ') || 'None'}`);
+  console.log(`  Last Move: ${zuko.lastMove}`);
 
   console.log('\n2. Getting Tactical Context...');
   const tacticalContext = getBattleTacticalContext(aang, zuko, battleLog);
@@ -162,7 +189,7 @@ export function makeAIDecisionWithAwareness(
   battleLog: BattleLogEntry[]
 ): string {
   // Get complete battle awareness
-  const perceivedState = getPerceivedBattleState(turn, self, enemy, battleLog);
+  getPerceivedBattleState(turn, self, enemy, battleLog);
   const tacticalContext = getBattleTacticalContext(self, enemy, battleLog);
 
   // Decision logic based on tactical context

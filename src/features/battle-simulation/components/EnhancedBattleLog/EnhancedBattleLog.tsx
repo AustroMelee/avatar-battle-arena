@@ -98,7 +98,8 @@ export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
    */
   const formatEntryText = (entry: BattleLogEntry): React.ReactNode => {
     const icon = getEventIcon(entry);
-    const baseText = entry.result || entry.narrative || entry.action;
+    // Prioritize enhanced narratives over mechanical results
+    const baseText = entry.narrative || entry.result || entry.action;
     
     // Add damage highlight
     if (entry.damage) {
@@ -185,22 +186,19 @@ export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
                 {formatEntryText(entry)}
               </div>
               
-                             {entry.meta && Object.keys(entry.meta).length > 0 && (
-                 <div className={styles.entryMeta}>
-                   {entry.meta.aiRule && (
-                     <span className={styles.aiRule}>🤖 {String(entry.meta.aiRule)}</span>
-                   )}
-                   {entry.meta.resourceCost !== undefined && (
-                     <span className={styles.resourceCost}>💠 {Number(entry.meta.resourceCost)} chi</span>
-                   )}
-                   {entry.meta.climax === true && (
-                     <span className={styles.climaxBadge}>🔥 CLIMAX</span>
-                   )}
-                   {entry.meta.desperation === true && (
-                     <span className={styles.desperationBadge}>⚡ DESPERATION</span>
-                   )}
-                 </div>
-               )}
+              {entry.meta && Object.keys(entry.meta).length > 0 && (
+                <div className={styles.entryMeta}>
+                  {entry.meta.resourceCost !== undefined && (
+                    <span className={styles.resourceCost}>💠 {Number(entry.meta.resourceCost)} chi</span>
+                  )}
+                  {entry.meta.climax === true && (
+                    <span className={styles.climaxBadge}>🔥 CLIMAX</span>
+                  )}
+                  {entry.meta.desperation === true && (
+                    <span className={styles.desperationBadge}>⚡ DESPERATION</span>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}

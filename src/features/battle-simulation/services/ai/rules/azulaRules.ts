@@ -1,13 +1,10 @@
-import type { BattleState, BattleCharacter } from '../../../types';
 import type { AIRule } from '../types/AIBehavior';
 import {
-  isLowHP, isCriticalHP, isEnemyLowHP, isEnemyCriticalHP,
-  isEnemyDefended, isEnemyHeavilyDefended,
-  isLowChi, isCriticalChi,
-  hasMoveAvailable, hasPiercingMove, hasDesperateMove, hasHighDamageMove,
-  didEnemyJustShield, hasUsedMoveRecently,
-  isEarlyGame, isMidGame, isLateGame,
-  isWinning, isLosing,
+  isLowHP, isCriticalHP, isEnemyCriticalHP,
+  isEnemyHeavilyDefended,
+  isLowChi,
+  hasMoveAvailable, hasPiercingMove, hasDesperateMove,
+  didEnemyJustShield,
   getMoveByName, getMoveWithTag, getHighestDamageMove, getLowestCostMove
 } from '../helpers/conditionHelpers';
 
@@ -20,8 +17,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Critical Defense",
     priority: 20,
     description: "Defend when critically wounded",
-    when: (state, self, opp) => isCriticalHP(self) && hasMoveAvailable(self, 'Fire Jets'),
-    then: (state, self, opp) => getMoveByName(self, 'Fire Jets')
+    when: (_state, self) => isCriticalHP(self) && hasMoveAvailable(self, 'Fire Jets'),
+    then: (_state, self) => getMoveByName(self, 'Fire Jets')
   },
 
   // FINISH: Use Lightning when enemy is vulnerable
@@ -29,8 +26,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Lightning Finish",
     priority: 18,
     description: "Use Lightning to finish vulnerable enemy",
-    when: (state, self, opp) => isEnemyCriticalHP(opp) && hasMoveAvailable(self, 'Lightning'),
-    then: (state, self, opp) => getMoveByName(self, 'Lightning')
+    when: (_state, self, opp) => isEnemyCriticalHP(opp) && hasMoveAvailable(self, 'Lightning'),
+    then: (_state, self) => getMoveByName(self, 'Lightning')
   },
 
   // PIERCE: Use piercing moves against high defense
@@ -38,8 +35,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Pierce Defense",
     priority: 16,
     description: "Use piercing moves against defended enemy",
-    when: (state, self, opp) => isEnemyHeavilyDefended(opp) && hasPiercingMove(self),
-    then: (state, self, opp) => getMoveWithTag(self, 'piercing')
+    when: (_state, self, opp) => isEnemyHeavilyDefended(opp) && hasPiercingMove(self),
+    then: (_state, self) => getMoveWithTag(self, 'piercing')
   },
 
   // COUNTER: Use piercing after enemy shields
@@ -47,8 +44,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Counter Shield",
     priority: 15,
     description: "Counter enemy shield with piercing attack",
-    when: (state, self, opp) => didEnemyJustShield(opp) && hasPiercingMove(self),
-    then: (state, self, opp) => getMoveWithTag(self, 'piercing')
+    when: (_state, self, opp) => didEnemyJustShield(opp) && hasPiercingMove(self),
+    then: (_state, self) => getMoveWithTag(self, 'piercing')
   },
 
   // HEAL: Use Phoenix Recovery when wounded
@@ -56,8 +53,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Emergency Recovery",
     priority: 14,
     description: "Use healing when wounded",
-    when: (state, self, opp) => isLowHP(self) && hasMoveAvailable(self, 'Phoenix Recovery'),
-    then: (state, self, opp) => getMoveByName(self, 'Phoenix Recovery')
+    when: (_state, self) => isLowHP(self) && hasMoveAvailable(self, 'Phoenix Recovery'),
+    then: (_state, self) => getMoveByName(self, 'Phoenix Recovery')
   },
 
   // DESPERATE: Use desperate moves when health is low
@@ -65,8 +62,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Desperate Attack",
     priority: 12,
     description: "Use desperate moves when health is low",
-    when: (state, self, opp) => isLowHP(self) && hasDesperateMove(self),
-    then: (state, self, opp) => getMoveWithTag(self, 'desperate')
+    when: (_state, self) => isLowHP(self) && hasDesperateMove(self),
+    then: (_state, self) => getMoveWithTag(self, 'desperate')
   },
 
   // LIGHTNING: Use Lightning when safe and available
@@ -74,8 +71,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Lightning Strike",
     priority: 10,
     description: "Use Lightning when enemy is not heavily defended",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Lightning') && !isEnemyHeavilyDefended(opp),
-    then: (state, self, opp) => getMoveByName(self, 'Lightning')
+    when: (_state, self, opp) => hasMoveAvailable(self, 'Lightning') && !isEnemyHeavilyDefended(opp),
+    then: (_state, self) => getMoveByName(self, 'Lightning')
   },
 
   // FIREBOMB: Use Firebomb for high damage
@@ -83,8 +80,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Firebomb Assault",
     priority: 8,
     description: "Use Firebomb for high damage",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Firebomb'),
-    then: (state, self, opp) => getMoveByName(self, 'Firebomb')
+    when: (_state, self) => hasMoveAvailable(self, 'Firebomb'),
+    then: (_state, self) => getMoveByName(self, 'Firebomb')
   },
 
   // CHI CONSERVATION: Use low-cost moves when chi is low
@@ -92,8 +89,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Chi Conservation",
     priority: 6,
     description: "Use low-cost moves when chi is low",
-    when: (state, self, opp) => isLowChi(self) && getLowestCostMove(self) !== null,
-    then: (state, self, opp) => getLowestCostMove(self)
+    when: (_state, self) => isLowChi(self) && getLowestCostMove(self) !== null,
+    then: (_state, self) => getLowestCostMove(self)
   },
 
   // DEFENSE: Use Fire Jets for defense
@@ -101,8 +98,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Defensive Stance",
     priority: 4,
     description: "Use Fire Jets for defense",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Fire Jets'),
-    then: (state, self, opp) => getMoveByName(self, 'Fire Jets')
+    when: (_state, self) => hasMoveAvailable(self, 'Fire Jets'),
+    then: (_state, self) => getMoveByName(self, 'Fire Jets')
   },
 
   // DEFAULT: Use Blue Fire as fallback
@@ -110,8 +107,8 @@ export const azulaAIRules: AIRule[] = [
     name: "Blue Fire Attack",
     priority: 0,
     description: "Default attack with Blue Fire",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Blue Fire'),
-    then: (state, self, opp) => getMoveByName(self, 'Blue Fire')
+    when: (_state, self) => hasMoveAvailable(self, 'Blue Fire'),
+    then: (_state, self) => getMoveByName(self, 'Blue Fire')
   },
 
   // FALLBACK: Use any available move
@@ -120,6 +117,6 @@ export const azulaAIRules: AIRule[] = [
     priority: -1,
     description: "Use any available move as last resort",
     when: () => true,
-    then: (state, self, opp) => getHighestDamageMove(self) || getLowestCostMove(self)
+    then: (_state, self) => getHighestDamageMove(self) || getLowestCostMove(self)
   }
 ]; 

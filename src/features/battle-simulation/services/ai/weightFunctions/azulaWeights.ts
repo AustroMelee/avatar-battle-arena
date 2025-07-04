@@ -1,10 +1,9 @@
 // CONTEXT: AI, // FOCUS: AzulaWeights
-import type { BattleState, BattleCharacter, BattleLogEntry } from '../../../types';
+import type { BattleCharacter } from '../../../types';
 import type { WeightFunction } from '../weightedChoice';
 import { 
   recentDamageTaken, 
   wasRecentlyCriticallyHit, 
-  isSpammingMove,
   wasLastMoveShield,
   getCurrentCombo
 } from '../logQueries';
@@ -14,7 +13,7 @@ import {
  */
 
 // Lightning - High damage, high priority when safe
-export const lightningWeight: WeightFunction = (state, self, opp, log) => {
+export const lightningWeight: WeightFunction = (_state, self, opp) => {
   // Check availability
   if (self.cooldowns['Lightning'] || (self.resources.chi || 0) < 5) return 0;
   
@@ -27,12 +26,12 @@ export const lightningWeight: WeightFunction = (state, self, opp, log) => {
   if (opp.currentDefense < 25) weight += 4;
   
   // Bonus for countering shields
-  if (wasLastMoveShield(log, opp.name)) weight += 5;
+  if (wasLastMoveShield(_state.battleLog, opp.name)) weight += 5;
   
   // Penalty if recently blocked
-  if (log.some(entry => 
+  if (_state.battleLog.some(entry => 
     entry.actor === self.name && 
-    entry.turn >= state.turn - 2 && 
+    entry.turn >= _state.turn - 2 && 
     entry.meta?.blocked
   )) weight -= 3;
   
@@ -40,7 +39,7 @@ export const lightningWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Firebomb - High damage, good for pressure
-export const firebombWeight: WeightFunction = (state, self, opp, log) => {
+export const firebombWeight: WeightFunction = (_state, self, opp) => {
   if (self.cooldowns['Firebomb'] || (self.resources.chi || 0) < 4) return 0;
   
   let weight = 6;
@@ -52,14 +51,14 @@ export const firebombWeight: WeightFunction = (state, self, opp, log) => {
   if (self.currentHealth > opp.currentHealth + 10) weight += 2;
   
   // Bonus for combo potential
-  const combo = getCurrentCombo(log, self.name);
+  const combo = getCurrentCombo(_state.battleLog, self.name);
   if (combo > 0) weight += combo;
   
   return Math.max(0, weight);
 };
 
 // Blue Fire - Reliable damage
-export const blueFireWeight: WeightFunction = (state, self, opp, log) => {
+export const blueFireWeight: WeightFunction = (_state, self, opp) => {
   if (self.cooldowns['Blue Fire'] || (self.resources.chi || 0) < 2) return 0;
   
   let weight = 5;
@@ -77,7 +76,7 @@ export const blueFireWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Fire Jets - Defensive option
-export const fireJetsWeight: WeightFunction = (state, self, opp, log) => {
+export const fireJetsWeight: WeightFunction = (_state, self, opp) => {
   if (self.cooldowns['Fire Jets'] || (self.resources.chi || 0) < 3) return 0;
   
   let weight = 3;
@@ -86,13 +85,13 @@ export const fireJetsWeight: WeightFunction = (state, self, opp, log) => {
   if (self.currentHealth < 25) weight += 8;
   
   // High priority when recently damaged
-  if (recentDamageTaken(log, self.name, 2) > 15) weight += 6;
+  if (recentDamageTaken(_state.battleLog, self.name, 2) > 15) weight += 6;
   
   // High priority when critically hit
-  if (wasRecentlyCriticallyHit(log, self.name, 2)) weight += 5;
+  if (wasRecentlyCriticallyHit(_state.battleLog, self.name, 2)) weight += 5;
   
   // Bonus when enemy is aggressive
-  if (recentDamageTaken(log, self.name, 1) > 10) weight += 4;
+  if (recentDamageTaken(_state.battleLog, self.name, 1) > 10) weight += 4;
   
   // Penalty when winning comfortably
   if (self.currentHealth > opp.currentHealth + 20) weight -= 2;
@@ -101,7 +100,7 @@ export const fireJetsWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Phoenix Recovery - Healing when desperate
-export const phoenixRecoveryWeight: WeightFunction = (state, self, opp, log) => {
+export const phoenixRecoveryWeight: WeightFunction = (_state, self, opp) => {
   if (self.cooldowns['Phoenix Recovery'] || (self.resources.chi || 0) < 4) return 0;
   
   let weight = 2;
@@ -110,7 +109,7 @@ export const phoenixRecoveryWeight: WeightFunction = (state, self, opp, log) => 
   if (self.currentHealth < 15) weight += 10;
   
   // High priority when recently damaged heavily
-  if (recentDamageTaken(log, self.name, 2) > 20) weight += 8;
+  if (recentDamageTaken(_state.battleLog, self.name, 2) > 20) weight += 8;
   
   // Bonus when chi is available
   if ((self.resources.chi || 0) > 6) weight += 3;
@@ -125,7 +124,7 @@ export const phoenixRecoveryWeight: WeightFunction = (state, self, opp, log) => 
 };
 
 // Desperate moves - when all else fails
-export const desperateMovesWeight: WeightFunction = (state, self, opp, log) => {
+export const desperateMovesWeight: WeightFunction = (_state, self, opp) => {
   // Check for any desperate moves available
   const desperateMoves = self.abilities.filter(ability => 
     ability.tags?.includes('desperate') &&

@@ -1,13 +1,10 @@
-import type { BattleState, BattleCharacter } from '../../../types';
 import type { AIRule } from '../types/AIBehavior';
 import {
-  isLowHP, isCriticalHP, isEnemyLowHP, isEnemyCriticalHP,
-  isEnemyDefended, isEnemyHeavilyDefended,
-  isLowChi, isCriticalChi,
-  hasMoveAvailable, hasPiercingMove, hasDesperateMove, hasHighDamageMove,
-  didEnemyJustShield, hasUsedMoveRecently,
-  isEarlyGame, isMidGame, isLateGame,
-  isWinning, isLosing,
+  isLowHP, isCriticalHP, isEnemyCriticalHP,
+  isEnemyHeavilyDefended,
+  isLowChi,
+  hasMoveAvailable, hasPiercingMove, hasDesperateMove,
+  didEnemyJustShield,
   getMoveByName, getMoveWithTag, getHighestDamageMove, getLowestCostMove
 } from '../helpers/conditionHelpers';
 
@@ -20,8 +17,8 @@ export const aangAIRules: AIRule[] = [
     name: "Critical Defense",
     priority: 20,
     description: "Defend when critically wounded",
-    when: (state, self, opp) => isCriticalHP(self) && hasMoveAvailable(self, 'Last Stand'),
-    then: (state, self, opp) => getMoveByName(self, 'Last Stand')
+    when: (_state, self) => isCriticalHP(self) && hasMoveAvailable(self, 'Last Stand'),
+    then: (_state, self) => getMoveByName(self, 'Last Stand')
   },
 
   // FINISH: Use Wind Slice when enemy is vulnerable
@@ -29,8 +26,8 @@ export const aangAIRules: AIRule[] = [
     name: "Wind Slice Finish",
     priority: 18,
     description: "Use Wind Slice to finish vulnerable enemy",
-    when: (state, self, opp) => isEnemyCriticalHP(opp) && hasMoveAvailable(self, 'Wind Slice'),
-    then: (state, self, opp) => getMoveByName(self, 'Wind Slice')
+    when: (_state, self, opp) => isEnemyCriticalHP(opp) && hasMoveAvailable(self, 'Wind Slice'),
+    then: (_state, self) => getMoveByName(self, 'Wind Slice')
   },
 
   // PIERCE: Use piercing moves against high defense
@@ -38,8 +35,8 @@ export const aangAIRules: AIRule[] = [
     name: "Pierce Defense",
     priority: 16,
     description: "Use piercing moves against defended enemy",
-    when: (state, self, opp) => isEnemyHeavilyDefended(opp) && hasPiercingMove(self),
-    then: (state, self, opp) => getMoveWithTag(self, 'piercing')
+    when: (_state, self, opp) => isEnemyHeavilyDefended(opp) && hasPiercingMove(self),
+    then: (_state, self) => getMoveWithTag(self, 'piercing')
   },
 
   // COUNTER: Use piercing after enemy shields
@@ -47,8 +44,8 @@ export const aangAIRules: AIRule[] = [
     name: "Counter Shield",
     priority: 15,
     description: "Counter enemy shield with piercing attack",
-    when: (state, self, opp) => didEnemyJustShield(opp) && hasPiercingMove(self),
-    then: (state, self, opp) => getMoveWithTag(self, 'piercing')
+    when: (_state, self, opp) => didEnemyJustShield(opp) && hasPiercingMove(self),
+    then: (_state, self) => getMoveWithTag(self, 'piercing')
   },
 
   // HEAL: Use healing when wounded
@@ -56,8 +53,8 @@ export const aangAIRules: AIRule[] = [
     name: "Emergency Recovery",
     priority: 14,
     description: "Use healing when wounded",
-    when: (state, self, opp) => isLowHP(self) && hasMoveAvailable(self, 'Last Stand'),
-    then: (state, self, opp) => getMoveByName(self, 'Last Stand')
+    when: (_state, self) => isLowHP(self) && hasMoveAvailable(self, 'Last Stand'),
+    then: (_state, self) => getMoveByName(self, 'Last Stand')
   },
 
   // DESPERATE: Use desperate moves when health is low
@@ -65,8 +62,8 @@ export const aangAIRules: AIRule[] = [
     name: "Desperate Defense",
     priority: 12,
     description: "Use desperate moves when health is low",
-    when: (state, self, opp) => isLowHP(self) && hasDesperateMove(self),
-    then: (state, self, opp) => getMoveWithTag(self, 'desperate')
+    when: (_state, self) => isLowHP(self) && hasDesperateMove(self),
+    then: (_state, self) => getMoveWithTag(self, 'desperate')
   },
 
   // WIND SLICE: Use Wind Slice when safe and available
@@ -74,8 +71,8 @@ export const aangAIRules: AIRule[] = [
     name: "Wind Slice Strike",
     priority: 10,
     description: "Use Wind Slice when enemy is not heavily defended",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Wind Slice') && !isEnemyHeavilyDefended(opp),
-    then: (state, self, opp) => getMoveByName(self, 'Wind Slice')
+    when: (_state, self, opp) => hasMoveAvailable(self, 'Wind Slice') && !isEnemyHeavilyDefended(opp),
+    then: (_state, self) => getMoveByName(self, 'Wind Slice')
   },
 
   // AIR BLAST: Use Air Blast for high damage
@@ -83,8 +80,8 @@ export const aangAIRules: AIRule[] = [
     name: "Air Blast Assault",
     priority: 8,
     description: "Use Air Blast for high damage",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Air Blast'),
-    then: (state, self, opp) => getMoveByName(self, 'Air Blast')
+    when: (_state, self) => hasMoveAvailable(self, 'Air Blast'),
+    then: (_state, self) => getMoveByName(self, 'Air Blast')
   },
 
   // CHI CONSERVATION: Use low-cost moves when chi is low
@@ -92,8 +89,8 @@ export const aangAIRules: AIRule[] = [
     name: "Chi Conservation",
     priority: 6,
     description: "Use low-cost moves when chi is low",
-    when: (state, self, opp) => isLowChi(self) && getLowestCostMove(self) !== null,
-    then: (state, self, opp) => getLowestCostMove(self)
+    when: (_state, self) => isLowChi(self) && getLowestCostMove(self) !== null,
+    then: (_state, self) => getLowestCostMove(self)
   },
 
   // DEFENSE: Use Air Shield for defense
@@ -101,8 +98,8 @@ export const aangAIRules: AIRule[] = [
     name: "Defensive Stance",
     priority: 4,
     description: "Use Air Shield for defense",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Air Shield'),
-    then: (state, self, opp) => getMoveByName(self, 'Air Shield')
+    when: (_state, self) => hasMoveAvailable(self, 'Air Shield'),
+    then: (_state, self) => getMoveByName(self, 'Air Shield')
   },
 
   // DEFAULT: Use Wind Gust as fallback
@@ -110,8 +107,8 @@ export const aangAIRules: AIRule[] = [
     name: "Wind Gust Attack",
     priority: 0,
     description: "Default attack with Wind Gust",
-    when: (state, self, opp) => hasMoveAvailable(self, 'Wind Gust'),
-    then: (state, self, opp) => getMoveByName(self, 'Wind Gust')
+    when: (_state, self) => hasMoveAvailable(self, 'Wind Gust'),
+    then: (_state, self) => getMoveByName(self, 'Wind Gust')
   },
 
   // FALLBACK: Use any available move
@@ -120,6 +117,6 @@ export const aangAIRules: AIRule[] = [
     priority: -1,
     description: "Use any available move as last resort",
     when: () => true,
-    then: (state, self, opp) => getHighestDamageMove(self) || getLowestCostMove(self)
+    then: (_state, self) => getHighestDamageMove(self) || getLowestCostMove(self)
   }
 ]; 

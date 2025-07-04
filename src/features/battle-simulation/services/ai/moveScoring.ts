@@ -29,14 +29,15 @@ export function scoreMove(
   
   // Base scoring by move type
   switch (move.type) {
-    case 'attack':
+    case 'attack': {
       const potentialDamage = Math.max(1, move.power - enemy.currentDefense);
       const damageRatio = potentialDamage / enemy.currentHealth;
       score = damageRatio * 8 + Math.random() * 2;
       reasons.push(`Base attack (${potentialDamage} damage)`);
       break;
+    }
       
-    case 'defense_buff':
+    case 'defense_buff': {
       if (character.currentHealth < 25) {
         score = 12;
         reasons.push('Low health - defensive priority');
@@ -48,6 +49,7 @@ export function scoreMove(
         reasons.push('Moderate defense buff');
       }
       break;
+    }
       
     default:
       score = 5 + Math.random() * 3;

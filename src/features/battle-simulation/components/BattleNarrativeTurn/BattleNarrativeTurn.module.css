@@ -1,0 +1,222 @@
+.battleNarrativeTurn {
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+}
+
+.battleNarrativeTurn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.narrativeHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.characterName {
+  font-weight: bold;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.aangColor {
+  color: #81c784;
+}
+
+.azulaColor {
+  color: #f44336;
+}
+
+.narratorColor {
+  color: #ff9800;
+}
+
+.systemColor {
+  color: #9c27b0;
+}
+
+.defaultColor {
+  color: #ffffff;
+}
+
+.specialEvent {
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid currentColor;
+}
+
+.escalation {
+  color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.desperation {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.patternBreak {
+  color: #2196f3;
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.critical {
+  color: #ff5722;
+  background: rgba(255, 87, 34, 0.1);
+}
+
+.breakingPoint {
+  color: #9c27b0;
+  background: rgba(156, 39, 176, 0.1);
+}
+
+.oneOffBadge {
+  font-size: 16px;
+  color: #ffd700;
+  text-shadow: 0 0 8px #ffd700;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.mainNarrative {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.moveInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.moveName {
+  font-size: 12px;
+  font-weight: bold;
+  color: #64b5f6;
+  background: rgba(100, 181, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(100, 181, 246, 0.3);
+}
+
+.moveResult {
+  font-size: 12px;
+  color: #a5d6a7;
+  font-style: italic;
+}
+
+.chiCost {
+  font-size: 12px;
+  color: #ffb74d;
+  font-weight: bold;
+}
+
+.damageOutcome {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.devastating {
+  color: #ff1744;
+  background: rgba(255, 23, 68, 0.1);
+  border: 1px solid rgba(255, 23, 68, 0.3);
+  animation: shake 0.5s ease-in-out;
+}
+
+.heavy {
+  color: #ff5722;
+  background: rgba(255, 87, 34, 0.1);
+  border: 1px solid rgba(255, 87, 34, 0.3);
+}
+
+.medium {
+  color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.light {
+  color: #ffc107;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.oneOff {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.oneOff .mainNarrative {
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .battleNarrativeTurn {
+    padding: 12px;
+    margin: 8px 0;
+  }
+  
+  .narrativeHeader {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .characterName {
+    font-size: 14px;
+  }
+  
+  .mainNarrative {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  .moveInfo {
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .moveName,
+  .moveResult,
+  .chiCost {
+    font-size: 11px;
+  }
+} 

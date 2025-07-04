@@ -1,12 +1,10 @@
 // CONTEXT: AI, // FOCUS: AangWeights
-import type { BattleState, BattleCharacter, BattleLogEntry } from '../../../types';
+import type { BattleCharacter } from '../../../types';
 import type { WeightFunction } from '../weightedChoice';
 import { 
   recentDamageTaken, 
   wasRecentlyCriticallyHit, 
-  isSpammingMove,
-  wasLastMoveShield,
-  getCurrentCombo
+  wasLastMoveShield
 } from '../logQueries';
 
 /**
@@ -14,7 +12,7 @@ import {
  */
 
 // Air Shield - Primary defensive move
-export const airShieldWeight: WeightFunction = (state, self, opp, log) => {
+export const airShieldWeight: WeightFunction = (_state, self, opp, log) => {
   if (self.cooldowns['Air Shield'] || (self.resources.chi || 0) < 3) return 0;
   
   let weight = 6; // High base weight for defensive play
@@ -41,7 +39,7 @@ export const airShieldWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Air Blast - Reliable damage, good for pressure
-export const airBlastWeight: WeightFunction = (state, self, opp, log) => {
+export const airBlastWeight: WeightFunction = (_state, self, opp, log) => {
   if (self.cooldowns['Air Blast'] || (self.resources.chi || 0) < 2) return 0;
   
   let weight = 5;
@@ -65,7 +63,7 @@ export const airBlastWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Wind Slice - Piercing damage
-export const windSliceWeight: WeightFunction = (state, self, opp, log) => {
+export const windSliceWeight: WeightFunction = (_state, self, opp, log) => {
   if (self.cooldowns['Wind Slice'] || (self.resources.chi || 0) < 4) return 0;
   
   let weight = 4;
@@ -89,7 +87,7 @@ export const windSliceWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Air Scooter - Evasive and mobile
-export const airScooterWeight: WeightFunction = (state, self, opp, log) => {
+export const airScooterWeight: WeightFunction = (_state, self, opp, log) => {
   if (self.cooldowns['Air Scooter'] || (self.resources.chi || 0) < 2) return 0;
   
   let weight = 3;
@@ -113,7 +111,7 @@ export const airScooterWeight: WeightFunction = (state, self, opp, log) => {
 };
 
 // Air Nomad Meditation - Healing and recovery
-export const airNomadMeditationWeight: WeightFunction = (state, self, opp, log) => {
+export const airNomadMeditationWeight: WeightFunction = (_state, self, opp, log) => {
   if (self.cooldowns['Air Nomad Meditation'] || (self.resources.chi || 0) < 3) return 0;
   
   let weight = 2;
@@ -140,7 +138,7 @@ export const airNomadMeditationWeight: WeightFunction = (state, self, opp, log) 
 };
 
 // Desperate moves - when all else fails
-export const desperateMovesWeight: WeightFunction = (state, self, opp, log) => {
+export const desperateMovesWeight: WeightFunction = (_state, self, opp) => {
   // Check for any desperate moves available
   const desperateMoves = self.abilities.filter(ability => 
     ability.tags?.includes('desperate') &&

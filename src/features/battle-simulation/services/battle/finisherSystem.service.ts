@@ -4,6 +4,7 @@
 import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
 import { createEventId } from '../ai/logQueries';
+import { trackDamage, trackChiSpent } from './analyticsTracker.service';
 
 /**
  * @description Finisher move configuration
@@ -116,6 +117,12 @@ export function executeFinisherMove(
   
   // Apply damage
   state.participants[targetIndex].currentHealth = Math.max(0, target.currentHealth - finalDamage);
+  
+  // Update analytics immediately for finisher damage and chi cost
+  if (state.analytics) {
+    state.analytics = trackDamage(state.analytics, finalDamage, isCritical);
+    state.analytics = trackChiSpent(state.analytics, finisher.chiCost || 0);
+  }
   
   // Mark finisher as used
   const attackerIndex = state.participants.findIndex(p => p.name === attacker.name);

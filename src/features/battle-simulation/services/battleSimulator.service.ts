@@ -3,7 +3,8 @@
 import { SimulateBattleParams, BattleState, BattleLogEntry, AILogEntry } from '../types';
 import { createInitialBattleState, cloneBattleState } from './battle/state';
 import { processTurn } from './battle/processTurn';
-import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport, trackBattleAnalytics, BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
+import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport, BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
+import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 
 /**
  * @description Represents the result of a battle simulation with analytics.
@@ -17,6 +18,7 @@ export interface BattleSimulationResult {
     characterMetrics: CharacterMetrics[];
     aiMetrics: AIMetrics;
     report: string;
+    realTime: any;
   };
   duration: number;
 }
@@ -35,9 +37,12 @@ export async function simulateBattle(params: SimulateBattleParams): Promise<Batt
   let currentState = createInitialBattleState(params);
   const maxTurns = 50; // Prevent infinite battles
   
+  // Initialize analytics
+  let analytics = initializeAnalyticsTracker();
+  
   // Track analytics during battle
   const trackAnalytics = (logEntry: BattleLogEntry) => {
-    trackBattleAnalytics(logEntry);
+    analytics = processLogEntryForAnalytics(analytics, logEntry);
   };
   
   // Simulate battle turns
@@ -99,7 +104,8 @@ export async function simulateBattle(params: SimulateBattleParams): Promise<Batt
       battleMetrics,
       characterMetrics,
       aiMetrics,
-      report
+      report,
+      realTime: analytics
     },
     duration
   };

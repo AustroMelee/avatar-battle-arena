@@ -188,8 +188,7 @@ export function createResolutionLogEntry(
     timestamp: Date.now(),
     meta: {
       resolution,
-      winner,
-      aiRule: `Battle Resolution: ${resolution}`
+      winner
     }
   };
 }

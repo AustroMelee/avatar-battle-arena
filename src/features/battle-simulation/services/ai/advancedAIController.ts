@@ -33,6 +33,7 @@ function createEnhancedPerceivedState(
   enemy: BattleCharacter, 
   turn: number
 ): PerceivedState {
+  // TODO: Replace placeholder values with real character state logic
   return {
     self: {
       health: self.currentHealth,
@@ -50,7 +51,11 @@ function createEnhancedPerceivedState(
       moveHistory: self.moveHistory,
       activeBuffs: self.activeBuffs,
       activeDebuffs: self.activeDebuffs,
-      resources: self.resources
+      resources: self.resources,
+      position: self.position ?? { x: 0, y: 0 },
+      isCharging: self.isCharging ?? false,
+      chargeProgress: self.chargeProgress ?? 0,
+      repositionAttempts: self.repositionAttempts ?? 0
     },
     enemy: {
       health: enemy.currentHealth,
@@ -60,10 +65,16 @@ function createEnhancedPerceivedState(
       lastMove: enemy.lastMove,
       moveHistory: enemy.moveHistory,
       activeBuffs: enemy.activeBuffs,
-      activeDebuffs: enemy.activeDebuffs
+      activeDebuffs: enemy.activeDebuffs,
+      position: enemy.position ?? { x: 0, y: 0 },
+      isCharging: enemy.isCharging ?? false,
+      chargeProgress: enemy.chargeProgress ?? 0,
+      repositionAttempts: enemy.repositionAttempts ?? 0
     },
     round: turn,
-    cooldowns: {} // Legacy field - can be removed after migration
+    cooldowns: {}, // Legacy field - can be removed after migration
+    location: 'Fire Nation Throne Hall', // TODO: Replace with real location
+    locationType: 'interior' as any // TODO: Replace with real locationType
   };
 }
 

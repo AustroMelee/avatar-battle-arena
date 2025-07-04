@@ -24,6 +24,15 @@ export type WeightedMove = {
 };
 
 /**
+ * @description Fallback move type for when no weighted moves are available
+ */
+type FallbackMove = {
+  move: Ability;
+  weight: number;
+  description: string;
+};
+
+/**
  * @description Weighted random choice selection
  * @param {T[]} items - Array of items to choose from
  * @param {(item: T) => number} getWeight - Function to get weight for each item
@@ -112,11 +121,11 @@ export function selectWeightedMove(
     
     if (fallbackMoves.length === 0) return null;
     
-    console.log(`[WEIGHTED CHOICE] ${self.name} using fallback moves:`, fallbackMoves.map((f: any) => f.move.name));
+    console.log(`[WEIGHTED CHOICE] ${self.name} using fallback moves:`, fallbackMoves.map((f: FallbackMove) => f.move.name));
     
-    const selected = weightedRandomChoice(fallbackMoves, (item: any) => item.weight);
+    const selected = weightedRandomChoice(fallbackMoves, (item: FallbackMove) => item.weight);
     if (selected) {
-      const weights = fallbackMoves.map(({ move, weight, description }: any) => ({
+      const weights = fallbackMoves.map(({ move, weight, description }: FallbackMove) => ({
         move: move.name,
         weight,
         description

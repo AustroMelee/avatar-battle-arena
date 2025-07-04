@@ -29,14 +29,20 @@ function formatBattleLog(entries: BattleLogEntry[], detailLevel: LogDetailLevel)
       }
       case 'battle': {
         const chiCost = entry.meta?.resourceCost ? ` (${entry.meta.resourceCost} chi)` : '';
-        return `Turn ${entry.turn}: ${entry.actor} uses ${entry.action}${chiCost}. ${entry.result}`;
+        // Prioritize enhanced narratives over mechanical results
+        const displayText = entry.narrative || entry.result;
+        return `Turn ${entry.turn}: ${entry.actor} uses ${entry.action}${chiCost}. ${displayText}`;
       }
       case 'all': {
         const cost = entry.meta?.resourceCost ? ` (${entry.meta.resourceCost} chi)` : '';
-        return `Turn ${entry.turn}: ${entry.actor} uses ${entry.action}${cost}. ${entry.result}${entry.narrative ? `\n  Narrative: ${entry.narrative}` : ''}`;
+        // Prioritize enhanced narratives over mechanical results
+        const displayText = entry.narrative || entry.result;
+        return `Turn ${entry.turn}: ${entry.actor} uses ${entry.action}${cost}. ${displayText}${entry.narrative && entry.narrative !== entry.result ? `\n  Enhanced: ${entry.narrative}` : ''}`;
       }
       default: {
-        return `${entry.actor} uses ${entry.action}. ${entry.result}`;
+        // Prioritize enhanced narratives over mechanical results
+        const displayText = entry.narrative || entry.result;
+        return `${entry.actor} uses ${entry.action}. ${displayText}`;
       }
     }
   }).join('\n');
@@ -184,7 +190,6 @@ export function BattleLog({
               {entry.meta.piercing && <span className={styles.metaPiercing}>⚡ PIERCING</span>}
               {entry.meta.heal && <span className={styles.metaHeal}>💚 HEAL</span>}
               {entry.meta.combo && <span className={styles.metaCombo}>🔥 COMBO x{entry.meta.combo}</span>}
-              {entry.meta.aiRule && <span className={styles.metaAI}>🤖 {entry.meta.aiRule}</span>}
             </div>
           )}
         </div>

@@ -46,7 +46,14 @@ export function CharacterSelection({
               activeBuffs: [],
               activeDebuffs: [],
               flags: {},
-              diminishingEffects: {}
+              diminishingEffects: {},
+              position: 'neutral',
+              chargeProgress: 0,
+              isCharging: false,
+              repositionAttempts: 0,
+              chargeInterruptions: 0,
+              lastPositionChange: undefined,
+              positionHistory: []
             }}
             isActive={true}
             playerColor={playerColor}

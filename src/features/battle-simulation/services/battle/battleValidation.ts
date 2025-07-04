@@ -3,6 +3,7 @@
 import { BattleState, BattleLogEntry } from '../../types';
 import { createEventId } from '../ai/logQueries';
 import { getAvailableFallbackMoves } from './fallbackMoves';
+import { trackDamage } from './analyticsTracker.service';
 
 /**
  * @description Battle validation result with action recommendations.
@@ -173,6 +174,12 @@ export function forceBattleClimax(state: BattleState): BattleState {
 
   newState.participants[1].currentHealth = Math.max(0, fighter2.currentHealth - fighter1Damage);
   newState.participants[0].currentHealth = Math.max(0, fighter1.currentHealth - fighter2Damage);
+  
+  // Update analytics immediately for climax damage
+  if (newState.analytics) {
+    newState.analytics = trackDamage(newState.analytics, fighter1Damage, false);
+    newState.analytics = trackDamage(newState.analytics, fighter2Damage, false);
+  }
 
   // Log the climax moves
   const fighter1ClimaxLog: BattleLogEntry = {

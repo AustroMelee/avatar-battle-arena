@@ -13,38 +13,38 @@ import {
  */
 
 // Health-based conditions
-export function isLowHP(self: BattleCharacter, threshold: number = 0.3): boolean {
+export function isLowHP(self: BattleCharacter): boolean {
   return self.currentHealth < 30; // Fixed threshold for now
 }
 
-export function isCriticalHP(self: BattleCharacter, threshold: number = 0.15): boolean {
+export function isCriticalHP(self: BattleCharacter): boolean {
   return self.currentHealth < 15;
 }
 
-export function isEnemyLowHP(opp: BattleCharacter, threshold: number = 0.25): boolean {
+export function isEnemyLowHP(opp: BattleCharacter): boolean {
   return opp.currentHealth < 25;
 }
 
-export function isEnemyCriticalHP(opp: BattleCharacter, threshold: number = 0.1): boolean {
+export function isEnemyCriticalHP(opp: BattleCharacter): boolean {
   return opp.currentHealth < 10;
 }
 
 // Defense-based conditions
-export function isEnemyDefended(opp: BattleCharacter, threshold: number = 20): boolean {
-  return opp.currentDefense > threshold;
+export function isEnemyDefended(opp: BattleCharacter): boolean {
+  return opp.currentDefense > 20;
 }
 
-export function isEnemyHeavilyDefended(opp: BattleCharacter, threshold: number = 35): boolean {
-  return opp.currentDefense > threshold;
+export function isEnemyHeavilyDefended(opp: BattleCharacter): boolean {
+  return opp.currentDefense > 35;
 }
 
 // Resource-based conditions
-export function isLowChi(self: BattleCharacter, threshold: number = 3): boolean {
-  return (self.resources.chi || 0) < threshold;
+export function isLowChi(self: BattleCharacter): boolean {
+  return (self.resources.chi || 0) < 3;
 }
 
-export function isCriticalChi(self: BattleCharacter, threshold: number = 1): boolean {
-  return (self.resources.chi || 0) <= threshold;
+export function isCriticalChi(self: BattleCharacter): boolean {
+  return (self.resources.chi || 0) <= 1;
 }
 
 // Move availability conditions

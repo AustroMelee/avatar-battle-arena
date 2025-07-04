@@ -1,5 +1,6 @@
 // CONTEXT: BattleSimulation, // FOCUS: Types
 import { Character, Location } from '@/common/types';
+import { Position, LocationType } from './move.types';
 
 /**
  * @description Represents a positive status effect on a character.
@@ -58,8 +59,22 @@ export type BattleCharacter = Character & {
     isResting?: boolean; // Track if character is resting/focusing for enhanced regeneration
     stunned?: boolean; // Track if character is stunned
     stunDuration?: number; // Duration of stun effect
+    // NEW: Pattern breaking and escalation flags
+    forcedEscalation?: string; // 'true' if forced into escalation state
+    damageMultiplier?: string; // Damage multiplier as string (e.g., '2.0')
+    repositionDisabled?: string; // Turns remaining as string (e.g., '3')
+    escalationTurns?: string; // Turns in escalation state as string
   };
   diminishingEffects: Record<string, number>; // Track power reduction from diminishing returns
+  
+  // NEW: Positioning and tactical state
+  position: Position;
+  chargeProgress?: number; // 0-100 for charge-up moves
+  isCharging: boolean;
+  repositionAttempts: number; // Track reposition attempts for diminishing returns
+  chargeInterruptions: number; // Track failed charge attempts
+  lastPositionChange?: number; // Turn when position last changed
+  positionHistory: Position[]; // Track position changes for AI analysis
 };
 
 /**
@@ -79,19 +94,32 @@ export type PerceivedState = {
     resources: {
       chi: number;
     };
+    // NEW: Positioning context for AI
+    position: Position;
+    isCharging: boolean;
+    chargeProgress?: number;
+    repositionAttempts: number;
   };
   enemy: {
     health: number;
-    defense: number;
+    defense: number
     personality: string;
     name: string;
     lastMove?: string;
     moveHistory: string[];
     activeBuffs: Buff[];
     activeDebuffs: Debuff[];
+    // NEW: Enemy positioning context
+    position: Position;
+    isCharging: boolean;
+    chargeProgress?: number;
+    repositionAttempts: number;
   };
   round: number;
   cooldowns: Record<string, number>; // Legacy field - can be removed after migration
+  // NEW: Environmental context
+  location: string;
+  locationType: LocationType;
 };
 
 /**
@@ -102,6 +130,11 @@ export type ConsideredAction = {
   score: number;
   reason: string;
   abilityId: string;
+  // NEW: Tactical reasoning
+  tacticalReason?: string;
+  positionAdvantage?: boolean;
+  chargeOpportunity?: boolean;
+  punishOpportunity?: boolean;
 };
 
 /**
@@ -116,12 +149,19 @@ export type AILogEntry = {
   reasoning: string;
   narrative?: string;
   timestamp: number;
+  // NEW: Tactical analysis
+  tacticalAnalysis?: {
+    positionAdvantage: boolean;
+    chargeOpportunity: boolean;
+    punishOpportunity: boolean;
+    environmentalFactor: string;
+  };
 };
 
 /**
  * @description Event types for structured battle logging.
  */
-export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER';
+export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER' | 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT' | 'TACTICAL' | 'ESCALATION';
 
 /**
  * @description Battle resolution types for special end conditions.
@@ -160,6 +200,17 @@ export type BattleLogEntry = {
       damageBonus: number;
       defensePenalty: number;
     };
+    // NEW: Positioning and tactical meta
+    positionChange?: {
+      from: Position;
+      to: Position;
+      success: boolean;
+    };
+    chargeProgress?: number;
+    chargeInterrupted?: boolean;
+    environmentalFactor?: string;
+    repositionSuccess?: boolean;
+    punishDamage?: number;
     [key: string]: unknown; // Extensible for future features
   };
 };
@@ -182,6 +233,23 @@ export type BattleState = {
   isFinished: boolean;
   winner: BattleCharacter | null;
   location?: string; // Battle location for narrative context
+  // NEW: Environmental and tactical context
+  locationType: LocationType;
+  environmentalFactors: string[]; // e.g., ["Desert", "No Repositioning"]
+  tacticalPhase: 'positioning' | 'engagement' | 'climax' | 'stalemate';
+  positionAdvantage: number; // -1 to 1, negative means player1 advantage, positive means player2
+  // NEW: Real-time analytics tracking
+  analytics?: {
+    totalDamage: number;
+    totalChiSpent: number;
+    patternAdaptations: number;
+    stalematePreventions: number;
+    escalationEvents: number;
+    punishOpportunities: number;
+    criticalHits: number;
+    desperationMoves: number;
+    lastUpdated: number;
+  };
 };
 
 /**

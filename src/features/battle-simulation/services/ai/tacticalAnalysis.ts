@@ -1,4 +1,4 @@
-import type { Character, Ability } from '../../../../common/types';
+import type { Ability } from '../../../../common/types';
 import type { BattleCharacter } from '../../types';
 
 /**

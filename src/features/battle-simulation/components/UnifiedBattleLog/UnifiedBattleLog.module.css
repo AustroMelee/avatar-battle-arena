@@ -1,0 +1,333 @@
+/* Unified Battle Log Component Styles */
+
+.unifiedBattleLog {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--background-color-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.tabSelector {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  background: var(--background-color);
+  color: var(--text-color-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--background-color-hover);
+  color: var(--text-color-primary);
+}
+
+.tab.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.tabContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Log Entry Styles */
+.logEntry {
+  background: var(--background-color);
+  border: 1px solid var(--border-color-light);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.logEntry:hover {
+  border-color: var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.entryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+}
+
+.turnNumber {
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.actor {
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.timestamp {
+  margin-left: auto;
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.entryContent {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-color-primary);
+  margin-bottom: 6px;
+}
+
+.entryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.aiRule,
+.resourceCost,
+.finisherBadge,
+.desperationBadge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--background-color-secondary);
+  color: var(--text-color-secondary);
+}
+
+.finisherBadge {
+  background: #ff6b35;
+  color: white;
+}
+
+.desperationBadge {
+  background: #ffd700;
+  color: #333;
+}
+
+/* Damage Highlights */
+.damageHighlight {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.criticalHighlight {
+  color: #f39c12;
+  font-weight: 600;
+}
+
+/* Entry Type Styles */
+.victory {
+  border-left: 4px solid #27ae60;
+  background: rgba(39, 174, 96, 0.05);
+}
+
+.desperation {
+  border-left: 4px solid #f39c12;
+  background: rgba(243, 156, 18, 0.05);
+}
+
+.finisher {
+  border-left: 4px solid #e74c3c;
+  background: rgba(231, 76, 60, 0.05);
+}
+
+.narrative {
+  border-left: 4px solid #9b59b6;
+  background: rgba(155, 89, 182, 0.05);
+}
+
+.move {
+  border-left: 4px solid #3498db;
+  background: rgba(52, 152, 219, 0.05);
+}
+
+/* Opening Sequence Styles */
+.openingSequence {
+  border-left: 4px solid #f39c12;
+  background: rgba(243, 156, 18, 0.1);
+  font-style: italic;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.openingSequence .turnNumber {
+  background: #f39c12;
+  color: white;
+  font-weight: bold;
+}
+
+/* Damage Level Styles */
+.massiveDamage {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.highDamage {
+  background: rgba(243, 156, 18, 0.1);
+}
+
+.normalDamage {
+  background: rgba(52, 152, 219, 0.1);
+}
+
+/* AI Entry Specific Styles */
+.aiEntry {
+  border-left: 4px solid #2ecc71;
+  background: rgba(46, 204, 113, 0.05);
+}
+
+.aiIcon {
+  margin-right: 6px;
+}
+
+.aiAction {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.aiReasoning {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--background-color-secondary);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.aiReasoning strong {
+  color: var(--text-color-primary);
+}
+
+.aiPerceivedState {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--background-color-secondary);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.aiPerceivedState strong {
+  color: var(--text-color-primary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.perceivedStateDetails {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.perceivedStateDetails > div {
+  background: var(--background-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--text-color-secondary);
+}
+
+.aiConsideredActions {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--background-color-secondary);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.aiConsideredActions strong {
+  color: var(--text-color-primary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.aiConsideredActions ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.aiConsideredActions li {
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .unifiedBattleLog {
+    height: 300px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .tabSelector {
+    justify-content: center;
+  }
+  
+  .tab {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .perceivedStateDetails {
+    flex-direction: column;
+    gap: 4px;
+  }
+} 

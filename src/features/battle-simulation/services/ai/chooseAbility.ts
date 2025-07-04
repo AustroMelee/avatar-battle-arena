@@ -109,7 +109,11 @@ export function chooseAbilityWithLogging(
             moveHistory: character.moveHistory,
             activeBuffs: character.activeBuffs,
             activeDebuffs: character.activeDebuffs,
-            resources: character.resources
+            resources: character.resources,
+            position: character.position ?? { x: 0, y: 0 },
+            isCharging: character.isCharging ?? false,
+            chargeProgress: character.chargeProgress ?? 0,
+            repositionAttempts: character.repositionAttempts ?? 0
           },
           enemy: {
             health: enemy.currentHealth,
@@ -119,10 +123,16 @@ export function chooseAbilityWithLogging(
             lastMove: enemy.lastMove,
             moveHistory: enemy.moveHistory,
             activeBuffs: enemy.activeBuffs,
-            activeDebuffs: enemy.activeDebuffs
+            activeDebuffs: enemy.activeDebuffs,
+            position: enemy.position ?? { x: 0, y: 0 },
+            isCharging: enemy.isCharging ?? false,
+            chargeProgress: enemy.chargeProgress ?? 0,
+            repositionAttempts: enemy.repositionAttempts ?? 0
           },
           round: turn,
-          cooldowns: {}
+          cooldowns: {},
+          location: 'Fire Nation Throne Hall',
+          locationType: 'interior' as any
         },
         consideredActions: [],
         chosenAction: fallbackAbility?.name || 'No moves available',
@@ -293,7 +303,11 @@ export function chooseAbilityWithLogging(
             moveHistory: character.moveHistory,
             activeBuffs: character.activeBuffs,
             activeDebuffs: character.activeDebuffs,
-            resources: character.resources
+            resources: character.resources,
+            position: character.position ?? { x: 0, y: 0 },
+            isCharging: character.isCharging ?? false,
+            chargeProgress: character.chargeProgress ?? 0,
+            repositionAttempts: character.repositionAttempts ?? 0
           },
           enemy: {
             health: enemy.currentHealth,
@@ -303,10 +317,16 @@ export function chooseAbilityWithLogging(
             lastMove: enemy.lastMove,
             moveHistory: enemy.moveHistory,
             activeBuffs: enemy.activeBuffs,
-            activeDebuffs: enemy.activeDebuffs
+            activeDebuffs: enemy.activeDebuffs,
+            position: enemy.position ?? { x: 0, y: 0 },
+            isCharging: enemy.isCharging ?? false,
+            chargeProgress: enemy.chargeProgress ?? 0,
+            repositionAttempts: enemy.repositionAttempts ?? 0
           },
           round: turn,
-          cooldowns: {}
+          cooldowns: {},
+          location: 'Fire Nation Throne Hall',
+          locationType: 'interior' as any
         },
         consideredActions: scoredAbilities.slice(0, 3).map(action => ({
           abilityId: action.move.toLowerCase().replace(/\s+/g, '_'),

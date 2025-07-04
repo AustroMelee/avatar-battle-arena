@@ -3,6 +3,51 @@ import type { BattleCharacter, BattleLogEntry } from '../../types';
 import type { Ability } from '@/common/types';
 
 /**
+ * @description Mechanical states that drive narrative generation
+ */
+export type MechanicalState = {
+  // Escalation states
+  forcedEscalation: boolean;
+  escalationType?: 'damage' | 'repetition' | 'stalemate' | 'reposition';
+  escalationMultiplier: number;
+  
+  // Vulnerability and punishment
+  isVulnerable: boolean;
+  vulnerabilityType?: 'charging' | 'repositioning' | 'stunned';
+  punishMultiplier: number;
+  punishDamage: number;
+  
+  // Pattern and repetition
+  moveRepetition: number;
+  patternAdaptations: number;
+  repositionAttempts: number;
+  isRepetitive: boolean;
+  
+  // Position and charging
+  position: string;
+  isCharging: boolean;
+  chargeProgress: number;
+  positionChanged: boolean;
+  
+  // Damage and performance
+  damageDealt: number;
+  damageMultiplier: number;
+  isLowDamage: boolean;
+  isHighDamage: boolean;
+  
+  // Battle flow
+  turnsWithoutDamage: number;
+  averageDamagePerTurn: number;
+  isStalemate: boolean;
+  
+  // Character-specific mechanics
+  isDesperation: boolean;
+  isLastUse: boolean;
+  isRally: boolean;
+  isComeback: boolean;
+};
+
+/**
  * @description Complete battle context available to narrative hooks
  */
 export type BattleContext = {
@@ -25,6 +70,14 @@ export type BattleContext = {
   targetHealthPercent: number;
   actorChiPercent: number;
   targetChiPercent: number;
+  
+  // Enhanced mechanical context
+  mechanics: MechanicalState;
+  
+  // Narrative-specific context
+  narrativeTone: 'desperate' | 'confident' | 'furious' | 'calculated' | 'chaotic' | 'defensive' | 'aggressive';
+  narrativeIntensity: 'low' | 'medium' | 'high' | 'extreme';
+  narrativeFocus: 'damage' | 'position' | 'pattern' | 'vulnerability' | 'escalation' | 'recovery';
 };
 
 /**
@@ -97,4 +150,58 @@ export type NarrativeSystemConfig = {
   enabled: boolean;
   maxHooksPerTurn: number;
   priorityThreshold: number;
-}; 
+  useTemplateSystem?: boolean; // Enable new template system
+};
+
+/**
+ * @description Damage outcome categories for narrative mapping
+ */
+export type DamageOutcome = 'miss' | 'glance' | 'hit' | 'devastating' | 'overwhelming';
+
+/**
+ * @description Narrative mechanic categories for anti-repetition tracking
+ */
+export type NarrativeMechanic = 
+  | 'pattern_break'
+  | 'forced_escalation' 
+  | 'vulnerability_punish'
+  | 'position_change'
+  | 'desperation_unlock'
+  | 'climax'
+  | 'finisher'
+  | 'miss'
+  | 'glance'
+  | 'hit'
+  | 'devastating';
+
+/**
+ * @description Tracks recent narratives to prevent repetition
+ */
+export type RecentNarrativeTracker = {
+  [mechanic in NarrativeMechanic]?: {
+    [characterName: string]: {
+      lastUsed: number; // turn number
+      lineText: string;
+    }[];
+  };
+};
+
+/**
+ * @description Damage thresholds for narrative outcome mapping
+ */
+export const DAMAGE_OUTCOME_THRESHOLDS = {
+  MISS: 0,
+  GLANCE: 5,
+  HIT: 15,
+  DEVASTATING: 30,
+  OVERWHELMING: 50
+} as const;
+
+/**
+ * @description Anti-repetition configuration
+ */
+export const ANTI_REPETITION_CONFIG = {
+  MIN_TURNS_BETWEEN_REPEATS: 3,
+  MAX_RECENT_LINES_PER_MECHANIC: 5,
+  RESET_BUFFER_AFTER_TURNS: 10
+} as const; 

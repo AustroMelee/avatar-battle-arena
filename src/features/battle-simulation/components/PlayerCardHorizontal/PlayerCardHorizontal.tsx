@@ -1,3 +1,4 @@
+import React from 'react';
 // CONTEXT: BattleSimulation, // FOCUS: UIRendering
 import { PlayerCardHorizontalProps } from '../../types';
 import { FaWind, FaFire, FaShieldAlt, FaBolt, FaBrain, FaRunning, FaStar, FaShieldVirus } from 'react-icons/fa';

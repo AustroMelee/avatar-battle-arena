@@ -4,6 +4,7 @@ import React from 'react';
 import { BattleState, BattleCharacter } from '../../types';
 import { Ability } from '@/common/types';
 import { getAvailableFallbackMoves } from '../../services/battle/fallbackMoves';
+import { UnifiedBattleLog } from '../UnifiedBattleLog';
 import styles from './EnhancedBattleScene.module.css';
 
 interface EnhancedBattleSceneProps {
@@ -137,36 +138,16 @@ export const EnhancedBattleScene: React.FC<EnhancedBattleSceneProps> = ({
   };
 
   /**
-   * @description Renders the battle log with enhanced formatting.
+   * @description Renders the unified battle log with tabs.
    */
   const BattleLog: React.FC = () => {
-    const recentLogs = battleState.log.slice(-8); // Show last 8 entries
-
     return (
       <div className={styles.battleLog}>
-        <h3>Battle Log</h3>
-        <div className={styles.logContainer}>
-          {recentLogs.map((log, index) => {
-            const isClimax = log.includes('CLIMAX');
-            const isVictory = log.includes('wins');
-            const isDesperation = log.includes('Desperate');
-            const isRest = log.includes('Focus');
-
-            return (
-              <div 
-                key={index} 
-                className={`${styles.logEntry} ${
-                  isClimax ? styles.climax : 
-                  isVictory ? styles.victory : 
-                  isDesperation ? styles.desperation :
-                  isRest ? styles.rest : ''
-                }`}
-              >
-                {log}
-              </div>
-            );
-          })}
-        </div>
+        <UnifiedBattleLog 
+          battleLog={battleState.battleLog}
+          aiLog={battleState.aiLog}
+          maxEntries={12}
+        />
       </div>
     );
   };

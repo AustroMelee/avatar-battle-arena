@@ -1,3 +1,4 @@
+import React from 'react';
 // CONTEXT: CharacterSelection, // FOCUS: UIRendering
 import { Character } from '@/common/types';
 import styles from './CharacterCard.module.css';
@@ -29,7 +30,7 @@ function getBendingColor(bending: Character['bending']): string {
   }
 }
 
-const STAT_ICONS: Record<string, JSX.Element> = {
+const STAT_ICONS: Record<string, React.JSX.Element> = {
   power: <FaBolt style={{ color: '#f87171', marginRight: 6 }} aria-label="Power" />,
   agility: <FaRunning style={{ color: '#fbbf24', marginRight: 6 }} aria-label="Agility" />,
   defense: <FaShieldAlt style={{ color: '#38bdf8', marginRight: 6 }} aria-label="Defense" />,
@@ -43,7 +44,7 @@ const STAT_COLORS: Record<string, string> = {
   intelligence: '#a78bfa',
   default: '#fff',
 };
-const BENDING_ICONS: Record<string, JSX.Element> = {
+const BENDING_ICONS: Record<string, React.JSX.Element> = {
   air: <FaWind style={{ marginRight: 6 }} aria-label="Air" />,
   fire: <FaFire style={{ marginRight: 6 }} aria-label="Fire" />,
   water: <FaShieldVirus style={{ marginRight: 6 }} aria-label="Water" />,

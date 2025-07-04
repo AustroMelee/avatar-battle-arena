@@ -1,142 +1,371 @@
-// CONTEXT: Narrative System, // FOCUS: Main Service API
-export * from './types';
-export * from './contextBuilder';
-export * from './characterHooks';
-export * from './narratorHooks';
-export * from './narrativeEngine';
+// CONTEXT: Narrative System
+// FOCUS: Main narrative service with enhanced systems integration
 
-import type { BattleCharacter, BattleLogEntry } from '../../types';
-import type { Ability } from '@/common/types';
-import type { BattleContext, TriggeredNarrative, NarrativeSystemConfig } from './types';
-import { buildBattleContext } from './contextBuilder';
-import { 
-  evaluateNarrativeHooks, 
-  updateUsedHooks, 
-  createUsedHooksTracker,
-  createNarrativeConfig,
-  debugNarrativeEvaluation
-} from './narrativeEngine';
+import type { BattleCharacter, BattleLogEntry, BattleState } from '../../types';
+import type { TriggeredNarrative } from './types';
+import { BattleEndHandler } from './battleEndHandler';
+import { StateDrivenNarrativePool } from './stateDrivenNarrativePool';
+import { getContextualMoveDescription } from './contextualNarrativeMapper';
+import { StateAnnouncementManager } from './stateAnnouncementManager';
+import { enhancedNarrativeSystem } from './enhancedNarrativeSystem';
+
+// Core engine and orchestration
+export { evaluateNarrativeHooks } from './narrativeEngine';
+export type { UsedHooksTracker } from './narrativeEngine';
+
+// Configuration management
+export { createNarrativeConfig, getDefaultConfig } from './configManager';
+
+// Utility management
+export { createUsedHooksTracker, updateUsedHooks, debugNarrativeEvaluation } from './utilityManager';
+
+// Context building
+export { buildBattleContext } from './contextBuilder';
+
+// Mechanical state extraction
+export { extractMechanicalState, isComebackSequence, isRallySequence } from './mechanicalStateExtractor';
+
+// Battle phase analysis
+export { determineBattlePhase, isFirstBlood } from './battlePhaseAnalyzer';
+
+// Narrative tone analysis
+export { determineNarrativeTone, determineNarrativeIntensity, determineNarrativeFocus } from './narrativeToneAnalyzer';
+
+// Status analysis
+export { getHealthStatus, getChiStatus } from './statusAnalyzer';
+
+// Location analysis
+export { calcCollateralTolerance } from './locationAnalyzer';
+
+// Template-based narrative generation
+export { generateTemplateBasedNarratives, generateFallbackNarrative, determineMoodFromTone } from './templateNarrativeGenerator';
+
+// Hook-based narrative generation
+export { generateHookBasedNarratives } from './hookNarrativeGenerator';
+
+// Template system
+export { selectNarrativeTemplate, generateNarrativeText, generateNarratorCommentary } from './narrativeTemplates';
+
+// Character and narrator hooks
+export { characterNarratives } from './characterHooks';
+export { narratorHooks } from './narratorHooks';
+
+// Type definitions
+export type {
+  BattleContext,
+  MechanicalState,
+  NarrativeHook,
+  TriggeredNarrative,
+  NarrativeSystemConfig,
+  CharacterMood,
+  CharacterNarratives
+} from './types';
 
 /**
- * @description Main narrative service for battle integration
+ * @description Creates a narrative service with enhanced configuration
+ */
+export function createNarrativeService() {
+  return new NarrativeService();
+}
+
+/**
+ * @description Main narrative service that coordinates all narrative generation with enhanced state management
  */
 export class NarrativeService {
-  private config: NarrativeSystemConfig;
-  private usedHooks: ReturnType<typeof createUsedHooksTracker>;
-  private lastSpoken: Record<string, string> = {};
-  private phaseFlags: Record<string, boolean> = {};
+  private stateAnnouncementManager: StateAnnouncementManager;
+  private battleEndHandler: BattleEndHandler;
+  private enhancedSystem: typeof enhancedNarrativeSystem;
+  private stateManager: StateDrivenNarrativePool;
+  private currentTurn: number = 0;
 
-  constructor(config?: Partial<NarrativeSystemConfig>) {
-    this.config = createNarrativeConfig(config);
-    this.usedHooks = createUsedHooksTracker();
-    this.lastSpoken = {};
-    this.phaseFlags = {};
+  constructor() {
+    this.stateAnnouncementManager = new StateAnnouncementManager();
+    this.battleEndHandler = new BattleEndHandler();
+    this.enhancedSystem = enhancedNarrativeSystem;
+    this.stateManager = new StateDrivenNarrativePool();
   }
 
   /**
-   * @description Resets the service for a new battle
+   * @description Updates the current turn for all narrative systems
    */
-  reset(): void {
-    this.usedHooks = createUsedHooksTracker();
-    this.lastSpoken = {};
-    this.phaseFlags = {};
+  updateTurn(turnNumber: number): void {
+    this.currentTurn = turnNumber;
+    this.enhancedSystem.updateTurn(turnNumber);
   }
 
   /**
-   * @description Generates narrative hooks for a battle event
-   * @param actor - The acting character
-   * @param target - The target character
-   * @param move - The move being used
-   * @param turnIndex - Current turn number
-   * @param battleLog - Full battle log
-   * @param location - Battle location
-   * @param isCritical - Whether this is a critical hit
-   * @param isDesperation - Whether this is a desperation move
-   * @param damage - Damage dealt (if any)
-   * @returns Array of triggered narratives
+   * @description Generates a narrative line for a move with enhanced state management and anti-repetition
+   */
+  generateNarrative(
+    characterName: string,
+    context: {
+      damage: number;
+      maxHealth: number;
+      isMiss: boolean;
+      isCritical: boolean;
+      isPatternBreak: boolean;
+      isEscalation: boolean;
+      consecutiveHits: number;
+      consecutiveMisses: number;
+      turnNumber: number;
+      characterState: 'fresh' | 'wounded' | 'exhausted' | 'desperate';
+    },
+    damageOutcome: 'miss' | 'glance' | 'hit' | 'devastating' | 'overwhelming',
+    moveName?: string
+  ): string {
+    // Update turn number for state tracking
+    this.updateTurn(context.turnNumber);
+
+    // Generate enhanced narrative with anti-repetition
+    const narrative = this.enhancedSystem.generateNarrative(
+      characterName,
+      context,
+      damageOutcome,
+      moveName
+    );
+
+    // Add contextual move description if available
+    const moveDescription = moveName ? getContextualMoveDescription(characterName, context, moveName) : null;
+    
+    if (moveDescription && narrative !== moveDescription) {
+      return `${narrative} ${moveDescription}`;
+    }
+
+    return narrative;
+  }
+
+  /**
+   * @description Generates state announcement with enhanced tracking
+   */
+  generateStateAnnouncement(
+    character: string,
+    stateType: 'breaking_point' | 'escalation' | 'desperation' | 'pattern_break',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _context: {
+      turnNumber: number;
+      escalationCount: number;
+      desperationCount: number;
+    }
+  ): string | null {
+    // Check if state should be announced using enhanced system
+    if (!this.enhancedSystem.shouldAnnounceState(stateType)) {
+      return null;
+    }
+
+    // Get state announcement from enhanced system
+    const announcement = this.enhancedSystem.getStateAnnouncement(stateType, character);
+    
+    // Record the announcement to prevent repetition
+    this.enhancedSystem.recordStateAnnouncement(stateType);
+    
+    return announcement;
+  }
+
+  /**
+   * @description Generates tactical response narrative with enhanced context awareness
+   */
+  generateTacticalResponse(
+    character: string,
+    context: {
+      damage: number;
+      maxHealth: number;
+      isMiss: boolean;
+      isCritical: boolean;
+      isPatternBreak: boolean;
+      isEscalation: boolean;
+      consecutiveHits: number;
+      consecutiveMisses: number;
+      turnNumber: number;
+      characterState: 'fresh' | 'wounded' | 'exhausted' | 'desperate';
+      chi?: number;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _mechanic: string
+  ): string | null {
+    // Use enhanced system for tactical responses
+    this.enhancedSystem.determineNarrativeState(character, {
+      isPatternBreak: context.isPatternBreak,
+      isEscalation: context.isEscalation,
+      isDesperation: context.characterState === 'desperate',
+      turnNumber: context.turnNumber,
+      characterState: context.characterState,
+      health: context.maxHealth - context.damage,
+      maxHealth: context.maxHealth,
+      chi: context.chi || 0,
+      isCritical: context.isCritical,
+      damage: context.damage
+    });
+
+    // Generate tactical response using enhanced system
+    return this.enhancedSystem.getNarrative(character, 'pattern_break', {
+      turnNumber: context.turnNumber,
+      health: context.maxHealth - context.damage,
+      maxHealth: context.maxHealth,
+      chi: context.chi || 0,
+      isCritical: context.isCritical,
+      damage: context.damage
+    });
+  }
+
+  /**
+   * @description Generates late game narrative with enhanced progression tracking
+   */
+  generateLateGameNarrative(character: string, context?: {
+    turnNumber: number;
+    health: number;
+    maxHealth: number;
+    chi: number;
+    isCritical: boolean;
+    damage: number;
+  }): string | null {
+    if (!context) {
+      return null;
+    }
+
+    // Use enhanced system for late game narratives
+    return this.enhancedSystem.getNarrative(character, 'late_game', context);
+  }
+
+  /**
+   * @description Records battle end and generates victory narratives
+   */
+  recordBattleEnd(state: BattleState): TriggeredNarrative[] {
+    const victoryNarratives = this.battleEndHandler.recordBattleEnd(state);
+    return victoryNarratives;
+  }
+
+  /**
+   * @description Checks if a character can generate narratives
+   */
+  canCharacterGenerateNarrative(characterName: string): boolean {
+    return this.enhancedSystem.getUsageStats()[characterName] !== undefined;
+  }
+
+  /**
+   * @description Generates narratives for a move with enhanced state management
    */
   generateNarratives(
     actor: BattleCharacter,
     target: BattleCharacter,
-    move: Ability,
-    turnIndex: number,
-    battleLog: BattleLogEntry[],
-    location: string,
-    isCritical?: boolean,
-    isDesperation?: boolean,
-    damage?: number
-  ): TriggeredNarrative[] {
-    // Build battle context
-    const ctx = buildBattleContext(
-      actor,
-      target,
-      move,
-      turnIndex,
-      battleLog,
-      location,
+    move: Record<string, unknown>,
+    turnNumber: number,
+    _battleLog: BattleLogEntry[],
+    _location: string,
+    isCritical: boolean,
+    isDesperation: boolean,
+    damage: number
+  ): string[] {
+    const narratives: string[] = [];
+
+    // Update turn for all systems
+    this.updateTurn(turnNumber);
+
+    // Calculate max health from stats
+    const targetMaxHealth = target.stats.power + target.stats.defense + target.stats.agility + target.stats.intelligence;
+    const actorMaxHealth = actor.stats.power + actor.stats.defense + actor.stats.agility + actor.stats.intelligence;
+
+    // Generate actor narrative
+    const actorContext = {
+      damage,
+      maxHealth: targetMaxHealth,
+      isMiss: damage === 0,
       isCritical,
-      isDesperation,
-      damage
+      isPatternBreak: false, // Will be determined by enhanced system
+      isEscalation: false, // Will be determined by enhanced system
+      consecutiveHits: 0, // Will be tracked by enhanced system
+      consecutiveMisses: 0, // Will be tracked by enhanced system
+      turnNumber,
+      characterState: this.determineCharacterState(actor.currentHealth, actorMaxHealth)
+    };
+
+    const damageOutcome = this.determineDamageOutcome(damage, targetMaxHealth);
+    const actorNarrative = this.generateNarrative(
+      actor.name,
+      actorContext,
+      damageOutcome,
+      move.name as string
     );
 
-    // Evaluate narrative hooks (strict deduplication)
-    const narratives = evaluateNarrativeHooks(ctx, this.config, this.usedHooks, this.lastSpoken, this.phaseFlags);
+    if (actorNarrative) {
+      narratives.push(actorNarrative);
+    }
 
-    // Update used hooks tracker and lastSpoken
-    this.usedHooks = updateUsedHooks(narratives, this.usedHooks);
-    narratives.forEach(narrative => {
-      this.lastSpoken[narrative.speaker] = `${narrative.speaker}_${narrative.text}`;
-    });
+    // Generate target response if appropriate
+    if (damage > 0 && !isDesperation) {
+      const targetContext = {
+        damage,
+        maxHealth: targetMaxHealth,
+        isMiss: false,
+        isCritical,
+        isPatternBreak: false,
+        isEscalation: false,
+        consecutiveHits: 0,
+        consecutiveMisses: 0,
+        turnNumber,
+        characterState: this.determineCharacterState(target.currentHealth, targetMaxHealth)
+      };
 
-    // Debug logging
-    debugNarrativeEvaluation(ctx, narratives, this.config);
+      const targetResponse = this.generateTacticalResponse(
+        target.name,
+        targetContext,
+        'damage_received'
+      );
+
+      if (targetResponse) {
+        narratives.push(targetResponse);
+      }
+    }
 
     return narratives;
   }
 
   /**
-   * @description Updates the narrative system configuration
-   * @param newConfig - New configuration overrides
+   * @description Determines character state based on health
    */
-  updateConfig(newConfig: Partial<NarrativeSystemConfig>): void {
-    this.config = createNarrativeConfig(newConfig);
+  private determineCharacterState(currentHealth: number, maxHealth: number): 'fresh' | 'wounded' | 'exhausted' | 'desperate' {
+    const healthPercentage = (currentHealth / maxHealth) * 100;
+    
+    if (healthPercentage > 75) return 'fresh';
+    if (healthPercentage > 50) return 'wounded';
+    if (healthPercentage > 25) return 'exhausted';
+    return 'desperate';
   }
 
   /**
-   * @description Gets the current configuration
-   * @returns Current narrative system configuration
+   * @description Determines damage outcome based on damage and target health
    */
-  getConfig(): NarrativeSystemConfig {
-    return { ...this.config };
+  private determineDamageOutcome(damage: number, maxHealth: number): 'miss' | 'glance' | 'hit' | 'devastating' | 'overwhelming' {
+    if (damage === 0) return 'miss';
+    const damagePercentage = (damage / maxHealth) * 100;
+    if (damagePercentage < 5) return 'glance';
+    if (damagePercentage < 15) return 'hit';
+    if (damagePercentage < 25) return 'devastating';
+    return 'overwhelming';
   }
 
   /**
-   * @description Enables or disables the narrative system
-   * @param enabled - Whether to enable the system
+   * @description Resets all narrative systems
    */
-  setEnabled(enabled: boolean): void {
-    this.config.enabled = enabled;
+  reset(): void {
+    this.currentTurn = 0;
+    this.enhancedSystem.reset();
+    this.stateManager.reset();
+    this.stateAnnouncementManager.reset();
+    this.battleEndHandler.reset();
   }
 
   /**
-   * @description Checks if the narrative system is enabled
-   * @returns True if enabled
+   * @description Gets the current state of all narrative systems
    */
-  isEnabled(): boolean {
-    return this.config.enabled;
+  getState(): Record<string, unknown> {
+    return {
+      currentTurn: this.currentTurn,
+      enhancedSystemState: this.enhancedSystem.getState(),
+      stateManagerState: this.stateManager.getState(),
+      announcementManagerState: this.stateAnnouncementManager.getState()
+    };
   }
 }
 
-/**
- * @description Creates a new narrative service instance
- * @param config - Optional configuration overrides
- * @returns New narrative service
- */
-export function createNarrativeService(config?: Partial<NarrativeSystemConfig>): NarrativeService {
-  return new NarrativeService(config);
-}
-
-/**
- * @description Default narrative service instance
- */
-export const defaultNarrativeService = createNarrativeService(); 
+// Export singleton instance
+export const narrativeService = new NarrativeService(); 
