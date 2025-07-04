@@ -73,18 +73,54 @@ export function reduceCooldowns(character: BattleCharacter): BattleCharacter {
 }
 
 /**
- * @description Recovers chi for a character at the end of a turn.
+ * @description Recovers chi for a character at the end of a turn with enhanced regeneration logic.
  * @param {BattleCharacter} character - The character whose chi to recover.
  * @returns {BattleCharacter} The character with recovered chi.
  */
 export function recoverChi(character: BattleCharacter): BattleCharacter {
-  // Create severe resource pressure - only recover chi when critically low
-  const recoveryAmount = character.currentHealth < 20 ? 1 : 0; // Only recover when critically desperate
+  // Base regeneration: Always recover some chi (prevents complete starvation)
+  let recoveryAmount = 1;
+  
+  // Enhanced regeneration based on character state
+  if (character.currentHealth < 20) {
+    // Critical health: Desperation regeneration (2x base)
+    recoveryAmount = 2;
+  } else if (character.currentHealth < 40) {
+    // Low health: Moderate regeneration (1.5x base)
+    recoveryAmount = 1.5;
+  } else if (character.resources.chi < 3) {
+    // Low chi: Slight bonus regeneration
+    recoveryAmount = 1.5;
+  }
+  
+  // Rest bonus: If character used rest/focus move, get enhanced regeneration
+  if (character.flags?.isResting) {
+    recoveryAmount *= 2; // Double regeneration when resting
+  }
+  
+  // Bending-based regeneration bonuses
+  if (character.bending === 'air') {
+    // Airbenders recover chi more efficiently when mobile/evasive
+    recoveryAmount = Math.floor(recoveryAmount * 1.2);
+  } else if (character.bending === 'fire') {
+    // Firebenders recover chi more when aggressive
+    recoveryAmount = Math.floor(recoveryAmount * 1.1);
+  }
+  
+  // Ensure we don't exceed max chi (default to 10 if not specified)
+  const maxChi = 10; // Default max chi
+  const newChi = Math.min(maxChi, character.resources.chi + recoveryAmount);
+  
   return {
     ...character,
     resources: {
       ...character.resources,
-      chi: Math.min(10, character.resources.chi + recoveryAmount) // Prevent complete resource depletion
+      chi: newChi
+    },
+    // Clear resting flag after regeneration
+    flags: {
+      ...character.flags,
+      isResting: false
     }
   };
 }

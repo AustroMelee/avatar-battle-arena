@@ -1,40 +1,85 @@
-// CONTEXT: BattleSimulation, // FOCUS: StateManagement
-import { useState } from 'react';
-import { runTurnBasedSimulation } from '../services/battleSimulator.service';
-import { BattleState, SimulateBattleParams } from '../types';
+// CONTEXT: Battle Simulator Controller Hook
+// RESPONSIBILITY: Manage battle simulation state and provide battle data to components
+
+import { useState, useRef, useCallback } from 'react';
+import { BattleState, BattleLogEntry } from '../types';
+import { simulateBattle } from '../services/battleSimulator.service';
+import { SimulateBattleParams } from '../types';
+import { BattleMetrics, CharacterMetrics, AIMetrics } from '../services/battle/analytics';
 
 /**
- * @description A hook to manage the state and logic for running a turn-based battle simulation.
- * @returns {{
- *   battleState: BattleState | null;
- *   isSimulating: boolean;
- *   runSimulation: (params: SimulateBattleParams) => void;
- *   resetBattle: () => void;
- * }}
+ * @description Custom hook for managing battle simulation state.
+ * @returns {Object} Battle simulation state and control functions.
  */
 export function useBattleSimulator() {
   const [battleState, setBattleState] = useState<BattleState | null>(null);
-  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [battleLog, setBattleLog] = useState<BattleLogEntry[]>([]);
+  const [narratives, setNarratives] = useState<string[]>([]);
+  const [analytics, setAnalytics] = useState<{
+    battleMetrics: BattleMetrics;
+    characterMetrics: CharacterMetrics[];
+    aiMetrics: AIMetrics;
+  } | null>(null);
+  const displayedNarrativeIds = useRef<Set<string>>(new Set());
 
   /**
-   * @description Executes the battle simulation and updates state via callbacks.
-   * @param {SimulateBattleParams} params - The parameters for the battle.
+   * @description Starts a new battle simulation.
+   * @param {SimulateBattleParams} params - The battle parameters.
    */
-  const runSimulation = (params: SimulateBattleParams) => {
-    setIsSimulating(true);
-    setBattleState(null); // Clear previous results
+  const startBattle = useCallback(async (params: SimulateBattleParams) => {
+    setIsRunning(true);
+    setBattleState(null);
+    setBattleLog([]);
+    setNarratives([]);
+    setAnalytics(null);
+    displayedNarrativeIds.current.clear();
 
-    // The service will call setBattleState after each turn
-    runTurnBasedSimulation(params, (newState) => {
-      setBattleState(newState);
-      if (newState.isFinished) {
-        setIsSimulating(false);
-      }
-    });
+    try {
+      const result = await simulateBattle(params);
+      
+      setBattleState(result.finalState);
+      setBattleLog(result.battleLog);
+      setAnalytics(result.analytics);
+      
+      // Extract narratives from battle log
+      const newNarratives = result.battleLog
+        .filter((entry: BattleLogEntry) => entry.type === 'NARRATIVE' && !displayedNarrativeIds.current.has(entry.id))
+        .map((entry: BattleLogEntry) => ({
+          id: entry.id,
+          text: entry.narrative || entry.result,
+          turn: entry.turn
+        }));
+
+      newNarratives.forEach((n: { id: string; text: string; turn: number }) => displayedNarrativeIds.current.add(n.id));
+      setNarratives(prev => [...prev, ...newNarratives.map((n: { id: string; text: string; turn: number }) => n.text)]);
+      
+    } catch (error) {
+      console.error('Battle simulation failed:', error);
+    } finally {
+      setIsRunning(false);
+    }
+  }, []);
+
+  /**
+   * @description Resets the battle simulation state.
+   */
+  const resetBattle = useCallback(() => {
+    setBattleState(null);
+    setBattleLog([]);
+    setNarratives([]);
+    setAnalytics(null);
+    setIsRunning(false);
+    displayedNarrativeIds.current.clear();
+  }, []);
+
+  return {
+    battleState,
+    isRunning,
+    battleLog,
+    narratives,
+    analytics,
+    startBattle,
+    resetBattle
   };
-
-  // Add this function to allow external reset
-  const resetBattle = () => setBattleState(null);
-
-  return { battleState, isSimulating, runSimulation, resetBattle };
 } 

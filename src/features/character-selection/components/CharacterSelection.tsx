@@ -35,15 +35,18 @@ export function CharacterSelection({
         // STATE 2: Display the selected character's detailed card
         <div className={styles.displayCardContainer}>
           <PlayerCardHorizontal
-            character={{ 
-              ...selectedCharacter, 
-              currentHealth: 100, 
+            character={{
+              ...selectedCharacter,
+              currentHealth: 100,
               currentDefense: selectedCharacter.stats.defense,
               cooldowns: {},
+              usesLeft: {},
               moveHistory: [],
               resources: { chi: 10 },
               activeBuffs: [],
-              activeDebuffs: []
+              activeDebuffs: [],
+              flags: {},
+              diminishingEffects: {}
             }}
             isActive={true}
             playerColor={playerColor}

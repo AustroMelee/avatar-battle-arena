@@ -1,48 +1,106 @@
 // CONTEXT: Battle Simulation Orchestrator
 // RESPONSIBILITY: Orchestrate the battle simulation using modular services
-import { SimulateBattleParams, BattleState, BattleLogEntry } from '../types';
-import { createInitialBattleState } from './battle/state';
+import { SimulateBattleParams, BattleState, BattleLogEntry, AILogEntry } from '../types';
+import { createInitialBattleState, cloneBattleState } from './battle/state';
 import { processTurn } from './battle/processTurn';
+import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport, trackBattleAnalytics, BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 
 /**
- * @description Runs a full battle simulation with proper state management.
- * @param {SimulateBattleParams} params - The setup for the battle.
- * @param {(state: BattleState) => void} onTurnEnd - Callback function to report state after each turn.
+ * @description Represents the result of a battle simulation with analytics.
  */
-export function runTurnBasedSimulation(
-  params: SimulateBattleParams,
-  onTurnEnd: (state: BattleState) => void
-): void {
-  let battleState = createInitialBattleState(params);
-  const maxTurns = 50; // Prevent infinite battles
-  onTurnEnd(battleState);
-
-  // Process turns with proper state management to prevent infinite loops
-  const processNextTurn = () => {
-    if (!battleState.isFinished && battleState.turn <= maxTurns) {
-      battleState = processTurn(battleState);
-      onTurnEnd(battleState);
-      
-      // Use setTimeout to allow React to process state updates
-      setTimeout(processNextTurn, 0);
-    } else if (battleState.turn > maxTurns) {
-      // Force end battle if max turns reached
-      battleState.isFinished = true;
-      battleState.winner = battleState.participants[0]; // Default winner
-      const timeoutLogEntry: BattleLogEntry = {
-        turn: battleState.turn,
-        actor: 'System',
-        action: 'Timeout',
-        result: 'Battle ended due to maximum turns reached.',
-        narrative: 'The battle drags on too long and is called a draw.',
-        timestamp: Date.now()
-      };
-      battleState.log.push(timeoutLogEntry.result);
-      battleState.battleLog.push(timeoutLogEntry);
-      onTurnEnd(battleState);
-    }
+export interface BattleSimulationResult {
+  finalState: BattleState;
+  battleLog: BattleLogEntry[];
+  aiLog: AILogEntry[];
+  analytics: {
+    battleMetrics: BattleMetrics;
+    characterMetrics: CharacterMetrics[];
+    aiMetrics: AIMetrics;
+    report: string;
   };
+  duration: number;
+}
 
-  // Start processing turns
-  processNextTurn();
+
+
+/**
+ * @description Simulates a complete battle between two characters with comprehensive analytics.
+ * @param {SimulateBattleParams} params - The battle parameters.
+ * @returns {BattleSimulationResult} The complete battle result with analytics.
+ */
+export async function simulateBattle(params: SimulateBattleParams): Promise<BattleSimulationResult> {
+  const startTime = Date.now();
+  
+  // Initialize battle state
+  let currentState = createInitialBattleState(params);
+  const maxTurns = 50; // Prevent infinite battles
+  
+  // Track analytics during battle
+  const trackAnalytics = (logEntry: BattleLogEntry) => {
+    trackBattleAnalytics(logEntry);
+  };
+  
+  // Simulate battle turns
+  while (!currentState.isFinished && currentState.turn < maxTurns) {
+    const previousState = cloneBattleState(currentState);
+    currentState = processTurn(currentState);
+    
+    // Track new log entries for analytics
+    const newEntries = currentState.battleLog.slice(previousState.battleLog.length);
+    newEntries.forEach(trackAnalytics);
+  }
+  
+  // Force battle end if max turns reached
+  if (currentState.turn >= maxTurns && !currentState.isFinished) {
+    currentState.isFinished = true;
+    currentState.winner = null; // Draw
+    currentState.battleLog.push({
+      id: `turn-${currentState.turn}-max-turns`,
+      turn: currentState.turn,
+      actor: 'System',
+      type: 'DRAW',
+      action: 'max_turns',
+      result: 'Battle ended due to maximum turns reached.',
+      narrative: 'The battle has dragged on too long. Both warriors are exhausted.',
+      timestamp: Date.now(),
+      meta: { resolution: 'max_turns' }
+    });
+  }
+  
+  const endTime = Date.now();
+  const duration = endTime - startTime;
+  
+  // Generate comprehensive analytics
+  const battleMetrics = analyzeBattlePerformance(currentState, currentState.battleLog, startTime);
+  const characterMetrics = currentState.participants.map(character => 
+    analyzeCharacterPerformance(character, currentState.battleLog)
+  );
+  const aiMetrics = analyzeAIPerformance(currentState.battleLog, currentState.aiLog);
+  const report = generateBattleReport(battleMetrics, characterMetrics, aiMetrics);
+  
+  // Log analytics summary
+  console.log('=== BATTLE ANALYTICS SUMMARY ===');
+  console.log(`Duration: ${Math.round(duration / 1000)}s`);
+  console.log(`Turns: ${battleMetrics.totalTurns}`);
+  console.log(`Winner: ${battleMetrics.winner || 'Draw'}`);
+  console.log(`Victory Method: ${battleMetrics.victoryMethod}`);
+  console.log(`Total Damage: ${battleMetrics.totalDamage}`);
+  console.log(`Chi Efficiency: ${battleMetrics.chiEfficiency.toFixed(2)}`);
+  console.log(`Desperation Moves: ${battleMetrics.desperationMoves}`);
+  console.log(`Pattern Adaptations: ${battleMetrics.patternAdaptations}`);
+  console.log(`Stalemate Prevention: ${battleMetrics.stalematePrevention ? 'Yes' : 'No'}`);
+  console.log('================================');
+  
+  return {
+    finalState: currentState,
+    battleLog: currentState.battleLog,
+    aiLog: currentState.aiLog,
+    analytics: {
+      battleMetrics,
+      characterMetrics,
+      aiMetrics,
+      report
+    },
+    duration
+  };
 } 

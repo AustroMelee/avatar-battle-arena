@@ -118,7 +118,7 @@ export function chooseAbilityWithAdvancedAI(
   
   // 5. Select move with variance (weighted random from top 3)
   const topMoves = contextualMoveScores.slice(0, 3);
-  const totalWeight = topMoves.reduce((sum, move, index) => sum + (3 - index), 0);
+  const totalWeight = topMoves.reduce((sum, _move, index) => sum + (3 - index), 0);
   const random = Math.random() * totalWeight;
   
   let cumulativeWeight = 0;

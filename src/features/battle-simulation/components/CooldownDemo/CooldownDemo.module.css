@@ -1,0 +1,386 @@
+/* CONTEXT: BattleSimulation, // FOCUS: CooldownDemoStyles */
+
+.cooldownDemo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  min-height: 100vh;
+  color: #ffffff;
+}
+
+/* Demo header */
+.demoHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #333;
+}
+
+.demoTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  background: linear-gradient(135deg, #4a90e2 0%, #e74c3c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.demoDescription {
+  font-size: 1.125rem;
+  color: #cccccc;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Character selection */
+.characterSelection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.characterLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.characterSelect {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: #2a2a2a;
+  border: 2px solid #4a90e2;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.characterSelect:hover {
+  border-color: #5ba0f2;
+  background: #3a3a3a;
+}
+
+.characterSelect:focus {
+  outline: none;
+  border-color: #5ba0f2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+/* Battle controls */
+.battleControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.controlLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4a90e2;
+  background: rgba(74, 144, 226, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid rgba(74, 144, 226, 0.2);
+}
+
+.controlButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.controlButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+.controlButton:active {
+  transform: translateY(0);
+}
+
+.resetButton {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.resetButton:hover {
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+/* Demo content */
+.demoContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.abilitySection {
+  display: flex;
+  justify-content: center;
+}
+
+.abilityPanel {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Battle log section */
+.battleLogSection {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 600px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.logTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: #ffffff;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.battleLog {
+  flex: 1;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.emptyLog {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+}
+
+.logEntry {
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logEntry:last-child {
+  border-bottom: none;
+}
+
+/* Cooldown information */
+.cooldownInfo {
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid rgba(74, 144, 226, 0.2);
+}
+
+.infoTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: #4a90e2;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.75rem;
+}
+
+.featureList li {
+  color: #ffffff;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  border-left: 4px solid #4a90e2;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.featureList li::before {
+  content: '✓';
+  color: #4a90e2;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .demoContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .abilityPanel {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .cooldownDemo {
+    padding: 1rem;
+  }
+
+  .demoTitle {
+    font-size: 2rem;
+  }
+
+  .demoDescription {
+    font-size: 1rem;
+  }
+
+  .characterSelection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .characterLabel {
+    text-align: center;
+  }
+
+  .battleControls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .controlGroup {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .featureList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .demoTitle {
+    font-size: 1.75rem;
+  }
+
+  .controlButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .logTitle,
+  .infoTitle {
+    font-size: 1.125rem;
+  }
+
+  .battleLog {
+    font-size: 0.8rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .cooldownDemo {
+    background: #000000;
+  }
+
+  .characterSelection,
+  .battleControls,
+  .battleLogSection,
+  .cooldownInfo {
+    border-color: #ffffff;
+    background: #000000;
+  }
+
+  .controlButton {
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .controlButton {
+    transition: none;
+  }
+
+  .controlButton:hover {
+    transform: none;
+  }
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .cooldownDemo {
+    background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
+  }
+}
+
+/* Print styles */
+@media print {
+  .cooldownDemo {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .demoTitle {
+    color: #000000;
+    -webkit-text-fill-color: #000000;
+  }
+
+  .characterSelection,
+  .battleControls,
+  .battleLogSection,
+  .cooldownInfo {
+    border: 1px solid #000000;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .controlButton {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #000000;
+  }
+} 

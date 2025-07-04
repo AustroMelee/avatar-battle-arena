@@ -7,6 +7,7 @@ import { useBattleSimulator } from './features/battle-simulation/controllers/use
 import { Button } from './common/components/Button/Button';
 import { BattleScene } from './features/battle-simulation/components/BattleScene/BattleScene';
 import { LoggingDemo } from './features/battle-simulation/components/LoggingDemo/LoggingDemo';
+import { FinisherTest } from './features/battle-simulation/components/FinisherTest';
 
 /**
  * @description The root component that orchestrates the entire application state and renders feature modules.
@@ -17,11 +18,16 @@ function App() {
   const [player2, setPlayer2] = useState<Character | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
   
-  const { battleState, isSimulating, runSimulation, resetBattle } = useBattleSimulator();
+  const { 
+    battleState, 
+    isRunning, 
+    startBattle, 
+    resetBattle
+  } = useBattleSimulator();
 
   const handleSimulate = () => {
     if (player1 && player2 && location) {
-      runSimulation({ player1, player2, location });
+      startBattle({ player1, player2, location });
     }
   };
 
@@ -77,15 +83,20 @@ function App() {
               />
             </div>
             <div className={styles.simulateSection}>
-              <Button onClick={handleSimulate} disabled={!isSelectionComplete || isSimulating}>
-                {isSimulating ? 'Simulating...' : 'Simulate Battle'}
+              <Button onClick={handleSimulate} disabled={!isSelectionComplete || isRunning}>
+                {isRunning ? 'Simulating...' : 'Simulate Battle'}
               </Button>
             </div>
+            <FinisherTest />
           </>
         ) : (
           <>
-            <BattleScene state={battleState} onPlayerChange={handlePlayerChange} />
+            <BattleScene 
+              state={battleState} 
+              onPlayerChange={handlePlayerChange}
+            />
             <LoggingDemo battleState={battleState} />
+            <FinisherTest />
             <div className={styles.simulateSection}>
               {battleState.isFinished && (
                   <Button onClick={handleReset}>

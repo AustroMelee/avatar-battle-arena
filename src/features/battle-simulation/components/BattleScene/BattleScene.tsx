@@ -2,6 +2,7 @@
 import { BattleLog } from '@/features/battle-log/components/BattleLog';
 import { BattleState } from '../../types';
 import { VersusGrid } from '../VersusGrid/VersusGrid';
+import type { TriggeredNarrative } from '../../services/narrative/types';
 import styles from './BattleScene.module.css';
 
 /**
@@ -10,13 +11,18 @@ import styles from './BattleScene.module.css';
 export type BattleSceneProps = {
   state: BattleState;
   onPlayerChange?: (playerIndex: number) => void;
+  narratives?: TriggeredNarrative[];
+  onNarrativeComplete?: (narrativeId: string) => void;
 };
 
 /**
  * @description Renders the main battle screen with horizontal versus cards and the battle log.
  * @returns {JSX.Element} The battle scene UI.
  */
-export function BattleScene({ state, onPlayerChange }: BattleSceneProps) {
+export function BattleScene({ 
+  state, 
+  onPlayerChange
+}: BattleSceneProps) {
   const [player1, player2] = state.participants;
 
   const player1Props = {

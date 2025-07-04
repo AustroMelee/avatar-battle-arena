@@ -8,7 +8,28 @@ export type Ability = {
   description: string;
   cooldown?: number; // Number of turns required after use (optional)
   chiCost?: number; // Resource cost for future extensibility (optional)
+  maxUses?: number; // Maximum uses per battle (optional, e.g., 3 Lightning bolts)
   tags?: string[]; // For future categorization (e.g., 'piercing', 'defensive')
+  collateralRisk?: number; // 0 = safe, 1 = catastrophic
+  unlockCondition?: {
+    type: 'health';
+    threshold: number; // Health percentage (e.g., 20 for 20% health)
+  };
+  // New dramatic mechanics
+  critChance?: number; // e.g. 0.1 = 10% chance
+  critMultiplier?: number; // e.g. 3 = triple damage
+  isFinisher?: boolean;
+  oncePerBattle?: boolean;
+  finisherCondition?: {
+    type: 'hp_below' | 'phase';
+    percent?: number;
+    phase?: string;
+  };
+  desperationBuff?: {
+    hpThreshold: number; // percent, e.g. 25
+    damageBonus: number;
+    defensePenalty: number;
+  };
 };
 
 /**

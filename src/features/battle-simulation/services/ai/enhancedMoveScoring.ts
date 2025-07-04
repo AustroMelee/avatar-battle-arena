@@ -115,6 +115,16 @@ export function scoreMoveWithTactics(
     reasons.push('Penalty: Move on cooldown');
   }
   
+  // Uses remaining consideration
+  const usesLeft = self.usesLeft[move.name] ?? (move.maxUses || Infinity);
+  if (usesLeft <= 0) {
+    score -= 25;
+    reasons.push('Penalty: No uses remaining');
+  } else if (usesLeft === 1 && move.maxUses) {
+    score += 5; // Bonus for last use of limited move
+    reasons.push('Bonus: Last use of limited move');
+  }
+  
   // Chi cost consideration
   if (move.chiCost && move.chiCost > (self.resources.chi || 0)) {
     score -= 20;

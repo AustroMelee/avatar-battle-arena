@@ -1,161 +1,323 @@
 // CONTEXT: AI Ability Selection
 // RESPONSIBILITY: Choose abilities with comprehensive logging
 import { Ability } from '@/common/types';
-import { BattleCharacter, AILogEntry, PerceivedState, ConsideredAction, BattleLogEntry } from '../../types';
-import { assessMetaState } from './metaState';
-import { getAvailableMoves } from '../utils/moveUtils';
-import { scoreMoves } from './moveScoring';
-import { selectMove } from './moveSelection';
-import { buildMoveNarrative } from './narrative';
-import { chooseAbilityWithAdvancedAI, AdvancedAIState } from './advancedAIController';
-import { getPerceivedBattleState, getBattleTacticalContext } from './battleStateAwareness';
-import { selectBestTacticalMove } from './enhancedMoveScoring';
-import { createTacticalLogEntry } from './tacticalNarrative';
+import { BattleCharacter, AILogEntry, BattleLogEntry } from '../../types';
+import { shouldAvoidMove, getAntiPatternMoves, generatePatternNarrative } from './patternRecognition';
+
+
 
 /**
- * @description Creates a perceived state for AI decision making.
- * @param {BattleCharacter} self - The AI character making the decision.
- * @param {BattleCharacter} enemy - The enemy character.
- * @param {number} turn - Current turn number.
- * @returns {PerceivedState} The perceived state for AI analysis.
+ * @description Represents the result of AI ability selection with logging.
  */
-function createPerceivedState(self: BattleCharacter, enemy: BattleCharacter, turn: number): PerceivedState {
-  return {
-    self: {
-      health: self.currentHealth,
-      defense: self.currentDefense,
-      personality: self.personality,
-      abilities: self.abilities.map(ability => ({
-        id: ability.name.toLowerCase().replace(/\s+/g, '_'),
-        name: ability.name,
-        type: ability.type,
-        power: ability.power,
-        cooldown: ability.cooldown
-      })),
-      cooldowns: self.cooldowns,
-      lastMove: self.lastMove,
-      moveHistory: self.moveHistory,
-      activeBuffs: self.activeBuffs,
-      activeDebuffs: self.activeDebuffs,
-      resources: self.resources
-    },
-    enemy: {
-      health: enemy.currentHealth,
-      defense: enemy.currentDefense,
-      personality: enemy.personality,
-      name: enemy.name,
-      lastMove: enemy.lastMove,
-      moveHistory: enemy.moveHistory,
-      activeBuffs: enemy.activeBuffs,
-      activeDebuffs: enemy.activeDebuffs
-    },
-    round: turn,
-    cooldowns: {} // Legacy field - can be removed after migration
-  };
+export interface AIAbilityResult {
+  ability: Ability | null;
+  aiLog: AILogEntry;
 }
 
 /**
- * @description Chooses an ability for a character with comprehensive AI logging.
- * @param {BattleCharacter} character - The character choosing the ability.
+ * @description Chooses the best ability for the AI character with comprehensive logging.
+ * @param {BattleCharacter} character - The AI character.
  * @param {BattleCharacter} enemy - The enemy character.
- * @param {number} turn - Current turn number.
- * @param {BattleLogEntry[]} battleLog - The battle log entries.
- * @param {AdvancedAIState | null} previousState - The previous AI state (for intent continuity).
- * @returns {{ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState}} The chosen ability, AI log, and new state.
+ * @param {number} turn - The current turn number.
+ * @param {BattleLogEntry[]} battleLog - The battle log for context.
+ * @param {AdvancedAIState | null} previousState - The previous AI state.
+ * @returns {AIAbilityResult} The chosen ability and AI log entry.
  */
 export function chooseAbilityWithLogging(
-  character: BattleCharacter, 
-  enemy: BattleCharacter, 
+  character: BattleCharacter,
+  enemy: BattleCharacter,
   turn: number,
-  battleLog: BattleLogEntry[] = [],
-  previousState: AdvancedAIState | null = null
-): { ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState } {
-  // Get complete battle state awareness
-  const perceivedBattleState = getPerceivedBattleState(turn, character, enemy, battleLog);
-  const tacticalContext = getBattleTacticalContext(character, enemy, battleLog);
-  
-  // Use the enhanced tactical system for better decision making
-  const meta = assessMetaState(character, enemy, turn);
-  const availableAbilities = getAvailableMoves(character, meta);
-  
-  // Use enhanced tactical move selection
-  const tacticalResult = selectBestTacticalMove(availableAbilities, character, enemy);
-  
-  // Use the advanced AI system if we have battle log data (fallback)
-  if (battleLog.length > 0 && Math.random() < 0.3) { // 30% chance to use advanced AI
-    return chooseAbilityWithAdvancedAI(character, enemy, turn, battleLog, previousState);
+  battleLog: BattleLogEntry[]
+): AIAbilityResult {
+  // Get available abilities (not on cooldown, have chi, not overused)
+  const availableAbilities = character.abilities.filter(ability => {
+    // Check if we have enough chi
+    if ((character.resources.chi || 0) < (ability.chiCost || 0)) {
+      return false;
+    }
+    
+    // Check if ability is on cooldown
+    if (ability.cooldown && character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) {
+      return false;
+    }
+    
+    // Check if ability has uses left
+    if (ability.maxUses && (character.usesLeft[ability.name] || 0) <= 0) {
+      return false;
+    }
+    
+    // Check if we should avoid this move due to recent overuse
+    if (shouldAvoidMove(ability.name, character, battleLog)) {
+      return false;
+    }
+    
+    // Check finisher conditions
+    if (ability.isFinisher) {
+      // Check if already used this battle
+      if (ability.oncePerBattle && character.flags?.usedFinisher) {
+        return false;
+      }
+      
+      // Check finisher conditions
+      if (ability.finisherCondition) {
+        if (ability.finisherCondition.type === 'hp_below' && ability.finisherCondition.percent) {
+          const healthPercent = (character.currentHealth / 100) * 100; // TODO: Get max HP from character
+          if (healthPercent > ability.finisherCondition.percent) {
+            return false;
+          }
+        }
+        // TODO: Add other finisher condition checks
+      }
+    }
+    
+    // Check desperation move conditions
+    if (ability.desperationBuff) {
+      const healthPercent = (character.currentHealth / 100) * 100; // TODO: Get max HP from character
+      if (healthPercent > ability.desperationBuff.hpThreshold) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
+  if (availableAbilities.length === 0) {
+    // No abilities available - use fallback
+    const fallbackAbility = character.abilities.find(ability => 
+      ability.tags?.includes('fallback') && (character.resources.chi || 0) >= (ability.chiCost || 0)
+    );
+    
+    return {
+      ability: fallbackAbility || null,
+      aiLog: {
+        turn,
+        agent: character.name,
+        perceivedState: {
+          self: {
+            health: character.currentHealth,
+            defense: character.currentDefense,
+            personality: character.personality,
+            abilities: character.abilities.map(ability => ({
+              id: ability.name.toLowerCase().replace(/\s+/g, '_'),
+              name: ability.name,
+              type: ability.type,
+              power: ability.power,
+              cooldown: ability.cooldown
+            })),
+            cooldowns: character.cooldowns,
+            lastMove: character.lastMove,
+            moveHistory: character.moveHistory,
+            activeBuffs: character.activeBuffs,
+            activeDebuffs: character.activeDebuffs,
+            resources: character.resources
+          },
+          enemy: {
+            health: enemy.currentHealth,
+            defense: enemy.currentDefense,
+            personality: enemy.personality,
+            name: enemy.name,
+            lastMove: enemy.lastMove,
+            moveHistory: enemy.moveHistory,
+            activeBuffs: enemy.activeBuffs,
+            activeDebuffs: enemy.activeDebuffs
+          },
+          round: turn,
+          cooldowns: {}
+        },
+        consideredActions: [],
+        chosenAction: fallbackAbility?.name || 'No moves available',
+        reasoning: 'No abilities available - using fallback move',
+        narrative: `${character.name} has no viable moves and resorts to a basic action.`,
+        timestamp: Date.now()
+      }
+    };
   }
+
+  // Get anti-pattern moves based on opponent's recent behavior
+  const antiPatternMoves = getAntiPatternMoves(character, enemy, battleLog);
   
-  // Use enhanced tactical system as primary
-  const selected = {
-    move: tacticalResult.chosenAbility,
-    reasons: tacticalResult.reasons,
-    score: tacticalResult.score
+  // Score each available ability
+  const scoredAbilities = availableAbilities.map(ability => {
+    let score = 0;
+    const reasons: string[] = [];
+    
+    // Base score from ability power
+    score += ability.power * 2;
+    reasons.push(`Base power: ${ability.power}`);
+    
+    // Bonus for anti-pattern moves
+    if (antiPatternMoves.includes(ability.name)) {
+      score += 50;
+      reasons.push('Anti-pattern counter');
+    }
+    
+    // Health-based scoring
+    if (character.currentHealth < 30) {
+      // Low health - prioritize defense and healing
+      if (ability.type === 'defense_buff') {
+        score += 40;
+        reasons.push('Low health - defensive priority');
+      }
+      if (ability.tags?.includes('healing')) {
+        score += 60;
+        reasons.push('Low health - healing priority');
+      }
+      if (ability.tags?.includes('desperation')) {
+        score += 80;
+        reasons.push('Low health - desperation move');
+      }
+    } else if (character.currentHealth < 60) {
+      // Medium health - balanced approach
+      if (ability.type === 'attack') {
+        score += 20;
+        reasons.push('Medium health - offensive option');
+      }
+      if (ability.type === 'defense_buff') {
+        score += 15;
+        reasons.push('Medium health - defensive option');
+      }
+    } else {
+      // High health - aggressive approach
+      if (ability.type === 'attack') {
+        score += 30;
+        reasons.push('High health - aggressive approach');
+      }
+    }
+    
+    // Enemy health-based scoring
+    if (enemy.currentHealth < 20) {
+      // Enemy is low - finish them off
+      if (ability.type === 'attack' && ability.power > 15) {
+        score += 40;
+        reasons.push('Enemy low health - finishing move');
+      }
+    } else if (enemy.currentHealth < 50) {
+      // Enemy is wounded - apply pressure
+      if (ability.type === 'attack') {
+        score += 20;
+        reasons.push('Enemy wounded - applying pressure');
+      }
+    }
+    
+    // Chi management
+    if ((character.resources.chi || 0) < 5) {
+      // Low chi - prefer low-cost moves
+      if ((ability.chiCost || 0) <= 2) {
+        score += 30;
+        reasons.push('Low chi - conserving energy');
+      }
+    } else if ((character.resources.chi || 0) > 8) {
+      // High chi - can afford expensive moves
+      if (ability.power > 20) {
+        score += 25;
+        reasons.push('High chi - using powerful moves');
+      }
+    }
+    
+    // Special move bonuses
+    if (ability.tags?.includes('piercing')) {
+      score += 15;
+      reasons.push('Piercing attack');
+    }
+    if (ability.tags?.includes('high-damage')) {
+      score += 20;
+      reasons.push('High damage potential');
+    }
+    if (ability.tags?.includes('rest')) {
+      score += 10;
+      reasons.push('Rest/recovery move');
+    }
+    
+    // Desperation move bonuses (when health is very low)
+    if (ability.desperationBuff && character.currentHealth < 25) {
+      score += 100;
+      reasons.push('Critical health - desperation move');
+    }
+    
+    // Finisher move bonuses (when conditions are met)
+    if (ability.isFinisher && !character.flags?.usedFinisher) {
+      if (ability.finisherCondition?.type === 'hp_below' && ability.finisherCondition.percent) {
+        const healthPercent = (character.currentHealth / 100) * 100;
+        if (healthPercent <= ability.finisherCondition.percent) {
+          score += 120;
+          reasons.push('Finisher conditions met - devastating move');
+        }
+      }
+    }
+    
+    // Critical hit potential
+    if (ability.critChance && ability.critMultiplier) {
+      const expectedDamage = ability.power * (1 + (ability.critChance * (ability.critMultiplier - 1)));
+      score += expectedDamage * 0.5;
+      reasons.push(`Critical potential: ${(ability.critChance * 100).toFixed(0)}% chance for ${ability.critMultiplier}x damage`);
+    }
+    
+    return {
+      move: ability.name,
+      score,
+      reason: reasons.join(', ')
+    };
+  });
+
+  // Sort by score and choose the best
+  scoredAbilities.sort((a, b) => b.score - a.score);
+  const bestAbility = availableAbilities.find(ability => ability.name === scoredAbilities[0].move)!;
+  
+  // Generate narrative based on pattern recognition
+  const patternNarrative = generatePatternNarrative(character, {
+    detectedPatterns: [],
+    recommendedCounters: antiPatternMoves,
+    antiSpamMoves: antiPatternMoves,
+    patternStrength: antiPatternMoves.length > 0 ? 'medium' : 'weak'
+  });
+
+  return {
+    ability: bestAbility,
+          aiLog: {
+        turn,
+        agent: character.name,
+        perceivedState: {
+          self: {
+            health: character.currentHealth,
+            defense: character.currentDefense,
+            personality: character.personality,
+            abilities: character.abilities.map(ability => ({
+              id: ability.name.toLowerCase().replace(/\s+/g, '_'),
+              name: ability.name,
+              type: ability.type,
+              power: ability.power,
+              cooldown: ability.cooldown
+            })),
+            cooldowns: character.cooldowns,
+            lastMove: character.lastMove,
+            moveHistory: character.moveHistory,
+            activeBuffs: character.activeBuffs,
+            activeDebuffs: character.activeDebuffs,
+            resources: character.resources
+          },
+          enemy: {
+            health: enemy.currentHealth,
+            defense: enemy.currentDefense,
+            personality: enemy.personality,
+            name: enemy.name,
+            lastMove: enemy.lastMove,
+            moveHistory: enemy.moveHistory,
+            activeBuffs: enemy.activeBuffs,
+            activeDebuffs: enemy.activeDebuffs
+          },
+          round: turn,
+          cooldowns: {}
+        },
+        consideredActions: scoredAbilities.slice(0, 3).map(action => ({
+          abilityId: action.move.toLowerCase().replace(/\s+/g, '_'),
+          move: action.move,
+          score: action.score,
+          reason: action.reason
+        })),
+        chosenAction: bestAbility.name,
+        reasoning: scoredAbilities[0].reason,
+        narrative: patternNarrative,
+        timestamp: Date.now()
+      }
   };
-  
-  // 5. Build AI log with enhanced battle state awareness
-  const perceivedState = createPerceivedState(character, enemy, turn);
-  const consideredActions: ConsideredAction[] = [{
-    move: selected.move.name,
-    score: Math.round(selected.score * 100) / 100,
-    reason: selected.reasons.join(' - '),
-    abilityId: selected.move.name.toLowerCase().replace(/\s+/g, '_')
-  }];
-  
-  const aiLog: AILogEntry = {
-    turn,
-    agent: character.name,
-    perceivedState,
-    consideredActions,
-    chosenAction: selected.move.name,
-    reasoning: selected.reasons.join(' - '),
-    narrative: `${character.name} uses ${selected.move.name} - ${tacticalResult.tacticalExplanation}`,
-    timestamp: Date.now()
-  };
-  
-  // Create enhanced AI state with battle awareness
-  const newState: AdvancedAIState = {
-    context: {
-      myHealth: tacticalContext.myHealth,
-      myDefense: tacticalContext.myDefense,
-      myChi: tacticalContext.myChi,
-      enemyHealth: tacticalContext.enemyHealth,
-      enemyDefense: tacticalContext.enemyDefense,
-      enemyChi: tacticalContext.enemyChi,
-      lastMyMove: tacticalContext.lastMyMove,
-      lastEnemyMove: tacticalContext.lastEnemyMove,
-      enemyDefenseStreak: tacticalContext.enemyDefenseStreak,
-      myAttackStreak: tacticalContext.myAttackStreak,
-      isLosing: tacticalContext.isLosing,
-      isDominating: tacticalContext.isDominating,
-      enemyIsTurtling: tacticalContext.enemyIsTurtling,
-      enemyVulnerable: tacticalContext.enemyVulnerable,
-      hasMomentum: tacticalContext.hasMomentum,
-      burstAvailable: tacticalContext.burstAvailable,
-      enemyBurstThreat: tacticalContext.enemyBurstThreat,
-      chiPressure: tacticalContext.chiPressure,
-      healthPressure: tacticalContext.healthPressure,
-      enemyPattern: tacticalContext.enemyPattern,
-      myPattern: tacticalContext.myPattern,
-      turnCount: tacticalContext.turnCount,
-      isEarlyGame: tacticalContext.isEarlyGame,
-      isMidGame: tacticalContext.isMidGame,
-      isLateGame: tacticalContext.isLateGame,
-      myRecentDamage: tacticalContext.myRecentDamage,
-      enemyRecentDamage: tacticalContext.enemyRecentDamage,
-      damageRatio: tacticalContext.damageRatio,
-      myCooldownPressure: tacticalContext.myCooldownPressure,
-      enemyCooldownPressure: tacticalContext.enemyCooldownPressure
-    },
-    intent: {
-      type: 'standard_attack',
-      description: 'Legacy fallback - standard attacks',
-      priority: 3,
-      expectedDuration: 1
-    },
-    intentTurnCount: 1,
-    lastIntentChange: turn
-  };
-  
-  return { ability: selected.move, aiLog, newState };
 } 

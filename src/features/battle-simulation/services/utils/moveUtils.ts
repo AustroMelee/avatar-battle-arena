@@ -18,6 +18,12 @@ export function getAvailableMoves(character: BattleCharacter, meta: MetaState): 
       return false; // Ability is on cooldown
     }
     
+    // Check uses remaining
+    const usesLeft = character.usesLeft[ability.name] ?? (ability.maxUses || Infinity);
+    if (usesLeft <= 0) {
+      return false; // No uses remaining
+    }
+    
     // Check resource cost
     const chiCost = ability.chiCost || 0;
     if (character.resources.chi < chiCost) return false;

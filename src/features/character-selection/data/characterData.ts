@@ -13,59 +13,106 @@ export const availableCharacters: Character[] = [
     image: '/assets/aang.jpg',
     bending: 'air',
     stats: {
-      power: 70,
-      agility: 98,
-      defense: 15,
-      intelligence: 80,
+      power: 85,
+      agility: 95,
+      defense: 70,
+      intelligence: 90
     },
     abilities: [
-      { 
-        name: 'Wind Gust', 
-        type: 'attack', 
-        power: 8, 
-        description: 'A light, fast attack.',
-        cooldown: 0, // No cooldown - can use every turn
-        chiCost: 1, // Low cost for basic attack
-        tags: ['quick']
+      {
+        name: 'Basic Strike',
+        type: 'attack',
+        power: 1,
+        description: 'Aang delivers a quick, focused physical blow',
+        chiCost: 0,
+        cooldown: 0,
+        maxUses: 5,
+        tags: ['basic'],
+        critChance: 0.12,
+        critMultiplier: 3
       },
-      { 
-        name: 'Air Shield', 
-        type: 'defense_buff', 
-        power: 15, 
-        description: 'Increases defense for one turn.',
-        cooldown: 2, // 2-turn cooldown
-        chiCost: 3, // Moderate cost for defensive ability
+      {
+        name: 'Air Blast',
+        type: 'attack',
+        power: 2,
+        description: 'A powerful blast of compressed air',
+        chiCost: 4,
+        cooldown: 2,
+        maxUses: 5,
+        tags: ['piercing'],
+        critChance: 0.15,
+        critMultiplier: 2.5
+      },
+      {
+        name: 'Wind Slice',
+        type: 'attack',
+        power: 4,
+        description: 'A sharp blade of wind that cuts through defenses',
+        chiCost: 6,
+        cooldown: 3,
+        maxUses: 4,
+        tags: ['piercing', 'high-damage'],
+        critChance: 0.18,
+        critMultiplier: 2.5
+      },
+      {
+        name: 'Air Shield',
+        type: 'defense_buff',
+        power: 15,
+        description: 'Creates a protective barrier of swirling air',
+        chiCost: 3,
+        cooldown: 4,
+        maxUses: 3,
         tags: ['defensive']
       },
-      { 
-        name: 'Air Blast', 
-        type: 'attack', 
-        power: 18, 
-        description: 'A powerful blast of focused air.',
-        cooldown: 3, // 3-turn cooldown
-        chiCost: 4, // Higher cost for powerful attack
-        tags: ['piercing']
+      {
+        name: 'Focus',
+        type: 'defense_buff',
+        power: 5,
+        description: 'Takes a moment to focus and recover chi',
+        chiCost: 0,
+        cooldown: 0,
+        tags: ['rest', 'fallback', 'climax']
       },
-      { 
-        name: 'Wind Slice', 
-        type: 'attack', 
-        power: 25, 
-        description: 'A devastating cutting wind that ignores defense.',
-        cooldown: 4, // 4-turn cooldown
-        chiCost: 6, // High cost for devastating attack
-        tags: ['piercing', 'high-damage']
+      // Desperation moves that unlock at low health
+      {
+        name: 'Air Tornado',
+        type: 'attack',
+        power: 3,
+        description: 'Aang summons a swirling tornado of air to batter his foe',
+        chiCost: 7,
+        cooldown: 3,
+        tags: ['desperation', 'area'],
+        critChance: 0.18,
+        critMultiplier: 2.5,
+        desperationBuff: { hpThreshold: 25, damageBonus: 2, defensePenalty: 5 },
+        unlockCondition: {
+          type: 'health',
+          threshold: 25
+        }
       },
-      { 
-        name: 'Last Stand', 
-        type: 'defense_buff', 
-        power: 30, 
-        description: 'Desperate defense that doubles when health is low.',
-        cooldown: 5, // 5-turn cooldown
-        chiCost: 5, // High cost for emergency defense
-        tags: ['defensive', 'desperate']
-      },
+      {
+        name: 'Last Breath Cyclone',
+        type: 'attack',
+        power: 12,
+        description: 'Aang channels every last ounce of strength into a world-shaking cyclone',
+        chiCost: 10,
+        cooldown: 0,
+        maxUses: 1,
+        tags: ['finisher', 'desperation', 'high-damage'],
+        isFinisher: true,
+        oncePerBattle: true,
+        finisherCondition: {
+          type: 'hp_below',
+          percent: 20
+        },
+        unlockCondition: {
+          type: 'health',
+          threshold: 20
+        }
+      }
     ],
-    personality: 'defensive',
+    personality: 'balanced'
   },
   {
     id: 'azula',
@@ -73,59 +120,101 @@ export const availableCharacters: Character[] = [
     image: '/assets/azula.jpg',
     bending: 'fire',
     stats: {
-      power: 95,
-      agility: 95,
-      defense: 12,
-      intelligence: 100,
+      power: 90,
+      agility: 85,
+      defense: 75,
+      intelligence: 95
     },
     abilities: [
-      { 
-        name: 'Blue Fire', 
-        type: 'attack', 
-        power: 12, 
-        description: 'A precise and powerful fire jab.',
-        cooldown: 0, // No cooldown - can use every turn
-        chiCost: 2, // Moderate cost for basic attack
-        tags: ['precise']
+      {
+        name: 'Basic Strike',
+        type: 'attack',
+        power: 1,
+        description: 'Azula delivers a focused physical strike',
+        chiCost: 0,
+        cooldown: 0,
+        tags: ['basic'],
+        critChance: 0.10,
+        critMultiplier: 3
       },
-      { 
-        name: 'Lightning', 
-        type: 'attack', 
-        power: 28, 
-        description: 'A devastating, high-risk attack.',
-        cooldown: 4, // 4-turn cooldown
-        chiCost: 6, // High cost for devastating attack
-        tags: ['piercing', 'high-damage']
+      {
+        name: 'Blue Fire',
+        type: 'attack',
+        power: 3,
+        description: 'Intense blue flames that burn hotter than normal fire',
+        chiCost: 2,
+        cooldown: 1,
+        tags: ['piercing'],
+        critChance: 0.16,
+        critMultiplier: 2.8
       },
-      { 
-        name: 'Fire Jets', 
-        type: 'defense_buff', 
-        power: 12, 
-        description: 'Uses fire jets to increase agility and defense.',
-        cooldown: 2, // 2-turn cooldown
-        chiCost: 3, // Moderate cost for defensive ability
+      {
+        name: 'Fire Jets',
+        type: 'defense_buff',
+        power: 12,
+        description: 'Uses fire propulsion to enhance mobility and defense',
+        chiCost: 3,
+        cooldown: 1,
         tags: ['defensive']
       },
-      { 
-        name: 'Firebomb', 
-        type: 'attack', 
-        power: 22, 
-        description: 'An explosive attack that ignores defense.',
-        cooldown: 3, // 3-turn cooldown
-        chiCost: 5, // High cost for powerful attack
-        tags: ['piercing', 'explosive']
+      {
+        name: 'Phoenix Recovery',
+        type: 'defense_buff',
+        power: 25,
+        description: 'Channels fire energy to heal and strengthen',
+        chiCost: 7,
+        cooldown: 3,
+        tags: ['healing', 'defensive']
       },
-      { 
-        name: 'Phoenix Recovery', 
-        type: 'defense_buff', 
-        power: 25, 
-        description: 'Desperate recovery that heals when health is low.',
-        cooldown: 5, // 5-turn cooldown
-        chiCost: 7, // Very high cost for emergency recovery
-        tags: ['defensive', 'healing', 'desperate']
+      {
+        name: 'Focus',
+        type: 'defense_buff',
+        power: 5,
+        description: 'Takes a moment to focus and recover chi',
+        chiCost: 0,
+        cooldown: 0,
+        tags: ['rest', 'fallback', 'climax']
       },
+      // Desperation moves that unlock at low health
+      {
+        name: 'Lightning Storm',
+        type: 'attack',
+        power: 5,
+        description: 'Channels lightning for a powerful attack',
+        chiCost: 7,
+        cooldown: 6,
+        maxUses: 2,
+        tags: ['desperation', 'lightning'],
+        critChance: 0.20,
+        critMultiplier: 3.0,
+        desperationBuff: { hpThreshold: 25, damageBonus: 3, defensePenalty: 8 },
+        unlockCondition: {
+          type: 'health',
+          threshold: 25
+        }
+      },
+      {
+        name: 'Phoenix Inferno',
+        type: 'attack',
+        power: 15,
+        description: 'Azula channels all remaining energy into a devastating final attack',
+        chiCost: 12,
+        cooldown: 0,
+        maxUses: 1,
+        tags: ['finisher', 'desperation', 'high-damage', 'piercing'],
+        isFinisher: true,
+        oncePerBattle: true,
+        finisherCondition: {
+          type: 'hp_below',
+          percent: 20
+        },
+        unlockCondition: {
+          type: 'health',
+          threshold: 20
+        }
+      }
     ],
-    personality: 'aggressive',
+    personality: 'aggressive'
   },
   // FIXME: Add more characters like Zuko, Katara, Toph, etc. here
   // TEMP: Sokka (non-bender) could be added with 'none' as bending type later

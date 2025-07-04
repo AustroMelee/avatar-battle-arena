@@ -4,6 +4,9 @@ import { Ability } from '@/common/types';
 import { BattleCharacter } from '../../types';
 import { BattleTacticalContext } from './battleStateAwareness';
 import { Intent } from './intentSystem';
+import { scoreAttackMove, getAttackMoveScoringReasons, getAttackMoveContextFactors } from './attackMoveScoring.service';
+import { scoreDefenseMove, getDefenseMoveScoringReasons, getDefenseMoveContextFactors } from './defenseMoveScoring.service';
+import { calculateIntentAlignment } from './intentAlignment.service';
 
 /**
  * @description Enhanced move score with detailed reasoning.
@@ -39,9 +42,13 @@ export function scoreMoveWithContext(
 
   // Base scoring by move type
   if (move.type === 'attack') {
-    score += scoreAttackMove(move, enemy, context, intent, reasons, contextFactors);
+    score += scoreAttackMove(move, enemy, context, intent);
+    reasons.push(...getAttackMoveScoringReasons(move, enemy, context, intent));
+    contextFactors.push(...getAttackMoveContextFactors(move, context));
   } else if (move.type === 'defense_buff') {
-    score += scoreDefenseMove(move, context, intent, reasons, contextFactors);
+    score += scoreDefenseMove(move, context, intent);
+    reasons.push(...getDefenseMoveScoringReasons(move, intent));
+    contextFactors.push(...getDefenseMoveContextFactors(move, context));
   }
 
   // Resource cost penalties
@@ -79,273 +86,9 @@ export function scoreMoveWithContext(
   };
 }
 
-/**
- * @description Scores an attack move based on context and intent.
- */
-function scoreAttackMove(
-  move: Ability,
-  enemy: BattleCharacter,
-  context: BattleTacticalContext,
-  intent: Intent,
-  reasons: string[],
-  contextFactors: string[]
-): number {
-  let score = 0;
-  
-  // Base damage calculation
-  const netDamage = Math.max(1, move.power - (enemy.currentDefense || 0));
-  const damageRatio = netDamage / Math.max(1, enemy.currentHealth);
-  
-  score += netDamage * 0.8; // Base damage value
-  reasons.push(`Base attack (${netDamage} damage)`);
-  
-  // Intent-specific scoring
-  switch (intent.type) {
-    case 'go_for_finish':
-      if (move.power > 40) {
-        score += 15;
-        reasons.push('High power for finishing blow');
-      }
-      if (context.enemyVulnerable) {
-        score += 8;
-        reasons.push('Enemy vulnerable - perfect for finish');
-      }
-      break;
-      
-    case 'break_defense':
-      if (move.tags?.includes('piercing')) {
-        score += 12;
-        reasons.push('Piercing move for defense breaking');
-      }
-      if (move.power > 30) {
-        score += 6;
-        reasons.push('High power for defense breaking');
-      }
-      break;
-      
-    case 'pressure_enemy':
-      score += netDamage * 0.5;
-      reasons.push('Pressure enemy with damage');
-      break;
-      
-    case 'build_momentum':
-      if (context.hasMomentum) {
-        score += 5;
-        reasons.push('Build on existing momentum');
-      }
-      break;
-      
-    case 'desperate_attack':
-      score += move.power * 0.3; // Prioritize raw power
-      reasons.push('Desperate situation - maximize damage');
-      break;
-      
-    case 'counter_attack':
-      if (context.enemyPattern === 'aggressive') {
-        score += 4;
-        reasons.push('Counter aggressive enemy');
-      }
-      break;
-  }
-  
-  // Context-specific bonuses
-  if (context.enemyVulnerable) {
-    score += 12;
-    contextFactors.push('Enemy vulnerable');
-  }
-  
-  if (context.enemyDefenseStreak >= 3) {
-    score += 8;
-    contextFactors.push('Enemy turtling');
-  }
-  
-  if (context.hasMomentum) {
-    score += 5;
-    contextFactors.push('We have momentum');
-  }
-  
-  if (context.isLateGame && damageRatio > 0.3) {
-    score += 8;
-    contextFactors.push('Late game high damage');
-  }
-  
-  // Desperate move bonuses
-  if (context.healthPressure && move.tags?.includes('desperate')) {
-    score += 15;
-    contextFactors.push('Desperate situation - use desperate move');
-  }
-  
-  // High damage move bonuses when enemy is weak
-  if (context.enemyHealth < 30 && move.tags?.includes('high-damage')) {
-    score += 12;
-    contextFactors.push('Enemy is weak - finish them');
-  }
-  
-  // Piercing move bonuses when enemy has high defense
-  if (context.enemyDefense > 15 && move.tags?.includes('piercing')) {
-    score += 10;
-    contextFactors.push('Enemy has high defense - use piercing');
-  }
-  
-  // Chi pressure penalties for expensive attacks
-  if (context.chiPressure && (move.chiCost || 0) > 3) {
-    score -= 8;
-    contextFactors.push('Chi pressure - avoid expensive attacks');
-  }
-  
-  return score;
-}
 
-/**
- * @description Scores a defense move based on context and intent.
- */
-function scoreDefenseMove(
-  move: Ability,
-  context: BattleTacticalContext,
-  intent: Intent,
-  reasons: string[],
-  contextFactors: string[]
-): number {
-  let score = 0;
-  
-  // Base defense value
-  score += move.power * 0.6;
-  reasons.push(`Base defense buff (${move.power} defense)`);
-  
-  // Intent-specific scoring
-  switch (intent.type) {
-    case 'defend':
-      score += 12;
-      reasons.push('Defensive intent - prioritize defense');
-      break;
-      
-    case 'stall':
-      score += 8;
-      reasons.push('Stalling - build defense');
-      break;
-      
-    case 'restore_chi':
-      if ((move.chiCost || 0) === 0) {
-        score += 6;
-        reasons.push('Free defense while restoring chi');
-      }
-      break;
-      
-    case 'conservative_play':
-      score += 4;
-      reasons.push('Conservative play - build defense');
-      break;
-  }
-  
-  // Context-specific bonuses
-  if (context.healthPressure) {
-    score += 15;
-    contextFactors.push('Low health - need defense');
-  }
-  
-  if (context.enemyBurstThreat) {
-    score += 12;
-    contextFactors.push('Enemy has burst threat');
-  }
-  
-  if (context.myDefense < 15) {
-    score += 8;
-    contextFactors.push('Low current defense');
-  }
-  
-  if (context.enemyPattern === 'aggressive') {
-    score += 6;
-    contextFactors.push('Enemy is aggressive');
-  }
-  
-  // Desperate defense bonuses
-  if (context.healthPressure && move.tags?.includes('desperate')) {
-    score += 20;
-    contextFactors.push('Desperate situation - use desperate defense');
-  }
-  
-  // Healing move bonuses
-  if (context.healthPressure && move.tags?.includes('healing')) {
-    score += 18;
-    contextFactors.push('Low health - need healing');
-  }
-  
-  // Chi pressure bonuses for free moves
-  if (context.chiPressure && (move.chiCost || 0) === 0) {
-    score += 15;
-    contextFactors.push('Chi pressure - use free defense');
-  }
-  
-  // Chi pressure penalties for expensive moves
-  if (context.chiPressure && (move.chiCost || 0) > 3) {
-    score -= 10;
-    contextFactors.push('Chi pressure - avoid expensive moves');
-  }
-  
-  return score;
-}
 
-/**
- * @description Calculates how well a move aligns with the current intent.
- */
-function calculateIntentAlignment(move: Ability, intent: Intent): number {
-  let alignment = 0;
-  
-  switch (intent.type) {
-    case 'defend':
-      if (move.type === 'defense_buff') alignment += 8;
-      if (move.type === 'attack') alignment -= 3;
-      break;
-      
-    case 'restore_chi':
-      if ((move.chiCost || 0) === 0) alignment += 6;
-      if ((move.chiCost || 0) > 2) alignment -= 4;
-      break;
-      
-    case 'go_for_finish':
-      if (move.type === 'attack' && move.power > 40) alignment += 8;
-      if (move.type === 'defense_buff') alignment -= 5;
-      break;
-      
-    case 'break_defense':
-      if (move.tags?.includes('piercing')) alignment += 8;
-      if (move.type === 'attack' && move.power > 30) alignment += 4;
-      break;
-      
-    case 'pressure_enemy':
-      if (move.type === 'attack') alignment += 6;
-      if (move.type === 'defense_buff') alignment -= 2;
-      break;
-      
-    case 'build_momentum':
-      if (move.type === 'attack') alignment += 5;
-      break;
-      
-    case 'desperate_attack':
-      if (move.type === 'attack' && move.power > 30) alignment += 7;
-      if (move.type === 'defense_buff') alignment -= 6;
-      break;
-      
-    case 'counter_attack':
-      if (move.type === 'attack') alignment += 4;
-      break;
-      
-    case 'stall':
-      if (move.type === 'defense_buff') alignment += 6;
-      if (move.type === 'attack') alignment -= 2;
-      break;
-      
-    case 'conservative_play':
-      if (move.type === 'defense_buff') alignment += 4;
-      if (move.type === 'attack' && move.power > 40) alignment -= 3;
-      break;
-      
-    default:
-      alignment = 3; // Neutral alignment for standard attacks
-  }
-  
-  return Math.max(0, Math.min(10, alignment));
-}
+
 
 /**
  * @description Calculates context-specific bonuses for a move.

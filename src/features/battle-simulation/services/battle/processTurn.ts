@@ -3,8 +3,27 @@
 
 import { BattleState, BattleLogEntry } from '../../types';
 import { getActiveParticipants, cloneBattleState, declareWinner } from './state';
-import { chooseAbilityWithLogging } from '../ai/chooseAbility';
+import { chooseAbilityWithLogging, AIAbilityResult } from '../ai/chooseAbility';
 import { processBuffsAndDebuffs, reduceCooldowns, recoverChi } from '../effects/buffs';
+import { createEventId } from '../ai/logQueries';
+import { defaultNarrativeService } from '../narrative';
+import { validateBattleState, forceBattleClimax } from './battleValidation';
+import { generateAndFormatBattleAnalytics } from './battleAnalytics.service';
+import { executeMove } from './moveExecution.service';
+import { 
+  calculateDesperationState, 
+  shouldTriggerDesperation, 
+  createDesperationLogEntry,
+  applyDesperationModifiers 
+} from './desperationSystem.service';
+import { 
+  getAvailableFinisher, 
+  executeFinisherMove 
+} from './finisherSystem.service';
+
+
+
+
 
 /**
  * @description Processes a single turn of the battle with comprehensive logging.
@@ -15,144 +34,198 @@ export function processTurn(currentState: BattleState): BattleState {
   const newState = cloneBattleState(currentState);
   const { attacker, target, attackerIndex, targetIndex } = getActiveParticipants(newState);
 
-  // Get AI decision with enhanced tactical awareness
-  const { ability: chosenAbility, aiLog } = chooseAbilityWithLogging(
-    attacker, 
-    target, 
-    newState.turn, 
-    newState.battleLog, // Pass the current battle log for state awareness
-    null // No previous AI state for now
-  );
-  
-  // Add AI log entry
-  newState.aiLog.push(aiLog);
-  
-  // Reset temporary buffs from previous turn
-  newState.participants[attackerIndex].currentDefense = attacker.stats.defense;
-  
-  // Also reset target's defense to base stats (defense buffs are temporary)
-  newState.participants[targetIndex].currentDefense = target.stats.defense;
-  
-  // Debug defense values
-  console.log(`[DEFENSE DEBUG] Turn ${newState.turn}: ${attacker.name} defense = ${newState.participants[attackerIndex].currentDefense}, ${target.name} defense = ${newState.participants[targetIndex].currentDefense}`);
+  // Validate battle state and check for forced endings
+  const validation = validateBattleState(newState);
+  if (validation.shouldForceEnd) {
+    if (validation.logEntry) {
+      newState.battleLog.push(validation.logEntry);
+      if (validation.logEntry.narrative) {
+        newState.log.push(validation.logEntry.narrative);
+      }
+    }
+    
+    if (validation.endReason === 'stalemate') {
+      // Force a climactic ending instead of a simple draw
+      const climaxState = forceBattleClimax(newState);
+      const analytics = generateAndFormatBattleAnalytics(climaxState);
+      climaxState.log.push(analytics);
+      return climaxState;
+    } else if (validation.endReason === 'victory') {
+      // Handle victory
+      const winnerIndex = newState.participants[0].currentHealth <= 0 ? 1 : 0;
+      const victoryState = declareWinner(newState, newState.participants[winnerIndex]);
+      const analytics = generateAndFormatBattleAnalytics(victoryState);
+      victoryState.log.push(analytics);
+      return victoryState;
+    }
+    
+    // Default to ending the battle
+    newState.isFinished = true;
+    const analytics = generateAndFormatBattleAnalytics(newState);
+    newState.log.push(analytics);
+    return newState;
+  }
 
-  // Create enhanced battle log entry with tactical context
-  const battleLogEntry: BattleLogEntry = {
-    turn: newState.turn,
-    actor: attacker.name,
-    action: chosenAbility.name,
-    target: target.name,
-    abilityType: chosenAbility.type,
-    result: '', // Will be set in switch statement
-    timestamp: Date.now()
-  };
+  // Check for desperation state changes and trigger dramatic events
+  const currentDesperationState = calculateDesperationState(attacker, newState);
+  const previousDesperationState = attacker.flags?.desperationState ? 
+    JSON.parse(attacker.flags.desperationState) : null;
+  
+  if (shouldTriggerDesperation(attacker, newState, previousDesperationState)) {
+    const desperationLogEntry = createDesperationLogEntry(attacker, currentDesperationState, newState.turn);
+    newState.battleLog.push(desperationLogEntry);
+    newState.log.push(desperationLogEntry.narrative || desperationLogEntry.result);
+    
+    // Store desperation state in character flags
+    newState.participants[attackerIndex].flags = {
+      ...newState.participants[attackerIndex].flags,
+      desperationState: JSON.stringify(currentDesperationState)
+    };
+  }
+  
+  // Apply desperation modifiers to attacker
+  const modifiedAttacker = applyDesperationModifiers(attacker, currentDesperationState);
+  newState.participants[attackerIndex] = modifiedAttacker;
+  
+  // Check for finisher moves first (highest priority)
+  const availableFinisher = getAvailableFinisher(attacker, target, newState);
+  let aiResult: AIAbilityResult | null = null;
+  let moveDamage = 0;
+  let moveResult = '';
+  let finisherLogEntry: BattleLogEntry | undefined;
+  
+  if (availableFinisher) {
+    // Execute finisher move with dramatic consequences
+    finisherLogEntry = executeFinisherMove(availableFinisher, attacker, target, newState, targetIndex);
+    newState.battleLog.push(finisherLogEntry);
+    newState.log.push(finisherLogEntry.narrative || finisherLogEntry.result);
+    
+    // Check for winner after finisher
+    if (newState.participants[targetIndex].currentHealth <= 0) {
+      return declareWinner(newState, newState.participants[attackerIndex]);
+    }
+    
+    // Continue with end-of-turn processing
+  } else {
+    // Normal AI move selection (existing code)
+    aiResult = chooseAbilityWithLogging(
+      attacker,
+      target,
+      newState.turn,
+      newState.battleLog
+    );
 
-  // Apply the chosen ability
-  switch (chosenAbility.type) {
-    case 'attack': {
-      let damage = chosenAbility.power;
+    if (aiResult.ability) {
+      const chosenAbility = aiResult.ability;
+      const aiLog = aiResult.aiLog;
+      newState.aiLog.push(aiLog);
+
+      // Execute the chosen ability using the move execution service
+      const executionResult = executeMove(chosenAbility, attacker, target, newState, attackerIndex, targetIndex);
       
-      // Piercing attacks ignore defense
-      if (chosenAbility.tags?.includes('piercing')) {
-        damage = Math.max(1, damage - Math.floor(target.currentDefense * 0.3)); // Only 30% defense reduction
-      } else {
-        damage = Math.max(1, damage - target.currentDefense);
+      // Update state with execution result
+      Object.assign(newState, executionResult.newState);
+      moveDamage = executionResult.damage;
+      moveResult = executionResult.result;
+      
+      // Add AI rule to the log entry
+      executionResult.logEntry.meta = {
+        ...executionResult.logEntry.meta,
+        aiRule: aiLog.reasoning || undefined
+      };
+      
+      newState.battleLog.push(executionResult.logEntry);
+      
+      // Update attacker's move history and last move
+      newState.participants[attackerIndex].lastMove = chosenAbility.name;
+      newState.participants[attackerIndex].moveHistory.push(chosenAbility.name);
+      
+      // Apply cooldown if the ability has one
+      if (chosenAbility.cooldown && chosenAbility.cooldown > 0) {
+        newState.participants[attackerIndex].cooldowns[chosenAbility.name] = chosenAbility.cooldown;
+        console.log(`Applied cooldown: ${chosenAbility.name} = ${chosenAbility.cooldown} turns`);
       }
       
-      // Desperate moves get bonus when health is low
-      if (chosenAbility.tags?.includes('desperate') && attacker.currentHealth < 30) {
-        damage = Math.floor(damage * 1.5);
+      // Decrement uses if the ability has a limit
+      if (chosenAbility.maxUses) {
+        const currentUses = newState.participants[attackerIndex].usesLeft[chosenAbility.name] ?? chosenAbility.maxUses;
+        newState.participants[attackerIndex].usesLeft[chosenAbility.name] = currentUses - 1;
       }
       
-      newState.participants[targetIndex].currentHealth = Math.max(0, target.currentHealth - damage);
-      
-      // Debug damage calculation
-      console.log(`[DAMAGE DEBUG] ${attacker.name} uses ${chosenAbility.name} (${chosenAbility.power} power) vs ${target.name} (${target.currentDefense} defense) = ${damage} damage`);
-      
-      battleLogEntry.result = `It hits ${target.name}, dealing ${damage} damage.`;
-      battleLogEntry.damage = damage;
-      
-      // Enhanced narrative based on battle state
-      if (chosenAbility.tags?.includes('piercing')) {
-        battleLogEntry.narrative = `${attacker.name} senses ${target.name}'s defensive stance and counters with ${chosenAbility.name}, piercing through their guard!`;
-      } else if (chosenAbility.tags?.includes('desperate') && attacker.currentHealth < 30) {
-        battleLogEntry.narrative = `${attacker.name} (${attacker.currentHealth} HP) desperately channels their remaining strength into ${chosenAbility.name}, striking ${target.name} with renewed fury!`;
-      } else if (target.currentHealth < 20) {
-        battleLogEntry.narrative = `${attacker.name} sees ${target.name} critically wounded (${target.currentHealth} HP) and presses the advantage with ${chosenAbility.name}!`;
-      } else if (chosenAbility.tags?.includes('high-damage')) {
-        battleLogEntry.narrative = `${attacker.name} unleashes a devastating ${chosenAbility.name}, aiming to finish the fight!`;
-      } else if (target.currentDefense > 20) {
-        battleLogEntry.narrative = `${attacker.name} sees ${target.name} heavily defended and tests their guard with ${chosenAbility.name}!`;
-      } else {
-        battleLogEntry.narrative = `${attacker.name} channels their power into ${chosenAbility.name}, the energy crackling as it strikes ${target.name}!`;
-      }
-      break;
-    }
-      
-    case 'defense_buff': {
-      let defenseBonus = chosenAbility.power;
-      
-      // Desperate defense moves get bonus when health is low
-      if (chosenAbility.tags?.includes('desperate') && attacker.currentHealth < 30) {
-        defenseBonus = Math.floor(defenseBonus * 1.5);
+      // Spend chi if the ability has a cost
+      if (chosenAbility.chiCost && chosenAbility.chiCost > 0) {
+        newState.participants[attackerIndex].resources.chi = Math.max(0, attacker.resources.chi - chosenAbility.chiCost);
       }
       
-      // Healing moves restore health when health is low
-      if (chosenAbility.tags?.includes('healing') && attacker.currentHealth < 40) {
-        const healAmount = Math.floor(defenseBonus * 0.8);
-        newState.participants[attackerIndex].currentHealth = Math.min(100, attacker.currentHealth + healAmount);
-        battleLogEntry.result = `${attacker.name}'s defense rises by ${defenseBonus} and recovers ${healAmount} health!`;
-      } else {
-        battleLogEntry.result = `${attacker.name}'s defense rises by ${defenseBonus}!`;
-      }
+      // Add to both legacy log and new structured log with AI rule explanation
+      const aiRuleExplanation = aiLog.reasoning ? ` (${aiLog.reasoning})` : '';
+      newState.log.push(`${attacker.name} uses ${chosenAbility.name}! ${moveResult}${aiRuleExplanation}`);
+    } else {
+      // No ability available - use fallback
+      const fallbackLogEntry: BattleLogEntry = {
+        id: createEventId(),
+        turn: newState.turn,
+        actor: attacker.name,
+        type: 'MOVE',
+        action: 'Basic Strike',
+        target: target.name,
+        abilityType: 'attack',
+        result: `It hits ${target.name}, dealing 1 damage.`,
+        damage: 1,
+        timestamp: Date.now(),
+        meta: {
+          resourceCost: 0,
+          aiRule: 'Fallback Move'
+        }
+      };
       
-      newState.participants[attackerIndex].currentDefense += defenseBonus;
-      
-      // Enhanced narrative based on battle state
-      if (chosenAbility.tags?.includes('desperate') && attacker.currentHealth < 30) {
-        battleLogEntry.narrative = `${attacker.name} (${attacker.currentHealth} HP) desperately activates ${chosenAbility.name}, their aura flaring with renewed strength!`;
-      } else if (chosenAbility.tags?.includes('healing') && attacker.currentHealth < 40) {
-        battleLogEntry.narrative = `${attacker.name} (${attacker.currentHealth} HP) channels healing energy through ${chosenAbility.name}, feeling their wounds begin to close!`;
-      } else if (attacker.currentHealth < 50) {
-        battleLogEntry.narrative = `${attacker.name} focuses inward, strengthening their defenses with ${chosenAbility.name} as they prepare for the next assault!`;
-      } else if ((attacker.resources.chi || 0) < 3) {
-        battleLogEntry.narrative = `${attacker.name} (${attacker.resources.chi} chi) conserves their dwindling energy with ${chosenAbility.name}!`;
-      } else if (attacker.currentDefense < attacker.stats.defense + 10) {
-        battleLogEntry.narrative = `${attacker.name} senses vulnerability and strengthens their defenses with ${chosenAbility.name}!`;
-      } else {
-        battleLogEntry.narrative = `${attacker.name} focuses inward, their aura strengthening as ${chosenAbility.name} takes effect.`;
-      }
-      break;
-    }
-      
-    default: {
-      battleLogEntry.result = `${chosenAbility.name} is used.`;
-      battleLogEntry.narrative = `${attacker.name} executes ${chosenAbility.name} with practiced precision.`;
+      newState.participants[targetIndex].currentHealth = Math.max(0, target.currentHealth - 1);
+      newState.log.push(`${attacker.name} uses Basic Strike! It hits ${target.name}, dealing 1 damage.`);
+      newState.battleLog.push(fallbackLogEntry);
     }
   }
-  
-  // Update attacker's move history and last move
-  newState.participants[attackerIndex].lastMove = chosenAbility.name;
-  newState.participants[attackerIndex].moveHistory.push(chosenAbility.name);
-  
-  // Apply cooldown if the ability has one
-  if (chosenAbility.cooldown && chosenAbility.cooldown > 0) {
-    newState.participants[attackerIndex].cooldowns[chosenAbility.name] = chosenAbility.cooldown;
-  }
-  
-  // Spend chi if the ability has a cost
-  if (chosenAbility.chiCost && chosenAbility.chiCost > 0) {
-    newState.participants[attackerIndex].resources.chi = Math.max(0, attacker.resources.chi - chosenAbility.chiCost);
-  }
-  
-  // Add to both legacy log and new structured log with tactical explanation
-  const tacticalExplanation = aiLog.reasoning ? ` (${aiLog.reasoning})` : '';
-  newState.log.push(`${attacker.name} uses ${chosenAbility.name}! ${battleLogEntry.result}${tacticalExplanation}`);
-  newState.battleLog.push(battleLogEntry);
+
+  // Generate narrative hooks for this battle event
+  const usedAbility = availableFinisher || (aiResult?.ability || null);
+  const actualDamage = availableFinisher ? (finisherLogEntry?.damage || 0) : moveDamage;
+  const isCritical = !availableFinisher && aiResult?.ability?.type === 'attack' && 
+    moveResult?.includes('CRITICALLY');
+  const narratives = usedAbility ? defaultNarrativeService.generateNarratives(
+    attacker,
+    target,
+    usedAbility,
+    newState.turn,
+    newState.battleLog,
+    newState.location || 'Fire Nation Capital',
+    isCritical, // Pass critical hit information
+    !!availableFinisher, // Is a finisher move
+    actualDamage // Pass the actual damage dealt
+  ) : [];
+
+  // Add narratives to the log
+  narratives.forEach(narrative => {
+    newState.log.push(narrative.text);
+    newState.battleLog.push({
+      id: createEventId(),
+      turn: newState.turn,
+      actor: narrative.speaker, // Use the actual speaker (character or narrator)
+      type: 'NARRATIVE',
+      action: 'speak',
+      result: narrative.text,
+      narrative: narrative.text,
+      timestamp: Date.now()
+    });
+  });
 
   // Check for winner
   if (newState.participants[targetIndex].currentHealth <= 0) {
-    return declareWinner(newState, newState.participants[attackerIndex]);
+    const finalState = declareWinner(newState, newState.participants[attackerIndex]);
+    
+    // Add battle analytics
+    const analytics = generateAndFormatBattleAnalytics(finalState);
+    finalState.log.push(analytics);
+    
+    return finalState;
   } else {
     // Process end-of-turn effects for both participants
     newState.participants[0] = processBuffsAndDebuffs(newState.participants[0]);

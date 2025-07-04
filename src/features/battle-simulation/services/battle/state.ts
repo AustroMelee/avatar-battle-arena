@@ -4,8 +4,9 @@ import {
   BattleCharacter, 
   BattleState, 
   SimulateBattleParams, 
-  BattleLogEntry 
+  BattleLogEntry
 } from '../../types';
+import { createEventId } from '../ai/logQueries';
 
 /**
  * @description Initializes the state for a new battle.
@@ -17,15 +18,36 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   const initialHealth = 100; // All characters start with 100 health
   const initialChi = 10; // All characters start with 10 chi
 
+  // Initialize usesLeft for abilities with maxUses
+  const p1UsesLeft: Record<string, number> = {};
+  player1.abilities.forEach(ability => {
+    if (ability.maxUses) {
+      p1UsesLeft[ability.name] = ability.maxUses;
+    }
+  });
+  
+  const p2UsesLeft: Record<string, number> = {};
+  player2.abilities.forEach(ability => {
+    if (ability.maxUses) {
+      p2UsesLeft[ability.name] = ability.maxUses;
+    }
+  });
+
   const p1Battle: BattleCharacter = { 
     ...player1, 
     currentHealth: initialHealth, 
     currentDefense: player1.stats.defense,
     cooldowns: {}, // No cooldowns at battle start
+    usesLeft: p1UsesLeft, // Initialize uses for limited moves
     moveHistory: [], // No moves used yet
     resources: { chi: initialChi },
     activeBuffs: [], // No buffs at battle start
-    activeDebuffs: [] // No debuffs at battle start
+    activeDebuffs: [], // No debuffs at battle start
+    flags: {
+      usedFinisher: false,
+      usedDesperation: false
+    }, // Initialize flags for resolution tracking
+    diminishingEffects: {} // Initialize diminishing effects tracking
   };
   
   const p2Battle: BattleCharacter = { 
@@ -33,15 +55,23 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     currentHealth: initialHealth, 
     currentDefense: player2.stats.defense,
     cooldowns: {}, // No cooldowns at battle start
+    usesLeft: p2UsesLeft, // Initialize uses for limited moves
     moveHistory: [], // No moves used yet
     resources: { chi: initialChi },
     activeBuffs: [], // No buffs at battle start
-    activeDebuffs: [] // No debuffs at battle start
+    activeDebuffs: [], // No debuffs at battle start
+    flags: {
+      usedFinisher: false,
+      usedDesperation: false
+    }, // Initialize flags for resolution tracking
+    diminishingEffects: {} // Initialize diminishing effects tracking
   };
 
   const initialLogEntry: BattleLogEntry = {
+    id: createEventId(),
     turn: 0,
     actor: 'System',
+    type: 'INFO',
     action: 'Battle Start',
     result: `The battle begins in the ${params.location.name}!`,
     narrative: `The air crackles with anticipation as ${player1.name} and ${player2.name} face off in the ${params.location.name}.`,
@@ -57,6 +87,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     aiLog: [],
     isFinished: false,
     winner: null,
+    location: params.location.name, // Store location for narrative context
   };
 }
 
@@ -126,8 +157,10 @@ export function declareWinner(state: BattleState, winner: BattleCharacter): Batt
   newState.winner = winner;
   
   const victoryLogEntry: BattleLogEntry = {
+    id: createEventId(),
     turn: newState.turn,
     actor: 'System',
+    type: 'KO',
     action: 'Victory',
     result: `${winner.name} is victorious!`,
     narrative: `The battle reaches its climax as ${winner.name} stands triumphant.`,
