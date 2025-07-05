@@ -2,7 +2,7 @@
 // RESPONSIBILITY: Detect when escalation should be triggered
 
 import { BattleState, BattleCharacter } from '../../types';
-import { PatternState, getPatternState } from './patternTracking.service';
+import { getPatternState } from './patternTracking.service';
 
 // Escalation triggers
 const ESCALATION_TRIGGERS = {

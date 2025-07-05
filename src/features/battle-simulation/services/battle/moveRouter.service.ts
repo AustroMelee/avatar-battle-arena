@@ -27,22 +27,22 @@ export interface MoveExecutionResult {
  * @param {BattleState} state - Current battle state
  * @param {number} attackerIndex - Index of attacker in participants array
  * @param {number} targetIndex - Index of target in participants array
- * @returns {MoveExecutionResult} The execution result
+ * @returns {Promise<MoveExecutionResult>} The execution result
  */
-export function executeMove(
+export async function executeMove(
   ability: Ability,
   attacker: BattleCharacter,
   target: BattleCharacter,
   state: BattleState,
   attackerIndex: number,
   targetIndex: number
-): MoveExecutionResult {
+): Promise<MoveExecutionResult> {
   switch (ability.type) {
     case 'attack':
-      return executeAttackMove(ability, attacker, target, state, targetIndex);
+      return await executeAttackMove(ability, attacker, target, state, targetIndex);
     case 'defense_buff':
-      return executeDefenseMove(ability, attacker, state, attackerIndex);
+      return await executeDefenseMove(ability, attacker, state, attackerIndex);
     default:
-      return executeGenericMove(ability, attacker, state);
+      return await executeGenericMove(ability, attacker, state);
   }
 } 

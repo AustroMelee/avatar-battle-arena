@@ -4,8 +4,7 @@
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { shouldTriggerEscalation } from './escalationDetection.service';
 import { forcePatternEscalation } from './escalationApplication.service';
-import { updatePatternTracking } from './patternTracking.service';
-import { createDesperationMove } from './desperationMoveCreation.service';
+// Removed unused imports
 
 /**
  * @description Checks and triggers pattern breaking escalation

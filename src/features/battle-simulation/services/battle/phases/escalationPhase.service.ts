@@ -11,15 +11,22 @@ import { createNarrativeService } from '../../narrative';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
-// Global narrative service instance
-const narrativeService = createNarrativeService();
+// Lazy narrative service instance
+let narrativeService: ReturnType<typeof createNarrativeService> | null = null;
+
+function getNarrativeService() {
+  if (!narrativeService) {
+    narrativeService = createNarrativeService();
+  }
+  return narrativeService;
+}
 
 /**
  * @description Processes pattern breaking and escalation events with enhanced state management
  * @param {BattleState} state - The current battle state
- * @returns {BattleState} Updated state with escalation effects
+ * @returns {Promise<BattleState>} Updated state with escalation effects
  */
-export function escalationPhase(state: BattleState): BattleState {
+export async function escalationPhase(state: BattleState): Promise<BattleState> {
   if (state.isFinished) return state;
   
   // Update the state manager with current turn
@@ -39,10 +46,10 @@ export function escalationPhase(state: BattleState): BattleState {
     };
     
     // Update narrative service turn
-    narrativeService.updateTurn(state.turn);
+    getNarrativeService().updateTurn(state.turn);
     
     // Generate state announcement using enhanced narrative system
-    const escalationAnnouncement = narrativeService.generateStateAnnouncement(
+    const escalationAnnouncement = await getNarrativeService().generateStateAnnouncement(
       attacker.name,
       'escalation',
       {

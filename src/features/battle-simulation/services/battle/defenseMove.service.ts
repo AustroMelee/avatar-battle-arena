@@ -24,14 +24,14 @@ export interface DefenseMoveResult {
  * @param {BattleCharacter} attacker - The character using the ability
  * @param {BattleState} state - Current battle state
  * @param {number} attackerIndex - Index of attacker in participants array
- * @returns {DefenseMoveResult} The execution result
+ * @returns {Promise<DefenseMoveResult>} The execution result
  */
-export function executeDefenseMove(
+export async function executeDefenseMove(
   ability: Ability,
   attacker: BattleCharacter,
   state: BattleState,
   attackerIndex: number
-): DefenseMoveResult {
+): Promise<DefenseMoveResult> {
   const defenseBonus = ability.power;
   const newState = { ...state };
   
@@ -72,7 +72,7 @@ export function executeDefenseMove(
     chi: attacker.resources.chi || 0
   };
   
-  const defenseNarrative = narrativeService.generateNarrative(
+  const defenseNarrative = await narrativeService.generateNarrative(
     attacker.name,
     context,
     'hit',

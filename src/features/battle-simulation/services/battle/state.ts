@@ -4,11 +4,9 @@ import {
   BattleCharacter, 
   BattleState, 
   SimulateBattleParams, 
-  BattleLogEntry
 } from '../../types';
 import { getLocationType } from '../../types/move.types';
 import { getEnvironmentalFactors } from './positioningMechanics.service';
-import { createEventId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
 import { generateOpeningSequence, integrateOpeningSequence } from '../narrative/openingSequence';
 import { EnhancedStateManager } from '../narrative/enhancedStateManager';
@@ -26,9 +24,6 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   
   // Reset enhanced state manager for new battle
   enhancedStateManager.reset();
-  
-  // Initialize narrative service for enhanced storytelling
-  const narrativeService = createNarrativeService();
   
   // Create battle characters
   const p1Battle: BattleCharacter = {
@@ -172,13 +167,11 @@ export function declareWinner(state: BattleState, winner: BattleCharacter): Batt
   newState.isFinished = true;
   newState.winner = winner;
   
-  // Initialize narrative service for enhanced storytelling
-  const narrativeService = createNarrativeService();
-  
   // Get the loser
   const loser = newState.participants.find(p => p.name !== winner.name);
   if (loser) {
-    // Generate enhanced victory narrative using the new battle end handler
+    // Generate enhanced victory narrative using the new battle end handler (lazy)
+    const narrativeService = createNarrativeService();
     const battleEndNarratives = narrativeService.recordBattleEnd(newState);
     
     // Add victory narratives to the log

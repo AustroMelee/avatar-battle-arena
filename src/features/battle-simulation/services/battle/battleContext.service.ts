@@ -2,7 +2,7 @@
 // RESPONSIBILITY: Create and manage battle context for move resolution
 
 import { BattleState, BattleCharacter } from '../../types';
-import { BattleContext, LocationType } from '../../types/move.types';
+import { BattleContext } from '../../types/move.types';
 import { getLocationType } from '../../types/move.types';
 
 /**

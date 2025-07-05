@@ -16,6 +16,27 @@ export type NarrativeState =
   | 'burnout';
 
 /**
+ * @description Emotional state for characters
+ */
+export interface EmotionalState {
+  primary: string;
+  intensity: number;
+  confidence: number;
+  fear: number;
+  anger: number;
+  determination: number;
+}
+
+/**
+ * @description Character emotion with timestamp
+ */
+export interface CharacterEmotion {
+  characterName: string;
+  emotion: EmotionalState;
+  timestamp: number;
+}
+
+/**
  * @description Context for narrative generation
  */
 export interface NarrativeContext {
@@ -28,6 +49,16 @@ export interface NarrativeContext {
   characterState: string;
   isEscalation: boolean;
   isPatternBreak: boolean;
+}
+
+/**
+ * @description Request for narrative generation
+ */
+export interface NarrativeRequest {
+  characterName: string;
+  moveName: string;
+  damageOutcome: DamageOutcome;
+  context: NarrativeContext;
 }
 
 /**

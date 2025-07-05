@@ -1,9 +1,9 @@
 // CONTEXT: End Phase Service
 // RESPONSIBILITY: Handle battle end validation and forced endings
 
-import { BattleState, BattleLogEntry } from '../../../types';
+import { BattleState } from '../../../types';
 import { validateBattleState, forceBattleClimax } from '../battleValidation';
-import { declareWinner, switchActiveParticipant } from '../state';
+import { declareWinner } from '../state';
 import { generateAndFormatBattleAnalytics } from '../battleAnalytics.service';
 import { formatRealTimeAnalytics } from '../analyticsTracker.service';
 

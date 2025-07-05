@@ -1,7 +1,7 @@
 // CONTEXT: Tactical Phase Service
 // RESPONSIBILITY: Handle tactical AI move selection and execution with enhanced narratives
 
-import { BattleState, BattleLogEntry } from '../../../types';
+import { BattleState } from '../../../types';
 import { selectTacticalMove, createTacticalAnalysis } from '../../ai/tacticalAI.service';
 import { canUseMove } from '../positioningMechanics.service';
 import { executeTacticalMove } from '../moveExecution.service';
@@ -14,15 +14,14 @@ import {
   updatePatternTracking
 } from '../patternBreaking.service';
 import { processLogEntryForAnalytics } from '../analyticsTracker.service';
-import { createEventId } from '../../ai/logQueries';
 import { propagateTacticalStates } from '../tacticalState.service';
 
 /**
  * @description Processes tactical AI move selection and execution with enhanced narratives
  * @param {BattleState} state - The current battle state
- * @returns {BattleState} Updated state with move execution results
+ * @returns {Promise<BattleState>} Updated state with move execution results
  */
-export function tacticalMovePhase(state: BattleState): BattleState {
+export async function tacticalMovePhase(state: BattleState): Promise<BattleState> {
   if (state.isFinished) return state;
   const newState = { ...state };
   const { attacker, target, attackerIndex, targetIndex } = getActiveParticipants(newState);
@@ -52,7 +51,7 @@ export function tacticalMovePhase(state: BattleState): BattleState {
     console.log(`DEBUG: T${newState.turn} ${attacker.name} cannot use ${chosenMove.name}, falling back to basic move`);
     // Fallback to basic move
     const basicMove = availableMoves.find(m => m.id === 'basic_strike') || availableMoves[0];
-    const executionResult = executeTacticalMove(basicMove, attacker, target, newState);
+    const executionResult = await executeTacticalMove(basicMove, attacker, target, newState);
     
     // Only add the enhanced narrative to the user-facing log
     newState.battleLog.push(executionResult.logEntry);
@@ -92,7 +91,7 @@ export function tacticalMovePhase(state: BattleState): BattleState {
     const modifiedMove = applyEscalationModifiers(chosenMove, attacker);
     
     // Execute tactical move
-    const executionResult = executeTacticalMove(modifiedMove, attacker, target, newState);
+    const executionResult = await executeTacticalMove(modifiedMove, attacker, target, newState);
     
     // Add tactical analysis to log entry meta (for debugging, not user display)
     executionResult.logEntry.meta = {

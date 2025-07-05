@@ -16,9 +16,9 @@ import {
 /**
  * @description Processes a single turn of the battle using a clean phase-based pipeline.
  * @param {BattleState} currentState - The current state of the battle.
- * @returns {BattleState} The state after the turn is completed.
+ * @returns {Promise<BattleState>} The state after the turn is completed.
  */
-export function processTurn(currentState: BattleState): BattleState {
+export async function processTurn(currentState: BattleState): Promise<BattleState> {
   let state = cloneBattleState(currentState);
   
   // Initialize analytics tracker if not present
@@ -31,16 +31,16 @@ export function processTurn(currentState: BattleState): BattleState {
   state = validateBattleEndPhase(state);
   if (state.isFinished) return state;
   
-  state = processDesperationPhase(state);
+  state = await processDesperationPhase(state);
   if (state.isFinished) return state;
   
   state = finisherPhase(state);
   if (state.isFinished) return state;
   
-  state = escalationPhase(state);
+  state = await escalationPhase(state);
   if (state.isFinished) return state;
   
-  state = tacticalMovePhase(state);
+  state = await tacticalMovePhase(state);
   if (state.isFinished) return state;
   
   state = endOfTurnEffectsPhase(state);

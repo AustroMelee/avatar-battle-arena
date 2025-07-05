@@ -3,7 +3,7 @@
 
 import type { OneOffMomentType, OneOffMomentContext } from '../types/NarrativeTypes';
 import { StateTracker } from './StateTracker';
-import { PoolManager } from './PoolManager';
+import { PoolManager } from './pools/PoolManager';
 
 /**
  * @description Manages dramatic one-off narrative moments

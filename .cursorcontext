@@ -873,10 +873,177 @@ Ensure that all containers use explicit gap or padding values, never relying on 
  *     - Create migration scripts for large-scale changes
  */
 
+/*==========================================
+=        CIRCULAR DEPENDENCY PREVENTION     =
+==========================================*/
+
+/**
+ * 121. Circular Dependency Detection (CRITICAL)
+ * MUST detect and prevent circular dependencies:
+ *     - Run "npx madge --circular src/" before any major changes
+ *     - Use "npx dependency-cruiser --validate .dependency-cruiser.js" in CI
+ *     - Monitor browser console for "The requested module does not provide an export" errors
+ *     - Check for "Cannot access before initialization" errors in module loading
+ * 
+ * 122. Module Architecture Rules
+ * MUST follow strict module architecture:
+ *     - Services must be stateless or use lazy initialization
+ *     - No eager singleton instantiation at module load time
+ *     - Use factory functions instead of direct service exports
+ *     - Implement dependency injection patterns for complex services
+ * 
+ * 123. Lazy Initialization Pattern (MANDATORY)
+ * MUST use lazy initialization for all services:
+ *     - Replace: export const service = new Service()
+ *     - With: export const getService = () => service || (service = new Service())
+ *     - Use dynamic imports for heavy dependencies: const module = await import('./heavy-module')
+ *     - Implement singleton pattern with lazy instantiation
+ * 
+ * 124. Service Factory Pattern Enforcement
+ * MUST use service factories instead of direct exports:
+ *     - Create: export const createService = (config) => new Service(config)
+ *     - Use: const service = createService(config) inside functions
+ *     - Never export pre-instantiated services from module root
+ *     - Pass dependencies as parameters to service constructors
+ * 
+ * 125. Import Chain Analysis
+ * MUST analyze import chains before implementation:
+ *     - Map all import dependencies before writing code
+ *     - Identify potential circular paths (A → B → C → A)
+ *     - Use dependency graphs to visualize module relationships
+ *     - Break circular chains with lazy loading or dependency injection
+ * 
+ * 126. Battle System Architecture Rules
+ * MUST follow specific rules for battle system modules:
+ *     - Narrative services must use lazy initialization
+ *     - Battle services must instantiate dependencies inside functions
+ *     - AI services must not eagerly import battle state managers
+ *     - Core engine must be the only module with eager initialization
+ * 
+ * 127. Emergency Circular Dependency Resolution
+ * MUST resolve circular dependencies immediately:
+ *     - Identify the circular chain using browser dev tools
+ *     - Break the cycle by moving shared logic to a separate module
+ *     - Use dynamic imports to defer module loading
+ *     - Implement interface segregation to reduce coupling
+ * 
+ * 128. Module Loading Error Prevention
+ * MUST prevent module loading errors:
+ *     - Test all imports resolve correctly before committing
+ *     - Use TypeScript's "noEmit" to catch import issues early
+ *     - Validate that all exported symbols exist in source files
+ *     - Check for typos in import/export statements
+ * 
+ * 129. Service State Management Rules
+ * MUST manage service state safely:
+ *     - Services should be stateless when possible
+ *     - Use dependency injection for stateful services
+ *     - Implement proper cleanup and disposal methods
+ *     - Avoid global state that can cause initialization issues
+ * 
+ * 130. Development Server Port Management
+ * MUST handle development server port conflicts:
+ *     - Kill existing processes on ports 5173-5190 before starting dev server
+ *     - Use "netstat -ano | findstr :5173" to identify blocking processes
+ *     - Implement automatic port detection and switching
+ *     - Document port usage in development setup
+ */
+
+/*==========================================
+=        MODULE RESOLUTION PROTOCOLS       =
+==========================================*/
+
+/**
+ * 131. Import Path Validation
+ * MUST validate all import paths:
+ *     - Use absolute paths for imports from different feature modules
+ *     - Use relative paths for imports within the same module
+ *     - Validate that all import targets exist and export the expected symbols
+ *     - Use TypeScript's module resolution to catch path issues
+ * 
+ * 132. Export Symbol Validation
+ * MUST validate all export symbols:
+ *     - Ensure all exported symbols are actually defined in the module
+ *     - Use named exports instead of default exports for better tree-shaking
+ *     - Validate that re-exports maintain the original symbol names
+ *     - Check for typos in export statements
+ * 
+ * 133. Dynamic Import Safety
+ * MUST use dynamic imports safely:
+ *     - Handle import failures with proper error boundaries
+ *     - Use loading states for dynamically imported components
+ *     - Validate that dynamic imports resolve to the expected modules
+ *     - Implement fallback mechanisms for failed imports
+ * 
+ * 134. Module Initialization Order
+ * MUST control module initialization order:
+ *     - Core modules must initialize before feature modules
+ *     - Use dependency injection to control initialization order
+ *     - Avoid side effects during module loading
+ *     - Implement proper cleanup for module disposal
+ * 
+ * 135. Cross-Module Communication
+ * MUST use safe cross-module communication:
+ *     - Use events or callbacks instead of direct imports for loose coupling
+ *     - Implement interface contracts for module interactions
+ *     - Use dependency injection for complex module relationships
+ *     - Avoid direct state sharing between modules
+ */
+
+/*==========================================
+=        DEVELOPMENT WORKFLOW ENFORCEMENT  =
+==========================================*/
+
+/**
+ * 136. Pre-Development Validation
+ * MUST validate before starting development:
+ *     - Run circular dependency detection tools
+ *     - Check for existing module loading errors
+ *     - Validate current import/export structure
+ *     - Ensure development environment is clean
+ * 
+ * 137. During Development Monitoring
+ * MUST monitor during development:
+ *     - Watch browser console for module loading errors
+ *     - Run TypeScript checks after each file modification
+ *     - Test module imports after adding new dependencies
+ *     - Validate that all exports are properly defined
+ * 
+ * 138. Post-Development Validation
+ * MUST validate after development:
+ *     - Run complete circular dependency analysis
+ *     - Test all module imports and exports
+ *     - Validate that no unused imports remain
+ *     - Ensure development server starts without errors
+ * 
+ * 139. Emergency Recovery Procedures
+ * MUST have emergency recovery procedures:
+ *     - Kill all development server processes
+ *     - Clear browser cache and reload
+ *     - Restart development server on a clean port
+ *     - Validate that all modules load correctly
+ * 
+ * 140. Prevention Checklist
+ * MUST follow prevention checklist:
+ *     - No eager service instantiation at module level
+ *     - Use lazy initialization for all services
+ *     - Implement proper dependency injection
+ *     - Validate all import/export statements
+ *     - Test module loading after each change
+ */
+
 /*
+  CRITICAL: NEVER TEST OR RUN DEVELOPMENT SERVERS
+  MUST NEVER attempt to test, run dev servers, or claim to verify functionality
+  unless explicitly requested by the user. I have no ability to actually test
+  applications or see if they work properly.
+
   Adhering to this context ensures:
     - Cursor can generate, refactor, and migrate code autonomously and safely.
     - Your solo codebase remains bug-resistant, accessible, and future-proof.
     - Maintenance and iteration are frictionless, even months or years later.
+    - Circular dependencies are prevented and resolved automatically.
+    - Module loading errors are caught and fixed before they cause issues.
+    - No false claims about testing or verification capabilities.
 */
 

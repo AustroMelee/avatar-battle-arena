@@ -76,7 +76,7 @@ export function forcePatternEscalation(
       narrative = `The battle reaches a breaking point! Both fighters are forced to escalate or face defeat!`;
       forcedState = 'climax';
       // Force both participants into aggressive states
-      newState.participants.forEach((participant, index) => {
+      newState.participants.forEach((participant, _index) => {
         participant.position = 'aggressive';
         participant.flags = {
           ...participant.flags,

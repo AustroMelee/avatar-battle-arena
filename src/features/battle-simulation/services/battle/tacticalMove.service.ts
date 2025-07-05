@@ -1,5 +1,5 @@
 // CONTEXT: Tactical Move Service
-// RESPONSIBILITY: Execute tactical moves with enhanced narrative generation
+// RESPONSIBILITY: Execute tactical moves with pure game logic
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Move } from '../../types/move.types';
@@ -12,7 +12,26 @@ import {
   createTacticalLogEntry
 } from './positioningMechanics.service';
 
-import { createNarrativeService } from '../narrative';
+import { 
+  generateRepositionNarrative,
+  generateChargeNarrative,
+  generateInterruptionNarrative,
+  generateRegularTacticalNarrative
+} from './TacticalNarrativeService';
+
+import { 
+  logTacticalMove,
+  logEscalation,
+  logPunishment,
+  logNarrative,
+  logMoveUsage,
+  logCharge
+} from './BattleLogger';
+
+import { 
+  updateTacticalAnalytics,
+  trackEscalationEvent
+} from './BattleAnalyticsTracker';
 
 /**
  * @description Result of executing a tactical move
@@ -25,36 +44,22 @@ export interface TacticalMoveResult {
 }
 
 /**
- * @description Executes a tactical move with enhanced narrative generation
+ * @description Executes a tactical move with pure game logic
  * @param {Move} move - The move to execute
  * @param {BattleCharacter} attacker - The attacking character
  * @param {BattleCharacter} target - The target character
  * @param {BattleState} state - Current battle state
- * @returns {TacticalMoveResult} The execution result with enhanced narrative
+ * @returns {TacticalMoveResult} The execution result with narrative
  */
-export function executeTacticalMove(
+export async function executeTacticalMove(
   move: Move,
   attacker: BattleCharacter,
   target: BattleCharacter,
   state: BattleState
-): TacticalMoveResult {
+): Promise<TacticalMoveResult> {
   const newAttacker = { ...attacker };
   const newTarget = { ...target };
   let narrative = '';
-  
-  // Initialize narrative service for enhanced storytelling
-  const narrativeService = createNarrativeService();
-  
-  // Helper function to update analytics
-  const updateAnalytics = (damage: number, chiCost: number, punishDamage: number = 0) => {
-    if (state.analytics) {
-      state.analytics.totalDamage += damage;
-      state.analytics.totalChiSpent += chiCost;
-      if (punishDamage > 0) {
-        state.analytics.punishOpportunities += 1;
-      }
-    }
-  };
   
   // Handle repositioning moves
   if (move.changesPosition === "repositioning") {
@@ -62,42 +67,24 @@ export function executeTacticalMove(
     
     if (repositionResult.damage) {
       newAttacker.currentHealth = Math.max(0, newAttacker.currentHealth - repositionResult.damage);
-      // Update analytics immediately for reposition damage
-      updateAnalytics(repositionResult.damage, 0);
+      // Update analytics for reposition damage
+      updateTacticalAnalytics(state, repositionResult.damage, 0);
     }
     
-    // Generate enhanced narrative for repositioning
-    const context = {
-      damage: repositionResult.damage || 0,
-      maxHealth: newTarget.stats.power + newTarget.stats.defense + newTarget.stats.agility,
-      isMiss: false,
-      isCritical: false,
-      isPatternBreak: newAttacker.flags?.forcedEscalation === 'true' && newAttacker.flags?.damageMultiplier === '2.0',
-      isEscalation: newAttacker.flags?.forcedEscalation === 'true',
-      consecutiveHits: 0,
-      consecutiveMisses: 0,
-      turnNumber: state.turn,
-      characterState: (newAttacker.flags?.usedDesperation === true ? 'desperate' : 
-                     newAttacker.currentHealth < 30 ? 'wounded' : 
-                     newAttacker.currentHealth < 60 ? 'exhausted' : 'fresh') as 'fresh' | 'wounded' | 'exhausted' | 'desperate',
-      chi: newAttacker.resources.chi || 0
-    };
-    
-    // Generate enhanced narrative for repositioning
-    const repositionNarrative = narrativeService.generateNarrative(
-      newAttacker.name,
-      context,
-      'miss',
-      move.name
+    // Generate narrative for repositioning
+    const narrativeResult = await generateRepositionNarrative(
+      newAttacker,
+      newTarget,
+      move,
+      repositionResult.damage || 0,
+      state,
+      repositionResult.narrative
     );
+    narrative = narrativeResult.narrative;
     
-    if (repositionNarrative && repositionNarrative.trim()) {
-      narrative = repositionNarrative;
-      console.log(`DEBUG: Enhanced reposition narrative for ${newAttacker.name}: "${narrative}"`);
-    } else {
-      narrative = repositionResult.narrative || `${newAttacker.name} repositions to gain advantage!`;
-      console.log(`DEBUG: Fallback reposition narrative for ${newAttacker.name}: "${narrative}"`);
-    }
+    // Log reposition execution
+    logTacticalMove(newAttacker.name, move.name, repositionResult.damage || 0, 'repositioned');
+    logNarrative(newAttacker.name, narrative, 'enhanced');
     
     const logEntry = createTacticalLogEntry(
       state.turn,
@@ -125,41 +112,23 @@ export function executeTacticalMove(
     
     if (chargeResult.interrupted) {
       newAttacker.currentHealth = Math.max(0, newAttacker.currentHealth - (chargeResult.damage || 0));
-      // Update analytics immediately for charge interruption damage
-      updateAnalytics(chargeResult.damage || 0, 0);
+      // Update analytics for charge interruption damage
+      updateTacticalAnalytics(state, chargeResult.damage || 0, 0);
       
-      // Generate enhanced narrative for charge interruption
-      const context = {
-        damage: chargeResult.damage || 0,
-        maxHealth: newTarget.stats.power + newTarget.stats.defense + newTarget.stats.agility,
-        isMiss: false,
-        isCritical: false,
-        isPatternBreak: newAttacker.flags?.forcedEscalation === 'true' && newAttacker.flags?.damageMultiplier === '2.0',
-        isEscalation: newAttacker.flags?.forcedEscalation === 'true',
-        consecutiveHits: 0,
-        consecutiveMisses: 0,
-        turnNumber: state.turn,
-        characterState: (newAttacker.flags?.usedDesperation === true ? 'desperate' : 
-                       newAttacker.currentHealth < 30 ? 'wounded' : 
-                       newAttacker.currentHealth < 60 ? 'exhausted' : 'fresh') as 'fresh' | 'wounded' | 'exhausted' | 'desperate',
-        chi: newAttacker.resources.chi || 0
-      };
-      
-      // Generate enhanced narrative for charge interruption
-      const interruptionNarrative = narrativeService.generateNarrative(
-        newAttacker.name,
-        context,
-        'miss',
-        move.name
+      // Generate narrative for charge interruption
+      const narrativeResult = await generateInterruptionNarrative(
+        newAttacker,
+        newTarget,
+        move,
+        chargeResult.damage || 0,
+        state,
+        chargeResult.narrative
       );
+      narrative = narrativeResult.narrative;
       
-      if (interruptionNarrative && interruptionNarrative.trim()) {
-        narrative = interruptionNarrative;
-        console.log(`DEBUG: Enhanced interruption narrative for ${newAttacker.name}: "${narrative}"`);
-      } else {
-        narrative = chargeResult.narrative || `${newAttacker.name}'s charge is interrupted!`;
-        console.log(`DEBUG: Fallback interruption narrative for ${newAttacker.name}: "${narrative}"`);
-      }
+      // Log charge interruption
+      logTacticalMove(newAttacker.name, move.name, chargeResult.damage || 0, 'charge interrupted');
+      logNarrative(newAttacker.name, narrative, 'enhanced');
       
       // Update move usage limits even for interrupted charge-ups
       if (move.maxUses) {
@@ -168,7 +137,7 @@ export function executeTacticalMove(
         }
         const currentUses = newAttacker.usesLeft[move.name] ?? move.maxUses;
         newAttacker.usesLeft[move.name] = Math.max(0, currentUses - 1);
-        console.log(`DEBUG: ${newAttacker.name} interrupted charge-up of ${move.name}, uses left: ${newAttacker.usesLeft[move.name]}`);
+        logMoveUsage(newAttacker.name, move.name, newAttacker.usesLeft[move.name], 'interrupted charge-up of');
       }
       
       const logEntry = createTacticalLogEntry(
@@ -198,7 +167,8 @@ export function executeTacticalMove(
       if (newAttacker.flags?.forcedEscalation === 'true') {
         const escalationMultiplier = parseFloat(newAttacker.flags.damageMultiplier || '1.0');
         chargeDamage = Math.floor(chargeDamage * escalationMultiplier);
-        console.log(`DEBUG: ${newAttacker.name} escalation charge damage: ${chargeDamage} (${escalationMultiplier}x multiplier)`);
+        logEscalation(newAttacker.name, chargeDamage, escalationMultiplier);
+        trackEscalationEvent(state);
       }
       
       // Apply real punishment damage for vulnerable enemies
@@ -208,47 +178,29 @@ export function executeTacticalMove(
         const baseChargeDamage = chargeDamage;
         chargeDamage = Math.floor(chargeDamage * punishMultiplier);
         chargePunishDamage = chargeDamage - baseChargeDamage;
-        console.log(`DEBUG: ${newAttacker.name} PUNISHING VULNERABLE ENEMY with charge: ${chargeDamage} damage (${punishMultiplier}x multiplier)`);
+        logPunishment(newAttacker.name, chargeDamage, punishMultiplier, 'vulnerable enemy with charge');
       }
       
       newTarget.currentHealth = Math.max(0, newTarget.currentHealth - chargeDamage);
       
-      // Update analytics immediately for charge damage and chi cost
+      // Update analytics for charge damage and chi cost
       const actualChiCost = Math.max(0, move.chiCost - positionBonus.chiCostReduction);
-      updateAnalytics(chargeDamage, actualChiCost, chargePunishDamage);
+      updateTacticalAnalytics(state, chargeDamage, actualChiCost, chargePunishDamage);
       
-      // Generate enhanced narrative for charged attack
-      const context = {
-        damage: chargeDamage,
-        maxHealth: newTarget.stats.power + newTarget.stats.defense + newTarget.stats.agility,
-        isMiss: false,
-        isCritical: false,
-        isPatternBreak: newAttacker.flags?.forcedEscalation === 'true' && newAttacker.flags?.damageMultiplier === '2.0',
-        isEscalation: newAttacker.flags?.forcedEscalation === 'true',
-        consecutiveHits: 0,
-        consecutiveMisses: 0,
-        turnNumber: state.turn,
-        characterState: (newAttacker.flags?.usedDesperation === true ? 'desperate' : 
-                       newAttacker.currentHealth < 30 ? 'wounded' : 
-                       newAttacker.currentHealth < 60 ? 'exhausted' : 'fresh') as 'fresh' | 'wounded' | 'exhausted' | 'desperate',
-        chi: newAttacker.resources.chi || 0
-      };
-      
-      // Generate enhanced narrative for charged attack
-      const chargeNarrative = narrativeService.generateNarrative(
-        newAttacker.name,
-        context,
-        'devastating',
-        move.name
+      // Generate narrative for charged attack
+      const narrativeResult = await generateChargeNarrative(
+        newAttacker,
+        newTarget,
+        move,
+        chargeDamage,
+        state,
+        true // isComplete
       );
+      narrative = narrativeResult.narrative;
       
-      if (chargeNarrative && chargeNarrative.trim()) {
-        narrative = chargeNarrative;
-        console.log(`DEBUG: Enhanced charge narrative for ${newAttacker.name}: "${narrative}"`);
-      } else {
-        narrative = `CHARGED ATTACK! ${newAttacker.name} unleashes ${move.name} for ${chargeDamage} damage!`;
-        console.log(`DEBUG: Fallback charge narrative for ${newAttacker.name}: "${narrative}"`);
-      }
+      // Log charge completion
+      logTacticalMove(newAttacker.name, move.name, chargeDamage, 'completed charge-up of');
+      logNarrative(newAttacker.name, narrative, 'enhanced');
       
       // Update move usage limits for completed charge-up moves
       if (move.maxUses) {
@@ -257,7 +209,7 @@ export function executeTacticalMove(
         }
         const currentUses = newAttacker.usesLeft[move.name] ?? move.maxUses;
         newAttacker.usesLeft[move.name] = Math.max(0, currentUses - 1);
-        console.log(`DEBUG: ${newAttacker.name} completed charge-up of ${move.name}, uses left: ${newAttacker.usesLeft[move.name]}`);
+        logMoveUsage(newAttacker.name, move.name, newAttacker.usesLeft[move.name], 'completed charge-up of');
       }
       
       const logEntry = createTacticalLogEntry(
@@ -279,38 +231,20 @@ export function executeTacticalMove(
       return { newAttacker, newTarget, logEntry, narrative };
     } else {
       // Still charging
-      // Generate enhanced narrative for charging
-      const context = {
-        damage: 0,
-        maxHealth: newTarget.stats.power + newTarget.stats.defense + newTarget.stats.agility,
-        isMiss: false,
-        isCritical: false,
-        isPatternBreak: newAttacker.flags?.forcedEscalation === 'true' && newAttacker.flags?.damageMultiplier === '2.0',
-        isEscalation: newAttacker.flags?.forcedEscalation === 'true',
-        consecutiveHits: 0,
-        consecutiveMisses: 0,
-        turnNumber: state.turn,
-        characterState: (newAttacker.flags?.usedDesperation === true ? 'desperate' : 
-                       newAttacker.currentHealth < 30 ? 'wounded' : 
-                       newAttacker.currentHealth < 60 ? 'exhausted' : 'fresh') as 'fresh' | 'wounded' | 'exhausted' | 'desperate',
-        chi: newAttacker.resources.chi || 0
-      };
-      
-      // Generate enhanced narrative for charging
-      const chargingNarrative = narrativeService.generateNarrative(
-        newAttacker.name,
-        context,
-        'miss',
-        move.name
+      // Generate narrative for charging
+      const narrativeResult = await generateChargeNarrative(
+        newAttacker,
+        newTarget,
+        move,
+        0,
+        state,
+        false // isComplete
       );
+      narrative = narrativeResult.narrative;
       
-      if (chargingNarrative && chargingNarrative.trim()) {
-        narrative = chargingNarrative;
-        console.log(`DEBUG: Enhanced charging narrative for ${newAttacker.name}: "${narrative}"`);
-      } else {
-        narrative = chargeResult.narrative || `${newAttacker.name} continues charging ${move.name}...`;
-        console.log(`DEBUG: Fallback charging narrative for ${newAttacker.name}: "${narrative}"`);
-      }
+      // Log charging progress
+      logCharge(newAttacker.name, move.name, newAttacker.chargeProgress || 0, 'continues charging');
+      logNarrative(newAttacker.name, narrative, 'enhanced');
       
       const logEntry = createTacticalLogEntry(
         state.turn,
@@ -332,14 +266,15 @@ export function executeTacticalMove(
   const positionBonus = applyPositionBonuses(move, newAttacker);
   const punishBonus = calculatePunishBonus(move, newTarget);
   
-  // ENHANCED: Real punishment mechanics
+  // Real punishment mechanics
   let finalDamage = Math.floor(move.baseDamage * positionBonus.damageMultiplier) + punishBonus;
   
   // Apply escalation damage multiplier if in forced escalation
   if (newAttacker.flags?.forcedEscalation === 'true') {
     const escalationMultiplier = parseFloat(newAttacker.flags.damageMultiplier || '1.0');
     finalDamage = Math.floor(finalDamage * escalationMultiplier);
-    console.log(`DEBUG: ${newAttacker.name} escalation damage: ${finalDamage} (${escalationMultiplier}x multiplier)`);
+    logEscalation(newAttacker.name, finalDamage, escalationMultiplier);
+    trackEscalationEvent(state);
   }
   
   // Apply real punishment damage for vulnerable enemies
@@ -349,14 +284,14 @@ export function executeTacticalMove(
     const baseDamage = finalDamage;
     finalDamage = Math.floor(finalDamage * punishMultiplier);
     punishDamage = finalDamage - baseDamage;
-    console.log(`DEBUG: ${newAttacker.name} PUNISHING VULNERABLE ENEMY: ${finalDamage} damage (${punishMultiplier}x multiplier)`);
+    logPunishment(newAttacker.name, finalDamage, punishMultiplier, 'vulnerable enemy');
   }
   
   newTarget.currentHealth = Math.max(0, newTarget.currentHealth - finalDamage);
   
-  // Update analytics immediately for damage and chi cost
+  // Update analytics for damage and chi cost
   const actualChiCost = Math.max(0, move.chiCost - positionBonus.chiCostReduction);
-  updateAnalytics(finalDamage, actualChiCost, punishDamage);
+  updateTacticalAnalytics(state, finalDamage, actualChiCost, punishDamage);
   
   // Apply position changes
   const positionResult = updatePositionAfterMove(newAttacker, move, state.turn);
@@ -364,39 +299,19 @@ export function executeTacticalMove(
     narrative += positionResult.narrative + " ";
   }
   
-  // Generate enhanced narrative for regular attack
-  const context = {
-    damage: finalDamage,
-    maxHealth: newTarget.stats.power + newTarget.stats.defense + newTarget.stats.agility,
-    isMiss: finalDamage === 0,
-    isCritical: false, // Could be enhanced to detect critical hits
-    isPatternBreak: newAttacker.flags?.forcedEscalation === 'true' && newAttacker.flags?.damageMultiplier === '2.0',
-    isEscalation: newAttacker.flags?.forcedEscalation === 'true',
-    consecutiveHits: 0, // Could be calculated from battle log
-    consecutiveMisses: 0, // Could be calculated from battle log
-    turnNumber: state.turn,
-    characterState: (newAttacker.flags?.usedDesperation === true ? 'desperate' : 
-                   newAttacker.currentHealth < 30 ? 'wounded' : 
-                   newAttacker.currentHealth < 60 ? 'exhausted' : 'fresh') as 'fresh' | 'wounded' | 'exhausted' | 'desperate',
-    chi: newAttacker.resources.chi || 0
-  };
-  
-  // Generate enhanced narrative
-  const attackNarrative = narrativeService.generateNarrative(
-    newAttacker.name,
-    context,
-    finalDamage === 0 ? 'miss' : finalDamage < 10 ? 'glance' : finalDamage < 25 ? 'hit' : 'devastating',
-    move.name
+  // Generate narrative for regular attack
+  const narrativeResult = await generateRegularTacticalNarrative(
+    newAttacker,
+    newTarget,
+    move,
+    finalDamage,
+    state
   );
+  narrative = narrativeResult.narrative;
   
-  // Use enhanced narrative if generated, otherwise fallback
-  if (attackNarrative && attackNarrative.trim()) {
-    narrative = attackNarrative;
-    console.log(`DEBUG: Enhanced narrative for ${newAttacker.name}: "${narrative}"`);
-  } else {
-    narrative = `${newAttacker.name} uses ${move.name} and deals ${finalDamage} damage!`;
-    console.log(`DEBUG: Fallback narrative for ${newAttacker.name}: "${narrative}"`);
-  }
+  // Log regular move execution
+  logTacticalMove(newAttacker.name, move.name, finalDamage, 'used');
+  logNarrative(newAttacker.name, narrative, 'enhanced');
   
   // Spend chi
   newAttacker.resources.chi = Math.max(0, newAttacker.resources.chi - actualChiCost);
@@ -413,7 +328,7 @@ export function executeTacticalMove(
     }
     const currentUses = newAttacker.usesLeft[move.name] ?? move.maxUses;
     newAttacker.usesLeft[move.name] = Math.max(0, currentUses - 1);
-    console.log(`DEBUG: ${newAttacker.name} used ${move.name}, uses left: ${newAttacker.usesLeft[move.name]}`);
+    logMoveUsage(newAttacker.name, move.name, newAttacker.usesLeft[move.name], 'used');
   }
   
   // Update move history
@@ -429,17 +344,12 @@ export function executeTacticalMove(
     narrative,
     {
       damage: finalDamage,
-      resourceCost: actualChiCost,
       positionBonus: positionBonus.damageMultiplier,
       punishBonus,
       punishDamage: punishDamage > 0 ? punishDamage : undefined,
-      positionChange: positionResult.positionChanged ? {
-        from: attacker.position,
-        to: newAttacker.position,
-        success: true
-      } : undefined
+      positionChanged: positionResult.positionChanged
     }
   );
   
   return { newAttacker, newTarget, logEntry, narrative };
-} 
+}

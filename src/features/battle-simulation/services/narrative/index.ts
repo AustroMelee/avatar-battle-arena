@@ -7,7 +7,7 @@ import { BattleEndHandler } from './battleEndHandler';
 import { StateDrivenNarrativePool } from './stateDrivenNarrativePool';
 import { getContextualMoveDescription } from './contextualNarrativeMapper';
 import { StateAnnouncementManager } from './stateAnnouncementManager';
-import { enhancedNarrativeSystem } from './enhancedNarrativeSystem';
+import { getEnhancedNarrativeSystem, EnhancedNarrativeSystem } from './enhancedNarrativeSystem';
 
 // Core engine and orchestration
 export { evaluateNarrativeHooks } from './narrativeEngine';
@@ -61,11 +61,17 @@ export type {
   CharacterNarratives
 } from './types';
 
+// Lazy singleton instance
+let narrativeServiceInstance: NarrativeService | null = null;
+
 /**
- * @description Creates a narrative service with enhanced configuration
+ * @description Creates a narrative service with enhanced configuration (lazy singleton)
  */
-export function createNarrativeService() {
-  return new NarrativeService();
+export function createNarrativeService(): NarrativeService {
+  if (!narrativeServiceInstance) {
+    narrativeServiceInstance = new NarrativeService();
+  }
+  return narrativeServiceInstance;
 }
 
 /**
@@ -74,14 +80,14 @@ export function createNarrativeService() {
 export class NarrativeService {
   private stateAnnouncementManager: StateAnnouncementManager;
   private battleEndHandler: BattleEndHandler;
-  private enhancedSystem: typeof enhancedNarrativeSystem;
+  private enhancedSystem: EnhancedNarrativeSystem;
   private stateManager: StateDrivenNarrativePool;
   private currentTurn: number = 0;
 
   constructor() {
     this.stateAnnouncementManager = new StateAnnouncementManager();
     this.battleEndHandler = new BattleEndHandler();
-    this.enhancedSystem = enhancedNarrativeSystem;
+    this.enhancedSystem = getEnhancedNarrativeSystem();
     this.stateManager = new StateDrivenNarrativePool();
   }
 
@@ -90,13 +96,15 @@ export class NarrativeService {
    */
   updateTurn(turnNumber: number): void {
     this.currentTurn = turnNumber;
-    this.enhancedSystem.updateTurn(turnNumber);
+    // Update turn for all characters (backward compatibility)
+    this.enhancedSystem.updateTurn('Aang', turnNumber);
+    this.enhancedSystem.updateTurn('Azula', turnNumber);
   }
 
   /**
    * @description Generates a narrative line for a move with enhanced state management and anti-repetition
    */
-  generateNarrative(
+  async generateNarrative(
     characterName: string,
     context: {
       damage: number;
@@ -112,12 +120,12 @@ export class NarrativeService {
     },
     damageOutcome: 'miss' | 'glance' | 'hit' | 'devastating' | 'overwhelming',
     moveName?: string
-  ): string {
+  ): Promise<string> {
     // Update turn number for state tracking
     this.updateTurn(context.turnNumber);
 
     // Generate enhanced narrative with anti-repetition
-    const narrative = this.enhancedSystem.generateNarrative(
+    const narrative = await this.enhancedSystem.generateNarrative(
       characterName,
       context,
       damageOutcome,
@@ -137,7 +145,7 @@ export class NarrativeService {
   /**
    * @description Generates state announcement with enhanced tracking
    */
-  generateStateAnnouncement(
+  async generateStateAnnouncement(
     character: string,
     stateType: 'breaking_point' | 'escalation' | 'desperation' | 'pattern_break',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -146,14 +154,14 @@ export class NarrativeService {
       escalationCount: number;
       desperationCount: number;
     }
-  ): string | null {
+  ): Promise<string | null> {
     // Check if state should be announced using enhanced system
     if (!this.enhancedSystem.shouldAnnounceState(stateType)) {
       return null;
     }
 
     // Get state announcement from enhanced system
-    const announcement = this.enhancedSystem.getStateAnnouncement(stateType, character);
+    const announcement = await this.enhancedSystem.getStateAnnouncement(stateType, character);
     
     // Record the announcement to prevent repetition
     this.enhancedSystem.recordStateAnnouncement(stateType);
@@ -164,7 +172,7 @@ export class NarrativeService {
   /**
    * @description Generates tactical response narrative with enhanced context awareness
    */
-  generateTacticalResponse(
+  async generateTacticalResponse(
     character: string,
     context: {
       damage: number;
@@ -181,7 +189,7 @@ export class NarrativeService {
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _mechanic: string
-  ): string | null {
+  ): Promise<string | null> {
     // Use enhanced system for tactical responses
     this.enhancedSystem.determineNarrativeState(character, {
       isPatternBreak: context.isPatternBreak,
@@ -197,7 +205,7 @@ export class NarrativeService {
     });
 
     // Generate tactical response using enhanced system
-    return this.enhancedSystem.getNarrative(character, 'pattern_break', {
+    return await this.enhancedSystem.getNarrative(character, 'pattern_break', {
       turnNumber: context.turnNumber,
       health: context.maxHealth - context.damage,
       maxHealth: context.maxHealth,
@@ -210,20 +218,20 @@ export class NarrativeService {
   /**
    * @description Generates late game narrative with enhanced progression tracking
    */
-  generateLateGameNarrative(character: string, context?: {
+  async generateLateGameNarrative(character: string, context?: {
     turnNumber: number;
     health: number;
     maxHealth: number;
     chi: number;
     isCritical: boolean;
     damage: number;
-  }): string | null {
+  }): Promise<string | null> {
     if (!context) {
       return null;
     }
 
     // Use enhanced system for late game narratives
-    return this.enhancedSystem.getNarrative(character, 'late_game', context);
+    return await this.enhancedSystem.getNarrative(character, 'late_game', context);
   }
 
   /**
@@ -237,14 +245,15 @@ export class NarrativeService {
   /**
    * @description Checks if a character can generate narratives
    */
-  canCharacterGenerateNarrative(characterName: string): boolean {
-    return this.enhancedSystem.getUsageStats()[characterName] !== undefined;
+  async canCharacterGenerateNarrative(characterName: string): Promise<boolean> {
+    const stats = await this.enhancedSystem.getUsageStats();
+    return stats[characterName] !== undefined;
   }
 
   /**
    * @description Generates narratives for a move with enhanced state management
    */
-  generateNarratives(
+  async generateNarratives(
     actor: BattleCharacter,
     target: BattleCharacter,
     move: Record<string, unknown>,
@@ -254,7 +263,7 @@ export class NarrativeService {
     isCritical: boolean,
     isDesperation: boolean,
     damage: number
-  ): string[] {
+  ): Promise<string[]> {
     const narratives: string[] = [];
 
     // Update turn for all systems
@@ -279,7 +288,7 @@ export class NarrativeService {
     };
 
     const damageOutcome = this.determineDamageOutcome(damage, targetMaxHealth);
-    const actorNarrative = this.generateNarrative(
+    const actorNarrative = await this.generateNarrative(
       actor.name,
       actorContext,
       damageOutcome,
@@ -305,7 +314,7 @@ export class NarrativeService {
         characterState: this.determineCharacterState(target.currentHealth, targetMaxHealth)
       };
 
-      const targetResponse = this.generateTacticalResponse(
+      const targetResponse = await this.generateTacticalResponse(
         target.name,
         targetContext,
         'damage_received'
@@ -367,5 +376,4 @@ export class NarrativeService {
   }
 }
 
-// Export singleton instance
-export const narrativeService = new NarrativeService(); 
+ 

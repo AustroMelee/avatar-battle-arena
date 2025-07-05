@@ -3,7 +3,7 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
-import { Move } from '../../types/move.types';
+// Removed unused import
 import { convertAbilityToMove } from './moveConverter.service';
 import { createBattleContext } from './battleContext.service';
 import { resolveMove } from './moveLogic.service';
@@ -28,15 +28,15 @@ export interface AttackMoveResult {
  * @param {BattleCharacter} target - The target character
  * @param {BattleState} state - Current battle state
  * @param {number} targetIndex - Index of target in participants array
- * @returns {AttackMoveResult} The execution result
+ * @returns {Promise<AttackMoveResult>} The execution result
  */
-export function executeAttackMove(
+export async function executeAttackMove(
   ability: Ability,
   attacker: BattleCharacter,
   target: BattleCharacter,
   state: BattleState,
   targetIndex: number
-): AttackMoveResult {
+): Promise<AttackMoveResult> {
   // Convert ability to move format
   const move = convertAbilityToMove(ability);
   const battleContext = createBattleContext(attacker, target, state);
@@ -56,7 +56,7 @@ export function executeAttackMove(
     };
   }
   
-  // Initialize narrative service for enhanced storytelling
+  // Initialize narrative service for enhanced storytelling (lazy)
   const narrativeService = createNarrativeService();
   
   // Generate enhanced narrative for attack using new system
@@ -77,7 +77,7 @@ export function executeAttackMove(
   };
   
   // Generate enhanced narrative for attack
-  const attackNarrative = narrativeService.generateNarrative(
+  const attackNarrative = await narrativeService.generateNarrative(
     attacker.name,
     context,
     moveResult.damage === 0 ? 'miss' : moveResult.damage < 10 ? 'glance' : moveResult.damage < 25 ? 'hit' : 'devastating',

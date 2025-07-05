@@ -13,15 +13,22 @@ import { createNarrativeService } from '../../narrative';
 
 // Global enhanced state manager instance (shared with escalation phase)
 const enhancedStateManager = new EnhancedStateManager();
-// Global narrative service instance
-const narrativeService = createNarrativeService();
+// Lazy narrative service instance
+let narrativeService: ReturnType<typeof createNarrativeService> | null = null;
+
+function getNarrativeService() {
+  if (!narrativeService) {
+    narrativeService = createNarrativeService();
+  }
+  return narrativeService;
+}
 
 /**
  * @description Processes desperation state changes and triggers dramatic events with enhanced state management
  * @param {BattleState} state - The current battle state
- * @returns {BattleState} Updated state with desperation effects
+ * @returns {Promise<BattleState>} Updated state with desperation effects
  */
-export function processDesperationPhase(state: BattleState): BattleState {
+export async function processDesperationPhase(state: BattleState): Promise<BattleState> {
   if (state.isFinished) return state;
   
   // Update the state manager with current turn
@@ -37,10 +44,10 @@ export function processDesperationPhase(state: BattleState): BattleState {
   
   if (shouldTriggerDesperation(attacker, newState, previousDesperationState)) {
     // Update narrative service turn
-    narrativeService.updateTurn(state.turn);
+    getNarrativeService().updateTurn(state.turn);
     
     // Generate state announcement using enhanced narrative system
-    const desperationAnnouncement = narrativeService.generateStateAnnouncement(
+    const desperationAnnouncement = await getNarrativeService().generateStateAnnouncement(
       attacker.name,
       'desperation',
       {

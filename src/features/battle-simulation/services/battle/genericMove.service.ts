@@ -23,13 +23,13 @@ export interface GenericMoveResult {
  * @param {Ability} ability - The ability to execute
  * @param {BattleCharacter} attacker - The character using the ability
  * @param {BattleState} state - Current battle state
- * @returns {GenericMoveResult} The execution result
+ * @returns {Promise<GenericMoveResult>} The execution result
  */
-export function executeGenericMove(
+export async function executeGenericMove(
   ability: Ability,
   attacker: BattleCharacter,
   state: BattleState
-): GenericMoveResult {
+): Promise<GenericMoveResult> {
   const result = `${ability.name} is used.`;
   
   // Initialize narrative service for enhanced storytelling
@@ -52,7 +52,7 @@ export function executeGenericMove(
   };
   
   let narrative = `${attacker.name} executes ${ability.name} with practiced precision.`;
-  const genericNarrative = narrativeService.generateNarrative(
+  const genericNarrative = await narrativeService.generateNarrative(
     attacker.name,
     context,
     'hit',

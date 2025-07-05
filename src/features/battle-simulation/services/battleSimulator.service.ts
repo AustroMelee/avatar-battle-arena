@@ -48,7 +48,7 @@ export async function simulateBattle(params: SimulateBattleParams): Promise<Batt
   // Simulate battle turns
   while (!currentState.isFinished && currentState.turn < maxTurns) {
     const previousState = cloneBattleState(currentState);
-    currentState = processTurn(currentState);
+    currentState = await processTurn(currentState);
     
     // Track new log entries for analytics
     const newEntries = currentState.battleLog.slice(previousState.battleLog.length);
