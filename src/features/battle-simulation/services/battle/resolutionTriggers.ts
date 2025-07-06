@@ -1,7 +1,7 @@
 // CONTEXT: Battle Resolution, // FOCUS: Triggers
 import type { BattleState, BattleCharacter, BattleLogEntry, LogEventType, BattleResolution } from '../../types';
 import type { Ability } from '@/common/types';
-import { createEventId, generateUniqueLogId } from '../ai/logQueries';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Desperation move definitions for each character

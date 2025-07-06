@@ -124,6 +124,4 @@ export const BattleNarrativeTurn: React.FC<BattleNarrativeTurnProps> = ({
       )}
     </div>
   );
-};
-
-export default BattleNarrativeTurn; 
+}; 

@@ -3,7 +3,7 @@ import type { AIRule, AIDecision } from './types/AIBehavior';
 import type { Ability, Location } from '@/common/types';
 import { azulaAIRules } from './rules/azulaRules';
 import { aangAIRules } from './rules/aangRules';
-import { getAvailableMoves, getHighestDamageMove, getLowestCostMove } from './helpers/conditionHelpers';
+import { getAvailableMovesSimple, getHighestDamageMove, getLowestCostMove } from './helpers/conditionHelpers';
 import { selectWeightedMove } from './weightedChoice';
 import { getAzulaWeightedMoves } from './weightFunctions/azulaWeights';
 import { getAangWeightedMoves } from './weightFunctions/aangWeights';
@@ -49,7 +49,7 @@ function getCharacterWeightedMoves(character: BattleCharacter) {
  * @returns A fallback move
  */
 function legacyTacticalMove(self: BattleCharacter, location?: Location): Ability | null {
-  const availableMoves = getAvailableMoves(self, location);
+  const availableMoves = getAvailableMovesSimple(self, location);
   if (availableMoves.length === 0) return null;
   
   // Simple fallback: prefer high damage moves
@@ -95,7 +95,7 @@ export function decideMove(
               ruleName: rule.name,
               priority: rule.priority ?? 0,
               conditionMet: true,
-              availableMoves: getAvailableMoves(self).length
+              availableMoves: getAvailableMovesSimple(self).length
             }
           };
         }
@@ -139,7 +139,7 @@ export function decideMove(
         ruleName: 'Weighted Choice',
         priority: 5,
         conditionMet: true,
-        availableMoves: getAvailableMoves(self).length,
+        availableMoves: getAvailableMovesSimple(self).length,
         weights: weightedResult.weights
       }
     };
@@ -186,7 +186,7 @@ export function decideMove(
       ruleName: 'Legacy Fallback',
       priority: -20,
       conditionMet: false,
-      availableMoves: getAvailableMoves(self).length
+      availableMoves: getAvailableMovesSimple(self).length
     }
   };
 }

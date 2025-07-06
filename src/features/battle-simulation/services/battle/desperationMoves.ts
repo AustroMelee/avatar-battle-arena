@@ -125,12 +125,18 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
 /**
  * @description Gets all available desperation moves for a character.
  * @param {BattleCharacter} character - The character to check
+ * @param {number} [turn] - The current turn number
  * @returns {DesperationMove[]} Array of available desperation moves
  */
-export function getAvailableDesperationMoves(character: BattleCharacter): DesperationMove[] {
+export function getAvailableDesperationMoves(character: BattleCharacter, turn?: number): DesperationMove[] {
   const characterMoves = DESPERATION_MOVES[character.name.toLowerCase()] || [];
-  
-  return characterMoves.filter(move => move.unlockCondition(character));
+  return characterMoves.filter(move => {
+    const unlocked = move.unlockCondition(character);
+    if (unlocked && turn !== undefined) {
+      // TODO: Add logEntry to log system
+    }
+    return unlocked;
+  });
 }
 
 /**

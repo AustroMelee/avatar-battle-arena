@@ -56,6 +56,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     behavioralTraits: initializeBehavioralSystem(player1),
     manipulationResilience: player1.manipulationResilience || 50, // Default resilience
     activeFlags: initializeActiveFlags(),
+    controlState: 'Neutral',
+    stability: 50,
+    momentum: 50,
+    recoveryOptions: [],
   };
   
   const p2Battle: BattleCharacter = {
@@ -84,6 +88,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     behavioralTraits: initializeBehavioralSystem(player2),
     manipulationResilience: player2.manipulationResilience || 50, // Default resilience
     activeFlags: initializeActiveFlags(),
+    controlState: 'Neutral',
+    stability: 50,
+    momentum: 50,
+    recoveryOptions: [],
   };
   
   // Calculate environmental factors

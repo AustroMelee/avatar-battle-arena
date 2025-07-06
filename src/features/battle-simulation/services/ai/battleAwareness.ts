@@ -1,7 +1,6 @@
 // CONTEXT: Battle Awareness and Context Analysis
 // RESPONSIBILITY: Analyze battle state to provide situational awareness for AI decision making
 import { BattleCharacter, BattleLogEntry } from '../../types';
-// Removed unused import
 
 /**
  * @description Comprehensive battle context that captures the current tactical situation.

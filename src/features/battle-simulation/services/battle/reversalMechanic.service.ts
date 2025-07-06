@@ -3,18 +3,13 @@
  * Determines if a reversal can be attempted and resolves the outcome.
  * Applies personality, trait, and location modifiers.
  */
-import type { BattleCharacter, BattleState } from '../../types';
-import type { Location } from '@/common/types';
+import type { BattleCharacter } from '../../types';
 import type { ReversalResult } from '../../types/mechanic.types';
 
 export function resolveReversal({
   character,
-  state,
-  location,
 }: {
   character: BattleCharacter;
-  state: BattleState;
-  location: Location;
 }): ReversalResult | null {
   // Eligibility: must be compromised or low stability
   if (character.controlState !== 'Compromised' && character.stability > 15) return null;

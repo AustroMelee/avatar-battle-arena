@@ -342,8 +342,8 @@ interface NarrativeContext {
 function hasActorAndTarget(ctx: unknown): ctx is { actor: { name: string }; target: { name: string } } {
   return typeof ctx === 'object' && ctx !== null && 
          'actor' in ctx && 'target' in ctx &&
-         typeof (ctx as any).actor === 'object' && 
-         typeof (ctx as any).target === 'object';
+         typeof (ctx as { actor: { name: string } }).actor === 'object' && 
+         typeof (ctx as { target: { name: string } }).target === 'object';
 }
 
 /**

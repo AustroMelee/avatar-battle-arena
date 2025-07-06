@@ -52,13 +52,10 @@ export class NarrativeEscalationService {
     }
 
     // Filter out recently used lines
-    const unused = this.escalationPool.filter(line => !this.escalationUsed.has(line));
+    const availableLines = this.escalationPool.filter(line => !this.escalationUsed.has(line));
     
     // If all lines have been used, clear the set and use any line
-    const availableLines = unused.length > 0 ? unused : this.escalationPool;
-    
-    // Select random line
-    const choice = availableLines[Math.floor(Math.random() * availableLines.length)];
+    const choice = availableLines.length > 0 ? availableLines[Math.floor(Math.random() * availableLines.length)] : this.escalationPool[Math.floor(Math.random() * this.escalationPool.length)];
     
     // Track usage
     this.escalationUsed.add(choice);

@@ -1,8 +1,7 @@
 // UPGRADED BATTLE LOGIC FOR DRAMATIC MECHANICS
 
 import type { Move, BattleContext } from '../../types/move.types';
-import type { BattleCharacter, BattleLogEntry } from '../../types';
-import { createEventId } from '../ai/logQueries';
+import type { BattleCharacter } from '../../types';
 import { modifyDamageWithEffects } from '../effects/statusEffect.service';
 
 export interface MoveResult {
@@ -47,19 +46,16 @@ export function canUseMove(move: Move, ctx: BattleContext): boolean {
  * @param {BattleContext} ctx - Current battle context
  * @param {BattleCharacter} attacker - The attacking character
  * @param {BattleCharacter} target - The target character
- * @param {number} turn - Current turn number
  * @returns {MoveResult} The resolved move result
  */
 export function resolveMove(
   move: Move,
   ctx: BattleContext,
   attacker: BattleCharacter,
-  target: BattleCharacter,
-  turn: number
+  target: BattleCharacter
 ): MoveResult {
   let damage = move.baseDamage;
   let wasCrit = false;
-  const _wasFinisher = !!move.isFinisher;
   let wasDesperation = false;
 
   // Finisher logic - massive damage, dramatic narrative
@@ -132,105 +128,5 @@ export function resolveMove(
     wasCrit,
     wasFinisher: false,
     wasDesperation
-  };
-}
-
-/**
- * @description Create a finisher log entry
- * @param {Move} move - The finisher move
- * @param {BattleCharacter} attacker - The attacking character
- * @param {BattleCharacter} target - The target character
- * @param {number} damage - The damage dealt
- * @param {number} turn - Current turn
- * @returns {BattleLogEntry} The log entry
- */
-function createFinisherLogEntry(
-  move: Move,
-  attacker: BattleCharacter,
-  target: BattleCharacter,
-  damage: number,
-  turn: number,
-  wasCrit: boolean = false,
-  wasDesperation: boolean = false
-): BattleLogEntry {
-  let result = `FINISHER! ${target.name} takes ${damage} damage!`;
-  if (wasCrit) {
-    result = `LEGENDARY FINISHER! ${target.name} takes ${damage} damage!`;
-  } else if (wasDesperation) {
-    result = `DESPERATE FINISHER! ${target.name} takes ${damage} damage!`;
-  }
-  
-  return {
-    id: createEventId(),
-    turn,
-    actor: attacker.name,
-    type: 'FINISHER',
-    action: move.name,
-    target: target.name,
-    abilityType: 'attack',
-    result,
-    damage,
-    narrative: `FINISHER! ${move.name} unleashes devastating power, dealing ${damage} damage! The arena quakes as ${attacker.name} channels their final strength.`,
-    timestamp: Date.now(),
-    meta: {
-      resourceCost: move.chiCost || 0,
-      isFinisher: true,
-      crit: wasCrit,
-      desperation: wasDesperation
-    }
-  };
-}
-
-/**
- * @description Create a regular move log entry
- * @param {Move} move - The move used
- * @param {BattleCharacter} attacker - The attacking character
- * @param {BattleCharacter} target - The target character
- * @param {number} damage - The damage dealt
- * @param {boolean} wasCrit - Whether it was a critical hit
- * @param {boolean} wasDesperation - Whether it was a desperation move
- * @param {number} turn - Current turn
- * @returns {BattleLogEntry} The log entry
- */
-function createMoveLogEntry(
-  move: Move,
-  attacker: BattleCharacter,
-  target: BattleCharacter,
-  damage: number,
-  wasCrit: boolean,
-  wasDesperation: boolean,
-  turn: number
-): BattleLogEntry {
-  let result: string;
-  if (wasCrit) {
-    result = `CRITICAL HIT! ${target.name} takes ${damage} damage!`;
-  } else if (wasDesperation) {
-    result = `DESPERATION MOVE! ${target.name} takes ${damage} damage!`;
-  } else {
-    result = `${target.name} takes ${damage} damage.`;
-  }
-
-  return {
-    id: createEventId(),
-    turn,
-    actor: attacker.name,
-    type: 'MOVE',
-    action: move.name,
-    target: target.name,
-    abilityType: 'attack',
-    result,
-    damage,
-    narrative: wasCrit 
-      ? `CRITICAL HIT! ${move.name} strikes with devastating precision, dealing ${damage} damage!`
-      : wasDesperation
-      ? `DESPERATION MOVE! ${move.name} surges with raw power, dealing ${damage} damage!`
-      : `${move.name} deals ${damage} damage.`,
-    timestamp: Date.now(),
-    meta: {
-      resourceCost: move.chiCost || 0,
-      crit: wasCrit,
-      desperation: wasDesperation,
-      finisher: false
-    }
   };
 } 

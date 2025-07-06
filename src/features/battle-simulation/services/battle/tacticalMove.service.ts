@@ -3,18 +3,15 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Move } from '../../types/move.types';
-import { resolveMove } from './moveLogic.service';
 import { createBattleContext } from './battleContext.service';
-// Removed unused import
-import { modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
 import { handleChargeUp, calculatePunishBonus, applyPositionBonuses } from './positioningMechanics.service';
-import { generateTacticalNarrative } from './TacticalNarrativeService';
+import { generateUniqueLogId } from '../ai/logQueries';
+import type { Ability } from '../../types/move.types';
+import { getMoveFatigueMultiplier, applyMoveFatigue } from './moveFatigue.service';
+import { resolveMove } from './moveLogic.service';
 import { resolveImpact } from './resolveImpact';
 import { checkDefeat } from './checkDefeat';
-import { getMoveFatigueMultiplier, applyMoveFatigue } from './moveFatigue.service';
-import { canOpenDisruptionWindow, openDisruptionWindow, resolveDisruptionWindow } from './disruptionWindow.service';
-import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Result of executing a tactical move
@@ -164,7 +161,7 @@ async function handleChargeUpMove(
   const newTarget = { ...target };
   
   // Handle charge-up mechanics
-  const chargeResult = handleChargeUp(attacker, target, move);
+  const chargeResult = handleChargeUp(attacker, target, move, state.turn ?? 0);
   
   let damage = 0;
   let narrative = chargeResult.narrative;
@@ -176,7 +173,7 @@ async function handleChargeUpMove(
   } else if (chargeResult.success && attacker.chargeProgress && attacker.chargeProgress >= 100) {
     // Charge complete - calculate full damage
     const battleContext = createBattleContext(attacker, target, state);
-    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    const moveResult = resolveMove(move, battleContext, attacker, target);
     damage = moveResult.damage;
     
     // Apply status effects if any
@@ -248,8 +245,10 @@ async function handleRegularTacticalMove(
 ): Promise<TacticalMoveResult> {
   const newTarget = { ...target };
   // --- MOVE FATIGUE ---
-  const fatigueMultiplier = getMoveFatigueMultiplier(attacker, move as any);
-  let impactResult = resolveImpact(attacker, newTarget, move as any);
+  // Calculate fatigue multiplier
+  const fatigueMultiplier = getMoveFatigueMultiplier(attacker, moveToAbility(move));
+  // Calculate impact result
+  let impactResult = resolveImpact(newTarget, moveToAbility(move));
   if (impactResult && typeof impactResult.stabilityDamage === 'number') {
     impactResult = {
       ...impactResult,
@@ -260,7 +259,7 @@ async function handleRegularTacticalMove(
   // --- HEALTH DAMAGE LOGIC ---
   // Calculate base damage using resolveMove
   const battleContext = createBattleContext(attacker, newTarget, state);
-  const moveResult = resolveMove(move, battleContext, attacker, newTarget, state.turn);
+  const moveResult = resolveMove(move, battleContext, attacker, target);
   let damage = applyMoveFatigue(moveResult.damage, fatigueMultiplier);
   // Apply punish bonus if applicable
   const punishBonus = calculatePunishBonus(move, newTarget);
@@ -338,5 +337,16 @@ async function handleRegularTacticalMove(
     logEntry,
     narrative,
     ...(stateChangeLogEntry ? { stateChangeLogEntry } : {})
+  };
+}
+
+// Utility to convert Move to Ability for disruption logic
+function moveToAbility(move: Move): Ability {
+  return {
+    id: move.id,
+    name: move.name,
+    type: 'attack', // Fallback, as Move does not have disruption/positioning
+    impactClass: 'moderate', // Fallback, as Move does not have impactClass
+    description: move.description || move.name,
   };
 }

@@ -1,415 +1,178 @@
-# Avatar Battle Arena - Simulator Mechanics Documentation
-
-## 🗂️ Battle Mechanics Reference Table
-
-| Mechanic           | Description                                      | Log Example                  | Doc/Section                              |
-|--------------------|--------------------------------------------------|------------------------------|-------------------------------------------|
-| Manipulation       | Alters enemy state, makes them easier to exploit | T14 Azula: manipulation      | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
-| Overconfidence     | Character becomes reckless, changes AI           | T28 Azula: overconfidence    | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
-| Forced Escalation  | Triggers all-out attack phase                    | T30 Azula: Forced Escalation | ESCALATION_SYSTEM.md                     |
-| Plea for Peace     | Aang attempts to de-escalate                     | T25 Aang: plea_for_peace     | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
-| State Change       | Major state transition (e.g., Compromised)       | T19 Azula: State Change      | STATUS_EFFECT_SYSTEM.md                   |
-| Move Fatigue       | Repeated move use penalized                      | (AI: Move used recently)     | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
-| Reversal           | Comeback mechanic, turns the tables              | T23 Aang: Reversal           | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
-| Desperation        | Last-stand move, high risk/reward                | T24 Azula: desperation       | FINISHER_DESPERATION_IMPLEMENTATION.md    |
-| Finisher           | Once-per-battle, high-damage move                | T10 Aang: FINISHER!          | FINISHER_DESPERATION_IMPLEMENTATION.md    |
-| Critical           | High-damage, chance-based event                  | T4 Aang: CRITICAL!           | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
-| Collateral Damage  | Environmental/mental state impact                | T14 Environment: Collateral  | COLLATERAL_DAMAGE_SYSTEM.md               |
-| Positioning        | Tactical stance/terrain effects                  | (see log)                    | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
-| Victory/Draw/etc.  | End conditions                                   | T31 System: victory          | ROADMAP_6_IMPLEMENTATION.md               |
-| Status Effects     | Buffs/debuffs, state changes                     | (see log)                    | STATUS_EFFECT_SYSTEM.md                   |
-
-> All mechanics are now fully implemented, including Reversal. See below for details.
-
-### Reversal Mechanic (Implemented)
-- **Trigger:** When a character (Aang or Azula) is in a compromised state and low stability, a reversal can occur, turning the tide of battle.
-- **Log Example:** `T23 Aang: Reversal`, `T29 Azula: Reversal`
-- **AI/Personality:** Aang is more likely to trigger a reversal when desperate; Azula can also trigger reversals, especially in high-risk moments.
-- **Effect:** Regains stability, shifts control, and is logged as a dramatic event.
-- **Integration:** Fully integrated with disruption-first, narrative-driven battle flow.
-
-## Overview
-
-The Avatar Battle Arena is a sophisticated turn-based battle simulator featuring advanced AI, narrative systems, and complex battle mechanics with optimized battle flow. This document provides a comprehensive overview of all implemented systems, their architecture, and completion status.
-
-## 🏗️ Core Architecture
-
-The simulator follows a modular service-oriented architecture with clear separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Battle Simulator                         │
-├─────────────────────────────────────────────────────────────┤
-│  Core Services                                              │
-│  ├── battleSimulator.service.ts (Orchestrator)             │
-│  ├── processTurn.ts (Turn Processing)                      │
-│  └── state.ts (State Management)                           │
-├─────────────────────────────────────────────────────────────┤
-│  Battle Systems                                             │
-│  ├── AI Decision Engine (Enhanced)                         │
-│  ├── Move Resolution                                        │
-│  ├── Cooldown System                                        │
-│  ├── Desperation System                                     │
-│  ├── Finisher System                                        │
-│  ├── Critical System                                        │
-│  ├── Analytics                                              │
-│  └── Dynamic Escalation Timeline (Optimized)               │
-├─────────────────────────────────────────────────────────────┤
-│  Narrative Systems                                          │
-│  ├── Narrative Engine                                       │
-│  ├── Character Hooks                                        │
-│  └── Context Builder                                        │
-├─────────────────────────────────────────────────────────────┤
-│  UI Components                                              │
-│  ├── Battle Scene                                           │
-│  ├── Character Status                                       │
-│  ├── Ability Panel                                          │
-│  └── Battle Log                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## 📊 System Completion Status
-
-### 🎯 Core Battle Engine (100% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battleSimulator.service.ts`
-- `src/features/battle-simulation/services/battle/processTurn.ts`
-- `src/features/battle-simulation/services/battle/state.ts`
-
-**Mechanics:**
-- ✅ Battle initialization and state management
-- ✅ Turn processing with comprehensive logging
-- ✅ Battle termination conditions (victory, draw, max turns)
-- ✅ State validation and error handling
-- ✅ Performance analytics and metrics
-- ✅ Optimized battle flow with natural progression
-
-**What's Left:**
-- 🔄 Battle replay system (0%)
-- 🔄 Save/load battle states (0%)
-
-### 🤖 Advanced AI System (98% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/ai/tacticalAI.service.ts` (Enhanced)
-- `src/features/battle-simulation/services/ai/chooseAbility.ts`
-- `src/features/battle-simulation/services/ai/battleAwareness.ts`
-- `src/features/battle-simulation/services/ai/intentSystem.ts`
-- `src/features/battle-simulation/services/ai/contextualMoveScoring.ts`
-- `src/features/battle-simulation/services/ai/advancedAIController.ts`
-- `src/features/battle-simulation/services/ai/behaviorTreeEngine.ts`
-- `src/features/battle-simulation/services/ai/patternRecognition.ts`
-- `src/features/battle-simulation/services/ai/weightedChoice.ts`
-
-**Mechanics:**
-- ✅ Context-aware battle analysis
-- ✅ Tactical intent planning (break_defense, go_for_finish, defend, etc.)
-- ✅ Pattern recognition and adaptation
-- ✅ Weighted move scoring with multiple factors
-- ✅ Character-specific AI rules (Aang, Azula)
-- ✅ Behavior tree decision making
-- ✅ Advanced move selection with reasoning
-- ✅ Basic Strike prevention during escalation (-1000 score)
-- ✅ Signature move prioritization during escalation
-- ✅ Enhanced fallback logic with double protection
-- ✅ Strategic move selection with environmental awareness
-
-**What's Left:**
-- 🔄 Learning from battle history (2%)
-- 🔄 Dynamic difficulty adjustment (0%)
-
-### ⚡ Move Resolution System (95% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/moveExecution.service.ts`
-- `src/features/battle-simulation/services/battle/moveLogic.service.ts`
-- `src/features/battle-simulation/services/battle/resolutionTriggers.ts`
-
-**Mechanics:**
-- ✅ Damage calculation with defense reduction
-- ✅ Critical hit system with character-specific rates
-- ✅ Ability type handling (attack, defense_buff, healing)
-- ✅ Resource cost validation (chi)
-- ✅ Move execution with comprehensive logging
-- ✅ Effect application and state updates
-- ✅ Enhanced fallback logic for move selection
-
-**What's Left:**
-- 🔄 Status effect system (5%)
-- 🔄 Combo move system (0%)
-
-### 🕐 Cooldown System (100% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/cooldownSystem.ts`
-- `src/features/battle-simulation/services/cooldown/cooldownManager.service.ts`
-- `src/features/battle-simulation/hooks/useCooldownManager.hook.ts`
-- `src/features/battle-simulation/components/CooldownDemo/`
-
-**Mechanics:**
-- ✅ Turn-based cooldown tracking
-- ✅ Use limits per battle
-- ✅ Chi cost validation
-- ✅ Visual feedback with progress bars
-- ✅ Accessibility support (ARIA labels, keyboard navigation)
-- ✅ Comprehensive validation and error handling
-
-**What's Left:**
-- ✅ Fully implemented and tested
-
-### 💥 Desperation System (95% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/desperationSystem.service.ts`
-- `src/features/battle-simulation/services/battle/desperationMoves.ts`
-
-**Mechanics:**
-- ✅ Health-based desperation thresholds (15%, 10%, 5%)
-- ✅ Stat modifiers (attack bonus, defense penalty, crit bonus)
-- ✅ Desperation move unlocking
-- ✅ Dramatic narrative generation
-- ✅ State tracking and persistence
-
-**What's Left:**
-- 🔄 Desperation move balancing (5%)
-
-### 🎭 Finisher System (90% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/finisherSystem.service.ts`
-
-**Mechanics:**
-- ✅ Once-per-battle finisher moves
-- ✅ Health threshold conditions (opponent below 20%)
-- ✅ High critical hit chance (30%)
-- ✅ Dramatic narrative and effects
-- ✅ Character-specific finishers (Gale Ender, Phoenix Inferno)
-
-**What's Left:**
-- 🔄 Finisher move balancing (10%)
-- 🔄 Additional finisher conditions (0%)
-
-### 🎯 Critical System (80% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/criticalSystem.service.ts`
-
-**Mechanics:**
-- ✅ Character-specific critical hit rates
-- ✅ Critical damage multipliers
-- ✅ Critical hit detection and logging
-- ✅ Desperation state critical bonuses
-
-**What's Left:**
-- 🔄 Critical hit effects (20%)
-- 🔄 Critical hit chains (0%)
-
-### 📈 Analytics System (85% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/analytics.ts`
-- `src/features/battle-simulation/services/battle/battleAnalytics.service.ts`
-- `src/features/battle-simulation/services/battle/battleValidation.ts`
-
-**Mechanics:**
-- ✅ Battle performance metrics
-- ✅ Character performance analysis
-- ✅ AI performance tracking
-- ✅ Battle report generation
-- ✅ Stalemate detection and prevention
-- ✅ Pattern adaptation tracking
-
-**What's Left:**
-- 🔄 Enhanced analytics reporting (15%)
-- 🔄 Historical battle analysis (0%)
-
-### 🚀 Dynamic Escalation Timeline System (100% Complete - Optimized)
-
-**Files:**
-- `src/features/battle-simulation/services/battle/escalationDetection.service.ts`
-- `src/features/battle-simulation/services/battle/escalationApplication.service.ts`
-- `src/features/battle-simulation/services/battle/patternTracking.service.ts`
-- `src/features/battle-simulation/services/battle/tacticalState.service.ts`
-
-**Mechanics:**
-- ✅ Conservative escalation thresholds (25 damage by turn 35)
-- ✅ Pattern detection with 8-move threshold
-- ✅ 15-turn cooldown between escalation events
-- ✅ Basic Strike completely disabled during escalation
-- ✅ Enhanced fallback logic with signature move prioritization
-- ✅ Escalation state management and cleanup
-- ✅ Natural battle progression without forced interruptions
-- ✅ Performance: 0 escalation events in 29 turns (0% frequency)
-
-**What's Left:**
-- ✅ Fully optimized and tested
-
-### 📖 Narrative System (95% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/narrative/narrativeEngine.ts`
-- `src/features/battle-simulation/services/narrative/characterHooks.ts`
-- `src/features/battle-simulation/services/narrative/narratorHooks.ts`
-- `src/features/battle-simulation/services/narrative/contextBuilder.ts`
-
-**Mechanics:**
-- ✅ Context-aware narrative generation
-- ✅ Character-specific dialogue hooks
-- ✅ Narrator commentary system
-- ✅ Deduplication and priority system
-- ✅ Battle phase narrative triggers
-- ✅ Mood-based narrative selection
-
-**What's Left:**
-- 🔄 Additional character narratives (5%)
-- 🔄 Dynamic narrative adaptation (0%)
-
-### 🎮 UI Components (85% Complete)
-
-**Files:**
-- `src/features/battle-simulation/components/BattleScene/`
-- `src/features/battle-simulation/components/CharacterStatus/`
-- `src/features/battle-simulation/components/AbilityPanel/`
-- `src/features/battle-simulation/components/UnifiedBattleLog/`
-- `src/features/battle-simulation/components/AbilityButton/`
-
-**Mechanics:**
-- ✅ Real-time battle status display
-- ✅ Character status information
-- ✅ Ability selection interface
-- ✅ Cooldown status indicators
-- ✅ Unified battle log with tabs (narrative/AI)
-- ✅ Accessibility support (ARIA labels, keyboard navigation)
-- ✅ Clean single-log interface reducing scrolling
-
-**What's Left:**
-- 🔄 Advanced filtering and search features (15%)
-- 🔄 Log export and sharing features (0%)
-
-### 🎨 Character System (85% Complete)
-
-**Files:**
-- `src/features/character-selection/data/characterData.ts`
-- `src/features/character-selection/components/`
-
-**Mechanics:**
-- ✅ Character definitions with stats and abilities
-- ✅ Character selection interface
-- ✅ Character portraits and information
-- ✅ Ability definitions with costs and effects
-
-**What's Left:**
-- 🔄 Additional characters (15%)
-- 🔄 Character progression system (0%)
-
-### 🌍 Environmental & Collateral Damage System (30% Complete)
-
-**Files:**
-- `src/features/battle-simulation/services/narrative/contextBuilder.ts`
-- `src/features/battle-simulation/services/narrative/types.ts`
-- `src/common/types/index.ts`
-- `src/features/location-selection/data/locationData.ts`
-
-**Mechanics:**
-- ✅ Collateral damage tolerance calculation system
-- ✅ Character-specific tolerance values (Azula: 0.2, Aang: 0.7)
-- ✅ Location-based tolerance modifiers (Fire Nation Capital)
-- ✅ Type definitions for collateral risk and tolerance
-- ✅ Integration with battle context for narrative system
-
-**What's Left:**
-- 🔄 Ability collateral risk assignment (70%)
-- 🔄 Environmental damage tracking and effects (0%)
-- 🔄 Narrative hooks using collateral tolerance (0%)
-- 🔄 Text-based environmental damage reporting (0%)
-- 🔄 Gameplay impact of collateral damage (0%)
-
-## Manipulation Resilience & Behavioral Traits
-
-- **Manipulation Resilience**: Each character now has a stat (0-100) representing resistance to psychological manipulation, tracked in `BattleCharacter` and `PerceivedState`. This affects AI decision-making, escalation triggers, and narrative events.
-- **Behavioral Traits**: Characters have a set of `behavioralTraits` that influence tactical and narrative behavior, also tracked in state and used by the AI and escalation systems.
-
-## 🔧 Technical Implementation Details
-
-### Type Safety
-The entire codebase uses comprehensive TypeScript with strict type checking:
-- ✅ 99th percentile JavaScript type safety achieved
-- ✅ Comprehensive type definitions in `src/common/types/`
-- ✅ Defensive programming with input validation
-- ✅ Error boundaries and graceful error handling
-
-### Performance Optimizations
-- ✅ Memoized calculations for expensive operations
-- ✅ Efficient state updates with minimal re-renders
-- ✅ Lazy evaluation of AI decisions
-- ✅ Optimized battle loop processing
-
-### Code Quality
-- ✅ ESLint configuration with strict rules
-- ✅ Comprehensive error handling
-- ✅ Accessibility compliance (WCAG)
-- ✅ Modular architecture with clear separation of concerns
-
-## 🚀 Current Capabilities
-
-### Battle Simulation
-- **Turn-based combat** with sophisticated AI decision making
-- **Real-time battle logging** with detailed event tracking
-- **Multiple victory conditions** (health depletion, max turns, stalemate)
-- **Comprehensive analytics** with performance metrics
-
-### AI Intelligence
-- **Context-aware decision making** based on battle state
-- **Pattern recognition** and adaptation to opponent strategies
-- **Tactical intent planning** across multiple turns
-- **Character-specific behavior** with unique personality traits
-
-### Battle Mechanics
-- **Cooldown system** preventing ability spamming
-- **Desperation system** with dramatic power shifts at low health
-- **Finisher moves** for climactic battle endings
-- **Critical hit system** with character-specific rates
-- **Resource management** with chi costs and recovery
-- **Collateral damage tolerance** with character-specific environmental concerns
-
-### Narrative Experience
-- **Dynamic storytelling** with context-aware dialogue
-- **Character-specific narratives** reflecting personality
-- **Battle phase commentary** from narrator
-- **Emotional progression** through battle stages
-
-## 🎯 Future Development Priorities
-
-### High Priority (Next Sprint)
-1. **Enhanced battle log formatting** - Better text presentation and readability
-2. **Status effect system** - Buffs, debuffs, and temporary effects
-3. **Additional characters** - Expand roster beyond Aang and Azula
-4. **Advanced analytics display** - Detailed text-based battle reports and statistics
-
-### Medium Priority (Next Quarter)
-1. **Combo move system** - Chain abilities for bonus effects
-2. **Learning AI** - AI that adapts based on battle history
-3. **Battle replay system** - Review and analyze past battles
-4. **Dynamic difficulty adjustment** - AI that scales with player skill
-
-### Low Priority (Future Releases)
-1. **Character progression** - Leveling and ability unlocking
-2. **Team battles** - Multi-character combat
-3. **Environmental effects** - Location-based battle mechanics
-4. **Tournament system** - Competitive battle brackets
-
-## 📊 Overall Completion: 98%
-
-The Avatar Battle Arena simulator represents a sophisticated battle system with advanced AI, comprehensive mechanics, and engaging narrative elements. The core battle engine is nearly complete, with most systems at 80-95% implementation. The remaining work focuses on polish, additional features, and enhanced user experience elements.
-
-### Key Achievements
-- ✅ Advanced AI system with context awareness and pattern recognition
-- ✅ Comprehensive battle mechanics with cooldowns, desperation, and finishers
-- ✅ Dynamic narrative system with character-specific dialogue
-- ✅ Robust type safety and error handling
-- ✅ Accessibility-compliant UI components
-- ✅ Performance-optimized battle processing
-
-### Next Steps
-The simulator is ready for production use with the current feature set. Future development should focus on text-based enhancements, additional content, and improved user experience features while maintaining the high code quality and type safety standards already established. 
+
+⚔️ Core Battle Mechanics
+
+1. Manipulation
+Alters the enemy’s state, making them easier to exploit in subsequent turns.
+ 🟦 Triggers only if opponent is vulnerable (low health/stability), not already manipulated, and not too early in the fight. Success is probability-based and affected by opponent’s resilience stat.
+2. Overconfidence
+Character becomes reckless, changing AI behavior and increasing vulnerability.
+ 🟦 Triggers only if character is winning decisively, not already overconfident, and still healthy.
+3. Forced Escalation
+Triggers an all-out attack phase where only powerful/signature moves are allowed.
+4. Plea for Peace
+Aang attempts to de-escalate the battle, potentially changing its course.
+ 🟦 Triggers only if the character is in danger, not already pleaded, and at very low health.
+5. State Change
+Major transitions in character status (e.g., compromised, stunned).
+6. Move Fatigue
+Penalizes repeated use of the same move, encouraging tactical variety.
+7. Reversal
+A comeback mechanic that allows a disadvantaged character to turn the tide.
+8. Desperation
+Last-stand, high-risk/high-reward move available only under dire conditions.
+9. Finisher
+Once-per-battle, high-damage move that can decisively end a fight.
+10. Critical
+High-damage, chance-based event that can dramatically shift momentum.
+11. Collateral Damage
+Environmental or mental state impacts that affect the battle beyond direct attacks.
+ 🟦 Locations have numeric tolerance and narrative description for collateral damage, affecting mechanics and story.
+12. Positioning
+Tactical stances and terrain effects that influence move effectiveness and defense.
+13. Victory / Draw / Escape
+End conditions: win, draw, escape, or mutual KO.
+14. Status Effects
+Buffs, debuffs, and state changes persisting over turns (e.g., Burn, Defense Up/Down, Stun, Heal Over Time, Crit Chance Up, Slow).
+15. Momentum / Initiative
+Dynamic turn order and dramatic swings that unlock special actions and comeback opportunities.
+16. Environmental Damage
+Powerful moves can damage the environment, with locations having unique tolerances and narrative consequences.
+17. Mental State Impact
+Environmental destruction can cause permanent changes to a character’s mental state, affecting future behavior.
+18. Dynamic Escalation Timeline
+A battle arc state machine: Opening → Rising Action → Climax → Falling Action → Resolution → Twilight; each state applies unique global modifiers and narrative effects.
+19. Pattern Detection
+Detects repeated move use or repositioning to trigger escalation or force close combat.
+20. Arc State Modifiers
+Each battle arc state applies global modifiers (damage, defense, chi regen, status effect duration, AI risk, finisher unlocks).
+21. Conditional Move Unlocking
+Moves (e.g., finishers, desperation) unlock based on health thresholds or battle state.
+22. Desperation Buffs
+Low HP triggers damage bonuses and defense penalties for high-stakes moments.
+ 🟦 Implemented as a desperationBuff object with threshold, bonus, and penalty.
+23. Progressive Move Availability
+Moves become available as the battle progresses, based on state and conditions.
+24. Cooldown System
+Prevents ability spamming with turn-based cooldowns, use limits, and resource management.
+ 🟦 Each trait and move has its own cooldown, tracked per character.
+25. Limited Use Moves
+Some moves have a maximum number of uses per battle, tracked and enforced.
+26. Charge-Up Mechanics
+Certain moves require multiple turns to charge—vulnerable while charging, high reward if successful.
+27. Environmental Constraints
+Locations can restrict or enhance certain moves, affecting tactics.
+28. Behavioral Traits
+Character-specific personality traits (e.g., manipulation, overconfidence, plea for peace) with mechanical impact, able to interrupt normal combat flow.
+ 🟦 Each trait tracks cooldown and last triggered turn per character.
+29. Active Flags
+Temporary states (e.g., isManipulated, overconfidenceActive, isExposed, hasPleadedThisBattle) that modify stats or move availability.
+ 🟦 Flags are set/cleared by trait and move effects for gating mechanics and AI logic.
+30. Trait Effects
+Behavioral traits can apply flags, modify stats, or change AI priorities.
+31. Identity-Driven Tactical Behavior (IDTB)
+AI decision-making is influenced by unique psychology, core values, tactical tendencies, and moral boundaries.
+32. Mental State Tracking
+Dynamic psychological states (stability, pride, active states) change with battle events and influence behavior.
+ 🟦 Mental state variables are checked in trait logic and can gate effects.
+33. Opponent Perception
+Each character tracks subjective views of the opponent (threat, respect, fear), affecting tactics.
+34. AI Tactical Intent System
+AI sets multi-turn tactical objectives (e.g., break defense, go for finish, stall, pressure, desperate attack, conservative play).
+35. AI Pattern Recognition
+AI adapts to repeated patterns in opponent behavior, changing tactics accordingly.
+36. AI Environmental Awareness
+AI considers environmental factors, constraints, and collateral damage when selecting moves.
+37. Battle Log & Narrative Integration
+All major mechanics and state changes are logged with narrative context; the UI provides visual feedback for dramatic events.
+ 🟦 Every trait trigger (success or failure) generates a narrative log entry.
+38. Accessibility & Visual Feedback
+All mechanics are reflected in the UI with badges, color coding, ARIA labels, and animations for clarity and accessibility.
+
+🟦 Additional / Hidden Mechanics
+
+39. Probability-Based Trait Effects
+Some traits (e.g., manipulation) have a chance to fail, based on opponent stats.
+40. Multi-Condition Gating
+Effects/traits often require several conditions (e.g., health, stability, turn, previous flags).
+41. Early/Late Battle Gating
+Some mechanics restricted to certain battle phases (e.g., manipulation/plea for peace cannot occur too early).
+42. Resilience/Resistance Stats
+Opponent stats (e.g., manipulationResilience) affect trait success probability.
+43. Move Tag System
+Moves are tagged (e.g., ['finisher', 'desperation', 'area', 'lightning', 'high-damage']) for filtering, unlock logic, AI.
+44. Behavioral System Integration
+Characters have a list of behavioralTraits with traitId and lastTriggeredTurn for tracking/cooldowns.
+45. Environmental Tolerance & Narrative
+Locations have both a numeric collateralTolerance and a toleranceNarrative for environmental damage.
+46. Flag-Based Gating
+Many mechanics (e.g., move unlocks, AI behavior) are gated by specific flags.
+47. Narrative-Driven Environmental Impact
+Moves/locations include narrative fields for collateral/environmental impact, surfaced in logs/UI.
+48. Combo Move System (Planned)
+Referenced in code/docs; not yet implemented.
+
+🟣 Status Effects (Detailed)
+BURN: Damage over time (e.g., Azula’s Blue Fire)
+
+
+DEFENSE_UP: Increases defense (e.g., Aang’s Air Shield)
+
+
+ATTACK_UP: Increases attack power
+
+
+DEFENSE_DOWN: Decreases defense (e.g., Aang’s Wind Slice)
+
+
+STUN: Prevents actions
+
+
+HEAL_OVER_TIME: Healing over time
+
+
+CRIT_CHANCE_UP: Increases crit chance
+
+
+SLOW: Reduces action speed
+
+
+
+🟡 Battle Arc States & Modifiers
+Opening: Cautious probing, normal damage, conservative AI
+
+
+Rising Action: Slight damage bonus, normal AI, minor chi regen
+
+
+Climax: High intensity, damage bonus, aggressive AI, finishers unlocked
+
+
+Falling Action: Exhaustion, high damage, defense penalty, very aggressive AI
+
+
+Resolution: Final push, max damage, significant defense penalty, extremely aggressive AI
+
+
+Twilight: Both fighters critically wounded, max bonuses/penalties, rare edge case
+
+
+
+🛠 Other Notable Systems
+Turn Processing & State Validation: Ensures mechanic order/state consistency
+
+
+Battle Termination Conditions: Victory, draw, escape, mutual KO, turn limit
+
+
+Combo Move System (Planned): Not yet implemented; future mechanic
+
+
+
+🧭 Future Features
+1. Advanced Environmental Interactivity
+ The environment can be manipulated, destroyed, or used tactically (e.g., knockback into hazards, cover, traps).
+2. Emotion-Driven Dialogue and Taunts
+ Characters dynamically generate taunts, encouragement, or pleas based on emotional/mental state for immersion.
+
+
+

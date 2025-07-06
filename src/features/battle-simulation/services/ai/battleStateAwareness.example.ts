@@ -59,9 +59,28 @@ export function demonstrateBattleStateAwareness(): void {
     isCharging: false,
     repositionAttempts: 0,
     chargeInterruptions: 0,
-    lastPositionChange: undefined,
+    // lastPositionChange: undefined, // Unused, removed for cleanliness
     positionHistory: [],
-    personality: 'balanced'
+    personality: 'balanced',
+    controlState: 'Neutral',
+    stability: 100,
+    momentum: 0,
+    recoveryOptions: [],
+    defensiveStance: 'none',
+    mentalState: {
+      stability: 100,
+      pride: 100,
+      activeStates: []
+    },
+    opponentPerception: {
+      aggressionLevel: 0,
+      predictability: 50,
+      respect: 100
+    },
+    mentalThresholdsCrossed: {},
+    behavioralTraits: [],
+    manipulationResilience: 100,
+    activeFlags: new Map()
   };
 
   const zuko: BattleCharacter = {
@@ -113,9 +132,28 @@ export function demonstrateBattleStateAwareness(): void {
     isCharging: false,
     repositionAttempts: 0,
     chargeInterruptions: 0,
-    lastPositionChange: undefined,
+    // lastPositionChange: undefined, // Unused, removed for cleanliness
     positionHistory: [],
-    personality: 'aggressive'
+    personality: 'aggressive',
+    controlState: 'Neutral',
+    stability: 100,
+    momentum: 0,
+    recoveryOptions: [],
+    defensiveStance: 'none',
+    mentalState: {
+      stability: 100,
+      pride: 100,
+      activeStates: []
+    },
+    opponentPerception: {
+      aggressionLevel: 0,
+      predictability: 50,
+      respect: 100
+    },
+    mentalThresholdsCrossed: {},
+    behavioralTraits: [],
+    manipulationResilience: 100,
+    activeFlags: new Map()
   };
 
   // Create example battle log

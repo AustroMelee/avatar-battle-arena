@@ -183,7 +183,7 @@ export function useMultipleNarrativePools(
         };
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, unknown>);
   }, [pools]);
 
   return {

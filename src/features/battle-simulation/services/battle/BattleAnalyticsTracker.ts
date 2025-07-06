@@ -76,7 +76,7 @@ export function updateTacticalAnalytics(
   if (additionalMetrics) {
     Object.entries(additionalMetrics).forEach(([key, value]) => {
       if (key in state.analytics! && typeof value === 'number') {
-        (state.analytics as any)[key] += value;
+        (state.analytics as Record<string, number>)[key] += value;
       }
     });
   }

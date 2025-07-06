@@ -1,7 +1,6 @@
 // CONTEXT: Battle, // FOCUS: MoveFatigue
 import type { BattleCharacter } from '../../types';
 import type { Ability } from '../../types/move.types';
-import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
 /**
  * Configuration for move fatigue mechanics.

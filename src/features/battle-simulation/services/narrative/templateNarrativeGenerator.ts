@@ -1,5 +1,5 @@
 // CONTEXT: Narrative System, // FOCUS: Template-Based Narrative Generation
-import type { BattleContext, TriggeredNarrative, NarrativeSystemConfig } from './types';
+import type { BattleContext, TriggeredNarrative, NarrativeSystemConfig, CharacterMood } from './types';
 import { 
   selectNarrativeTemplate, 
   generateNarrativeText, 
@@ -30,7 +30,7 @@ export function generateTemplateBasedNarratives(
         id: generateUniqueLogId('template'),
         speaker: ctx.actor.name,
         text: characterText,
-        mood: determineMoodFromTone(ctx.narrativeTone) as any,
+        mood: determineMoodFromTone(ctx.narrativeTone) as CharacterMood,
         priority: template.priority,
         timestamp: Date.now()
       });
@@ -43,7 +43,7 @@ export function generateTemplateBasedNarratives(
         id: generateUniqueLogId('template'),
         speaker: 'Narrator',
         text: narratorText,
-        mood: 'neutral' as any,
+        mood: undefined,
         priority: template.priority - 1, // Slightly lower priority than character
         timestamp: Date.now()
       });
@@ -96,7 +96,7 @@ export function generateFallbackNarrative(ctx: BattleContext): TriggeredNarrativ
     id: generateUniqueLogId('template'),
     speaker: ctx.actor.name,
     text,
-    mood: mood as any,
+    mood: mood as CharacterMood,
     priority: 1,
     timestamp: Date.now()
   };

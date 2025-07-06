@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
+import { App } from './App.tsx';
 import './styles/variables.css';
 import './styles/global.css';
 import { ErrorBoundary } from 'react-error-boundary';

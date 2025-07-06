@@ -1,5 +1,5 @@
 import type { BattleCharacter, ControlState } from '../../types';
-import type { Ability, ImpactClass } from '../../types/move.types';
+import type { Ability } from '../../types/move.types';
 
 export type ImpactType = 'graze' | 'redirected' | 'glancing_hit' | 'direct_hit' | 'critical_disruption';
 
@@ -23,7 +23,6 @@ function defenderHasEvaded(_defender: BattleCharacter, _move: Ability): boolean 
  * Scales odds and magnitude based on move.impactClass, defender.controlState, traits, etc.
  */
 export function resolveImpact(
-  attacker: BattleCharacter,
   defender: BattleCharacter,
   move: Ability
 ): ImpactResult {

@@ -108,11 +108,11 @@ export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
       
       if (parts.length > 1) {
         return (
-          <>
+          <React.Fragment>
             {icon} {parts[0]}
             <span className={styles.damageHighlight}>{damageText}</span>
             {parts[1]}
-          </>
+          </React.Fragment>
         );
       }
     }
@@ -124,19 +124,19 @@ export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
       
       if (parts.length > 1) {
         return (
-          <>
+          <React.Fragment>
             {icon} {parts[0]}
             <span className={styles.criticalHighlight}>{critText}</span>
             {parts[1]}
-          </>
+          </React.Fragment>
         );
       }
     }
     
     return (
-      <>
+      <React.Fragment>
         {icon} {baseText}
-      </>
+      </React.Fragment>
     );
   };
 

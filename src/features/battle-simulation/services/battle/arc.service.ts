@@ -1,5 +1,5 @@
 // CONTEXT: BattleSimulation, // FOCUS: ArcStateEngine
-import { BattleState, BattleArcState, ArcStateModifier, ArcTransition, BattleLogEntry } from '../../types';
+import { BattleState, BattleArcState, ArcStateModifier, BattleLogEntry } from '../../types';
 import { ARC_TRANSITIONS } from '../../data/arcTransitions';
 
 // For developer controls - can be overridden for testing

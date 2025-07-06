@@ -1,5 +1,5 @@
 // CONTEXT: Battle, // FOCUS: DecisiveClash
-import type { BattleState, BattleCharacter } from '../../types';
+import type { BattleState } from '../../types';
 
 /**
  * Configuration for decisive clash mechanics.

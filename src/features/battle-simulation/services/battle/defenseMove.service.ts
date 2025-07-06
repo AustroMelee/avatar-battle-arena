@@ -3,8 +3,7 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
-import { createEventId, generateUniqueLogId } from '../ai/logQueries';
-// Removed unused import
+import { generateUniqueLogId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect } from '../effects/statusEffect.service';
 

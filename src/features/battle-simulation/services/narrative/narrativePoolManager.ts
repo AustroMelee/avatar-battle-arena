@@ -377,8 +377,8 @@ export class NarrativePoolManager {
   /**
    * Get usage statistics for debugging
    */
-  getUsageStats(): Record<string, any> {
-    const stats: Record<string, any> = {};
+  getUsageStats(): Record<string, unknown> {
+    const stats: Record<string, unknown> = {};
     
     Object.entries(this.characterStates).forEach(([character, state]) => {
       stats[character] = {

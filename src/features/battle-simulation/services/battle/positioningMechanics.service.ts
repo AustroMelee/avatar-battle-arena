@@ -58,8 +58,7 @@ export function canUseMove(move: Move, character: BattleCharacter, enemy: Battle
  */
 export function performReposition(
   character: BattleCharacter, 
-  location: string,
-  turn: number
+  location: string
 ): { success: boolean; newPosition: Position; narrative: string; damage?: number } {
   const locationType = getLocationType(location);
   const isAirbender = character.name.toLowerCase().includes('aang');
@@ -96,19 +95,17 @@ export function performReposition(
   if (success) {
     character.position = "repositioning";
     character.repositionAttempts++;
-    character.lastPositionChange = turn;
+    character.lastPositionChange = Date.now();
     character.positionHistory.push("repositioning");
-    
-    const narrative = isAirbender 
-      ? `${character.name} glides gracefully through the air to new ground.`
-      : isFirebender
-      ? `${character.name} uses fire propulsion to dash to a new position.`
-      : `${character.name} dashes to new ground, watching for an opening.`;
     
     return {
       success: true,
       newPosition: "repositioning",
-      narrative
+      narrative: isAirbender 
+        ? `${character.name} glides gracefully through the air to new ground.`
+        : isFirebender
+        ? `${character.name} uses fire propulsion to dash to a new position.`
+        : `${character.name} dashes to new ground, watching for an opening.`
     };
   } else {
     // Failed reposition
@@ -212,15 +209,14 @@ export function calculatePunishBonus(move: Move, enemy: BattleCharacter): number
  */
 export function updatePositionAfterMove(
   character: BattleCharacter, 
-  move: Move, 
-  turn: number
+  move: Move
 ): { positionChanged: boolean; narrative: string } {
   if (!move.changesPosition) {
     return { positionChanged: false, narrative: "" };
   }
   
   character.position = move.changesPosition;
-  character.lastPositionChange = turn;
+  character.lastPositionChange = Date.now();
   character.positionHistory.push(move.changesPosition);
   
   let narrative = "";

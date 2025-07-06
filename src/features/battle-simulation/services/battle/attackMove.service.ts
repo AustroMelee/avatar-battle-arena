@@ -71,7 +71,7 @@ export async function executeAttackMove(
     console.log(`⚔️⚔️⚔️ CLASH RESULT - ${clashResult.outcome}: ${clashResult.narrative} ⚔️⚔️⚔️`);
   } else {
     // Use new dramatic mechanics system for normal attacks
-    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    const moveResult = resolveMove(move, battleContext, attacker, target);
     
     // Apply status effect damage modifiers
     const modifiedDamage = modifyDamageWithEffects(moveResult.damage, attacker, target);
@@ -126,7 +126,7 @@ export async function executeAttackMove(
   
   // Mark finisher as used if it was a finisher
   if (!wasEvaded && !wasParried) {
-    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    const moveResult = resolveMove(move, battleContext, attacker, target);
     if (moveResult.wasFinisher) {
       newState.participants[state.activeParticipantIndex].flags = {
         ...newState.participants[state.activeParticipantIndex].flags,
@@ -143,7 +143,7 @@ export async function executeAttackMove(
     damage: finalDamage,
     maxHealth: target.stats.power + target.stats.defense + target.stats.agility,
     isMiss: finalDamage === 0,
-    isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target, state.turn).wasCrit : false,
+    isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target).wasCrit : false,
     isPatternBreak: attacker.flags?.forcedEscalation === 'true' && attacker.flags?.damageMultiplier === '2.0',
     isEscalation: attacker.flags?.forcedEscalation === 'true',
     consecutiveHits: 0,
@@ -173,7 +173,7 @@ export async function executeAttackMove(
       narrative = attackNarrative;
       console.log(`DEBUG: Enhanced attack narrative for ${attacker.name}: "${narrative}"`);
     } else {
-      const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+      const moveResult = resolveMove(move, battleContext, attacker, target);
       narrative = moveResult.narrative || `${attacker.name} uses ${ability.name} and deals ${finalDamage} damage!`;
       console.log(`DEBUG: Fallback attack narrative for ${attacker.name}: "${narrative}"`);
     }
@@ -199,7 +199,7 @@ export async function executeAttackMove(
   } else if (wasParried) {
     result = `${target.name} parries the attack and creates an opening!`;
   } else if (!wasEvaded && !wasParried) {
-    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    const moveResult = resolveMove(move, battleContext, attacker, target);
     if (moveResult.wasCrit) {
       result = `CRITICAL HIT! ${target.name} takes ${finalDamage} damage!`;
     } else if (moveResult.wasDesperation) {
@@ -247,6 +247,6 @@ export async function executeAttackMove(
     damage: finalDamage,
     result,
     narrative,
-    isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target, state.turn).wasCrit : false
+    isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target).wasCrit : false
   };
 } 

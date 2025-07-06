@@ -1,0 +1,75 @@
+✅ Cursor 100% Effectiveness Checklist
+1. Initial Setup
+ Install latest Cursor (update regularly)
+
+ Connect all relevant MCP servers (GitHub, Context7, Puppeteer, etc.)
+
+ Enable/authorize your repo & project folders
+
+2. Project Context & Rules
+ Create a project rules file
+
+Use the “New Cursor Rule” command (CMD/CTRL + Shift + P → New Cursor Rule)
+
+Add a clear project description and file structure at the top
+
+ Keep rules minimal and targeted
+
+Only add rules for issues Cursor actually repeats
+
+Update rules whenever you see persistent AI mistakes
+
+3. Best Practices for Prompting
+ Always provide file context in your prompt (e.g., “see @utils.ts”)
+
+ For big tasks, end with:
+“Ask any questions that would clarify this task for you.”
+
+ Avoid vague prompts; be explicit about goals and constraints
+
+ If prompt ends in a “?”, instruct Cursor to answer, not generate code
+
+4. Code Review & Validation
+ Review all AI-suggested code before applying
+
+ Manually refactor core/critical sections (don’t trust AI with your project’s “heart”)
+
+ Use Composer/Agent for small, low-risk changes
+
+ Use Chat/Ask for everything else (and always review diffs)
+
+5. Automation & Guardrails
+ Set up validation scripts (e.g., linters, type checks)
+
+ Add pre-commit git hooks to block bad changes
+
+ Use templates/snippets for key files to standardize structure
+
+6. Learning & Adapting
+ Refine rules as you discover new pain points or patterns
+
+ Update your context (rules, docs) as the project grows
+
+ Keep spec sheets/checklists for major features—attach to prompts
+
+7. Recovery & Troubleshooting
+ Restore from checkpoint if AI output spirals
+
+ If stuck, clarify instructions and try again, or step in manually
+
+ Iterate on one prompt rather than scatter new ones—maintains context
+
+8. Community & Power Tips
+ Review popular community rules/templates for your stack
+
+ Double check with ChatGPT/Claude for complex logic or bugfixes
+
+ Bookmark the Cursor Guardrails repo for best practices
+
+9. Miscellaneous
+ Update Cursor regularly for bug fixes & features
+
+ Participate in the r/cursor community for new strategies
+
+⭐ Final Reminder:
+Cursor is a powerful assistant—not a replacement for your own review and judgment. Use these steps as a workflow, and you’ll avoid nearly all common pitfalls.

@@ -18,6 +18,41 @@ interface UnifiedBattleLogProps {
 
 type LogTab = 'narrative' | 'ai';
 
+// Move this helper function above the component definition
+
+const renderMetaDetails = (entry: BattleLogEntry, styles: any): React.ReactNode | null => {
+  if (!entry.meta || Object.keys(entry.meta).length === 0) return null;
+  const filteredMetaFields = Object.entries(entry.meta)
+    .filter(([key]) => !['crit','finisher','desperation','resourceCost','controlShift','stabilityChange','newControlState'].includes(key));
+  const hasResourceCost = entry.meta.resourceCost !== undefined;
+  const hasFinisher = entry.meta.finisher === true;
+  const hasDesperation = entry.meta.desperation === true;
+  const hasOtherMeta = filteredMetaFields.length > 0;
+  if (!hasResourceCost && !hasFinisher && !hasDesperation && !hasOtherMeta) return null;
+  return (
+    <div className={styles.entryMeta}>
+      {hasResourceCost && (
+        <span className={styles.resourceCost}>💠 {Number(entry.meta.resourceCost)} chi</span>
+      )}
+      {hasFinisher && (
+        <span className={styles.finisherBadge}>🔥 FINISHER</span>
+      )}
+      {hasDesperation && (
+        <span className={styles.desperationBadge}>⚡ DESPERATION</span>
+      )}
+      {hasOtherMeta && (
+        <div className={styles.metaDetails}>
+          {filteredMetaFields.map(([key, value]) => (
+            <div key={key} className={styles.metaDetailItem}>
+              <span className={styles.metaKey}>{key}:</span> <span className={styles.metaValue}>{JSON.stringify(value)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /**
  * @description Unified battle log with tabs for narrative and AI logs.
  */
@@ -102,32 +137,20 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    */
   const formatBattleEntryText = (entry: BattleLogEntry): React.ReactNode => {
     const icon = getEventIcon(entry);
-    // Show disruption mechanics if present
     if (entry.meta?.controlShift !== undefined || entry.meta?.stabilityChange !== undefined) {
       return (
-        <>
+        <React.Fragment>
           {icon} <b>{entry.action}</b>: {entry.narrative}
-          {entry.meta.controlShift !== undefined ? (
-            <span className={styles.controlShift}> [Control Shift: {entry.meta.controlShift}]</span>
+          {entry.meta?.controlShift !== undefined && entry.meta?.controlShift !== null ? (
+            <span className={styles.controlShift}> [Control Shift: {String(entry.meta.controlShift)}]</span>
           ) : null}
-          {entry.meta.stabilityChange !== undefined ? (
-            <span className={styles.stabilityChange}> [Stability: -{entry.meta.stabilityChange}]</span>
+          {entry.meta?.stabilityChange !== undefined && entry.meta?.stabilityChange !== null ? (
+            <span className={styles.stabilityChange}> [Stability: -{String(entry.meta.stabilityChange)}]</span>
           ) : null}
-          {entry.meta.newControlState ? (
-            <span className={styles.newControlState}> [State: {entry.meta.newControlState}]</span>
+          {entry.meta?.newControlState !== undefined && entry.meta?.newControlState !== null ? (
+            <span className={styles.newControlState}> [State: {String(entry.meta.newControlState)}]</span>
           ) : null}
-        </>
-      );
-    }
-    // Highlight state change log entries
-    if (entry.type === 'STATUS' && entry.action === 'State Change') {
-      return (
-        <>
-          {icon} <b>{entry.actor}</b>: <span className={styles.stateChangeBadge}>{entry.narrative}</span>
-          {entry.meta?.newControlState ? (
-            <span className={styles.newControlState}> [State: {entry.meta.newControlState}]</span>
-          ) : null}
-        </>
+        </React.Fragment>
       );
     }
     // Fallback to old logic
@@ -140,11 +163,11 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       
       if (parts.length > 1) {
         return (
-          <>
+          <React.Fragment>
             {icon} {parts[0]}
             <span className={styles.damageHighlight}>{damageText}</span>
             {parts[1]}
-          </>
+          </React.Fragment>
         );
       }
     }
@@ -156,19 +179,19 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       
       if (parts.length > 1) {
         return (
-          <>
+          <React.Fragment>
             {icon} {parts[0]}
             <span className={styles.criticalHighlight}>{critText}</span>
             {parts[1]}
-          </>
+          </React.Fragment>
         );
       }
     }
     
     return (
-      <>
+      <React.Fragment>
         {icon} {baseText}
-      </>
+      </React.Fragment>
     );
   };
 
@@ -200,22 +223,6 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       limitedEntries = limitedEntries.filter(entry => entry.turn === turnFilter);
     }
 
-    // DEV ONLY: Duplicate key detector
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const viteEnv = (import.meta as any).env;
-    if ((viteEnv && viteEnv.MODE === 'development') || (!viteEnv || !viteEnv.MODE)) {
-      const seen = new Set<string>();
-      for (const entry of limitedEntries) {
-        if (seen.has(entry.id)) {
-          // eslint-disable-next-line no-console
-          console.error('DUPLICATE LOG KEY DETECTED:', entry.id, entry);
-          // eslint-disable-next-line no-console
-          console.log('FULL BATTLE LOG:', limitedEntries);
-        }
-        seen.add(entry.id);
-      }
-    }
-
     return (
       <div className={styles.tabContent}>
         {limitedEntries.length === 0 ? (
@@ -236,19 +243,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
                 {formatBattleEntryText(entry)}
               </div>
               
-              {entry.meta && Object.keys(entry.meta).length > 0 && (
-                <div className={styles.entryMeta}>
-                  {entry.meta.resourceCost !== undefined ? (
-                    <span className={styles.resourceCost}>💠 {Number(entry.meta.resourceCost)} chi</span>
-                  ) : null}
-                  {entry.meta.finisher === true ? (
-                    <span className={styles.finisherBadge}>🔥 FINISHER</span>
-                  ) : null}
-                  {entry.meta.desperation === true ? (
-                    <span className={styles.desperationBadge}>⚡ DESPERATION</span>
-                  ) : null}
-                </div>
-              )}
+              {renderMetaDetails(entry, styles) as React.ReactNode}
             </div>
           ))
         )}

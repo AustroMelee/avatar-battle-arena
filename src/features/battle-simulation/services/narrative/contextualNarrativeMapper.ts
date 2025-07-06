@@ -58,7 +58,7 @@ export function getContextualMoveDescription(
 function getAzulaContextualDescription(
   context: NarrativeContext,
   intensity: 'glancing' | 'solid' | 'devastating',
-  _baseMove: string
+  _baseMove: string // intentionally unused
 ): string {
   if (context.isMiss) {
     const missReasons = [
@@ -105,7 +105,7 @@ function getAzulaContextualDescription(
 function getAangContextualDescription(
   context: NarrativeContext,
   intensity: 'glancing' | 'solid' | 'devastating',
-  _baseMove: string
+  _baseMove: string // intentionally unused
 ): string {
   if (context.isMiss) {
     const missReasons = [
@@ -152,7 +152,7 @@ function getAangContextualDescription(
 function getGenericContextualDescription(
   context: NarrativeContext,
   intensity: 'glancing' | 'solid' | 'devastating',
-  _baseMove: string
+  _baseMove: string // intentionally unused
 ): string {
   if (context.isMiss) {
     const missReasons = [

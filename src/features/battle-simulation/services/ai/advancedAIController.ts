@@ -7,7 +7,6 @@ import { chooseIntent, Intent, shouldMaintainIntent } from './intentSystem';
 import { scoreMovesWithContext, ContextualMoveScore } from './contextualMoveScoring';
 import { getAvailableMoves } from '../utils/moveUtils';
 import { assessMetaState } from './metaState';
-// Removed unused import
 
 /**
  * @description Enhanced AI decision state that includes context and intent.
@@ -72,7 +71,7 @@ function createEnhancedPerceivedState(
     round: turn,
     cooldowns: {}, // Legacy field - can be removed after migration
     location: 'Fire Nation Throne Hall', // TODO: Replace with real location
-    locationType: 'interior' as any // TODO: Replace with real locationType
+    locationType: 'Enclosed'
   };
 }
 
@@ -116,7 +115,7 @@ export function chooseAbilityWithAdvancedAI(
   
   // 3. Get available moves
   const meta = assessMetaState(character, enemy, turn);
-  const availableMoves = getAvailableMoves(character, meta, location);
+  const availableMoves = getAvailableMoves(character, meta, location, 0);
   
   // 4. Score moves with context and intent
   const contextualMoveScores = scoreMovesWithContext(

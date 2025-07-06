@@ -70,7 +70,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   
   // Check if move can be used
   console.log(`DEBUG: T${newState.turn} ${attacker.name} attempting to use ${chosenMove.name}`);
-  if (!canUseMove(chosenMove, attacker, target, newState.location || 'Open Field')) {
+  if (!canUseMove(chosenMove, attacker, target, newState.location || 'Open Field', state.turn ?? 0)) {
     console.log(`DEBUG: T${newState.turn} ${attacker.name} cannot use ${chosenMove.name}, falling back to alternative move`);
     
     // Enhanced fallback logic: avoid Basic Strike during escalation

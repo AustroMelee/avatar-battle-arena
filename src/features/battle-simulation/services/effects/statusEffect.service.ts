@@ -12,13 +12,13 @@ import { createEventId, generateUniqueLogId } from '../ai/logQueries';
  * @param {BattleCharacter} character - The character to apply the effect to
  * @param {ActiveStatusEffect} effect - The effect to apply
  * @param {ArcStateModifier} arcModifiers - Current arc state modifiers
- * @returns {BattleCharacter} The updated character
+ * @returns {object} Object with updated character and log entry
  */
 export function applyEffect(
-  character: BattleCharacter, 
-  effect: ActiveStatusEffect, 
+  character: BattleCharacter,
+  effect: ActiveStatusEffect,
   arcModifiers?: ArcStateModifier
-): BattleCharacter {
+): { updatedCharacter: BattleCharacter; logEntry: BattleLogEntry } {
   let modifiedEffect = { ...effect };
   
   // Apply arc state duration modifier if provided
@@ -28,7 +28,27 @@ export function applyEffect(
   }
   
   const newEffects = [...character.activeEffects, modifiedEffect];
-  return { ...character, activeEffects: newEffects };
+  const updatedCharacter = { ...character, activeEffects: newEffects };
+
+  // Log entry for status effect application
+  const logEntry: BattleLogEntry = {
+    id: generateUniqueLogId('status'),
+    turn: Date.now(), // Should be replaced with actual turn number by caller
+    actor: character.name,
+    type: 'STATUS',
+    action: 'Effect Applied',
+    target: character.name,
+    result: `${character.name} is affected by ${modifiedEffect.type}${modifiedEffect.name ? ` (${modifiedEffect.name})` : ''} from ${modifiedEffect.sourceAbility}`,
+    narrative: `${character.name} is now under the effect of ${modifiedEffect.type}${modifiedEffect.name ? ` (${modifiedEffect.name})` : ''} from ${modifiedEffect.sourceAbility}!`,
+    timestamp: Date.now(),
+    meta: {
+      effectType: modifiedEffect.type,
+      sourceEffect: modifiedEffect.name,
+      sourceAbility: modifiedEffect.sourceAbility
+    }
+  };
+
+  return { updatedCharacter, logEntry };
 }
 
 /**

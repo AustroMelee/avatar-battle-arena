@@ -3,6 +3,7 @@ import { Character } from '@/common/types';
 import { ALL_BEHAVIORAL_TRAITS } from '../../../character-selection/data/traits';
 import { ActiveFlag } from '../../types/behavioral.types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
 /**
  * Helper function to tick down flag durations and remove expired ones.
@@ -103,7 +104,6 @@ export function processBehavioralSystemForTurn(
   
   // 2. Attempt to trigger a new behavioral trait for the active character (self)
   let behavioralLogEntry: BattleLogEntry | null = null;
-  
   for (const traitInstance of self.behavioralTraits) {
     const trait = ALL_BEHAVIORAL_TRAITS[traitInstance.traitId];
     if (!trait) continue;
@@ -136,12 +136,24 @@ export function processBehavioralSystemForTurn(
           if (!(target.activeFlags instanceof Map)) {
             target.activeFlags = new Map(Object.entries(target.activeFlags || {}));
           }
-          
           target.activeFlags.set(effect.flag, { 
             duration: effect.duration, 
             source: trait.name,
             appliedTurn: state.turn
           });
+          const logEntry = createMechanicLogEntry({
+            turn: state.turn,
+            actor: self.name,
+            mechanic: 'Trait Effect',
+            effect: 'Flag Applied',
+            reason: 'traitEffect',
+            meta: {
+              flag: effect.flag,
+              target: effect.target,
+              duration: effect.duration
+            }
+          });
+          // TODO: Add logEntry to log system
         }
       });
       

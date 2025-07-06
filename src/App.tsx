@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import styles from './App.module.css';
 import { Character, Location } from './common/types';
@@ -52,7 +53,7 @@ function App() {
 
       <main className={styles.mainContent}>
         {!isBattleActive ? (
-          <>
+          <React.Fragment>
             <div className={styles.selectionGrid}>
               <div className={styles.playerColumn}>
                 <CharacterSelection
@@ -85,9 +86,9 @@ function App() {
                 {isRunning ? 'Simulating...' : 'Simulate Battle'}
               </Button>
             </div>
-          </>
+          </React.Fragment>
         ) : (
-          <>
+          <React.Fragment>
             <BattleScene 
               state={battleState} 
               onPlayerChange={handlePlayerChange}
@@ -99,11 +100,11 @@ function App() {
                   </Button>
               )}
             </div>
-          </>
+          </React.Fragment>
         )}
       </main>
     </div>
   );
 }
 
-export default App; 
+export { App }; 

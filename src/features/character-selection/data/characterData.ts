@@ -286,6 +286,4 @@ export const availableCharacters: Character[] = [
       { traitId: 'overconfidence', lastTriggeredTurn: -99 }
     ]
   },
-  // FIXME: Add more characters like Zuko, Katara, Toph, etc. here
-  // TEMP: Sokka (non-bender) could be added with 'none' as bending type later
 ]; 

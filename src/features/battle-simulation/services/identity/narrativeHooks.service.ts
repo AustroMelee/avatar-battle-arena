@@ -1,6 +1,5 @@
 import { BattleCharacter } from '../../types';
 import { Move } from '../../types/move.types';
-// Removed unused import
 
 /**
  * Generates a move description that incorporates the character's current mental state.

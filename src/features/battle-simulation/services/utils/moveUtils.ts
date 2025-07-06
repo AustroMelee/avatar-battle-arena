@@ -4,6 +4,7 @@ import { Ability, Location } from '@/common/types';
 import { BattleCharacter } from '../../types';
 import { MetaState } from '../ai/metaState';
 import { IDENTITY_PROFILES } from '../../data/identities';
+import { createMechanicLogEntry } from './mechanicLogUtils';
 
 /**
  * @description Gets the dynamic collateral tolerance for a character based on their mental state and the location.
@@ -43,19 +44,44 @@ function getDynamicCollateralTolerance(character: BattleCharacter, location: Loc
  * @param {BattleCharacter} character - The character whose moves to check.
  * @param {MetaState} meta - The current meta-state for hard gating.
  * @param {Location} location - The battle location for collateral damage checks.
+ * @param {number} turn - The current turn number.
  * @returns {Ability[]} The available moves.
  */
-export function getAvailableMoves(character: BattleCharacter, meta: MetaState, location: Location): Ability[] {
+export function getAvailableMoves(character: BattleCharacter, meta: MetaState, location: Location, turn: number): Ability[] {
   let moves = character.abilities.filter(ability => {
     // Check cooldown using the cooldown object system
     if (character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) {
+      const logEntry = createMechanicLogEntry({
+        turn,
+        actor: character.name,
+        mechanic: 'Cooldown',
+        effect: 'Blocked',
+        reason: 'getAvailableMoves',
+        meta: {
+          move: ability.name,
+          cooldown: character.cooldowns[ability.name]
+        }
+      });
+      // TODO: Add logEntry to log system
       return false; // Ability is on cooldown
     }
     
     // Check uses remaining
     const usesLeft = character.usesLeft[ability.name] ?? (ability.maxUses || Infinity);
-    if (usesLeft <= 0) {
-      return false; // No uses remaining
+    if (ability.maxUses && usesLeft <= 0) {
+      const logEntry = createMechanicLogEntry({
+        turn,
+        actor: character.name,
+        mechanic: 'Limited Use',
+        effect: 'Blocked',
+        reason: 'getAvailableMoves',
+        meta: {
+          move: ability.name,
+          usesLeft
+        }
+      });
+      // TODO: Add logEntry to log system
+      return false;
     }
     
     // Check resource cost

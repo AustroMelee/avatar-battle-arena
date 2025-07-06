@@ -1,5 +1,5 @@
 // CONTEXT: Battle, // FOCUS: HeroicReversal
-import type { BattleState, BattleCharacter } from '../../types';
+import type { BattleCharacter } from '../../types';
 import type { BattleCharacterFlags } from '../../types/index';
 import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
@@ -25,13 +25,12 @@ export const DEFAULT_HEROIC_REVERSAL_CONFIG: HeroicReversalConfig = {
  */
 export function canTriggerHeroicReversal(
   character: BattleCharacter,
-  opponent: BattleCharacter,
   config: HeroicReversalConfig = DEFAULT_HEROIC_REVERSAL_CONFIG
 ): boolean {
   const flags = character.flags as BattleCharacterFlags;
   if (config.oncePerBattle && flags?.heroicReversalUsed) return false;
   const isLowHealth = character.currentHealth < config.healthThreshold;
-  const isLosingMomentum = (opponent.momentum - character.momentum) > config.momentumGap;
+  const isLosingMomentum = (character.momentum - character.momentum) > config.momentumGap;
   return isLowHealth && isLosingMomentum;
 }
 
@@ -40,7 +39,6 @@ export function canTriggerHeroicReversal(
  */
 export function triggerHeroicReversalWithLog(
   character: BattleCharacter,
-  opponent: BattleCharacter,
   turn: number,
   config: HeroicReversalConfig = DEFAULT_HEROIC_REVERSAL_CONFIG
 ) {

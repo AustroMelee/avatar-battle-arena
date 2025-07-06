@@ -18,7 +18,6 @@ type CharacterStatusProps = {
  */
 export function CharacterStatus({ character, isActive, playerColor }: CharacterStatusProps) {
   // Disruption model: controlState, stability, momentum
-  const stabilityPercentage = (character.stability / 100) * 100;
   const momentumPercentage = ((character.momentum + 100) / 2);
   
   // Get abilities with cooldown information

@@ -70,6 +70,4 @@ export const NarrativeBubble: React.FC<NarrativeBubbleProps> = ({
       </div>
     </div>
   );
-};
-
-export default NarrativeBubble; 
+}; 

@@ -1,7 +1,7 @@
 // CONTEXT: AI, // FOCUS: WeightedChoice
 import type { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import type { Ability, Location } from '@/common/types';
-import { getAvailableMoves } from './helpers/conditionHelpers';
+import { getAvailableMovesSimple } from './helpers/conditionHelpers';
 
 /**
  * @description Weight function type for move selection
@@ -115,7 +115,7 @@ export function selectWeightedMove(
   
   // If no weighted moves available, add fallback moves with minimum weight
   if (availableMoves.length === 0) {
-    const allMoves = getAvailableMoves(self, location);
+    const allMoves = getAvailableMovesSimple(self, location);
     
     // Enhanced fallback logic: prioritize signature moves and damaging moves over basic strikes
     const signatureMoves = ['Wind Slice', 'Blue Fire', 'Blazing Counter', 'Flowing Evasion'];

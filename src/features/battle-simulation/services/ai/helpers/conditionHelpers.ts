@@ -142,7 +142,7 @@ export function isLosing(self: BattleCharacter, opp: BattleCharacter): boolean {
 }
 
 // Move selection helpers
-export function getAvailableMoves(self: BattleCharacter, location?: Location): Ability[] {
+export function getAvailableMovesSimple(self: BattleCharacter, location?: Location): Ability[] {
   if (location) {
     // Use the main getAvailableMoves function with collateral damage filtering
     const meta: MetaState = {
@@ -157,9 +157,8 @@ export function getAvailableMoves(self: BattleCharacter, location?: Location): A
       boredomLevel: 0,
       frustrationLevel: 0
     };
-    return getAvailableMovesWithLocation(self, meta, location);
+    return getAvailableMovesWithLocation(self, meta, location, 0);
   }
-  
   // Fallback to basic filtering if no location provided
   return self.abilities.filter(ability => 
     !self.cooldowns[ability.name] && 
@@ -169,17 +168,17 @@ export function getAvailableMoves(self: BattleCharacter, location?: Location): A
 }
 
 export function getMoveByName(self: BattleCharacter, moveName: string): Ability | null {
-  const availableMoves = getAvailableMoves(self);
+  const availableMoves = getAvailableMovesSimple(self);
   return availableMoves.find(move => move.name === moveName) || null;
 }
 
 export function getMoveWithTag(self: BattleCharacter, tag: string): Ability | null {
-  const availableMoves = getAvailableMoves(self);
+  const availableMoves = getAvailableMovesSimple(self);
   return availableMoves.find(move => move.tags?.includes(tag)) || null;
 }
 
 export function getHighestDamageMove(self: BattleCharacter): Ability | null {
-  const availableMoves = getAvailableMoves(self);
+  const availableMoves = getAvailableMovesSimple(self);
   if (availableMoves.length === 0) return null;
   
   return availableMoves.reduce((best, current) => 
@@ -188,7 +187,7 @@ export function getHighestDamageMove(self: BattleCharacter): Ability | null {
 }
 
 export function getLowestCostMove(self: BattleCharacter): Ability | null {
-  const availableMoves = getAvailableMoves(self);
+  const availableMoves = getAvailableMovesSimple(self);
   if (availableMoves.length === 0) return null;
   
   return availableMoves.reduce((best, current) => 
