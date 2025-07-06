@@ -25,6 +25,10 @@ export function CharacterStatus({ character, isActive, playerColor }: CharacterS
     cooldownRemaining: character.cooldowns[ability.name] || 0
   }));
 
+  // Separate active effects by category
+  const buffs = character.activeEffects.filter(effect => effect.category === 'buff');
+  const debuffs = character.activeEffects.filter(effect => effect.category === 'debuff');
+
   return (
     <div className={`${styles.characterStatus} ${isActive ? styles.active : ''}`}>
       <div className={styles.header}>
@@ -91,14 +95,15 @@ export function CharacterStatus({ character, isActive, playerColor }: CharacterS
       )}
       
       {/* Active Buffs */}
-      {character.activeBuffs.length > 0 && (
+      {buffs.length > 0 && (
         <div className={styles.buffsSection}>
           <h4 className={styles.sectionTitle}>Active Buffs</h4>
           <div className={styles.buffsList}>
-            {character.activeBuffs.map(buff => (
+            {buffs.map(buff => (
               <div key={buff.id} className={styles.buff}>
                 <span className={styles.buffName}>{buff.name}</span>
                 <span className={styles.buffDuration}>Turns: {buff.duration}</span>
+                <span className={styles.buffSource}>from {buff.sourceAbility}</span>
               </div>
             ))}
           </div>
@@ -106,14 +111,15 @@ export function CharacterStatus({ character, isActive, playerColor }: CharacterS
       )}
       
       {/* Active Debuffs */}
-      {character.activeDebuffs.length > 0 && (
+      {debuffs.length > 0 && (
         <div className={styles.debuffsSection}>
           <h4 className={styles.sectionTitle}>Active Debuffs</h4>
           <div className={styles.debuffsList}>
-            {character.activeDebuffs.map(debuff => (
+            {debuffs.map(debuff => (
               <div key={debuff.id} className={styles.debuff}>
                 <span className={styles.debuffName}>{debuff.name}</span>
                 <span className={styles.debuffDuration}>Turns: {debuff.duration}</span>
+                <span className={styles.debuffSource}>from {debuff.sourceAbility}</span>
               </div>
             ))}
           </div>

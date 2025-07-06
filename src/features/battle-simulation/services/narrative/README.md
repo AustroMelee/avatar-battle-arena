@@ -1,5 +1,12 @@
 # Enhanced Narrative System
 
+## SRP Compliance
+
+The narrative system is now fully SRP-compliant:
+- Each file/class has a single responsibility (see SRP_REFACTORING.md, SRP_SUMMARY.md)
+- Orchestration, composition, emotional policy, and strategy are all separated
+- This enables safe, maintainable, and extensible narrative logic
+
 A comprehensive narrative system that transforms mechanical battle events into compelling, character-driven storytelling. The system uses a modular, single-responsibility architecture where each file has one clear purpose.
 
 ## Architecture Overview

@@ -181,6 +181,12 @@
   font-size: 0.7rem;
 }
 
+.buffSource {
+  color: #888;
+  font-size: 0.6rem;
+  font-style: italic;
+}
+
 .debuffsSection {
   margin-bottom: 12px;
 }
@@ -210,6 +216,12 @@
 .debuffDuration {
   color: #ccc;
   font-size: 0.7rem;
+}
+
+.debuffSource {
+  color: #888;
+  font-size: 0.6rem;
+  font-style: italic;
 }
 
 .resourcesSection {

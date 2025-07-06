@@ -63,16 +63,29 @@ export const availableCharacters: Character[] = [
         chiCost: 3,
         cooldown: 4,
         maxUses: 3,
-        tags: ['defensive']
+        tags: ['defensive'],
+        appliesEffect: {
+          type: 'DEFENSE_UP',
+          chance: 1.0, // Always applies defense buff
+          duration: 3,
+          potency: 15 // +15 defense
+        }
       },
       {
         name: 'Focus',
         type: 'defense_buff',
-        power: 5,
-        description: 'Takes a moment to focus and recover chi',
-        chiCost: 0,
-        cooldown: 0,
-        tags: ['rest', 'fallback', 'climax']
+        power: 25,
+        description: 'Focuses chi to heal and strengthen',
+        chiCost: 5,
+        cooldown: 5,
+        maxUses: 2,
+        tags: ['healing', 'defensive'],
+        appliesEffect: {
+          type: 'HEAL_OVER_TIME',
+          chance: 1.0, // Always applies healing
+          duration: 3,
+          potency: 5 // 5 health per turn
+        }
       },
       // Desperation moves that unlock at low health
       {
@@ -146,7 +159,13 @@ export const availableCharacters: Character[] = [
         cooldown: 1,
         tags: ['piercing'],
         critChance: 0.16,
-        critMultiplier: 2.8
+        critMultiplier: 2.8,
+        appliesEffect: {
+          type: 'BURN',
+          chance: 1.0, // Always applies burn for testing
+          duration: 3,
+          potency: 2 // 2 damage per turn
+        }
       },
       {
         name: 'Fire Jets',
@@ -164,7 +183,13 @@ export const availableCharacters: Character[] = [
         description: 'Channels fire energy to heal and strengthen',
         chiCost: 7,
         cooldown: 3,
-        tags: ['healing', 'defensive']
+        tags: ['healing', 'defensive'],
+        appliesEffect: {
+          type: 'HEAL_OVER_TIME',
+          chance: 1.0, // Always applies healing
+          duration: 4,
+          potency: 6 // 6 health per turn
+        }
       },
       {
         name: 'Focus',

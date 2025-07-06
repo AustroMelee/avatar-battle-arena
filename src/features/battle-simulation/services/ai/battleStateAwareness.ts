@@ -108,8 +108,8 @@ export function getPerceivedBattleState(
     maxHealth: 100, // All characters start with 100 health
     currentDefense: self.currentDefense,
     resources: { ...self.resources },
-    buffs: self.activeBuffs.map(b => b.name),
-    debuffs: self.activeDebuffs.map(d => d.name),
+    buffs: self.activeEffects.filter(e => e.category === 'buff').map(e => e.name),
+    debuffs: self.activeEffects.filter(e => e.category === 'debuff').map(e => e.name),
     cooldowns: { ...self.cooldowns },
     lastMove: self.lastMove || null,
     moveHistory: [...self.moveHistory]
@@ -120,8 +120,8 @@ export function getPerceivedBattleState(
     maxHealth: 100, // All characters start with 100 health
     currentDefense: enemy.currentDefense,
     resources: { ...enemy.resources },
-    buffs: enemy.activeBuffs.map(b => b.name),
-    debuffs: enemy.activeDebuffs.map(d => d.name),
+    buffs: enemy.activeEffects.filter(e => e.category === 'buff').map(e => e.name),
+    debuffs: enemy.activeEffects.filter(e => e.category === 'debuff').map(e => e.name),
     cooldowns: { ...enemy.cooldowns },
     lastMove: enemy.lastMove || null,
     moveHistory: [...enemy.moveHistory]

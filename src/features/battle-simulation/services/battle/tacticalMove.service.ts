@@ -1,37 +1,15 @@
 // CONTEXT: Tactical Move Service
-// RESPONSIBILITY: Execute tactical moves with pure game logic
+// RESPONSIBILITY: Execute tactical moves with positioning, charge-up, and status effect mechanics
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Move } from '../../types/move.types';
-import { 
-  performReposition, 
-  handleChargeUp, 
-  applyPositionBonuses, 
-  calculatePunishBonus,
-  updatePositionAfterMove,
-  createTacticalLogEntry
-} from './positioningMechanics.service';
-
-import { 
-  generateRepositionNarrative,
-  generateChargeNarrative,
-  generateInterruptionNarrative,
-  generateRegularTacticalNarrative
-} from './TacticalNarrativeService';
-
-import { 
-  logTacticalMove,
-  logEscalation,
-  logPunishment,
-  logNarrative,
-  logMoveUsage,
-  logCharge
-} from './BattleLogger';
-
-import { 
-  updateTacticalAnalytics,
-  trackEscalationEvent
-} from './BattleAnalyticsTracker';
+import { resolveMove } from './moveLogic.service';
+import { createBattleContext } from './battleContext.service';
+import { convertAbilityToMove } from './moveConverter.service';
+import { modifyDamageWithEffects } from '../effects/statusEffect.service';
+import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
+import { handleChargeUp, calculatePunishBonus, applyPositionBonuses } from './positioningMechanics.service';
+import { generateTacticalNarrative } from './TacticalNarrativeService';
 
 /**
  * @description Result of executing a tactical move
@@ -44,7 +22,7 @@ export interface TacticalMoveResult {
 }
 
 /**
- * @description Executes a tactical move with pure game logic
+ * @description Executes a tactical move with positioning, charge-up, and status effect mechanics
  * @param {Move} move - The move to execute
  * @param {BattleCharacter} attacker - The attacking character
  * @param {BattleCharacter} target - The target character
@@ -57,299 +35,300 @@ export async function executeTacticalMove(
   target: BattleCharacter,
   state: BattleState
 ): Promise<TacticalMoveResult> {
+  console.log('DEBUG: Entered executeTacticalMove for', move.name, 'by', attacker.name, 'on', target.name);
+  
   const newAttacker = { ...attacker };
   const newTarget = { ...target };
-  let narrative = '';
   
   // Handle repositioning moves
   if (move.changesPosition === "repositioning") {
-    const repositionResult = performReposition(newAttacker, state.location || 'Open Field', state.turn);
-    
-    if (repositionResult.damage) {
-      newAttacker.currentHealth = Math.max(0, newAttacker.currentHealth - repositionResult.damage);
-      // Update analytics for reposition damage
-      updateTacticalAnalytics(state, repositionResult.damage, 0);
-    }
-    
-    // Generate narrative for repositioning
-    const narrativeResult = await generateRepositionNarrative(
-      newAttacker,
-      newTarget,
-      move,
-      repositionResult.damage || 0,
-      state,
-      repositionResult.narrative
-    );
-    narrative = narrativeResult.narrative;
-    
-    // Log reposition execution
-    logTacticalMove(newAttacker.name, move.name, repositionResult.damage || 0, 'repositioned');
-    logNarrative(newAttacker.name, narrative, 'enhanced');
-    
-    const logEntry = createTacticalLogEntry(
-      state.turn,
-      newAttacker.name,
-      'REPOSITION',
-      move.name,
-      repositionResult.success ? 'Success' : 'Failed',
-      narrative,
-      {
-        positionChange: {
-          from: attacker.position,
-          to: repositionResult.newPosition,
-          success: repositionResult.success
-        },
-        damage: repositionResult.damage
-      }
-    );
-    
-    return { newAttacker, newTarget, logEntry, narrative };
+    return handleRepositioningMove(move, newAttacker, newTarget, state);
   }
   
   // Handle charge-up moves
   if (move.isChargeUp) {
-    const chargeResult = handleChargeUp(newAttacker, newTarget, move);
-    
-    if (chargeResult.interrupted) {
-      newAttacker.currentHealth = Math.max(0, newAttacker.currentHealth - (chargeResult.damage || 0));
-      // Update analytics for charge interruption damage
-      updateTacticalAnalytics(state, chargeResult.damage || 0, 0);
-      
-      // Generate narrative for charge interruption
-      const narrativeResult = await generateInterruptionNarrative(
-        newAttacker,
-        newTarget,
-        move,
-        chargeResult.damage || 0,
-        state,
-        chargeResult.narrative
-      );
-      narrative = narrativeResult.narrative;
-      
-      // Log charge interruption
-      logTacticalMove(newAttacker.name, move.name, chargeResult.damage || 0, 'charge interrupted');
-      logNarrative(newAttacker.name, narrative, 'enhanced');
-      
-      // Update move usage limits even for interrupted charge-ups
-      if (move.maxUses) {
-        if (!newAttacker.usesLeft) {
-          newAttacker.usesLeft = {};
-        }
-        const currentUses = newAttacker.usesLeft[move.name] ?? move.maxUses;
-        newAttacker.usesLeft[move.name] = Math.max(0, currentUses - 1);
-        logMoveUsage(newAttacker.name, move.name, newAttacker.usesLeft[move.name], 'interrupted charge-up of');
-      }
-      
-      const logEntry = createTacticalLogEntry(
-        state.turn,
-        newAttacker.name,
-        'INTERRUPT',
-        move.name,
-        'Interrupted',
-        narrative,
-        {
-          chargeInterrupted: true,
-          damage: chargeResult.damage
-        }
-      );
-      
-      return { newAttacker, newTarget, logEntry, narrative };
-    }
-    
-    if ((newAttacker.chargeProgress || 0) >= 100) {
-      // Charge complete - execute the move
-      const positionBonus = applyPositionBonuses(move, newAttacker);
-      const punishBonus = calculatePunishBonus(move, newTarget);
-      
-      let chargeDamage = Math.floor(move.baseDamage * positionBonus.damageMultiplier) + punishBonus;
-      
-      // Apply escalation damage multiplier if in forced escalation
-      if (newAttacker.flags?.forcedEscalation === 'true') {
-        const escalationMultiplier = parseFloat(newAttacker.flags.damageMultiplier || '1.0');
-        chargeDamage = Math.floor(chargeDamage * escalationMultiplier);
-        logEscalation(newAttacker.name, chargeDamage, escalationMultiplier);
-        trackEscalationEvent(state);
-      }
-      
-      // Apply real punishment damage for vulnerable enemies
-      let chargePunishDamage = 0;
-      if (newTarget.isCharging || newTarget.position === "repositioning" || newTarget.position === "stunned") {
-        const punishMultiplier = move.punishIfCharging ? 3 : 2;
-        const baseChargeDamage = chargeDamage;
-        chargeDamage = Math.floor(chargeDamage * punishMultiplier);
-        chargePunishDamage = chargeDamage - baseChargeDamage;
-        logPunishment(newAttacker.name, chargeDamage, punishMultiplier, 'vulnerable enemy with charge');
-      }
-      
-      newTarget.currentHealth = Math.max(0, newTarget.currentHealth - chargeDamage);
-      
-      // Update analytics for charge damage and chi cost
-      const actualChiCost = Math.max(0, move.chiCost - positionBonus.chiCostReduction);
-      updateTacticalAnalytics(state, chargeDamage, actualChiCost, chargePunishDamage);
-      
-      // Generate narrative for charged attack
-      const narrativeResult = await generateChargeNarrative(
-        newAttacker,
-        newTarget,
-        move,
-        chargeDamage,
-        state,
-        true // isComplete
-      );
-      narrative = narrativeResult.narrative;
-      
-      // Log charge completion
-      logTacticalMove(newAttacker.name, move.name, chargeDamage, 'completed charge-up of');
-      logNarrative(newAttacker.name, narrative, 'enhanced');
-      
-      // Update move usage limits for completed charge-up moves
-      if (move.maxUses) {
-        if (!newAttacker.usesLeft) {
-          newAttacker.usesLeft = {};
-        }
-        const currentUses = newAttacker.usesLeft[move.name] ?? move.maxUses;
-        newAttacker.usesLeft[move.name] = Math.max(0, currentUses - 1);
-        logMoveUsage(newAttacker.name, move.name, newAttacker.usesLeft[move.name], 'completed charge-up of');
-      }
-      
-      const logEntry = createTacticalLogEntry(
-        state.turn,
-        newAttacker.name,
-        'CHARGE',
-        move.name,
-        `Deals ${chargeDamage} damage`,
-        narrative,
-        {
-          damage: chargeDamage,
-          chargeProgress: 100,
-          positionBonus: positionBonus.damageMultiplier,
-          punishBonus,
-          punishDamage: chargePunishDamage > 0 ? chargePunishDamage : undefined
-        }
-      );
-      
-      return { newAttacker, newTarget, logEntry, narrative };
-    } else {
-      // Still charging
-      // Generate narrative for charging
-      const narrativeResult = await generateChargeNarrative(
-        newAttacker,
-        newTarget,
-        move,
-        0,
-        state,
-        false // isComplete
-      );
-      narrative = narrativeResult.narrative;
-      
-      // Log charging progress
-      logCharge(newAttacker.name, move.name, newAttacker.chargeProgress || 0, 'continues charging');
-      logNarrative(newAttacker.name, narrative, 'enhanced');
-      
-      const logEntry = createTacticalLogEntry(
-        state.turn,
-        newAttacker.name,
-        'CHARGE',
-        move.name,
-        'Charging',
-        narrative,
-        {
-          chargeProgress: newAttacker.chargeProgress
-        }
-      );
-      
-      return { newAttacker, newTarget, logEntry, narrative };
+    return handleChargeUpMove(move, newAttacker, newTarget, state);
+  }
+  
+  // Handle regular tactical moves
+  return handleRegularTacticalMove(move, newAttacker, newTarget, state);
+}
+
+/**
+ * @description Handles repositioning moves
+ */
+async function handleRepositioningMove(
+  move: Move,
+  attacker: BattleCharacter,
+  target: BattleCharacter,
+  state: BattleState
+): Promise<TacticalMoveResult> {
+  console.log(`DEBUG: ${attacker.name} starts repositioning`);
+  
+  const newTarget = { ...target };
+  
+  // Set attacker to repositioning state
+  attacker.position = "repositioning";
+  attacker.repositionAttempts++;
+  
+  // Calculate reposition success
+  const successRate = move.repositionSuccessRate || 0.8;
+  const isSuccessful = Math.random() < successRate;
+  
+  let damage = 0;
+  let narrative = `${attacker.name} repositions to gain advantage!`;
+  
+  if (isSuccessful) {
+    // Successful reposition - minimal damage but tactical advantage
+    damage = Math.floor(move.baseDamage * 0.3);
+    narrative = `${attacker.name} successfully repositions, gaining tactical advantage!`;
+  } else {
+    // Failed reposition - no damage
+    damage = 0;
+    narrative = `${attacker.name} attempts to reposition but fails to gain advantage.`;
+  }
+  
+  // Apply damage to target
+  newTarget.currentHealth = Math.max(0, target.currentHealth - damage);
+  
+  // Apply status effects if any
+  if (move.appliesEffect) {
+    const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
+    if (shouldApply) {
+      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
+      const updatedTarget = applyEffect(newTarget, statusEffect);
+      Object.assign(newTarget, updatedTarget);
     }
   }
-  
-  // Handle regular moves
-  const positionBonus = applyPositionBonuses(move, newAttacker);
-  const punishBonus = calculatePunishBonus(move, newTarget);
-  
-  // Real punishment mechanics
-  let finalDamage = Math.floor(move.baseDamage * positionBonus.damageMultiplier) + punishBonus;
-  
-  // Apply escalation damage multiplier if in forced escalation
-  if (newAttacker.flags?.forcedEscalation === 'true') {
-    const escalationMultiplier = parseFloat(newAttacker.flags.damageMultiplier || '1.0');
-    finalDamage = Math.floor(finalDamage * escalationMultiplier);
-    logEscalation(newAttacker.name, finalDamage, escalationMultiplier);
-    trackEscalationEvent(state);
-  }
-  
-  // Apply real punishment damage for vulnerable enemies
-  let punishDamage = 0;
-  if (newTarget.isCharging || newTarget.position === "repositioning" || newTarget.position === "stunned") {
-    const punishMultiplier = move.punishIfCharging ? 3 : 2; // Triple damage for punish moves, double for regular attacks
-    const baseDamage = finalDamage;
-    finalDamage = Math.floor(finalDamage * punishMultiplier);
-    punishDamage = finalDamage - baseDamage;
-    logPunishment(newAttacker.name, finalDamage, punishMultiplier, 'vulnerable enemy');
-  }
-  
-  newTarget.currentHealth = Math.max(0, newTarget.currentHealth - finalDamage);
-  
-  // Update analytics for damage and chi cost
-  const actualChiCost = Math.max(0, move.chiCost - positionBonus.chiCostReduction);
-  updateTacticalAnalytics(state, finalDamage, actualChiCost, punishDamage);
-  
-  // Apply position changes
-  const positionResult = updatePositionAfterMove(newAttacker, move, state.turn);
-  if (positionResult.positionChanged) {
-    narrative += positionResult.narrative + " ";
-  }
-  
-  // Generate narrative for regular attack
-  const narrativeResult = await generateRegularTacticalNarrative(
-    newAttacker,
-    newTarget,
-    move,
-    finalDamage,
-    state
-  );
-  narrative = narrativeResult.narrative;
-  
-  // Log regular move execution
-  logTacticalMove(newAttacker.name, move.name, finalDamage, 'used');
-  logNarrative(newAttacker.name, narrative, 'enhanced');
   
   // Spend chi
-  newAttacker.resources.chi = Math.max(0, newAttacker.resources.chi - actualChiCost);
+  const chiCost = move.chiCost || 0;
+  attacker.resources.chi = Math.max(0, attacker.resources.chi - chiCost);
   
   // Apply cooldown
-  if (move.cooldown > 0) {
-    newAttacker.cooldowns[move.id] = move.cooldown;
-  }
-  
-  // Update move usage limits
-  if (move.maxUses) {
-    if (!newAttacker.usesLeft) {
-      newAttacker.usesLeft = {};
-    }
-    const currentUses = newAttacker.usesLeft[move.name] ?? move.maxUses;
-    newAttacker.usesLeft[move.name] = Math.max(0, currentUses - 1);
-    logMoveUsage(newAttacker.name, move.name, newAttacker.usesLeft[move.name], 'used');
+  if (move.cooldown && move.cooldown > 0) {
+    attacker.cooldowns[move.id] = move.cooldown;
   }
   
   // Update move history
-  newAttacker.lastMove = move.name;
-  newAttacker.moveHistory.push(move.name);
+  attacker.lastMove = move.name;
+  attacker.moveHistory.push(move.name);
   
-  const logEntry = createTacticalLogEntry(
-    state.turn,
-    newAttacker.name,
-    'POSITION' as const,
-    move.name,
-    `Deals ${finalDamage} damage`,
+  // Create log entry
+  const logEntry: BattleLogEntry = {
+    id: `reposition-${state.turn}-${Date.now()}`,
+    turn: state.turn,
+    actor: attacker.name,
+    type: 'REPOSITION',
+    action: move.name,
+    target: target.name,
+    damage,
+    result: damage > 0 ? `${target.name} takes ${damage} damage.` : `${attacker.name} repositions.`,
     narrative,
-    {
-      damage: finalDamage,
-      positionBonus: positionBonus.damageMultiplier,
-      punishBonus,
-      punishDamage: punishDamage > 0 ? punishDamage : undefined,
-      positionChanged: positionResult.positionChanged
+    timestamp: Date.now(),
+    meta: {
+      moveType: 'repositioning',
+      success: isSuccessful,
+      resourceCost: chiCost
     }
+  };
+  
+  return {
+    newAttacker: attacker,
+    newTarget: newTarget,
+    logEntry,
+    narrative
+  };
+}
+
+/**
+ * @description Handles charge-up moves
+ */
+async function handleChargeUpMove(
+  move: Move,
+  attacker: BattleCharacter,
+  target: BattleCharacter,
+  state: BattleState
+): Promise<TacticalMoveResult> {
+  console.log(`DEBUG: ${attacker.name} starts charging ${move.name}`);
+  
+  const newTarget = { ...target };
+  
+  // Handle charge-up mechanics
+  const chargeResult = handleChargeUp(attacker, target, move);
+  
+  let damage = 0;
+  let narrative = chargeResult.narrative;
+  
+  // If charge was interrupted, apply damage to attacker
+  if (chargeResult.interrupted && chargeResult.damage) {
+    attacker.currentHealth = Math.max(0, attacker.currentHealth - chargeResult.damage);
+    narrative = chargeResult.narrative;
+  } else if (chargeResult.success && attacker.chargeProgress && attacker.chargeProgress >= 100) {
+    // Charge complete - calculate full damage
+    const battleContext = createBattleContext(attacker, target, state);
+    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    damage = moveResult.damage;
+    
+    // Apply status effects if any
+    if (move.appliesEffect) {
+      const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
+      if (shouldApply) {
+        const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
+        const updatedTarget = applyEffect(newTarget, statusEffect);
+        Object.assign(newTarget, updatedTarget);
+      }
+    }
+    
+    // Apply damage to target
+    newTarget.currentHealth = Math.max(0, target.currentHealth - damage);
+    
+    narrative = `CHARGED ATTACK! ${attacker.name} unleashes ${move.name} for ${damage} damage!`;
+  }
+  
+  // Spend chi
+  const chiCost = move.chiCost || 0;
+  attacker.resources.chi = Math.max(0, attacker.resources.chi - chiCost);
+  
+  // Apply cooldown
+  if (move.cooldown && move.cooldown > 0) {
+    attacker.cooldowns[move.id] = move.cooldown;
+  }
+  
+  // Update move history
+  attacker.lastMove = move.name;
+  attacker.moveHistory.push(move.name);
+  
+  // Create log entry
+  const logEntry: BattleLogEntry = {
+    id: `charge-${state.turn}-${Date.now()}`,
+    turn: state.turn,
+    actor: attacker.name,
+    type: 'CHARGE',
+    action: move.name,
+    target: target.name,
+    damage,
+    result: chargeResult.interrupted ? `${attacker.name}'s charge was interrupted!` : 
+            damage > 0 ? `${target.name} takes ${damage} damage.` : `${attacker.name} continues charging.`,
+    narrative,
+    timestamp: Date.now(),
+    meta: {
+      moveType: 'charge-up',
+      chargeComplete: attacker.chargeProgress && attacker.chargeProgress >= 100,
+      interrupted: chargeResult.interrupted,
+      resourceCost: chiCost
+    }
+  };
+  
+  return {
+    newAttacker: attacker,
+    newTarget: newTarget,
+    logEntry,
+    narrative
+  };
+}
+
+/**
+ * @description Handles regular tactical moves
+ */
+async function handleRegularTacticalMove(
+  move: Move,
+  attacker: BattleCharacter,
+  target: BattleCharacter,
+  state: BattleState
+): Promise<TacticalMoveResult> {
+  const newTarget = { ...target };
+  
+  // Create battle context and resolve move
+  const battleContext = createBattleContext(attacker, target, state);
+  const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+  
+  // Apply position bonuses
+  const positionBonus = applyPositionBonuses(move, attacker);
+  let damage = moveResult.damage;
+  
+  // Apply punish bonus if applicable
+  const punishBonus = calculatePunishBonus(move, target);
+  damage += punishBonus;
+  
+  // Apply status effect damage modifiers
+  damage = modifyDamageWithEffects(damage, attacker, target);
+  
+  // Apply damage to target
+  newTarget.currentHealth = Math.max(0, target.currentHealth - damage);
+  
+  // Apply status effects if any
+  if (move.appliesEffect) {
+    const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
+    if (shouldApply) {
+      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
+      const updatedTarget = applyEffect(newTarget, statusEffect);
+      Object.assign(newTarget, updatedTarget);
+    }
+  }
+  
+  // Spend chi
+  const chiCost = move.chiCost || 0;
+  attacker.resources.chi = Math.max(0, attacker.resources.chi - chiCost);
+  
+  // Apply cooldown
+  if (move.cooldown && move.cooldown > 0) {
+    attacker.cooldowns[move.id] = move.cooldown;
+  }
+  
+  // Update move history
+  attacker.lastMove = move.name;
+  attacker.moveHistory.push(move.name);
+  
+  // Generate enhanced narrative
+  const enhancedNarrative = await generateTacticalNarrative(
+    attacker,
+    newTarget,
+    move,
+    damage,
+    state,
+    moveResult.wasCrit ? 'devastating' : damage > 0 ? 'hit' : 'miss',
+    moveResult.narrative
   );
   
-  return { newAttacker, newTarget, logEntry, narrative };
+  const narrative = enhancedNarrative.narrative || moveResult.narrative;
+  
+  // Create result string
+  let result: string;
+  if (moveResult.wasCrit) {
+    result = `CRITICAL HIT! ${target.name} takes ${damage} damage!`;
+  } else if (moveResult.wasDesperation) {
+    result = `DESPERATION MOVE! ${target.name} takes ${damage} damage!`;
+  } else {
+    result = `${target.name} takes ${damage} damage.`;
+  }
+  
+  // Create log entry
+  const logEntry: BattleLogEntry = {
+    id: `tactical-${state.turn}-${Date.now()}`,
+    turn: state.turn,
+    actor: attacker.name,
+    type: 'TACTICAL',
+    action: move.name,
+    target: target.name,
+    damage,
+    result,
+    narrative,
+    timestamp: Date.now(),
+    meta: {
+      moveType: 'tactical',
+      wasCrit: moveResult.wasCrit,
+      wasDesperation: moveResult.wasDesperation,
+      positionBonus: positionBonus.damageMultiplier > 1 ? positionBonus.damageMultiplier : undefined,
+      punishBonus: punishBonus > 0 ? punishBonus : undefined,
+      resourceCost: chiCost
+    }
+  };
+  
+  return {
+    newAttacker: attacker,
+    newTarget: newTarget,
+    logEntry,
+    narrative
+  };
 }

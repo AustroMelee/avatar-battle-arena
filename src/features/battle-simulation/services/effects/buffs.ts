@@ -1,28 +1,18 @@
-// CONTEXT: Buff/Debuff Management
+// CONTEXT: Buff/Debuff Management (Legacy - Use statusEffect.service.ts instead)
 // RESPONSIBILITY: Apply, reduce, and process buffs/debuffs
-import { BattleCharacter, Buff, Debuff } from '../../types';
+import { BattleCharacter, Buff, Debuff, ActiveStatusEffect } from '../../types';
+import { processTurnEffects, applyEffect, createStatusEffect } from './statusEffect.service';
 
 /**
  * @description Processes buffs and debuffs for a character, reducing duration and removing expired ones.
  * @param {BattleCharacter} character - The character whose buffs/debuffs to process.
  * @returns {BattleCharacter} The character with updated buffs/debuffs.
+ * @deprecated Use processTurnEffects from statusEffect.service.ts instead
  */
 export function processBuffsAndDebuffs(character: BattleCharacter): BattleCharacter {
-  // Reduce duration of all buffs and remove expired ones
-  const updatedBuffs = character.activeBuffs
-    .map(buff => ({ ...buff, duration: buff.duration - 1 }))
-    .filter(buff => buff.duration > 0);
-  
-  // Reduce duration of all debuffs and remove expired ones
-  const updatedDebuffs = character.activeDebuffs
-    .map(debuff => ({ ...debuff, duration: debuff.duration - 1 }))
-    .filter(debuff => debuff.duration > 0);
-  
-  return {
-    ...character,
-    activeBuffs: updatedBuffs,
-    activeDebuffs: updatedDebuffs
-  };
+  // Use the new status effect system
+  const result = processTurnEffects(character, 0); // turn number doesn't matter for legacy compatibility
+  return result.updatedCharacter;
 }
 
 /**
@@ -30,12 +20,20 @@ export function processBuffsAndDebuffs(character: BattleCharacter): BattleCharac
  * @param {BattleCharacter} character - The character to buff.
  * @param {Buff} buff - The buff to apply.
  * @returns {BattleCharacter} The character with the new buff.
+ * @deprecated Use applyEffect from statusEffect.service.ts instead
  */
 export function applyBuff(character: BattleCharacter, buff: Buff): BattleCharacter {
-  return {
-    ...character,
-    activeBuffs: [...character.activeBuffs, buff]
+  // Convert legacy buff to new status effect format
+  const effect: ActiveStatusEffect = {
+    id: buff.id,
+    name: buff.name,
+    type: 'DEFENSE_UP', // Default assumption for legacy buffs
+    category: 'buff',
+    duration: buff.duration,
+    potency: buff.potency || 1,
+    sourceAbility: buff.source
   };
+  return applyEffect(character, effect);
 }
 
 /**
@@ -43,12 +41,20 @@ export function applyBuff(character: BattleCharacter, buff: Buff): BattleCharact
  * @param {BattleCharacter} character - The character to debuff.
  * @param {Debuff} debuff - The debuff to apply.
  * @returns {BattleCharacter} The character with the new debuff.
+ * @deprecated Use applyEffect from statusEffect.service.ts instead
  */
 export function applyDebuff(character: BattleCharacter, debuff: Debuff): BattleCharacter {
-  return {
-    ...character,
-    activeDebuffs: [...character.activeDebuffs, debuff]
+  // Convert legacy debuff to new status effect format
+  const effect: ActiveStatusEffect = {
+    id: debuff.id,
+    name: debuff.name,
+    type: 'DEFENSE_DOWN', // Default assumption for legacy debuffs
+    category: 'debuff',
+    duration: debuff.duration,
+    potency: debuff.potency || 1,
+    sourceAbility: debuff.source
   };
+  return applyEffect(character, effect);
 }
 
 /**

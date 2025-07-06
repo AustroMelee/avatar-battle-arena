@@ -171,6 +171,26 @@ export function selectTacticalMove(
       reasoning += "Move used recently. ";
       tacticalFactors.push("Recent Use");
     }
+
+    // 13. STATUS EFFECT SCORING - Value applying and reacting to status effects
+    if (move.appliesEffect) {
+      const effect = move.appliesEffect;
+      if (effect.category === 'debuff') {
+        // Highly value applying debuffs to healthy enemies
+        if (!enemy.activeEffects.some(e => e.type === effect.type)) {
+          score += 25; // High bonus for applying a new, impactful debuff
+          reasoning += `Applies a powerful ${effect.type} debuff. `;
+          tacticalFactors.push("Status Debuff");
+        }
+      } else { // It's a buff
+        // Value applying buffs to self, especially when not already active
+        if (!self.activeEffects.some(e => e.type === effect.type)) {
+          score += 20;
+          reasoning += `Applies a useful ${effect.type} self-buff. `;
+          tacticalFactors.push("Status Buff");
+        }
+      }
+    }
     
     return {
       move,

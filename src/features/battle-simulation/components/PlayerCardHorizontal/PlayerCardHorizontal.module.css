@@ -146,7 +146,7 @@
   z-index: 1;
 }
 
-.statsRow, .abilitiesRow, .styleRow {
+.statsRow, .abilitiesRow, .styleRow, .effectsRow {
   display: flex;
   flex-direction: row;
   gap: 8px;
@@ -169,7 +169,7 @@
   transition: all 0.2s ease;
 }
 
-.statChip:hover, .abilityChip:hover, .styleChip:hover {
+.statChip:hover, .abilityChip:hover, .styleChip:hover, .effectIcon:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
 }
@@ -177,6 +177,48 @@
 .statChip svg, .abilityChip svg, .styleChip svg {
   font-size: 12px;
   color: var(--bending-color);
+}
+
+/* Status Effect Styles */
+.effectIcon {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.effectIcon svg {
+  font-size: 12px;
+  color: var(--effect-color, #9E9E9E);
+}
+
+.effectDuration {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--effect-color, #9E9E9E);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 1px 4px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.effectIcon.buff {
+  border-color: rgba(0, 255, 0, 0.3);
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.effectIcon.debuff {
+  border-color: rgba(255, 0, 0, 0.3);
+  background: rgba(255, 0, 0, 0.1);
 }
 
 .statLabel {
@@ -240,7 +282,7 @@
     font-size: 18px;
   }
   
-  .statsRow, .abilitiesRow, .styleRow {
+  .statsRow, .abilitiesRow, .styleRow, .effectsRow {
     gap: 6px;
     font-size: 12px;
   }
@@ -265,7 +307,7 @@
     width: 100%;
   }
   
-  .statsRow, .abilitiesRow, .styleRow {
+  .statsRow, .abilitiesRow, .styleRow, .effectsRow {
     justify-content: center;
   }
 } 

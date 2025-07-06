@@ -1,4 +1,4 @@
-🔥❄️ 15 Things You’d Expect in a Top-Tier Text-Only Simulator Battle
+🔥❄️ 15 Things You'd Expect in a Top-Tier Text-Only Simulator Battle
 Tactical Environment Use
 
 Azula launching fire off palace pillars; Aang ricocheting air off walls or using banners as slingshots.
@@ -33,7 +33,7 @@ Singed robes, scorched palms, bruised ribs from air pressure—maintains ATLA to
 
 Chi Economy or Move Cost Tracking
 
-E.g., “Aang channels 6 chi into Wind Slice”; “Azula’s lightning drains 12 chi.”
+E.g., "Aang channels 6 chi into Wind Slice"; "Azula's lightning drains 12 chi."
 
 Terrain Degradation
 
@@ -62,17 +62,172 @@ Rooftop chase, throne hall confrontation, fire garden duel—showcasing Fire Nat
 ✅ Checklist for Outstanding Quality
 Category	Criteria
 Tactical Realism	Bending reflects canon limitations and creative uses. No out-of-character moves.
-Cinematic Clarity	Each action described with visual weight and clear spatial logic. No “floaty” vagueness.
+Cinematic Clarity	Each action described with visual weight and clear spatial logic. No "floaty" vagueness.
 Emotional Subtext	Inner thoughts or body language reflect fear, confidence, doubt.
 Ideological Clash	Even brief lines reflect who they are: pacifist vs predator.
 Rhythm & Pacing	Momentum builds, with pauses and spikes. Not repetitive turn spam.
 Environmental Integration	The Fire Nation capital isn't a backdrop—it shapes the fight.
-Move Variety	No spamming the same techniques. Airbending isn’t just "push"; fire isn’t just "blast."
+Move Variety	No spamming the same techniques. Airbending isn't just "push"; fire isn't just "blast."
 Damage Consequence	Each blow changes behavior. Aang winces, Azula gets frustrated, footing shifts.
 Move Economy	Chi/move cost tracked or implied, making choices meaningful.
 Character Consistency	Aang avoids lethal force; Azula takes kill shots but shows control.
-Narrative Flourish	Dynamic prose, vivid metaphors (“Azula’s flame licked the sky like a viper’s tongue.”)
+Narrative Flourish	Dynamic prose, vivid metaphors ("Azula's flame licked the sky like a viper's tongue.")
 No Plot Armor	Stakes feel real. No immunity to consequence; they survive by wit.
 Symbolic Framing	Moments echo broader themes (e.g., mercy vs dominance).
 Creative Counters	Unexpected counters add surprise (e.g., Aang deflects lightning via compressed air burst).
-Satisfying Closure	Doesn’t end abruptly. Closes with aftermath tone—emotionally or ideologically resonant.
+Satisfying Closure	Doesn't end abruptly. Closes with aftermath tone—emotionally or ideologically resonant.
+[x] SRP pass: All services and modules refactored for single responsibility
+[ ] Ongoing: Enforce SRP boundaries for all new features and refactors
+
+AVATAR BATTLE ARENA - DEVELOPMENT ROADMAP
+
+PHASE 1: CORE BATTLE SYSTEM ✅ COMPLETE
+[x] Basic battle simulation engine
+[x] Character system with stats and abilities
+[x] Turn-based combat mechanics
+[x] Health and defense systems
+[x] Chi resource management
+[x] Basic AI decision making
+[x] Battle logging and state management
+
+PHASE 2: TACTICAL BATTLE SYSTEM ✅ COMPLETE
+[x] Positioning mechanics
+[x] Charge-up moves with risks/rewards
+[x] Environmental constraints
+[x] Repositioning mechanics
+[x] Punish mechanics for vulnerable enemies
+[x] Advanced tactical AI
+[x] Pattern recognition and adaptation
+[x] Escalation mechanics
+[x] Desperation system
+[x] Finisher moves
+
+PHASE 3: STATUS EFFECT SYSTEM ✅ COMPLETE
+[x] Unified status effect system
+[x] Status effect application with chance/duration
+[x] Status effect processing and expiration
+[x] Damage modification based on effects
+[x] AI integration with status effect valuation
+[x] Battle log integration for status effects
+[x] Status effect debugging and logging
+[x] Move integration with appliesEffect property
+[x] Status effect types: BURN, DEFENSE_UP, DEFENSE_DOWN, ATTACK_UP, STUN, HEAL_OVER_TIME
+
+PHASE 4: NARRATIVE SYSTEM ✅ COMPLETE
+[x] Dynamic narrative generation
+[x] Character-specific narrative styles
+[x] Emotional arc tracking
+[x] Battle phase adaptation
+[x] Environmental context integration
+[x] Narrative templates and variants
+[x] Narrative coordination and composition
+[x] Narrative memory and repetition prevention
+[x] Narrative escalation and climax building
+[x] Narrative state management
+
+PHASE 5: AI ENHANCEMENT ✅ COMPLETE
+[x] Advanced AI decision making
+[x] AI pattern recognition and adaptation
+[x] AI escalation awareness
+[x] AI status effect valuation
+[x] AI move scoring with multiple criteria
+[x] AI reasoning and explanation system
+[x] AI log entries for debugging
+[x] AI state awareness and context
+[x] AI move variety and repetition prevention
+[x] AI environmental awareness
+
+PHASE 6: UI/UX ENHANCEMENT ✅ COMPLETE
+[x] Character selection interface
+[x] Battle simulation interface
+[x] Battle log display with filtering
+[x] Technical log display
+[x] AI decision log display
+[x] Character status display
+[x] Move selection interface
+[x] Battle scene visualization
+[x] Narrative bubble display
+[x] Enhanced battle log with animations
+
+PHASE 7: TECHNICAL INFRASTRUCTURE ✅ COMPLETE
+[x] TypeScript with strict type checking
+[x] React with functional components and hooks
+[x] CSS Modules for styling
+[x] Vite for build tooling
+[x] ESLint for code quality
+[x] Comprehensive error handling
+[x] Defensive programming patterns
+[x] Modular architecture with SRP compliance
+[x] Dependency injection patterns
+[x] Lazy initialization to prevent circular dependencies
+
+PHASE 8: SRP REFACTORING ✅ COMPLETE
+[x] All major services refactored for single responsibility
+[x] Tactical move service split into focused modules
+[x] Narrative system fully modularized
+[x] AI services properly separated
+[x] Battle services organized by domain
+[x] No files exceed 500 lines
+[x] Clear separation of concerns
+[x] Proper orchestration patterns
+[x] Maintainable and extensible architecture
+
+PHASE 9: ENHANCED UI/UX (CURRENT PHASE)
+[ ] Improved battle scene animations
+[ ] Enhanced character portraits and effects
+[ ] Better mobile responsiveness
+[ ] Accessibility improvements
+[ ] Performance optimizations
+[ ] Advanced battle log filtering
+[ ] Real-time battle statistics
+[ ] Customizable UI themes
+[ ] Keyboard shortcuts and controls
+[ ] Battle replay functionality
+
+PHASE 10: PERFORMANCE OPTIMIZATION
+[ ] Battle simulation performance tuning
+[ ] AI decision making optimization
+[ ] Memory usage optimization
+[ ] Bundle size reduction
+[ ] Lazy loading implementation
+[ ] Caching strategies
+[ ] Database optimization (if needed)
+[ ] Network request optimization
+[ ] Rendering performance improvements
+[ ] Real-time analytics optimization
+
+PHASE 11: ADVANCED FEATURES
+[ ] Multi-character battles (3+ participants)
+[ ] Team-based combat mechanics
+[ ] Advanced environmental effects
+[ ] Weather and time-of-day mechanics
+[ ] Character progression and leveling
+[ ] Equipment and item systems
+[ ] Advanced combo mechanics
+[ ] Special battle conditions
+[ ] Tournament mode
+[ ] Replay and analysis tools
+
+PHASE 12: POLISH AND REFINEMENT
+[ ] Comprehensive testing suite
+[ ] Performance benchmarking
+[ ] User experience testing
+[ ] Accessibility audit
+[ ] Code quality improvements
+[ ] Documentation completion
+[ ] Bug fixes and stability
+[ ] Final optimizations
+[ ] Release preparation
+[ ] Deployment automation
+
+CURRENT STATUS: PHASE 9 - Enhanced UI/UX
+Overall Progress: 85% Complete
+All core systems operational and integrated
+Status Effect System fully functional
+SRP compliance achieved across all modules
+
+NEXT MILESTONES:
+1. Enhanced battle scene animations and effects
+2. Improved mobile responsiveness
+3. Performance optimizations
+4. Advanced UI features and customization

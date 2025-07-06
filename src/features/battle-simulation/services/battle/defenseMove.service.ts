@@ -1,10 +1,12 @@
 // CONTEXT: Defense Move Service
-// RESPONSIBILITY: Execute defense/buff moves with enhanced narrative generation
+// RESPONSIBILITY: Execute defense moves with enhanced narrative generation
 
-import { BattleState, BattleCharacter, BattleLogEntry, Buff } from '../../types';
+import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
 import { createEventId } from '../ai/logQueries';
+import { createBattleContext } from './battleContext.service';
 import { createNarrativeService } from '../narrative';
+import { applyEffect, createStatusEffect } from '../effects/statusEffect.service';
 
 /**
  * @description Result of executing a defense move
@@ -12,14 +14,13 @@ import { createNarrativeService } from '../narrative';
 export interface DefenseMoveResult {
   newState: BattleState;
   logEntry: BattleLogEntry;
-  damage: number;
   result: string;
   narrative: string;
-  isCritical: boolean;
+  defenseBonus: number;
 }
 
 /**
- * @description Executes a defense/buff move with enhanced narrative generation
+ * @description Executes a defense move and applies defensive bonuses with enhanced narrative generation
  * @param {Ability} ability - The defense ability to execute
  * @param {BattleCharacter} attacker - The character using the ability
  * @param {BattleState} state - Current battle state
@@ -32,31 +33,55 @@ export async function executeDefenseMove(
   state: BattleState,
   attackerIndex: number
 ): Promise<DefenseMoveResult> {
-  const defenseBonus = ability.power;
   const newState = { ...state };
+  const newAttacker = { ...attacker };
   
   // Apply defense bonus
-  newState.participants[attackerIndex].currentDefense += defenseBonus;
+  const defenseBonus = ability.power || 0;
+  newAttacker.currentDefense = Math.min(100, newAttacker.currentDefense + defenseBonus);
   
-  // Apply buff with duration (3 turns by default)
-  const buffDuration = ability.tags?.includes('rest') ? 1 : 3;
-  const defenseBuff: Buff = {
-    id: `${ability.name}_${Date.now()}`,
-    name: `${ability.name} Defense`,
-    duration: buffDuration,
-    potency: defenseBonus,
-    description: `Defense increased by ${defenseBonus} for ${buffDuration} turns`,
-    source: ability.name
-  };
+  // Apply status effects if the ability has them
+  if (ability.appliesEffect) {
+    // Check if the effect should be applied based on chance
+    const shouldApply = !ability.appliesEffect.chance || Math.random() < ability.appliesEffect.chance;
+    
+    if (shouldApply) {
+      const statusEffect = createStatusEffect(
+        ability.name,
+        ability.appliesEffect,
+        attacker.name
+      );
+      
+      // Apply the status effect to the character
+      const updatedAttacker = applyEffect(newAttacker, statusEffect);
+      newState.participants[attackerIndex] = updatedAttacker;
+      
+      console.log(`DEBUG: ${attacker.name} applied ${statusEffect.name} to self for ${statusEffect.duration} turns`);
+    } else {
+      newState.participants[attackerIndex] = newAttacker;
+      console.log(`DEBUG: ${attacker.name}'s ${ability.name} failed to apply status effect (chance check failed)`);
+    }
+  } else {
+    newState.participants[attackerIndex] = newAttacker;
+  }
   
-  newState.participants[attackerIndex].activeBuffs.push(defenseBuff);
+  // Spend chi
+  const chiCost = ability.chiCost || 0;
+  newState.participants[attackerIndex].resources.chi = Math.max(0, newState.participants[attackerIndex].resources.chi - chiCost);
   
-  const result = `${attacker.name}'s defense rises by ${defenseBonus} (${buffDuration} turns)!`;
+  // Apply cooldown
+  if (ability.cooldown && ability.cooldown > 0) {
+    newState.participants[attackerIndex].cooldowns[ability.name] = ability.cooldown;
+  }
+  
+  // Update move history
+  newState.participants[attackerIndex].lastMove = ability.name;
+  newState.participants[attackerIndex].moveHistory.push(ability.name);
   
   // Initialize narrative service for enhanced storytelling
   const narrativeService = createNarrativeService();
   
-  // Generate enhanced narrative based on battle state
+  // Generate enhanced narrative for defense move
   const target = newState.participants[1 - attackerIndex]; // Target is the other participant
   const context = {
     damage: 0,
@@ -101,6 +126,27 @@ export async function executeDefenseMove(
     }
   }
   
+  // Add status effect information to narrative if applicable
+  if (ability.appliesEffect) {
+    const effectInfo = ability.appliesEffect.type === 'HEAL_OVER_TIME' 
+      ? ` and begins regenerating health over time`
+      : ability.appliesEffect.type === 'DEFENSE_UP'
+      ? ` and their defenses are bolstered`
+      : ability.appliesEffect.type === 'ATTACK_UP'
+      ? ` and their attack power increases`
+      : ` and gains a ${ability.appliesEffect.type.toLowerCase().replace('_', ' ')} effect`;
+    
+    narrative += effectInfo;
+  }
+  
+  // Create result string
+  let result: string;
+  if (ability.appliesEffect) {
+    result = `${attacker.name} uses ${ability.name} and gains ${defenseBonus} defense${ability.appliesEffect ? ` plus ${ability.appliesEffect.type.toLowerCase().replace('_', ' ')} effect` : ''}!`;
+  } else {
+    result = `${attacker.name} uses ${ability.name} and gains ${defenseBonus} defense!`;
+  }
+  
   // Create battle log entry
   const logEntry: BattleLogEntry = {
     id: createEventId(),
@@ -114,16 +160,21 @@ export async function executeDefenseMove(
     narrative,
     timestamp: Date.now(),
     meta: {
-      resourceCost: ability.chiCost || 0
+      resourceCost: ability.chiCost || 0,
+      defenseBonus,
+      statusEffect: ability.appliesEffect ? {
+        type: ability.appliesEffect.type,
+        duration: ability.appliesEffect.duration,
+        potency: ability.appliesEffect.potency
+      } : undefined
     }
   };
   
   return {
     newState,
     logEntry,
-    damage: 0,
     result,
     narrative,
-    isCritical: false
+    defenseBonus
   };
 } 

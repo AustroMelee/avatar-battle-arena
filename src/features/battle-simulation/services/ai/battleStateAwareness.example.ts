@@ -15,21 +15,43 @@ export function demonstrateBattleStateAwareness(): void {
     name: 'Aang',
     image: '/assets/aang.jpg',
     bending: 'air',
-    stats: { power: 60, agility: 80, defense: 40, intelligence: 70 },
+    stats: {
+      power: 85,
+      agility: 95,
+      defense: 70,
+      intelligence: 90
+    },
     abilities: [
-      { name: 'Air Slice', type: 'attack', power: 35, description: 'Swift air attack', chiCost: 2 },
-      { name: 'Air Shield', type: 'defense_buff', power: 25, description: 'Defensive air barrier', chiCost: 1 }
+      {
+        name: 'Air Blast',
+        type: 'attack',
+        power: 2,
+        description: 'A powerful blast of compressed air',
+        chiCost: 4,
+        cooldown: 2,
+        maxUses: 5,
+        tags: ['piercing'],
+        critChance: 0.15,
+        critMultiplier: 2.5
+      }
     ],
-    personality: 'balanced',
-    currentHealth: 65,
-    currentDefense: 15,
-    cooldowns: { 'Air Slice': 1 },
-    usesLeft: { 'Air Slice': 2, 'Air Shield': 3 },
-    moveHistory: ['Air Slice', 'Air Shield', 'Air Slice'],
-    lastMove: 'Air Slice',
+    currentHealth: 75,
+    currentDefense: 85,
+    cooldowns: { 'Air Blast': 1 },
+    usesLeft: {},
+    moveHistory: ['Air Blast', 'Basic Strike'],
     resources: { chi: 6 },
-    activeBuffs: [{ id: 'shield', name: 'Air Shield', duration: 2, description: 'Defense buff', source: 'Air Shield' }],
-    activeDebuffs: [],
+    activeEffects: [
+      {
+        id: 'defense_up_aang_123',
+        name: 'Defense Boost',
+        type: 'DEFENSE_UP',
+        category: 'buff',
+        duration: 2,
+        potency: 15,
+        sourceAbility: 'Air Shield'
+      }
+    ],
     flags: {},
     diminishingEffects: {},
     position: 'neutral',
@@ -38,7 +60,8 @@ export function demonstrateBattleStateAwareness(): void {
     repositionAttempts: 0,
     chargeInterruptions: 0,
     lastPositionChange: undefined,
-    positionHistory: []
+    positionHistory: [],
+    personality: 'balanced'
   };
 
   const zuko: BattleCharacter = {
@@ -46,21 +69,43 @@ export function demonstrateBattleStateAwareness(): void {
     name: 'Zuko',
     image: '/assets/zuko.jpg',
     bending: 'fire',
-    stats: { power: 70, agility: 60, defense: 50, intelligence: 60 },
+    stats: {
+      power: 80,
+      agility: 75,
+      defense: 65,
+      intelligence: 75
+    },
     abilities: [
-      { name: 'Fire Blast', type: 'attack', power: 40, description: 'Powerful fire attack', chiCost: 3 },
-      { name: 'Defense Stance', type: 'defense_buff', power: 30, description: 'Defensive stance', chiCost: 1 }
+      {
+        name: 'Fire Blast',
+        type: 'attack',
+        power: 3,
+        description: 'A powerful fire attack',
+        chiCost: 3,
+        cooldown: 1,
+        maxUses: 4,
+        tags: ['piercing'],
+        critChance: 0.12,
+        critMultiplier: 2.2
+      }
     ],
-    personality: 'aggressive',
-    currentHealth: 80,
-    currentDefense: 30,
+    currentHealth: 60,
+    currentDefense: 65,
     cooldowns: {},
-    usesLeft: { 'Fire Blast': 2, 'Defense Stance': 3 },
-    moveHistory: ['Fire Blast', 'Defense Stance', 'Defense Stance'],
-    lastMove: 'Defense Stance',
-    resources: { chi: 4 },
-    activeBuffs: [{ id: 'stance', name: 'Defense Stance', duration: 1, description: 'Defense buff', source: 'Defense Stance' }],
-    activeDebuffs: [],
+    usesLeft: {},
+    moveHistory: ['Fire Blast', 'Basic Strike'],
+    resources: { chi: 8 },
+    activeEffects: [
+      {
+        id: 'defense_up_zuko_456',
+        name: 'Defense Boost',
+        type: 'DEFENSE_UP',
+        category: 'buff',
+        duration: 1,
+        potency: 10,
+        sourceAbility: 'Defense Stance'
+      }
+    ],
     flags: {},
     diminishingEffects: {},
     position: 'neutral',
@@ -69,7 +114,8 @@ export function demonstrateBattleStateAwareness(): void {
     repositionAttempts: 0,
     chargeInterruptions: 0,
     lastPositionChange: undefined,
-    positionHistory: []
+    positionHistory: [],
+    personality: 'aggressive'
   };
 
   // Create example battle log
@@ -128,21 +174,25 @@ export function demonstrateBattleStateAwareness(): void {
   console.log('1. Getting Perceived Battle State...');
   getPerceivedBattleState(currentTurn, aang, zuko, battleLog);
   
-  console.log('Aang\'s State:');
+  console.log('=== Battle State Awareness Example ===');
+  
+  console.log(`\n${aang.name}'s State:`);
   console.log(`  Health: ${aang.currentHealth}/100`);
   console.log(`  Defense: ${aang.currentDefense}`);
   console.log(`  Chi: ${aang.resources.chi}`);
-  console.log(`  Buffs: ${aang.activeBuffs.map(b => b.name).join(', ') || 'None'}`);
-  console.log(`  Cooldowns: ${Object.keys(aang.cooldowns).join(', ') || 'None'}`);
-  console.log(`  Last Move: ${aang.lastMove}`);
+  console.log(`  Buffs: ${aang.activeEffects.filter(e => e.category === 'buff').map(e => e.name).join(', ') || 'None'}`);
+  console.log(`  Debuffs: ${aang.activeEffects.filter(e => e.category === 'debuff').map(e => e.name).join(', ') || 'None'}`);
+  console.log(`  Last Move: ${aang.lastMove || 'None'}`);
+  console.log(`  Move History: ${aang.moveHistory.join(' → ')}`);
   
-  console.log('\nZuko\'s State:');
+  console.log(`\n${zuko.name}'s State:`);
   console.log(`  Health: ${zuko.currentHealth}/100`);
   console.log(`  Defense: ${zuko.currentDefense}`);
   console.log(`  Chi: ${zuko.resources.chi}`);
-  console.log(`  Buffs: ${zuko.activeBuffs.map(b => b.name).join(', ') || 'None'}`);
-  console.log(`  Cooldowns: ${Object.keys(zuko.cooldowns).join(', ') || 'None'}`);
-  console.log(`  Last Move: ${zuko.lastMove}`);
+  console.log(`  Buffs: ${zuko.activeEffects.filter(e => e.category === 'buff').map(e => e.name).join(', ') || 'None'}`);
+  console.log(`  Debuffs: ${zuko.activeEffects.filter(e => e.category === 'debuff').map(e => e.name).join(', ') || 'None'}`);
+  console.log(`  Last Move: ${zuko.lastMove || 'None'}`);
+  console.log(`  Move History: ${zuko.moveHistory.join(' → ')}`);
 
   console.log('\n2. Getting Tactical Context...');
   const tacticalContext = getBattleTacticalContext(aang, zuko, battleLog);

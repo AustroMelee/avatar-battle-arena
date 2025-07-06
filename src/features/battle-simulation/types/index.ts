@@ -2,8 +2,36 @@
 import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
 
+/** @description The category of the status effect. */
+export type EffectCategory = 'buff' | 'debuff';
+
+/** @description The specific type of the status effect, dictating its mechanical function. */
+export type EffectType =
+  // Buffs
+  | 'DEFENSE_UP' // Increases defense stat
+  | 'ATTACK_UP'  // Increases power stat
+  | 'CRIT_CHANCE_UP' // Increases critical hit chance
+  | 'HEAL_OVER_TIME' // Regenerates health each turn
+  // Debuffs
+  | 'BURN' // Deals damage over time
+  | 'STUN' // Skips the target's next turn
+  | 'DEFENSE_DOWN' // Reduces defense stat
+  | 'SLOW'; // Reduces agility/speed
+
+/** @description Represents an active status effect on a character. */
+export interface ActiveStatusEffect {
+  id: string; // Unique instance ID, e.g., "burn_azula_167..."
+  name: string; // Display name, e.g., "Searing Burn"
+  type: EffectType;
+  category: EffectCategory;
+  duration: number; // How many turns it lasts
+  potency: number; // e.g., Damage per turn for BURN, or % increase for BUFF
+  sourceAbility: string; // The name of the ability that applied it
+}
+
 /**
  * @description Represents a positive status effect on a character.
+ * @deprecated Use ActiveStatusEffect instead
  */
 export type Buff = {
   id: string;
@@ -16,6 +44,7 @@ export type Buff = {
 
 /**
  * @description Represents a negative status effect on a character.
+ * @deprecated Use ActiveStatusEffect instead
  */
 export type Debuff = {
   id: string;
@@ -48,8 +77,7 @@ export type BattleCharacter = Character & {
   resources: {
     chi: number;
   };
-  activeBuffs: Buff[];
-  activeDebuffs: Debuff[];
+  activeEffects: ActiveStatusEffect[]; // Unified status effects system
   flags: {
     usedDesperation?: boolean; // Track if desperation move was used
     usedFinisher?: boolean; // Track if finisher move was used
@@ -89,8 +117,7 @@ export type PerceivedState = {
     cooldowns: Record<string, number>;
     lastMove?: string;
     moveHistory: string[];
-    activeBuffs: Buff[];
-    activeDebuffs: Debuff[];
+    activeEffects: ActiveStatusEffect[];
     resources: {
       chi: number;
     };
@@ -107,8 +134,7 @@ export type PerceivedState = {
     name: string;
     lastMove?: string;
     moveHistory: string[];
-    activeBuffs: Buff[];
-    activeDebuffs: Debuff[];
+    activeEffects: ActiveStatusEffect[];
     // NEW: Enemy positioning context
     position: Position;
     isCharging: boolean;

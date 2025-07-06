@@ -34,8 +34,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     usesLeft: {},
     moveHistory: [],
     resources: { chi: 10 },
-    activeBuffs: [],
-    activeDebuffs: [],
+    activeEffects: [], // Unified status effects system
     flags: {},
     diminishingEffects: {},
     position: 'neutral',
@@ -53,8 +52,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     usesLeft: {},
     moveHistory: [],
     resources: { chi: 10 },
-    activeBuffs: [],
-    activeDebuffs: [],
+    activeEffects: [], // Unified status effects system
     flags: {},
     diminishingEffects: {},
     position: 'neutral',

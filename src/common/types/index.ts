@@ -30,6 +30,13 @@ export type Ability = {
     damageBonus: number;
     defensePenalty: number;
   };
+  // Status Effect System
+  appliesEffect?: {
+    type: 'DEFENSE_UP' | 'ATTACK_UP' | 'CRIT_CHANCE_UP' | 'HEAL_OVER_TIME' | 'BURN' | 'STUN' | 'DEFENSE_DOWN' | 'SLOW';
+    chance: number; // Probability of applying the effect (0.0 to 1.0)
+    duration: number; // How many turns the effect lasts
+    potency: number; // Effect strength (damage per turn for BURN, % increase for buffs, etc.)
+  };
 };
 
 /**

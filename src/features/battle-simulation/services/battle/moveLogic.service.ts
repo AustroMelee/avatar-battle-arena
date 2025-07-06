@@ -3,6 +3,7 @@
 import type { Move, BattleContext } from '../../types/move.types';
 import type { BattleCharacter, BattleLogEntry } from '../../types';
 import { createEventId } from '../ai/logQueries';
+import { modifyDamageWithEffects } from '../effects/statusEffect.service';
 
 export interface MoveResult {
   damage: number;
@@ -103,6 +104,9 @@ export function resolveMove(
     wasCrit = true;
   }
 
+  // Apply status effect damage modifiers
+  damage = modifyDamageWithEffects(damage, attacker, target);
+
   // Generate narrative based on what happened
   let narrative: string;
   if (wasCrit) {
@@ -117,7 +121,7 @@ export function resolveMove(
     damage,
     narrative,
     wasCrit,
-    wasFinisher,
+    wasFinisher: false,
     wasDesperation,
     logEntry: createMoveLogEntry(move, attacker, target, damage, wasCrit, wasDesperation, turn)
   };

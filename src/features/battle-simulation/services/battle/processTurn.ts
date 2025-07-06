@@ -4,6 +4,7 @@
 import { BattleState } from '../../types';
 import { cloneBattleState, switchActiveParticipant } from './state';
 import { initializeAnalyticsTracker } from './analyticsTracker.service';
+import { processTurnEffects } from '../effects/statusEffect.service';
 import {
   validateBattleEndPhase,
   processDesperationPhase,
@@ -25,6 +26,13 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   if (!state.analytics) {
     state.analytics = initializeAnalyticsTracker();
   }
+  
+  // --- NEW STATUS EFFECT PROCESSING STEP ---
+  const activeCharacterIndex = state.activeParticipantIndex;
+  const effectResult = processTurnEffects(state.participants[activeCharacterIndex], state.turn);
+  state.participants[activeCharacterIndex] = effectResult.updatedCharacter;
+  state.battleLog.push(...effectResult.logEntries);
+  // --- END OF NEW STEP ---
   
   // Execute battle phases in sequence
   // Each phase returns early if the battle should end

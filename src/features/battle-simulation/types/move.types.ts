@@ -91,6 +91,12 @@ export interface Move {
       chiCostReduction?: number;
     };
   };
+  appliesEffect?: {
+    type: 'DEFENSE_UP' | 'ATTACK_UP' | 'CRIT_CHANCE_UP' | 'HEAL_OVER_TIME' | 'BURN' | 'STUN' | 'DEFENSE_DOWN' | 'SLOW';
+    chance: number; // Probability of applying the effect (0.0 to 1.0)
+    duration: number; // How many turns the effect lasts
+    potency: number; // Effect strength (damage per turn for BURN, % increase for buffs, etc.)
+  };
 }
 
 // --- SAMPLE: AANG'S AIRBENDING MOVE SHEET ---
@@ -140,6 +146,12 @@ export const AANG_MOVES: Move[] = [
     critMultiplier: 2,
     description: 'A razor-sharp blade of wind that cuts through defenses.',
     requiresPosition: ["aggressive", "neutral"],
+    appliesEffect: {
+      type: 'DEFENSE_DOWN',
+      chance: 0.5, // 50% chance to reduce defense
+      duration: 2, // Defense down for 2 turns
+      potency: 3 // Reduce defense by 3
+    }
   },
   {
     id: 'air_shield',
@@ -149,6 +161,12 @@ export const AANG_MOVES: Move[] = [
     cooldown: 4,
     description: 'A swirling barrier of air that boosts defense for 2 turns.',
     changesPosition: "defensive",
+    appliesEffect: {
+      type: 'DEFENSE_UP',
+      chance: 1.0, // 100% chance to apply defense boost
+      duration: 2, // Defense up for 2 turns
+      potency: 5 // Increase defense by 5
+    }
   },
   {
     id: 'charged_tornado',
@@ -204,6 +222,12 @@ export const AZULA_MOVES: Move[] = [
     critMultiplier: 2.5,
     description: 'Azula unleashes her signature blue flames.',
     requiresPosition: ["aggressive", "neutral"],
+    appliesEffect: {
+      type: 'BURN',
+      chance: 0.7, // 70% chance to apply burn
+      duration: 3, // Burn for 3 turns
+      potency: 2 // 2 damage per turn
+    }
   },
   {
     id: 'fire_dash',

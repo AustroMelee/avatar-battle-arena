@@ -36,6 +36,7 @@ export function convertAbilityToMove(ability: Ability): Move {
         phase: ability.finisherCondition.phase as 'climax' | 'stalemate'
       } : undefined
     : undefined,
-    desperationBuff: ability.desperationBuff
+    desperationBuff: ability.desperationBuff,
+    appliesEffect: ability.appliesEffect
   };
 } 
