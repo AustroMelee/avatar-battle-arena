@@ -1047,3 +1047,16 @@ Ensure that all containers use explicit gap or padding values, never relying on 
     - No false claims about testing or verification capabilities.
 */
 
+/*==========================================
+=      PRE-COMMIT HOOKS ENFORCEMENT        =
+==========================================*/
+
+/**
+ * 141. Pre-commit hooks MUST be configured to run:
+ *     - npx tsc --noEmit
+ *     - npm run lint
+ *   before any commit is accepted. Commits MUST be blocked if either command fails.
+ *   Use Husky, lint-staged, or equivalent tools to enforce this in local and CI environments.
+ *   All contributors MUST have these hooks enabled.
+ */
+

@@ -141,7 +141,12 @@ export const availableCharacters: Character[] = [
         collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
       }
     ],
-    personality: 'balanced'
+    personality: 'balanced',
+    // NEW: Behavioral System Integration
+    manipulationResilience: 30, // Aang is somewhat vulnerable to manipulation
+    behavioralTraits: [
+      { traitId: 'plea_for_peace', lastTriggeredTurn: -99 }
+    ]
   },
   {
     id: 'azula',
@@ -273,7 +278,13 @@ export const availableCharacters: Character[] = [
         collateralDamageNarrative: "The inferno engulfs the entire plaza, leaving nothing but scorched earth and melted stone in its wake.",
       }
     ],
-    personality: 'aggressive'
+    personality: 'aggressive',
+    // NEW: Behavioral System Integration
+    manipulationResilience: 95, // Azula is highly resistant to manipulation
+    behavioralTraits: [
+      { traitId: 'manipulation', lastTriggeredTurn: -99 },
+      { traitId: 'overconfidence', lastTriggeredTurn: -99 }
+    ]
   },
   // FIXME: Add more characters like Zuko, Katara, Toph, etc. here
   // TEMP: Sokka (non-bender) could be added with 'none' as bending type later

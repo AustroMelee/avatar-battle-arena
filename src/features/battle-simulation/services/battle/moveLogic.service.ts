@@ -107,6 +107,17 @@ export function resolveMove(
   // Apply status effect damage modifiers
   damage = modifyDamageWithEffects(damage, attacker, target);
 
+  // --- EXPOSED TARGET MECHANIC ---
+  // Ensure target's activeFlags is a Map
+  if (!(target.activeFlags instanceof Map)) {
+    target.activeFlags = new Map(Object.entries(target.activeFlags || {}));
+  }
+  
+  if (target.activeFlags.has('isExposed')) {
+    damage = Math.round(damage * 1.5); // Target takes 50% more damage!
+    target.activeFlags.delete('isExposed'); // The flag is consumed.
+  }
+
   // Generate narrative based on what happened
   let narrative: string;
   if (wasCrit) {

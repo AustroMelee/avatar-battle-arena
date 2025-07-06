@@ -68,6 +68,13 @@ export type Character = {
 
   /** @description The default combat style or AI tendency. */
   personality: 'aggressive' | 'defensive' | 'balanced';
+  
+  // NEW: Behavioral System Integration
+  manipulationResilience?: number; // Resistance to psychological manipulation (0-100)
+  behavioralTraits?: Array<{
+    traitId: string;
+    lastTriggeredTurn: number;
+  }>;
 };
 
 /**

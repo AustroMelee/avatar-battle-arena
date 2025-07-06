@@ -2,11 +2,12 @@
 // RESPONSIBILITY: Orchestrate the battle turn phases
 
 import { BattleState } from '../../types';
-import { cloneBattleState, switchActiveParticipant } from './state';
+import { cloneBattleState, switchActiveParticipant, getActiveParticipants } from './state';
 import { initializeAnalyticsTracker } from './analyticsTracker.service';
 import { processTurnEffects } from '../effects/statusEffect.service';
 import { updateMentalState } from '../identity/mentalState.service';
 import { cleanupTacticalStates } from './tacticalState.service';
+import { processBehavioralSystemForTurn } from '../identity/behavioral.service';
 import {
   validateBattleEndPhase,
   processDesperationPhase,
@@ -28,6 +29,14 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   if (!state.analytics) {
     state.analytics = initializeAnalyticsTracker();
   }
+  
+  // --- NEW BEHAVIORAL SYSTEM PROCESSING STEP ---
+  const { attacker, target, attackerIndex, targetIndex } = getActiveParticipants(state);
+  const behavioralResult = processBehavioralSystemForTurn(attacker, target, state);
+  state.participants[attackerIndex] = behavioralResult.updatedSelf;
+  state.participants[targetIndex] = behavioralResult.updatedOpponent;
+  state.battleLog.push(...behavioralResult.logEntries);
+  // --- END OF NEW STEP ---
   
   // --- NEW STATUS EFFECT PROCESSING STEP ---
   const activeCharacterIndex = state.activeParticipantIndex;

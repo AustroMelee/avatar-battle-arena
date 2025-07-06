@@ -2,6 +2,7 @@
 import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
 import { MentalState, OpponentPerception } from './identity.types';
+import { BehavioralTraitInstance, ActiveFlag } from './behavioral.types';
 
 /** @description The narrative phases of a battle. */
 export enum BattleArcState {
@@ -164,6 +165,13 @@ export type BattleCharacter = Character & {
     unhinged?: boolean; // Has Azula's composure ever broken?
     broken?: boolean;   // Has she reached a point of no return?
   };
+  
+  // NEW: Behavioral System Integration
+  behavioralTraits: BehavioralTraitInstance[];
+  manipulationResilience: number; // Resistance to psychological manipulation (0-100)
+  
+  // REPLACES old boolean flags. This is a map to track all active flags and their durations.
+  activeFlags: Map<string, ActiveFlag>;
 };
 
 /**

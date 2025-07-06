@@ -13,6 +13,7 @@ import { EnhancedStateManager } from '../narrative/enhancedStateManager';
 import { initializeMentalState } from '../identity/mentalState.service';
 import { DEFAULT_OPPONENT_PERCEPTION } from '../../data/identities';
 import { getDefaultArcState, getDefaultArcStateHistory } from '../../data/arcTransitions';
+import { initializeBehavioralSystem, initializeActiveFlags } from '../identity/behavioral.service';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -51,6 +52,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     opponentPerception: DEFAULT_OPPONENT_PERCEPTION,
     // NEW: Initialize mental thresholds tracking
     mentalThresholdsCrossed: {}, // Starts with no thresholds crossed
+    // NEW: Behavioral System Integration
+    behavioralTraits: initializeBehavioralSystem(player1),
+    manipulationResilience: player1.manipulationResilience || 50, // Default resilience
+    activeFlags: initializeActiveFlags(),
   };
   
   const p2Battle: BattleCharacter = {
@@ -75,6 +80,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     opponentPerception: DEFAULT_OPPONENT_PERCEPTION,
     // NEW: Initialize mental thresholds tracking
     mentalThresholdsCrossed: {}, // Starts with no thresholds crossed
+    // NEW: Behavioral System Integration
+    behavioralTraits: initializeBehavioralSystem(player2),
+    manipulationResilience: player2.manipulationResilience || 50, // Default resilience
+    activeFlags: initializeActiveFlags(),
   };
   
   // Calculate environmental factors

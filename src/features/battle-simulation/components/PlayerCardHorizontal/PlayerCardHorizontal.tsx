@@ -2,6 +2,7 @@ import React from 'react';
 // CONTEXT: BattleSimulation, // FOCUS: UIRendering
 import { PlayerCardHorizontalProps } from '../../types';
 import { FaWind, FaFire, FaShieldAlt, FaBolt, FaBrain, FaRunning, FaStar, FaShieldVirus, FaBurn, FaClock, FaArrowUp, FaArrowDown, FaHeart } from 'react-icons/fa';
+import { getActiveFlagsWithUI } from '../../services/identity/behavioralUI.service';
 import styles from './PlayerCardHorizontal.module.css';
 
 /**
@@ -161,6 +162,26 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
               );
             })}
           </div>
+        )}
+        
+        {/* NEW: Behavioral Flags Row */}
+        {character.activeFlags && (
+          // Ensure activeFlags is a Map before checking size
+          (character.activeFlags instanceof Map ? character.activeFlags.size : Object.keys(character.activeFlags || {}).length) > 0 && (
+            <div className={styles.behavioralFlagsRow}>
+              {getActiveFlagsWithUI(character).map(({ flag, data, ui }) => (
+                <div 
+                  key={flag} 
+                  className={styles.behavioralFlagIcon}
+                  style={{ '--flag-color': ui.color } as React.CSSProperties}
+                  title={`${ui.tooltip} (${data.duration} turns left)`}
+                >
+                  <span className={styles.flagIcon}>{ui.icon}</span>
+                  <span className={styles.flagDuration}>{data.duration}</span>
+                </div>
+              ))}
+            </div>
+          )
         )}
         
         {/* Abilities Row */}

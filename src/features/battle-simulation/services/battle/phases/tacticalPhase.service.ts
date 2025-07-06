@@ -112,7 +112,46 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
       turn: newState.turn,
       agent: attacker.name,
       reasoning: `Fallback: ${tacticalResult.reasoning}`,
-      perceivedState: {} as any,
+      perceivedState: {
+        self: {
+          health: attacker.currentHealth,
+          defense: attacker.currentDefense,
+          personality: attacker.personality,
+          abilities: attacker.abilities.map(ability => ({
+            id: ability.name,
+            name: ability.name,
+            type: ability.type,
+            power: ability.power,
+            cooldown: ability.cooldown
+          })),
+          cooldowns: attacker.cooldowns,
+          lastMove: attacker.lastMove,
+          moveHistory: attacker.moveHistory,
+          activeEffects: attacker.activeEffects,
+          resources: attacker.resources,
+          position: attacker.position,
+          isCharging: attacker.isCharging,
+          chargeProgress: attacker.chargeProgress,
+          repositionAttempts: attacker.repositionAttempts
+        },
+        enemy: {
+          health: target.currentHealth,
+          defense: target.currentDefense,
+          personality: target.personality,
+          name: target.name,
+          lastMove: target.lastMove,
+          moveHistory: target.moveHistory,
+          activeEffects: target.activeEffects,
+          position: target.position,
+          isCharging: target.isCharging,
+          chargeProgress: target.chargeProgress,
+          repositionAttempts: target.repositionAttempts
+        },
+        round: newState.turn,
+        cooldowns: attacker.cooldowns,
+        location: newState.location || 'Unknown',
+        locationType: newState.locationType || 'Open'
+      },
       consideredActions: [],
       chosenAction: chosenMove.name,
       timestamp: Date.now()
@@ -159,7 +198,46 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
       turn: newState.turn,
       agent: attacker.name,
       reasoning: tacticalResult.reasoning,
-      perceivedState: {} as any,
+      perceivedState: {
+        self: {
+          health: attacker.currentHealth,
+          defense: attacker.currentDefense,
+          personality: attacker.personality,
+          abilities: attacker.abilities.map(ability => ({
+            id: ability.name,
+            name: ability.name,
+            type: ability.type,
+            power: ability.power,
+            cooldown: ability.cooldown
+          })),
+          cooldowns: attacker.cooldowns,
+          lastMove: attacker.lastMove,
+          moveHistory: attacker.moveHistory,
+          activeEffects: attacker.activeEffects,
+          resources: attacker.resources,
+          position: attacker.position,
+          isCharging: attacker.isCharging,
+          chargeProgress: attacker.chargeProgress,
+          repositionAttempts: attacker.repositionAttempts
+        },
+        enemy: {
+          health: target.currentHealth,
+          defense: target.currentDefense,
+          personality: target.personality,
+          name: target.name,
+          lastMove: target.lastMove,
+          moveHistory: target.moveHistory,
+          activeEffects: target.activeEffects,
+          position: target.position,
+          isCharging: target.isCharging,
+          chargeProgress: target.chargeProgress,
+          repositionAttempts: target.repositionAttempts
+        },
+        round: newState.turn,
+        cooldowns: attacker.cooldowns,
+        location: newState.location || 'Unknown',
+        locationType: newState.locationType || 'Open'
+      },
       consideredActions: [],
       chosenAction: chosenMove.name,
       timestamp: Date.now()

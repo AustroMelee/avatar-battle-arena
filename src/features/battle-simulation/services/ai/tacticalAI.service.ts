@@ -266,28 +266,35 @@ export function selectTacticalMove(
     }
     // --- END OF MODIFIER ---
 
-    // 13. STATUS EFFECT SCORING - Value applying and reacting to status effects
-    if (move.appliesEffect) {
-      const effect = move.appliesEffect;
-      const isDebuff = ['BURN', 'STUN', 'DEFENSE_DOWN', 'SLOW'].includes(effect.type);
-      if (isDebuff) {
-        // Highly value applying debuffs to healthy enemies
-        if (!enemy.activeEffects.some(e => e.type === effect.type)) {
-          score += 25; // High bonus for applying a new, impactful debuff
-          reasoning += `Applies a powerful ${effect.type} debuff. `;
-          tacticalFactors.push("Status Debuff");
-        }
-      } else { // It's a buff
-        // Value applying buffs to self, especially when not already active
-        if (!self.activeEffects.some(e => e.type === effect.type)) {
-          score += 20;
-          reasoning += `Applies a useful ${effect.type} self-buff. `;
-          tacticalFactors.push("Status Buff");
-        }
+    // 14. BEHAVIORAL FLAG CONSIDERATIONS - NEW: AI reacts to behavioral effects
+    if (self.activeFlags.has('overconfidenceActive')) {
+      // Overconfidence disables finisher moves completely
+      if (move.name.toLowerCase().includes('finisher') || move.baseDamage > 15) {
+        score = -Infinity;
+        reasoning += "Overconfidence disables finisher moves. ";
+      } else {
+        // But boosts flashy, high-damage moves
+        score += 70;
+        reasoning += "Overconfidence demands flashy display. ";
       }
     }
 
-    // 14. ARC STATE AI RISK FACTOR - Apply arc state influence on AI behavior
+    if (enemy.activeFlags.has('isManipulated')) {
+      // Manipulated targets are easier to hit and less effective at defense
+      score += 50;
+      reasoning += "Target is manipulated - easier to exploit. ";
+    }
+
+    if (enemy.activeFlags.has('isExposed')) {
+      // Exposed targets are extremely vulnerable
+      score += 100;
+      reasoning += "Target is completely exposed - perfect opportunity! ";
+    }
+
+    // Store the final score for debugging
+    const _originalScore = score;
+
+    // 15. ARC STATE AI RISK FACTOR - Apply arc state influence on AI behavior
     if (arcModifiers && move.baseDamage > 20) { // Only apply to risky, high-damage moves
       const originalScore = score;
       score *= arcModifiers.aiRiskFactor;

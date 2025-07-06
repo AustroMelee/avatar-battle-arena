@@ -197,7 +197,7 @@
   z-index: 1;
 }
 
-.statsRow, .abilitiesRow, .styleRow, .effectsRow {
+.statsRow, .abilitiesRow, .styleRow, .effectsRow, .behavioralFlagsRow {
   display: flex;
   flex-direction: row;
   gap: 8px;
@@ -361,4 +361,53 @@
   .statsRow, .abilitiesRow, .styleRow, .effectsRow {
     justify-content: center;
   }
+}
+
+/* NEW: Behavioral Flags Styling */
+.behavioralFlagsRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.behavioralFlagIcon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--flag-color, #9E9E9E);
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: help;
+}
+
+.behavioralFlagIcon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.flagIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.flagDuration {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: var(--flag-color, #9E9E9E);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 6px;
+  min-width: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 } 
