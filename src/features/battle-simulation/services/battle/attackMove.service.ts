@@ -97,11 +97,12 @@ export async function executeAttackMove(
       );
       
       // Apply the status effect to the target
-      const updatedTarget = applyEffect(newState.participants[targetIndex], statusEffect);
-      newState.participants[targetIndex] = updatedTarget;
+      const { updatedCharacter, logEntry } = applyEffect(newState.participants[targetIndex], statusEffect, state.turn);
+      newState.participants[targetIndex] = updatedCharacter;
+      if (newState.battleLog) newState.battleLog.push(logEntry);
       
       console.log(`🎯🎯🎯 STATUS EFFECT APPLIED - ${attacker.name} applied ${statusEffect.name} to ${target.name} for ${statusEffect.duration} turns 🎯🎯🎯`);
-      console.log(`🎯🎯🎯 TARGET EFFECTS AFTER - ${target.name} now has ${updatedTarget.activeEffects.length} active effects:`, updatedTarget.activeEffects);
+      console.log(`🎯🎯🎯 TARGET EFFECTS AFTER - ${target.name} now has ${updatedCharacter.activeEffects.length} active effects:`, updatedCharacter.activeEffects);
     } else {
       console.log(`❌❌❌ STATUS EFFECT FAILED - ${attacker.name}'s ${ability.name} did not apply status effect (chance check failed) ❌❌❌`);
     }

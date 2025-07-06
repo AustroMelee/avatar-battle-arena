@@ -5,7 +5,7 @@
 // No matter how many updates or changes we make, users MUST be able to see logs from T1
 // This is essential for battle analysis and debugging - never hide early turns!
 //
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { BattleLogEntry, AILogEntry, BattleCharacter } from '../../types';
 import styles from './UnifiedBattleLog.module.css';
 
@@ -68,6 +68,22 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   const [copied, setCopied] = useState(false);
   const [showAllEntries, setShowAllEntries] = useState(true); // ALWAYS TRUE BY DEFAULT
   const [turnFilter, setTurnFilter] = useState<number | null>(null);
+
+  // Group battle log entries by turn
+  const groupedBattleLog = useMemo(() => {
+    return battleLog.reduce((acc, entry) => {
+      (acc[entry.turn] = acc[entry.turn] || []).push(entry);
+      return acc;
+    }, {} as Record<number, BattleLogEntry[]>);
+  }, [battleLog]);
+
+  // Group AI log entries by turn
+  const groupedAILog = useMemo(() => {
+    return aiLog.reduce((acc, entry) => {
+      (acc[entry.turn] = acc[entry.turn] || []).push(entry);
+      return acc;
+    }, {} as Record<number, AILogEntry[]>);
+  }, [aiLog]);
 
   /**
    * @description Gets the appropriate icon for a battle event.
@@ -214,39 +230,24 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    * The showAllEntries state should default to true to ensure complete visibility
    */
   const renderNarrativeTab = () => {
-    // ⚠️ CRITICAL: Always show all entries by default to ensure T1 logs are visible
-    // Only slice if explicitly requested by user (showAllEntries = false)
-    let limitedEntries = showAllEntries ? battleLog : battleLog.slice(-maxEntries);
-    
-    // Apply turn filter if set
-    if (turnFilter !== null) {
-      limitedEntries = limitedEntries.filter(entry => entry.turn === turnFilter);
+    const turnNumbers = Object.keys(groupedBattleLog).map(Number).sort((a, b) => a - b);
+    const visibleTurnNumbers = showAllEntries ? turnNumbers : turnNumbers.slice(-Math.floor(maxEntries / 2));
+    if (visibleTurnNumbers.length === 0) {
+      return (
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>⚔️</span>
+          <p>Battle log is empty</p>
+        </div>
+      );
     }
-
     return (
       <div className={styles.tabContent}>
-        {limitedEntries.length === 0 ? (
-          <div className={styles.emptyState}>
-            <span className={styles.emptyIcon}>⚔️</span>
-            <p>Battle log is empty</p>
+        {visibleTurnNumbers.map(turnNumber => (
+          <div key={`turn-${turnNumber}`} className={styles.turnGroup}>
+            <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
+            {groupedBattleLog[turnNumber].map(renderLogEntry)}
           </div>
-        ) : (
-          limitedEntries.map((entry) => (
-            <div key={entry.id} className={getBattleEntryClasses(entry)}>
-              <div className={styles.entryHeader}>
-                <span className={styles.turnNumber}>T{entry.turn}</span>
-                <span className={styles.actor}>{entry.actor}</span>
-                <span className={styles.timestamp}>{getTimestamp(entry.timestamp)}</span>
-              </div>
-              
-              <div className={styles.entryContent}>
-                {formatBattleEntryText(entry)}
-              </div>
-              
-              {renderMetaDetails(entry, styles) as React.ReactNode}
-            </div>
-          ))
-        )}
+        ))}
       </div>
     );
   };
@@ -366,6 +367,25 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
             <strong>{char.name}</strong>: {char.controlState} | S:{char.stability} | M:{char.momentum}
           </span>
         ))}
+      </div>
+    );
+  };
+
+  // Helper function to render a single log entry
+  const renderLogEntry = (entry: BattleLogEntry) => {
+    return (
+      <div key={entry.id} className={getBattleEntryClasses(entry)}>
+        <div className={styles.entryHeader}>
+          <span className={styles.turnNumber}>T{entry.turn}</span>
+          <span className={styles.actor}>{entry.actor}</span>
+          <span className={styles.timestamp}>{getTimestamp(entry.timestamp)}</span>
+        </div>
+        
+        <div className={styles.entryContent}>
+          {formatBattleEntryText(entry)}
+        </div>
+        
+        {renderMetaDetails(entry, styles) as React.ReactNode}
       </div>
     );
   };

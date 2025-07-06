@@ -68,8 +68,9 @@ export async function executeDefenseMove(
         attacker.name
       );
       
-      const updatedAttacker = applyEffect(newAttacker, statusEffect);
-      newState.participants[attackerIndex] = updatedAttacker;
+      const { updatedCharacter, logEntry } = applyEffect(newAttacker, statusEffect, state.turn);
+      newState.participants[attackerIndex] = updatedCharacter;
+      if (newState.battleLog) newState.battleLog.push(logEntry);
       
       console.log(`DEBUG: ${attacker.name} applied ${statusEffect.name} to self for ${statusEffect.duration} turns`);
     } else {

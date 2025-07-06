@@ -361,4 +361,31 @@
   background: #e57373;
   color: #fff;
   border: 2px solid #b71c1c;
+}
+
+/* NEW: Styles for Turn Grouping */
+.turnGroup {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color-light);
+  border-radius: 8px;
+}
+
+.turnGroup:last-of-type {
+  margin-bottom: 0;
+}
+
+.turnHeader {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--highlight-color);
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.logEntry:last-child {
+  margin-bottom: 0;
 } 

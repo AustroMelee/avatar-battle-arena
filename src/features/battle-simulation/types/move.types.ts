@@ -283,7 +283,7 @@ export const AZULA_MOVES: Move[] = [
     requiresPosition: ["aggressive", "neutral"],
     appliesEffect: {
       type: 'BURN',
-      chance: 0.7, // 70% chance to apply burn
+      chance: 1.0, // 100% chance to apply burn (for testing)
       duration: 3, // Burn for 3 turns
       potency: 2 // 2 damage per turn
     },

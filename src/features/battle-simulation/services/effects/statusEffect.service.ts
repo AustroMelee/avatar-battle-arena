@@ -11,12 +11,14 @@ import { createEventId, generateUniqueLogId } from '../ai/logQueries';
  * Applies a new status effect to a character with arc state duration modification.
  * @param {BattleCharacter} character - The character to apply the effect to
  * @param {ActiveStatusEffect} effect - The effect to apply
+ * @param {number} turn - Current turn number
  * @param {ArcStateModifier} arcModifiers - Current arc state modifiers
  * @returns {object} Object with updated character and log entry
  */
 export function applyEffect(
   character: BattleCharacter,
   effect: ActiveStatusEffect,
+  turn: number,
   arcModifiers?: ArcStateModifier
 ): { updatedCharacter: BattleCharacter; logEntry: BattleLogEntry } {
   let modifiedEffect = { ...effect };
@@ -33,7 +35,7 @@ export function applyEffect(
   // Log entry for status effect application
   const logEntry: BattleLogEntry = {
     id: generateUniqueLogId('status'),
-    turn: Date.now(), // Should be replaced with actual turn number by caller
+    turn,
     actor: character.name,
     type: 'STATUS',
     action: 'Effect Applied',

@@ -70,7 +70,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   
   // Check if move can be used
   console.log(`DEBUG: T${newState.turn} ${attacker.name} attempting to use ${chosenMove.name}`);
-  if (!canUseMove(chosenMove, attacker, target, newState.location || 'Open Field', state.turn ?? 0)) {
+  if (!canUseMove(chosenMove, attacker, target, newState.location || 'Open Field')) {
     console.log(`DEBUG: T${newState.turn} ${attacker.name} cannot use ${chosenMove.name}, falling back to alternative move`);
     
     // Enhanced fallback logic: avoid Basic Strike during escalation
@@ -101,140 +101,16 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
     const executionResult = await executeTacticalMove(fallbackMove, attacker, target, newState);
     
     // Collect all log entries
-    const logEntries: BattleLogEntry[] = [executionResult.logEntry];
-    if (executionResult.fatigueLogEntry) logEntries.push(executionResult.fatigueLogEntry);
-    if (executionResult.stateChangeLogEntry) logEntries.push(executionResult.stateChangeLogEntry);
-    if (executionResult.collateralLogEntry) logEntries.push(executionResult.collateralLogEntry);
+    const logEntries: BattleLogEntry[] = [...(executionResult.logEntries || [])];
     if (tacticalResult.tacticalMemoryLogEntry) logEntries.push(tacticalResult.tacticalMemoryLogEntry);
     
-    // Only add the enhanced narrative to the user-facing log
-    newState.log.push(executionResult.narrative);
-    
-    // NEW: Add collateral damage log entry if present
-    if (executionResult.collateralLogEntry) {
-      newState.log.push(executionResult.collateralLogEntry.narrative || executionResult.collateralLogEntry.result);
+    // Add tactical analysis to first log entry's meta (for debugging, not user display)
+    if (logEntries.length > 0) {
+      logEntries[0].meta = {
+        ...logEntries[0].meta,
+        tacticalAnalysis
+      };
     }
-    
-    // Add AI reasoning to aiLog for debugging (not user-facing)
-    newState.aiLog.push({
-      turn: newState.turn,
-      agent: attacker.name,
-      reasoning: `Fallback: ${tacticalResult.reasoning}`,
-      perceivedState: {
-        self: {
-          health: attacker.currentHealth,
-          defense: attacker.currentDefense,
-          personality: attacker.personality,
-          abilities: attacker.abilities.map(ability => ({
-            id: ability.name,
-            name: ability.name,
-            type: ability.type,
-            power: ability.power,
-            cooldown: ability.cooldown
-          })),
-          cooldowns: attacker.cooldowns,
-          lastMove: attacker.lastMove,
-          moveHistory: attacker.moveHistory,
-          activeEffects: attacker.activeEffects,
-          resources: attacker.resources,
-          position: attacker.position,
-          isCharging: attacker.isCharging,
-          chargeProgress: attacker.chargeProgress,
-          repositionAttempts: attacker.repositionAttempts
-        },
-        enemy: {
-          health: target.currentHealth,
-          defense: target.currentDefense,
-          personality: target.personality,
-          name: target.name,
-          lastMove: target.lastMove,
-          moveHistory: target.moveHistory,
-          activeEffects: target.activeEffects,
-          position: target.position,
-          isCharging: target.isCharging,
-          chargeProgress: target.chargeProgress,
-          repositionAttempts: target.repositionAttempts
-        },
-        round: newState.turn,
-        cooldowns: attacker.cooldowns,
-        location: newState.location || 'Unknown',
-        locationType: newState.locationType || 'Open'
-      },
-      consideredActions: [],
-      chosenAction: chosenMove.name,
-      timestamp: Date.now()
-    });
-    
-    // Update analytics for fallback move execution
-    if (newState.analytics) {
-      newState.analytics = processLogEntryForAnalytics(newState.analytics, executionResult.logEntry);
-      console.log(`DEBUG: T${newState.turn} Fallback Analytics - Damage: ${newState.analytics.totalDamage}, Chi: ${newState.analytics.totalChiSpent}`);
-    }
-    
-    // Update BOTH participants' states to ensure tactical state visibility
-    newState.participants[attackerIndex] = executionResult.newAttacker;
-    newState.participants[targetIndex] = executionResult.newTarget;
-    
-    // Update pattern tracking after move execution
-    newState.participants[attackerIndex] = updatePatternTracking(
-      newState.participants[attackerIndex], 
-      chosenMove.name
-    );
-    
-    // Propagate tactical states to ensure opponents can see them
-    propagateTacticalStates(newState, attackerIndex, targetIndex);
-    
-    // After move execution and before returning, check for reversal for both participants
-    // (attacker and target)
-    const reversalLogEntries: BattleLogEntry[] = [];
-    const participants = [newState.participants[attackerIndex], newState.participants[targetIndex]];
-    for (const participant of participants) {
-      const reversalResult = resolveReversal({
-        character: participant,
-        state: newState,
-        location: locationData,
-      });
-      if (reversalResult) {
-        reversalLogEntries.push(
-          createMechanicLogEntry({
-            turn: newState.turn,
-            actor: participant.name,
-            mechanic: 'Reversal',
-            effect: reversalResult.narrative,
-            reason: reversalResult.source,
-            meta: {
-              controlShift: reversalResult.controlShift,
-              stabilityGain: reversalResult.stabilityGain,
-            },
-          })
-        );
-        // Apply reversal effects (example: boost stability, shift control)
-        participant.stability += reversalResult.stabilityGain;
-        // You may want to update controlState or other fields here as needed
-      }
-    }
-    
-    return { state: newState, logEntries: [...logEntries, ...reversalLogEntries] };
-  } else {
-    // Apply escalation modifiers to the chosen move
-    const modifiedMove = applyEscalationModifiers(chosenMove, attacker);
-    
-    // Execute tactical move
-    const executionResult = await executeTacticalMove(modifiedMove, attacker, target, newState);
-    
-    // Collect all log entries
-    const logEntries: BattleLogEntry[] = [executionResult.logEntry];
-    if (executionResult.fatigueLogEntry) logEntries.push(executionResult.fatigueLogEntry);
-    if (executionResult.stateChangeLogEntry) logEntries.push(executionResult.stateChangeLogEntry);
-    if (executionResult.collateralLogEntry) logEntries.push(executionResult.collateralLogEntry);
-    if (tacticalResult.tacticalMemoryLogEntry) logEntries.push(tacticalResult.tacticalMemoryLogEntry);
-    
-    // Add tactical analysis to log entry meta (for debugging, not user display)
-    executionResult.logEntry.meta = {
-      ...executionResult.logEntry.meta,
-      tacticalAnalysis
-      // Removed aiRule from user-facing logs - AI reasoning goes to aiLog only
-    };
     
     // Debug: Log AI reasoning to console only (not user-facing)
     console.log(`T${newState.turn} ${attacker.name} AI: ${tacticalResult.reasoning}`);
@@ -293,15 +169,22 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
     // Only add the enhanced narrative to the user-facing log
     newState.log.push(executionResult.narrative);
     
-    // NEW: Add collateral damage log entry if present
-    if (executionResult.collateralLogEntry) {
-      newState.log.push(executionResult.collateralLogEntry.narrative || executionResult.collateralLogEntry.result);
+    // NEW: Add collateral damage log entry if present in logEntries
+    const collateralLog = logEntries.find(e => e.type === 'TACTICAL' && e.meta?.collateralDamage);
+    if (collateralLog) {
+      newState.log.push(collateralLog.narrative || collateralLog.result);
     }
     
     // Update analytics for successful move execution
     if (newState.analytics) {
-      newState.analytics = processLogEntryForAnalytics(newState.analytics, executionResult.logEntry);
-      console.log(`DEBUG: T${newState.turn} Success Analytics - Damage: ${newState.analytics.totalDamage}, Chi: ${newState.analytics.totalChiSpent}`);
+      logEntries.forEach(log => {
+        if (newState.analytics) {
+          newState.analytics = processLogEntryForAnalytics(newState.analytics, log);
+        }
+      });
+      if (newState.analytics) {
+        console.log(`DEBUG: T${newState.turn} Success Analytics - Damage: ${newState.analytics.totalDamage}, Chi: ${newState.analytics.totalChiSpent}`);
+      }
     }
     
     // Update BOTH participants' states to ensure tactical state visibility
@@ -323,9 +206,143 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
     const participants = [newState.participants[attackerIndex], newState.participants[targetIndex]];
     for (const participant of participants) {
       const reversalResult = resolveReversal({
-        character: participant,
-        state: newState,
-        location: locationData,
+        character: participant
+      });
+      if (reversalResult) {
+        reversalLogEntries.push(
+          createMechanicLogEntry({
+            turn: newState.turn,
+            actor: participant.name,
+            mechanic: 'Reversal',
+            effect: reversalResult.narrative,
+            reason: reversalResult.source,
+            meta: {
+              controlShift: reversalResult.controlShift,
+              stabilityGain: reversalResult.stabilityGain,
+            },
+          })
+        );
+        // Apply reversal effects (example: boost stability, shift control)
+        participant.stability += reversalResult.stabilityGain;
+        // You may want to update controlState or other fields here as needed
+      }
+    }
+    
+    return { state: newState, logEntries: [...logEntries, ...reversalLogEntries] };
+  } else {
+    // Apply escalation modifiers to the chosen move
+    const modifiedMove = applyEscalationModifiers(chosenMove, attacker);
+    
+    // Execute tactical move
+    const executionResult = await executeTacticalMove(modifiedMove, attacker, target, newState);
+    
+    // Collect all log entries
+    const logEntries: BattleLogEntry[] = [...(executionResult.logEntries || [])];
+    if (tacticalResult.tacticalMemoryLogEntry) logEntries.push(tacticalResult.tacticalMemoryLogEntry);
+    
+    // Add tactical analysis to first log entry's meta (for debugging, not user display)
+    if (logEntries.length > 0) {
+      logEntries[0].meta = {
+        ...logEntries[0].meta,
+        tacticalAnalysis
+      };
+    }
+    
+    // Debug: Log AI reasoning to console only (not user-facing)
+    console.log(`T${newState.turn} ${attacker.name} AI: ${tacticalResult.reasoning}`);
+    console.log(`T${newState.turn} ${attacker.name} Tactical Factors: ${tacticalResult.tacticalAnalysis}`);
+    
+    // Add AI reasoning to aiLog for debugging (not user-facing)
+    newState.aiLog.push({
+      turn: newState.turn,
+      agent: attacker.name,
+      reasoning: tacticalResult.reasoning,
+      perceivedState: {
+        self: {
+          health: attacker.currentHealth,
+          defense: attacker.currentDefense,
+          personality: attacker.personality,
+          abilities: attacker.abilities.map(ability => ({
+            id: ability.name,
+            name: ability.name,
+            type: ability.type,
+            power: ability.power,
+            cooldown: ability.cooldown
+          })),
+          cooldowns: attacker.cooldowns,
+          lastMove: attacker.lastMove,
+          moveHistory: attacker.moveHistory,
+          activeEffects: attacker.activeEffects,
+          resources: attacker.resources,
+          position: attacker.position,
+          isCharging: attacker.isCharging,
+          chargeProgress: attacker.chargeProgress,
+          repositionAttempts: attacker.repositionAttempts
+        },
+        enemy: {
+          health: target.currentHealth,
+          defense: target.currentDefense,
+          personality: target.personality,
+          name: target.name,
+          lastMove: target.lastMove,
+          moveHistory: target.moveHistory,
+          activeEffects: target.activeEffects,
+          position: target.position,
+          isCharging: target.isCharging,
+          chargeProgress: target.chargeProgress,
+          repositionAttempts: target.repositionAttempts
+        },
+        round: newState.turn,
+        cooldowns: attacker.cooldowns,
+        location: newState.location || 'Unknown',
+        locationType: newState.locationType || 'Open'
+      },
+      consideredActions: [],
+      chosenAction: chosenMove.name,
+      timestamp: Date.now()
+    });
+    
+    // Only add the enhanced narrative to the user-facing log
+    newState.log.push(executionResult.narrative);
+    
+    // NEW: Add collateral damage log entry if present in logEntries
+    const collateralLog = logEntries.find(e => e.type === 'TACTICAL' && e.meta?.collateralDamage);
+    if (collateralLog) {
+      newState.log.push(collateralLog.narrative || collateralLog.result);
+    }
+    
+    // Update analytics for successful move execution
+    if (newState.analytics) {
+      logEntries.forEach(log => {
+        if (newState.analytics) {
+          newState.analytics = processLogEntryForAnalytics(newState.analytics, log);
+        }
+      });
+      if (newState.analytics) {
+        console.log(`DEBUG: T${newState.turn} Success Analytics - Damage: ${newState.analytics.totalDamage}, Chi: ${newState.analytics.totalChiSpent}`);
+      }
+    }
+    
+    // Update BOTH participants' states to ensure tactical state visibility
+    newState.participants[attackerIndex] = executionResult.newAttacker;
+    newState.participants[targetIndex] = executionResult.newTarget;
+    
+    // Update pattern tracking after move execution
+    newState.participants[attackerIndex] = updatePatternTracking(
+      newState.participants[attackerIndex], 
+      chosenMove.name
+    );
+    
+    // Propagate tactical states to ensure opponents can see them
+    propagateTacticalStates(newState, attackerIndex, targetIndex);
+    
+    // After move execution and before returning, check for reversal for both participants
+    // (attacker and target)
+    const reversalLogEntries: BattleLogEntry[] = [];
+    const participants = [newState.participants[attackerIndex], newState.participants[targetIndex]];
+    for (const participant of participants) {
+      const reversalResult = resolveReversal({
+        character: participant
       });
       if (reversalResult) {
         reversalLogEntries.push(
