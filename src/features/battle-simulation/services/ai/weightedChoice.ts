@@ -115,11 +115,42 @@ export function selectWeightedMove(
   
   // If no weighted moves available, add fallback moves with minimum weight
   if (availableMoves.length === 0) {
-    const fallbackMoves = getAvailableMoves(self, location).map((move: Ability) => ({
-      move,
-      weight: 1, // Minimum weight for unpredictability
-      description: 'Fallback move'
-    }));
+    const allMoves = getAvailableMoves(self, location);
+    
+    // Enhanced fallback logic: prioritize signature moves and damaging moves over basic strikes
+    const signatureMoves = ['Wind Slice', 'Blue Fire', 'Blazing Counter', 'Flowing Evasion'];
+    const damagingMoves = ['Fire Dash', 'Air Glide', 'Lightning Strike'];
+    
+    // During escalation, be even more aggressive about avoiding Basic Strike
+    const isInEscalation = self.flags?.forcedEscalation === 'true';
+    
+    const fallbackMoves = allMoves.map((move: Ability) => {
+      let weight = 1; // Base weight
+      let description = 'Fallback move';
+      
+      // Prioritize signature moves
+      if (signatureMoves.includes(move.name)) {
+        weight = isInEscalation ? 50 : 30; // Even higher priority during escalation
+        description = isInEscalation ? 'FORCED ESCALATION - Signature move fallback' : 'Signature move fallback';
+      }
+      // Prioritize damaging moves
+      else if (damagingMoves.includes(move.name)) {
+        weight = isInEscalation ? 25 : 15;
+        description = isInEscalation ? 'FORCED ESCALATION - Damaging move fallback' : 'Damaging move fallback';
+      }
+      // Heavy penalty for Basic Strike during escalation
+      else if (move.name === 'Basic Strike' && isInEscalation) {
+        weight = 0; // Effectively disable Basic Strike during escalation
+        description = 'Basic Strike disabled during escalation';
+      }
+      // Normal weight for other moves
+      else {
+        weight = 5;
+        description = 'Standard fallback move';
+      }
+      
+      return { move, weight, description };
+    }).filter(item => item.weight > 0); // Remove disabled moves
     
     if (fallbackMoves.length === 0) return null;
     

@@ -12,6 +12,7 @@ import { generateOpeningSequence, integrateOpeningSequence } from '../narrative/
 import { EnhancedStateManager } from '../narrative/enhancedStateManager';
 import { initializeMentalState } from '../identity/mentalState.service';
 import { DEFAULT_OPPONENT_PERCEPTION } from '../../data/identities';
+import { getDefaultArcState, getDefaultArcStateHistory } from '../../data/arcTransitions';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -99,7 +100,11 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     locationType,
     environmentalFactors,
     tacticalPhase: 'positioning',
-    positionAdvantage: 0 // Neutral at start
+    positionAdvantage: 0, // Neutral at start
+    
+    // NEW: Dynamic Escalation Timeline
+    arcState: getDefaultArcState(),
+    arcStateHistory: getDefaultArcStateHistory(),
   };
   
   // Integrate opening sequence into the state

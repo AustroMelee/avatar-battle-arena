@@ -4,12 +4,13 @@
 import { BattleState, BattleCharacter } from '../../types';
 import { getPatternState } from './patternTracking.service';
 
-// Escalation triggers
+// Escalation triggers - EXTREMELY CONSERVATIVE
 const ESCALATION_TRIGGERS = {
-  DAMAGE_THRESHOLD: 10, // Force escalation if total damage < 10 by turn 20
-  TURNS_WITHOUT_DAMAGE: 8, // Force escalation after 8 turns without damage
-  REPOSITION_SPAM: 4, // Force close combat after 4 reposition attempts
-  STALEMATE_TURNS: 15 // Force climax after 15 turns of stalemate
+  DAMAGE_THRESHOLD: 25, // Force escalation if total damage < 25 by turn 35 (much higher threshold)
+  TURNS_WITHOUT_DAMAGE: 15, // Force escalation after 15 turns without damage (increased from 10)
+  REPOSITION_SPAM: 8, // Force close combat after 8 reposition attempts (increased from 5)
+  STALEMATE_TURNS: 30, // Force climax after 30 turns of stalemate (increased from 20)
+  ESCALATION_COOLDOWN: 15 // Much longer cooldown between escalation triggers (increased from 12)
 };
 
 /**
@@ -48,8 +49,30 @@ export function shouldTriggerEscalation(state: BattleState, attacker: BattleChar
   const damageStats = calculateDamageStats(state);
   const patternState = getPatternState(attacker);
   
-  // Check for damage-based escalation
-  if (state.turn >= 20 && damageStats.totalDamage < ESCALATION_TRIGGERS.DAMAGE_THRESHOLD) {
+  // Check escalation cooldown - prevent spam
+  const lastEscalationTurn = attacker.flags?.escalationTurns ? parseInt(attacker.flags.escalationTurns) : 0;
+  const escalationDuration = attacker.flags?.escalationDuration ? parseInt(attacker.flags.escalationDuration) : 0;
+  
+  // If currently in escalation, don't trigger again
+  if (attacker.flags?.forcedEscalation === 'true' && state.turn - lastEscalationTurn < escalationDuration) {
+    return {
+      shouldEscalate: false,
+      reason: 'Currently in escalation state',
+      escalationType: 'damage'
+    };
+  }
+  
+  // Check cooldown between escalation triggers
+  if (state.turn - lastEscalationTurn < ESCALATION_TRIGGERS.ESCALATION_COOLDOWN) {
+    return {
+      shouldEscalate: false,
+      reason: 'Escalation cooldown active',
+      escalationType: 'damage'
+    };
+  }
+  
+  // Check for damage-based escalation - much higher threshold to prevent early escalation
+  if (state.turn >= 35 && damageStats.totalDamage < ESCALATION_TRIGGERS.DAMAGE_THRESHOLD) {
     return {
       shouldEscalate: true,
       reason: `Low damage output (${damageStats.totalDamage} total) by turn ${state.turn}`,
@@ -75,8 +98,8 @@ export function shouldTriggerEscalation(state: BattleState, attacker: BattleChar
     };
   }
   
-  // Check for stalemate
-  if (state.turn >= ESCALATION_TRIGGERS.STALEMATE_TURNS && damageStats.averageDamagePerTurn < 1) {
+  // Check for stalemate - increased threshold to prevent early stalemate detection
+  if (state.turn >= ESCALATION_TRIGGERS.STALEMATE_TURNS && damageStats.averageDamagePerTurn < 0.5) {
     return {
       shouldEscalate: true,
       reason: `Stalemate detected: ${damageStats.averageDamagePerTurn.toFixed(1)} avg damage/turn`,

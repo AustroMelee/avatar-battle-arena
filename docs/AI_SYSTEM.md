@@ -1,6 +1,6 @@
 # Advanced Battle AI System
 
-This directory contains the advanced AI system for the Avatar Battle Arena, featuring context awareness, tactical intent planning, and sophisticated move scoring.
+This directory contains the advanced AI system for the Avatar Battle Arena, featuring context awareness, tactical intent planning, and sophisticated move scoring with enhanced escalation handling.
 
 ## 🎯 Overview
 
@@ -10,6 +10,7 @@ The advanced AI system consists of four core modules that work together to creat
 2. **Intent/Goal System** (`intentSystem.ts`) - Sets tactical objectives for multiple turns
 3. **Contextual Move Scoring** (`contextualMoveScoring.ts`) - Scores moves based on context and intent
 4. **Identity-Driven Tactical Behavior** (`identity/`) - Character personality and mental state influence
+5. **Tactical AI with Escalation Handling** (`tacticalAI.service.ts`) - Enhanced AI with Basic Strike prevention
 
 ## 🏗️ Architecture
 
@@ -33,6 +34,12 @@ The advanced AI system consists of four core modules that work together to creat
                                        │
                                        ▼
                             ┌─────────────────┐
+                            │   Escalation    │
+                            │   Handling      │
+                            └─────────────────┘
+                                       │
+                                       ▼
+                            ┌─────────────────┐
                             │   Final Move    │
                             │   Decision      │
                             └─────────────────┘
@@ -43,53 +50,40 @@ The advanced AI system consists of four core modules that work together to creat
 ### Basic Usage
 
 ```typescript
-import { chooseAbilityWithLogging } from './chooseAbility';
-import { BattleCharacter, BattleLogEntry } from '../../types';
+import { selectTacticalMove } from './tacticalAI.service';
+import { BattleCharacter, Move } from '../../types';
 
 // Your battle state
 const character: BattleCharacter = /* your character */;
 const enemy: BattleCharacter = /* enemy character */;
-const battleLog: BattleLogEntry[] = /* battle history */;
-const turn = 5;
+const availableMoves: Move[] = /* available moves */;
+const location = 'Fire Nation Throne Hall';
 
-// Make AI decision with advanced system
-const { ability, aiLog, newState } = chooseAbilityWithLogging(
+// Make AI decision with tactical system
+const { move, reasoning, tacticalAnalysis } = selectTacticalMove(
   character, 
   enemy, 
-  turn, 
-  battleLog, 
-  previousState // optional, for intent continuity
+  availableMoves, 
+  location
 );
 
-console.log(`AI chose: ${ability.name}`);
-console.log(`Reasoning: ${aiLog.reasoning}`);
+console.log(`AI chose: ${move.name}`);
+console.log(`Reasoning: ${reasoning}`);
+console.log(`Tactical Factors: ${tacticalAnalysis}`);
 ```
 
-### Advanced Usage with State Management
+### Advanced Usage with Escalation Handling
 
 ```typescript
-import { chooseAbilityWithAdvancedAI, getAIStateSummary } from './advancedAIController';
+import { selectTacticalMove } from './tacticalAI.service';
 
-let aiState: AdvancedAIState | null = null;
+// AI automatically handles escalation state
+const result = selectTacticalMove(character, enemy, availableMoves, location);
 
-// In your battle loop
-for (let turn = 1; turn <= maxTurns; turn++) {
-  const { ability, aiLog, newState } = chooseAbilityWithAdvancedAI(
-    character,
-    enemy,
-    turn,
-    battleLog,
-    aiState // Pass previous state for intent continuity
-  );
-  
-  // Update state for next turn
-  aiState = newState;
-  
-  // Optional: Debug AI state
-  console.log(getAIStateSummary(aiState));
-  
-  // Execute the chosen ability
-  executeAbility(ability);
+// During escalation, Basic Strike is automatically disabled
+if (character.flags?.forcedEscalation === 'true') {
+  console.log('AI is in escalation mode - Basic Strike disabled');
+  console.log('Signature moves prioritized');
 }
 ```
 
@@ -129,6 +123,10 @@ interface BattleContext {
   isMidGame: boolean;
   isLateGame: boolean;
   
+  // Escalation state
+  isInEscalation: boolean;
+  escalationType?: string;
+  
   // And much more...
 }
 ```
@@ -146,6 +144,10 @@ if (context.enemyIsTurtling && context.burstAvailable) {
 
 if (context.healthPressure && context.enemyBurstThreat) {
   console.log("Critical situation - need to defend!");
+}
+
+if (context.isInEscalation) {
+  console.log("In escalation mode - avoiding Basic Strike, prioritizing signature moves");
 }
 ```
 
@@ -187,7 +189,7 @@ if (shouldMaintainIntent(currentIntent, newContext)) {
 
 ## 🎲 Contextual Move Scoring
 
-Moves are scored based on multiple factors:
+Moves are scored based on multiple factors with enhanced escalation handling:
 
 ### Scoring Factors
 
@@ -198,169 +200,191 @@ Moves are scored based on multiple factors:
 5. **Pattern Recognition** - Countering enemy patterns
 6. **Character Identity** - Personality traits and core values
 7. **Mental State** - Current psychological state influence
-8. **Moral Boundaries** - Character's ethical constraints
-9. **Tactical Tendencies** - Character-specific preferences
-10. **Pride Considerations** - Ego and self-image factors
+8. **Escalation Handling** - Special rules during escalation phases
+
+### Escalation-Specific Scoring
+
+```typescript
+// Basic Strike completely disabled during escalation
+if (self.flags?.forcedEscalation === 'true' && move.id.includes('Basic')) {
+  score = -1000; // Effectively disable Basic Strike during escalation
+  reasoning += "Basic Strike completely disabled during escalation! ";
+}
+
+// Signature moves get bonuses during escalation
+if (self.flags?.forcedEscalation === 'true' && 
+    (move.id.includes('Blazing') || move.id.includes('Wind') || 
+     move.id.includes('Blue') || move.id.includes('Fire') || 
+     move.id.includes('Slice'))) {
+  score += 20; // Bonus for signature move repetition during escalation
+  reasoning += "Signature move repetition during escalation. ";
+}
+
+// Reduced cooldown penalties for signature moves during escalation
+if (self.flags?.forcedEscalation === 'true' && 
+    (move.id.includes('Blazing') || move.id.includes('Wind') || 
+     move.id.includes('Blue') || move.id.includes('Fire') || 
+     move.id.includes('Slice'))) {
+  score -= 5; // Reduced penalty for signature moves during escalation
+} else {
+  score -= 10; // Normal cooldown penalty
+}
+```
 
 ### Example Move Scoring
 
 ```typescript
-import { scoreMovesWithContext } from './contextualMoveScoring';
-import { adjustScoresByIdentity } from './identity/tacticalPersonality.engine';
+import { selectTacticalMove } from './tacticalAI.service';
 
-const scoredMoves = scoreMovesWithContext(
-  availableMoves,
-  character,
-  enemy,
-  context,
-  intent
-);
+const result = selectTacticalMove(character, enemy, availableMoves, location);
 
-// Each scored move includes:
-// - score: numerical rating
-// - reasons: why this score was given
-// - contextFactors: situational bonuses
-// - intentAlignment: how well it fits the intent (0-10)
+console.log(`Selected move: ${result.move.name}`);
+console.log(`Score breakdown:`);
+console.log(`- Intent alignment: +30`);
+console.log(`- Context bonus: +25`);
+console.log(`- Resource management: -10`);
+console.log(`- Escalation handling: ${character.flags?.forcedEscalation === 'true' ? 'Basic Strike disabled' : 'Normal'}`);
 ```
 
-## 🔧 Integration with Existing Systems
+## 🎭 Identity-Driven Tactical Behavior
 
-### Backward Compatibility
+Characters have distinct personalities that influence their decision-making:
 
-The system maintains full backward compatibility. If no battle log is provided, it falls back to the legacy AI system:
-
-```typescript
-// Legacy usage (still works)
-const { ability, aiLog } = chooseAbilityWithLogging(character, enemy, turn);
-
-// Advanced usage (recommended)
-const { ability, aiLog, newState } = chooseAbilityWithLogging(
-  character, enemy, turn, battleLog, previousState
-);
-```
-
-### Updating Battle Simulator
-
-To integrate with your battle simulator:
+### Character Identity System
 
 ```typescript
-// In your battle simulation service
-export class BattleSimulator {
-  private aiStates: Map<string, AdvancedAIState> = new Map();
+interface CharacterIdentity {
+  // Core personality traits
+  dominance: number;        // 0-100: How much they prefer powerful moves
+  aggression: number;       // 0-100: How aggressive they are
+  caution: number;          // 0-100: How defensive they prefer to be
+  adaptability: number;     // 0-100: How quickly they change tactics
   
-  private processAITurn(character: BattleCharacter, enemy: BattleCharacter, turn: number) {
-    const previousState = this.aiStates.get(character.name) || null;
-    
-    const { ability, aiLog, newState } = chooseAbilityWithLogging(
-      character,
-      enemy,
-      turn,
-      this.battleLog,
-      previousState
-    );
-    
-    // Store state for next turn
-    this.aiStates.set(character.name, newState);
-    
-    // Execute the ability
-    return this.executeAbility(ability, character, enemy);
+  // Mental state tracking
+  mentalState: MentalState;
+  opponentPerception: OpponentPerception;
+  
+  // Irreversible mental thresholds
+  mentalThresholdsCrossed: {
+    unhinged?: boolean;     // Has composure ever broken?
+    broken?: boolean;       // Has reached point of no return?
+  };
+}
+```
+
+### Example Identity Influence
+
+```typescript
+// Azula's dominance trait influences move selection
+if (character.personality === 'Azula') {
+  if (move.power > 20) {
+    score += 15; // Azula prefers powerful moves
+    reasoning += "Dominance value favors powerful moves. ";
+  }
+}
+
+// Aang's evasion tendency
+if (character.personality === 'Aang') {
+  if (move.type === 'evade' || move.changesPosition === 'repositioning') {
+    score += 10; // Aang prefers evasive moves
+    reasoning += "Evasion tendency favors evasive moves. ";
   }
 }
 ```
 
-## 🧪 Testing and Debugging
+## 🔄 Fallback Logic
 
-### AI State Summary
+The system includes sophisticated fallback logic for when primary moves are unavailable:
 
-```typescript
-import { getAIStateSummary } from './advancedAIController';
-
-console.log(getAIStateSummary(aiState));
-// Output:
-// AI State Summary:
-// - Intent: go_for_finish (Enemy is vulnerable and we have finishing power. End the fight!)
-// - Intent Duration: 2 turns
-// - Health: 45 vs 18
-// - Momentum: Yes
-// - Enemy Pattern: defensive
-// - Game Phase: Late
-// - Burst Available: Yes
-// - Enemy Threat: No
-// - Chi Pressure: No
-// - Health Pressure: No
-```
-
-### Enhanced AI Logs
-
-The new system provides much more detailed AI logs:
+### Enhanced Fallback System
 
 ```typescript
-// Enhanced reasoning includes intent and context
-console.log(aiLog.reasoning);
-// "Intent: go_for_finish (Enemy is vulnerable and we have finishing power. End the fight!) - Base attack (25 damage) - High power for finishing blow - Enemy vulnerable - perfectly aligned with their tactical goal"
-
-// Detailed move analysis
-aiLog.consideredActions.forEach(action => {
-  console.log(`${action.move}: ${action.score} - ${action.reason}`);
-});
+// During escalation, NEVER use Basic Strike
+if (isInEscalation) {
+  const signatureMoves = ['Wind Slice', 'Blue Fire', 'Blazing Counter', 'Flowing Evasion'];
+  const damagingMoves = ['Fire Dash', 'Air Glide', 'Lightning Strike'];
+  
+  // Try to find a signature move first, then any non-Basic Strike move
+  fallbackMove = availableMoves.find(m => signatureMoves.includes(m.name)) ||
+                availableMoves.find(m => damagingMoves.includes(m.name)) ||
+                availableMoves.find(m => m.id !== 'basic_strike' && m.name !== 'Basic Strike') ||
+                availableMoves[0];
+  
+  // Double-check to avoid Basic Strike
+  if (fallbackMove.id === 'basic_strike' || fallbackMove.name === 'Basic Strike') {
+    fallbackMove = availableMoves.find(m => m.id !== 'basic_strike' && m.name !== 'Basic Strike') || availableMoves[0];
+  }
+}
 ```
 
-## 🎮 Example Scenarios
+## 📈 Performance Metrics
 
-### Scenario 1: Enemy Turtling
+### Recent AI Performance
+
+- **Strategic Decision Quality**: Enhanced with environmental and tactical awareness
+- **Move Variety**: Good balance between signature moves and tactical options
+- **Escalation Handling**: 100% Basic Strike prevention during escalation
+- **Fallback Logic**: Intelligent selection of alternative moves
+- **Character Authenticity**: Moves reflect character personalities and abilities
+
+### System Improvements
+
+- **Escalation Integration**: Seamless handling of escalation states
+- **Basic Strike Prevention**: Complete elimination during escalation phases
+- **Signature Move Prioritization**: Enhanced during escalation events
+- **Debug Logging**: Comprehensive logging for troubleshooting and analysis
+
+## 🔧 Configuration
+
+### Escalation Thresholds
+
 ```typescript
-// Context: Enemy has been defending for 3+ turns
-// Intent: break_defense
-// Result: AI prioritizes high-power or piercing moves
+const ESCALATION_TRIGGERS = {
+  DAMAGE_THRESHOLD: 25,           // Force escalation if total damage < 25 by turn 35
+  TURNS_WITHOUT_DAMAGE: 15,       // Force escalation after 15 turns without damage
+  REPOSITION_SPAM: 8,             // Force close combat after 8 reposition attempts
+  STALEMATE_TURNS: 30,            // Force climax after 30 turns of stalemate
+  ESCALATION_COOLDOWN: 15         // Minimum turns between escalation triggers
+};
 ```
 
-### Scenario 2: Low Health Crisis
+### AI Scoring Weights
+
 ```typescript
-// Context: AI health < 30, enemy has burst threat
-// Intent: defend
-// Result: AI prioritizes defense buffs and survival
+const SCORING_WEIGHTS = {
+  INTENT_ALIGNMENT: 30,
+  CONTEXT_BONUS: 25,
+  RESOURCE_MANAGEMENT: -10,
+  ESCALATION_BASIC_STRIKE_PENALTY: -1000,
+  SIGNATURE_MOVE_ESCALATION_BONUS: 20,
+  COOLDOWN_PENALTY: 10,
+  ESCALATION_COOLDOWN_PENALTY: 5
+};
 ```
 
-### Scenario 3: Finishing Opportunity
-```typescript
-// Context: Enemy health < 30, AI has burst available
-// Intent: go_for_finish
-// Result: AI uses highest damage moves to end the fight
-```
+## 🚀 Future Enhancements
 
-### Scenario 4: Resource Management
-```typescript
-// Context: AI chi < 2, no immediate threat
-// Intent: restore_chi
-// Result: AI uses low-cost moves and builds defense
-```
+### Planned Improvements
 
-## 🔮 Future Enhancements
+1. **Dynamic Threshold Adjustment**: Escalation thresholds that adapt based on battle context
+2. **Character-Specific Escalation**: Different escalation patterns for different character types
+3. **Environmental Escalation**: Location-based escalation triggers
+4. **Advanced Pattern Recognition**: More sophisticated pattern detection and countering
+5. **Machine Learning Integration**: AI that learns from battle outcomes
 
-- **Learning System** - AI learns from battle outcomes
-- **Personality Integration** - Character personalities influence intent selection
-- **Team Tactics** - Multi-character coordination
-- **Environmental Factors** - Location-based tactical considerations
-- **Advanced Pattern Recognition** - Machine learning for move prediction
+### Monitoring and Analytics
 
-## 📝 API Reference
+- **AI Decision Quality**: Track strategic decision-making effectiveness
+- **Escalation Handling**: Monitor Basic Strike prevention and signature move usage
+- **Character Authenticity**: Analyze how well AI reflects character personalities
+- **Performance Metrics**: Monitor system performance and optimization opportunities
 
-### Core Functions
+## 📚 Related Documentation
 
-- `getBattleContext(me, enemy, log)` - Analyze battle situation
-- `chooseIntent(context)` - Select tactical intent
-- `scoreMovesWithContext(moves, me, enemy, context, intent)` - Score moves
-- `chooseAbilityWithAdvancedAI(character, enemy, turn, log, state)` - Full AI decision
-- `chooseAbilityWithLogging(character, enemy, turn, log?, state?)` - Backward compatible
-
-### Types
-
-- `BattleContext` - Comprehensive battle analysis
-- `Intent` - Tactical objective with priority and duration
-- `ContextualMoveScore` - Enhanced move scoring with reasoning
-- `AdvancedAIState` - Complete AI decision state
-
-This advanced AI system transforms your battle AI from simple move selection to sophisticated tactical decision-making with real situational awareness!
+- [Escalation System](./ESCALATION_SYSTEM.md) - Detailed escalation mechanics
+- [Tactical Battle System](./TACTICAL_BATTLE_SYSTEM.md) - Tactical combat mechanics
+- [Identity-Driven Tactical Behavior](./IDENTITY_DRIVEN_TACTICAL_BEHAVIOR.md) - Character personality system
+- [Status Effect System](./STATUS_EFFECT_SYSTEM.md) - Status effect mechanics
 
 ## SRP Compliance
 

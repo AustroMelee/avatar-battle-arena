@@ -6,6 +6,7 @@ import { cloneBattleState, switchActiveParticipant } from './state';
 import { initializeAnalyticsTracker } from './analyticsTracker.service';
 import { processTurnEffects } from '../effects/statusEffect.service';
 import { updateMentalState } from '../identity/mentalState.service';
+import { cleanupTacticalStates } from './tacticalState.service';
 import {
   validateBattleEndPhase,
   processDesperationPhase,
@@ -59,6 +60,10 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   state.participants.forEach((participant, index) => {
     state.participants[index].mentalState = updateMentalState(participant, turnLogs);
   });
+  // --- END OF NEW STEP ---
+  
+  // --- NEW TACTICAL STATE CLEANUP STEP (at the end of the turn) ---
+  cleanupTacticalStates(state);
   // --- END OF NEW STEP ---
   
   // Switch active participant for next turn

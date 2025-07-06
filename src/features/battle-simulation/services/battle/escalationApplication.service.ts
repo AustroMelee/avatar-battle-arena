@@ -30,7 +30,9 @@ export function forcePatternEscalation(
       newState.participants[attackerIndex].flags = {
         ...newState.participants[attackerIndex].flags,
         forcedEscalation: 'true',
-        damageMultiplier: '2.0'
+        damageMultiplier: '2.0',
+        escalationTurns: state.turn.toString(), // Track when escalation was triggered
+        escalationDuration: '2' // Escalation lasts for 2 turns
       };
       break;
       
@@ -59,6 +61,14 @@ export function forcePatternEscalation(
       // Reset pattern tracking to prevent immediate re-triggering
       newState.participants[attackerIndex].moveHistory = [];
       newState.participants[attackerIndex].lastMove = '';
+      
+      // Set escalation duration to prevent immediate re-triggering
+      newState.participants[attackerIndex].flags = {
+        ...newState.participants[attackerIndex].flags,
+        escalationTurns: state.turn.toString(),
+        escalationDuration: '2', // Reduced escalation duration to 2 turns
+        forcedEscalation: 'true' // Ensure escalation state is properly set
+      };
       break;
     }
       
@@ -81,7 +91,9 @@ export function forcePatternEscalation(
         participant.flags = {
           ...participant.flags,
           forcedEscalation: 'true',
-          damageMultiplier: '1.5'
+          damageMultiplier: '1.5',
+          escalationTurns: state.turn.toString(), // Track when escalation was triggered
+          escalationDuration: '2' // Escalation lasts for 2 turns
         };
       });
       break;

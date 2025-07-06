@@ -3,6 +3,35 @@ import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
 import { MentalState, OpponentPerception } from './identity.types';
 
+/** @description The narrative phases of a battle. */
+export enum BattleArcState {
+  Opening = 'Opening',
+  RisingAction = 'RisingAction',
+  Climax = 'Climax',
+  FallingAction = 'FallingAction',
+  Resolution = 'Resolution',
+  Twilight = 'Twilight', // For rare, dramatic edge cases like a double KO
+}
+
+/** @description Global modifiers applied during a specific arc state. */
+export interface ArcStateModifier {
+  damageBonus: number;
+  defenseBonus: number;
+  chiRegenBonus: number;
+  statusEffectDurationModifier: number; // e.g., 0.5 to halve durations
+  aiRiskFactor: number; // 1.0 is normal, 1.5 makes AI 50% more aggressive
+  unlocksFinishers: boolean;
+}
+
+/** @description A transition rule between battle arc states. */
+export interface ArcTransition {
+  from: BattleArcState;
+  to: BattleArcState;
+  priority: number; // Higher priority transitions are checked first
+  condition: (state: BattleState) => boolean;
+  narrative: string; // Description of the transition for battle logs
+}
+
 /** @description The specific defensive stance a character is currently in. */
 export type DefensiveStance = 'none' | 'evading' | 'parrying';
 
@@ -103,6 +132,7 @@ export type BattleCharacter = Character & {
     damageMultiplier?: string; // Damage multiplier as string (e.g., '2.0')
     repositionDisabled?: string; // Turns remaining as string (e.g., '3')
     escalationTurns?: string; // Turns in escalation state as string
+    escalationDuration?: string; // Duration of escalation state as string (e.g., '3')
     isCountering?: boolean; // NEW: Track if character is in counter-attack state
   };
   diminishingEffects: Record<string, number>; // Track power reduction from diminishing returns
@@ -218,7 +248,7 @@ export type AILogEntry = {
 /**
  * @description Event types for structured battle logging.
  */
-export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER' | 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT' | 'TACTICAL' | 'ESCALATION';
+export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER' | 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT' | 'TACTICAL' | 'ESCALATION' | 'ARC_TRANSITION';
 
 /**
  * @description Battle resolution types for special end conditions.
@@ -295,6 +325,9 @@ export type BattleState = {
   environmentalFactors: string[]; // e.g., ["Desert", "No Repositioning"]
   tacticalPhase: 'positioning' | 'engagement' | 'climax' | 'stalemate';
   positionAdvantage: number; // -1 to 1, negative means player1 advantage, positive means player2
+  // NEW: Dynamic Escalation Timeline
+  arcState: BattleArcState;
+  arcStateHistory: BattleArcState[]; // Tracks the progression to prevent reversion
   // NEW: Real-time analytics tracking
   analytics?: {
     totalDamage: number;

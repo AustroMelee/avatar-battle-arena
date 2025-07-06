@@ -1,7 +1,6 @@
 // CONTEXT: Enhanced Narrative System
 // RESPONSIBILITY: Main entry point for the narrative system with backward compatibility
 
-import { NarrativeCoordinator } from './core/NarrativeCoordinator';
 import type { 
   NarrativeContext, 
   DamageOutcome, 
@@ -9,11 +8,23 @@ import type {
   NarrativeRequest
 } from './types/NarrativeTypes';
 
+// Type for the dynamically imported coordinator
+interface NarrativeCoordinatorInstance {
+  initializeBattle(player1Name: string, player2Name: string): void;
+  generateMoveNarrative(request: NarrativeRequest): string;
+  generateEscalationNarrative(characterName: string, context: NarrativeContext): string;
+  generateDesperationNarrative(characterName: string, context: NarrativeContext): string;
+  generateVictoryNarrative(winnerName: string, loserName: string): string;
+  getNarrativeVariant(type: string): string;
+  checkOneOffMoment(characterName: string, context: NarrativeContext): string | null;
+  getBattleStateSummary(): Record<string, unknown>;
+}
+
 /**
  * @description Enhanced narrative system with dynamic coordinator loading
  */
 export class EnhancedNarrativeSystem {
-  private coordinator: unknown; // Will be NarrativeCoordinator after dynamic import
+  private coordinator: NarrativeCoordinatorInstance | null = null;
   private initializationPromise: Promise<void> | null = null;
 
   constructor() {
@@ -21,7 +32,7 @@ export class EnhancedNarrativeSystem {
   }
 
   private async initializeCoordinator(): Promise<void> {
-    const { NarrativeCoordinator } = await import('./core/NarrativeCoordinator');
+    const { NarrativeCoordinator } = await import('./core/NarrativeCoordinator') as { NarrativeCoordinator: new () => NarrativeCoordinatorInstance };
     this.coordinator = new NarrativeCoordinator();
   }
 
@@ -30,7 +41,9 @@ export class EnhancedNarrativeSystem {
    */
   async initializeCharacter(characterName: string): Promise<void> {
     await this.initializationPromise;
-    (this.coordinator as NarrativeCoordinator).initializeBattle(characterName, 'opponent');
+    if (this.coordinator) {
+      this.coordinator.initializeBattle(characterName, 'opponent');
+    }
   }
 
   /**
@@ -43,13 +56,16 @@ export class EnhancedNarrativeSystem {
     damageOutcome: DamageOutcome
   ): Promise<string> {
     await this.initializationPromise;
+    if (!this.coordinator) {
+      throw new Error('Narrative coordinator not initialized');
+    }
     const request: NarrativeRequest = {
       characterName,
       moveName,
       damageOutcome,
       context
     };
-    return (this.coordinator as NarrativeCoordinator).generateMoveNarrative(request);
+    return this.coordinator.generateMoveNarrative(request);
   }
 
   /**
@@ -82,6 +98,9 @@ export class EnhancedNarrativeSystem {
    */
   async generateStateAnnouncement(stateType: StateAnnouncementType, turnNumber: number): Promise<string> {
     await this.initializationPromise;
+    if (!this.coordinator) {
+      throw new Error('Narrative coordinator not initialized');
+    }
     const context: NarrativeContext = {
       turnNumber,
       health: 100,
@@ -320,9 +339,6 @@ export function getEnhancedNarrativeSystem(): EnhancedNarrativeSystem {
   }
   return enhancedNarrativeSystemInstance;
 }
-
-// Export class for testing
-export { EnhancedNarrativeSystem };
 
 // Export types for external use
 export type { 

@@ -1,19 +1,20 @@
 // CONTEXT: Tactical AI Decision Making
 // RESPONSIBILITY: AI that considers positioning, charge-ups, and environmental factors
 
-import { BattleCharacter } from '../../types';
+import { BattleCharacter, ArcStateModifier } from '../../types';
 import { Move, getLocationType } from '../../types/move.types';
 import { canUseMove, applyPositionBonuses } from '../battle/positioningMechanics.service';
 import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
 
 /**
- * @description Enhanced AI move selection with tactical awareness.
+ * @description Enhanced AI move selection with tactical awareness and arc state influence.
  */
 export function selectTacticalMove(
   self: BattleCharacter,
   enemy: BattleCharacter,
   availableMoves: Move[],
-  location: string
+  location: string,
+  arcModifiers?: ArcStateModifier
 ): { move: Move; reasoning: string; tacticalAnalysis: string } {
   const locationType = getLocationType(location);
   const isAirbender = self.name.toLowerCase().includes('aang');
@@ -29,6 +30,33 @@ export function selectTacticalMove(
   // --- END OF NEW INTEGRATION ---
   
   if (usableMoves.length === 0) {
+    // During escalation, try to find any damaging move before falling back to basic
+    if (self.flags?.forcedEscalation === 'true') {
+      // First try signature moves
+      const signatureMoves = availableMoves.filter(move => 
+        move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire') || move.id.includes('Slice')
+      );
+      if (signatureMoves.length > 0) {
+        return {
+          move: signatureMoves[0],
+          reasoning: "Escalation fallback: using available signature move",
+          tacticalAnalysis: "Escalation Signature Fallback"
+        };
+      }
+      
+      // Then try any damaging move
+      const damagingMoves = availableMoves.filter(move => 
+        move.baseDamage > 5 && !move.isChargeUp
+      );
+      if (damagingMoves.length > 0) {
+        return {
+          move: damagingMoves[0],
+          reasoning: "Escalation fallback: using available damaging move",
+          tacticalAnalysis: "Escalation Fallback"
+        };
+      }
+    }
+    
     // Fallback to basic moves if no tactical moves available
     const basicMoves = availableMoves.filter(move => 
       move.chiCost === 0 && !move.isChargeUp && !move.changesPosition
@@ -54,9 +82,30 @@ export function selectTacticalMove(
       
       // Prioritize high-damage moves during escalation
       if (move.baseDamage >= 5) {
-        score += 100;
+        score += 120; // Increased bonus for high-damage moves
         reasoning += "High damage move for escalation! ";
         tacticalFactors.push("Escalation Damage");
+      }
+      
+      // Prioritize signature moves during escalation
+      if (move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire')) {
+        score += 80;
+        reasoning += "Signature move for escalation! ";
+        tacticalFactors.push("Escalation Signature");
+      }
+      
+      // Avoid basic moves during escalation unless necessary
+      if (move.baseDamage <= 10 && !move.id.includes('Blazing') && !move.id.includes('Wind') && !move.id.includes('Blue') && !move.id.includes('Fire')) {
+        score -= 100; // Increased penalty for weak moves during escalation
+        reasoning += "Avoiding weak moves during escalation. ";
+        tacticalFactors.push("Escalation Avoidance");
+      }
+      
+      // Completely disable Basic Strike during escalation
+      if (move.id.includes('Basic') && self.flags?.forcedEscalation === 'true') {
+        score = -1000; // Effectively disable Basic Strike during escalation
+        reasoning += "Basic Strike completely disabled during escalation! ";
+        tacticalFactors.push("Escalation Disabled");
       }
       
       // Avoid repositioning during escalation unless forced
@@ -153,7 +202,13 @@ export function selectTacticalMove(
     
     // 9. COOLDOWN CONSIDERATION
     if (self.cooldowns[move.id] && self.cooldowns[move.id] > 0) {
-      score -= 10;
+      // During escalation, reduce cooldown penalty for signature moves
+      if (self.flags?.forcedEscalation === 'true' && 
+          (move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire') || move.id.includes('Slice'))) {
+        score -= 5; // Reduced penalty for signature moves during escalation
+      } else {
+        score -= 10;
+      }
     }
     
     // 10. MOVE USAGE LIMITS
@@ -168,19 +223,38 @@ export function selectTacticalMove(
       }
     }
     
-    // 11. MOVE VARIETY - Penalize using the same move repeatedly
+    // 11. MOVE VARIETY - Penalize using the same move repeatedly (reduced during escalation)
     if (self.lastMove === move.name) {
-      score -= 30; // Significant penalty for repeating moves
-      reasoning += "Avoiding move repetition. ";
-      tacticalFactors.push("Move Variety");
+      // Allow immediate repetition for signature moves during escalation
+      if (self.flags?.forcedEscalation === 'true' && 
+          (move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire') || move.id.includes('Slice'))) {
+        score += 20; // Bonus for signature move repetition during escalation
+        reasoning += "Signature move repetition during escalation. ";
+        tacticalFactors.push("Escalation Signature Repetition");
+      } else {
+        const repetitionPenalty = self.flags?.forcedEscalation === 'true' ? 30 : 60; // Reduced penalty during escalation
+        score -= repetitionPenalty;
+        reasoning += "Avoiding move repetition. ";
+        tacticalFactors.push("Move Variety");
+      }
     }
     
-    // 12. MOVE HISTORY PENALTY - Penalize moves used recently
-    const recentMoves = self.moveHistory.slice(-3); // Last 3 moves
+    // 12. MOVE HISTORY PENALTY - Penalize moves used recently (reduced during escalation)
+    const recentMoves = self.moveHistory.slice(-3); // Last 3 moves (increased from 2)
     if (recentMoves.includes(move.name)) {
-      score -= 20; // Penalty for recently used moves
+      const recentPenalty = self.flags?.forcedEscalation === 'true' ? 10 : 25; // Reduced penalty during escalation
+      score -= recentPenalty;
       reasoning += "Move used recently. ";
       tacticalFactors.push("Recent Use");
+    }
+    
+    // 13. EXTENDED MOVE HISTORY - Penalize moves used in last 5 turns (reduced during escalation)
+    const extendedMoves = self.moveHistory.slice(-5); // Last 5 moves
+    if (extendedMoves.filter(m => m === move.name).length >= 2) {
+      const overusePenalty = self.flags?.forcedEscalation === 'true' ? 5 : 15; // Reduced penalty during escalation
+      score -= overusePenalty;
+      reasoning += "Move overused recently. ";
+      tacticalFactors.push("Overuse Penalty");
     }
 
     // --- APPLY IDENTITY MODIFIER ---
@@ -210,6 +284,19 @@ export function selectTacticalMove(
           reasoning += `Applies a useful ${effect.type} self-buff. `;
           tacticalFactors.push("Status Buff");
         }
+      }
+    }
+
+    // 14. ARC STATE AI RISK FACTOR - Apply arc state influence on AI behavior
+    if (arcModifiers && move.baseDamage > 20) { // Only apply to risky, high-damage moves
+      const originalScore = score;
+      score *= arcModifiers.aiRiskFactor;
+      if (arcModifiers.aiRiskFactor > 1.0) {
+        reasoning += `Arc state makes AI more aggressive (${arcModifiers.aiRiskFactor.toFixed(1)}x). `;
+        tacticalFactors.push("Arc State Aggression");
+      } else if (arcModifiers.aiRiskFactor < 1.0) {
+        reasoning += `Arc state makes AI more conservative (${arcModifiers.aiRiskFactor.toFixed(1)}x). `;
+        tacticalFactors.push("Arc State Caution");
       }
     }
     

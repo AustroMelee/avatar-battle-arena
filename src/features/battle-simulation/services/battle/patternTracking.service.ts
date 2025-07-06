@@ -18,7 +18,7 @@ export interface PatternState {
 
 // Escalation triggers
 const ESCALATION_TRIGGERS = {
-  MOVE_REPETITION: 3 // Disable move after 3 consecutive uses
+  MOVE_REPETITION: 5 // Disable move after 5 consecutive uses (increased from 3)
 };
 
 /**
@@ -33,8 +33,8 @@ export function getPatternState(character: BattleCharacter): PatternState {
     moveCounts[move] = (moveCounts[move] || 0) + 1;
   });
   
-  // Check for repetitive patterns
-  const isRepetitive = lastMoves.length >= 2 && 
+  // Check for repetitive patterns - require many more consecutive moves to trigger
+  const isRepetitive = lastMoves.length >= 8 && 
     lastMoves.every(move => move === lastMoves[0]);
   
   return {

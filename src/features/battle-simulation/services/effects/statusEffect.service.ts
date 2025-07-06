@@ -1,6 +1,6 @@
 // CONTEXT: Status Effect Management
 // RESPONSIBILITY: Apply, process, and manage status effects on characters
-import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType } from '../../types';
+import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType, ArcStateModifier } from '../../types';
 import { createEventId } from '../ai/logQueries';
 
 /**
@@ -8,13 +8,26 @@ import { createEventId } from '../ai/logQueries';
  */
 
 /**
- * Applies a new status effect to a character.
+ * Applies a new status effect to a character with arc state duration modification.
  * @param {BattleCharacter} character - The character to apply the effect to
  * @param {ActiveStatusEffect} effect - The effect to apply
+ * @param {ArcStateModifier} arcModifiers - Current arc state modifiers
  * @returns {BattleCharacter} The updated character
  */
-export function applyEffect(character: BattleCharacter, effect: ActiveStatusEffect): BattleCharacter {
-  const newEffects = [...character.activeEffects, effect];
+export function applyEffect(
+  character: BattleCharacter, 
+  effect: ActiveStatusEffect, 
+  arcModifiers?: ArcStateModifier
+): BattleCharacter {
+  let modifiedEffect = { ...effect };
+  
+  // Apply arc state duration modifier if provided
+  if (arcModifiers) {
+    const modifiedDuration = Math.round(effect.duration * arcModifiers.statusEffectDurationModifier);
+    modifiedEffect = { ...modifiedEffect, duration: Math.max(1, modifiedDuration) }; // Minimum 1 turn
+  }
+  
+  const newEffects = [...character.activeEffects, modifiedEffect];
   return { ...character, activeEffects: newEffects };
 }
 

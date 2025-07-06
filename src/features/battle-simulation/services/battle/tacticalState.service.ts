@@ -26,6 +26,14 @@ export function propagateTacticalStates(state: BattleState, attackerIndex: numbe
     target.position = "neutral"; // Reset to neutral after repositioning
   }
   
+  // Additional cleanup: Reset any lingering repositioning states for all participants
+  state.participants.forEach((participant) => {
+    if (participant.position === "repositioning") {
+      console.log(`DEBUG: T${state.turn} - ${participant.name} cleanup: resetting from repositioning to neutral`);
+      participant.position = "neutral";
+    }
+  });
+  
   // Ensure charge states are visible
   if (attacker.isCharging && attacker.chargeProgress && attacker.chargeProgress >= 100) {
     attacker.isCharging = false;
@@ -43,9 +51,9 @@ export function propagateTacticalStates(state: BattleState, attackerIndex: numbe
  */
 export function createTacticalWindows(state: BattleState): void {
   state.participants.forEach((participant) => {
-    // 15% chance per turn to create a tactical window
-    if (Math.random() < 0.15) {
-      const windowType = Math.random() < 0.5 ? 'charging' : 'repositioning';
+    // Reduced to 5% chance per turn to create a tactical window (was 15%)
+    if (Math.random() < 0.05) {
+      const windowType = Math.random() < 0.7 ? 'charging' : 'repositioning'; // Favor charging over repositioning
       
       if (windowType === 'charging') {
         participant.isCharging = true;
@@ -54,6 +62,50 @@ export function createTacticalWindows(state: BattleState): void {
       } else {
         participant.position = 'repositioning';
         console.log(`DEBUG: T${state.turn} - ${participant.name} starts repositioning`);
+      }
+    }
+  });
+}
+
+/**
+ * @description Cleans up tactical states at the end of each turn to prevent accumulation
+ * @param {BattleState} state - The battle state
+ */
+export function cleanupTacticalStates(state: BattleState): void {
+  state.participants.forEach((participant) => {
+    // Reset repositioning states that might have been missed
+    if (participant.position === "repositioning") {
+      console.log(`DEBUG: T${state.turn} - ${participant.name} end-of-turn cleanup: resetting from repositioning to neutral`);
+      participant.position = "neutral";
+    }
+    
+    // Reset charging states that have completed
+    if (participant.isCharging && participant.chargeProgress && participant.chargeProgress >= 100) {
+      participant.isCharging = false;
+      participant.chargeProgress = 0;
+      console.log(`DEBUG: T${state.turn} - ${participant.name} charge completed and reset`);
+    }
+    
+    // Clear escalation states that have expired
+    if (participant.flags?.forcedEscalation === 'true' && participant.flags?.escalationTurns && participant.flags?.escalationDuration) {
+      const escalationTurn = parseInt(participant.flags.escalationTurns);
+      const escalationDuration = parseInt(participant.flags.escalationDuration);
+      
+      if (state.turn - escalationTurn >= escalationDuration) {
+        console.log(`DEBUG: T${state.turn} - ${participant.name} escalation expired, clearing escalation state`);
+        participant.flags.forcedEscalation = 'false';
+        participant.flags.damageMultiplier = '1.0';
+        participant.position = 'neutral';
+        // Clear escalation tracking flags
+        participant.flags.escalationTurns = '0';
+        participant.flags.escalationDuration = '0';
+        
+        // Also clear reposition disabled if it was set during escalation
+        if (participant.flags.repositionDisabled) {
+          participant.flags.repositionDisabled = '0';
+        }
+      } else {
+        console.log(`DEBUG: T${state.turn} - ${participant.name} still in escalation (${state.turn - escalationTurn}/${escalationDuration} turns)`);
       }
     }
   });

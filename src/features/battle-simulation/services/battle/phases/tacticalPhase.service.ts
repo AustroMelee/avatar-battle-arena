@@ -49,6 +49,12 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
   // Filter out disabled moves due to pattern breaking
   const filteredMoves = collateralFilteredMoves.filter(move => !isMoveDisabled(move, attacker));
   
+  // Debug escalation state
+  if (attacker.flags?.forcedEscalation === 'true') {
+    console.log(`DEBUG: T${newState.turn} ${attacker.name} is in escalation state`);
+    console.log(`DEBUG: T${newState.turn} ${attacker.name} escalation turns: ${attacker.flags.escalationTurns}, duration: ${attacker.flags.escalationDuration}`);
+  }
+  
   const tacticalResult = selectTacticalMove(
     attacker,
     target,
@@ -62,10 +68,34 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
   // Check if move can be used
   console.log(`DEBUG: T${newState.turn} ${attacker.name} attempting to use ${chosenMove.name}`);
   if (!canUseMove(chosenMove, attacker, target, newState.location || 'Open Field')) {
-    console.log(`DEBUG: T${newState.turn} ${attacker.name} cannot use ${chosenMove.name}, falling back to basic move`);
-    // Fallback to basic move
-    const basicMove = availableMoves.find(m => m.id === 'basic_strike') || availableMoves[0];
-    const executionResult = await executeTacticalMove(basicMove, attacker, target, newState);
+    console.log(`DEBUG: T${newState.turn} ${attacker.name} cannot use ${chosenMove.name}, falling back to alternative move`);
+    
+    // Enhanced fallback logic: avoid Basic Strike during escalation
+    const isInEscalation = attacker.flags?.forcedEscalation === 'true';
+    let fallbackMove = availableMoves[0]; // Default fallback
+    
+    if (isInEscalation) {
+      // During escalation, NEVER use Basic Strike - prioritize any other move
+      const signatureMoves = ['Wind Slice', 'Blue Fire', 'Blazing Counter', 'Flowing Evasion'];
+      const damagingMoves = ['Fire Dash', 'Air Glide', 'Lightning Strike'];
+      
+      // Try to find a signature move first, then any non-Basic Strike move
+      fallbackMove = availableMoves.find(m => signatureMoves.includes(m.name)) ||
+                    availableMoves.find(m => damagingMoves.includes(m.name)) ||
+                    availableMoves.find(m => m.id !== 'basic_strike' && m.name !== 'Basic Strike') ||
+                    availableMoves[0];
+      
+      // If we still got Basic Strike, try to find ANY other move
+      if (fallbackMove.id === 'basic_strike' || fallbackMove.name === 'Basic Strike') {
+        fallbackMove = availableMoves.find(m => m.id !== 'basic_strike' && m.name !== 'Basic Strike') || availableMoves[0];
+      }
+      
+      console.log(`DEBUG: T${newState.turn} ${attacker.name} escalation fallback: ${fallbackMove.name} (avoided Basic Strike)`);
+    } else {
+      // Normal fallback - can use Basic Strike
+      fallbackMove = availableMoves.find(m => m.id === 'basic_strike') || availableMoves[0];
+    }
+    const executionResult = await executeTacticalMove(fallbackMove, attacker, target, newState);
     
     // Only add the enhanced narrative to the user-facing log
     newState.battleLog.push(executionResult.logEntry);
