@@ -10,6 +10,8 @@ import { getEnvironmentalFactors } from './positioningMechanics.service';
 import { createNarrativeService } from '../narrative';
 import { generateOpeningSequence, integrateOpeningSequence } from '../narrative/openingSequence';
 import { EnhancedStateManager } from '../narrative/enhancedStateManager';
+import { initializeMentalState } from '../identity/mentalState.service';
+import { DEFAULT_OPPONENT_PERCEPTION } from '../../data/identities';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -38,28 +40,52 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     flags: {},
     diminishingEffects: {},
     position: 'neutral',
+    chargeProgress: 0,
     isCharging: false,
     repositionAttempts: 0,
     chargeInterruptions: 0,
-    positionHistory: ['neutral']
+    positionHistory: ['neutral'],
+    defensiveStance: 'none',
+    mentalState: {
+      stability: 50,
+      pride: 50,
+      activeStates: []
+    },
+    opponentPerception: {
+      aggressionLevel: 50,
+      predictability: 50,
+      respect: 50
+    }
   };
   
   const p2Battle: BattleCharacter = {
     ...player2,
-    currentHealth: 100, // All characters start with 100 health
+    currentHealth: 100,
     currentDefense: player2.stats.defense,
     cooldowns: {},
     usesLeft: {},
     moveHistory: [],
     resources: { chi: 10 },
-    activeEffects: [], // Unified status effects system
+    activeEffects: [],
     flags: {},
     diminishingEffects: {},
     position: 'neutral',
+    chargeProgress: 0,
     isCharging: false,
     repositionAttempts: 0,
     chargeInterruptions: 0,
-    positionHistory: ['neutral']
+    positionHistory: [],
+    defensiveStance: 'none',
+    mentalState: {
+      stability: 50,
+      pride: 50,
+      activeStates: []
+    },
+    opponentPerception: {
+      aggressionLevel: 50,
+      predictability: 50,
+      respect: 50
+    }
   };
   
   // Calculate environmental factors

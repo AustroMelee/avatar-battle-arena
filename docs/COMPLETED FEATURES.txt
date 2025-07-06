@@ -11,7 +11,7 @@ Battle Awareness Completion Checklist
  AI Receives Perceived State:
 Every AI decision function receives a single PerceivedBattleState object (or equivalent), containing:
 
-Both agents’ HP, max HP, defense, chi/resources.
+Both agents' HP, max HP, defense, chi/resources.
 
 Active buffs & debuffs (by name, ideally with effect).
 
@@ -48,6 +48,22 @@ TACTICAL BATTLE SYSTEM
 ✅ Desperation system with low-health mechanics
 ✅ Finisher moves with conditions and high damage
 
+IDENTITY-DRIVEN TACTICAL BEHAVIOR (IDTB) SYSTEM - COMPLETE
+✅ Character identity profiles with psychological traits
+✅ Dynamic mental state tracking during battle
+✅ Opponent perception modeling
+✅ Identity-based AI move scoring
+✅ Mental state updates based on battle events
+✅ Character-specific behavioral patterns
+✅ Pride and stability mechanics
+✅ Active state transitions (focused, enraged, fearful, unhinged)
+✅ UI integration with mental state indicators
+✅ Narrative integration with psychological states
+✅ Character profiles: Aang (pacifist, evasion) and Azula (control, dominance)
+✅ Real-time psychological state changes
+✅ Identity-driven decision making
+✅ Mental state logging and debugging
+
 STATUS EFFECT SYSTEM - COMPLETE
 ✅ Unified status effect system with activeEffects array
 ✅ Status effect application with configurable chance and duration
@@ -71,6 +87,9 @@ AI SYSTEM
 ✅ AI log entries for debugging and analysis
 ✅ AI state awareness and context consideration
 ✅ AI move variety and repetition prevention
+✅ Identity-driven AI behavior with character personality
+✅ Psychological state influence on AI decisions
+✅ Character-specific tactical preferences
 
 NARRATIVE SYSTEM
 ✅ Dynamic narrative generation with context awareness
@@ -83,6 +102,8 @@ NARRATIVE SYSTEM
 ✅ Narrative memory and repetition prevention
 ✅ Narrative escalation and climax building
 ✅ Narrative state management and tracking
+✅ Mental state integration with narrative generation
+✅ Character personality influence on storytelling
 
 UI COMPONENTS
 ✅ Character selection interface
@@ -95,6 +116,19 @@ UI COMPONENTS
 ✅ Battle scene visualization
 ✅ Narrative bubble display
 ✅ Enhanced battle log with animations
+✅ Mental state indicators in character cards
+✅ T1 log visibility controls (Show All/Recent Only)
+✅ Turn filtering and navigation
+✅ Complete battle log visibility by default
+
+CRITICAL UI REQUIREMENTS - IMPLEMENTED
+✅ T1 logs always visible by default
+✅ User controls for log visibility (Show All/Recent Only)
+✅ Clear warnings when T1 logs will be hidden
+✅ Turn filtering for specific turn analysis
+✅ Complete battle visibility for debugging and analysis
+✅ Mental state indicators with visual feedback
+✅ Character personality influence on UI elements
 
 TECHNICAL INFRASTRUCTURE
 ✅ TypeScript with strict type checking
@@ -107,6 +141,9 @@ TECHNICAL INFRASTRUCTURE
 ✅ Modular architecture with SRP compliance
 ✅ Dependency injection patterns
 ✅ Lazy initialization to prevent circular dependencies
+✅ Identity system type safety
+✅ Mental state type definitions
+✅ Character profile type system
 
 SRP REFACTORING - COMPLETE
 ✅ All major services refactored for single responsibility
@@ -114,13 +151,15 @@ SRP REFACTORING - COMPLETE
 ✅ Narrative system fully modularized
 ✅ AI services properly separated
 ✅ Battle services organized by domain
+✅ Identity services properly isolated
+✅ Mental state services with clear boundaries
 ✅ No files exceed 500 lines
 ✅ Clear separation of concerns
 ✅ Proper orchestration patterns
 ✅ Maintainable and extensible architecture
 
-PROJECT STATUS: 85% COMPLETE
-Current Phase: Status Effect System Complete ✅
+PROJECT STATUS: 92% COMPLETE
+Current Phase: Identity-Driven Tactical Behavior System Complete ✅
 Next Phase: Enhanced UI/UX and Performance Optimization
-Overall Progress: All core systems operational and integrated
+Overall Progress: All core systems operational and integrated with character-driven AI
 

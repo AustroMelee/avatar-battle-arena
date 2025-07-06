@@ -46,6 +46,8 @@ src/
 - **Advanced AI**: Context-aware decision making with pattern recognition
 - **Battle Mechanics**: Cooldowns, desperation moves, finishers, critical hits
 - **Dynamic Narrative**: Character-specific dialogue and battle commentary
+- **Identity-Driven AI**: Character personality and mental state influence decisions
+- **Complete Battle Visibility**: T1 logs always visible by default for analysis
 
 ## 📚 Documentation
 
@@ -55,8 +57,9 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
 - **[AI System](./docs/AI_SYSTEM.md)** - Advanced AI decision-making guide
 - **[Cooldown System](./docs/COOLDOWN_SYSTEM.md)** - Battle mechanics implementation
 - **[Development Roadmap](./docs/ROADMAP.txt)** - Project direction and milestones
+- **[IDTB System](./docs/IDENTITY_DRIVEN_TACTICAL_BEHAVIOR.md)** - Character personality and mental state system
 
-**Overall Completion: 87%** - The simulator is production-ready with advanced features and robust type safety.
+**Overall Completion: 92%** - The simulator is production-ready with advanced features, robust type safety, and character-driven AI.
 
 ## 🛠️ Development
 
@@ -98,6 +101,34 @@ This project enforces the Single Responsibility Principle (SRP) at every level:
 
 This ensures maximum maintainability, testability, and AI-editability.
 
+## 🧠 **Identity-Driven Tactical Behavior (IDTB) System - COMPLETE**
+
+The comprehensive character personality and mental state system is now fully operational:
+
+### ✅ **Core Features:**
+- **Character Identity Profiles**: Static psychological traits and tactical tendencies
+- **Dynamic Mental States**: Real-time psychological state tracking during battle
+- **Opponent Perception**: Character's subjective view of their opponent
+- **Identity-Based Scoring**: AI move selection influenced by character personality
+- **Mental State Updates**: Psychological state changes based on battle events
+- **Narrative Integration**: Mental states influence battle narrative generation
+
+### ✅ **Character Profiles:**
+- **Aang**: Balance, pacifism, survival instincts, evasion preference
+- **Azula**: Control, dominance, lethal precision, escalation under pressure
+
+### ✅ **Mental State Tracking:**
+- **Stability**: 0-100 scale (calm to unhinged)
+- **Pride**: 0-100 scale (ego and self-image)
+- **Active States**: enraged, fearful, focused, unhinged
+- **Real-time Updates**: State changes based on hits, misses, criticals, etc.
+
+### ✅ **System Integration:**
+- **AI Decision Making**: Identity influences move scoring and selection
+- **Battle Logging**: Mental state changes logged in battle events
+- **UI Indicators**: Visual indicators for mental states in character cards
+- **Narrative Hooks**: Mental states influence move descriptions and battle commentary
+
 ## 🎯 **Status Effect System - COMPLETE**
 
 The comprehensive status effect system is now fully operational:
@@ -121,6 +152,14 @@ The comprehensive status effect system is now fully operational:
 - **AI Decision Making**: AI considers status effects when choosing moves
 - **Battle Logging**: Complete logging of status effect application and processing
 
+## 🔍 **Critical UI Requirements**
+
+### **T1 Log Visibility - MANDATORY**
+- **Default Behavior**: T1 logs are ALWAYS visible by default
+- **User Control**: Users can optionally switch to "Recent Only" mode
+- **Clear Warnings**: UI warns users when T1 logs will be hidden
+- **Analysis Support**: Complete battle visibility essential for debugging and analysis
+
 ## 🚀 **Current Features**
 
 ### Battle System
@@ -131,6 +170,7 @@ The comprehensive status effect system is now fully operational:
 - **Finisher System**: High-damage finisher moves with conditions
 - **Positioning System**: Tactical positioning with environmental bonuses
 - **Charge-up Mechanics**: Interruptible charge-up moves with risks/rewards
+- **Identity-Driven AI**: Character personality influences all AI decisions
 
 ### Narrative System
 - **Dynamic Narratives**: Context-aware narrative generation
@@ -138,6 +178,7 @@ The comprehensive status effect system is now fully operational:
 - **Emotional Arcs**: Emotional state tracking and narrative reflection
 - **Battle Phases**: Narrative adaptation to battle progression
 - **Environmental Context**: Location-aware narrative elements
+- **Mental State Integration**: Narrative reflects character psychological states
 
 ### AI System
 - **Tactical Decision Making**: AI considers positioning, status effects, and context
@@ -145,6 +186,8 @@ The comprehensive status effect system is now fully operational:
 - **Escalation Awareness**: AI responds to forced escalation states
 - **Status Effect Valuation**: AI recognizes and values status effect application
 - **Environmental Awareness**: AI considers location and environmental factors
+- **Identity-Driven Behavior**: AI decisions reflect character personality and mental state
+- **Psychological Modeling**: AI responds to psychological state changes
 
 ## 🛠️ **Technical Architecture**
 
@@ -170,6 +213,7 @@ The comprehensive status effect system is now fully operational:
 - **`docs/AI_SYSTEM.md`**: Complete AI system documentation
 - **`docs/TACTICAL_BATTLE_SYSTEM.md`**: Tactical battle mechanics
 - **`docs/STATUS_EFFECT_SYSTEM.md`**: Status effect system documentation
+- **`docs/IDENTITY_DRIVEN_TACTICAL_BEHAVIOR.md`**: IDTB system documentation
 - **`docs/COMPLETED FEATURES.txt`**: List of all completed features
 - **`docs/ROADMAP.txt`**: Development roadmap and future plans
 
@@ -187,11 +231,12 @@ The comprehensive status effect system is now fully operational:
 - **Defensive Programming**: Validate all inputs and handle edge cases
 - **Documentation**: Document all public APIs and complex logic
 - **Testing**: Write tests for all new features
+- **T1 Log Visibility**: Never hide T1 logs by default - this is a critical requirement
 
 ## 🎯 **Project Status**
 
-**Current Phase**: Status Effect System Complete ✅
+**Current Phase**: Identity-Driven Tactical Behavior System Complete ✅
 **Next Phase**: Enhanced UI/UX and Performance Optimization
-**Overall Progress**: 85% Complete
+**Overall Progress**: 92% Complete
 
-The Avatar Battle Arena is a sophisticated battle simulation system with advanced AI, dynamic narratives, and comprehensive status effects, all built with strict type safety and modular architecture. 
+The Avatar Battle Arena is a sophisticated battle simulation system with advanced AI, dynamic narratives, comprehensive status effects, and character-driven tactical behavior, all built with strict type safety and modular architecture. 

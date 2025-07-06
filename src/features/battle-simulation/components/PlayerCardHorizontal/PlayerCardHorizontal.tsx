@@ -101,6 +101,16 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
         <div className={styles.nameRow}>
           <h3>{character.name}</h3>
           {isActive && <div className={styles.activeIndicator}>ACTIVE</div>}
+          {/* NEW MENTAL STATE INDICATOR */}
+          {character.mentalState?.activeStates?.includes('unhinged') && (
+            <div className={styles.mentalStateIndicator_unhinged}>UNHINGED</div>
+          )}
+          {character.mentalState?.activeStates?.includes('enraged') && (
+            <div className={styles.mentalStateIndicator_enraged}>ENRAGED</div>
+          )}
+          {character.mentalState?.activeStates?.includes('fearful') && (
+            <div className={styles.mentalStateIndicator_fearful}>FEARFUL</div>
+          )}
         </div>
         
         <div className={styles.healthRow}>

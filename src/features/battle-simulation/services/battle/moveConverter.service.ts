@@ -13,6 +13,7 @@ export function convertAbilityToMove(ability: Ability): Move {
   return {
     id: ability.name.toLowerCase().replace(/\s+/g, '_'),
     name: ability.name,
+    type: ability.type,
     baseDamage: ability.power,
     chiCost: ability.chiCost || 0,
     cooldown: ability.cooldown || 0,

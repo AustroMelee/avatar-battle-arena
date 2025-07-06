@@ -162,9 +162,13 @@ export function chooseAbilityWithLogging(
     // Health-based scoring
     if (character.currentHealth < 30) {
       // Low health - prioritize defense and healing
-      if (ability.type === 'defense_buff') {
+      if (ability.type === 'defense_buff' || ability.type === 'evade') {
         score += 40;
         reasons.push('Low health - defensive priority');
+      }
+      if (ability.type === 'parry_retaliate') {
+        score += 35;
+        reasons.push('Low health - defensive counter-attack');
       }
       if (ability.tags?.includes('healing')) {
         score += 60;
@@ -176,17 +180,17 @@ export function chooseAbilityWithLogging(
       }
     } else if (character.currentHealth < 60) {
       // Medium health - balanced approach
-      if (ability.type === 'attack') {
+      if (ability.type === 'attack' || ability.type === 'parry_retaliate') {
         score += 20;
         reasons.push('Medium health - offensive option');
       }
-      if (ability.type === 'defense_buff') {
+      if (ability.type === 'defense_buff' || ability.type === 'evade') {
         score += 15;
         reasons.push('Medium health - defensive option');
       }
     } else {
       // High health - aggressive approach
-      if (ability.type === 'attack') {
+      if (ability.type === 'attack' || ability.type === 'parry_retaliate') {
         score += 30;
         reasons.push('High health - aggressive approach');
       }
@@ -195,13 +199,13 @@ export function chooseAbilityWithLogging(
     // Enemy health-based scoring
     if (enemy.currentHealth < 20) {
       // Enemy is low - finish them off
-      if (ability.type === 'attack' && ability.power > 15) {
+      if ((ability.type === 'attack' || ability.type === 'parry_retaliate') && ability.power > 15) {
         score += 40;
         reasons.push('Enemy low health - finishing move');
       }
     } else if (enemy.currentHealth < 50) {
       // Enemy is wounded - apply pressure
-      if (ability.type === 'attack') {
+      if (ability.type === 'attack' || ability.type === 'parry_retaliate') {
         score += 20;
         reasons.push('Enemy wounded - applying pressure');
       }

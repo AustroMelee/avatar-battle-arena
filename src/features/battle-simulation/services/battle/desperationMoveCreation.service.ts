@@ -38,8 +38,9 @@ export function createDesperationMove(character: BattleCharacter, escalationType
   
   return {
     id: `desperation_${escalationType}`,
-    name: moveName,
-    baseDamage,
+    name: `${moveName} (Desperate)`,
+    type: 'attack',
+    baseDamage: baseDamage + 2,
     chiCost,
     cooldown: 0,
     description,

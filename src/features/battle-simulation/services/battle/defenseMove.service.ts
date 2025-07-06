@@ -17,6 +17,8 @@ export interface DefenseMoveResult {
   result: string;
   narrative: string;
   defenseBonus: number;
+  damage: number;
+  isCritical: boolean;
 }
 
 /**
@@ -36,13 +38,28 @@ export async function executeDefenseMove(
   const newState = { ...state };
   const newAttacker = { ...attacker };
   
-  // Apply defense bonus
-  const defenseBonus = ability.power || 0;
-  newAttacker.currentDefense = Math.min(100, newAttacker.currentDefense + defenseBonus);
+  if (ability.type === 'evade') {
+    newAttacker.activeDefense = { 
+      type: 'evade', 
+      sourceAbility: ability.name, 
+      evadeChance: ability.power 
+    };
+    newAttacker.defensiveStance = 'evading';
+  } else if (ability.type === 'parry_retaliate') {
+    newAttacker.activeDefense = { 
+      type: 'parry_retaliate', 
+      sourceAbility: ability.name, 
+      parryThreshold: ability.power 
+    };
+    newAttacker.defensiveStance = 'parrying';
+  }
   
-  // Apply status effects if the ability has them
+  const defenseBonus = ability.type === 'defense_buff' ? (ability.power || 0) : 0;
+  if (ability.type === 'defense_buff') {
+    newAttacker.currentDefense = Math.min(100, newAttacker.currentDefense + defenseBonus);
+  }
+  
   if (ability.appliesEffect) {
-    // Check if the effect should be applied based on chance
     const shouldApply = !ability.appliesEffect.chance || Math.random() < ability.appliesEffect.chance;
     
     if (shouldApply) {
@@ -52,7 +69,6 @@ export async function executeDefenseMove(
         attacker.name
       );
       
-      // Apply the status effect to the character
       const updatedAttacker = applyEffect(newAttacker, statusEffect);
       newState.participants[attackerIndex] = updatedAttacker;
       
@@ -65,24 +81,19 @@ export async function executeDefenseMove(
     newState.participants[attackerIndex] = newAttacker;
   }
   
-  // Spend chi
   const chiCost = ability.chiCost || 0;
   newState.participants[attackerIndex].resources.chi = Math.max(0, newState.participants[attackerIndex].resources.chi - chiCost);
   
-  // Apply cooldown
   if (ability.cooldown && ability.cooldown > 0) {
     newState.participants[attackerIndex].cooldowns[ability.name] = ability.cooldown;
   }
   
-  // Update move history
   newState.participants[attackerIndex].lastMove = ability.name;
   newState.participants[attackerIndex].moveHistory.push(ability.name);
   
-  // Initialize narrative service for enhanced storytelling
   const narrativeService = createNarrativeService();
   
-  // Generate enhanced narrative for defense move
-  const target = newState.participants[1 - attackerIndex]; // Target is the other participant
+  const target = newState.participants[1 - attackerIndex];
   const context = {
     damage: 0,
     maxHealth: target.stats.power + target.stats.defense + target.stats.agility,
@@ -108,8 +119,11 @@ export async function executeDefenseMove(
   if (defenseNarrative) {
     narrative = defenseNarrative;
   } else {
-    // Fallback to basic narrative if no enhanced narrative generated
-    if (ability.tags?.includes('rest')) {
+    if (ability.type === 'evade') {
+      narrative = `${attacker.name} is in the wind, anticipating an attack with ${ability.name}!`;
+    } else if (ability.type === 'parry_retaliate') {
+      narrative = `${attacker.name}'s gaze sharpens—she's waiting for a mistake with ${ability.name}!`;
+    } else if (ability.tags?.includes('rest')) {
       narrative = `${attacker.name} (${attacker.resources.chi} chi) takes a moment to focus and recover their energy, preparing for the next exchange!`;
     } else if (ability.tags?.includes('desperate') && attacker.currentHealth < 30) {
       narrative = `${attacker.name} (${attacker.currentHealth} HP) desperately activates ${ability.name}, their aura flaring with renewed strength!`;
@@ -126,7 +140,6 @@ export async function executeDefenseMove(
     }
   }
   
-  // Add status effect information to narrative if applicable
   if (ability.appliesEffect) {
     const effectInfo = ability.appliesEffect.type === 'HEAL_OVER_TIME' 
       ? ` and begins regenerating health over time`
@@ -139,15 +152,17 @@ export async function executeDefenseMove(
     narrative += effectInfo;
   }
   
-  // Create result string
   let result: string;
-  if (ability.appliesEffect) {
+  if (ability.type === 'evade') {
+    result = `${attacker.name} uses ${ability.name} and enters an evasive stance!`;
+  } else if (ability.type === 'parry_retaliate') {
+    result = `${attacker.name} uses ${ability.name} and prepares to counter-attack!`;
+  } else if (ability.appliesEffect) {
     result = `${attacker.name} uses ${ability.name} and gains ${defenseBonus} defense${ability.appliesEffect ? ` plus ${ability.appliesEffect.type.toLowerCase().replace('_', ' ')} effect` : ''}!`;
   } else {
     result = `${attacker.name} uses ${ability.name} and gains ${defenseBonus} defense!`;
   }
   
-  // Create battle log entry
   const logEntry: BattleLogEntry = {
     id: createEventId(),
     turn: state.turn,
@@ -166,7 +181,8 @@ export async function executeDefenseMove(
         type: ability.appliesEffect.type,
         duration: ability.appliesEffect.duration,
         potency: ability.appliesEffect.potency
-      } : undefined
+      } : undefined,
+      defensiveStance: ability.type === 'evade' || ability.type === 'parry_retaliate' ? ability.type : undefined
     }
   };
   
@@ -175,6 +191,8 @@ export async function executeDefenseMove(
     logEntry,
     result,
     narrative,
-    defenseBonus
+    defenseBonus,
+    damage: 0,
+    isCritical: false
   };
 } 

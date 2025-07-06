@@ -3,7 +3,7 @@
  */
 export type Ability = {
   name: string;
-  type: 'attack' | 'defense_buff';
+  type: 'attack' | 'defense_buff' | 'evade' | 'parry_retaliate';
   power: number; // Potency of the ability
   description: string;
   cooldown?: number; // Number of turns required after use (optional)
@@ -37,6 +37,8 @@ export type Ability = {
     duration: number; // How many turns the effect lasts
     potency: number; // Effect strength (damage per turn for BURN, % increase for buffs, etc.)
   };
+  // NEW: Future-proofing for "mixup" attacks that counter specific defensive styles
+  beatsDefenseType?: 'evade' | 'parry_retaliate';
 };
 
 /**

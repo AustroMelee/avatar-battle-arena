@@ -72,6 +72,18 @@ export const availableCharacters: Character[] = [
         }
       },
       {
+        name: 'Flowing Evasion',
+        type: 'evade',
+        power: 75,
+        description: 'Aang uses airbending to become like the wind, flowing around attacks with graceful evasion',
+        chiCost: 4,
+        cooldown: 3,
+        maxUses: 4,
+        tags: ['defensive', 'evasion'],
+        critChance: 0.05,
+        critMultiplier: 1.5
+      },
+      {
         name: 'Focus',
         type: 'defense_buff',
         power: 25,
@@ -175,6 +187,18 @@ export const availableCharacters: Character[] = [
         chiCost: 3,
         cooldown: 1,
         tags: ['defensive']
+      },
+      {
+        name: 'Blazing Counter',
+        type: 'parry_retaliate',
+        power: 20,
+        description: 'Azula uses a precise blast of fire to intercept an attack and create an opening for a devastating counter',
+        chiCost: 5,
+        cooldown: 4,
+        maxUses: 3,
+        tags: ['defensive', 'counter'],
+        critChance: 0.08,
+        critMultiplier: 2.0
       },
       {
         name: 'Phoenix Recovery',

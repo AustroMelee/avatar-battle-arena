@@ -76,9 +76,15 @@ export function getAvailableMoves(character: BattleCharacter, meta: MetaState): 
   }
   
   // 8. HARD Frustration - Force aggressive moves
-  if (meta.frustrated && moves.some(m => m.type === 'attack' && m.power > 30)) {
-    moves = moves.filter(m => m.type === 'attack' && m.power > 30);
-    console.log(`HARD FRUSTRATION: Only aggressive attacks available`);
+  if (meta.frustrated && moves.some(m => (m.type === 'attack' || m.type === 'parry_retaliate') && m.power > 30)) {
+    moves = moves.filter(m => (m.type === 'attack' || m.type === 'parry_retaliate') && m.power > 30);
+    console.log(`HARD FRUSTRATION: Only aggressive attacks and counters available`);
+  }
+  
+  // 9. HARD Defensive Pressure - Force defensive moves when under heavy attack
+  if (meta.desperate && character.currentHealth < 30 && moves.some(m => m.type === 'evade' || m.type === 'parry_retaliate')) {
+    moves = moves.filter(m => m.type === 'evade' || m.type === 'parry_retaliate');
+    console.log(`HARD DEFENSIVE: Only defensive moves available due to low health`);
   }
   
   // Fallback: If we filtered too aggressively, allow some moves back

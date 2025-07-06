@@ -109,6 +109,57 @@
   animation: pulse 2s infinite;
 }
 
+/* Mental State Indicators */
+.mentalStateIndicator_unhinged {
+  background: #ff4757;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: shake 0.5s infinite;
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+}
+
+.mentalStateIndicator_enraged {
+  background: #ff6347;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: pulse 1s infinite;
+  box-shadow: 0 0 10px rgba(255, 99, 71, 0.5);
+}
+
+.mentalStateIndicator_fearful {
+  background: #87ceeb;
+  color: #222;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: tremble 0.3s infinite;
+  box-shadow: 0 0 10px rgba(135, 206, 235, 0.5);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes tremble {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }

@@ -77,6 +77,8 @@ Symbolic Framing	Moments echo broader themes (e.g., mercy vs dominance).
 Creative Counters	Unexpected counters add surprise (e.g., Aang deflects lightning via compressed air burst).
 Satisfying Closure	Doesn't end abruptly. Closes with aftermath tone—emotionally or ideologically resonant.
 [x] SRP pass: All services and modules refactored for single responsibility
+[x] IDTB System: Character personality and mental state system complete
+[x] T1 Log Visibility: Critical UI requirement implemented
 [ ] Ongoing: Enforce SRP boundaries for all new features and refactors
 
 AVATAR BATTLE ARENA - DEVELOPMENT ROADMAP
@@ -148,6 +150,10 @@ PHASE 6: UI/UX ENHANCEMENT ✅ COMPLETE
 [x] Battle scene visualization
 [x] Narrative bubble display
 [x] Enhanced battle log with animations
+[x] Mental state indicators in character cards
+[x] T1 log visibility controls (Show All/Recent Only)
+[x] Turn filtering and navigation
+[x] Complete battle log visibility by default
 
 PHASE 7: TECHNICAL INFRASTRUCTURE ✅ COMPLETE
 [x] TypeScript with strict type checking
@@ -167,12 +173,30 @@ PHASE 8: SRP REFACTORING ✅ COMPLETE
 [x] Narrative system fully modularized
 [x] AI services properly separated
 [x] Battle services organized by domain
+[x] Identity services properly isolated
+[x] Mental state services with clear boundaries
 [x] No files exceed 500 lines
 [x] Clear separation of concerns
 [x] Proper orchestration patterns
 [x] Maintainable and extensible architecture
 
-PHASE 9: ENHANCED UI/UX (CURRENT PHASE)
+PHASE 9: IDENTITY-DRIVEN TACTICAL BEHAVIOR ✅ COMPLETE
+[x] Character identity profiles with psychological traits
+[x] Dynamic mental state tracking during battle
+[x] Opponent perception modeling
+[x] Identity-based AI move scoring
+[x] Mental state updates based on battle events
+[x] Character-specific behavioral patterns
+[x] Pride and stability mechanics
+[x] Active state transitions (focused, enraged, fearful, unhinged)
+[x] UI integration with mental state indicators
+[x] Narrative integration with psychological states
+[x] Character profiles: Aang (pacifist, evasion) and Azula (control, dominance)
+[x] Real-time psychological state changes
+[x] Identity-driven decision making
+[x] Mental state logging and debugging
+
+PHASE 10: ENHANCED UI/UX (CURRENT PHASE)
 [ ] Improved battle scene animations
 [ ] Enhanced character portraits and effects
 [ ] Better mobile responsiveness
@@ -184,7 +208,7 @@ PHASE 9: ENHANCED UI/UX (CURRENT PHASE)
 [ ] Keyboard shortcuts and controls
 [ ] Battle replay functionality
 
-PHASE 10: PERFORMANCE OPTIMIZATION
+PHASE 11: PERFORMANCE OPTIMIZATION
 [ ] Battle simulation performance tuning
 [ ] AI decision making optimization
 [ ] Memory usage optimization
@@ -196,38 +220,27 @@ PHASE 10: PERFORMANCE OPTIMIZATION
 [ ] Rendering performance improvements
 [ ] Real-time analytics optimization
 
-PHASE 11: ADVANCED FEATURES
+PHASE 12: ADVANCED FEATURES
 [ ] Multi-character battles (3+ participants)
-[ ] Team-based combat mechanics
-[ ] Advanced environmental effects
-[ ] Weather and time-of-day mechanics
-[ ] Character progression and leveling
-[ ] Equipment and item systems
-[ ] Advanced combo mechanics
-[ ] Special battle conditions
+[ ] Character relationship dynamics
+[ ] Environmental psychology effects
+[ ] Character growth and evolution
+[ ] Advanced psychological states
+[ ] Emotional memory system
+[ ] Battle history and statistics
 [ ] Tournament mode
-[ ] Replay and analysis tools
+[ ] Custom character creation
+[ ] Advanced narrative branching
 
-PHASE 12: POLISH AND REFINEMENT
-[ ] Comprehensive testing suite
-[ ] Performance benchmarking
-[ ] User experience testing
-[ ] Accessibility audit
-[ ] Code quality improvements
-[ ] Documentation completion
-[ ] Bug fixes and stability
-[ ] Final optimizations
-[ ] Release preparation
-[ ] Deployment automation
+PROJECT STATUS: 92% COMPLETE
+Current Phase: Identity-Driven Tactical Behavior System Complete ✅
+Next Phase: Enhanced UI/UX and Performance Optimization
+Overall Progress: All core systems operational and integrated with character-driven AI
 
-CURRENT STATUS: PHASE 9 - Enhanced UI/UX
-Overall Progress: 85% Complete
-All core systems operational and integrated
-Status Effect System fully functional
-SRP compliance achieved across all modules
-
-NEXT MILESTONES:
-1. Enhanced battle scene animations and effects
-2. Improved mobile responsiveness
-3. Performance optimizations
-4. Advanced UI features and customization
+CRITICAL REQUIREMENTS MAINTAINED:
+✅ T1 logs always visible by default
+✅ Character personality influences all AI decisions
+✅ Mental states tracked and displayed in real-time
+✅ Complete battle visibility for analysis and debugging
+✅ Identity-driven narrative generation
+✅ Type safety and SRP compliance maintained

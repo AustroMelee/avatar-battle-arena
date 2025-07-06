@@ -41,13 +41,13 @@ export function scoreMoveWithContext(
   let intentAlignment = 0;
 
   // Base scoring by move type
-  if (move.type === 'attack') {
+  if (move.type === 'attack' || move.type === 'parry_retaliate') {
     score += scoreAttackMove(move, enemy, context, intent);
     reasons.push(...getAttackMoveScoringReasons(move, enemy, context, intent));
     contextFactors.push(...getAttackMoveContextFactors(move, context));
-  } else if (move.type === 'defense_buff') {
-    score += scoreDefenseMove(move, context, intent);
-    reasons.push(...getDefenseMoveScoringReasons(move, intent));
+  } else if (move.type === 'defense_buff' || move.type === 'evade') {
+    score += scoreDefenseMove(move, me, enemy, context, intent);
+    reasons.push(...getDefenseMoveScoringReasons(move, me, enemy, context, intent));
     contextFactors.push(...getDefenseMoveContextFactors(move, context));
   }
 
@@ -86,10 +86,6 @@ export function scoreMoveWithContext(
   };
 }
 
-
-
-
-
 /**
  * @description Calculates context-specific bonuses for a move.
  */
@@ -101,12 +97,12 @@ function calculateContextBonuses(
   let bonus = 0;
   
   // Game phase bonuses
-  if (context.isEarlyGame && move.type === 'defense_buff') {
+  if (context.isEarlyGame && (move.type === 'defense_buff' || move.type === 'evade')) {
     bonus += 2;
     contextFactors.push('Early game defense building');
   }
   
-  if (context.isLateGame && move.type === 'attack' && move.power > 35) {
+  if (context.isLateGame && (move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 35) {
     bonus += 3;
     contextFactors.push('Late game high damage');
   }
@@ -117,7 +113,7 @@ function calculateContextBonuses(
     contextFactors.push('Counter defensive enemy');
   }
   
-  if (context.myPattern === 'aggressive' && move.type === 'attack') {
+  if (context.myPattern === 'aggressive' && (move.type === 'attack' || move.type === 'parry_retaliate')) {
     bonus += 2;
     contextFactors.push('Maintain aggressive pattern');
   }

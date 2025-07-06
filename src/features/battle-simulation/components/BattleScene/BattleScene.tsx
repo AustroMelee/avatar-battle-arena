@@ -1,4 +1,9 @@
 // CONTEXT: BattleSimulation, // FOCUS: UIRendering
+// 
+// ⚠️ CRITICAL REQUIREMENT: Battle log MUST always show T1 logs by default
+// The UnifiedBattleLog component defaults to showAllEntries=true to ensure T1 visibility
+// This is essential for battle analysis and debugging - never change this default!
+//
 import { BattleState } from '../../types';
 import { VersusGrid } from '../VersusGrid/VersusGrid';
 import { UnifiedBattleLog } from '../UnifiedBattleLog';
@@ -48,10 +53,11 @@ export function BattleScene({
       )}
       <VersusGrid player1={player1Props} player2={player2Props} />
       <div className={styles.logContainer}>
+        {/* ⚠️ CRITICAL: UnifiedBattleLog defaults to showAllEntries=true to ensure T1 logs are always visible */}
         <UnifiedBattleLog 
           battleLog={state.battleLog}
           aiLog={state.aiLog}
-          maxEntries={50}
+          maxEntries={100}
         />
       </div>
     </div>

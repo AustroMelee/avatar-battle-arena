@@ -1,5 +1,10 @@
 // CONTEXT: Unified Battle Log
 // RESPONSIBILITY: Single log component with tabs for narrative and AI logs
+// 
+// ⚠️ CRITICAL REQUIREMENT: Turn 1 logs MUST ALWAYS be visible by default
+// No matter how many updates or changes we make, users MUST be able to see logs from T1
+// This is essential for battle analysis and debugging - never hide early turns!
+//
 import React, { useState } from 'react';
 import { BattleLogEntry, AILogEntry } from '../../types';
 import styles from './UnifiedBattleLog.module.css';
@@ -20,8 +25,12 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   aiLog,
   maxEntries = 15
 }) => {
+  // ⚠️ CRITICAL: Always start with showAllEntries = true to ensure T1 logs are visible
+  // This is a hard requirement - users must always see the complete battle log by default
   const [activeTab, setActiveTab] = useState<LogTab>('narrative');
   const [copied, setCopied] = useState(false);
+  const [showAllEntries, setShowAllEntries] = useState(true); // ALWAYS TRUE BY DEFAULT
+  const [turnFilter, setTurnFilter] = useState<number | null>(null);
 
   /**
    * @description Gets the appropriate icon for a battle event.
@@ -141,9 +150,18 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
 
   /**
    * @description Renders the narrative/battle log tab.
+   * ⚠️ CRITICAL: This function MUST always show T1 logs by default
+   * The showAllEntries state should default to true to ensure complete visibility
    */
   const renderNarrativeTab = () => {
-    const limitedEntries = battleLog.slice(-maxEntries);
+    // ⚠️ CRITICAL: Always show all entries by default to ensure T1 logs are visible
+    // Only slice if explicitly requested by user (showAllEntries = false)
+    let limitedEntries = showAllEntries ? battleLog : battleLog.slice(-maxEntries);
+    
+    // Apply turn filter if set
+    if (turnFilter !== null) {
+      limitedEntries = limitedEntries.filter(entry => entry.turn === turnFilter);
+    }
 
     return (
       <div className={styles.tabContent}>
@@ -189,7 +207,12 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    * @description Renders the AI log tab.
    */
   const renderAITab = () => {
-    const limitedEntries = aiLog.slice(-maxEntries);
+    let limitedEntries = showAllEntries ? aiLog : aiLog.slice(-maxEntries);
+    
+    // Apply turn filter if set
+    if (turnFilter !== null) {
+      limitedEntries = limitedEntries.filter(entry => entry.turn === turnFilter);
+    }
 
     return (
       <div className={styles.tabContent}>
@@ -301,9 +324,51 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
             🤖 AI Decisions ({aiLog.length})
           </button>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
+          <input
+            type="number"
+            placeholder="Turn #"
+            min="1"
+            max={Math.max(...battleLog.map(e => e.turn), 1)}
+            value={turnFilter || ''}
+            onChange={(e) => setTurnFilter(e.target.value ? Number(e.target.value) : null)}
+            style={{ 
+              width: '60px', 
+              padding: '4px 8px', 
+              borderRadius: 4, 
+              border: '1px solid #888', 
+              background: '#222', 
+              color: '#fff',
+              fontSize: '12px'
+            }}
+          />
+          {turnFilter && (
+            <button
+              onClick={() => setTurnFilter(null)}
+              style={{ 
+                padding: '2px 6px', 
+                borderRadius: 4, 
+                border: '1px solid #888', 
+                background: '#e74c3c', 
+                color: '#fff',
+                fontSize: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => setShowAllEntries(!showAllEntries)}
+          style={{ marginLeft: 'auto', padding: '6px 14px', borderRadius: 6, border: '1px solid #888', background: showAllEntries ? '#e74c3c' : '#222', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
+          title={showAllEntries ? "Show recent entries only (T1 logs will be hidden)" : "Show all entries (including T1 logs)"}
+        >
+          {showAllEntries ? '📜 Recent Only' : '📜 Show All (T1+)'}
+        </button>
         <button
           onClick={handleCopyAllLogs}
-          style={{ marginLeft: 'auto', padding: '6px 14px', borderRadius: 6, border: '1px solid #888', background: copied ? '#27ae60' : '#222', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
+          style={{ marginLeft: '8px', padding: '6px 14px', borderRadius: 6, border: '1px solid #888', background: copied ? '#27ae60' : '#222', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
           title="Copy all logs to clipboard"
         >
           {copied ? 'Copied!' : '📋 Copy All Logs'}

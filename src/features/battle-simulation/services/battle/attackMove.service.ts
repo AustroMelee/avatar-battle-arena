@@ -9,6 +9,7 @@ import { createBattleContext } from './battleContext.service';
 import { resolveMove } from './moveLogic.service';
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect, modifyDamageWithEffects } from '../effects/statusEffect.service';
+import { resolveClash } from './defensiveResolution.service';
 
 /**
  * @description Result of executing an attack move
@@ -44,18 +45,44 @@ export async function executeAttackMove(
   const move = convertAbilityToMove(ability);
   const battleContext = createBattleContext(attacker, target, state);
   
-  // Use new dramatic mechanics system
-  const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+  // NEW: Check for defensive clash before damage calculation
+  let finalDamage = 0;
+  let clashNarrative = '';
+  let wasEvaded = false;
+  let wasParried = false;
   
-  // Apply status effect damage modifiers
-  const modifiedDamage = modifyDamageWithEffects(moveResult.damage, attacker, target);
+  if (target.activeDefense) {
+    console.log(`🛡️🛡️🛡️ DEFENSIVE CLASH DETECTED - ${target.name} has active defense: ${target.activeDefense.type} 🛡️🛡️🛡️`);
+    
+    const clashResult = resolveClash(attacker, target, move);
+    finalDamage = clashResult.damageDealt;
+    clashNarrative = clashResult.narrative;
+    
+    // Update target state after clash resolution
+    state.participants[targetIndex] = target;
+    
+    if (clashResult.outcome === 'evaded') {
+      wasEvaded = true;
+    } else if (clashResult.outcome === 'parried') {
+      wasParried = true;
+    }
+    
+    console.log(`⚔️⚔️⚔️ CLASH RESULT - ${clashResult.outcome}: ${clashResult.narrative} ⚔️⚔️⚔️`);
+  } else {
+    // Use new dramatic mechanics system for normal attacks
+    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    
+    // Apply status effect damage modifiers
+    const modifiedDamage = modifyDamageWithEffects(moveResult.damage, attacker, target);
+    finalDamage = modifiedDamage;
+  }
   
   // Apply damage to target
   const newState = { ...state };
-  newState.participants[targetIndex].currentHealth = Math.max(0, target.currentHealth - modifiedDamage);
+  newState.participants[targetIndex].currentHealth = Math.max(0, target.currentHealth - finalDamage);
   
-  // Apply status effects to target if the ability has them
-  if (ability.appliesEffect) {
+  // Apply status effects to target if the ability has them (only if not evaded/parried)
+  if (ability.appliesEffect && !wasEvaded && !wasParried) {
     console.log(`⚡⚡⚡ STATUS EFFECT CHECK - ${ability.name} has appliesEffect:`, ability.appliesEffect);
     // Check if the effect should be applied based on chance
     const shouldApply = !ability.appliesEffect.chance || Math.random() < ability.appliesEffect.chance;
@@ -77,6 +104,8 @@ export async function executeAttackMove(
     } else {
       console.log(`❌❌❌ STATUS EFFECT FAILED - ${attacker.name}'s ${ability.name} did not apply status effect (chance check failed) ❌❌❌`);
     }
+  } else if (wasEvaded || wasParried) {
+    console.log(`🛡️🛡️🛡️ STATUS EFFECT BLOCKED - ${ability.name} status effect blocked by ${wasEvaded ? 'evasion' : 'parry'} 🛡️🛡️🛡️`);
   } else {
     console.log(`🚫🚫🚫 NO STATUS EFFECT - ${ability.name} does not have appliesEffect property 🚫🚫🚫`);
   }
@@ -95,11 +124,14 @@ export async function executeAttackMove(
   newState.participants[state.activeParticipantIndex].moveHistory.push(ability.name);
   
   // Mark finisher as used if it was a finisher
-  if (moveResult.wasFinisher) {
-    newState.participants[state.activeParticipantIndex].flags = {
-      ...newState.participants[state.activeParticipantIndex].flags,
-      usedFinisher: true
-    };
+  if (!wasEvaded && !wasParried) {
+    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    if (moveResult.wasFinisher) {
+      newState.participants[state.activeParticipantIndex].flags = {
+        ...newState.participants[state.activeParticipantIndex].flags,
+        usedFinisher: true
+      };
+    }
   }
   
   // Initialize narrative service for enhanced storytelling (lazy)
@@ -107,10 +139,10 @@ export async function executeAttackMove(
   
   // Generate enhanced narrative for attack using new system
   const context = {
-    damage: modifiedDamage,
+    damage: finalDamage,
     maxHealth: target.stats.power + target.stats.defense + target.stats.agility,
-    isMiss: modifiedDamage === 0,
-    isCritical: moveResult.wasCrit,
+    isMiss: finalDamage === 0,
+    isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target, state.turn).wasCrit : false,
     isPatternBreak: attacker.flags?.forcedEscalation === 'true' && attacker.flags?.damageMultiplier === '2.0',
     isEscalation: attacker.flags?.forcedEscalation === 'true',
     consecutiveHits: 0,
@@ -123,24 +155,31 @@ export async function executeAttackMove(
   };
   
   // Generate enhanced narrative for attack
-  const attackNarrative = await narrativeService.generateNarrative(
-    attacker.name,
-    context,
-    modifiedDamage === 0 ? 'miss' : modifiedDamage < 10 ? 'glance' : modifiedDamage < 25 ? 'hit' : 'devastating',
-    ability.name
-  );
-  
   let narrative: string;
-  if (attackNarrative && attackNarrative.trim()) {
-    narrative = attackNarrative;
-    console.log(`DEBUG: Enhanced attack narrative for ${attacker.name}: "${narrative}"`);
+  if (wasEvaded || wasParried) {
+    // Use clash narrative for defensive outcomes
+    narrative = clashNarrative;
+    console.log(`DEBUG: Defensive clash narrative for ${attacker.name}: "${narrative}"`);
   } else {
-    narrative = moveResult.narrative || `${attacker.name} uses ${ability.name} and deals ${modifiedDamage} damage!`;
-    console.log(`DEBUG: Fallback attack narrative for ${attacker.name}: "${narrative}"`);
+    const attackNarrative = await narrativeService.generateNarrative(
+      attacker.name,
+      context,
+      finalDamage === 0 ? 'miss' : finalDamage < 10 ? 'glance' : finalDamage < 25 ? 'hit' : 'devastating',
+      ability.name
+    );
+    
+    if (attackNarrative && attackNarrative.trim()) {
+      narrative = attackNarrative;
+      console.log(`DEBUG: Enhanced attack narrative for ${attacker.name}: "${narrative}"`);
+    } else {
+      const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+      narrative = moveResult.narrative || `${attacker.name} uses ${ability.name} and deals ${finalDamage} damage!`;
+      console.log(`DEBUG: Fallback attack narrative for ${attacker.name}: "${narrative}"`);
+    }
   }
   
-  // Add status effect information to narrative if applicable
-  if (ability.appliesEffect) {
+  // Add status effect information to narrative if applicable (only if not evaded/parried)
+  if (ability.appliesEffect && !wasEvaded && !wasParried) {
     const effectInfo = ability.appliesEffect.type === 'BURN' 
       ? ` and ${target.name} begins to burn`
       : ability.appliesEffect.type === 'STUN'
@@ -154,39 +193,59 @@ export async function executeAttackMove(
   
   // Create result string
   let result: string;
-  if (moveResult.wasCrit) {
-    result = `CRITICAL HIT! ${target.name} takes ${modifiedDamage} damage!`;
-  } else if (moveResult.wasDesperation) {
-    result = `DESPERATION MOVE! ${target.name} takes ${modifiedDamage} damage!`;
+  if (wasEvaded) {
+    result = `${target.name} evades the attack!`;
+  } else if (wasParried) {
+    result = `${target.name} parries the attack and creates an opening!`;
+  } else if (!wasEvaded && !wasParried) {
+    const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
+    if (moveResult.wasCrit) {
+      result = `CRITICAL HIT! ${target.name} takes ${finalDamage} damage!`;
+    } else if (moveResult.wasDesperation) {
+      result = `DESPERATION MOVE! ${target.name} takes ${finalDamage} damage!`;
+    } else {
+      result = `${target.name} takes ${finalDamage} damage.`;
+    }
   } else {
-    result = `${target.name} takes ${modifiedDamage} damage.`;
+    result = `${target.name} takes ${finalDamage} damage.`;
   }
   
-  // Add status effect information to result if applicable
-  if (ability.appliesEffect) {
+  // Add status effect information to result if applicable (only if not evaded/parried)
+  if (ability.appliesEffect && !wasEvaded && !wasParried) {
     result += ` ${target.name} is affected by ${ability.appliesEffect.type.toLowerCase().replace('_', ' ')}!`;
   }
   
-  return {
-    newState,
-    logEntry: {
-      ...moveResult.logEntry,
-      damage: modifiedDamage,
-      result,
-      narrative,
-      meta: {
-        ...moveResult.logEntry.meta,
-        resourceCost: chiCost,
-        statusEffect: ability.appliesEffect ? {
-          type: ability.appliesEffect.type,
-          duration: ability.appliesEffect.duration,
-          potency: ability.appliesEffect.potency
-        } : undefined
-      }
-    },
-    damage: modifiedDamage,
+  // Create log entry
+  const logEntry: BattleLogEntry = {
+    id: `attack_${Date.now()}_${Math.random()}`,
+    turn: state.turn,
+    actor: attacker.name,
+    type: 'MOVE',
+    action: ability.name,
+    target: target.name,
+    abilityType: ability.type,
     result,
     narrative,
-    isCritical: moveResult.wasCrit
+    damage: finalDamage,
+    timestamp: Date.now(),
+    meta: {
+      resourceCost: chiCost,
+      evaded: wasEvaded,
+      parried: wasParried,
+      statusEffect: ability.appliesEffect && !wasEvaded && !wasParried ? {
+        type: ability.appliesEffect.type,
+        duration: ability.appliesEffect.duration,
+        potency: ability.appliesEffect.potency
+      } : undefined
+    }
+  };
+  
+  return {
+    newState,
+    logEntry,
+    damage: finalDamage,
+    result,
+    narrative,
+    isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target, state.turn).wasCrit : false
   };
 } 

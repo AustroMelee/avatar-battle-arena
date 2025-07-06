@@ -1,6 +1,17 @@
 // CONTEXT: BattleSimulation, // FOCUS: Types
 import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
+import { MentalState, OpponentPerception } from './identity.types';
+
+/** @description The specific defensive stance a character is currently in. */
+export type DefensiveStance = 'none' | 'evading' | 'parrying';
+
+/** @description The result of a clash between an attack and a defensive maneuver. */
+export type ClashResult = {
+  outcome: 'full_hit' | 'evaded' | 'parried';
+  damageDealt: number;
+  narrative: string;
+};
 
 /** @description The category of the status effect. */
 export type EffectCategory = 'buff' | 'debuff';
@@ -92,8 +103,18 @@ export type BattleCharacter = Character & {
     damageMultiplier?: string; // Damage multiplier as string (e.g., '2.0')
     repositionDisabled?: string; // Turns remaining as string (e.g., '3')
     escalationTurns?: string; // Turns in escalation state as string
+    isCountering?: boolean; // NEW: Track if character is in counter-attack state
   };
   diminishingEffects: Record<string, number>; // Track power reduction from diminishing returns
+  
+  // NEW: Defensive state tracking for UI/VFX
+  defensiveStance: DefensiveStance; // The character's current defensive state for UI/VFX
+  activeDefense?: {
+    type: 'evade' | 'parry_retaliate';
+    sourceAbility: string;
+    evadeChance?: number;
+    parryThreshold?: number;
+  };
   
   // NEW: Positioning and tactical state
   position: Position;
@@ -103,6 +124,10 @@ export type BattleCharacter = Character & {
   chargeInterruptions: number; // Track failed charge attempts
   lastPositionChange?: number; // Turn when position last changed
   positionHistory: Position[]; // Track position changes for AI analysis
+  
+  // NEW: Identity-Driven Tactical Behavior (IDTB) System
+  mentalState: MentalState;
+  opponentPerception: OpponentPerception;
 };
 
 /**

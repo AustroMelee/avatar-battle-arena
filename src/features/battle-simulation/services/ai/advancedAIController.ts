@@ -198,19 +198,19 @@ function buildAdvancedMoveNarrative(
   let narrative = `${characterName} follows their ${intentType.replace('_', ' ')} strategy`;
   
   // Add context-specific details
-  if (context.enemyVulnerable && move.type === 'attack') {
+  if (context.enemyVulnerable && (move.type === 'attack' || move.type === 'parry_retaliate')) {
     narrative += `, seizing the opportunity while ${context.enemyHealth < 20 ? 'the enemy is critically wounded' : 'the enemy is vulnerable'}`;
   }
   
-  if (context.healthPressure && move.type === 'defense_buff') {
+  if (context.healthPressure && (move.type === 'defense_buff' || move.type === 'evade')) {
     narrative += `, desperately trying to survive with ${character.currentHealth} health remaining`;
   }
   
-  if (context.enemyIsTurtling && move.type === 'attack') {
+  if (context.enemyIsTurtling && (move.type === 'attack' || move.type === 'parry_retaliate')) {
     narrative += `, attempting to break through the enemy's defensive stance`;
   }
   
-  if (context.hasMomentum && move.type === 'attack') {
+  if (context.hasMomentum && (move.type === 'attack' || move.type === 'parry_retaliate')) {
     narrative += `, building on their momentum`;
   }
   

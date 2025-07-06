@@ -21,7 +21,7 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       if (move.power > 30) {
         alignment += 2;
       }
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 1;
       }
       break;
@@ -33,14 +33,17 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       if (move.tags?.includes('high-damage')) {
         alignment += 2;
       }
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 2;
       }
       break;
       
     case 'defend':
-      if (move.type === 'defense_buff') {
+      if (move.type === 'defense_buff' || move.type === 'evade') {
         alignment += 3;
+      }
+      if (move.type === 'parry_retaliate') {
+        alignment += 2;
       }
       if (move.tags?.includes('healing')) {
         alignment += 2;
@@ -51,7 +54,7 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       break;
       
     case 'stall':
-      if (move.type === 'defense_buff') {
+      if (move.type === 'defense_buff' || move.type === 'evade') {
         alignment += 2;
       }
       if (move.tags?.includes('rest')) {
@@ -69,13 +72,13 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       if (move.chiCost && move.chiCost <= 1) {
         alignment += 2;
       }
-      if (move.type === 'defense_buff') {
+      if (move.type === 'defense_buff' || move.type === 'evade') {
         alignment += 1;
       }
       break;
       
     case 'standard_attack':
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 2;
       }
       if (move.power > 20 && move.power <= 40) {
@@ -93,7 +96,7 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       break;
       
     case 'pressure_enemy':
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 2;
       }
       if (move.power > 15) {
@@ -105,13 +108,13 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       if (move.tags?.includes('counter')) {
         alignment += 3;
       }
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 1;
       }
       break;
       
     case 'build_momentum':
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 2;
       }
       if (move.power > 25) {
@@ -120,7 +123,7 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       break;
       
     case 'desperate_attack':
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         alignment += 3;
       }
       if (move.power > 30) {
@@ -135,18 +138,18 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       if (move.chiCost && move.chiCost <= 2) {
         alignment += 2;
       }
-      if (move.type === 'defense_buff') {
+      if (move.type === 'defense_buff' || move.type === 'evade') {
         alignment += 1;
       }
       break;
   }
   
   // Penalize moves that are counterproductive to the intent
-  if (intent.type === 'go_for_finish' && move.type === 'defense_buff') {
+  if (intent.type === 'go_for_finish' && (move.type === 'defense_buff' || move.type === 'evade')) {
     alignment -= 2;
   }
   
-  if (intent.type === 'defend' && move.type === 'attack' && move.power > 30) {
+  if (intent.type === 'defend' && (move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 30) {
     alignment -= 2;
   }
   
@@ -174,7 +177,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.power > 30) {
         reasons.push('High power for defense breaking');
       }
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         reasons.push('Attack move for defense breaking');
       }
       break;
@@ -186,14 +189,17 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.tags?.includes('high-damage')) {
         reasons.push('High damage move for finishing');
       }
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         reasons.push('Attack move for finishing');
       }
       break;
       
     case 'defend':
-      if (move.type === 'defense_buff') {
+      if (move.type === 'defense_buff' || move.type === 'evade') {
         reasons.push('Defense move for defending');
+      }
+      if (move.type === 'parry_retaliate') {
+        reasons.push('Parry retaliate move for defending');
       }
       if (move.tags?.includes('healing')) {
         reasons.push('Healing move for defending');
@@ -246,8 +252,8 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       break;
       
     case 'pressure_enemy':
-      if (move.type === 'attack') {
-        reasons.push('Attack move for pressure');
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
+        reasons.push('Attack or parry retaliate move for pressure');
       }
       if (move.power > 15) {
         reasons.push('Good power for pressure');
@@ -258,14 +264,14 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.tags?.includes('counter')) {
         reasons.push('Counter move for counter-attacking');
       }
-      if (move.type === 'attack') {
-        reasons.push('Attack move for counter-attacking');
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
+        reasons.push('Attack or parry retaliate move for counter-attacking');
       }
       break;
       
     case 'build_momentum':
-      if (move.type === 'attack') {
-        reasons.push('Attack move for momentum');
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
+        reasons.push('Attack or parry retaliate move for momentum');
       }
       if (move.power > 25) {
         reasons.push('Good power for momentum');
@@ -273,8 +279,8 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       break;
       
     case 'desperate_attack':
-      if (move.type === 'attack') {
-        reasons.push('Attack move for desperate situation');
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
+        reasons.push('Attack or parry retaliate move for desperate situation');
       }
       if (move.power > 30) {
         reasons.push('High power for desperate situation');
@@ -288,8 +294,8 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.chiCost && move.chiCost <= 2) {
         reasons.push('Low cost move for conservative play');
       }
-      if (move.type === 'defense_buff') {
-        reasons.push('Defense move for conservative play');
+      if (move.type === 'defense_buff' || move.type === 'evade') {
+        reasons.push('Defensive move for conservative play');
       }
       break;
   }

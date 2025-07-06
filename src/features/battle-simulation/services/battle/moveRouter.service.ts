@@ -41,6 +41,8 @@ export async function executeMove(
     case 'attack':
       return await executeAttackMove(ability, attacker, target, state, targetIndex);
     case 'defense_buff':
+    case 'evade':
+    case 'parry_retaliate':
       return await executeDefenseMove(ability, attacker, state, attackerIndex);
     default:
       return await executeGenericMove(ability, attacker, state);

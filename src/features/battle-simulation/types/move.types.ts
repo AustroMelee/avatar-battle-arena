@@ -61,6 +61,7 @@ export interface DesperationBuff {
 export interface Move {
   id: string;
   name: string;
+  type: 'attack' | 'defense_buff' | 'evade' | 'parry_retaliate';
   chiCost: number;
   baseDamage: number;
   cooldown: number;
@@ -72,6 +73,9 @@ export interface Move {
   desperationBuff?: DesperationBuff;
   description?: string;
   maxUses?: number;            // Maximum uses per battle (e.g., 3 Lightning bolts)
+  
+  // NEW: Future-proofing for "mixup" attacks that counter specific defensive styles
+  beatsDefenseType?: 'evade' | 'parry_retaliate';
   
   // NEW: Positioning and tactical mechanics
   requiresPosition?: Position[]; // e.g., ['aggressive', 'high_ground']
@@ -105,6 +109,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'basic_strike',
     name: 'Basic Strike',
+    type: 'attack',
     chiCost: 0,
     baseDamage: 1,
     cooldown: 0,
@@ -116,6 +121,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'reposition',
     name: 'Air Glide',
+    type: 'defense_buff',
     chiCost: 1,
     baseDamage: 0,
     cooldown: 1,
@@ -127,6 +133,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'air_tornado',
     name: 'Air Tornado',
+    type: 'attack',
     chiCost: 7,
     baseDamage: 3,
     cooldown: 3,
@@ -139,6 +146,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'wind_slice',
     name: 'Wind Slice',
+    type: 'attack',
     chiCost: 5,
     baseDamage: 4,
     cooldown: 2,
@@ -156,6 +164,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'air_shield',
     name: 'Air Shield',
+    type: 'defense_buff',
     chiCost: 4,
     baseDamage: 0,
     cooldown: 4,
@@ -171,6 +180,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'charged_tornado',
     name: 'Charged Air Tornado',
+    type: 'attack',
     chiCost: 8,
     baseDamage: 99, // Basically instant-win if lands
     cooldown: 8,
@@ -187,6 +197,7 @@ export const AANG_MOVES: Move[] = [
   {
     id: 'last_breath_cyclone',
     name: 'Last Breath Cyclone',
+    type: 'attack',
     chiCost: 10,
     baseDamage: 12,
     cooldown: 10,
@@ -195,6 +206,24 @@ export const AANG_MOVES: Move[] = [
     oncePerBattle: true,
     finisherCondition: { type: 'hp_below', percent: 20 },
     description: 'Aang channels every last ounce of strength into a world-shaking cyclone. Only available below 20% HP.'
+  },
+  {
+    id: 'flowing_evasion',
+    name: 'Flowing Evasion',
+    type: 'evade',
+    chiCost: 4,
+    baseDamage: 0,
+    cooldown: 3,
+    maxUses: 4,
+    description: 'Aang uses airbending to become like the wind, flowing around attacks with graceful evasion.',
+    changesPosition: "defensive",
+    environmentalConstraints: ["Open", "Air-Friendly"],
+    positionBonus: {
+      defensive: {
+        defenseBonus: 10,
+        chiCostReduction: 1
+      }
+    }
   }
 ];
 
@@ -204,6 +233,7 @@ export const AZULA_MOVES: Move[] = [
   {
     id: 'basic_strike',
     name: 'Basic Strike',
+    type: 'attack',
     chiCost: 0,
     baseDamage: 1,
     cooldown: 0,
@@ -215,6 +245,7 @@ export const AZULA_MOVES: Move[] = [
   {
     id: 'blue_fire',
     name: 'Blue Fire',
+    type: 'attack',
     chiCost: 3,
     baseDamage: 3,
     cooldown: 2,
@@ -232,6 +263,7 @@ export const AZULA_MOVES: Move[] = [
   {
     id: 'fire_dash',
     name: 'Fire Dash',
+    type: 'defense_buff',
     chiCost: 2,
     baseDamage: 0,
     cooldown: 2,
@@ -243,6 +275,7 @@ export const AZULA_MOVES: Move[] = [
   {
     id: 'lightning',
     name: 'Lightning',
+    type: 'attack',
     chiCost: 10,
     baseDamage: 99, // Instant kill, but see above
     cooldown: 10,
@@ -257,6 +290,7 @@ export const AZULA_MOVES: Move[] = [
   {
     id: 'fire_shield',
     name: 'Fire Shield',
+    type: 'defense_buff',
     chiCost: 4,
     baseDamage: 0,
     cooldown: 4,
@@ -266,6 +300,7 @@ export const AZULA_MOVES: Move[] = [
   {
     id: 'relentless_assault',
     name: 'Relentless Assault',
+    type: 'attack',
     chiCost: 6,
     baseDamage: 5,
     cooldown: 5,
@@ -275,6 +310,24 @@ export const AZULA_MOVES: Move[] = [
       aggressive: {
         damageMultiplier: 1.5,
         chiCostReduction: 1,
+      }
+    }
+  },
+  {
+    id: 'blazing_counter',
+    name: 'Blazing Counter',
+    type: 'parry_retaliate',
+    chiCost: 5,
+    baseDamage: 20,
+    cooldown: 4,
+    maxUses: 3,
+    description: 'Azula uses a precise blast of fire to intercept an attack and create an opening for a devastating counter.',
+    changesPosition: "defensive",
+    environmentalConstraints: ["Open", "Fire-Friendly"],
+    positionBonus: {
+      defensive: {
+        defenseBonus: 15,
+        damageMultiplier: 1.2
       }
     }
   }

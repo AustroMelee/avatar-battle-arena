@@ -27,7 +27,7 @@ export function scoreMoveWithTactics(
   // Score based on tactical priority
   switch (priority) {
     case 'defend':
-      if (move.type === 'defense_buff') {
+      if (move.type === 'defense_buff' || move.type === 'evade' || move.type === 'parry_retaliate') {
         score += 20;
         reasons.push('High priority: Critical defense needed');
       }
@@ -42,7 +42,7 @@ export function scoreMoveWithTactics(
         score += 25;
         reasons.push('Finisher move against vulnerable enemy');
       }
-      if (move.type === 'attack' && move.power > 15) {
+      if ((move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 15) {
         score += 18;
         reasons.push('High damage attack to finish');
       }
@@ -53,7 +53,7 @@ export function scoreMoveWithTactics(
         score += 22;
         reasons.push('Piercing attack against high defense');
       }
-      if (move.type === 'attack' && move.power > 12) {
+      if ((move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 12) {
         score += 12;
         reasons.push('Strong attack to test defenses');
       }
@@ -82,7 +82,7 @@ export function scoreMoveWithTactics(
       break;
       
     case 'attack':
-      if (move.type === 'attack') {
+      if (move.type === 'attack' || move.type === 'parry_retaliate') {
         score += 10;
         reasons.push('Standard attack pressure');
       }
@@ -107,6 +107,47 @@ export function scoreMoveWithTactics(
   if (move.tags?.includes('healing') && self.currentHealth < 40) {
     score += 10;
     reasons.push('Healing bonus when wounded');
+  }
+  
+  // NEW: Defensive move scoring
+  if (move.type === 'evade') {
+    // High priority when health is low
+    if (self.currentHealth < 40) {
+      score += 25;
+      reasons.push('High evade priority when health is low');
+    }
+    // Good when enemy is charging a powerful attack
+    if (enemy.isCharging && enemy.chargeProgress && enemy.chargeProgress > 50) {
+      score += 20;
+      reasons.push('Evade to avoid charging enemy attack');
+    }
+    // Character-specific bonus for Aang
+    if (self.name.toLowerCase().includes('aang')) {
+      score += 15;
+      reasons.push('Aang\'s natural evasive tendencies');
+    }
+  }
+  
+  if (move.type === 'parry_retaliate') {
+    // High priority when health is low but want to counter
+    if (self.currentHealth < 50) {
+      score += 20;
+      reasons.push('Parry-retaliate for defensive counter-attack');
+    }
+    // Good against predictable enemies
+    if (enemy.moveHistory.length > 2) {
+      const recentMoves = enemy.moveHistory.slice(-3);
+      const isPredictable = recentMoves.every(move => move === recentMoves[0]);
+      if (isPredictable) {
+        score += 18;
+        reasons.push('Parry-retaliate against predictable enemy');
+      }
+    }
+    // Character-specific bonus for Azula
+    if (self.name.toLowerCase().includes('azula')) {
+      score += 15;
+      reasons.push('Azula\'s aggressive counter-attack style');
+    }
   }
   
   // Cooldown consideration

@@ -4,6 +4,7 @@
 import { BattleCharacter } from '../../types';
 import { Move, getLocationType } from '../../types/move.types';
 import { canUseMove, applyPositionBonuses } from '../battle/positioningMechanics.service';
+import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
 
 /**
  * @description Enhanced AI move selection with tactical awareness.
@@ -22,6 +23,10 @@ export function selectTacticalMove(
   const usableMoves = availableMoves.filter(move => 
     canUseMove(move, self, enemy, location)
   );
+  
+  // --- NEW IDTB INTEGRATION ---
+  const identityAdjustments = adjustScoresByIdentity(self, usableMoves);
+  // --- END OF NEW INTEGRATION ---
   
   if (usableMoves.length === 0) {
     // Fallback to basic moves if no tactical moves available
@@ -136,6 +141,12 @@ export function selectTacticalMove(
       tacticalFactors.push("Firebender Tactics");
     }
     
+    // NEW: DEFENSIVE MOVE SCORING
+    score += evaluateDefensiveMoves(move, self, enemy, isAirbender, isFirebender);
+    if (move.id.includes('evade') || move.id.includes('parry') || move.id.includes('counter')) {
+      tacticalFactors.push("Defensive Strategy");
+    }
+    
     // 8. BASE MOVE STRENGTH
     score += move.baseDamage * 2;
     score -= move.chiCost;
@@ -172,10 +183,20 @@ export function selectTacticalMove(
       tacticalFactors.push("Recent Use");
     }
 
+    // --- APPLY IDENTITY MODIFIER ---
+    const identityMod = identityAdjustments[move.name];
+    if (identityMod) {
+      score += identityMod.adjustment;
+      reasoning += `${identityMod.reason}. `;
+      tacticalFactors.push("Identity Influence");
+    }
+    // --- END OF MODIFIER ---
+
     // 13. STATUS EFFECT SCORING - Value applying and reacting to status effects
     if (move.appliesEffect) {
       const effect = move.appliesEffect;
-      if (effect.category === 'debuff') {
+      const isDebuff = ['BURN', 'STUN', 'DEFENSE_DOWN', 'SLOW'].includes(effect.type);
+      if (isDebuff) {
         // Highly value applying debuffs to healthy enemies
         if (!enemy.activeEffects.some(e => e.type === effect.type)) {
           score += 25; // High bonus for applying a new, impactful debuff
@@ -391,4 +412,90 @@ export function shouldPrioritizePositioning(
   }
   
   return false;
+}
+
+/**
+ * @description Evaluates defensive moves based on character personality and tactical situation.
+ */
+function evaluateDefensiveMoves(
+  move: Move, 
+  self: BattleCharacter, 
+  enemy: BattleCharacter, 
+  isAirbender: boolean, 
+  isFirebender: boolean
+): number {
+  let score = 0;
+  
+  // Check if this is a defensive move by name
+  const isEvadeMove = move.id.includes('evade') || move.id.includes('evasion') || move.id.includes('flowing');
+  const isParryMove = move.id.includes('parry') || move.id.includes('counter') || move.id.includes('blazing');
+  
+  if (!isEvadeMove && !isParryMove) {
+    return 0; // Not a defensive move
+  }
+  
+  // HIGH PRIORITY: Use defensive moves when health is low
+  if (self.currentHealth < 30) {
+    score += 80; // Very high priority when health is low
+  } else if (self.currentHealth < 50) {
+    score += 40; // Medium priority when health is moderate
+  }
+  
+  // HIGH PRIORITY: Use defensive moves when enemy is charging a powerful attack
+  if (enemy.isCharging && enemy.chargeProgress && enemy.chargeProgress > 50) {
+    score += 60; // High priority to defend against charged attacks
+  }
+  
+  // MEDIUM PRIORITY: Use defensive moves when enemy has high damage potential
+  if (enemy.stats.power > 80) {
+    score += 30; // Defend against high-power enemies
+  }
+  
+  // CHARACTER-SPECIFIC DEFENSIVE STRATEGIES
+  
+  // AANG (Airbender) - Prefers evasion
+  if (isAirbender && isEvadeMove) {
+    score += 25; // Aang prefers flowing evasion
+    // Aang uses evasion more when he's mobile
+    if (self.position === "flying" || self.position === "repositioning") {
+      score += 15;
+    }
+  }
+  
+  // AZULA (Firebender) - Prefers parry/counter
+  if (isFirebender && isParryMove) {
+    score += 25; // Azula prefers aggressive counter-attacks
+    // Azula uses counter more when enemy is predictable
+    if (enemy.moveHistory.length > 0) {
+      const lastMove = enemy.moveHistory[enemy.moveHistory.length - 1];
+      const moveCount = enemy.moveHistory.filter(m => m === lastMove).length;
+      if (moveCount > 1) {
+        score += 20; // Bonus for countering predictable enemies
+      }
+    }
+  }
+  
+  // PENALTIES
+  
+  // Don't spam defensive moves
+  if (self.lastMove && (self.lastMove.includes('evade') || self.lastMove.includes('parry') || self.lastMove.includes('counter'))) {
+    score -= 30; // Penalty for defensive move spam
+  }
+  
+  // Don't use defensive moves when we have the advantage
+  if (self.currentHealth > 80 && enemy.currentHealth < 40) {
+    score -= 40; // Don't defend when we're winning
+  }
+  
+  // Don't use defensive moves during forced escalation
+  if (self.flags?.forcedEscalation === 'true') {
+    score -= 50; // Focus on attack during escalation
+  }
+  
+  // Don't use defensive moves when we have counter-attack opportunity
+  if (self.flags?.isCountering === true) {
+    score -= 60; // Use the counter-attack instead of defending
+  }
+  
+  return score;
 } 

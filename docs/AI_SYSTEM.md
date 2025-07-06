@@ -4,11 +4,12 @@ This directory contains the advanced AI system for the Avatar Battle Arena, feat
 
 ## 🎯 Overview
 
-The advanced AI system consists of three core modules that work together to create intelligent, context-aware battle decisions:
+The advanced AI system consists of four core modules that work together to create intelligent, context-aware, and character-driven battle decisions:
 
 1. **BattleContext Analysis** (`battleAwareness.ts`) - Analyzes the current battle situation
 2. **Intent/Goal System** (`intentSystem.ts`) - Sets tactical objectives for multiple turns
 3. **Contextual Move Scoring** (`contextualMoveScoring.ts`) - Scores moves based on context and intent
+4. **Identity-Driven Tactical Behavior** (`identity/`) - Character personality and mental state influence
 
 ## 🏗️ Architecture
 
@@ -17,18 +18,24 @@ The advanced AI system consists of three core modules that work together to crea
 │   Battle Log    │───▶│ Battle Context  │───▶│   Intent        │
 │   & State       │    │   Analysis      │    │   Selection     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-                                ▼                       ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │ Contextual Move │◀───│   Move          │
-                       │   Scoring       │    │   Selection     │
-                       └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   Final Move    │
-                       │   Decision      │
-                       └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Character     │    │ Contextual Move │◀───│   Move          │
+│   Identity &    │    │   Scoring       │    │   Selection     │
+│   Mental State  │    └─────────────────┘    └─────────────────┘
+└─────────────────┘              │                       │
+         │                       ▼                       │
+         └─────────────────▶┌─────────────────┐◀────────┘
+                            │   Identity      │
+                            │   Adjustments   │
+                            └─────────────────┘
+                                       │
+                                       ▼
+                            ┌─────────────────┐
+                            │   Final Move    │
+                            │   Decision      │
+                            └─────────────────┘
 ```
 
 ## 🚀 Quick Start
@@ -189,11 +196,17 @@ Moves are scored based on multiple factors:
 3. **Resource Management** - Chi costs, cooldowns, health pressure
 4. **Damage Potential** - Expected damage vs enemy defense
 5. **Pattern Recognition** - Countering enemy patterns
+6. **Character Identity** - Personality traits and core values
+7. **Mental State** - Current psychological state influence
+8. **Moral Boundaries** - Character's ethical constraints
+9. **Tactical Tendencies** - Character-specific preferences
+10. **Pride Considerations** - Ego and self-image factors
 
 ### Example Move Scoring
 
 ```typescript
 import { scoreMovesWithContext } from './contextualMoveScoring';
+import { adjustScoresByIdentity } from './identity/tacticalPersonality.engine';
 
 const scoredMoves = scoreMovesWithContext(
   availableMoves,
@@ -355,6 +368,47 @@ All AI, battle, and narrative services now follow the Single Responsibility Prin
 - Each service handles only one domain concern (e.g., move execution, narrative composition, emotional policy).
 - Orchestration files (e.g., tacticalMove.service.ts, NarrativeCoordinator.ts) only delegate to focused services.
 - This enables safe, autonomous AI-driven refactoring and prevents architectural drift or circular dependencies.
+
+## Identity-Driven Tactical Behavior Integration - COMPLETE
+
+The AI system now fully integrates with the Identity-Driven Tactical Behavior (IDTB) system:
+
+### ✅ **Character Identity Integration**
+- **AI considers character personality** when making decisions
+- **AI respects moral boundaries** (lethal vs non-lethal)
+- **AI follows tactical tendencies** (precision, evasion, etc.)
+- **AI adapts to core values** (control, dominance, balance, pacifism)
+
+### ✅ **Mental State Influence**
+- **AI responds to psychological states** (focused, enraged, fearful, unhinged)
+- **AI considers pride levels** in decision making
+- **AI adapts to stability changes** throughout the battle
+- **AI reflects character emotional state** in move selection
+
+### ✅ **Identity-Based Scoring**
+```typescript
+// Example: Aang's pacifist nature penalizing lethal moves
+if (profile.coreValues.includes('pacifism')) {
+  if (move.damage > 20) {
+    adjustment -= 15; // Penalty for high-damage moves
+    reasons.push('Pacifism value penalizes high-damage moves');
+  }
+}
+
+// Example: Azula's control obsession favoring precision
+if (profile.tacticalTendencies.includes('prefers_precision')) {
+  if (move.critChance && move.critChance > 0.15) {
+    adjustment += 15; // Bonus for high-crit moves
+    reasons.push('Control value favors precision moves');
+  }
+}
+```
+
+### ✅ **Mental State Updates**
+- **Real-time psychological tracking** during battle
+- **State changes based on events** (damage, misses, criticals)
+- **Character-specific reactions** to battle outcomes
+- **Psychological state logging** for analysis
 
 ## Status Effect Integration - COMPLETE
 
