@@ -34,7 +34,7 @@ export class BattleLogger {
   /**
    * @description Log a debug message
    */
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       this.log(LogLevel.DEBUG, message, context);
     }
@@ -43,7 +43,7 @@ export class BattleLogger {
   /**
    * @description Log an info message
    */
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.INFO)) {
       this.log(LogLevel.INFO, message, context);
     }
@@ -52,7 +52,7 @@ export class BattleLogger {
   /**
    * @description Log a warning message
    */
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.log(LogLevel.WARN, message, context);
     }
@@ -61,7 +61,7 @@ export class BattleLogger {
   /**
    * @description Log an error message
    */
-  error(message: string, context?: Record<string, any>): void {
+  error(message: string, context?: Record<string, unknown>): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       this.log(LogLevel.ERROR, message, context);
     }
@@ -80,7 +80,7 @@ export class BattleLogger {
   /**
    * @description Output the log message
    */
-  private log(level: LogLevel, message: string, context?: Record<string, any>): void {
+  private log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     const timestamp = new Date().toISOString();
     
     if (this.config.enableConsole) {
@@ -114,7 +114,7 @@ export function logTacticalMove(
   moveName: string,
   damage: number,
   context: string,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, unknown>
 ): void {
   battleLogger.debug(
     `${characterName} ${context} ${moveName}: ${damage} damage`,

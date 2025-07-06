@@ -1,6 +1,6 @@
 // CONTEXT: Advanced AI Controller
 // RESPONSIBILITY: Integrate battle awareness, intent system, and contextual move scoring
-import { Ability } from '@/common/types';
+import { Ability, Location } from '@/common/types';
 import { BattleCharacter, AILogEntry, PerceivedState, ConsideredAction, BattleLogEntry } from '../../types';
 import { getBattleTacticalContext, BattleTacticalContext } from './battleStateAwareness';
 import { chooseIntent, Intent, shouldMaintainIntent } from './intentSystem';
@@ -82,6 +82,7 @@ function createEnhancedPerceivedState(
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {number} turn - Current turn number.
  * @param {BattleLogEntry[]} battleLog - The battle log entries.
+ * @param {Location} location - The battle location for collateral damage checks.
  * @param {AdvancedAIState | null} previousState - The previous AI state (for intent continuity).
  * @returns {{ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState}} The chosen ability, AI log, and new state.
  */
@@ -90,6 +91,7 @@ export function chooseAbilityWithAdvancedAI(
   enemy: BattleCharacter, 
   turn: number,
   battleLog: BattleLogEntry[],
+  location: Location,
   previousState: AdvancedAIState | null = null
 ): { ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState } {
   
@@ -114,7 +116,7 @@ export function chooseAbilityWithAdvancedAI(
   
   // 3. Get available moves
   const meta = assessMetaState(character, enemy, turn);
-  const availableMoves = getAvailableMoves(character, meta);
+  const availableMoves = getAvailableMoves(character, meta, location);
   
   // 4. Score moves with context and intent
   const contextualMoveScores = scoreMovesWithContext(

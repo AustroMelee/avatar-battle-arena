@@ -1,6 +1,6 @@
 // CONTEXT: AI, // FOCUS: WeightedChoice
 import type { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
-import type { Ability } from '@/common/types';
+import type { Ability, Location } from '@/common/types';
 import { getAvailableMoves } from './helpers/conditionHelpers';
 
 /**
@@ -100,6 +100,7 @@ export function getAvailableMovesWithWeights(
  * @param {BattleState} state - Current battle state
  * @param {BattleCharacter} opp - Opponent character
  * @param {BattleLogEntry[]} log - Battle log
+ * @param {Location} location - Optional battle location for collateral damage checks
  * @returns {{move: Ability, weights: Array<{move: string, weight: number, description: string}>} | null} Selected move and debug info
  */
 export function selectWeightedMove(
@@ -107,13 +108,14 @@ export function selectWeightedMove(
   weightedMoves: WeightedMove[],
   state: BattleState,
   opp: BattleCharacter,
-  log: BattleLogEntry[]
+  log: BattleLogEntry[],
+  location?: Location
 ): {move: Ability, weights: Array<{move: string, weight: number, description: string}>} | null {
   const availableMoves = getAvailableMovesWithWeights(self, weightedMoves, state, opp, log);
   
   // If no weighted moves available, add fallback moves with minimum weight
   if (availableMoves.length === 0) {
-    const fallbackMoves = getAvailableMoves(self).map((move: Ability) => ({
+    const fallbackMoves = getAvailableMoves(self, location).map((move: Ability) => ({
       move,
       weight: 1, // Minimum weight for unpredictability
       description: 'Fallback move'

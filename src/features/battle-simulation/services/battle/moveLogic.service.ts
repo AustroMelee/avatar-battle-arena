@@ -60,7 +60,7 @@ export function resolveMove(
 ): MoveResult {
   let damage = move.baseDamage;
   let wasCrit = false;
-  const wasFinisher = !!move.isFinisher;
+  const _wasFinisher = !!move.isFinisher;
   let wasDesperation = false;
 
   // Finisher logic - massive damage, dramatic narrative

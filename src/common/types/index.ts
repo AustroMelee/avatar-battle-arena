@@ -11,6 +11,9 @@ export type Ability = {
   maxUses?: number; // Maximum uses per battle (optional, e.g., 3 Lightning bolts)
   tags?: string[]; // For future categorization (e.g., 'piercing', 'defensive')
   collateralRisk?: number; // 0 = safe, 1 = catastrophic
+  // NEW: Collateral damage system for narrative impact
+  collateralDamage?: 0 | 1 | 2 | 3; // 0: None, 1: Minor, 2: Moderate, 3: Major
+  collateralDamageNarrative?: string; // e.g., "shatters nearby windows", "sends stone flying"
   unlockCondition?: {
     type: 'health';
     threshold: number; // Health percentage (e.g., 20 for 20% health)
@@ -74,4 +77,7 @@ export type Location = {
   id: string;
   name: string;
   image: string; // URL or path to image
+  // NEW: Collateral damage tolerance system
+  collateralTolerance?: number; // The location's baseline durability/importance (0-3)
+  toleranceNarrative?: string; // e.g., "A pristine and culturally significant site."
 }; 

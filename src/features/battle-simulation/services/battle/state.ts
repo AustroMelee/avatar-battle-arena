@@ -46,16 +46,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     chargeInterruptions: 0,
     positionHistory: ['neutral'],
     defensiveStance: 'none',
-    mentalState: {
-      stability: 50,
-      pride: 50,
-      activeStates: []
-    },
-    opponentPerception: {
-      aggressionLevel: 50,
-      predictability: 50,
-      respect: 50
-    }
+    mentalState: initializeMentalState(), // Use proper initialization
+    opponentPerception: DEFAULT_OPPONENT_PERCEPTION,
+    // NEW: Initialize mental thresholds tracking
+    mentalThresholdsCrossed: {}, // Starts with no thresholds crossed
   };
   
   const p2Battle: BattleCharacter = {
@@ -76,16 +70,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     chargeInterruptions: 0,
     positionHistory: [],
     defensiveStance: 'none',
-    mentalState: {
-      stability: 50,
-      pride: 50,
-      activeStates: []
-    },
-    opponentPerception: {
-      aggressionLevel: 50,
-      predictability: 50,
-      respect: 50
-    }
+    mentalState: initializeMentalState(), // Use proper initialization
+    opponentPerception: DEFAULT_OPPONENT_PERCEPTION,
+    // NEW: Initialize mental thresholds tracking
+    mentalThresholdsCrossed: {}, // Starts with no thresholds crossed
   };
   
   // Calculate environmental factors

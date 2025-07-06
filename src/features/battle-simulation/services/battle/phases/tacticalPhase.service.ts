@@ -15,6 +15,7 @@ import {
 } from '../patternBreaking.service';
 import { processLogEntryForAnalytics } from '../analyticsTracker.service';
 import { propagateTacticalStates } from '../tacticalState.service';
+import { availableLocations } from '../../../../location-selection/data/locationData';
 
 /**
  * @description Processes tactical AI move selection and execution with enhanced narratives
@@ -29,11 +30,24 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
   // Get character-specific moves
   const availableMoves = getCharacterMoves(attacker.name);
   
+  // Get location data for collateral damage filtering
+  const locationData = availableLocations.find(loc => loc.name === newState.location) || availableLocations[0];
+  
+  // NEW: Apply collateral damage filtering manually
+  const collateralFilteredMoves = availableMoves.filter(move => {
+    // Check if move has collateral damage that exceeds location tolerance
+    if (move.collateralDamage && move.collateralDamage > (locationData.collateralTolerance || 2)) {
+      console.log(`DEBUG: T${newState.turn} ${attacker.name} filtered out ${move.name} due to collateral damage ${move.collateralDamage} > tolerance ${locationData.collateralTolerance}`);
+      return false;
+    }
+    return true;
+  });
+  
   // Use tactical AI for move selection
-  console.log(`DEBUG: T${newState.turn} ${attacker.name} available moves:`, availableMoves.map(m => `${m.name}(${m.maxUses || 'unlimited'})`));
+  console.log(`DEBUG: T${newState.turn} ${attacker.name} available moves:`, collateralFilteredMoves.map(m => `${m.name}(${m.maxUses || 'unlimited'})`));
   
   // Filter out disabled moves due to pattern breaking
-  const filteredMoves = availableMoves.filter(move => !isMoveDisabled(move, attacker));
+  const filteredMoves = collateralFilteredMoves.filter(move => !isMoveDisabled(move, attacker));
   
   const tacticalResult = selectTacticalMove(
     attacker,
@@ -56,6 +70,12 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
     // Only add the enhanced narrative to the user-facing log
     newState.battleLog.push(executionResult.logEntry);
     newState.log.push(executionResult.narrative);
+    
+    // NEW: Add collateral damage log entry if present
+    if (executionResult.collateralLogEntry) {
+      newState.battleLog.push(executionResult.collateralLogEntry);
+      newState.log.push(executionResult.collateralLogEntry.narrative || executionResult.collateralLogEntry.result);
+    }
     
     // Add AI reasoning to aiLog for debugging (not user-facing)
     newState.aiLog.push({
@@ -118,6 +138,12 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
     // Only add the enhanced narrative to the user-facing log
     newState.battleLog.push(executionResult.logEntry);
     newState.log.push(executionResult.narrative);
+    
+    // NEW: Add collateral damage log entry if present
+    if (executionResult.collateralLogEntry) {
+      newState.battleLog.push(executionResult.collateralLogEntry);
+      newState.log.push(executionResult.collateralLogEntry.narrative || executionResult.collateralLogEntry.result);
+    }
     
     // Update analytics for successful move execution
     if (newState.analytics) {

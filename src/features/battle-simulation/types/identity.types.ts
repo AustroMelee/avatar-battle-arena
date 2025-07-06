@@ -23,7 +23,7 @@ export interface IdentityProfile {
 export interface MentalState {
   stability: number; // 0-100. High is calm/composed, low is unhinged/panicked.
   pride: number;     // 0-100. A measure of ego. Taking hits or being outplayed lowers it.
-  activeStates: ('enraged' | 'fearful' | 'focused' | 'unhinged')[];
+  activeStates: ('enraged' | 'fearful' | 'focused' | 'unhinged' | 'broken')[];
 }
 
 /**

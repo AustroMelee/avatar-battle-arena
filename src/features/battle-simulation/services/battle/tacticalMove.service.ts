@@ -5,7 +5,7 @@ import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Move } from '../../types/move.types';
 import { resolveMove } from './moveLogic.service';
 import { createBattleContext } from './battleContext.service';
-import { convertAbilityToMove } from './moveConverter.service';
+// Removed unused import
 import { modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
 import { handleChargeUp, calculatePunishBonus, applyPositionBonuses } from './positioningMechanics.service';
@@ -19,6 +19,8 @@ export interface TacticalMoveResult {
   newTarget: BattleCharacter;
   logEntry: BattleLogEntry;
   narrative: string;
+  // NEW: Collateral damage log entry for environmental damage
+  collateralLogEntry?: BattleLogEntry;
 }
 
 /**
@@ -293,6 +295,25 @@ async function handleRegularTacticalMove(
   
   const narrative = enhancedNarrative.narrative || moveResult.narrative;
   
+  // NEW: Create collateral damage log entry if move causes environmental damage
+  let collateralLogEntry: BattleLogEntry | undefined;
+  if (move.collateralDamage && move.collateralDamage > 0) {
+    collateralLogEntry = {
+      id: `collateral-${state.turn}-${Date.now()}`,
+      turn: state.turn,
+      actor: 'Environment', // The environment is the "target" of the damage
+      type: 'NARRATIVE',
+      action: 'Collateral Damage',
+      result: `A nearby structure was damaged by ${move.name}.`,
+      narrative: move.collateralDamageNarrative || `The force of ${move.name} causes environmental damage.`, // Use the narrative from the ability!
+      timestamp: Date.now(),
+      meta: { damageLevel: move.collateralDamage },
+    };
+    
+    // Add collateral damage log entry to state (this will be handled by the caller)
+    console.log(`[COLLATERAL DAMAGE] ${attacker.name}'s ${move.name} caused level ${move.collateralDamage} environmental damage`);
+  }
+  
   // Create result string
   let result: string;
   if (moveResult.wasCrit) {
@@ -329,6 +350,8 @@ async function handleRegularTacticalMove(
     newAttacker: attacker,
     newTarget: newTarget,
     logEntry,
-    narrative
+    narrative,
+    // NEW: Collateral damage log entry for environmental damage
+    collateralLogEntry
   };
 }

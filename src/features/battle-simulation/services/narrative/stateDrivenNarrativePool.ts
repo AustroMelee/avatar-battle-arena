@@ -1,5 +1,7 @@
 // CONTEXT: Narrative System, // FOCUS: State-Driven Narrative Pool
 
+// No imports needed for this file
+
 /**
  * @description Tracks narrative state changes to prevent repetition
  */
@@ -40,32 +42,36 @@ export class StateDrivenNarrativePool {
   /**
    * @description Updates the state tracker with current context
    */
-  updateState(_ctx: any): void {
-    this.stateTracker.turnCount = _ctx.turnIndex;
+  updateState(_ctx: unknown): void {
+    const ctx = _ctx as NarrativeContext;
+    
+    if (ctx.turnIndex !== undefined) {
+      this.stateTracker.turnCount = ctx.turnIndex;
+    }
     
     // Track damage outcomes
-    if (_ctx.damage !== undefined) {
-      if (_ctx.damage === 0) {
+    if (ctx.damage !== undefined) {
+      if (ctx.damage === 0) {
         this.stateTracker.consecutiveMisses++;
         this.stateTracker.consecutiveHits = 0;
         this.stateTracker.lastDamageOutcome = 'miss';
       } else {
         this.stateTracker.consecutiveHits++;
         this.stateTracker.consecutiveMisses = 0;
-        this.stateTracker.lastDamageOutcome = _ctx.damage > 15 ? 'high' : 'moderate';
+        this.stateTracker.lastDamageOutcome = ctx.damage > 15 ? 'high' : 'moderate';
       }
     }
 
     // Track state changes
-    if (_ctx.mechanics.forcedEscalation) {
+    if (ctx.mechanics?.forcedEscalation) {
       this.stateTracker.escalationCount++;
       this.stateTracker.lastStateChange = 'escalation';
     }
-    if (_ctx.mechanics.isDesperation) {
+    if (ctx.mechanics?.isDesperation) {
       this.stateTracker.desperationCount++;
       this.stateTracker.lastStateChange = 'desperation';
     }
-    if (_ctx.mechanics.moveRepetition >= 3) {
+    if (ctx.mechanics?.moveRepetition && ctx.mechanics.moveRepetition >= 3) {
       this.stateTracker.patternBreakCount++;
       this.stateTracker.lastStateChange = 'pattern_break';
     }
@@ -74,7 +80,7 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual escalation narrative based on state
    */
-  getEscalationNarrative(_ctx: any): string {
+  getEscalationNarrative(_ctx: unknown): string {
     const { escalationCount } = this.stateTracker;
     
     if (escalationCount === 1) {
@@ -91,7 +97,7 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual pattern break narrative based on state
    */
-  getPatternBreakNarrative(_ctx: any): string {
+  getPatternBreakNarrative(_ctx: unknown): string {
     const { patternBreakCount } = this.stateTracker;
     
     if (patternBreakCount === 1) {
@@ -108,7 +114,7 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual damage narrative with character-specific details
    */
-  getDamageNarrative(_ctx: any, damage: number): string {
+  getDamageNarrative(_ctx: unknown, damage: number): string {
     const { consecutiveHits, consecutiveMisses } = this.stateTracker;
     
     if (damage === 0) {
@@ -127,7 +133,11 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets miss narrative with character-specific details
    */
-  private getMissNarrative(_ctx: any, consecutiveMisses: number): string {
+  private getMissNarrative(_ctx: unknown, consecutiveMisses: number): string {
+    if (!hasActorAndTarget(_ctx)) {
+      return "The attack misses its target.";
+    }
+    
     const { actor, target } = _ctx;
     
     if (actor.name === 'Aang') {
@@ -154,7 +164,11 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets glance narrative with character-specific details
    */
-  private getGlanceNarrative(_ctx: any): string {
+  private getGlanceNarrative(_ctx: unknown): string {
+    if (!hasActorAndTarget(_ctx)) {
+      return "The attack connects, but lacks power.";
+    }
+    
     const { actor, target } = _ctx;
     
     if (actor.name === 'Aang') {
@@ -169,7 +183,11 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets hit narrative with character-specific details
    */
-  private getHitNarrative(_ctx: any, consecutiveHits: number): string {
+  private getHitNarrative(_ctx: unknown, consecutiveHits: number): string {
+    if (!hasActorAndTarget(_ctx)) {
+      return "The attack lands with solid impact!";
+    }
+    
     const { actor, target } = _ctx;
     
     if (actor.name === 'Aang') {
@@ -192,7 +210,11 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets devastating narrative with character-specific details
    */
-  private getDevastatingNarrative(_ctx: any): string {
+  private getDevastatingNarrative(_ctx: unknown): string {
+    if (!hasActorAndTarget(_ctx)) {
+      return "The attack devastates with brutal efficiency!";
+    }
+    
     const { actor, target } = _ctx;
     
     if (actor.name === 'Aang') {
@@ -207,7 +229,11 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets overwhelming narrative with character-specific details
    */
-  private getOverwhelmingNarrative(_ctx: any): string {
+  private getOverwhelmingNarrative(_ctx: unknown): string {
+    if (!hasActorAndTarget(_ctx)) {
+      return "An overwhelming assault that nearly ends the battle!";
+    }
+    
     const { actor, target } = _ctx;
     
     if (actor.name === 'Aang') {
@@ -222,7 +248,11 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual defensive narrative
    */
-  getDefensiveNarrative(_ctx: any): string {
+  getDefensiveNarrative(_ctx: unknown): string {
+    if (!hasActorAndTarget(_ctx)) {
+      return "The fighter expertly dodges the attack.";
+    }
+    
     const { actor, target } = _ctx;
     
     if (actor.name === 'Aang') {
@@ -281,9 +311,44 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets the current state for debugging
    */
-  getState(): any {
+  getState(): Record<string, unknown> {
     return {
       stateTracker: { ...this.stateTracker }
     };
   }
+}
+
+// CONTEXT: Narrative Pool Management
+// RESPONSIBILITY: Manage state-driven narrative pools for battle storytelling
+
+/**
+ * @description Context interface for narrative generation
+ */
+interface NarrativeContext {
+  turnIndex?: number;
+  actor?: { name: string };
+  target?: { name: string };
+  damage?: number;
+  mechanics?: {
+    forcedEscalation?: boolean;
+    isDesperation?: boolean;
+    moveRepetition?: number;
+  };
+}
+
+/**
+ * @description Type guard to check if context has actor and target
+ */
+function hasActorAndTarget(ctx: unknown): ctx is { actor: { name: string }; target: { name: string } } {
+  return typeof ctx === 'object' && ctx !== null && 
+         'actor' in ctx && 'target' in ctx &&
+         typeof (ctx as any).actor === 'object' && 
+         typeof (ctx as any).target === 'object';
+}
+
+/**
+ * @description Type guard to check if context has mechanics
+ */
+function hasMechanics(ctx: unknown): ctx is { mechanics: { forcedEscalation?: boolean; isDesperation?: boolean; moveRepetition?: number } } {
+  return typeof ctx === 'object' && ctx !== null && 'mechanics' in ctx;
 } 

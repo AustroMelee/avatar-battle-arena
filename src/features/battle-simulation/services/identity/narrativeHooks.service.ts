@@ -1,6 +1,6 @@
 import { BattleCharacter } from '../../types';
 import { Move } from '../../types/move.types';
-import { getMentalStateNarrative } from './tacticalPersonality.engine';
+// Removed unused import
 
 /**
  * Generates a move description that incorporates the character's current mental state.
@@ -13,7 +13,7 @@ export function generateMentalStateMoveDescription(
   move: Move
 ): string {
   const mentalState = character.mentalState;
-  const profile = character.name; // We'll use the name to determine character personality
+  const _profile = character.name; // We'll use the name to determine character personality
 
   // Base move description
   let description = `${character.name} uses ${move.name}`;

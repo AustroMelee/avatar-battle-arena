@@ -74,6 +74,10 @@ export interface Move {
   description?: string;
   maxUses?: number;            // Maximum uses per battle (e.g., 3 Lightning bolts)
   
+  // NEW: Collateral damage system for narrative impact
+  collateralDamage?: 0 | 1 | 2 | 3; // 0: None, 1: Minor, 2: Moderate, 3: Major
+  collateralDamageNarrative?: string; // e.g., "shatters nearby windows", "sends stone flying"
+  
   // NEW: Future-proofing for "mixup" attacks that counter specific defensive styles
   beatsDefenseType?: 'evade' | 'parry_retaliate';
   
@@ -142,6 +146,8 @@ export const AANG_MOVES: Move[] = [
     desperationBuff: { hpThreshold: 25, damageBonus: 2, defensePenalty: 5 },
     description: 'Aang summons a swirling tornado of air to batter his foe.',
     requiresPosition: ["neutral", "flying", "high_ground"],
+    collateralDamage: 2,
+    collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and sends debris flying through the plaza.",
   },
   {
     id: 'wind_slice',
@@ -193,6 +199,8 @@ export const AANG_MOVES: Move[] = [
     canBeInterrupted: true,
     chargeInterruptionPenalty: 5,
     description: 'Aang channels immense airbending power into a devastating tornado. Only usable when opponent is vulnerable.',
+    collateralDamage: 3,
+    collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
   },
   {
     id: 'last_breath_cyclone',
@@ -205,7 +213,9 @@ export const AANG_MOVES: Move[] = [
     isFinisher: true,
     oncePerBattle: true,
     finisherCondition: { type: 'hp_below', percent: 20 },
-    description: 'Aang channels every last ounce of strength into a world-shaking cyclone. Only available below 20% HP.'
+    description: 'Aang channels every last ounce of strength into a world-shaking cyclone. Only available below 20% HP.',
+    collateralDamage: 3,
+    collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
   },
   {
     id: 'flowing_evasion',
@@ -258,7 +268,10 @@ export const AZULA_MOVES: Move[] = [
       chance: 0.7, // 70% chance to apply burn
       duration: 3, // Burn for 3 turns
       potency: 2 // 2 damage per turn
-    }
+    },
+    // NEW: Collateral damage properties
+    collateralDamage: 1,
+    collateralDamageNarrative: "The intense heat scorches nearby surfaces and leaves blackened marks on the stone.",
   },
   {
     id: 'fire_dash',
@@ -286,6 +299,9 @@ export const AZULA_MOVES: Move[] = [
     canBeInterrupted: true,
     chargeInterruptionPenalty: 8, // High penalty for failed lightning
     description: 'Azula channels lightning. Only usable when opponent is vulnerable.',
+    // NEW: Collateral damage properties
+    collateralDamage: 2,
+    collateralDamageNarrative: "The bolt of lightning misses its primary target, striking a nearby statue and sending superheated shrapnel flying.",
   },
   {
     id: 'fire_shield',

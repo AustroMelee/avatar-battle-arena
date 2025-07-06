@@ -4,7 +4,7 @@
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
 import { createEventId } from '../ai/logQueries';
-import { createBattleContext } from './battleContext.service';
+// Removed unused import
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect } from '../effects/statusEffect.service';
 

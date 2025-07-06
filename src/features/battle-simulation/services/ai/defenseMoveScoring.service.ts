@@ -18,7 +18,7 @@ import { Intent } from './intentSystem';
 export function scoreDefenseMove(
   move: Ability,
   self: BattleCharacter,
-  enemy: BattleCharacter,
+  _enemy: BattleCharacter,
   context: BattleTacticalContext,
   intent: Intent
 ): number {
@@ -167,8 +167,8 @@ export function scoreDefenseMove(
 export function getDefenseMoveScoringReasons(
   move: Ability,
   self: BattleCharacter,
-  enemy: BattleCharacter,
-  context: BattleTacticalContext,
+  _enemy: BattleCharacter,
+  _context: BattleTacticalContext,
   intent: Intent
 ): string[] {
   const reasons: string[] = [];

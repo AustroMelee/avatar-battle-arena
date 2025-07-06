@@ -72,15 +72,24 @@ export function updateMentalState(
     }
   });
 
-  // Determine active mental states based on current values
+  // --- NEW: Check and set irreversible thresholds ---
+  if (stability < 50 && !character.mentalThresholdsCrossed.unhinged) {
+    character.mentalThresholdsCrossed.unhinged = true;
+    // This could trigger a one-time narrative event!
+  }
+  if (stability < 20 && !character.mentalThresholdsCrossed.broken) {
+    character.mentalThresholdsCrossed.broken = true;
+  }
+  // ---
+
+  // Determine active state for THIS turn
   activeStates = [];
-  
-  if (stability < profile.prideTolerance) {
+  if (character.mentalThresholdsCrossed.broken) {
+    activeStates.push('broken');
+  } else if (character.mentalThresholdsCrossed.unhinged) {
     activeStates.push('unhinged');
-  } else if (stability < 50) {
+  } else if (stability < 75) {
     activeStates.push('enraged');
-  } else if (pride < 30) {
-    activeStates.push('fearful');
   } else {
     activeStates.push('focused');
   }
@@ -93,6 +102,6 @@ export function updateMentalState(
  * @param character The character to reset
  * @returns The reset mental state
  */
-export function resetMentalState(character: BattleCharacter): MentalState {
+export function resetMentalState(_character: BattleCharacter): MentalState {
   return initializeMentalState();
 } 

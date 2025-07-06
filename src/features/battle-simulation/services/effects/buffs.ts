@@ -1,7 +1,7 @@
 // CONTEXT: Buff/Debuff Management (Legacy - Use statusEffect.service.ts instead)
 // RESPONSIBILITY: Apply, reduce, and process buffs/debuffs
 import { BattleCharacter, Buff, Debuff, ActiveStatusEffect } from '../../types';
-import { processTurnEffects, applyEffect, createStatusEffect } from './statusEffect.service';
+import { processTurnEffects, applyEffect } from './statusEffect.service';
 
 /**
  * @description Processes buffs and debuffs for a character, reducing duration and removing expired ones.

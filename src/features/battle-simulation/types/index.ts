@@ -128,6 +128,12 @@ export type BattleCharacter = Character & {
   // NEW: Identity-Driven Tactical Behavior (IDTB) System
   mentalState: MentalState;
   opponentPerception: OpponentPerception;
+  
+  // NEW: Irreversible mental state tracking for narrative impact
+  mentalThresholdsCrossed: {
+    unhinged?: boolean; // Has Azula's composure ever broken?
+    broken?: boolean;   // Has she reached a point of no return?
+  };
 };
 
 /**

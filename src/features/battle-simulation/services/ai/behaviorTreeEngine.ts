@@ -1,6 +1,6 @@
 import type { BattleState, BattleCharacter } from '../../types';
 import type { AIRule, AIDecision } from './types/AIBehavior';
-import type { Ability } from '@/common/types';
+import type { Ability, Location } from '@/common/types';
 import { azulaAIRules } from './rules/azulaRules';
 import { aangAIRules } from './rules/aangRules';
 import { getAvailableMoves, getHighestDamageMove, getLowestCostMove } from './helpers/conditionHelpers';
@@ -48,8 +48,8 @@ function getCharacterWeightedMoves(character: BattleCharacter) {
  * @param state - The battle state
  * @returns A fallback move
  */
-function legacyTacticalMove(self: BattleCharacter): Ability | null {
-  const availableMoves = getAvailableMoves(self);
+function legacyTacticalMove(self: BattleCharacter, location?: Location): Ability | null {
+  const availableMoves = getAvailableMoves(self, location);
   if (availableMoves.length === 0) return null;
   
   // Simple fallback: prefer high damage moves
@@ -110,7 +110,17 @@ export function decideMove(
   console.log(`[AI DECISION] ${self.name} - No high-priority rules, using weighted choice`);
   
   const weightedMoves = getCharacterWeightedMoves(self);
-  const weightedResult = selectWeightedMove(self, weightedMoves, state, opp, state.battleLog);
+  
+  // Create location object from state for collateral damage checks
+  const location: Location = {
+    id: state.location || 'fire-nation-capital',
+    name: state.location || 'Fire Nation Capital',
+    image: '/assets/caldera.jpg',
+    collateralTolerance: 1, // Default to low tolerance for Fire Nation Capital
+    toleranceNarrative: "The pristine Royal Plaza. Widespread destruction here would be a sign of great disrespect and instability."
+  };
+  
+  const weightedResult = selectWeightedMove(self, weightedMoves, state, opp, state.battleLog, location);
   
   if (weightedResult) {
     const weightedRule: AIRule = {
@@ -138,7 +148,7 @@ export function decideMove(
   // Ultimate fallback to legacy system if weighted choice fails
   console.log(`[AI ULTIMATE FALLBACK] ${self.name} - Weighted choice failed, using legacy system`);
   
-  const fallbackMove = legacyTacticalMove(self);
+  const fallbackMove = legacyTacticalMove(self, location);
   if (!fallbackMove) {
     // If even legacy fallback fails, return null
     return {

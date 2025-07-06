@@ -10,10 +10,10 @@ import type {
 } from './types/NarrativeTypes';
 
 /**
- * @description Enhanced narrative system with modular architecture
+ * @description Enhanced narrative system with dynamic coordinator loading
  */
-class EnhancedNarrativeSystem {
-  private coordinator: any; // Will be NarrativeCoordinator after dynamic import
+export class EnhancedNarrativeSystem {
+  private coordinator: unknown; // Will be NarrativeCoordinator after dynamic import
   private initializationPromise: Promise<void> | null = null;
 
   constructor() {
@@ -30,7 +30,7 @@ class EnhancedNarrativeSystem {
    */
   async initializeCharacter(characterName: string): Promise<void> {
     await this.initializationPromise;
-    this.coordinator.initializeBattle(characterName, 'opponent');
+    (this.coordinator as NarrativeCoordinator).initializeBattle(characterName, 'opponent');
   }
 
   /**
@@ -49,7 +49,7 @@ class EnhancedNarrativeSystem {
       damageOutcome,
       context
     };
-    return this.coordinator.generateMoveNarrative(request);
+    return (this.coordinator as NarrativeCoordinator).generateMoveNarrative(request);
   }
 
   /**
@@ -191,37 +191,37 @@ class EnhancedNarrativeSystem {
 
   // Backward compatibility methods
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateTurn(characterName: string, turnNumber: number): void {
+  updateTurn(_characterName: string, _turnNumber: number): void {
     // Stub for backward compatibility
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateHealth(characterName: string, health: number, maxHealth: number): void {
+  updateHealth(_characterName: string, _health: number, _maxHealth: number): void {
     // Stub for backward compatibility
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateChi(characterName: string, chi: number): void {
+  updateChi(_characterName: string, _chi: number): void {
     // Stub for backward compatibility
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateDamage(characterName: string, damage: number): void {
+  updateDamage(_characterName: string, _damage: number): void {
     // Stub for backward compatibility
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateCritical(characterName: string, isCritical: boolean): void {
+  updateCritical(_characterName: string, _isCritical: boolean): void {
     // Stub for backward compatibility
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateEscalation(characterName: string, isEscalation: boolean): void {
+  updateEscalation(_characterName: string, _isEscalation: boolean): void {
     // Stub for backward compatibility
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updatePatternBreak(characterName: string, isPatternBreak: boolean): void {
+  updatePatternBreak(_characterName: string, _isPatternBreak: boolean): void {
     // Stub for backward compatibility
   }
 

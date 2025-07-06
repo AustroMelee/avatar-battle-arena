@@ -201,8 +201,9 @@ export class EnhancedTemplateGenerator {
 
   /**
    * @description Gets the current state for debugging
+   * @returns {Record<string, unknown>} Current state
    */
-  getState(): any {
+  getState(): Record<string, unknown> {
     return {
       currentTurn: this.currentTurn,
       repetitionManager: this.repetitionManager.getState(),

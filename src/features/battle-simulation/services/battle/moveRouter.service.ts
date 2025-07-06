@@ -1,7 +1,7 @@
 // CONTEXT: Move Router Service
 // RESPONSIBILITY: Route moves to appropriate execution services based on type
 
-import { BattleState, BattleCharacter } from '../../types';
+import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
 import { executeAttackMove } from './attackMove.service';
 import { executeDefenseMove } from './defenseMove.service';
@@ -12,11 +12,20 @@ import { executeGenericMove } from './genericMove.service';
  */
 export interface MoveExecutionResult {
   newState: BattleState;
-  logEntry: any;
+  logEntry: BattleLogEntry;
   damage: number;
   result: string;
   narrative: string;
   isCritical: boolean;
+}
+
+/**
+ * @description Result of move routing
+ */
+export interface MoveRouterResult {
+  success: boolean;
+  logEntry: BattleLogEntry;
+  narrative?: string;
 }
 
 /**

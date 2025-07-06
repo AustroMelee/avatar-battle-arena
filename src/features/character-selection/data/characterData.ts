@@ -114,7 +114,9 @@ export const availableCharacters: Character[] = [
         unlockCondition: {
           type: 'health',
           threshold: 25
-        }
+        },
+        collateralDamage: 2,
+        collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and sends debris flying through the plaza.",
       },
       {
         name: 'Last Breath Cyclone',
@@ -134,7 +136,9 @@ export const availableCharacters: Character[] = [
         unlockCondition: {
           type: 'health',
           threshold: 20
-        }
+        },
+        collateralDamage: 3,
+        collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
       }
     ],
     personality: 'balanced'
@@ -177,7 +181,9 @@ export const availableCharacters: Character[] = [
           chance: 1.0, // Always applies burn for testing
           duration: 3,
           potency: 2 // 2 damage per turn
-        }
+        },
+        collateralDamage: 1,
+        collateralDamageNarrative: "The intense heat scorches nearby surfaces and leaves blackened marks on the stone.",
       },
       {
         name: 'Fire Jets',
@@ -240,7 +246,9 @@ export const availableCharacters: Character[] = [
         unlockCondition: {
           type: 'health',
           threshold: 25
-        }
+        },
+        collateralDamage: 2,
+        collateralDamageNarrative: "The bolt of lightning misses its primary target, striking a nearby statue and sending superheated shrapnel flying.",
       },
       {
         name: 'Phoenix Inferno',
@@ -260,7 +268,9 @@ export const availableCharacters: Character[] = [
         unlockCondition: {
           type: 'health',
           threshold: 20
-        }
+        },
+        collateralDamage: 3,
+        collateralDamageNarrative: "The inferno engulfs the entire plaza, leaving nothing but scorched earth and melted stone in its wake.",
       }
     ],
     personality: 'aggressive'
