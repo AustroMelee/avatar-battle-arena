@@ -10,6 +10,7 @@ import {
 } from '../desperationSystem.service';
 import { EnhancedStateManager } from '../../narrative/enhancedStateManager';
 import { createNarrativeService } from '../../narrative';
+import { generateUniqueLogId } from '../../ai/logQueries';
 
 // Global enhanced state manager instance (shared with escalation phase)
 const enhancedStateManager = new EnhancedStateManager();
@@ -60,7 +61,7 @@ export async function processDesperationPhase(state: BattleState): Promise<Battl
     // Add state announcement to the log if generated
     if (desperationAnnouncement) {
       newState.battleLog.push({
-        id: `desperation-announcement-${attacker.name}-${state.turn}`,
+        id: generateUniqueLogId('desperation'),
         turn: state.turn,
         actor: attacker.name,
         type: 'DESPERATION',

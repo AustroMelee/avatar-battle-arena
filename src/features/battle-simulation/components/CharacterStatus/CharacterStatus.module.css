@@ -251,4 +251,43 @@
 .resourceValue {
   color: #ffd700;
   font-weight: bold;
+}
+
+.disruptionSummary {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.summaryState {
+  padding: 0.2em 0.7em;
+  border-radius: 1em;
+  background: #e0e0e0;
+  color: #222;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.summaryState.compromised {
+  background: #ffb347;
+  color: #7a3b00;
+  border: 2px solid #ff9800;
+}
+
+.summaryState.defeated {
+  background: #e57373;
+  color: #fff;
+  border: 2px solid #b71c1c;
+}
+
+.summaryStability {
+  color: #1976d2;
+}
+
+.summaryMomentum {
+  color: #388e3c;
 } 

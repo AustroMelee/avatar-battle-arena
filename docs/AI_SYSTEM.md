@@ -649,4 +649,12 @@ const aiLogEntry = {
 - **Effect Consideration**: AI considers status effects in decision making
 - **Effect Strategy**: AI develops strategies around status effects
 
-The AI system is now a sophisticated, status-effect-aware decision-making engine that provides challenging and engaging gameplay while maintaining transparency through comprehensive logging and reasoning. 
+The AI system is now a sophisticated, status-effect-aware decision-making engine that provides challenging and engaging gameplay while maintaining transparency through comprehensive logging and reasoning.
+
+## Behavioral Traits & Manipulation Resilience
+
+**Manipulation Resilience** is a new stat (0-100) for each character, representing their resistance to psychological manipulation and mind games. This value is now tracked in the `BattleCharacter` and `PerceivedState` types, and is used by the AI to determine susceptibility to manipulation-based tactics, narrative events, and certain abilities.
+
+- **Behavioral Traits**: Each character now has a list of `behavioralTraits` (instances of `BehavioralTraitInstance`), which influence tactical preferences, risk tolerance, and narrative responses.
+- **AI Integration**: The AI system now considers both `manipulationResilience` and `behavioralTraits` when evaluating moves, responding to narrative hooks, and adapting to psychological strategies.
+- **State Tracking**: These properties are updated in real time and logged for introspective analysis and debugging. 

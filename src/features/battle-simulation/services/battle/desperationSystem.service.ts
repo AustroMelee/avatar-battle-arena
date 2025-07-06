@@ -3,7 +3,7 @@
 
 import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
-import { createEventId } from '../ai/logQueries';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Desperation thresholds that trigger dramatic changes
@@ -163,7 +163,7 @@ export function createDesperationLogEntry(
   }
 
   return {
-    id: createEventId(),
+    id: generateUniqueLogId('desperation'),
     turn,
     actor: character.name,
     type: 'DESPERATION',

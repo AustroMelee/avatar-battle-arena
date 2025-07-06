@@ -6,13 +6,14 @@
 // This is essential for battle analysis and debugging - never hide early turns!
 //
 import React, { useState } from 'react';
-import { BattleLogEntry, AILogEntry } from '../../types';
+import { BattleLogEntry, AILogEntry, BattleCharacter } from '../../types';
 import styles from './UnifiedBattleLog.module.css';
 
 interface UnifiedBattleLogProps {
   battleLog: BattleLogEntry[];
   aiLog: AILogEntry[];
   maxEntries?: number;
+  participants?: BattleCharacter[];
 }
 
 type LogTab = 'narrative' | 'ai';
@@ -23,7 +24,8 @@ type LogTab = 'narrative' | 'ai';
 export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   battleLog,
   aiLog,
-  maxEntries = 15
+  maxEntries = 15,
+  participants = []
 }) => {
   // ⚠️ CRITICAL: Always start with showAllEntries = true to ensure T1 logs are visible
   // This is a hard requirement - users must always see the complete battle log by default
@@ -85,6 +87,13 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       else if (entry.damage > 0) classes.push(styles.normalDamage);
     }
     
+    // Highlight state change
+    if (entry.type === 'STATUS' && entry.action === 'State Change') {
+      classes.push(styles.stateChange);
+      if (entry.meta?.newControlState === 'Compromised') classes.push(styles.compromised);
+      if (entry.meta?.newControlState === 'Defeated') classes.push(styles.defeated);
+    }
+    
     return classes.join(' ');
   };
 
@@ -93,7 +102,35 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    */
   const formatBattleEntryText = (entry: BattleLogEntry): React.ReactNode => {
     const icon = getEventIcon(entry);
-    // Prioritize enhanced narratives over mechanical results
+    // Show disruption mechanics if present
+    if (entry.meta?.controlShift !== undefined || entry.meta?.stabilityChange !== undefined) {
+      return (
+        <>
+          {icon} <b>{entry.action}</b>: {entry.narrative}
+          {entry.meta.controlShift !== undefined ? (
+            <span className={styles.controlShift}> [Control Shift: {entry.meta.controlShift}]</span>
+          ) : null}
+          {entry.meta.stabilityChange !== undefined ? (
+            <span className={styles.stabilityChange}> [Stability: -{entry.meta.stabilityChange}]</span>
+          ) : null}
+          {entry.meta.newControlState ? (
+            <span className={styles.newControlState}> [State: {entry.meta.newControlState}]</span>
+          ) : null}
+        </>
+      );
+    }
+    // Highlight state change log entries
+    if (entry.type === 'STATUS' && entry.action === 'State Change') {
+      return (
+        <>
+          {icon} <b>{entry.actor}</b>: <span className={styles.stateChangeBadge}>{entry.narrative}</span>
+          {entry.meta?.newControlState ? (
+            <span className={styles.newControlState}> [State: {entry.meta.newControlState}]</span>
+          ) : null}
+        </>
+      );
+    }
+    // Fallback to old logic
     const baseText = entry.narrative || entry.result || entry.action;
     
     // Add damage highlight
@@ -163,6 +200,22 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       limitedEntries = limitedEntries.filter(entry => entry.turn === turnFilter);
     }
 
+    // DEV ONLY: Duplicate key detector
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const viteEnv = (import.meta as any).env;
+    if ((viteEnv && viteEnv.MODE === 'development') || (!viteEnv || !viteEnv.MODE)) {
+      const seen = new Set<string>();
+      for (const entry of limitedEntries) {
+        if (seen.has(entry.id)) {
+          // eslint-disable-next-line no-console
+          console.error('DUPLICATE LOG KEY DETECTED:', entry.id, entry);
+          // eslint-disable-next-line no-console
+          console.log('FULL BATTLE LOG:', limitedEntries);
+        }
+        seen.add(entry.id);
+      }
+    }
+
     return (
       <div className={styles.tabContent}>
         {limitedEntries.length === 0 ? (
@@ -185,15 +238,15 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
               
               {entry.meta && Object.keys(entry.meta).length > 0 && (
                 <div className={styles.entryMeta}>
-                  {entry.meta.resourceCost !== undefined && (
+                  {entry.meta.resourceCost !== undefined ? (
                     <span className={styles.resourceCost}>💠 {Number(entry.meta.resourceCost)} chi</span>
-                  )}
-                  {entry.meta.finisher === true && (
+                  ) : null}
+                  {entry.meta.finisher === true ? (
                     <span className={styles.finisherBadge}>🔥 FINISHER</span>
-                  )}
-                  {entry.meta.desperation === true && (
+                  ) : null}
+                  {entry.meta.desperation === true ? (
                     <span className={styles.desperationBadge}>⚡ DESPERATION</span>
-                  )}
+                  ) : null}
                 </div>
               )}
             </div>
@@ -306,8 +359,25 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     }
   };
 
+  // Disruption state ticker (shows after each turn)
+  const renderDisruptionTicker = () => {
+    if (!participants.length) return null;
+    return (
+      <div className={styles.disruptionTicker} aria-label="Disruption State Ticker">
+        {participants.map((char) => (
+          <span key={char.name} className={`${styles.tickerState} ${styles[char.controlState.toLowerCase()]}`}
+            aria-label={`${char.name} Control State: ${char.controlState}, Stability: ${char.stability}, Momentum: ${char.momentum}`}
+          >
+            <strong>{char.name}</strong>: {char.controlState} | S:{char.stability} | M:{char.momentum}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.unifiedBattleLog}>
+      {renderDisruptionTicker()}
       <div className={styles.header}>
         <h3>Battle Log</h3>
         <div className={styles.tabSelector}>

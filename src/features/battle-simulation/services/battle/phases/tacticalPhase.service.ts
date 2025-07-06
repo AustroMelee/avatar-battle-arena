@@ -16,14 +16,17 @@ import {
 import { processLogEntryForAnalytics } from '../analyticsTracker.service';
 import { propagateTacticalStates } from '../tacticalState.service';
 import { availableLocations } from '../../../../location-selection/data/locationData';
+import type { BattleLogEntry } from '../../../types';
+import { resolveReversal } from '../reversalMechanic.service';
+import { createMechanicLogEntry } from '../../utils/mechanicLogUtils';
 
 /**
  * @description Processes tactical AI move selection and execution with enhanced narratives
  * @param {BattleState} state - The current battle state
- * @returns {Promise<BattleState>} Updated state with move execution results
+ * @returns {Promise<{ state: BattleState; logEntries: BattleLogEntry[] }>} Updated state with move execution results and log entries
  */
-export async function tacticalMovePhase(state: BattleState): Promise<BattleState> {
-  if (state.isFinished) return state;
+export async function tacticalMovePhase(state: BattleState): Promise<{ state: BattleState; logEntries: BattleLogEntry[] }> {
+  if (state.isFinished) return { state, logEntries: [] };
   const newState = { ...state };
   const { attacker, target, attackerIndex, targetIndex } = getActiveParticipants(newState);
   
@@ -97,13 +100,18 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
     }
     const executionResult = await executeTacticalMove(fallbackMove, attacker, target, newState);
     
+    // Collect all log entries
+    const logEntries: BattleLogEntry[] = [executionResult.logEntry];
+    if (executionResult.fatigueLogEntry) logEntries.push(executionResult.fatigueLogEntry);
+    if (executionResult.stateChangeLogEntry) logEntries.push(executionResult.stateChangeLogEntry);
+    if (executionResult.collateralLogEntry) logEntries.push(executionResult.collateralLogEntry);
+    if (tacticalResult.tacticalMemoryLogEntry) logEntries.push(tacticalResult.tacticalMemoryLogEntry);
+    
     // Only add the enhanced narrative to the user-facing log
-    newState.battleLog.push(executionResult.logEntry);
     newState.log.push(executionResult.narrative);
     
     // NEW: Add collateral damage log entry if present
     if (executionResult.collateralLogEntry) {
-      newState.battleLog.push(executionResult.collateralLogEntry);
       newState.log.push(executionResult.collateralLogEntry.narrative || executionResult.collateralLogEntry.result);
     }
     
@@ -175,12 +183,51 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
     
     // Propagate tactical states to ensure opponents can see them
     propagateTacticalStates(newState, attackerIndex, targetIndex);
+    
+    // After move execution and before returning, check for reversal for both participants
+    // (attacker and target)
+    const reversalLogEntries: BattleLogEntry[] = [];
+    const participants = [newState.participants[attackerIndex], newState.participants[targetIndex]];
+    for (const participant of participants) {
+      const reversalResult = resolveReversal({
+        character: participant,
+        state: newState,
+        location: locationData,
+      });
+      if (reversalResult) {
+        reversalLogEntries.push(
+          createMechanicLogEntry({
+            turn: newState.turn,
+            actor: participant.name,
+            mechanic: 'Reversal',
+            effect: reversalResult.narrative,
+            reason: reversalResult.source,
+            meta: {
+              controlShift: reversalResult.controlShift,
+              stabilityGain: reversalResult.stabilityGain,
+            },
+          })
+        );
+        // Apply reversal effects (example: boost stability, shift control)
+        participant.stability += reversalResult.stabilityGain;
+        // You may want to update controlState or other fields here as needed
+      }
+    }
+    
+    return { state: newState, logEntries: [...logEntries, ...reversalLogEntries] };
   } else {
     // Apply escalation modifiers to the chosen move
     const modifiedMove = applyEscalationModifiers(chosenMove, attacker);
     
     // Execute tactical move
     const executionResult = await executeTacticalMove(modifiedMove, attacker, target, newState);
+    
+    // Collect all log entries
+    const logEntries: BattleLogEntry[] = [executionResult.logEntry];
+    if (executionResult.fatigueLogEntry) logEntries.push(executionResult.fatigueLogEntry);
+    if (executionResult.stateChangeLogEntry) logEntries.push(executionResult.stateChangeLogEntry);
+    if (executionResult.collateralLogEntry) logEntries.push(executionResult.collateralLogEntry);
+    if (tacticalResult.tacticalMemoryLogEntry) logEntries.push(tacticalResult.tacticalMemoryLogEntry);
     
     // Add tactical analysis to log entry meta (for debugging, not user display)
     executionResult.logEntry.meta = {
@@ -244,12 +291,10 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
     });
     
     // Only add the enhanced narrative to the user-facing log
-    newState.battleLog.push(executionResult.logEntry);
     newState.log.push(executionResult.narrative);
     
     // NEW: Add collateral damage log entry if present
     if (executionResult.collateralLogEntry) {
-      newState.battleLog.push(executionResult.collateralLogEntry);
       newState.log.push(executionResult.collateralLogEntry.narrative || executionResult.collateralLogEntry.result);
     }
     
@@ -271,9 +316,39 @@ export async function tacticalMovePhase(state: BattleState): Promise<BattleState
     
     // Propagate tactical states to ensure opponents can see them
     propagateTacticalStates(newState, attackerIndex, targetIndex);
+    
+    // After move execution and before returning, check for reversal for both participants
+    // (attacker and target)
+    const reversalLogEntries: BattleLogEntry[] = [];
+    const participants = [newState.participants[attackerIndex], newState.participants[targetIndex]];
+    for (const participant of participants) {
+      const reversalResult = resolveReversal({
+        character: participant,
+        state: newState,
+        location: locationData,
+      });
+      if (reversalResult) {
+        reversalLogEntries.push(
+          createMechanicLogEntry({
+            turn: newState.turn,
+            actor: participant.name,
+            mechanic: 'Reversal',
+            effect: reversalResult.narrative,
+            reason: reversalResult.source,
+            meta: {
+              controlShift: reversalResult.controlShift,
+              stabilityGain: reversalResult.stabilityGain,
+            },
+          })
+        );
+        // Apply reversal effects (example: boost stability, shift control)
+        participant.stability += reversalResult.stabilityGain;
+        // You may want to update controlState or other fields here as needed
+      }
+    }
+    
+    return { state: newState, logEntries: [...logEntries, ...reversalLogEntries] };
   }
-  
-  return newState;
 }
 
 /**

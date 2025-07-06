@@ -1,13 +1,19 @@
 // CONTEXT: AI, // FOCUS: LogAnalysis
 import { BattleLogEntry, LogEventType, BattleCharacter } from '../../types';
 
+// --- SINGLETON LOG ID GENERATOR ---
 /**
- * @description Utility to generate unique event IDs.
- * @returns {string} A unique event identifier.
+ * @description Factory for a bulletproof unique log ID generator with a private counter.
  */
-export function createEventId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
+const createIdGenerator = () => {
+  let counter = 0;
+  return (prefix: string = 'log') => `${prefix}-${Date.now()}-${counter++}-${Math.random().toString(36).slice(2, 9)}`;
+};
+
+/**
+ * @description The one and only log ID generator for the entire app.
+ */
+export const generateUniqueLogId = createIdGenerator();
 
 /**
  * @description Get recent log entries for a specific player within a turn range.
@@ -228,4 +234,8 @@ export function getCurrentCombo(log: BattleLogEntry[], playerId: string): number
   
   const lastAction = playerActions[playerActions.length - 1];
   return lastAction.meta?.combo || 0;
+}
+
+export function createEventId(): string {
+  return generateUniqueLogId();
 } 

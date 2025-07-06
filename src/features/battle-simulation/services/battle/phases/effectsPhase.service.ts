@@ -16,7 +16,7 @@ export function endOfTurnEffectsPhase(state: BattleState): BattleState {
   
   // Apply end-of-turn effects to all participants
   newState.participants.forEach((participant, index) => {
-    const updatedParticipant = processBuffsAndDebuffs(participant);
+    const updatedParticipant = processBuffsAndDebuffs(participant, newState.turn);
     const withCooldowns = reduceCooldowns(updatedParticipant);
     const withChiRecovery = recoverChi(withCooldowns);
     newState.participants[index] = withChiRecovery;

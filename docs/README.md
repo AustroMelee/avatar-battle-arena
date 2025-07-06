@@ -102,6 +102,11 @@ The Avatar Battle Arena is a sophisticated turn-based battle simulator featuring
 - **Fallback Logic**: Intelligent selection of alternative moves
 - **Character Authenticity**: Moves reflect character personalities and abilities
 
+### Manipulation Resilience & Behavioral Traits
+
+- **Manipulation Resilience**: New stat (0-100) for each character, tracked in `BattleCharacter` and `PerceivedState`, determines resistance to psychological manipulation and affects AI, escalation, and narrative outcomes.
+- **Behavioral Traits**: Each character now has a set of `behavioralTraits` that influence tactical and narrative behavior, tracked and used by the AI and escalation systems.
+
 ## 🔗 Related Files
 
 - **Root README.md** - Project overview and setup instructions

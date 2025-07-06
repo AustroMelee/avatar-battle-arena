@@ -1,5 +1,33 @@
 # Dynamic Escalation Timeline System
 
+## 🗂️ Battle Mechanics Reference Table
+
+| Mechanic           | Description                                      | Log Example                  | Doc/Section                              |
+|--------------------|--------------------------------------------------|------------------------------|-------------------------------------------|
+| Manipulation       | Alters enemy state, makes them easier to exploit | T14 Azula: manipulation      | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Overconfidence     | Character becomes reckless, changes AI           | T28 Azula: overconfidence    | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Forced Escalation  | Triggers all-out attack phase                    | T30 Azula: Forced Escalation | ESCALATION_SYSTEM.md                     |
+| Plea for Peace     | Aang attempts to de-escalate                     | T25 Aang: plea_for_peace     | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
+| State Change       | Major state transition (e.g., Compromised)       | T19 Azula: State Change      | STATUS_EFFECT_SYSTEM.md                   |
+| Move Fatigue       | Repeated move use penalized                      | (AI: Move used recently)     | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Reversal           | Comeback mechanic, turns the tables              | T23 Aang: Reversal           | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
+| Desperation        | Last-stand move, high risk/reward                | T24 Azula: desperation       | FINISHER_DESPERATION_IMPLEMENTATION.md    |
+| Finisher           | Once-per-battle, high-damage move                | T10 Aang: FINISHER!          | FINISHER_DESPERATION_IMPLEMENTATION.md    |
+| Critical           | High-damage, chance-based event                  | T4 Aang: CRITICAL!           | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
+| Collateral Damage  | Environmental/mental state impact                | T14 Environment: Collateral  | COLLATERAL_DAMAGE_SYSTEM.md               |
+| Positioning        | Tactical stance/terrain effects                  | (see log)                    | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Victory/Draw/etc.  | End conditions                                   | T31 System: victory          | ROADMAP_6_IMPLEMENTATION.md               |
+| Status Effects     | Buffs/debuffs, state changes                     | (see log)                    | STATUS_EFFECT_SYSTEM.md                   |
+
+> All mechanics are now fully implemented, including Reversal. See below for details.
+
+### Reversal Mechanic (Implemented)
+- **Trigger:** When a character (Aang or Azula) is in a compromised state and low stability, a reversal can occur, turning the tide of battle.
+- **Log Example:** `T23 Aang: Reversal`, `T29 Azula: Reversal`
+- **AI/Personality:** Aang is more likely to trigger a reversal when desperate; Azula can also trigger reversals, especially in high-risk moments.
+- **Effect:** Regains stability, shifts control, and is logged as a dramatic event.
+- **Integration:** Fully integrated with disruption-first, narrative-driven battle flow.
+
 ## Overview
 
 The Dynamic Escalation Timeline is a sophisticated battle arc state machine that creates narrative progression and mechanical escalation in the Avatar Battle Arena. It transforms battles from simple turn-based combat into dynamic, story-driven experiences with authentic character development and dramatic tension building.
@@ -264,4 +292,10 @@ const result = updateArcState(battleState, injectedTrigger);
 - **Escalation Frequency Tracking**: Monitor escalation event rates
 - **Battle Flow Analysis**: Analyze natural vs. forced battle progression
 - **AI Decision Quality**: Track strategic decision-making effectiveness
-- **Performance Metrics**: Monitor system performance and optimization opportunities 
+- **Performance Metrics**: Monitor system performance and optimization opportunities
+
+## Manipulation Resilience & Behavioral Traits
+
+- **Manipulation Resilience**: Each character now has a `manipulationResilience` stat (0-100) that determines their resistance to psychological manipulation and escalation triggers. Characters with low resilience are more likely to escalate or be affected by psychological tactics.
+- **Behavioral Traits**: The escalation system now considers `behavioralTraits` (instances of `BehavioralTraitInstance`) when determining escalation likelihood and narrative outcomes.
+- **Integration**: Both properties are tracked in `BattleCharacter` and `PerceivedState`, and are used by the AI and escalation logic to create more nuanced, context-aware battle flow. 

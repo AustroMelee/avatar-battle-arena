@@ -1,5 +1,6 @@
 // CONTEXT: Narrative System, // FOCUS: Hook-Based Narrative Generation
 import type { BattleContext, NarrativeHook, TriggeredNarrative, NarrativeSystemConfig } from './types';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Tracks which hooks have been used in this battle
@@ -76,7 +77,7 @@ export function generateHookBasedNarratives(
 
     // Create triggered narrative
     const narrative: TriggeredNarrative = {
-      id: `${hook.speaker}_${Date.now()}_${Math.random()}`,
+      id: generateUniqueLogId('narrativehook'),
       speaker: hook.speaker,
       text: finalText,
       mood: hook.mood,

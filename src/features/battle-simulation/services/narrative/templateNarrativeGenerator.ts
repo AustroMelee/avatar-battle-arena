@@ -5,6 +5,7 @@ import {
   generateNarrativeText, 
   generateNarratorCommentary 
 } from './narrativeTemplates';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Generates narratives using the new template system
@@ -26,7 +27,7 @@ export function generateTemplateBasedNarratives(
     const characterText = generateNarrativeText(template, ctx, ctx.actor.name);
     if (characterText) {
       narratives.push({
-        id: `${ctx.actor.name}_template_${template.id}_${ctx.turnIndex}`,
+        id: generateUniqueLogId('template'),
         speaker: ctx.actor.name,
         text: characterText,
         mood: determineMoodFromTone(ctx.narrativeTone) as any,
@@ -39,7 +40,7 @@ export function generateTemplateBasedNarratives(
     const narratorText = generateNarratorCommentary(ctx);
     if (narratorText) {
       narratives.push({
-        id: `narrator_template_${template.id}_${ctx.turnIndex}`,
+        id: generateUniqueLogId('template'),
         speaker: 'Narrator',
         text: narratorText,
         mood: 'neutral' as any,
@@ -92,7 +93,7 @@ export function generateFallbackNarrative(ctx: BattleContext): TriggeredNarrativ
   }
   
   return {
-    id: `${ctx.actor.name}_fallback_${ctx.turnIndex}`,
+    id: generateUniqueLogId('template'),
     speaker: ctx.actor.name,
     text,
     mood: mood as any,

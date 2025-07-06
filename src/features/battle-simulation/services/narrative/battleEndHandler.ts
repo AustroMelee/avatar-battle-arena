@@ -2,6 +2,7 @@
 import type { BattleState } from '../../types';
 import type { TriggeredNarrative } from './types';
 import { StateDrivenNarrativePool } from './stateDrivenNarrativePool';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Handles battle end narratives and prevents post-victory processing
@@ -52,7 +53,7 @@ export class BattleEndHandler {
 
     return [
       {
-        id: `victory_${state.turn}_${winner.name}`,
+        id: generateUniqueLogId('victory'),
         speaker: 'System',
         text: victoryNarrative,
         priority: 10,

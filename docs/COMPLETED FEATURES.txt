@@ -530,6 +530,9 @@ RECENT MAJOR ADDITIONS (2025-01-27)
 - Improved error handling
 - Enhanced type safety
 
+✅ MANIPULATION RESILIENCE AND BEHAVIORAL TRAITS
+- Manipulation Resilience stat (0-100) and behavioralTraits now integrated into AI, escalation, and narrative systems. These are tracked in BattleCharacter and PerceivedState types, affecting psychological tactics, escalation triggers, and narrative outcomes.
+
 PENDING FEATURES
 ================
 

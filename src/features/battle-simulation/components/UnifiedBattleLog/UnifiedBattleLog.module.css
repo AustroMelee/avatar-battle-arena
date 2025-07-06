@@ -330,4 +330,35 @@
     flex-direction: column;
     gap: 4px;
   }
+}
+
+.disruptionTicker {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.tickerState {
+  padding: 0.2em 0.7em;
+  border-radius: 1em;
+  background: #e0e0e0;
+  color: #222;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.tickerState.compromised {
+  background: #ffb347;
+  color: #7a3b00;
+  border: 2px solid #ff9800;
+}
+
+.tickerState.defeated {
+  background: #e57373;
+  color: #fff;
+  border: 2px solid #b71c1c;
 } 

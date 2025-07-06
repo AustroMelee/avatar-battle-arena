@@ -11,7 +11,6 @@ export interface MoveResult {
   wasCrit: boolean;
   wasFinisher: boolean;
   wasDesperation: boolean;
-  logEntry: BattleLogEntry;
 }
 
 /**
@@ -88,7 +87,6 @@ export function resolveMove(
       wasCrit: finisherWasCrit,
       wasFinisher: true,
       wasDesperation: finisherWasDesperation,
-      logEntry: createFinisherLogEntry(move, attacker, target, finisherDamage, turn, finisherWasCrit, finisherWasDesperation)
     };
   }
 
@@ -133,8 +131,7 @@ export function resolveMove(
     narrative,
     wasCrit,
     wasFinisher: false,
-    wasDesperation,
-    logEntry: createMoveLogEntry(move, attacker, target, damage, wasCrit, wasDesperation, turn)
+    wasDesperation
   };
 }
 

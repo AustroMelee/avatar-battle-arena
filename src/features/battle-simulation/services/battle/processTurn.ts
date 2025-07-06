@@ -59,7 +59,9 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   state = await escalationPhase(state);
   if (state.isFinished) return state;
   
-  state = await tacticalMovePhase(state);
+  const tacticalResult = await tacticalMovePhase(state);
+  state = tacticalResult.state;
+  tacticalResult.logEntries.forEach(entry => state.battleLog.push(entry));
   if (state.isFinished) return state;
   
   state = endOfTurnEffectsPhase(state);

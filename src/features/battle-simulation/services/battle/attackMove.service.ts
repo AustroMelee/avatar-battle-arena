@@ -10,6 +10,7 @@ import { resolveMove } from './moveLogic.service';
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect, modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { resolveClash } from './defensiveResolution.service';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Result of executing an attack move
@@ -217,7 +218,7 @@ export async function executeAttackMove(
   
   // Create log entry
   const logEntry: BattleLogEntry = {
-    id: `attack_${Date.now()}_${Math.random()}`,
+    id: generateUniqueLogId('attack'),
     turn: state.turn,
     actor: attacker.name,
     type: 'MOVE',

@@ -1,6 +1,6 @@
 // CONTEXT: Narrative System, // FOCUS: Opening Sequence and Pre-Fight Banter
 import type { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
-import { createEventId } from '../ai/logQueries';
+import { createEventId, generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Opening sequence configuration for each character
@@ -114,7 +114,7 @@ export function generateOpeningSequence(
 
   // System opening
   openingEntries.push({
-    id: createEventId(),
+    id: generateUniqueLogId('opening'),
     turn: turnCounter++,
     actor: 'System',
     type: 'INFO',
@@ -126,7 +126,7 @@ export function generateOpeningSequence(
 
   // Narrator introduction
   openingEntries.push({
-    id: createEventId(),
+    id: generateUniqueLogId('opening'),
     turn: turnCounter++,
     actor: 'Narrator',
     type: 'NARRATIVE',
@@ -140,7 +140,7 @@ export function generateOpeningSequence(
   const char1Sequence = OPENING_SEQUENCES[player1.name];
   if (char1Sequence) {
     openingEntries.push({
-      id: createEventId(),
+      id: generateUniqueLogId('opening'),
       turn: turnCounter++,
       actor: player1.name,
       type: 'NARRATIVE',
@@ -155,7 +155,7 @@ export function generateOpeningSequence(
   const char2Sequence = OPENING_SEQUENCES[player2.name];
   if (char2Sequence) {
     openingEntries.push({
-      id: createEventId(),
+      id: generateUniqueLogId('opening'),
       turn: turnCounter++,
       actor: player2.name,
       type: 'NARRATIVE',
@@ -168,7 +168,7 @@ export function generateOpeningSequence(
 
   // Narrator character descriptions
   openingEntries.push({
-    id: createEventId(),
+    id: generateUniqueLogId('opening'),
     turn: turnCounter++,
     actor: 'Narrator',
     type: 'NARRATIVE',
@@ -179,7 +179,7 @@ export function generateOpeningSequence(
   });
 
   openingEntries.push({
-    id: createEventId(),
+    id: generateUniqueLogId('opening'),
     turn: turnCounter++,
     actor: 'Narrator',
     type: 'NARRATIVE',
@@ -191,7 +191,7 @@ export function generateOpeningSequence(
 
   // Final tension building
   openingEntries.push({
-    id: createEventId(),
+    id: generateUniqueLogId('opening'),
     turn: turnCounter++,
     actor: 'Narrator',
     type: 'NARRATIVE',

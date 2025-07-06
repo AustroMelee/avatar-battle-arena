@@ -5,6 +5,7 @@ import { createInitialBattleState, cloneBattleState } from './battle/state';
 import { processTurn } from './battle/processTurn';
 import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport, BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
+import { generateUniqueLogId } from './ai/logQueries';
 
 /**
  * @description Represents the result of a battle simulation with analytics.
@@ -77,7 +78,7 @@ export class BattleSimulator {
       currentState.isFinished = true;
       currentState.winner = null; // Draw
       currentState.battleLog.push({
-        id: `turn-${currentState.turn}-max-turns`,
+        id: generateUniqueLogId('turn'),
         turn: currentState.turn,
         actor: 'System',
         type: 'DRAW',

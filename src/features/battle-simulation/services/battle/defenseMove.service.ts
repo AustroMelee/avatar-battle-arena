@@ -3,7 +3,7 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
-import { createEventId } from '../ai/logQueries';
+import { createEventId, generateUniqueLogId } from '../ai/logQueries';
 // Removed unused import
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect } from '../effects/statusEffect.service';
@@ -164,7 +164,7 @@ export async function executeDefenseMove(
   }
   
   const logEntry: BattleLogEntry = {
-    id: createEventId(),
+    id: generateUniqueLogId('defense'),
     turn: state.turn,
     actor: attacker.name,
     type: 'MOVE',

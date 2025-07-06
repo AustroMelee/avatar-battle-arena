@@ -2,6 +2,7 @@ import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { Character } from '@/common/types';
 import { ALL_BEHAVIORAL_TRAITS } from '../../../character-selection/data/traits';
 import { ActiveFlag } from '../../types/behavioral.types';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * Helper function to tick down flag durations and remove expired ones.
@@ -20,7 +21,7 @@ function tickDownFlags(character: BattleCharacter): BattleLogEntry[] {
     if (data.duration <= 0) {
       expiredFlags.push(flag);
       expiredLogs.push({
-        id: `flag_expired_${character.name}_${flag}_${Date.now()}`,
+        id: generateUniqueLogId('flag_expired'),
         turn: 0, // Will be set by caller
         actor: character.name,
         type: 'INFO',
@@ -54,7 +55,7 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
   if (character.activeFlags.has('overconfidenceActive') && damageTaken > 20) {
     character.activeFlags.delete('overconfidenceActive');
     clearedLogs.push({
-      id: `overconfidence_broken_${character.name}_${Date.now()}`,
+      id: generateUniqueLogId('overconfidence_broken'),
       turn: state.turn,
       actor: character.name,
       type: 'INFO',
@@ -68,7 +69,7 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
   if (character.activeFlags.has('isManipulated') && character.flags.stunned) {
     character.activeFlags.delete('isManipulated');
     clearedLogs.push({
-      id: `manipulation_broken_${character.name}_${Date.now()}`,
+      id: generateUniqueLogId('manipulation_broken'),
       turn: state.turn,
       actor: character.name,
       type: 'INFO',
@@ -116,7 +117,7 @@ export function processBehavioralSystemForTurn(
       
       // Create main log entry
       behavioralLogEntry = {
-        id: `behavioral_${self.name}_${trait.id}_${Date.now()}`,
+        id: generateUniqueLogId('behavioral'),
         turn: state.turn,
         actor: self.name,
         type: 'NARRATIVE',

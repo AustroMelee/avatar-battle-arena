@@ -107,6 +107,24 @@ export interface Move {
   };
 }
 
+// Disruption/impact class for narrative-first battle system
+export type ImpactClass = 'minor' | 'moderate' | 'severe';
+
+/**
+ * UPGRADED: Ability for disruption system
+ * NOTE: Does not extend Move directly due to incompatible 'type' property.
+ * For migration, use Ability for new disruption logic and Move for legacy logic.
+ */
+export interface Ability {
+  id: string;
+  name: string;
+  type: 'attack' | 'disruption' | 'positioning' | 'deception';
+  impactClass: ImpactClass;
+  disruptsOnHit?: boolean;
+  description: string;
+  // ...other fields as needed
+}
+
 // --- SAMPLE: AANG'S AIRBENDING MOVE SHEET ---
 
 export const AANG_MOVES: Move[] = [

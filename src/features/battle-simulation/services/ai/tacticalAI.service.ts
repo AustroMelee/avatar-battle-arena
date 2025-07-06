@@ -5,6 +5,11 @@ import { BattleCharacter, ArcStateModifier } from '../../types';
 import { Move, getLocationType } from '../../types/move.types';
 import { canUseMove, applyPositionBonuses } from '../battle/positioningMechanics.service';
 import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
+import { TacticalMemory, checkTacticalMemoryWithLog } from './tacticalMemory.service';
+import type { BattleLogEntry } from '../../types';
+
+// TacticalMemory instance per AI (could be attached to BattleCharacter or managed externally)
+const tacticalMemoryMap = new WeakMap<BattleCharacter, TacticalMemory>();
 
 /**
  * @description Enhanced AI move selection with tactical awareness and arc state influence.
@@ -15,7 +20,7 @@ export function selectTacticalMove(
   availableMoves: Move[],
   location: string,
   arcModifiers?: ArcStateModifier
-): { move: Move; reasoning: string; tacticalAnalysis: string } {
+): { move: Move; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
   const locationType = getLocationType(location);
   const isAirbender = self.name.toLowerCase().includes('aang');
   const isFirebender = self.name.toLowerCase().includes('azula');
@@ -28,6 +33,14 @@ export function selectTacticalMove(
   // --- NEW IDTB INTEGRATION ---
   const identityAdjustments = adjustScoresByIdentity(self, usableMoves);
   // --- END OF NEW INTEGRATION ---
+  
+  // --- TACTICAL MEMORY: Get or create memory for this AI ---
+  let tacticalMemory = tacticalMemoryMap.get(self);
+  if (!tacticalMemory) {
+    tacticalMemory = new TacticalMemory();
+    tacticalMemoryMap.set(self, tacticalMemory);
+  }
+  // --- END TACTICAL MEMORY ---
   
   if (usableMoves.length === 0) {
     // During escalation, try to find any damaging move before falling back to basic
@@ -69,10 +82,31 @@ export function selectTacticalMove(
   }
   
   // Score each move based on tactical considerations
+  let tacticalMemoryLog = '';
+  let tacticalMemoryLogEntry: BattleLogEntry | undefined = undefined;
   const scoredMoves = usableMoves.map(move => {
     let score = 0;
     let reasoning = "";
     const tacticalFactors: string[] = [];
+    
+    // --- TACTICAL MEMORY: Penalize stale moves ---
+    const staleMoves = tacticalMemory!.getStaleMoves();
+    if (staleMoves.includes(move.name)) {
+      score = -1000;
+      reasoning += `Move is stale/ineffective (Tactical Memory). `;
+      tacticalFactors.push('Tactical Memory Avoidance');
+      tacticalMemoryLog += `Tactical Memory: ${move.name} is stale/ineffective and avoided.\n`;
+      // Only log the first stale move avoided per selection
+      if (!tacticalMemoryLogEntry) {
+        tacticalMemoryLogEntry = checkTacticalMemoryWithLog({
+          actor: self.name,
+          moveName: move.name,
+          turn: self.moveHistory.length + 1, // Approximate turn
+          reason: 'Move avoided due to low effectiveness or overuse',
+        }).logEntry;
+      }
+    }
+    // --- END TACTICAL MEMORY: Penalize stale moves ---
     
     // 0. ESCALATION AWARENESS - Highest priority when forced escalation is active
     if (self.flags?.forcedEscalation === 'true') {
@@ -120,7 +154,7 @@ export function selectTacticalMove(
     if (enemy.isCharging || enemy.position === "repositioning" || enemy.position === "stunned") {
       console.log(`DEBUG: ${self.name} sees vulnerable enemy: charging=${enemy.isCharging}, position=${enemy.position}`);
       if (move.punishIfCharging) {
-        score += 150; // Very high priority for punish moves
+        score += 200; // Very high priority for punish moves
         reasoning += "PUNISHING VULNERABLE ENEMY! ";
         tacticalFactors.push("Punish Opportunity");
         console.log(`DEBUG: ${self.name} prioritizing punish move: ${move.name}`);
@@ -194,6 +228,34 @@ export function selectTacticalMove(
     score += evaluateDefensiveMoves(move, self, enemy, isAirbender, isFirebender);
     if (move.id.includes('evade') || move.id.includes('parry') || move.id.includes('counter')) {
       tacticalFactors.push("Defensive Strategy");
+    }
+    
+    // --- NEW: ATTACK INCENTIVE ---
+    // Give a small base score to all offensive moves to encourage action.
+    if (move.type === 'attack') {
+      score += 100; // Base incentive to attack
+      reasoning += 'Offensive move bonus. ';
+      tacticalFactors.push('Attack Incentive');
+    }
+    // --- NEW: DEFENSIVE PENALTY ---
+    // Penalize using a defensive move if the last move was also defensive.
+    const wasLastMoveDefensive = self.lastMove === 'Flowing Evasion' || self.lastMove === 'Blazing Counter' || self.lastMove === 'Air Shield';
+    if (wasLastMoveDefensive && (move.type === 'evade' || move.type === 'parry_retaliate')) {
+      score -= 30; // Significant penalty to prevent turtling
+      reasoning += 'Avoiding defensive spam. ';
+      tacticalFactors.push('Defensive Spam Penalty');
+    }
+    
+    // Before the Clarity of Purpose penalty, define:
+    const isVulnerable = enemy.isCharging || enemy.position === 'repositioning' || enemy.position === 'stunned';
+    const isCriticallyLowHealth = self.currentHealth < 30;
+    const isDefensiveOrUtilityMove = move.type !== 'attack';
+    // Then:
+    if (!isVulnerable && !isCriticallyLowHealth && isDefensiveOrUtilityMove) {
+        score -= 100; // Very significant penalty to make attacks the clear default
+        reasoning += 'No immediate threat, focusing on offense. ';
+        tacticalFactors.push('Offensive Focus');
+        console.log(`DEBUG: ${self.name} penalized for passive/utility move (${move.name}) in neutral situation.`);
     }
     
     // 8. BASE MOVE STRENGTH
@@ -324,10 +386,16 @@ export function selectTacticalMove(
   console.log(`  - Reasoning: ${bestMove.reasoning}`);
   console.log(`  - Top 3 moves:`, scoredMoves.slice(0, 3).map(m => `${m.move.name}(${m.score})`));
   
+  // After move is chosen and executed, record in tactical memory (should be called externally after execution)
+  // tacticalMemory.recordMove(chosenMove, turn, effectiveness); // To be called after move execution
+  
+  // Return tacticalMemoryLog for logging
   return {
     move: bestMove.move,
     reasoning: bestMove.reasoning,
-    tacticalAnalysis: bestMove.tacticalFactors.join(", ")
+    tacticalAnalysis: bestMove.tacticalFactors.join(", "),
+    tacticalMemoryLog,
+    tacticalMemoryLogEntry
   };
 }
 

@@ -6,6 +6,9 @@ import { validateBattleState, forceBattleClimax } from '../battleValidation';
 import { declareWinner } from '../state';
 import { generateAndFormatBattleAnalytics } from '../battleAnalytics.service';
 import { formatRealTimeAnalytics } from '../analyticsTracker.service';
+import { checkAndTriggerDecisiveClash } from '../decisiveClash.service';
+import { canTriggerHeroicReversal, triggerHeroicReversalWithLog, resolveHeroicReversalWithLog } from '../heroicReversal.service';
+import { generateUniqueLogId } from '../../ai/logQueries';
 
 /**
  * @description Validates if the battle should end and handles forced endings
@@ -69,6 +72,43 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
     const analytics = generateAndFormatBattleAnalytics(newState);
     newState.log.push(analytics);
     return newState;
+  }
+  
+  // --- DECISIVE CLASH CHECK ---
+  const decisiveResult = checkAndTriggerDecisiveClash(newState);
+  if (decisiveResult.triggered) {
+    newState.battleLog.push({
+      id: generateUniqueLogId('decisive'),
+      turn: newState.turn,
+      actor: 'System',
+      type: 'DECISIVE_CLASH',
+      action: decisiveResult.outcome,
+      result: decisiveResult.log,
+      narrative: decisiveResult.log,
+      timestamp: Date.now(),
+      meta: { outcome: decisiveResult.outcome }
+    });
+    return newState;
+  }
+
+  // --- HEROIC REVERSAL CHECK ---
+  const [p1, p2] = newState.participants;
+  if (canTriggerHeroicReversal(p1, p2)) {
+    const { logEntry } = triggerHeroicReversalWithLog(p1, p2, newState.turn);
+    newState.battleLog.push(logEntry);
+  }
+  if (canTriggerHeroicReversal(p2, p1)) {
+    const { logEntry } = triggerHeroicReversalWithLog(p2, p1, newState.turn);
+    newState.battleLog.push(logEntry);
+  }
+  // --- HEROIC REVERSAL END CHECK ---
+  if (p1.flags?.heroicReversalActive === false) {
+    const { logEntry } = resolveHeroicReversalWithLog(p1, newState.turn);
+    newState.battleLog.push(logEntry);
+  }
+  if (p2.flags?.heroicReversalActive === false) {
+    const { logEntry } = resolveHeroicReversalWithLog(p2, newState.turn);
+    newState.battleLog.push(logEntry);
   }
   
   return newState;

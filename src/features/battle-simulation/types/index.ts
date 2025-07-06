@@ -105,10 +105,31 @@ export type SimulateBattleParams = {
   location: Location;
 };
 
+// Disruption-based control state for narrative-first battle system
+export type ControlState =
+  | 'Dominating'
+  | 'Advantaged'
+  | 'Neutral'
+  | 'Pressured'
+  | 'Compromised'
+  | 'Defeated';
+
+// Recovery option for future extensibility
+export interface RecoveryOption {
+  id: string;
+  name: string;
+  description: string;
+  // ...future fields
+}
+
 /**
  * @description Represents a character's dynamic state during a battle.
  */
-export type BattleCharacter = Character & {
+export interface BattleCharacter extends Character {
+  controlState: ControlState;
+  stability: number; // 0-100
+  momentum: number; // -100 to +100
+  recoveryOptions: RecoveryOption[];
   currentHealth: number;
   currentDefense: number;
   cooldowns: Record<string, number>;
@@ -135,6 +156,14 @@ export type BattleCharacter = Character & {
     escalationTurns?: string; // Turns in escalation state as string
     escalationDuration?: string; // Duration of escalation state as string (e.g., '3')
     isCountering?: boolean; // NEW: Track if character is in counter-attack state
+    // --- NEW: Disruption Window ---
+    disruptionWindowActive?: boolean;
+    disruptionWindowCooldown?: number;
+    disruptionWindowOpenedTurn?: number;
+    // --- NEW: Heroic Reversal ---
+    heroicReversalUsed?: boolean;
+    heroicReversalActive?: boolean;
+    heroicReversalBuff?: number;
   };
   diminishingEffects: Record<string, number>; // Track power reduction from diminishing returns
   
@@ -172,7 +201,7 @@ export type BattleCharacter = Character & {
   
   // REPLACES old boolean flags. This is a map to track all active flags and their durations.
   activeFlags: Map<string, ActiveFlag>;
-};
+}
 
 /**
  * @description Represents the perceived state for AI decision making.
@@ -256,7 +285,7 @@ export type AILogEntry = {
 /**
  * @description Event types for structured battle logging.
  */
-export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER' | 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT' | 'TACTICAL' | 'ESCALATION' | 'ARC_TRANSITION';
+export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER' | 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT' | 'TACTICAL' | 'ESCALATION' | 'ARC_TRANSITION' | 'DECISIVE_CLASH';
 
 /**
  * @description Battle resolution types for special end conditions.
@@ -381,4 +410,28 @@ export type {
   UseAbilityParams,
   ResetCooldownsParams,
   CooldownDisplayInfo
-} from './cooldown.types'; 
+} from './cooldown.types';
+
+/**
+ * Flags for special battle mechanics (extensible for new systems)
+ */
+export interface BattleCharacterFlags {
+  usedDesperation?: boolean;
+  usedFinisher?: boolean;
+  desperationState?: string;
+  lowHealthTurns?: number;
+  stalemateTurns?: number;
+  forcedEscalation?: string;
+  damageMultiplier?: string;
+  escalationTurns?: string;
+  escalationDuration?: string;
+  isCountering?: boolean;
+  // --- NEW: Disruption Window ---
+  disruptionWindowActive?: boolean;
+  disruptionWindowCooldown?: number;
+  disruptionWindowOpenedTurn?: number;
+  // --- NEW: Heroic Reversal ---
+  heroicReversalUsed?: boolean;
+  heroicReversalActive?: boolean;
+  heroicReversalBuff?: number;
+} 

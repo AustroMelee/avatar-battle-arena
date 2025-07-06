@@ -2,16 +2,18 @@
 // RESPONSIBILITY: Apply, reduce, and process buffs/debuffs
 import { BattleCharacter, Buff, Debuff, ActiveStatusEffect } from '../../types';
 import { processTurnEffects, applyEffect } from './statusEffect.service';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Processes buffs and debuffs for a character, reducing duration and removing expired ones.
  * @param {BattleCharacter} character - The character whose buffs/debuffs to process.
+ * @param {number} turn - The current turn number.
  * @returns {BattleCharacter} The character with updated buffs/debuffs.
  * @deprecated Use processTurnEffects from statusEffect.service.ts instead
  */
-export function processBuffsAndDebuffs(character: BattleCharacter): BattleCharacter {
+export function processBuffsAndDebuffs(character: BattleCharacter, turn: number): BattleCharacter {
   // Use the new status effect system
-  const result = processTurnEffects(character, 0); // turn number doesn't matter for legacy compatibility
+  const result = processTurnEffects(character, turn);
   return result.updatedCharacter;
 }
 
@@ -25,7 +27,7 @@ export function processBuffsAndDebuffs(character: BattleCharacter): BattleCharac
 export function applyBuff(character: BattleCharacter, buff: Buff): BattleCharacter {
   // Convert legacy buff to new status effect format
   const effect: ActiveStatusEffect = {
-    id: buff.id,
+    id: generateUniqueLogId('buff'),
     name: buff.name,
     type: 'DEFENSE_UP', // Default assumption for legacy buffs
     category: 'buff',
@@ -46,7 +48,7 @@ export function applyBuff(character: BattleCharacter, buff: Buff): BattleCharact
 export function applyDebuff(character: BattleCharacter, debuff: Debuff): BattleCharacter {
   // Convert legacy debuff to new status effect format
   const effect: ActiveStatusEffect = {
-    id: debuff.id,
+    id: generateUniqueLogId('debuff'),
     name: debuff.name,
     type: 'DEFENSE_DOWN', // Default assumption for legacy debuffs
     category: 'debuff',
@@ -140,7 +142,7 @@ export function recoverChi(character: BattleCharacter): BattleCharacter {
  */
 export function createTestBuff(name: string, duration: number, source: string): Buff {
   return {
-    id: `${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
+    id: generateUniqueLogId('buff'),
     name,
     duration,
     potency: 1,
@@ -158,7 +160,7 @@ export function createTestBuff(name: string, duration: number, source: string): 
  */
 export function createTestDebuff(name: string, duration: number, source: string): Debuff {
   return {
-    id: `${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
+    id: generateUniqueLogId('debuff'),
     name,
     duration,
     potency: 1,

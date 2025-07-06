@@ -1,5 +1,33 @@
 # Avatar Battle Arena - Simulator Mechanics Documentation
 
+## 🗂️ Battle Mechanics Reference Table
+
+| Mechanic           | Description                                      | Log Example                  | Doc/Section                              |
+|--------------------|--------------------------------------------------|------------------------------|-------------------------------------------|
+| Manipulation       | Alters enemy state, makes them easier to exploit | T14 Azula: manipulation      | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Overconfidence     | Character becomes reckless, changes AI           | T28 Azula: overconfidence    | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Forced Escalation  | Triggers all-out attack phase                    | T30 Azula: Forced Escalation | ESCALATION_SYSTEM.md                     |
+| Plea for Peace     | Aang attempts to de-escalate                     | T25 Aang: plea_for_peace     | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
+| State Change       | Major state transition (e.g., Compromised)       | T19 Azula: State Change      | STATUS_EFFECT_SYSTEM.md                   |
+| Move Fatigue       | Repeated move use penalized                      | (AI: Move used recently)     | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Reversal           | Comeback mechanic, turns the tables              | T23 Aang: Reversal           | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
+| Desperation        | Last-stand move, high risk/reward                | T24 Azula: desperation       | FINISHER_DESPERATION_IMPLEMENTATION.md    |
+| Finisher           | Once-per-battle, high-damage move                | T10 Aang: FINISHER!          | FINISHER_DESPERATION_IMPLEMENTATION.md    |
+| Critical           | High-damage, chance-based event                  | T4 Aang: CRITICAL!           | DRAMATIC_MECHANICS_IMPLEMENTATION.md      |
+| Collateral Damage  | Environmental/mental state impact                | T14 Environment: Collateral  | COLLATERAL_DAMAGE_SYSTEM.md               |
+| Positioning        | Tactical stance/terrain effects                  | (see log)                    | TACTICAL_SYSTEM_IMPLEMENTATION.md         |
+| Victory/Draw/etc.  | End conditions                                   | T31 System: victory          | ROADMAP_6_IMPLEMENTATION.md               |
+| Status Effects     | Buffs/debuffs, state changes                     | (see log)                    | STATUS_EFFECT_SYSTEM.md                   |
+
+> All mechanics are now fully implemented, including Reversal. See below for details.
+
+### Reversal Mechanic (Implemented)
+- **Trigger:** When a character (Aang or Azula) is in a compromised state and low stability, a reversal can occur, turning the tide of battle.
+- **Log Example:** `T23 Aang: Reversal`, `T29 Azula: Reversal`
+- **AI/Personality:** Aang is more likely to trigger a reversal when desperate; Azula can also trigger reversals, especially in high-risk moments.
+- **Effect:** Regains stability, shifts control, and is logged as a dramatic event.
+- **Integration:** Fully integrated with disruption-first, narrative-driven battle flow.
+
 ## Overview
 
 The Avatar Battle Arena is a sophisticated turn-based battle simulator featuring advanced AI, narrative systems, and complex battle mechanics with optimized battle flow. This document provides a comprehensive overview of all implemented systems, their architecture, and completion status.
@@ -296,6 +324,11 @@ The simulator follows a modular service-oriented architecture with clear separat
 - 🔄 Narrative hooks using collateral tolerance (0%)
 - 🔄 Text-based environmental damage reporting (0%)
 - 🔄 Gameplay impact of collateral damage (0%)
+
+## Manipulation Resilience & Behavioral Traits
+
+- **Manipulation Resilience**: Each character now has a stat (0-100) representing resistance to psychological manipulation, tracked in `BattleCharacter` and `PerceivedState`. This affects AI decision-making, escalation triggers, and narrative events.
+- **Behavioral Traits**: Characters have a set of `behavioralTraits` that influence tactical and narrative behavior, also tracked in state and used by the AI and escalation systems.
 
 ## 🔧 Technical Implementation Details
 

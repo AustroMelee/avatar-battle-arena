@@ -17,7 +17,9 @@ type CharacterStatusProps = {
  * @returns {JSX.Element} The character status display.
  */
 export function CharacterStatus({ character, isActive, playerColor }: CharacterStatusProps) {
-  const healthPercentage = (character.currentHealth / 100) * 100;
+  // Disruption model: controlState, stability, momentum
+  const stabilityPercentage = (character.stability / 100) * 100;
+  const momentumPercentage = ((character.momentum + 100) / 2);
   
   // Get abilities with cooldown information
   const abilitiesWithCooldowns = character.abilities.map(ability => ({
@@ -29,25 +31,44 @@ export function CharacterStatus({ character, isActive, playerColor }: CharacterS
   const buffs = character.activeEffects.filter(effect => effect.category === 'buff');
   const debuffs = character.activeEffects.filter(effect => effect.category === 'debuff');
 
+  // Disruption summary panel
   return (
-    <div className={`${styles.characterStatus} ${isActive ? styles.active : ''}`}>
+    <div className={`${styles.characterStatus} ${isActive ? styles.active : ''}`}
+      aria-label={`Status for ${character.name}`}
+      role="region"
+    >
+      <div className={styles.disruptionSummary} aria-label="Disruption State Summary">
+        <span className={`${styles.summaryState} ${styles[character.controlState.toLowerCase()]}`}
+          aria-label={`Control State: ${character.controlState}`}
+        >{character.controlState}</span>
+        <span className={styles.summaryStability} aria-label={`Stability: ${character.stability}/100`}>
+          Stability: <strong>{character.stability}</strong>
+        </span>
+        <span className={styles.summaryMomentum} aria-label={`Momentum: ${character.momentum}`}
+        >Momentum: <strong>{character.momentum}</strong></span>
+      </div>
       <div className={styles.header}>
         <h3 className={styles.name}>{character.name}</h3>
         <div className={styles.bending}>{character.bending}</div>
       </div>
-      
-      {/* Health Bar */}
-      <div className={styles.healthSection}>
-        <div className={styles.healthBar}>
-          <div 
-            className={styles.healthFill} 
-            style={{ 
-              width: `${healthPercentage}%`,
-              backgroundColor: playerColor 
-            }}
-          />
+      {/* Control State */}
+      <div className={styles.controlStateSection}>
+        <span className={styles.controlStateLabel}>Control State:</span>
+        <span className={`${styles.controlState} ${styles[character.controlState.toLowerCase()]}`}>{character.controlState}</span>
+      </div>
+      {/* Stability Bar */}
+      <div className={styles.stabilitySection}>
+        <span className={styles.stabilityLabel}>Stability:</span>
+        <progress className={styles.stabilityBar} value={character.stability} max={100} aria-valuenow={character.stability} aria-valuemax={100} aria-label="Stability" />
+        <span className={styles.stabilityValue}>{character.stability}/100</span>
+      </div>
+      {/* Momentum Meter */}
+      <div className={styles.momentumSection}>
+        <span className={styles.momentumLabel}>Momentum:</span>
+        <div className={styles.momentumMeterOuter} aria-label="Momentum Meter">
+          <div className={styles.momentumMeterInner} style={{ width: `${momentumPercentage}%`, backgroundColor: playerColor }} />
         </div>
-        <span className={styles.healthText}>{character.currentHealth}/100</span>
+        <span className={styles.momentumValue}>{character.momentum}</span>
       </div>
       
       {/* Cooldowns */}

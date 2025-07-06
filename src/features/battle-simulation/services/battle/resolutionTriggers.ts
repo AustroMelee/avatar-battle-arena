@@ -1,7 +1,7 @@
 // CONTEXT: Battle Resolution, // FOCUS: Triggers
 import type { BattleState, BattleCharacter, BattleLogEntry, LogEventType, BattleResolution } from '../../types';
 import type { Ability } from '@/common/types';
-import { createEventId } from '../ai/logQueries';
+import { createEventId, generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Desperation move definitions for each character
@@ -178,7 +178,7 @@ export function createResolutionLogEntry(
   const eventType: LogEventType = resolution.toUpperCase() as LogEventType;
   
   return {
-    id: createEventId(),
+    id: generateUniqueLogId('resolution'),
     turn: state.turn,
     actor: 'System',
     type: eventType,

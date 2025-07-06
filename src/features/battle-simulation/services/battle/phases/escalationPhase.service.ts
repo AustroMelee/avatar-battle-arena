@@ -8,6 +8,7 @@ import {
 import { processLogEntryForAnalytics } from '../analyticsTracker.service';
 import { EnhancedStateManager } from '../../narrative/enhancedStateManager';
 import { createNarrativeService } from '../../narrative';
+import { generateUniqueLogId } from '../../ai/logQueries';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -62,7 +63,7 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
     // Add state announcement to the log if generated
     if (escalationAnnouncement) {
       newState.battleLog.push({
-        id: `escalation-announcement-${attacker.name}-${state.turn}`,
+        id: generateUniqueLogId('escalation'),
         turn: state.turn,
         actor: attacker.name,
         type: 'ESCALATION',

@@ -10,6 +10,11 @@ import { modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
 import { handleChargeUp, calculatePunishBonus, applyPositionBonuses } from './positioningMechanics.service';
 import { generateTacticalNarrative } from './TacticalNarrativeService';
+import { resolveImpact } from './resolveImpact';
+import { checkDefeat } from './checkDefeat';
+import { getMoveFatigueMultiplier, applyMoveFatigue } from './moveFatigue.service';
+import { canOpenDisruptionWindow, openDisruptionWindow, resolveDisruptionWindow } from './disruptionWindow.service';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Result of executing a tactical move
@@ -21,6 +26,8 @@ export interface TacticalMoveResult {
   narrative: string;
   // NEW: Collateral damage log entry for environmental damage
   collateralLogEntry?: BattleLogEntry;
+  stateChangeLogEntry?: BattleLogEntry;
+  fatigueLogEntry?: BattleLogEntry;
 }
 
 /**
@@ -118,7 +125,7 @@ async function handleRepositioningMove(
   
   // Create log entry
   const logEntry: BattleLogEntry = {
-    id: `reposition-${state.turn}-${Date.now()}`,
+    id: generateUniqueLogId('reposition'),
     turn: state.turn,
     actor: attacker.name,
     type: 'REPOSITION',
@@ -203,7 +210,7 @@ async function handleChargeUpMove(
   
   // Create log entry
   const logEntry: BattleLogEntry = {
-    id: `charge-${state.turn}-${Date.now()}`,
+    id: generateUniqueLogId('charge'),
     turn: state.turn,
     actor: attacker.name,
     type: 'CHARGE',
@@ -240,118 +247,96 @@ async function handleRegularTacticalMove(
   state: BattleState
 ): Promise<TacticalMoveResult> {
   const newTarget = { ...target };
-  
-  // Create battle context and resolve move
-  const battleContext = createBattleContext(attacker, target, state);
-  const moveResult = resolveMove(move, battleContext, attacker, target, state.turn);
-  
-  // Apply position bonuses
-  const positionBonus = applyPositionBonuses(move, attacker);
-  let damage = moveResult.damage;
-  
-  // Apply punish bonus if applicable
-  const punishBonus = calculatePunishBonus(move, target);
-  damage += punishBonus;
-  
-  // Apply status effect damage modifiers
-  damage = modifyDamageWithEffects(damage, attacker, target);
-  
-  // Apply damage to target
-  newTarget.currentHealth = Math.max(0, target.currentHealth - damage);
-  
-  // Apply status effects if any
-  if (move.appliesEffect) {
-    const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
-    if (shouldApply) {
-      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
-      const updatedTarget = applyEffect(newTarget, statusEffect);
-      Object.assign(newTarget, updatedTarget);
-    }
+  // --- MOVE FATIGUE ---
+  const fatigueMultiplier = getMoveFatigueMultiplier(attacker, move as any);
+  let impactResult = resolveImpact(attacker, newTarget, move as any);
+  if (impactResult && typeof impactResult.stabilityDamage === 'number') {
+    impactResult = {
+      ...impactResult,
+      stabilityDamage: applyMoveFatigue(impactResult.stabilityDamage, fatigueMultiplier),
+      controlShift: applyMoveFatigue(impactResult.controlShift, fatigueMultiplier)
+    };
   }
-  
-  // Spend chi
+  // --- HEALTH DAMAGE LOGIC ---
+  // Calculate base damage using resolveMove
+  const battleContext = createBattleContext(attacker, newTarget, state);
+  const moveResult = resolveMove(move, battleContext, attacker, newTarget, state.turn);
+  let damage = applyMoveFatigue(moveResult.damage, fatigueMultiplier);
+  // Apply punish bonus if applicable
+  const punishBonus = calculatePunishBonus(move, newTarget);
+  if (punishBonus > 0) {
+    damage += punishBonus;
+  }
+  // Apply position bonus
+  const positionBonus = applyPositionBonuses(move, attacker);
+  damage = Math.floor(damage * positionBonus.damageMultiplier);
+  // Apply final damage to target's health
+  newTarget.currentHealth = Math.max(0, newTarget.currentHealth - damage);
+  // --- END HEALTH DAMAGE LOGIC ---
+  // --- UPDATE STATE ---
+  const prevControlState = newTarget.controlState;
+  newTarget.momentum = (newTarget.momentum ?? 0) + impactResult.controlShift;
+  newTarget.stability = (newTarget.stability ?? 100) - impactResult.stabilityDamage;
+  if (impactResult.causesStateShift && impactResult.newControlState) {
+    newTarget.controlState = impactResult.newControlState;
+  } else if (newTarget.stability < 10 || newTarget.momentum < -50) {
+    newTarget.controlState = 'Compromised';
+  }
+  if (checkDefeat(newTarget)) {
+    newTarget.controlState = 'Defeated';
+  }
+  // Spend chi, cooldown, move history as before
   const chiCost = move.chiCost || 0;
   attacker.resources.chi = Math.max(0, attacker.resources.chi - chiCost);
-  
-  // Apply cooldown
   if (move.cooldown && move.cooldown > 0) {
     attacker.cooldowns[move.id] = move.cooldown;
   }
-  
-  // Update move history
   attacker.lastMove = move.name;
   attacker.moveHistory.push(move.name);
-  
-  // Generate enhanced narrative
-  const enhancedNarrative = await generateTacticalNarrative(
-    attacker,
-    newTarget,
-    move,
-    damage,
-    state,
-    moveResult.wasCrit ? 'devastating' : damage > 0 ? 'hit' : 'miss',
-    moveResult.narrative
-  );
-  
-  const narrative = enhancedNarrative.narrative || moveResult.narrative;
-  
-  // NEW: Create collateral damage log entry if move causes environmental damage
-  let collateralLogEntry: BattleLogEntry | undefined;
-  if (move.collateralDamage && move.collateralDamage > 0) {
-    collateralLogEntry = {
-      id: `collateral-${state.turn}-${Date.now()}`,
-      turn: state.turn,
-      actor: 'Environment', // The environment is the "target" of the damage
-      type: 'NARRATIVE',
-      action: 'Collateral Damage',
-      result: `A nearby structure was damaged by ${move.name}.`,
-      narrative: move.collateralDamageNarrative || `The force of ${move.name} causes environmental damage.`, // Use the narrative from the ability!
-      timestamp: Date.now(),
-      meta: { damageLevel: move.collateralDamage },
-    };
-    
-    // Add collateral damage log entry to state (this will be handled by the caller)
-    console.log(`[COLLATERAL DAMAGE] ${attacker.name}'s ${move.name} caused level ${move.collateralDamage} environmental damage`);
-  }
-  
-  // Create result string
-  let result: string;
-  if (moveResult.wasCrit) {
-    result = `CRITICAL HIT! ${target.name} takes ${damage} damage!`;
-  } else if (moveResult.wasDesperation) {
-    result = `DESPERATION MOVE! ${target.name} takes ${damage} damage!`;
-  } else {
-    result = `${target.name} takes ${damage} damage.`;
-  }
-  
-  // Create log entry
+  // Narrative
+  const narrative = impactResult.narrative || moveResult.narrative;
+  // --- SINGLE LOG ENTRY ---
   const logEntry: BattleLogEntry = {
-    id: `tactical-${state.turn}-${Date.now()}`,
+    id: generateUniqueLogId('tactical'),
     turn: state.turn,
     actor: attacker.name,
     type: 'TACTICAL',
     action: move.name,
     target: target.name,
-    damage,
-    result,
+    damage, // Include calculated damage
+    result: `${target.name} takes ${damage} damage. ${narrative}`,
     narrative,
     timestamp: Date.now(),
     meta: {
-      moveType: 'tactical',
-      wasCrit: moveResult.wasCrit,
-      wasDesperation: moveResult.wasDesperation,
-      positionBonus: positionBonus.damageMultiplier > 1 ? positionBonus.damageMultiplier : undefined,
-      punishBonus: punishBonus > 0 ? punishBonus : undefined,
-      resourceCost: chiCost
+      controlShift: impactResult.controlShift,
+      stabilityChange: impactResult.stabilityDamage,
+      newControlState: newTarget.controlState,
+      fatigueMultiplier
     }
   };
-  
+  // If controlState changed, add explicit log entry
+  let stateChangeLogEntry: BattleLogEntry | undefined;
+  if (prevControlState !== newTarget.controlState) {
+    stateChangeLogEntry = {
+      id: generateUniqueLogId('statechange'),
+      turn: state.turn,
+      actor: newTarget.name,
+      type: 'STATUS',
+      action: 'State Change',
+      result: `${newTarget.name} is now ${newTarget.controlState}!`,
+      narrative: `${newTarget.name} is now ${newTarget.controlState}!`,
+      timestamp: Date.now(),
+      meta: {
+        newControlState: newTarget.controlState
+      }
+    };
+  }
+  // Return only the main log entry (and state change if needed)
   return {
     newAttacker: attacker,
-    newTarget: newTarget,
+    newTarget,
     logEntry,
     narrative,
-    // NEW: Collateral damage log entry for environmental damage
-    collateralLogEntry
+    ...(stateChangeLogEntry ? { stateChangeLogEntry } : {})
   };
 }

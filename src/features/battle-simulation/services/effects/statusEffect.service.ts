@@ -1,7 +1,7 @@
 // CONTEXT: Status Effect Management
 // RESPONSIBILITY: Apply, process, and manage status effects on characters
 import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType, ArcStateModifier } from '../../types';
-import { createEventId } from '../ai/logQueries';
+import { createEventId, generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Types for status effects
@@ -61,7 +61,7 @@ export function processTurnEffects(
         console.log(`🔥🔥🔥 BURN DAMAGE - ${character.name} takes ${burnDamage} burn damage from ${effect.name} (${updatedCharacter.currentHealth} HP remaining) 🔥🔥🔥`);
         
         logEntries.push({
-          id: createEventId(),
+          id: generateUniqueLogId('status'),
           turn,
           actor: character.name,
           type: 'STATUS',
@@ -84,7 +84,7 @@ export function processTurnEffects(
         console.log(`DEBUG: HEAL OVER TIME - ${character.name} recovers ${healAmount} health from ${effect.name} (${updatedCharacter.currentHealth} HP now)`);
         
         logEntries.push({
-          id: createEventId(),
+          id: generateUniqueLogId('status'),
           turn,
           actor: character.name,
           type: 'STATUS',
@@ -104,7 +104,7 @@ export function processTurnEffects(
       case 'STUN': {
         console.log(`DEBUG: STUN EFFECT - ${character.name} is stunned by ${effect.name}`);
         logEntries.push({
-          id: createEventId(),
+          id: generateUniqueLogId('status'),
           turn,
           actor: character.name,
           type: 'STATUS',
@@ -133,7 +133,7 @@ export function processTurnEffects(
     if (effect.duration <= 0) {
       console.log(`DEBUG: EFFECT EXPIRED - ${character.name}'s ${effect.name} has expired`);
       logEntries.push({
-        id: createEventId(),
+        id: generateUniqueLogId('status'),
         turn,
         actor: character.name,
         type: 'STATUS',
@@ -223,7 +223,7 @@ export function createStatusEffect(
   };
 
   return {
-    id: `${effectConfig.type.toLowerCase()}_${targetName}_${Date.now()}`,
+    id: `${effectConfig.type.toLowerCase()}_${targetName}_${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     name: effectNames[effectConfig.type],
     type: effectConfig.type,
     category: effectCategories[effectConfig.type],

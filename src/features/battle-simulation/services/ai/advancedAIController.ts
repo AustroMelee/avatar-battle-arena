@@ -262,4 +262,23 @@ AI State Summary:
 - Chi Pressure: ${context.chiPressure ? 'Yes' : 'No'}
 - Health Pressure: ${context.healthPressure ? 'Yes' : 'No'}
   `.trim();
+}
+
+/**
+ * Computes the AI's tendency to attempt a reversal based on character, state, and risk/reward.
+ * Returns a weight (0-1) for reversal likelihood.
+ */
+export function getReversalWeight(character: BattleCharacter): number {
+  let weight = 0;
+  if (character.controlState === 'Compromised' && character.stability < 20) {
+    if (character.name === 'Aang') {
+      weight += 0.4; // Aang is more likely to attempt a reversal when desperate
+    } else if (character.name === 'Azula') {
+      weight += 0.3; // Azula is aggressive, but less likely than Aang for a true reversal
+    } else {
+      weight += 0.2; // Default for other characters
+    }
+  }
+  // TODO: Add more nuanced logic for behavioralTraits, location, etc.
+  return weight;
 } 

@@ -3,6 +3,7 @@
 
 import { BattleCharacter, BattleLogEntry } from '../../types';
 import { Move, Position, getLocationType } from '../../types/move.types';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Determines if a move can be used based on positioning and environmental constraints.
@@ -301,7 +302,7 @@ export function createTacticalLogEntry(
   meta?: Record<string, unknown>
 ): BattleLogEntry {
   return {
-    id: `${type.toLowerCase()}-${turn}-${Date.now()}`,
+    id: generateUniqueLogId('positioning'),
     turn,
     actor,
     type,
