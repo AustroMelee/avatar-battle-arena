@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
+    "docs:refresh": "node scripts/docs-refresh.cjs"
   },
   "dependencies": {
     "react": "^18.2.0",

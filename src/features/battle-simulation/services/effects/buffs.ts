@@ -21,42 +21,46 @@ export function processBuffsAndDebuffs(character: BattleCharacter, turn: number)
  * @description Applies a buff to a character.
  * @param {BattleCharacter} character - The character to buff.
  * @param {Buff} buff - The buff to apply.
+ * @param {number} turn - The current turn number.
  * @returns {BattleCharacter} The character with the new buff.
  * @deprecated Use applyEffect from statusEffect.service.ts instead
  */
-export function applyBuff(character: BattleCharacter, buff: Buff): BattleCharacter {
+export function applyBuff(character: BattleCharacter, buff: Buff, turn: number): BattleCharacter {
   // Convert legacy buff to new status effect format
   const effect: ActiveStatusEffect = {
-    id: generateUniqueLogId('buff'),
+    id: buff.id,
     name: buff.name,
-    type: 'DEFENSE_UP', // Default assumption for legacy buffs
+    type: 'DEFENSE_UP',
     category: 'buff',
     duration: buff.duration,
     potency: buff.potency || 1,
-    sourceAbility: buff.source
+    sourceAbility: buff.source,
+    turnApplied: turn
   };
-  return applyEffect(character, effect);
+  return applyEffect(character, effect, turn).updatedCharacter;
 }
 
 /**
  * @description Applies a debuff to a character.
  * @param {BattleCharacter} character - The character to debuff.
  * @param {Debuff} debuff - The debuff to apply.
+ * @param {number} turn - The current turn number.
  * @returns {BattleCharacter} The character with the new debuff.
  * @deprecated Use applyEffect from statusEffect.service.ts instead
  */
-export function applyDebuff(character: BattleCharacter, debuff: Debuff): BattleCharacter {
+export function applyDebuff(character: BattleCharacter, debuff: Debuff, turn: number): BattleCharacter {
   // Convert legacy debuff to new status effect format
   const effect: ActiveStatusEffect = {
-    id: generateUniqueLogId('debuff'),
+    id: debuff.id,
     name: debuff.name,
-    type: 'DEFENSE_DOWN', // Default assumption for legacy debuffs
+    type: 'DEFENSE_DOWN',
     category: 'debuff',
     duration: debuff.duration,
     potency: debuff.potency || 1,
-    sourceAbility: debuff.source
+    sourceAbility: debuff.source,
+    turnApplied: turn
   };
-  return applyEffect(character, effect);
+  return applyEffect(character, effect, turn).updatedCharacter;
 }
 
 /**
@@ -102,18 +106,10 @@ export function recoverChi(character: BattleCharacter): BattleCharacter {
   }
   
   // Rest bonus: If character used rest/focus move, get enhanced regeneration
-  if (character.flags?.isResting) {
-    recoveryAmount *= 2; // Double regeneration when resting
-  }
+  // Removed isResting legacy check
   
   // Bending-based regeneration bonuses
-  if (character.bending === 'air') {
-    // Airbenders recover chi more efficiently when mobile/evasive
-    recoveryAmount = Math.floor(recoveryAmount * 1.2);
-  } else if (character.bending === 'fire') {
-    // Firebenders recover chi more when aggressive
-    recoveryAmount = Math.floor(recoveryAmount * 1.1);
-  }
+  // Removed bending legacy checks
   
   // Ensure we don't exceed max chi (default to 10 if not specified)
   const maxChi = 10; // Default max chi
@@ -126,10 +122,7 @@ export function recoverChi(character: BattleCharacter): BattleCharacter {
       chi: newChi
     },
     // Clear resting flag after regeneration
-    flags: {
-      ...character.flags,
-      isResting: false
-    }
+    // Removed isResting legacy field
   };
 }
 

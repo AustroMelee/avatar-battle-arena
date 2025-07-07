@@ -1,6 +1,7 @@
 import type { BattleState, BattleCharacter } from '../../types';
 import type { AIRule, AIDecision } from './types/AIBehavior';
-import type { Ability, Location } from '@/common/types';
+import type { Move } from '../../types/move.types';
+import type { Location } from '@/common/types';
 import { azulaAIRules } from './rules/azulaRules';
 import { aangAIRules } from './rules/aangRules';
 import { getAvailableMovesSimple, getHighestDamageMove, getLowestCostMove } from './helpers/conditionHelpers';
@@ -48,7 +49,7 @@ function getCharacterWeightedMoves(character: BattleCharacter) {
  * @param state - The battle state
  * @returns A fallback move
  */
-function legacyTacticalMove(self: BattleCharacter, location?: Location): Ability | null {
+function legacyTacticalMove(self: BattleCharacter, location?: Location): Move | null {
   const availableMoves = getAvailableMovesSimple(self, location);
   if (availableMoves.length === 0) return null;
   
@@ -85,7 +86,7 @@ export function decideMove(
         if (move) {
           // Console logging for debugging
           console.log(`[AI DECISION] ${self.name} - High Priority Rule Fired: ${rule.name} (Priority: ${rule.priority ?? 0})`);
-          console.log(`[AI DECISION] ${self.name} - Chose: ${move.name} (Power: ${move.power}, Cost: ${move.chiCost || 0})`);
+          console.log(`[AI DECISION] ${self.name} - Chose: ${move.name} (Power: ${move.baseDamage}, Cost: ${move.chiCost || 0})`);
           
           return {
             move,

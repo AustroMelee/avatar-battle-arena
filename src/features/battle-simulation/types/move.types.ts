@@ -105,6 +105,9 @@ export interface Move {
     duration: number; // How many turns the effect lasts
     potency: number; // Effect strength (damage per turn for BURN, % increase for buffs, etc.)
   };
+  // --- EXTENDED FOR BATTLE ENGINE SINGLE SOURCE OF TRUTH ---
+  tags?: string[];
+  unlockCondition?: { type: 'health'; threshold: number };
 }
 
 // Disruption/impact class for narrative-first battle system
@@ -139,6 +142,8 @@ export const AANG_MOVES: Move[] = [
     critMultiplier: 3,
     description: 'Aang delivers a quick, focused physical blow.',
     punishIfCharging: true,
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'reposition',
@@ -151,6 +156,8 @@ export const AANG_MOVES: Move[] = [
     repositionSuccessRate: 0.9, // High success rate for airbender
     environmentalConstraints: ["Open", "Air-Friendly"],
     description: 'Aang glides through the air to reposition himself.',
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'air_tornado',
@@ -166,6 +173,8 @@ export const AANG_MOVES: Move[] = [
     requiresPosition: ["neutral", "flying", "high_ground"],
     collateralDamage: 2,
     collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and sends debris flying through the plaza.",
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'wind_slice',
@@ -183,7 +192,9 @@ export const AANG_MOVES: Move[] = [
       chance: 0.5, // 50% chance to reduce defense
       duration: 2, // Defense down for 2 turns
       potency: 3 // Reduce defense by 3
-    }
+    },
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'air_shield',
@@ -199,7 +210,9 @@ export const AANG_MOVES: Move[] = [
       chance: 1.0, // 100% chance to apply defense boost
       duration: 2, // Defense up for 2 turns
       potency: 5 // Increase defense by 5
-    }
+    },
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'charged_tornado',
@@ -219,6 +232,8 @@ export const AANG_MOVES: Move[] = [
     description: 'Aang channels immense airbending power into a devastating tornado. Only usable when opponent is vulnerable.',
     collateralDamage: 3,
     collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'last_breath_cyclone',
@@ -234,6 +249,8 @@ export const AANG_MOVES: Move[] = [
     description: 'Aang channels every last ounce of strength into a world-shaking cyclone. A battle-ending move.',
     collateralDamage: 3,
     collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'flowing_evasion',
@@ -251,7 +268,9 @@ export const AANG_MOVES: Move[] = [
         defenseBonus: 10,
         chiCostReduction: 1
       }
-    }
+    },
+    tags: [],
+    unlockCondition: undefined,
   }
 ];
 
@@ -269,6 +288,8 @@ export const AZULA_MOVES: Move[] = [
     critMultiplier: 2.5,
     description: 'Azula delivers a precise, calculated strike.',
     punishIfCharging: true,
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'blue_fire',
@@ -290,6 +311,8 @@ export const AZULA_MOVES: Move[] = [
     // NEW: Collateral damage properties
     collateralDamage: 1,
     collateralDamageNarrative: "The intense heat scorches nearby surfaces and leaves blackened marks on the stone.",
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'fire_dash',
@@ -302,6 +325,8 @@ export const AZULA_MOVES: Move[] = [
     repositionSuccessRate: 0.7, // Lower than Aang but still good
     environmentalConstraints: ["Open", "Fire-Friendly"],
     description: 'Azula uses fire propulsion to quickly reposition.',
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'lightning',
@@ -320,6 +345,8 @@ export const AZULA_MOVES: Move[] = [
     // NEW: Collateral damage properties
     collateralDamage: 2,
     collateralDamageNarrative: "The bolt of lightning misses its primary target, striking a nearby statue and sending superheated shrapnel flying.",
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'fire_shield',
@@ -330,6 +357,8 @@ export const AZULA_MOVES: Move[] = [
     cooldown: 4,
     description: 'A protective barrier of blue flames.',
     changesPosition: "defensive",
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'relentless_assault',
@@ -345,7 +374,9 @@ export const AZULA_MOVES: Move[] = [
         damageMultiplier: 1.5,
         chiCostReduction: 1,
       }
-    }
+    },
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'blazing_counter',
@@ -363,7 +394,9 @@ export const AZULA_MOVES: Move[] = [
         defenseBonus: 15,
         damageMultiplier: 1.2
       }
-    }
+    },
+    tags: [],
+    unlockCondition: undefined,
   },
   {
     id: 'phoenix_inferno',
@@ -379,6 +412,8 @@ export const AZULA_MOVES: Move[] = [
     description: 'Azula channels all remaining energy into a devastating final attack. A battle-ending move.',
     collateralDamage: 3,
     collateralDamageNarrative: "The inferno engulfs the entire plaza, leaving nothing but scorched earth and melted stone in its wake.",
+    tags: [],
+    unlockCondition: undefined,
   },
 ];
 
@@ -440,6 +475,8 @@ export const AANG_SUDDEN_DEATH_FINISHER: Move = {
   // tags: ['sudden_death', 'finisher', 'ultimate'], // Remove if not in Move
   description: 'SUDDEN DEATH: Aang unleashes a final, uncontrolled storm of air, risking everything to end the fight.',
   desperationBuff: { hpThreshold: 100, damageBonus: 20, defensePenalty: 100 },
+  tags: [],
+  unlockCondition: undefined,
 };
 
 export const AZULA_SUDDEN_DEATH_FINISHER: Move = {
@@ -453,4 +490,6 @@ export const AZULA_SUDDEN_DEATH_FINISHER: Move = {
   // tags: ['sudden_death', 'finisher', 'ultimate', 'piercing'], // Remove if not in Move
   description: 'SUDDEN DEATH: Azula channels the raw, destructive power of a comet, unleashing an inescapable inferno.',
   desperationBuff: { hpThreshold: 100, damageBonus: 25, defensePenalty: 100 },
+  tags: [],
+  unlockCondition: undefined,
 }; 

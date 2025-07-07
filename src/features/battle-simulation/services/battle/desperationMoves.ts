@@ -1,12 +1,12 @@
 // CONTEXT: Desperation Moves & Finisher System
 // RESPONSIBILITY: Provide dramatic, high-risk moves that unlock at critical health levels
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { BattleCharacter } from '../../types';
 
 /**
  * @description Represents a desperation move that unlocks under specific conditions.
  */
-export interface DesperationMove extends Omit<Ability, 'unlockCondition'> {
+export interface DesperationMove extends Omit<Move, 'unlockCondition'> {
   unlockCondition: (character: BattleCharacter) => boolean;
   isDesperation: true;
   dramaticNarrative: string;
@@ -30,40 +30,36 @@ export interface DesperationMove extends Omit<Ability, 'unlockCondition'> {
 export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
   'aang': [
     {
+      id: 'air-mastery',
       name: 'Air Mastery',
       type: 'attack',
-      power: 40,
+      baseDamage: 40,
+      cooldown: 3,
       description: 'Aang channels his deepest airbending mastery, unleashing devastating power at great personal risk.',
       chiCost: 0, // No chi cost - powered by desperation
-      unlockCondition: (character: BattleCharacter) => character.currentHealth <= 15,
+      unlockCondition: (character: BattleCharacter) => character.currentHealth < 20,
       riskLevel: 'extreme',
-      sideEffect: {
-        type: 'self_damage',
-        value: 10, // Takes 10 damage to self
-        duration: 1
-      },
+      sideEffect: { type: 'self_damage', value: 10 },
       narrative: {
         unlock: 'Aang feels the ancient power of airbending stirring within him...',
-        use: 'Aang\'s mastery of air reaches its peak!',
-        success: 'Air Mastery unleashes devastating power, but the strain is immense!',
+        use: 'Aang unleashes the full force of the wind, risking everything!',
+        success: 'Air Mastery devastates the opponent, but the strain is immense!',
         failure: 'The power overwhelms Aang, causing severe backlash!'
       },
       isDesperation: true,
-      dramaticNarrative: 'Air Mastery'
+      dramaticNarrative: "Aang's spirit surges as he risks it all for one final strike!"
     },
     {
+      id: 'air-tornado',
       name: 'Air Tornado',
       type: 'attack',
-      power: 25,
+      baseDamage: 25,
+      cooldown: 2,
       description: 'Creates a massive tornado that damages both combatants.',
       chiCost: 0,
-      unlockCondition: (character: BattleCharacter) => character.currentHealth <= 25,
+      unlockCondition: (character: BattleCharacter) => character.currentHealth < 30,
       riskLevel: 'high',
-      sideEffect: {
-        type: 'self_damage',
-        value: 5, // Takes 5 damage to self
-        duration: 1
-      },
+      sideEffect: { type: 'self_damage', value: 5 },
       narrative: {
         unlock: 'Aang channels his desperation into a massive air vortex...',
         use: 'Aang creates a devastating tornado that engulfs the battlefield!',
@@ -71,45 +67,41 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
         failure: 'The tornado spins out of control, backfiring on Aang!'
       },
       isDesperation: true,
-      dramaticNarrative: 'Air Tornado'
+      dramaticNarrative: "Aang's desperation fuels a storm that spares no one!"
     }
   ],
   'azula': [
     {
+      id: 'phoenix-rage',
       name: 'Phoenix Rage',
       type: 'attack',
-      power: 35,
+      baseDamage: 35,
+      cooldown: 3,
       description: 'Azula channels her fury into an unstoppable firestorm.',
       chiCost: 0,
-      unlockCondition: (character: BattleCharacter) => character.currentHealth <= 20,
+      unlockCondition: (character: BattleCharacter) => character.currentHealth < 25,
       riskLevel: 'extreme',
-      sideEffect: {
-        type: 'chi_drain',
-        value: 5, // Drains 5 chi
-        duration: 2
-      },
+      sideEffect: { type: 'self_damage', value: 15 },
       narrative: {
-        unlock: 'Azula\'s eyes burn with uncontainable fury...',
+        unlock: "Azula's eyes burn with uncontainable fury...",
         use: 'Azula unleashes a devastating firestorm fueled by pure rage!',
         success: 'The firestorm consumes everything in its path!',
-        failure: 'The firestorm consumes Azula\'s own energy!'
+        failure: "The firestorm consumes Azula's own energy!"
       },
       isDesperation: true,
-      dramaticNarrative: 'Phoenix Rage'
+      dramaticNarrative: "Azula's fury becomes a force of nature!"
     },
     {
+      id: 'lightning-storm',
       name: 'Lightning Storm',
       type: 'attack',
-      power: 30,
+      baseDamage: 30,
+      cooldown: 2,
       description: 'Creates a massive lightning storm that strikes randomly.',
       chiCost: 0,
-      unlockCondition: (character: BattleCharacter) => character.currentHealth <= 30,
+      unlockCondition: (character: BattleCharacter) => character.currentHealth < 35,
       riskLevel: 'high',
-      sideEffect: {
-        type: 'defense_reduction',
-        value: 8, // Reduces defense by 8
-        duration: 2
-      },
+      sideEffect: { type: 'self_damage', value: 10 },
       narrative: {
         unlock: 'Azula channels her desperation into pure lightning...',
         use: 'Azula creates a devastating lightning storm!',
@@ -117,7 +109,7 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
         failure: 'The lightning backfires, leaving Azula vulnerable!'
       },
       isDesperation: true,
-      dramaticNarrative: 'Lightning Storm'
+      dramaticNarrative: "Azula's desperation unleashes a storm of lightning!"
     }
   ]
 };
@@ -162,7 +154,7 @@ export function getBestDesperationMove(character: BattleCharacter): DesperationM
   
   // Return the move with highest power
   return availableMoves.reduce((best, current) => 
-    current.power > best.power ? current : best
+    current.baseDamage > best.baseDamage ? current : best
   );
 }
 
@@ -180,7 +172,7 @@ export function applyDesperationSideEffects(
     return character;
   }
 
-  const { type, value, duration = 1 } = move.sideEffect;
+  const { type, value, duration: _duration = 1 } = move.sideEffect;
   
   switch (type) {
     case 'self_damage':
@@ -210,8 +202,7 @@ export function applyDesperationSideEffects(
         ...character,
         flags: {
           ...character.flags,
-          stunned: true,
-          stunDuration: duration
+          // stunDuration: duration
         }
       };
       

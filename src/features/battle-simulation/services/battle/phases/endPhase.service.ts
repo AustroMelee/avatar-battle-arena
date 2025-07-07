@@ -93,12 +93,12 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
 
   // --- HEROIC REVERSAL CHECK ---
   const [p1, p2] = newState.participants;
-  if (canTriggerHeroicReversal(p1, p2)) {
-    const { logEntry } = triggerHeroicReversalWithLog(p1, p2, newState.turn);
+  if (canTriggerHeroicReversal(p1)) {
+    const { logEntry } = triggerHeroicReversalWithLog(p1, newState.turn);
     newState.battleLog.push(logEntry);
   }
-  if (canTriggerHeroicReversal(p2, p1)) {
-    const { logEntry } = triggerHeroicReversalWithLog(p2, p1, newState.turn);
+  if (canTriggerHeroicReversal(p2)) {
+    const { logEntry } = triggerHeroicReversalWithLog(p2, newState.turn);
     newState.battleLog.push(logEntry);
   }
   // --- HEROIC REVERSAL END CHECK ---

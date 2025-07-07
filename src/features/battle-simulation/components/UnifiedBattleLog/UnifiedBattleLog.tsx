@@ -1,38 +1,39 @@
 // CONTEXT: Unified Battle Log
-// RESPONSIBILITY: Single log component with tabs for narrative and AI logs
+// RESPONSIBILITY: Single log component with tabs for narrative and technical logs
 // 
 // ⚠️ CRITICAL REQUIREMENT: Turn 1 logs MUST ALWAYS be visible by default
 // No matter how many updates or changes we make, users MUST be able to see logs from T1
 // This is essential for battle analysis and debugging - never hide early turns!
 //
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { BattleLogEntry, AILogEntry, BattleCharacter } from '../../types';
 import styles from './UnifiedBattleLog.module.css';
+import { BattleNarrativeTurn } from '../BattleNarrativeTurn/BattleNarrativeTurn';
 
 interface UnifiedBattleLogProps {
   battleLog: BattleLogEntry[];
   aiLog: AILogEntry[];
   maxEntries?: number;
-  participants?: BattleCharacter[];
+  participants: [BattleCharacter, BattleCharacter];
 }
 
-type LogTab = 'narrative' | 'ai';
+type LogTab = 'narrative' | 'technical' | 'ai';
 
 // Move this helper function above the component definition
 
 const renderMetaDetails = (entry: BattleLogEntry, styles: any): React.ReactNode | null => {
-  if (!entry.meta || Object.keys(entry.meta).length === 0) return null;
-  const filteredMetaFields = Object.entries(entry.meta)
+  if (!entry.details || Object.keys(entry.details).length === 0) return null;
+  const filteredMetaFields = Object.entries(entry.details)
     .filter(([key]) => !['crit','finisher','desperation','resourceCost','controlShift','stabilityChange','newControlState'].includes(key));
-  const hasResourceCost = entry.meta.resourceCost !== undefined;
-  const hasFinisher = entry.meta.finisher === true;
-  const hasDesperation = entry.meta.desperation === true;
+  const hasResourceCost = entry.details.resourceCost !== undefined;
+  const hasFinisher = entry.details.finisher === true;
+  const hasDesperation = entry.details.desperation === true;
   const hasOtherMeta = filteredMetaFields.length > 0;
   if (!hasResourceCost && !hasFinisher && !hasDesperation && !hasOtherMeta) return null;
   return (
     <div className={styles.entryMeta}>
       {hasResourceCost && (
-        <span className={styles.resourceCost}>💠 {Number(entry.meta.resourceCost)} chi</span>
+        <span className={styles.resourceCost}>💠 {Number(entry.details.resourceCost)} chi</span>
       )}
       {hasFinisher && (
         <span className={styles.finisherBadge}>🔥 FINISHER</span>
@@ -60,7 +61,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   battleLog,
   aiLog,
   maxEntries = 15,
-  participants = []
+  participants
 }) => {
   // ⚠️ CRITICAL: Always start with showAllEntries = true to ensure T1 logs are visible
   // This is a hard requirement - users must always see the complete battle log by default
@@ -68,6 +69,14 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   const [copied, setCopied] = useState(false);
   const [showAllEntries, setShowAllEntries] = useState(true); // ALWAYS TRUE BY DEFAULT
   const [turnFilter, setTurnFilter] = useState<number | null>(null);
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to the bottom when new entries are added or tab changes
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [battleLog, activeTab]);
 
   // Group battle log entries by turn
   const groupedBattleLog = useMemo(() => {
@@ -77,13 +86,12 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     }, {} as Record<number, BattleLogEntry[]>);
   }, [battleLog]);
 
-  // Group AI log entries by turn
-  const groupedAILog = useMemo(() => {
-    return aiLog.reduce((acc, entry) => {
-      (acc[entry.turn] = acc[entry.turn] || []).push(entry);
-      return acc;
-    }, {} as Record<number, AILogEntry[]>);
-  }, [aiLog]);
+  // const _groupedAILog = useMemo(() => {
+  //   return aiLog.reduce((acc, entry) => {
+  //     (acc[entry.turn] = acc[entry.turn] || []).push(entry);
+  //     return acc;
+  //   }, {} as Record<number, AILogEntry[]>);
+  // }, [aiLog]);
 
   /**
    * @description Gets the appropriate icon for a battle event.
@@ -98,14 +106,15 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     if (entry.type === 'DESPERATION') return '⚡';
     if (entry.type === 'FINISHER') return '💥';
     if (entry.type === 'NARRATIVE') return '💭';
-    if (entry.meta?.crit === true) return '💥';
-    if (entry.meta?.finisher === true) return '🔥';
-    if (entry.meta?.rest === true) return '🔄';
-    if (entry.meta?.heal === true) return '💚';
-    if (entry.meta?.piercing === true) return '⚔️';
-    if (entry.damage && entry.damage > 15) return '💢';
-    if (entry.damage && entry.damage > 0) return '⚔️';
-    if (entry.abilityType === 'defense_buff') return '🛡️';
+    if (entry.details?.crit === true) return '💥';
+    if (entry.details?.finisher === true) return '🔥';
+    if (entry.details?.rest === true) return '🔄';
+    if (entry.details?.heal === true) return '💚';
+    if (entry.details?.piercing === true) return '⚔️';
+    if (entry.details?.damage && entry.details.damage > 15) return '💢';
+    if (entry.details?.damage && entry.details.damage > 0) return '⚔️';
+    if (entry.details?.abilityType === 'finisher') return '💥';
+    if (entry.details?.abilityType === 'defense_buff') return '🛡️';
     return '🎭';
   };
 
@@ -124,25 +133,23 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     classes.push(styles[entry.type.toLowerCase()]);
     
     // Meta-based classes
-    if (entry.meta?.crit === true) classes.push(styles.critical);
-    if (entry.meta?.finisher === true) classes.push(styles.finisher);
-    if (entry.meta?.rest === true) classes.push(styles.rest);
-    if (entry.meta?.heal === true) classes.push(styles.heal);
-    if (entry.meta?.piercing === true) classes.push(styles.piercing);
-    if (entry.meta?.desperation === true) classes.push(styles.desperation);
+    if (entry.details?.crit === true) classes.push(styles.critical);
+    if (entry.details?.finisher === true) classes.push(styles.finisher);
+    if (entry.details?.rest === true) classes.push(styles.rest);
+    if (entry.details?.heal === true) classes.push(styles.heal);
+    if (entry.details?.piercing === true) classes.push(styles.piercing);
+    if (entry.details?.desperation === true) classes.push(styles.desperation);
     
     // Damage-based classes
-    if (entry.damage) {
-      if (entry.damage > 20) classes.push(styles.massiveDamage);
-      else if (entry.damage > 10) classes.push(styles.highDamage);
-      else if (entry.damage > 0) classes.push(styles.normalDamage);
-    }
+    if (entry.details?.damage && entry.details.damage > 15) classes.push(styles.highDamage);
+    if (entry.details?.damage && entry.details.damage > 0) classes.push(styles.damage);
+    if (entry.details?.abilityType === 'finisher') classes.push(styles.finisher);
     
     // Highlight state change
     if (entry.type === 'STATUS' && entry.action === 'State Change') {
       classes.push(styles.stateChange);
-      if (entry.meta?.newControlState === 'Compromised') classes.push(styles.compromised);
-      if (entry.meta?.newControlState === 'Defeated') classes.push(styles.defeated);
+      if (entry.details?.newControlState === 'Compromised') classes.push(styles.compromised);
+      if (entry.details?.newControlState === 'Defeated') classes.push(styles.defeated);
     }
     
     return classes.join(' ');
@@ -153,18 +160,18 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    */
   const formatBattleEntryText = (entry: BattleLogEntry): React.ReactNode => {
     const icon = getEventIcon(entry);
-    if (entry.meta?.controlShift !== undefined || entry.meta?.stabilityChange !== undefined) {
+    if (entry.details?.controlShift !== undefined || entry.details?.stabilityChange !== undefined) {
       return (
         <React.Fragment>
           {icon} <b>{entry.action}</b>: {entry.narrative}
-          {entry.meta?.controlShift !== undefined && entry.meta?.controlShift !== null ? (
-            <span className={styles.controlShift}> [Control Shift: {String(entry.meta.controlShift)}]</span>
+          {entry.details?.controlShift !== undefined && entry.details?.controlShift !== null ? (
+            <span className={styles.controlShift}> [Control Shift: {String(entry.details.controlShift)}]</span>
           ) : null}
-          {entry.meta?.stabilityChange !== undefined && entry.meta?.stabilityChange !== null ? (
-            <span className={styles.stabilityChange}> [Stability: -{String(entry.meta.stabilityChange)}]</span>
+          {entry.details?.stabilityChange !== undefined && entry.details?.stabilityChange !== null ? (
+            <span className={styles.stabilityChange}> [Stability: -{String(entry.details.stabilityChange)}]</span>
           ) : null}
-          {entry.meta?.newControlState !== undefined && entry.meta?.newControlState !== null ? (
-            <span className={styles.newControlState}> [State: {String(entry.meta.newControlState)}]</span>
+          {entry.details?.newControlState !== undefined && entry.details?.newControlState !== null ? (
+            <span className={styles.newControlState}> [State: {String(entry.details.newControlState)}]</span>
           ) : null}
         </React.Fragment>
       );
@@ -173,8 +180,8 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     const baseText = entry.narrative || entry.result || entry.action;
     
     // Add damage highlight
-    if (entry.damage) {
-      const damageText = ` (${entry.damage} damage)`;
+    if (entry.details?.damage) {
+      const damageText = ` (${entry.details.damage} damage)`;
       const parts = baseText.split(damageText);
       
       if (parts.length > 1) {
@@ -189,7 +196,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     }
     
     // Add critical hit highlight
-    if (entry.meta?.crit === true) {
+    if (entry.details?.crit === true) {
       const critText = ' (CRITICAL!)';
       const parts = baseText.split(critText);
       
@@ -240,12 +247,44 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
         </div>
       );
     }
+    if (!participants || !Array.isArray(participants) || participants.length !== 2) {
+      return (
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>❓</span>
+          <p>Participants not loaded</p>
+        </div>
+      );
+    }
+    const [p1, p2] = participants;
+
     return (
-      <div className={styles.tabContent}>
+      <div className={styles.tabContent} ref={logContainerRef}>
         {visibleTurnNumbers.map(turnNumber => (
-          <div key={`turn-${turnNumber}`} className={styles.turnGroup}>
+          <div key={`turn-group-${turnNumber}`} className={styles.turnGroup}>
             <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
-            {groupedBattleLog[turnNumber].map(renderLogEntry)}
+            {groupedBattleLog[turnNumber].map((entry, index) => {
+              let playerSide: 'p1' | 'p2' | 'system' = 'system';
+              let icon = entry.actor === 'Narrator' || entry.actor === 'System' || entry.actor === 'Environment' ? '/favicon.ico' : '';
+
+              if (entry.actor === p1.name) {
+                playerSide = 'p1';
+                icon = p1.base.icon;
+              } else if (entry.actor === p2.name) {
+                playerSide = 'p2';
+                icon = p2.base.icon;
+              }
+
+              return (
+                <BattleNarrativeTurn
+                  key={`${entry.id}-${index}`}
+                  actor={entry.actor}
+                  narrative={entry.narrative || entry.result}
+                  type={entry.type}
+                  playerSide={playerSide}
+                  icon={icon}
+                />
+              )
+            })}
           </div>
         ))}
       </div>
@@ -328,7 +367,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       const turn = `T${entry.turn}`;
       const actor = entry.actor;
       const action = entry.action || entry.narrative || entry.result || '';
-      const chi = entry.meta && entry.meta.resourceCost !== undefined ? ` (${entry.meta.resourceCost} chi)` : '';
+      const chi = entry.details && entry.details.resourceCost !== undefined ? ` (${entry.details.resourceCost} chi)` : '';
       return `${turn} ${actor}: ${action}${chi}`.trim();
     }).join('\n');
     const aiLogText = aiLog.map(entry => {
@@ -357,7 +396,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
 
   // Disruption state ticker (shows after each turn)
   const renderDisruptionTicker = () => {
-    if (!participants.length) return null;
+    if (!participants || !Array.isArray(participants) || participants.length < 1) return null;
     return (
       <div className={styles.disruptionTicker} aria-label="Disruption State Ticker">
         {participants.map((char) => (
@@ -400,13 +439,19 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
             className={`${styles.tab} ${activeTab === 'narrative' ? styles.active : ''}`}
             onClick={() => setActiveTab('narrative')}
           >
-            📜 Narrative ({battleLog.length})
+            🎭 Narrative
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'technical' ? styles.active : ''}`}
+            onClick={() => setActiveTab('technical')}
+          >
+            💻 Technical
           </button>
           <button
             className={`${styles.tab} ${activeTab === 'ai' ? styles.active : ''}`}
             onClick={() => setActiveTab('ai')}
           >
-            🤖 AI Decisions ({aiLog.length})
+            🤖 AI Decisions
           </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
@@ -460,7 +505,9 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
         </button>
       </div>
       
-      {activeTab === 'narrative' ? renderNarrativeTab() : renderAITab()}
+      {activeTab === 'narrative' && renderNarrativeTab()}
+      {activeTab === 'technical' && renderAITab()}
+      {activeTab === 'ai' && renderAITab()}
     </div>
   );
 }; 

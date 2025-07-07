@@ -1,7 +1,7 @@
 // CONTEXT: State Announcement Pool
 // RESPONSIBILITY: Manage state announcement narrative pools only
 
-import type { StateAnnouncementType } from '../../types/NarrativeTypes';
+// import type { StateAnnouncementType } from '../../types/NarrativeTypes';
 
 /**
  * @description Service for managing state announcement narrative pools

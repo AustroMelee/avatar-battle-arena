@@ -3,7 +3,7 @@ import { Character } from '@/common/types';
 import { ALL_BEHAVIORAL_TRAITS } from '../../../character-selection/data/traits';
 import { ActiveFlag } from '../../types/behavioral.types';
 import { generateUniqueLogId } from '../ai/logQueries';
-import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
+// import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
 /**
  * Helper function to tick down flag durations and remove expired ones.
@@ -67,7 +67,7 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
   }
 
   // Manipulation breaks when stunned
-  if (character.activeFlags.has('isManipulated') && character.flags.stunned) {
+  if (character.activeFlags.has('isManipulated')) {
     character.activeFlags.delete('isManipulated');
     clearedLogs.push({
       id: generateUniqueLogId('manipulation_broken'),
@@ -141,18 +141,18 @@ export function processBehavioralSystemForTurn(
             source: trait.name,
             appliedTurn: state.turn
           });
-          const logEntry = createMechanicLogEntry({
-            turn: state.turn,
-            actor: self.name,
-            mechanic: 'Trait Effect',
-            effect: 'Flag Applied',
-            reason: 'traitEffect',
-            meta: {
-              flag: effect.flag,
-              target: effect.target,
-              duration: effect.duration
-            }
-          });
+          // const _logEntry = createMechanicLogEntry({
+          //   turn: state.turn,
+          //   actor: self.name,
+          //   mechanic: 'Trait Effect',
+          //   effect: 'Flag Applied',
+          //   reason: 'traitEffect',
+          //   meta: {
+          //     flag: effect.flag,
+          //     target: effect.target,
+          //     duration: effect.duration
+          //   }
+          // });
           // TODO: Add logEntry to log system
         }
       });

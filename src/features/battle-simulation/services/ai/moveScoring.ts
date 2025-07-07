@@ -1,25 +1,25 @@
 // CONTEXT: AI Move Scoring
 // RESPONSIBILITY: Score moves based on state and meta-state
 import { BattleCharacter } from '../../types';
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { MetaState } from './metaState';
 
 export interface MoveScore {
-  move: Ability;
+  move: Move;
   score: number;
   reasons: string[];
 }
 
 /**
  * @description Scores a move based on current battle state and meta-state.
- * @param {Ability} move - The move to score.
+ * @param {Move} move - The move to score.
  * @param {BattleCharacter} character - The character using the move.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {MetaState} meta - The current meta-state.
  * @returns {MoveScore} The scored move with reasons.
  */
 export function scoreMove(
-  move: Ability, 
+  move: Move, 
   character: BattleCharacter, 
   enemy: BattleCharacter, 
   meta: MetaState
@@ -30,7 +30,7 @@ export function scoreMove(
   // Base scoring by move type
   switch (move.type) {
     case 'attack': {
-      const potentialDamage = Math.max(1, move.power - enemy.currentDefense);
+      const potentialDamage = Math.max(1, move.baseDamage - enemy.currentDefense);
       const damageRatio = potentialDamage / enemy.currentHealth;
       score = damageRatio * 8 + Math.random() * 2;
       reasons.push(`Base attack (${potentialDamage} damage)`);
@@ -53,7 +53,7 @@ export function scoreMove(
       
     default:
       score = 5 + Math.random() * 3;
-      reasons.push(`Standard ${move.type} ability`);
+      reasons.push(`Standard ${move.type} move`);
   }
   
   // HARD GATING BONUSES - Reward moves that survived hard gating
@@ -109,7 +109,7 @@ export function scoreMove(
 
 /**
  * @description Scores multiple moves and returns them sorted by score.
- * @param {Ability[]} moves - The moves to score.
+ * @param {Move[]} moves - The moves to score.
  * @param {BattleCharacter} character - The character using the moves.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {MetaState} meta - The current meta-state.
@@ -117,7 +117,7 @@ export function scoreMove(
  * @returns {MoveScore[]} The scored moves sorted by score (highest first).
  */
 export function scoreMoves(
-  moves: Ability[],
+  moves: Move[],
   character: BattleCharacter,
   enemy: BattleCharacter,
   meta: MetaState

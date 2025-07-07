@@ -12,133 +12,213 @@ export class AzulaNarrativeService {
 
   // Azula-specific miss lines with emotional unraveling
   private missLines = [
-    "Azula sidesteps, a ghost in blue fire.",
-    "Her calculated strike finds only empty air.",
-    "The princess's precision fails her for once.",
-    "Her blue flames dance but miss their mark.",
-    "Azula's control slips—her fury disrupts her precision.",
-    "The perfect facade cracks—the strike goes wide.",
-    "Her calculated approach fails to find its target.",
-    "The princess's composure wavers—the attack misses.",
-    "Azula's control is tested—the strike lacks precision.",
-    "Her perfect timing is off—the attack goes astray.",
-    "The princess's fury disrupts her calculated strike.",
-    "Her control slips—the attack finds only air."
+    ...[
+      "Azula sidesteps, a ghost in blue fire.",
+      "Her calculated strike finds only empty air.",
+      "The princess's precision fails her for once.",
+      "Her blue flames dance but miss their mark.",
+      "Azula's control slips—her fury disrupts her precision.",
+      "The perfect facade cracks—the strike goes wide.",
+      "Her calculated approach fails to find its target.",
+      "The princess's composure wavers—the attack misses.",
+      "Azula's control is tested—the strike lacks precision.",
+      "Her perfect timing is off—the attack goes astray.",
+      "The princess's fury disrupts her calculated strike.",
+      "Her control slips—the attack finds only air."
+    ],
+    // Premium-grade additions (Low Control)
+    "Azula hurls fire with fury—wild, imprecise, unbecoming.",
+    "The flame escapes her hand like a scream—aimless, loud, wrong.",
+    "She fires too fast. Too much. Not enough direction. Just rage.",
+    "The air crackles with intent, but her aim dies in chaos.",
+    "Her fury lights the room, but not the target.",
+    // Premium-grade additions (High Composure)
+    "Azula exhales through her nose, unfazed by the near miss.",
+    "A narrow miscalculation—not a failure, a recalibration.",
+    "Her eyes narrow. The next strike will not miss.",
+    "Blue flame veers harmlessly past—her face doesn't change.",
+    "A miss, yes. But one she allowed."
   ];
 
   // Azula-specific hit lines with emotional depth
   private hitLines = [
-    "Azula's blue fire strikes with controlled precision.",
-    "Her flames dance with deadly grace, finding their mark.",
-    "The princess's calculated fury is a weapon in itself.",
-    "Her blue flames test their opponent's resolve.",
-    "Azula's firebending is poetry of destruction.",
-    "Her flames engulf the opponent, searing through their defenses.",
-    "The princess's precision is devastating.",
-    "Her control remains absolute—the strike lands perfectly.",
-    "Azula's perfect facade remains unbroken—the attack connects.",
-    "Her calculated approach proves effective.",
-    "The princess's composure serves her well.",
-    "Her control is tested but remains firm."
+    ...[
+      "Azula's blue fire strikes with controlled precision.",
+      "Her flames dance with deadly grace, finding their mark.",
+      "The princess's calculated fury is a weapon in itself.",
+      "Her blue flames test their opponent's resolve.",
+      "Azula's firebending is poetry of destruction.",
+      "Her flames engulf the opponent, searing through their defenses.",
+      "The princess's precision is devastating.",
+      "Her control remains absolute—the strike lands perfectly.",
+      "Azula's perfect facade remains unbroken—the attack connects.",
+      "Her calculated approach proves effective.",
+      "The princess's composure serves her well.",
+      "Her control is tested but remains firm."
+    ],
+    // Premium-grade additions (High Control)
+    "Azula strikes with surgical efficiency. No wasted motion.",
+    "The fire curves as commanded—like it knows to obey.",
+    "Her breath syncs with the strike. Measured. Fatal.",
+    "Control hums in her bones—the hit lands without flair, only certainty.",
+    "She calculates the opponent's breath—and strikes between heartbeats.",
+    // Premium-grade additions (Low Composure)
+    "The fire lashes out before her words can—pure venom, uncontrolled.",
+    "Azula snarls. The blast is messier than she wanted. But it lands.",
+    "Every crack in her mind feeds the fire that hits.",
+    "She burns them for noticing the tremor in her voice.",
+    "It's not elegance. It's impact. It's enough."
   ];
 
   // Azula-specific escalation lines
   private escalationLines = [
-    "Azula's control slips—her fury disrupts her precision.",
-    "The princess's perfect facade cracks only for an instant.",
-    "Her calculated approach gives way to raw power.",
-    "Azula's composure is tested by the escalating conflict.",
-    "The princess's control remains absolute despite the chaos.",
-    "Her perfect facade begins to show cracks.",
-    "Azula's fury threatens to burn away discipline.",
-    "The princess's composure is pushed to its limits.",
-    "Her calculated nature is tested by the intensity.",
-    "Azula's control is challenged by the escalating battle.",
-    "The princess's perfect facade is tested by the conflict.",
-    "Her composure remains unshakeable despite the chaos."
-  ];
-
-  // Azula-specific desperation lines
-  private desperationLines = [
-    "Azula's perfect facade finally cracks under pressure.",
-    "The princess's control slips—her fury takes over.",
-    "Her calculated approach gives way to desperation.",
-    "Azula's composure is shattered by the overwhelming odds.",
-    "The princess's perfect facade is broken.",
-    "Her control is lost to the desperate need to survive.",
-    "Azula's fury becomes her only weapon.",
-    "The princess's composure is overwhelmed by desperation.",
-    "Her calculated nature is forced to embrace chaos.",
-    "Azula's perfect facade is destroyed by the conflict.",
-    "The princess's control is broken by desperation.",
-    "Her composure is shattered by the brutal reality."
+    ...[
+      "Azula's control slips—her fury disrupts her precision.",
+      "The princess's perfect facade cracks only for an instant.",
+      "Her calculated approach gives way to raw power.",
+      "Azula's composure is tested by the escalating conflict.",
+      "The princess's control remains absolute despite the chaos.",
+      "Her perfect facade begins to show cracks.",
+      "Azula's fury threatens to burn away discipline.",
+      "The princess's composure is pushed to its limits.",
+      "Her calculated nature is tested by the intensity.",
+      "Azula's control is challenged by the escalating battle.",
+      "The princess's perfect facade is tested by the conflict.",
+      "Her composure remains unshakeable despite the chaos."
+    ],
+    // Premium-grade additions (Low Composure)
+    "The cracks in her mask widen—fire bursts through.",
+    "She stops breathing between strikes. There's only fire now.",
+    "Azula's elegance frays into something primal.",
+    "Each missed strike frays the silk of her composure.",
+    "What begins as strategy unravels into obsession.",
+    // Premium-grade additions (High Control)
+    "Chaos builds, but her technique holds like glass under pressure.",
+    "Azula tightens her control, turns tension into heat.",
+    "With each attack, her precision sharpens—distilled, not diluted.",
+    "Pressure refines her—like coal into diamond.",
+    "She channels the rising chaos into absolute focus."
   ];
 
   // Azula-specific victory lines
   private victoryLines = [
-    "Azula's perfect facade remains unbroken in victory.",
-    "The princess's control proves its worth.",
-    "Her calculated approach leads to triumph.",
-    "Azula's composure serves her well.",
-    "The princess's precision brings victory.",
-    "Her control remains absolute.",
-    "Azula's perfect facade is vindicated.",
-    "The princess's calculated nature prevails.",
-    "Her composure leads to success.",
-    "Azula's control proves superior.",
-    "The princess's precision triumphs.",
-    "Her perfect facade is justified."
+    ...[
+      "Azula's perfect facade remains unbroken in victory.",
+      "The princess's control proves its worth.",
+      "Her calculated approach leads to triumph.",
+      "Azula's composure serves her well.",
+      "The princess's precision brings victory.",
+      "Her control remains absolute.",
+      "Azula's perfect facade is vindicated.",
+      "The princess's calculated nature prevails.",
+      "Her composure leads to success.",
+      "Azula's control proves superior.",
+      "The princess's precision triumphs.",
+      "Her perfect facade is justified."
+    ],
+    // Premium-grade additions (Low Composure)
+    "Her breath is ragged, her smile cracked—but she won.",
+    "Victory comes drenched in sweat and self-loathing.",
+    "She stands over them—trembling, grinning, furious she needed effort.",
+    "Azula wins, but not without shedding parts of herself.",
+    "Even victory tastes bitter when your mask slips.",
+    // Premium-grade additions (High Control)
+    "Azula doesn't gloat—she simply knows the outcome was inevitable.",
+    "She walks away before the fire fades. Precision leaves no need for celebration.",
+    "Her heart rate never spiked. Her technique never broke.",
+    "Victory is a consequence, not an achievement.",
+    "She doesn't smirk—just notes the data."
   ];
 
   // Azula-specific defeat lines
   private defeatLines = [
-    "Azula's perfect facade is finally shattered.",
-    "The princess's control proves insufficient.",
-    "Her calculated approach fails her.",
-    "Azula's composure is broken by defeat.",
-    "The princess's precision is not enough.",
-    "Her control is overwhelmed by the odds.",
-    "Azula's perfect facade is destroyed.",
-    "The princess's calculated nature fails.",
-    "Her composure is shattered by defeat.",
-    "Azula's control proves inadequate.",
-    "The princess's precision is overcome.",
-    "Her perfect facade is finally broken."
+    ...[
+      "Azula's perfect facade is finally shattered.",
+      "The princess's control proves insufficient.",
+      "Her calculated approach fails her.",
+      "Azula's composure is broken by defeat.",
+      "The princess's precision is not enough.",
+      "Her control is overwhelmed by the odds.",
+      "Azula's perfect facade is destroyed.",
+      "The princess's calculated nature fails.",
+      "Her composure is shattered by defeat.",
+      "Azula's control proves inadequate.",
+      "The princess's precision is overcome.",
+      "Her perfect facade is finally broken."
+    ],
+    // Premium-grade additions (Low Composure)
+    "Azula stares at her trembling hands, like they betrayed her.",
+    "There's no scream. Just silence. And then the flames die.",
+    "She collapses before the blow lands—beaten by herself.",
+    "Her fire gutters out with a sound like choking.",
+    "The porcelain mask finally shatters.",
+    // Premium-grade additions (High Control)
+    "She fought to the end—unflinching, even in ruin.",
+    "Defeat stings, but her form never broke. Her posture remains.",
+    "Even broken, she watches with calculating eyes.",
+    "She falls like a blade—not flailing, but sharp to the last.",
+    "Control wasn't enough. But it was never lost."
   ];
 
   // Expanded move-specific flavor pools
   private moveFlavors: Record<string, string[]> = {
     'Blue Fire': [
-      "Azula conjures blue fire, her signature attack blazing across the throne room.",
-      "A torrent of blue flame surges from Azula's fingertips.",
-      "Her blue fire crackles, burning with unnatural intensity.",
-      "Blue fire licks at the opponent's defenses.",
-      "The blue flames test their opponent's resolve.",
-      "Azula's blue fire strikes with controlled precision."
+      ...[
+        "Azula conjures blue fire, her signature attack blazing across the throne room.",
+        "A torrent of blue flame surges from Azula's fingertips.",
+        "Her blue fire crackles, burning with unnatural intensity.",
+        "Blue fire licks at the opponent's defenses.",
+        "The blue flames test their opponent's resolve.",
+        "Azula's blue fire strikes with controlled precision."
+      ],
+      // Premium-grade additions
+      "Azula paints the air with fury—precision in every swirl.",
+      "Blue flame coils like a serpent, striking with intent.",
+      "The heat is not warmth. It is command.",
+      "Her signature fire surges forward, royal and wrathful."
     ],
     'Lightning Arc': [
-      "Azula channels lightning, the air humming with raw power.",
-      "A jagged bolt of lightning leaps from Azula's hand.",
-      "She unleashes a precise arc of lightning at her foe.",
-      "Lightning crackles around Azula's fingertips.",
-      "The air itself seems to burn with their fury.",
-      "Electricity dances at Azula's command."
+      ...[
+        "Azula channels lightning, the air humming with raw power.",
+        "A jagged bolt of lightning leaps from Azula's hand.",
+        "She unleashes a precise arc of lightning at her foe.",
+        "Lightning crackles around Azula's fingertips.",
+        "The air itself seems to burn with their fury.",
+        "Electricity dances at Azula's command."
+      ],
+      // Premium-grade additions
+      "She splits the sky with thought alone.",
+      "Azula's fingers snap—a line of death dances from them.",
+      "Lightning obeys her like a loyal blade.",
+      "No shout. No stance. Just intention—and light."
     ],
     'Fire Blast': [
-      "Azula's fire strikes with controlled precision.",
-      "The princess's calculated fury is precise.",
-      "Her fire strikes with controlled precision.",
-      "Azula's control remains unshakeable.",
-      "The Fire Nation heir's control is absolute.",
-      "Her calculated approach shows mastery."
+      ...[
+        "Azula's fire strikes with controlled precision.",
+        "The princess's calculated fury is precise.",
+        "Her fire strikes with controlled precision.",
+        "Azula's control remains unshakeable.",
+        "The Fire Nation heir's control is absolute.",
+        "Her calculated approach shows mastery."
+      ],
+      // Premium-grade additions
+      "A pillar of flame roars from her stance—unapologetic and pure.",
+      "Azula's blast doesn't roar. It announces.",
+      "She ignites from stillness—pure economy of power."
     ],
     'Precision Strike': [
-      "Azula's calculated strike finds only empty air.",
-      "Her perfect timing is off—the attack goes astray.",
-      "The princess's precision fails her for once.",
-      "Her calculated approach fails to find its target.",
-      "The perfect facade cracks—the strike goes wide.",
-      "The princess's composure wavers—the attack misses."
+      ...[
+        "Azula's calculated strike finds only empty air.",
+        "Her perfect timing is off—the attack goes astray.",
+        "The princess's precision fails her for once.",
+        "Her calculated approach fails to find its target.",
+        "The perfect facade cracks—the strike goes wide.",
+        "The princess's composure wavers—the attack misses."
+      ],
+      // Premium-grade additions
+      "She moves in angles—measured like calligraphy, brutal as execution.",
+      "Every motion balanced, weighted—then released like a blade.",
+      "Azula's flame trims the fat from combat. Only consequence remains."
     ]
   };
 
@@ -294,36 +374,6 @@ export class AzulaNarrativeService {
     } else {
       // Balanced state - standard escalation lines
       return this.getCycledVariant(this.escalationLines, 'escalation');
-    }
-  }
-
-  /**
-   * @description Get desperation line with emotional state
-   */
-  getDesperationLine(): string {
-    const emotionalState = this.getEmotionalState();
-    
-    // Use emotional state to select appropriate desperation line
-    if (emotionalState.control >= 3) {
-      // High control - more controlled desperation
-      const highControlLines = [
-        "Azula's perfect facade finally cracks under pressure.",
-        "The princess's control slips—her fury takes over.",
-        "Her calculated approach gives way to desperation.",
-        "Azula's composure is shattered by the overwhelming odds.",
-        "The princess's perfect facade is broken."
-      ];
-      return this.getCycledVariant(highControlLines, 'desperation_high_control');
-    } else {
-      // Low control - more uncontrolled desperation
-      const lowControlLines = [
-        "Azula's fury becomes her only weapon.",
-        "The princess's composure is overwhelmed by desperation.",
-        "Her calculated nature is forced to embrace chaos.",
-        "Azula's perfect facade is destroyed by the conflict.",
-        "The princess's control is broken by desperation."
-      ];
-      return this.getCycledVariant(lowControlLines, 'desperation_low_control');
     }
   }
 

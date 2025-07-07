@@ -1,10 +1,10 @@
-import type { Ability } from '../../../../common/types';
+import type { Move } from '../../types/move.types';
 import type { BattleCharacter } from '../../types';
 import { determineTacticalPriority, getTacticalExplanation } from './tacticalAnalysis';
 
 /**
  * @description Enhanced move scoring that considers tactical priorities and battle state
- * @param move - The ability being scored
+ * @param move - The move being scored
  * @param self - The AI character
  * @param enemy - The opponent character
  * @param availableAbilities - All abilities that can be used this turn
@@ -12,12 +12,12 @@ import { determineTacticalPriority, getTacticalExplanation } from './tacticalAna
  * @returns Scored move with reasoning
  */
 export function scoreMoveWithTactics(
-  move: Ability,
+  move: Move,
   self: BattleCharacter,
   enemy: BattleCharacter,
-  availableAbilities: Ability[],
+  availableAbilities: Move[],
   stalemateCounter: number = 0 // NEW: Accept stalemateCounter
-): { move: Ability; score: number; reasons: string[]; priority: string } {
+): { move: Move; score: number; reasons: string[]; priority: string } {
   let score = 0;
   const reasons: string[] = [];
   
@@ -27,7 +27,7 @@ export function scoreMoveWithTactics(
   reasons.push(`Tactical: ${tacticalExplanation}`);
   
   // Base Score: Always add the move's power
-  score += move.power;
+  score += move.baseDamage;
   
   // NEW: Context-aware penalty for useless defensive moves
   // Use the same getLastMoveType logic as in tacticalAnalysis
@@ -60,7 +60,7 @@ export function scoreMoveWithTactics(
         score += 60; // Prioritize high-damage moves
         reasons.push('High priority: Gamble with a powerful attack!');
       } else {
-        score += move.power; // Still prefer some damage
+        score += move.baseDamage; // Still prefer some damage
       }
       break;
       
@@ -76,7 +76,7 @@ export function scoreMoveWithTactics(
       break;
       
     case 'finish':
-      if ((move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 15) {
+      if ((move.type === 'attack' || move.type === 'parry_retaliate') && move.baseDamage > 15) {
         score += 70;
         reasons.push('High damage attack to finish');
       }
@@ -91,13 +91,13 @@ export function scoreMoveWithTactics(
         score += 150; // Massive bonus
         reasons.push('High priority: Piercing move required!');
       } else if (move.type === 'attack') {
-        score += move.power * 2; // Still prioritize any attack over a defensive move
+        score += move.baseDamage * 2; // Still prioritize any attack over a defensive move
         reasons.push('Prioritizing any attack to apply pressure.');
       }
       break;
       
     case 'heal':
-      if (move.type === 'defense_buff' && move.power > 20) {
+      if (move.type === 'defense_buff' && move.baseDamage > 20) {
         score += 15;
         reasons.push('Strong defense buff for safety');
       }
@@ -119,7 +119,7 @@ export function scoreMoveWithTactics(
         score += 20;
         reasons.push('Standard attack pressure');
       }
-      if (move.power > 15) {
+      if (move.baseDamage > 15) {
         score += 8;
         reasons.push('High damage attack');
       }
@@ -183,28 +183,6 @@ export function scoreMoveWithTactics(
     }
   }
   
-  // Cooldown consideration
-  if (self.cooldowns[move.name]) {
-    score -= 15;
-    reasons.push('Penalty: Move on cooldown');
-  }
-  
-  // Uses remaining consideration
-  const usesLeft = self.usesLeft[move.name] ?? (move.maxUses || Infinity);
-  if (usesLeft <= 0) {
-    score -= 25;
-    reasons.push('Penalty: No uses remaining');
-  } else if (usesLeft === 1 && move.maxUses) {
-    score += 5; // Bonus for last use of limited move
-    reasons.push('Bonus: Last use of limited move');
-  }
-  
-  // Chi cost consideration
-  if (move.chiCost && move.chiCost > (self.resources.chi || 0)) {
-    score -= 20;
-    reasons.push('Penalty: Cannot afford chi cost');
-  }
-  
   // Variety bonus (avoid repeating moves)
   if (self.lastMove === move.name) {
     score -= 10;
@@ -222,19 +200,19 @@ export function scoreMoveWithTactics(
 
 /**
  * @description Selects the best move based on tactical scoring
- * @param availableAbilities - List of abilities that can be used
+ * @param availableAbilities - List of moves that can be used
  * @param self - The AI character
  * @param enemy - The opponent character
  * @param stalemateCounter - NEW: Stalemate counter from tactical phase
  * @returns The best move with full tactical analysis
  */
 export function selectBestTacticalMove(
-  availableAbilities: Ability[],
+  availableAbilities: Move[],
   self: BattleCharacter,
   enemy: BattleCharacter,
   stalemateCounter: number = 0 // NEW: Accept stalemateCounter
 ): { 
-  chosenAbility: Ability; 
+  chosenAbility: Move; 
   score: number; 
   reasons: string[]; 
   priority: string;
@@ -252,8 +230,8 @@ export function selectBestTacticalMove(
     };
   }
 
-  const scoredMoves = availableAbilities.map(ability => 
-    scoreMoveWithTactics(ability, self, enemy, availableAbilities, stalemateCounter)
+  const scoredMoves = availableAbilities.map(move =>
+    scoreMoveWithTactics(move, self, enemy, availableAbilities, stalemateCounter)
   );
   
   // Sort by score (highest first)
@@ -272,31 +250,6 @@ export function selectBestTacticalMove(
   };
 }
 
-/**
- * Converts a Move to an Ability for tactical AI compatibility.
- * Only maps compatible fields; extra Ability fields are left undefined or defaulted.
- */
-export function moveToAbility(move: any): Ability {
-  return {
-    name: move.name,
-    type: move.type,
-    power: typeof move.baseDamage === 'number' ? move.baseDamage : (move.power ?? 0),
-    description: move.description || '',
-    cooldown: move.cooldown,
-    chiCost: move.chiCost,
-    maxUses: move.maxUses,
-    tags: move.tags,
-    collateralRisk: move.collateralRisk,
-    collateralDamage: move.collateralDamage,
-    collateralDamageNarrative: move.collateralDamageNarrative,
-    unlockCondition: move.unlockCondition,
-    critChance: move.critChance,
-    critMultiplier: move.critMultiplier,
-    isFinisher: move.isFinisher,
-    oncePerBattle: move.oncePerBattle,
-    finisherCondition: move.finisherCondition,
-    desperationBuff: move.desperationBuff,
-    appliesEffect: move.appliesEffect,
-    beatsDefenseType: move.beatsDefenseType,
-  };
-} 
+// (Removed moveToAbility; all logic is now Move-centric)
+
+// ... existing code ... 

@@ -5,7 +5,7 @@ import { useState, useRef, useCallback } from 'react';
 import { BattleState, BattleLogEntry } from '../types';
 import { simulateBattle } from '../services/battleSimulator.service';
 import { SimulateBattleParams } from '../types';
-import { BattleMetrics, CharacterMetrics, AIMetrics } from '../services/battle/analytics';
+import type { BattleMetrics, CharacterMetrics, AIMetrics } from '../services/battle/analytics';
 
 /**
  * @description Custom hook for managing battle simulation state.

@@ -74,7 +74,7 @@ function getStatusEffectIcon(effectType: string) {
  * @returns {JSX.Element} The horizontal player card UI.
  */
 export function PlayerCardHorizontal({ character, isActive, playerColor, onChange }: PlayerCardHorizontalProps) {
-  const bendingTheme = getBendingTheme(character.bending);
+  const bendingTheme = getBendingTheme(character.base.bending);
   const healthPercentage = ((character.currentHealth || 0) / 100) * 100;
 
   const containerClasses = [
@@ -91,7 +91,7 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
       } as React.CSSProperties}
     >
       <div className={styles.avatarSection}>
-        <img src={character.image} alt={character.name} className={styles.avatarImg} />
+        <img src={character.base.image} alt={character.name} className={styles.avatarImg} />
         <div className={styles.bendingBadge}>
           {bendingTheme.icon}
           <span>{bendingTheme.name}</span>
@@ -125,7 +125,7 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
         </div>
         
         <div className={styles.statsRow}>
-          {character.stats && Object.entries(character.stats).map(([statName, value]) => (
+          {character.base.stats && Object.entries(character.base.stats).map(([statName, value]) => (
             <span key={statName} className={styles.statChip}>
               {getStatIcon(statName)}
               <span className={styles.statLabel}>{statName.charAt(0).toUpperCase() + statName.slice(1)}</span>
@@ -190,7 +190,7 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
             {character.abilities.slice(0, 3).map((ability) => (
               <span key={ability.name} className={styles.abilityChip}>
                 <span className={styles.abilityName}>{ability.name}</span>
-                <span className={styles.abilityPower}>{ability.power}</span>
+                <span className={styles.abilityPower}>{'power' in ability ? String(ability.power) : ''}</span>
               </span>
             ))}
             {character.abilities.length > 3 && (
@@ -202,11 +202,11 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
         )}
         
         {/* Style Row */}
-        {character.personality && (
+        {character.base.personality && (
           <div className={styles.styleRow}>
             <span className={styles.styleChip}>
               <span className={styles.styleLabel}>Style</span>
-              <span className={styles.styleValue}>{character.personality}</span>
+              <span className={styles.styleValue}>{character.base.personality}</span>
             </span>
           </div>
         )}

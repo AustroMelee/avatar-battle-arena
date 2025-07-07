@@ -1,4 +1,4 @@
-import type { Ability } from '../../../../common/types';
+import type { Move } from '../../types/move.types';
 import type { BattleCharacter } from '../../types';
 
 // New helper function to classify the last move
@@ -24,7 +24,7 @@ function getLastMoveType(character: BattleCharacter): 'attack' | 'defense' | 'ot
 export function determineTacticalPriority(
   self: BattleCharacter,
   enemy: BattleCharacter,
-  availableAbilities: Ability[],
+  availableAbilities: Move[],
   stalemateCounter: number = 0 // NEW: Track tactical stalemates
 ): 'defend' | 'pierce' | 'finish' | 'recover' | 'attack' | 'heal' | 'gamble' { // NEW: Added 'gamble'
   const enemyLastMoveType = getLastMoveType(enemy);

@@ -1,5 +1,6 @@
 import type { BattleState, BattleCharacter } from '../../../types';
-import type { Ability, Location } from '../../../../../common/types';
+import type { Move } from '../../../types/move.types';
+import type { Location } from '@/common/types';
 import { getAvailableMoves as getAvailableMovesWithLocation } from '../../utils/moveUtils';
 import { MetaState } from '../metaState';
 import { 
@@ -142,7 +143,7 @@ export function isLosing(self: BattleCharacter, opp: BattleCharacter): boolean {
 }
 
 // Move selection helpers
-export function getAvailableMovesSimple(self: BattleCharacter, location?: Location): Ability[] {
+export function getAvailableMovesSimple(self: BattleCharacter, location?: Location): Move[] {
   if (location) {
     // Use the main getAvailableMoves function with collateral damage filtering
     const meta: MetaState = {
@@ -167,26 +168,26 @@ export function getAvailableMovesSimple(self: BattleCharacter, location?: Locati
   );
 }
 
-export function getMoveByName(self: BattleCharacter, moveName: string): Ability | null {
+export function getMoveByName(self: BattleCharacter, moveName: string): Move | null {
   const availableMoves = getAvailableMovesSimple(self);
   return availableMoves.find(move => move.name === moveName) || null;
 }
 
-export function getMoveWithTag(self: BattleCharacter, tag: string): Ability | null {
+export function getMoveWithTag(self: BattleCharacter, tag: string): Move | null {
   const availableMoves = getAvailableMovesSimple(self);
   return availableMoves.find(move => move.tags?.includes(tag)) || null;
 }
 
-export function getHighestDamageMove(self: BattleCharacter): Ability | null {
+export function getHighestDamageMove(self: BattleCharacter): Move | null {
   const availableMoves = getAvailableMovesSimple(self);
   if (availableMoves.length === 0) return null;
   
   return availableMoves.reduce((best, current) => 
-    current.power > best.power ? current : best
+    current.baseDamage > best.baseDamage ? current : best
   );
 }
 
-export function getLowestCostMove(self: BattleCharacter): Ability | null {
+export function getLowestCostMove(self: BattleCharacter): Move | null {
   const availableMoves = getAvailableMovesSimple(self);
   if (availableMoves.length === 0) return null;
   

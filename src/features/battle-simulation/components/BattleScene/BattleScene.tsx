@@ -58,6 +58,7 @@ export function BattleScene({
           battleLog={state.battleLog}
           aiLog={state.aiLog}
           maxEntries={100}
+          participants={state.participants}
         />
       </div>
     </div>

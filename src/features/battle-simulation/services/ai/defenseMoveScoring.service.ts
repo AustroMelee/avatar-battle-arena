@@ -1,14 +1,14 @@
 // CONTEXT: Defense Move Scoring Service
 // RESPONSIBILITY: Score defense moves based on context and intent
 
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { BattleCharacter } from '../../types';
 import { BattleTacticalContext } from './battleStateAwareness';
 import { Intent } from './intentSystem';
 
 /**
  * @description Scores a defense move based on context and intent
- * @param {Ability} move - The defense move to score
+ * @param {Move} move - The defense move to score
  * @param {BattleCharacter} self - The character using the move
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
@@ -16,7 +16,7 @@ import { Intent } from './intentSystem';
  * @returns {number} The calculated score
  */
 export function scoreDefenseMove(
-  move: Ability,
+  move: Move,
   self: BattleCharacter,
   _enemy: BattleCharacter,
   context: BattleTacticalContext,
@@ -25,7 +25,7 @@ export function scoreDefenseMove(
   let score = 0;
   
   // Base defense value
-  score += (move.power || 0) * 1.5;
+  score += (move.baseDamage || 0) * 1.5;
   
   // Status Effect Scoring
   // Value moves that apply defensive status effects
@@ -126,7 +126,7 @@ export function scoreDefenseMove(
 
 /**
  * @description Gets scoring reasons for a defense move
- * @param {Ability} move - The defense move to analyze
+ * @param {Move} move - The defense move to analyze
  * @param {BattleCharacter} self - The character using the move
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
@@ -134,7 +134,7 @@ export function scoreDefenseMove(
  * @returns {string[]} Array of scoring reasons
  */
 export function getDefenseMoveScoringReasons(
-  move: Ability,
+  move: Move,
   self: BattleCharacter,
   _enemy: BattleCharacter,
   _context: BattleTacticalContext,
@@ -142,7 +142,7 @@ export function getDefenseMoveScoringReasons(
 ): string[] {
   const reasons: string[] = [];
   
-  reasons.push(`Base defense (${move.power || 0} defense)`);
+  reasons.push(`Base defense (${move.baseDamage || 0} defense)`);
   
   // Status effect reasons
   if (move.appliesEffect) {
@@ -209,12 +209,12 @@ export function getDefenseMoveScoringReasons(
 
 /**
  * @description Gets context factors for a defense move
- * @param {Ability} move - The defense move to analyze
+ * @param {Move} move - The defense move to analyze
  * @param {BattleTacticalContext} context - The current battle context
  * @returns {string[]} Array of context factors
  */
 export function getDefenseMoveContextFactors(
-  move: Ability,
+  move: Move,
   context: BattleTacticalContext
 ): string[] {
   const factors: string[] = [];

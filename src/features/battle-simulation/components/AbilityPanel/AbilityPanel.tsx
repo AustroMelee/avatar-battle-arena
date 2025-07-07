@@ -1,6 +1,6 @@
 // CONTEXT: BattleSimulation, // FOCUS: AbilityPanel
 import React, { useMemo } from 'react';
-import type { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import type { BattleCharacter } from '../../types';
 import { AbilityButton } from '../AbilityButton';
 import { useCooldownManager } from '../../hooks/useCooldownManager.hook';
@@ -15,7 +15,7 @@ export type AbilityPanelProps = {
   /** @description Whether this panel is for the active player. */
   isActive: boolean;
   /** @description Callback when an ability is selected. */
-  onAbilitySelect: (ability: Ability) => void;
+  onAbilitySelect: (move: Move) => void;
   /** @description Whether to show detailed tooltips. */
   showTooltips?: boolean;
   /** @description Additional CSS class names. */
@@ -43,34 +43,34 @@ export const AbilityPanel: React.FC<AbilityPanelProps> = ({
 
   // Initialize cooldown manager
   const cooldownManager = useCooldownManager({
-    abilities: character.abilities,
+    moves: character.abilities,
     startingTurn: 0, // This should come from battle state
     availableChi: character.resources.chi,
     currentHealthPercentage: healthPercentage
   });
 
   // Memoize ability display info for performance
-  const abilityDisplayInfos = useMemo(() => {
-    return character.abilities.map(ability => ({
-      ability,
-      displayInfo: cooldownManager.getDisplayInfo(ability)
+  const moveDisplayInfos = useMemo(() => {
+    return character.abilities.map(move => ({
+      move,
+      displayInfo: cooldownManager.getDisplayInfo(move)
     }));
   }, [character.abilities, cooldownManager]);
 
   /**
    * @description Handle ability selection.
-   * @param {Ability} ability - The selected ability.
+   * @param {Move} move - The selected move.
    */
-  const handleAbilitySelect = (ability: Ability): void => {
+  const handleMoveSelect = (move: Move): void => {
     if (!isActive) {
       return; // Only allow selection for active player
     }
 
-    const availability = cooldownManager.isAbilityAvailable(ability);
+    const availability = cooldownManager.isMoveAvailable(move);
     
     if (availability.isAvailable) {
-      cooldownManager.useAbility(ability);
-      onAbilitySelect(ability);
+      cooldownManager.useMove(move);
+      onAbilitySelect(move);
     }
   };
 
@@ -112,14 +112,14 @@ export const AbilityPanel: React.FC<AbilityPanelProps> = ({
         </div>
       </div>
 
-      {/* Abilities list */}
+      {/* Moves list */}
       <div className={styles.abilitiesList}>
-        {abilityDisplayInfos.map(({ ability, displayInfo }) => (
+        {moveDisplayInfos.map(({ move, displayInfo }) => (
           <AbilityButton
-            key={ability.name}
-            ability={ability}
+            key={move.name}
+            ability={move}
             displayInfo={displayInfo}
-            onClick={handleAbilitySelect}
+            onClick={handleMoveSelect}
             showTooltips={showTooltips}
             className={styles.abilityButton}
           />
@@ -130,11 +130,11 @@ export const AbilityPanel: React.FC<AbilityPanelProps> = ({
       <div className={styles.cooldownSummary}>
         <h4 className={styles.summaryTitle}>Cooldown Status</h4>
         <div className={styles.summaryGrid}>
-          {abilityDisplayInfos
+          {moveDisplayInfos
             .filter(({ displayInfo }) => displayInfo.showCooldownIndicator)
-            .map(({ ability, displayInfo }) => (
-              <div key={ability.name} className={styles.summaryItem}>
-                <span className={styles.summaryAbilityName}>{ability.name}</span>
+            .map(({ move, displayInfo }) => (
+              <div key={move.name} className={styles.summaryItem}>
+                <span className={styles.summaryAbilityName}>{move.name}</span>
                 <span className={styles.summaryCooldown}>
                   {displayInfo.cooldownText}
                 </span>

@@ -270,8 +270,8 @@ export class NarrativeService {
     this.updateTurn(turnNumber);
 
     // Calculate max health from stats
-    const targetMaxHealth = target.stats.power + target.stats.defense + target.stats.agility + target.stats.intelligence;
-    const actorMaxHealth = actor.stats.power + actor.stats.defense + actor.stats.agility + actor.stats.intelligence;
+    const targetMaxHealth = target.base.stats.power + target.base.stats.defense + target.base.stats.agility + target.base.stats.intelligence;
+    const actorMaxHealth = actor.base.stats.power + actor.base.stats.defense + actor.base.stats.agility + actor.base.stats.intelligence;
 
     // Generate actor narrative
     const actorContext = {

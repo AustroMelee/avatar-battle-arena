@@ -1,4 +1,6 @@
-import { generateUniqueLogId } from '../../ai/logQueries';
+import { generateUniqueLogId } from '../ai/logQueries';
+import type { BattleState } from '../../types';
+import { declareWinner } from './state';
 
 const DECISIVE_WIN_HEALTH_DIFFERENCE = 60; // A 60 HP lead can trigger a decisive win
 
@@ -41,5 +43,6 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
     });
     return declareWinner(newState, p2);
   }
-  // ... existing code ...
+  // If no decisive win, return the state unchanged
+  return newState;
 } 

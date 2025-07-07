@@ -1,10 +1,11 @@
 // CONTEXT: Advanced AI Controller
 // RESPONSIBILITY: Integrate battle awareness, intent system, and contextual move scoring
-import { Ability, Location } from '@/common/types';
-import { BattleCharacter, AILogEntry, PerceivedState, ConsideredAction, BattleLogEntry } from '../../types';
+import { Location } from '@/common/types';
+import { BattleCharacter, AILogEntry, BattleLogEntry } from '../../types';
+import type { Move } from '../../types/move.types';
 import { getBattleTacticalContext, BattleTacticalContext } from './battleStateAwareness';
 import { chooseIntent, Intent, shouldMaintainIntent } from './intentSystem';
-import { scoreMovesWithContext, ContextualMoveScore } from './contextualMoveScoring';
+import { scoreMovesWithContext } from './contextualMoveScoring';
 import { getAvailableMoves } from '../utils/moveUtils';
 import { assessMetaState } from './metaState';
 
@@ -27,72 +28,72 @@ export interface AdvancedAIState {
  * @param {Intent} intent - The current tactical intent.
  * @returns {PerceivedState} The enhanced perceived state.
  */
-function createEnhancedPerceivedState(
-  self: BattleCharacter, 
-  enemy: BattleCharacter, 
-  turn: number
-): PerceivedState {
-  // TODO: Replace placeholder values with real character state logic
-  return {
-    self: {
-      health: self.currentHealth,
-      defense: self.currentDefense,
-      personality: self.personality,
-      abilities: self.abilities.map(ability => ({
-        id: ability.name.toLowerCase().replace(/\s+/g, '_'),
-        name: ability.name,
-        type: ability.type,
-        power: ability.power,
-        cooldown: ability.cooldown
-      })),
-      cooldowns: self.cooldowns,
-      lastMove: self.lastMove,
-      moveHistory: self.moveHistory,
-      activeEffects: self.activeEffects,
-      resources: self.resources,
-      position: self.position ?? { x: 0, y: 0 },
-      isCharging: self.isCharging ?? false,
-      chargeProgress: self.chargeProgress ?? 0,
-      repositionAttempts: self.repositionAttempts ?? 0
-    },
-    enemy: {
-      health: enemy.currentHealth,
-      defense: enemy.currentDefense,
-      personality: enemy.personality,
-      name: enemy.name,
-      lastMove: enemy.lastMove,
-      moveHistory: enemy.moveHistory,
-      activeEffects: enemy.activeEffects,
-      position: enemy.position ?? { x: 0, y: 0 },
-      isCharging: enemy.isCharging ?? false,
-      chargeProgress: enemy.chargeProgress ?? 0,
-      repositionAttempts: enemy.repositionAttempts ?? 0
-    },
-    round: turn,
-    cooldowns: {}, // Legacy field - can be removed after migration
-    location: 'Fire Nation Throne Hall', // TODO: Replace with real location
-    locationType: 'Enclosed'
-  };
-}
+// function _createEnhancedPerceivedState(
+//   self: BattleCharacter, 
+//   enemy: BattleCharacter, 
+//   turn: number
+// ): PerceivedState {
+//   // TODO: Replace placeholder values with real character state logic
+//   return {
+//     self: {
+//       health: self.currentHealth,
+//       defense: self.currentDefense,
+//       personality: self.base.personality,
+//       abilities: self.abilities.map(move => ({
+//         id: move.id,
+//         name: move.name,
+//         type: move.type,
+//         power: move.baseDamage,
+//         cooldown: move.cooldown
+//       })),
+//       cooldowns: self.cooldowns,
+//       lastMove: self.lastMove,
+//       moveHistory: self.moveHistory,
+//       activeEffects: self.activeEffects,
+//       resources: self.resources,
+//       position: self.position ?? { x: 0, y: 0 },
+//       isCharging: self.isCharging ?? false,
+//       chargeProgress: self.chargeProgress ?? 0,
+//       repositionAttempts: self.repositionAttempts ?? 0
+//     },
+//     enemy: {
+//       health: enemy.currentHealth,
+//       defense: enemy.currentDefense,
+//       personality: enemy.base.personality,
+//       name: enemy.name,
+//       lastMove: enemy.lastMove,
+//       moveHistory: enemy.moveHistory,
+//       activeEffects: enemy.activeEffects,
+//       position: enemy.position ?? { x: 0, y: 0 },
+//       isCharging: enemy.isCharging ?? false,
+//       chargeProgress: enemy.chargeProgress ?? 0,
+//       repositionAttempts: enemy.repositionAttempts ?? 0
+//     },
+//     round: turn,
+//     cooldowns: {}, // Legacy field - can be removed after migration
+//     location: 'Fire Nation Throne Hall', // TODO: Replace with real location
+//     locationType: 'Enclosed'
+//   };
+// }
 
 /**
- * @description Chooses an ability using the advanced AI system with context awareness and tactical intent.
- * @param {BattleCharacter} character - The character choosing the ability.
+ * @description Chooses a move using the advanced AI system with context awareness and tactical intent.
+ * @param {BattleCharacter} character - The character choosing the move.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {number} turn - Current turn number.
  * @param {BattleLogEntry[]} battleLog - The battle log entries.
  * @param {Location} location - The battle location for collateral damage checks.
  * @param {AdvancedAIState | null} previousState - The previous AI state (for intent continuity).
- * @returns {{ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState}} The chosen ability, AI log, and new state.
+ * @returns {{move: Move; aiLog: AILogEntry; newState: AdvancedAIState}} The chosen move, AI log, and new state.
  */
-export function chooseAbilityWithAdvancedAI(
+export function chooseMoveWithAdvancedAI(
   character: BattleCharacter, 
   enemy: BattleCharacter, 
   turn: number,
   battleLog: BattleLogEntry[],
   location: Location,
   previousState: AdvancedAIState | null = null
-): { ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState } {
+): { move: Move; aiLog: AILogEntry; newState: AdvancedAIState } {
   
   const context = getBattleTacticalContext(character, enemy, battleLog);
   
@@ -112,7 +113,7 @@ export function chooseAbilityWithAdvancedAI(
   
   if (availableMoves.length === 0) {
     // Handle no available moves fallback
-    const fallbackAbility = character.abilities.find(a => a.name === "Basic Strike") || character.abilities[0];
+    const fallbackMove = character.abilities.find(m => m.name === "Basic Strike") || character.abilities[0];
     let lastIntentChange: number;
     if (intentTurnCount === 1) {
       lastIntentChange = turn;
@@ -120,7 +121,7 @@ export function chooseAbilityWithAdvancedAI(
       lastIntentChange = previousState?.lastIntentChange ?? turn;
     }
     return {
-        ability: fallbackAbility,
+        move: fallbackMove,
         newState: { context, intent, intentTurnCount, lastIntentChange },
         aiLog: { /* ... create a fallback log ... */ } as any,
     };
@@ -165,73 +166,73 @@ export function chooseAbilityWithAdvancedAI(
     lastIntentChange,
   };
   
-  return { ability: bestMove.move, aiLog, newState };
+  return { move: bestMove.move, aiLog, newState };
 }
 
 /**
  * @description Builds an advanced narrative for the chosen move incorporating context and intent.
  * @param {BattleCharacter} character - The character making the move.
- * @param {Ability} move - The chosen move.
+ * @param {Move} move - The chosen move.
  * @param {BattleTacticalContext} context - The battle context.
  * @param {Intent} intent - The tactical intent.
  * @param {ContextualMoveScore} moveScore - The move score details.
  * @returns {string} The narrative description.
  */
-function buildAdvancedMoveNarrative(
-  character: BattleCharacter,
-  move: Ability,
-  context: BattleTacticalContext,
-  intent: Intent,
-  moveScore: ContextualMoveScore
-): string {
-  const characterName = character.name;
-  const moveName = move.name;
-  const intentType = intent.type;
-  
-  // Base narrative based on intent
-  let narrative = `${characterName} follows their ${intentType.replace('_', ' ')} strategy`;
-  
-  // Add context-specific details
-  if (context.enemyVulnerable && (move.type === 'attack' || move.type === 'parry_retaliate')) {
-    narrative += `, seizing the opportunity while ${context.enemyHealth < 20 ? 'the enemy is critically wounded' : 'the enemy is vulnerable'}`;
-  }
-  
-  if (context.healthPressure && (move.type === 'defense_buff' || move.type === 'evade')) {
-    narrative += `, desperately trying to survive with ${character.currentHealth} health remaining`;
-  }
-  
-  if (context.enemyIsTurtling && (move.type === 'attack' || move.type === 'parry_retaliate')) {
-    narrative += `, attempting to break through the enemy's defensive stance`;
-  }
-  
-  if (context.hasMomentum && (move.type === 'attack' || move.type === 'parry_retaliate')) {
-    narrative += `, building on their momentum`;
-  }
-  
-  if (context.chiPressure && (move.chiCost || 0) === 0) {
-    narrative += `, conserving their dwindling chi reserves`;
-  }
-  
-  // Add move-specific details
-  if (move.power > 40) {
-    narrative += ` with a powerful ${moveName}`;
-  } else if (move.power > 20) {
-    narrative += ` with ${moveName}`;
-  } else {
-    narrative += ` with a measured ${moveName}`;
-  }
-  
-  // Add intent alignment commentary
-  if (moveScore.intentAlignment >= 8) {
-    narrative += ` - perfectly aligned with their tactical goal`;
-  } else if (moveScore.intentAlignment >= 6) {
-    narrative += ` - well-suited to their current strategy`;
-  } else if (moveScore.intentAlignment <= 3) {
-    narrative += ` - a deviation from their intended approach`;
-  }
-  
-  return narrative;
-}
+// function _buildAdvancedMoveNarrative(
+//   character: BattleCharacter,
+//   move: Move,
+//   context: BattleTacticalContext,
+//   intent: Intent,
+//   moveScore: ContextualMoveScore
+// ): string {
+//   const characterName = character.name;
+//   const moveName = move.name;
+//   const intentType = intent.type;
+//   
+//   // Base narrative based on intent
+//   let narrative = `${characterName} follows their ${intentType.replace('_', ' ')} strategy`;
+//   
+//   // Add context-specific details
+//   if (context.enemyVulnerable && (move.type === 'attack' || move.type === 'parry_retaliate')) {
+//     narrative += `, seizing the opportunity while ${context.enemyHealth < 20 ? 'the enemy is critically wounded' : 'the enemy is vulnerable'}`;
+//   }
+//   
+//   if (context.healthPressure && (move.type === 'defense_buff' || move.type === 'evade')) {
+//     narrative += `, desperately trying to survive with ${character.currentHealth} health remaining`;
+//   }
+//   
+//   if (context.enemyIsTurtling && (move.type === 'attack' || move.type === 'parry_retaliate')) {
+//     narrative += `, attempting to break through the enemy's defensive stance`;
+//   }
+//   
+//   if (context.hasMomentum && (move.type === 'attack' || move.type === 'parry_retaliate')) {
+//     narrative += `, building on their momentum`;
+//   }
+//   
+//   if (context.chiPressure && (move.chiCost || 0) === 0) {
+//     narrative += `, conserving their dwindling chi reserves`;
+//   }
+//   
+//   // Add move-specific details
+//   if (move.baseDamage > 40) {
+//     narrative += ` with a powerful ${moveName}`;
+//   } else if (move.baseDamage > 20) {
+//     narrative += ` with ${moveName}`;
+//   } else {
+//     narrative += ` with a measured ${moveName}`;
+//   }
+//   
+//   // Add intent alignment commentary
+//   if (moveScore.intentAlignment >= 8) {
+//     narrative += ` - perfectly aligned with their tactical goal`;
+//   } else if (moveScore.intentAlignment >= 6) {
+//     narrative += ` - well-suited to their current strategy`;
+//   } else if (moveScore.intentAlignment <= 3) {
+//     narrative += ` - a deviation from their intended approach`;
+//   }
+//   
+//   return narrative;
+// }
 
 /**
  * @description Gets a summary of the current AI state for debugging and analysis.

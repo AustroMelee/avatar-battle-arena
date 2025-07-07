@@ -1,6 +1,6 @@
 import type { BattleState } from '../../../types';
 import type { BattleCharacter } from '../../../types';
-import type { Ability } from '../../../../../common/types';
+import type { Move } from '../../../types/move.types';
 
 /**
  * @description A condition function that evaluates whether a rule should fire
@@ -26,7 +26,7 @@ export type MoveSelector = (
   state: BattleState, 
   self: BattleCharacter, 
   opp: BattleCharacter
-) => Ability | null;
+) => Move | null;
 
 /**
  * @description A single AI rule that defines when and what move to use
@@ -53,7 +53,7 @@ export interface AIRule {
  */
 export interface AIDecision {
   /** The chosen move */
-  move: Ability | null;
+  move: Move | null;
   
   /** The rule that triggered this decision */
   rule: AIRule;

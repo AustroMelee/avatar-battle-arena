@@ -2,7 +2,7 @@
 // RESPONSIBILITY: Execute generic moves with enhanced narrative generation
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { createEventId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
 
@@ -20,17 +20,17 @@ export interface GenericMoveResult {
 
 /**
  * @description Executes a generic move (fallback for unknown types) with enhanced narrative generation
- * @param {Ability} ability - The ability to execute
- * @param {BattleCharacter} attacker - The character using the ability
+ * @param {Move} move - The move to execute
+ * @param {BattleCharacter} attacker - The character using the move
  * @param {BattleState} state - Current battle state
  * @returns {Promise<GenericMoveResult>} The execution result
  */
 export async function executeGenericMove(
-  ability: Ability,
+  move: Move,
   attacker: BattleCharacter,
   state: BattleState
 ): Promise<GenericMoveResult> {
-  const result = `${ability.name} is used.`;
+  const result = `${move.name} is used.`;
   
   // Initialize narrative service for enhanced storytelling
   const narrativeService = createNarrativeService();
@@ -39,7 +39,7 @@ export async function executeGenericMove(
   const target = state.participants[1 - state.activeParticipantIndex]; // Target is the other participant
   const context = {
     damage: 0,
-    maxHealth: target.stats.power + target.stats.defense + target.stats.agility,
+    maxHealth: target.base.stats.power + target.base.stats.defense + target.base.stats.agility,
     isMiss: false,
     isCritical: false,
     isPatternBreak: false,
@@ -51,12 +51,12 @@ export async function executeGenericMove(
     chi: attacker.resources.chi || 0
   };
   
-  let narrative = `${attacker.name} executes ${ability.name} with practiced precision.`;
+  let narrative = `${attacker.name} executes ${move.name} with practiced precision.`;
   const genericNarrative = await narrativeService.generateNarrative(
     attacker.name,
     context,
     'hit',
-    ability.name
+    move.name
   );
   if (genericNarrative) {
     narrative = genericNarrative;
@@ -67,14 +67,14 @@ export async function executeGenericMove(
     turn: state.turn,
     actor: attacker.name,
     type: 'MOVE',
-    action: ability.name,
+    action: move.name,
     target: 'Unknown',
-    abilityType: ability.type,
+    abilityType: move.type,
     result,
     narrative,
     timestamp: Date.now(),
     meta: {
-      resourceCost: ability.chiCost || 0
+      resourceCost: move.chiCost || 0
     }
   };
   

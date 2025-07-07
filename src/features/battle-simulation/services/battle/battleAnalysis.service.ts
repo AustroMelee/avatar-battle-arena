@@ -2,6 +2,7 @@
 // RESPONSIBILITY: Analyze overall battle performance metrics
 
 import { BattleState, BattleLogEntry } from '../../types';
+// import type { Move } from '../../types/move.types';
 
 /**
  * @description Represents battle performance metrics.
@@ -20,7 +21,7 @@ export interface BattleMetrics {
   stalematePrevention: boolean;
   battleDuration: number; // in milliseconds
   winner: string | null;
-  victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock';
+  victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock' | 'burnout';
 }
 
 /**
@@ -68,7 +69,7 @@ export function analyzeBattlePerformance(
   const chiEfficiency = totalChiSpent > 0 ? totalDamage / totalChiSpent : 0;
   
   // Determine victory method
-  let victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock' = 'health';
+  let victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock' | 'burnout' = 'health';
   if (finalState.winner && finalState.winner.name) {
     const winnerLogs = battleLog.filter(entry => entry.actor === finalState.winner!.name);
     if (winnerLogs.some(entry => entry.meta?.desperation)) {

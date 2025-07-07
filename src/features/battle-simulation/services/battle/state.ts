@@ -15,6 +15,7 @@ import { initializeMentalState } from '../identity/mentalState.service';
 import { DEFAULT_OPPONENT_PERCEPTION } from '../../data/identities';
 import { getDefaultArcState, getDefaultArcStateHistory } from '../../data/arcTransitions';
 import { initializeBehavioralSystem, initializeActiveFlags } from '../identity/behavioral.service';
+import { getCharacterMoves } from './moveRegistry.service';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -48,7 +49,9 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   };
   
   const p1Battle: BattleCharacter = {
-    ...player1,
+    base: player1,
+    id: player1.id,
+    name: player1.name,
     currentHealth: 100, // All characters start with 100 health
     currentDefense: player1.stats.defense,
     cooldowns: {},
@@ -78,10 +81,13 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     analytics: { ...analytics },
     tacticalStalemateCounter: 0,
     lastTacticalPriority: '',
+    abilities: getCharacterMoves(player1.name),
   };
   
   const p2Battle: BattleCharacter = {
-    ...player2,
+    base: player2,
+    id: player2.id,
+    name: player2.name,
     currentHealth: 100,
     currentDefense: player2.stats.defense,
     cooldowns: {},
@@ -111,6 +117,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     analytics: { ...analytics },
     tacticalStalemateCounter: 0,
     lastTacticalPriority: '',
+    abilities: getCharacterMoves(player2.name),
   };
   
   // Calculate environmental factors
@@ -124,7 +131,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   const initialState: BattleState = {
     participants: [p1Battle, p2Battle],
     turn: 7, // Start battle from turn 7 (after opening sequence turns 1-6)
-    activeParticipantIndex: p1Battle.stats.agility >= p2Battle.stats.agility ? 0 : 1, // Fastest goes first
+    activeParticipantIndex: player1.stats.agility >= player2.stats.agility ? 0 : 1, // Fastest goes first
     log: [],
     battleLog: [],
     aiLog: [],

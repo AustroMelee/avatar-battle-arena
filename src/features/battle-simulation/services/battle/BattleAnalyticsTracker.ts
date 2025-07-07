@@ -2,21 +2,7 @@
 // RESPONSIBILITY: Track and update battle analytics data
 
 import { BattleState } from '../../types';
-
-/**
- * @description Analytics data for battle tracking
- */
-export interface BattleAnalytics {
-  totalDamage: number;
-  totalChiSpent: number;
-  patternAdaptations: number;
-  stalematePreventions: number;
-  escalationEvents: number;
-  punishOpportunities: number;
-  criticalHits: number;
-  desperationMoves: number;
-  lastUpdated: number;
-}
+import type { BattleAnalytics } from '../../types';
 
 /**
  * @description Result of analytics update
@@ -36,13 +22,17 @@ export function initializeAnalytics(state: BattleState): void {
     state.analytics = {
       totalDamage: 0,
       totalChiSpent: 0,
+      turnsSinceLastDamage: 0,
+      averageDamagePerTurn: 0,
+      lastUpdatedTurn: 0,
       patternAdaptations: 0,
       stalematePreventions: 0,
       escalationEvents: 0,
       punishOpportunities: 0,
       criticalHits: 0,
       desperationMoves: 0,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
+      stalematePreventionTriggered: false
     };
   }
 }
@@ -75,8 +65,9 @@ export function updateTacticalAnalytics(
   // Update additional metrics if provided
   if (additionalMetrics) {
     Object.entries(additionalMetrics).forEach(([key, value]) => {
-      if (key in state.analytics! && typeof value === 'number') {
-        (state.analytics as Record<string, number>)[key] += value;
+      // Only update numeric fields, skip booleans (like stalematePreventionTriggered)
+      if (key in state.analytics! && typeof value === 'number' && typeof (state.analytics as any)[key] === 'number') {
+        (state.analytics as any)[key] += value;
       }
     });
   }
@@ -148,12 +139,16 @@ export function resetAnalytics(state: BattleState): void {
   state.analytics = {
     totalDamage: 0,
     totalChiSpent: 0,
+    turnsSinceLastDamage: 0,
+    averageDamagePerTurn: 0,
+    lastUpdatedTurn: 0,
     patternAdaptations: 0,
     stalematePreventions: 0,
     escalationEvents: 0,
     punishOpportunities: 0,
     criticalHits: 0,
     desperationMoves: 0,
-    lastUpdated: Date.now()
+    lastUpdated: Date.now(),
+    stalematePreventionTriggered: false
   };
 } 

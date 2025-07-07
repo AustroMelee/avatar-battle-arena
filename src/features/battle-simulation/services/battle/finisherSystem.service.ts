@@ -2,19 +2,16 @@
 // RESPONSIBILITY: Handle finisher moves - dramatic, once-per-battle abilities
 
 import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
-import { Ability } from '@/common/types';
+import type { Move, FinisherCondition } from '../../types/move.types';
 import { createEventId } from '../ai/logQueries';
 import { trackDamage, trackChiSpent } from './analyticsTracker.service';
 
 /**
  * @description Finisher move configuration
  */
-export interface FinisherMove extends Ability {
+export interface FinisherMove extends Move {
   isFinisher: true;
-  finisherCondition: {
-    type: 'hp_below' | 'phase';
-    value: number | string;
-  };
+  finisherCondition: FinisherCondition;
   critMultiplier: number;
   missPenalty: 'stun' | 'damage' | 'none';
   narrative: {
@@ -42,8 +39,8 @@ export function getAvailableFinisher(
   }
 
   // Find finisher moves
-  const finisherMoves = character.abilities.filter(ability => 
-    ability.tags?.includes('finisher')
+  const finisherMoves = character.abilities.filter(move =>
+    move.tags?.includes('finisher')
   ) as FinisherMove[];
 
   for (const finisher of finisherMoves) {
@@ -75,8 +72,10 @@ function isFinisherConditionMet(
   }
 
   if (finisher.finisherCondition.type === 'hp_below') {
-    const threshold = finisher.finisherCondition.value as number;
-    return (opponent.currentHealth / 100) <= (threshold / 100);
+    const threshold = finisher.finisherCondition.percent;
+    // Compute maxHealth as sum of base stats (power + defense + agility)
+    const maxHealth = opponent.base.stats.power + opponent.base.stats.defense + opponent.base.stats.agility;
+    return (opponent.currentHealth / maxHealth) * 100 <= threshold;
   }
   
   if (finisher.finisherCondition.type === 'phase') {
@@ -104,7 +103,7 @@ export function executeFinisherMove(
   targetIndex: number
 ): BattleLogEntry {
   // Calculate base damage with finisher bonus
-  const baseDamage = finisher.power;
+  const baseDamage = finisher.baseDamage;
   const defenseReduction = target.currentDefense;
   
   // Finishers have higher crit chance (30%)
@@ -170,19 +169,17 @@ export function executeFinisherMove(
  */
 export const CHARACTER_FINISHERS: Record<string, FinisherMove> = {
   'aang': {
+    id: 'finisher_aang',
     name: 'Gale Ender',
     type: 'attack',
-    power: 45,
+    baseDamage: 45,
     description: 'Aang closes his eyes, one breath, one step, the cyclone erupts',
     chiCost: 10,
     cooldown: 0,
     maxUses: 1,
     tags: ['finisher', 'desperation', 'high-damage'],
     isFinisher: true,
-    finisherCondition: {
-      type: 'hp_below',
-      value: 20 // Available when opponent below 20% HP
-    },
+    finisherCondition: { type: 'hp_below', percent: 20 },
     critMultiplier: 3.5,
     missPenalty: 'stun',
     narrative: {
@@ -192,25 +189,23 @@ export const CHARACTER_FINISHERS: Record<string, FinisherMove> = {
     }
   },
   'azula': {
+    id: 'finisher_azula',
     name: 'Phoenix Inferno',
     type: 'attack',
-    power: 50,
+    baseDamage: 50,
     description: 'Azula channels all remaining energy into a devastating final attack',
     chiCost: 12,
     cooldown: 0,
     maxUses: 1,
     tags: ['finisher', 'desperation', 'high-damage', 'piercing'],
     isFinisher: true,
-    finisherCondition: {
-      type: 'hp_below',
-      value: 20 // Available when opponent below 20% HP
-    },
+    finisherCondition: { type: 'hp_below', percent: 20 },
     critMultiplier: 3.0,
     missPenalty: 'damage',
     narrative: {
-      charge: 'Azula\'s eyes burn with blue fire. The air itself seems to ignite with her fury.',
-      success: 'The Phoenix Inferno consumes everything. Fire splits stone and pride alike. The throne room becomes a furnace of destruction.',
-      miss: 'The inferno rages out of control, backfiring on Azula. The flames consume her own energy.'
+      charge: 'Azula gathers every spark of her will, blue fire swirling into a blinding inferno.',
+      success: 'The Phoenix Inferno engulfs the battlefield. Aang is forced to his knees, the world awash in blue flame. Azula stands triumphant, if only for a moment.',
+      miss: 'The inferno rages, but Aang slips through the flames. Azula gasps, her energy spent, the moment lost.'
     }
   }
 };

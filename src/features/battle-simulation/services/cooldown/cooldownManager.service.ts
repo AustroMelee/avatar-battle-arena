@@ -1,5 +1,5 @@
 // CONTEXT: BattleSimulation, // FOCUS: CooldownManagement
-import type { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import type {
   AbilityCooldownState,
   CharacterCooldownState,
@@ -27,10 +27,10 @@ const MAX_USES_PER_BATTLE = 10;
  * @throws {TypeError} When abilities array is empty or startingTurn is negative.
  */
 export function initializeCooldownState(params: InitializeCooldownParams): CharacterCooldownState {
-  const { abilities, startingTurn } = params;
+  const { moves, startingTurn } = params;
 
-  if (!Array.isArray(abilities) || abilities.length === 0) {
-    throw new TypeError('Abilities array must be non-empty');
+  if (!Array.isArray(moves) || moves.length === 0) {
+    throw new TypeError('Moves array must be non-empty');
   }
 
   if (typeof startingTurn !== 'number' || startingTurn < 0) {
@@ -39,13 +39,13 @@ export function initializeCooldownState(params: InitializeCooldownParams): Chara
 
   const abilityStates: Record<string, AbilityCooldownState> = {};
 
-  for (const ability of abilities) {
-    if (!ability.name || typeof ability.name !== 'string') {
-      throw new TypeError(`Invalid ability name: ${ability.name}`);
+  for (const move of moves) {
+    if (!move.name || typeof move.name !== 'string') {
+      throw new TypeError(`Invalid move name: ${move.name}`);
     }
 
-    const cooldown = ability.cooldown ?? 0;
-    const maxUses = ability.maxUses;
+    const cooldown = move.cooldown ?? 0;
+    const maxUses = move.maxUses;
 
     if (cooldown < 0 || cooldown > MAX_COOLDOWN_TURNS) {
       throw new TypeError(`Invalid cooldown value: ${cooldown}. Must be between 0 and ${MAX_COOLDOWN_TURNS}`);
@@ -55,7 +55,7 @@ export function initializeCooldownState(params: InitializeCooldownParams): Chara
       throw new TypeError(`Invalid maxUses value: ${maxUses}. Must be between 1 and ${MAX_USES_PER_BATTLE}`);
     }
 
-    abilityStates[ability.name] = {
+    abilityStates[move.name] = {
       lastUsedTurn: -1,
       usesRemaining: maxUses,
       isOnCooldown: false,
@@ -76,10 +76,10 @@ export function initializeCooldownState(params: InitializeCooldownParams): Chara
  * @throws {TypeError} When parameters are invalid.
  */
 export function checkAbilityAvailability(params: CheckAbilityAvailabilityParams): AbilityAvailabilityResult {
-  const { ability, cooldownState, currentTurn, availableChi, battlePhase = 'normal' } = params;
+  const { move, cooldownState, currentTurn, availableChi, battlePhase = 'normal' } = params;
 
-  if (!ability || typeof ability.name !== 'string') {
-    throw new TypeError('Invalid ability provided');
+  if (!move || typeof move.name !== 'string') {
+    throw new TypeError('Invalid move provided');
   }
 
   if (typeof currentTurn !== 'number' || currentTurn < 0) {
@@ -91,26 +91,26 @@ export function checkAbilityAvailability(params: CheckAbilityAvailabilityParams)
   }
 
   // Check chi cost
-  const chiCost = ability.chiCost ?? 0;
+  const chiCost = move.chiCost ?? 0;
   if (availableChi < chiCost) {
     return {
       isAvailable: false,
       reason: 'insufficient_chi',
       cooldownTurnsRemaining: cooldownState.cooldownTurnsRemaining,
       usesRemaining: cooldownState.usesRemaining,
-      isDesperationMove: isDesperationMove(ability)
+      isDesperationMove: isDesperationMove(move)
     };
   }
 
   // Check cooldown - FIXED: Use strict off-by-one logic
-  if (cooldownState.lastUsedTurn !== -1 && currentTurn <= cooldownState.lastUsedTurn + (ability.cooldown ?? 0)) {
-    const cooldownTurnsRemaining = (cooldownState.lastUsedTurn + (ability.cooldown ?? 0)) - currentTurn + 1;
+  if (cooldownState.lastUsedTurn !== -1 && currentTurn <= cooldownState.lastUsedTurn + (move.cooldown ?? 0)) {
+    const cooldownTurnsRemaining = (cooldownState.lastUsedTurn + (move.cooldown ?? 0)) - currentTurn + 1;
     return {
       isAvailable: false,
       reason: 'on_cooldown',
       cooldownTurnsRemaining: Math.max(0, cooldownTurnsRemaining),
       usesRemaining: cooldownState.usesRemaining,
-      isDesperationMove: isDesperationMove(ability)
+      isDesperationMove: isDesperationMove(move)
     };
   }
 
@@ -121,34 +121,34 @@ export function checkAbilityAvailability(params: CheckAbilityAvailabilityParams)
       reason: 'no_uses_remaining',
       cooldownTurnsRemaining: cooldownState.cooldownTurnsRemaining,
       usesRemaining: cooldownState.usesRemaining,
-      isDesperationMove: isDesperationMove(ability)
+      isDesperationMove: isDesperationMove(move)
     };
   }
 
   // Check battle phase restrictions
-  if (battlePhase === 'stalemate' && !ability.tags?.includes('basic')) {
+  if (battlePhase === 'stalemate' && !move.tags?.includes('basic')) {
     return {
       isAvailable: false,
       reason: 'battle_phase_restriction',
       cooldownTurnsRemaining: 0,
       usesRemaining: cooldownState.usesRemaining,
-      isDesperationMove: isDesperationMove(ability)
+      isDesperationMove: isDesperationMove(move)
     };
   }
 
-  if (battlePhase === 'climax' && !ability.tags?.includes('climax')) {
+  if (battlePhase === 'climax' && !move.tags?.includes('climax')) {
     return {
       isAvailable: false,
       reason: 'battle_phase_restriction',
       cooldownTurnsRemaining: 0,
       usesRemaining: cooldownState.usesRemaining,
-      isDesperationMove: isDesperationMove(ability)
+      isDesperationMove: isDesperationMove(move)
     };
   }
 
   // Check unlock conditions (desperation moves)
-  const isDesperation = isDesperationMove(ability);
-  const requiredHealthThreshold = ability.unlockCondition?.threshold;
+  const isDesperation = isDesperationMove(move);
+  const requiredHealthThreshold = move.unlockCondition?.threshold;
 
   return {
     isAvailable: true,
@@ -170,10 +170,10 @@ export function updateAbilityCooldownState(
   params: UseAbilityParams,
   currentState: AbilityCooldownState
 ): AbilityCooldownState {
-  const { ability, currentTurn, currentHealthPercentage } = params;
+  const { move, currentTurn, currentHealthPercentage } = params;
 
-  if (!ability || typeof ability.name !== 'string') {
-    throw new TypeError('Invalid ability provided');
+  if (!move || typeof move.name !== 'string') {
+    throw new TypeError('Invalid move provided');
   }
 
   if (typeof currentTurn !== 'number' || currentTurn < 0) {
@@ -185,15 +185,15 @@ export function updateAbilityCooldownState(
   }
 
   // Check if desperation move can be used
-  if (isDesperationMove(ability)) {
-    const requiredThreshold = ability.unlockCondition?.threshold ?? 0;
+  if (isDesperationMove(move)) {
+    const requiredThreshold = move.unlockCondition?.threshold ?? 0;
     if (currentHealthPercentage > requiredThreshold) {
-      throw new TypeError(`Desperation move ${ability.name} requires health below ${requiredThreshold}%`);
+      throw new TypeError(`Desperation move ${move.name} requires health below ${requiredThreshold}%`);
     }
   }
 
-  const cooldown = ability.cooldown ?? 0;
-  const maxUses = ability.maxUses;
+  const cooldown = move.cooldown ?? 0;
+  const maxUses = move.maxUses;
 
   // Calculate new uses remaining
   const newUsesRemaining = maxUses !== undefined && currentState.usesRemaining !== undefined
@@ -219,36 +219,35 @@ export function updateAbilityCooldownState(
  */
 export function advanceCooldownTurn(
   state: CharacterCooldownState,
-  abilities: Ability[]
+  moves: Move[]
 ): CharacterCooldownState {
   if (!state || typeof state.currentTurn !== 'number') {
     throw new TypeError('Invalid cooldown state provided');
   }
 
-  if (!Array.isArray(abilities) || abilities.length === 0) {
-    throw new TypeError('Abilities array must be provided');
+  if (!Array.isArray(moves) || moves.length === 0) {
+    throw new TypeError('Moves array must be provided');
   }
 
   const newTurn = state.currentTurn + 1;
   const updatedAbilityStates: Record<string, AbilityCooldownState> = {};
 
-  for (const [abilityName, abilityState] of Object.entries(state.abilityStates)) {
-    if (!abilityState || typeof abilityState.lastUsedTurn !== 'number') {
-      throw new TypeError(`Invalid ability state for ${abilityName}`);
+  for (const move of moves) {
+    if (!move || typeof move.name !== 'string') {
+      throw new TypeError(`Invalid move name: ${move.name}`);
     }
 
-    // FIXED: Get cooldown from ability definition
-    const ability = abilities.find(a => a.name === abilityName);
-    const cooldown = ability?.cooldown ?? 0;
-    
+    const stateForMove = state.abilityStates[move.name];
+    if (!stateForMove) continue;
+
     // Calculate if still on cooldown based on strict logic
-    const isOnCooldown = abilityState.lastUsedTurn !== -1 && newTurn <= abilityState.lastUsedTurn + cooldown;
+    const isOnCooldown = stateForMove.lastUsedTurn !== -1 && newTurn <= stateForMove.lastUsedTurn + move.cooldown;
     const cooldownTurnsRemaining = isOnCooldown 
-      ? Math.max(0, (abilityState.lastUsedTurn + cooldown) - newTurn + 1)
+      ? Math.max(0, (stateForMove.lastUsedTurn + move.cooldown) - newTurn + 1)
       : 0;
 
-    updatedAbilityStates[abilityName] = {
-      ...abilityState,
+    updatedAbilityStates[move.name] = {
+      ...stateForMove,
       isOnCooldown,
       cooldownTurnsRemaining
     };
@@ -269,17 +268,17 @@ export function advanceCooldownTurn(
 export function resetCooldowns(
   params: ResetCooldownsParams
 ): CharacterCooldownState {
-  const { abilities, startingTurn } = params;
+  const { moves, startingTurn } = params;
 
-  if (!Array.isArray(abilities) || abilities.length === 0) {
-    throw new TypeError('Abilities array must be non-empty');
+  if (!Array.isArray(moves) || moves.length === 0) {
+    throw new TypeError('Moves array must be non-empty');
   }
 
   if (typeof startingTurn !== 'number' || startingTurn < 0) {
     throw new TypeError('Starting turn must be a non-negative number');
   }
 
-  return initializeCooldownState({ abilities, startingTurn });
+  return initializeCooldownState({ moves, startingTurn });
 }
 
 /**
@@ -291,27 +290,26 @@ export function resetCooldowns(
  */
 export function getAbilityCooldownState(
   state: CharacterCooldownState,
-  abilityName: string
+  moveName: string
 ): AbilityCooldownState | null {
   if (!state || !state.abilityStates) {
     throw new TypeError('Invalid cooldown state provided');
   }
 
-  if (typeof abilityName !== 'string' || abilityName.trim() === '') {
-    throw new TypeError('Ability name must be a non-empty string');
+  if (typeof moveName !== 'string' || moveName.trim() === '') {
+    throw new TypeError('Move name must be a non-empty string');
   }
 
-  return state.abilityStates[abilityName] ?? null;
+  return state.abilityStates[moveName] ?? null;
 }
 
 /**
  * @description Checks if an ability is a desperation move.
- * @param {Ability} ability - The ability to check.
- * @returns {boolean} True if the ability is a desperation move.
+ * @param {Move} move - The move to check.
+ * @returns {boolean} True if the move is a desperation move.
  */
-function isDesperationMove(ability: Ability): boolean {
-  return ability.unlockCondition?.type === 'health' && 
-         typeof ability.unlockCondition.threshold === 'number';
+function isDesperationMove(move: Move): boolean {
+  return !!move.unlockCondition;
 }
 
 /**
@@ -333,26 +331,26 @@ export function validateCooldownState(state: CharacterCooldownState): boolean {
     throw new TypeError('Ability states must be an object');
   }
 
-  for (const [abilityName, abilityState] of Object.entries(state.abilityStates)) {
-    if (!abilityState || typeof abilityState !== 'object') {
-      throw new TypeError(`Invalid ability state for ${abilityName}`);
+  for (const [moveName, moveState] of Object.entries(state.abilityStates)) {
+    if (!moveState || typeof moveState !== 'object') {
+      throw new TypeError(`Invalid move state for ${moveName}`);
     }
 
-    if (typeof abilityState.lastUsedTurn !== 'number' || abilityState.lastUsedTurn < -1) {
-      throw new TypeError(`Invalid lastUsedTurn for ${abilityName}`);
+    if (typeof moveState.lastUsedTurn !== 'number' || moveState.lastUsedTurn < -1) {
+      throw new TypeError(`Invalid lastUsedTurn for ${moveName}`);
     }
 
-    if (abilityState.usesRemaining !== undefined && 
-        (typeof abilityState.usesRemaining !== 'number' || abilityState.usesRemaining < 0)) {
-      throw new TypeError(`Invalid usesRemaining for ${abilityName}`);
+    if (moveState.usesRemaining !== undefined && 
+        (typeof moveState.usesRemaining !== 'number' || moveState.usesRemaining < 0)) {
+      throw new TypeError(`Invalid usesRemaining for ${moveName}`);
     }
 
-    if (typeof abilityState.isOnCooldown !== 'boolean') {
-      throw new TypeError(`Invalid isOnCooldown for ${abilityName}`);
+    if (typeof moveState.isOnCooldown !== 'boolean') {
+      throw new TypeError(`Invalid isOnCooldown for ${moveName}`);
     }
 
-    if (typeof abilityState.cooldownTurnsRemaining !== 'number' || abilityState.cooldownTurnsRemaining < 0) {
-      throw new TypeError(`Invalid cooldownTurnsRemaining for ${abilityName}`);
+    if (typeof moveState.cooldownTurnsRemaining !== 'number' || moveState.cooldownTurnsRemaining < 0) {
+      throw new TypeError(`Invalid cooldownTurnsRemaining for ${moveName}`);
     }
   }
 

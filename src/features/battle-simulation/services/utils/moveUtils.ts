@@ -1,10 +1,11 @@
 // CONTEXT: Move Utilities
 // RESPONSIBILITY: Determine available moves based on cooldowns, resources, and meta-state
-import { Ability, Location } from '@/common/types';
+import { Location } from '@/common/types';
 import { BattleCharacter } from '../../types';
 import { MetaState } from '../ai/metaState';
 import { IDENTITY_PROFILES } from '../../data/identities';
-import { createMechanicLogEntry } from './mechanicLogUtils';
+// import { createMechanicLogEntry } from './mechanicLogUtils';
+import type { Move } from '../../types/move.types';
 
 /**
  * @description Gets the dynamic collateral tolerance for a character based on their mental state and the location.
@@ -45,42 +46,20 @@ function getDynamicCollateralTolerance(character: BattleCharacter, location: Loc
  * @param {MetaState} meta - The current meta-state for hard gating.
  * @param {Location} location - The battle location for collateral damage checks.
  * @param {number} turn - The current turn number.
- * @returns {Ability[]} The available moves.
+ * @returns {Move[]} The available moves.
  */
-export function getAvailableMoves(character: BattleCharacter, meta: MetaState, location: Location, turn: number): Ability[] {
-  let moves = character.abilities.filter(ability => {
+export function getAvailableMoves(character: BattleCharacter, meta: MetaState, location: Location, _turn: number): Move[] {
+  let moves = character.abilities.filter((ability: Move) => {
     // Check cooldown using the cooldown object system
     if (character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) {
-      const logEntry = createMechanicLogEntry({
-        turn,
-        actor: character.name,
-        mechanic: 'Cooldown',
-        effect: 'Blocked',
-        reason: 'getAvailableMoves',
-        meta: {
-          move: ability.name,
-          cooldown: character.cooldowns[ability.name]
-        }
-      });
-      // TODO: Add logEntry to log system
+      // const logEntry = createMechanicLogEntry({
       return false; // Ability is on cooldown
     }
     
     // Check uses remaining
     const usesLeft = character.usesLeft[ability.name] ?? (ability.maxUses || Infinity);
     if (ability.maxUses && usesLeft <= 0) {
-      const logEntry = createMechanicLogEntry({
-        turn,
-        actor: character.name,
-        mechanic: 'Limited Use',
-        effect: 'Blocked',
-        reason: 'getAvailableMoves',
-        meta: {
-          move: ability.name,
-          usesLeft
-        }
-      });
-      // TODO: Add logEntry to log system
+      // const logEntry = createMechanicLogEntry({
       return false;
     }
     
@@ -105,26 +84,26 @@ export function getAvailableMoves(character: BattleCharacter, meta: MetaState, l
   }
   
   // 2. HARD Escalation - Force big moves when needed
-  if (meta.escalationNeeded && moves.some(m => m.power > 50)) {
-    moves = moves.filter(m => m.power > 50);
-    console.log(`HARD ESCALATION: Only high-power moves available`);
+  if (meta.escalationNeeded && moves.some(m => m.baseDamage > 50)) {
+    moves = moves.filter(m => m.baseDamage > 50);
+    console.log(`HARD ESCALATION: Only high-damage moves available`);
   }
   
   // 3. HARD Finisher - Force devastating moves for finishing
-  if (meta.finishingTime && moves.some(m => m.power > 60)) {
-    moves = moves.filter(m => m.power > 60);
+  if (meta.finishingTime && moves.some(m => m.baseDamage > 60)) {
+    moves = moves.filter(m => m.baseDamage > 60);
     console.log(`HARD FINISHER: Only devastating moves available`);
   }
   
   // 4. HARD Desperation - Force any high-damage move when desperate
-  if (meta.desperate && moves.some(m => m.power > 40)) {
-    moves = moves.filter(m => m.power > 40);
+  if (meta.desperate && moves.some(m => m.baseDamage > 40)) {
+    moves = moves.filter(m => m.baseDamage > 40);
     console.log(`HARD DESPERATION: Only high-damage moves available`);
   }
   
   // 5. HARD Timeout Pressure - Force maximum damage
-  if (meta.timeoutPressure && moves.some(m => m.power > 45)) {
-    moves = moves.filter(m => m.power > 45);
+  if (meta.timeoutPressure && moves.some(m => m.baseDamage > 45)) {
+    moves = moves.filter(m => m.baseDamage > 45);
     console.log(`HARD TIMEOUT: Only maximum damage moves available`);
   }
   
@@ -142,8 +121,8 @@ export function getAvailableMoves(character: BattleCharacter, meta: MetaState, l
   }
   
   // 8. HARD Frustration - Force aggressive moves
-  if (meta.frustrated && moves.some(m => (m.type === 'attack' || m.type === 'parry_retaliate') && m.power > 30)) {
-    moves = moves.filter(m => (m.type === 'attack' || m.type === 'parry_retaliate') && m.power > 30);
+  if (meta.frustrated && moves.some(m => (m.type === 'attack' || m.type === 'parry_retaliate') && m.baseDamage > 30)) {
+    moves = moves.filter(m => (m.type === 'attack' || m.type === 'parry_retaliate') && m.baseDamage > 30);
     console.log(`HARD FRUSTRATION: Only aggressive attacks and counters available`);
   }
   
@@ -156,7 +135,7 @@ export function getAvailableMoves(character: BattleCharacter, meta: MetaState, l
   // Fallback: If we filtered too aggressively, allow some moves back
   if (moves.length === 0) {
     console.log(`HARD GATING: Too restrictive, allowing fallback moves`);
-    moves = character.abilities.filter(ability => {
+    moves = character.abilities.filter((ability: Move) => {
       const chiCost = ability.chiCost || 0;
       return character.resources.chi >= chiCost;
     });
@@ -177,11 +156,11 @@ export function isMoveOnCooldown(moveName: string, character: BattleCharacter): 
 
 /**
  * @description Checks if a character has enough resources for a move.
- * @param {Ability} ability - The ability to check.
+ * @param {Move} ability - The move to check.
  * @param {BattleCharacter} character - The character to check.
  * @returns {boolean} True if the character has enough resources.
  */
-export function hasEnoughResources(ability: Ability, character: BattleCharacter): boolean {
+export function hasEnoughResources(ability: Move, character: BattleCharacter): boolean {
   const chiCost = ability.chiCost || 0;
   return character.resources.chi >= chiCost;
 } 

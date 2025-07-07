@@ -1,28 +1,28 @@
 // CONTEXT: Attack Move Scoring Service
 // RESPONSIBILITY: Score attack moves based on context and intent
 
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { BattleCharacter } from '../../types';
 import { BattleTacticalContext } from './battleStateAwareness';
 import { Intent } from './intentSystem';
 
 /**
  * @description Scores an attack move based on context and intent
- * @param {Ability} move - The attack move to score
+ * @param {Move} move - The attack move to score
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
  * @param {Intent} intent - The current tactical intent
  * @returns {number} The calculated score
  */
 export function scoreAttackMove(
-  move: Ability,
+  move: Move,
   enemy: BattleCharacter,
   context: BattleTacticalContext,
   intent: Intent
 ): number {
   let score = 0;
   
-  const netDamage = Math.max(1, move.power - (enemy.currentDefense || 0));
+  const netDamage = Math.max(1, move.baseDamage - (enemy.currentDefense || 0));
   score += netDamage * 2.5; // Base damage is highly valued
   
   if (move.appliesEffect?.type === 'BURN' || move.appliesEffect?.type === 'STUN') {
@@ -32,18 +32,18 @@ export function scoreAttackMove(
   // Intent-specific scoring
   switch (intent.type) {
     case 'go_for_finish':
-      if (move.power > 10) score += 80;
+      if (move.baseDamage > 10) score += 80;
       if (context.enemyVulnerable) score += 50;
       break;
     case 'break_defense':
       if (move.tags?.includes('piercing')) score += 100;
       break;
     case 'pressure_enemy':
-      score += netDamage * 1.5;
+      score += move.baseDamage * 1.5;
       if (move.appliesEffect?.type === 'BURN') score += 20;
       break;
     case 'desperate_attack':
-      score += move.power * 2;
+      score += move.baseDamage * 2;
       break;
   }
   
@@ -52,21 +52,21 @@ export function scoreAttackMove(
 
 /**
  * @description Gets scoring reasons for an attack move
- * @param {Ability} move - The attack move to analyze
+ * @param {Move} move - The attack move to analyze
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
  * @param {Intent} intent - The current tactical intent
  * @returns {string[]} Array of scoring reasons
  */
 export function getAttackMoveScoringReasons(
-  move: Ability,
+  move: Move,
   enemy: BattleCharacter,
   context: BattleTacticalContext,
   intent: Intent
 ): string[] {
   const reasons: string[] = [];
   
-  const netDamage = Math.max(1, move.power - (enemy.currentDefense || 0));
+  const netDamage = Math.max(1, move.baseDamage - (enemy.currentDefense || 0));
   reasons.push(`Base attack (${netDamage} damage)`);
   
   // Status effect reasons
@@ -92,8 +92,8 @@ export function getAttackMoveScoringReasons(
   // Intent-specific reasons
   switch (intent.type) {
     case 'go_for_finish':
-      if (move.power > 40) {
-        reasons.push('High power for finishing blow');
+      if (move.baseDamage > 40) {
+        reasons.push('High base damage for finishing blow');
       }
       if (context.enemyVulnerable) {
         reasons.push('Enemy vulnerable - perfect for finish');
@@ -107,8 +107,8 @@ export function getAttackMoveScoringReasons(
       if (move.tags?.includes('piercing')) {
         reasons.push('Piercing move for defense breaking');
       }
-      if (move.power > 30) {
-        reasons.push('High power for defense breaking');
+      if (move.baseDamage > 30) {
+        reasons.push('High base damage for defense breaking');
       }
       if (move.appliesEffect?.type === 'DEFENSE_DOWN') {
         reasons.push('Defense-down effect for breaking defense');
@@ -153,12 +153,12 @@ export function getAttackMoveScoringReasons(
 
 /**
  * @description Gets context factors for an attack move
- * @param {Ability} move - The attack move to analyze
+ * @param {Move} move - The attack move to analyze
  * @param {BattleTacticalContext} context - The current battle context
  * @returns {string[]} Array of context factors
  */
 export function getAttackMoveContextFactors(
-  move: Ability,
+  move: Move,
   context: BattleTacticalContext
 ): string[] {
   const factors: string[] = [];

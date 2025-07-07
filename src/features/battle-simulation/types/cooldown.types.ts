@@ -1,5 +1,5 @@
 // CONTEXT: BattleSimulation, // FOCUS: CooldownTypes
-import type { Ability } from '@/common/types';
+import type { Move } from './move.types';
 
 /**
  * @description Represents the cooldown state for a single ability.
@@ -29,8 +29,8 @@ export type CharacterCooldownState = {
  * @description Parameters for initializing cooldown state.
  */
 export type InitializeCooldownParams = {
-  /** @description List of abilities to track cooldowns for. */
-  abilities: Ability[];
+  /** @description List of moves to track cooldowns for. */
+  moves: Move[];
   /** @description Starting turn number (usually 0). */
   startingTurn: number;
 };
@@ -39,8 +39,8 @@ export type InitializeCooldownParams = {
  * @description Parameters for checking if an ability is available.
  */
 export type CheckAbilityAvailabilityParams = {
-  /** @description The ability to check. */
-  ability: Ability;
+  /** @description The move to check. */
+  move: Move;
   /** @description Current cooldown state for this ability. */
   cooldownState: AbilityCooldownState;
   /** @description Current turn number. */
@@ -73,8 +73,8 @@ export type AbilityAvailabilityResult = {
  * @description Parameters for using an ability and updating cooldown state.
  */
 export type UseAbilityParams = {
-  /** @description The ability being used. */
-  ability: Ability;
+  /** @description The move being used. */
+  move: Move;
   /** @description Current turn number. */
   currentTurn: number;
   /** @description Current character health percentage. */
@@ -85,8 +85,8 @@ export type UseAbilityParams = {
  * @description Parameters for resetting cooldown state (e.g., for new battles).
  */
 export type ResetCooldownsParams = {
-  /** @description List of abilities to reset. */
-  abilities: Ability[];
+  /** @description List of moves to reset. */
+  moves: Move[];
   /** @description New starting turn number. */
   startingTurn: number;
 };

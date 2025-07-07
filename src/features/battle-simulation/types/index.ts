@@ -3,6 +3,7 @@ import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
 import { MentalState, OpponentPerception } from './identity.types';
 import { BehavioralTraitInstance, ActiveFlag } from './behavioral.types';
+import type { Move } from './move.types';
 
 /** @description The narrative phases of a battle. */
 export enum BattleArcState {
@@ -126,7 +127,10 @@ export interface RecoveryOption {
 /**
  * @description Represents a character's dynamic state during a battle.
  */
-export interface BattleCharacter extends Character {
+export type BattleCharacter = {
+  base: Character; // static data
+  id: string;
+  name: string;
   controlState: ControlState;
   stability: number; // 0-100
   momentum: number; // -100 to +100
@@ -143,8 +147,6 @@ export interface BattleCharacter extends Character {
   activeEffects: ActiveStatusEffect[]; // Unified status effects system
   flags: BattleCharacterFlags;
   diminishingEffects: Record<string, number>; // Track power reduction from diminishing returns
-  
-  // NEW: Defensive state tracking for UI/VFX
   defensiveStance: DefensiveStance; // The character's current defensive state for UI/VFX
   activeDefense?: {
     type: 'evade' | 'parry_retaliate';
@@ -152,8 +154,6 @@ export interface BattleCharacter extends Character {
     evadeChance?: number;
     parryThreshold?: number;
   };
-  
-  // NEW: Positioning and tactical state
   position: Position;
   chargeProgress?: number; // 0-100 for charge-up moves
   isCharging: boolean;
@@ -161,28 +161,20 @@ export interface BattleCharacter extends Character {
   chargeInterruptions: number; // Track failed charge attempts
   lastPositionChange?: number; // Turn when position last changed
   positionHistory: Position[]; // Track position changes for AI analysis
-  
-  // NEW: Identity-Driven Tactical Behavior (IDTB) System
   mentalState: MentalState;
   opponentPerception: OpponentPerception;
-  
-  // NEW: Irreversible mental state tracking for narrative impact
   mentalThresholdsCrossed: {
-    unhinged?: boolean; // Has Azula's composure ever broken?
-    broken?: boolean;   // Has she reached a point of no return?
+    unhinged?: boolean;
+    broken?: boolean;
   };
-  
-  // NEW: Behavioral System Integration
   behavioralTraits: BehavioralTraitInstance[];
-  manipulationResilience: number; // Resistance to psychological manipulation (0-100)
-  
-  // REPLACES old boolean flags. This is a map to track all active flags and their durations.
+  manipulationResilience: number;
   activeFlags: Map<string, ActiveFlag>;
   analytics: BattleAnalytics;
-  // --- NEW: Tactical Stalemate Tracking ---
   tacticalStalemateCounter: number;
   lastTacticalPriority: string;
-}
+  abilities: Move[];
+};
 
 /**
  * @description Represents the perceived state for AI decision making.
@@ -274,7 +266,31 @@ export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY
 export type BattleResolution = 'victory' | 'draw' | 'escape' | 'desperation' | 'mutual_ko';
 
 /**
- * @description Enhanced battle log entry with structured data and queryable meta information.
+ * @description NEW: Structured object for mechanical log details.
+ */
+export interface LogDetails {
+  mechanic?: string;
+  reason?: string;
+  chi?: number;
+  moveType?: string;
+  chargeComplete?: number;
+  interrupted?: boolean;
+  tacticalAnalysis?: string;
+  escalationType?: 'repetition' | 'stalemate';
+  forcedState?: 'pattern_break' | 'climax';
+  damageLevel?: number;
+  controlShift?: number;
+  stabilityChange?: number;
+  newControlState?: string;
+  fatigueMultiplier?: number;
+  desperationLevel?: 'desperate' | 'extreme' | 'final';
+  resolution?: string;
+  winner?: string;
+  [key: string]: any; // Allows other meta fields
+}
+
+/**
+ * @description Enhanced battle log entry with a clear separation between narrative and mechanics.
  */
 export type BattleLogEntry = {
   id: string; // Unique event identifier
@@ -283,41 +299,10 @@ export type BattleLogEntry = {
   type: LogEventType;
   action: string;
   target?: string;
-  result: string;
-  narrative?: string;
-  damage?: number;
-  abilityType?: string;
+  result: string; // Clean, human-readable result (e.g., "Azula takes 15 damage.")
+  narrative: string; // The cinematic, story-driven line.
   timestamp: number;
-  meta?: {
-    crit?: boolean; // Was this a critical hit?
-    critMultiplier?: number; // Damage multiplier for crit
-    combo?: number; // Combo counter
-    blocked?: boolean; // Was the move blocked?
-    evaded?: boolean; // Was the move evaded?
-    resourceCost?: number; // Chi cost of the move
-    piercing?: boolean; // Did the move pierce defense?
-    heal?: boolean; // Was this a healing move?
-    interrupt?: boolean; // Did this interrupt an action?
-    aiRule?: string; // Which AI rule triggered this move (for explainable AI)
-    isFinisher?: boolean; // Was this a finisher move?
-    isDesperation?: boolean; // Was this a desperation move?
-    desperationBuff?: {
-      damageBonus: number;
-      defensePenalty: number;
-    };
-    // NEW: Positioning and tactical meta
-    positionChange?: {
-      from: Position;
-      to: Position;
-      success: boolean;
-    };
-    chargeProgress?: number;
-    chargeInterrupted?: boolean;
-    environmentalFactor?: string;
-    repositionSuccess?: boolean;
-    punishDamage?: number;
-    [key: string]: unknown; // Extensible for future features
-  };
+  details?: LogDetails; // All mechanical data goes here.
 };
 
 /**

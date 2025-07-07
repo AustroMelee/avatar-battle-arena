@@ -1,6 +1,6 @@
 // CONTEXT: Narrative System, // FOCUS: Opening Sequence and Pre-Fight Banter
 import type { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
-import { createEventId, generateUniqueLogId } from '../ai/logQueries';
+import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
  * @description Opening sequence configuration for each character
@@ -219,7 +219,7 @@ function getLocationOpening(location: string, player1: string, player2: string):
  */
 function getNarratorOpening(player1: BattleCharacter, player2: BattleCharacter, location: string): string {
   const openings = [
-    `The stage is set. ${player1.bending} and ${player2.bending} clash in the heart of the ${location}.`,
+    `The stage is set. ${player1.base.bending} and ${player2.base.bending} clash in the heart of the ${location}.`,
     `Two masters of their elements prepare for battle. The ${location} will witness this epic confrontation.`,
     `The elements themselves seem to gather, anticipating the clash between ${player1.name} and ${player2.name}.`,
     `Ancient forces stir as ${player1.name} and ${player2.name} prepare to settle their differences.`,
@@ -246,8 +246,8 @@ function getCharacterDescription(character: BattleCharacter, sequence?: OpeningS
   
   // Fallback descriptions
   const fallbacks = [
-    `${character.name} stands ready, their ${character.bending} abilities evident in their stance.`,
-    `The ${character.bending}bender's movements betray years of training and discipline.`,
+    `${character.name} stands ready, their ${character.base.bending} abilities evident in their stance.`,
+    `The ${character.base.bending}bender's movements betray years of training and discipline.`,
     `${character.name}'s presence commands attention, their power undeniable.`,
     `Every gesture from ${character.name} speaks of mastery over their element.`
   ];

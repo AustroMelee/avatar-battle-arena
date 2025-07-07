@@ -24,10 +24,7 @@ export class OneOffMomentManager {
     characterName: string, 
     context: OneOffMomentContext
   ): string | null {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { turnNumber, health, maxHealth, chi, isCritical, damage } = context;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const healthPercentage = (health / maxHealth) * 100;
+    const { turnNumber } = context;
 
     // Check for first blood (first significant damage)
     if (this.shouldTriggerFirstBlood(characterName, context)) {
@@ -100,10 +97,8 @@ export class OneOffMomentManager {
       return false;
     }
 
-    const healthPercentage = (context.health / context.maxHealth) * 100;
-    
     // Desperation triggers when health drops below 25% for the first time
-    return healthPercentage <= 25 && (context.isDesperation ?? false);
+    return (context.health / context.maxHealth) * 100 <= 25 && (context.isDesperation ?? false);
   }
 
   /**
@@ -138,10 +133,8 @@ export class OneOffMomentManager {
       return false;
     }
 
-    const healthPercentage = (context.health / context.maxHealth) * 100;
-    
     // Final gambit triggers when health is critically low and chi is depleted
-    return healthPercentage <= 10 && context.chi <= 1;
+    return (context.health / context.maxHealth) * 100 <= 10 && context.chi <= 1;
   }
 
   /**

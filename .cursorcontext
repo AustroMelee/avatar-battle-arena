@@ -1081,3 +1081,29 @@ Ensure that all containers use explicit gap or padding values, never relying on 
  * 5. Add this check to your pre-commit and code review process.
  */
 
+// PROJECT DOCS AUTOMATION
+// Run `npm run docs:refresh` to automatically update the Folder & File Overview in SYSTEM ARCHITECTURE.MD.
+// This command scans all source files for @docs comments and regenerates the documentation table, ensuring zero drift between code and docs.
+// Add @docs blocks to all critical files to keep the documentation living and accurate.
+
+/*==========================================
+=   🚨 How to Prevent Large-Scale Integration Errors   =
+==========================================*/
+
+/**
+ * Enforce Pre-Commit Hooks
+ * - Run `npx tsc --noEmit` and `npm run lint` as pre-commit and CI requirements. Block commits if either fails.
+ *
+ * Break Up Large Integrations
+ * - Refactor and merge in smaller, testable chunks instead of one sweeping PR.
+ *
+ * Use Type-First Development
+ * - Update types/interfaces before writing or merging logic or UI code.
+ *
+ * Automate Dead Code Cleanup
+ * - Auto-prefix unused variables with `_` or clean them in CI to prevent TS6133 and lint noise.
+ *
+ * Document Expectations
+ * - When upgrading core systems (like narrative), write developer changelogs and upgrade guides to set clear expectations for integration and testing.
+ */
+

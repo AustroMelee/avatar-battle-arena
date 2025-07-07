@@ -26,12 +26,6 @@ export class NarrativePoolManager {
   private pools: Record<string, NarrativePoolConfig> = {};
   private currentIndices: Record<string, Record<string, number>> = {};
   private usedNarratives: Record<string, Record<string, string[]>> = {};
-  private state: NarrativePoolState = {
-    recentLines: [],
-    maxRecentLines: 5, // Prevent same line within 5 turns
-    tierUsageCounts: {},
-    lastUsedLine: null
-  };
   private characterStates: Record<string, NarrativePoolState> = {};
 
   constructor() {
@@ -167,7 +161,7 @@ export class NarrativePoolManager {
    */
   getNarrative(
     character: string,
-    state: 'normal' | 'patternBreak' | 'escalation' | 'desperation' | 'lateGame',
+    _state: 'normal' | 'patternBreak' | 'escalation' | 'desperation' | 'lateGame',
     turnNumber: number
   ): string {
     const pool = this.pools[character];
@@ -175,18 +169,18 @@ export class NarrativePoolManager {
       return `${character} performs their move with determination!`;
     }
 
-    const narratives = pool[state];
+    const narratives = pool[_state];
     if (!narratives || narratives.length === 0) {
       return `${character} performs their move with determination!`;
     }
 
     // Check if we need to reset the pool (all narratives used)
-    if (this.usedNarratives[character][state].length >= narratives.length) {
-      this.resetPool(character, state);
+    if (this.usedNarratives[character][_state].length >= narratives.length) {
+      this.resetPool(character, _state);
     }
 
     // Get the next narrative with turn-based variety
-    const index = this.currentIndices[character][state];
+    const index = this.currentIndices[character][_state];
     let narrative = narratives[index];
 
     // Add turn-based variety to prevent exact repetition
@@ -203,8 +197,8 @@ export class NarrativePoolManager {
     }
 
     // Mark as used and advance index
-    this.usedNarratives[character][state].push(narrative);
-    this.currentIndices[character][state] = (index + 1) % narratives.length;
+    this.usedNarratives[character][_state].push(narrative);
+    this.currentIndices[character][_state] = (index + 1) % narratives.length;
 
     return narrative;
   }
@@ -291,7 +285,7 @@ export class NarrativePoolManager {
     characterName: string,
     pool: string[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    context: NarrativeContext,
+    _context: NarrativeContext,
     tier: number = 1
   ): string {
     // Initialize character state if not exists
@@ -365,12 +359,6 @@ export class NarrativePoolManager {
    */
   resetForNewBattle(): void {
     this.characterStates = {};
-    this.state = {
-      recentLines: [],
-      maxRecentLines: 5,
-      tierUsageCounts: {},
-      lastUsedLine: null
-    };
     console.log('DEBUG: Narrative pool manager reset for new battle');
   }
 

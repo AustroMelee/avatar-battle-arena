@@ -123,12 +123,13 @@ export function CharacterCard({ character, isSelected, isUnavailable, onSelect, 
       <div className={styles.sectionDivider} />
       {/* Personality Section */}
       <div className={styles.personality}>
-        <span className={styles.personalityLabel}>Style:</span>
-        <span className={styles.personalityChip}>
-          <FaShieldAlt style={{ marginRight: 6 }} aria-label="Playstyle" />
-          {character.personality}
-        </span>
+        <span className={styles.personalityLabel}>Personality:</span>
+        <span className={styles.personalityChip}>{character.personality.charAt(0).toUpperCase() + character.personality.slice(1)}</span>
       </div>
+      {/* Divider */}
+      <div className={styles.sectionDivider} />
+      {/* Behavioral Traits Section (if needed) */}
+      {/* ... existing code ... */}
     </div>
   );
 } 

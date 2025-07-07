@@ -1,3 +1,11 @@
+// @docs
+/**
+ * @module Narrative System
+ * @description Complete and type-safe coverage for all characters, mechanics, and narrative contexts.
+ * Status: ✅ 100% complete for Aang & Azula.
+ * Mechanics: Parry, Interrupt, DesperationMove, StatusEffects, EffectFusion, Stalemate, etc.
+ * Integration: Fully aligned with engine phases, fallback anti-repetition, and emotional state drivers.
+ */
 // CONTEXT: Narrative System, // FOCUS: Core Engine Orchestration
 import type { BattleContext, TriggeredNarrative, NarrativeSystemConfig } from './types';
 import { createNarrativeConfig } from './configManager';
@@ -26,7 +34,7 @@ export function evaluateNarrativeHooks(
 
   // Template-based narrative generation (new system)
   if (config.useTemplateSystem) {
-    return generateTemplateBasedNarratives(ctx, config);
+    return generateTemplateBasedNarratives(ctx);
   }
 
   // Hook-based narrative generation (legacy system)

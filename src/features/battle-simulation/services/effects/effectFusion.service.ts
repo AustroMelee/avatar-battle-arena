@@ -1,5 +1,6 @@
 import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType } from '../../types';
 import { generateUniqueLogId } from '../ai/logQueries';
+// import type { Move } from '../../types/move.types';
 
 interface FusionRecipe {
   name: string;
@@ -44,12 +45,12 @@ export function processEffectFusions(character: BattleCharacter, turn: number): 
         turn,
         actor: 'System',
         type: 'STATUS',
-        action: `Status Meltdown: ${recipe.name}`,
+        action: 'Status Meltdown!',
         target: character.name,
-        result: `${character.name} is now ${recipe.resultantEffect.type}!`,
+        result: `${character.name} suffers a system shock and is now ${recipe.resultantEffect.type}!`,
         narrative: recipe.narrative,
         timestamp: Date.now(),
-        meta: { crisis: true, effectsConsumed: recipe.requiredEffects },
+        meta: { crisis: true, effectsConsumed: recipe.requiredEffects, mechanic: 'Effect Fusion' },
       };
       return { updatedCharacter, logEntry };
     }

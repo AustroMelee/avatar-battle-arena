@@ -219,4 +219,110 @@
   .chiCost {
     font-size: 11px;
   }
+}
+
+.container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  line-height: 1.6;
+  max-width: 80%;
+}
+
+/* Player 1 (Left Aligned) */
+.p1 {
+  flex-direction: row;
+  margin-right: auto;
+}
+
+.p1 .actor {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.p1 .narrativeText {
+  background: rgba(59, 130, 246, 0.1); /* Blue tint */
+  border-radius: 12px 12px 12px 4px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Player 2 (Right Aligned) */
+.p2 {
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+
+.p2 .actor {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.p2 .narrativeText {
+  background: rgba(239, 68, 68, 0.1); /* Red tint */
+  border-radius: 12px 12px 4px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* System / Narrator (Centered) */
+.system {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+.system .actor {
+  min-width: 0;
+  text-align: center;
+}
+
+.system .narrativeText {
+  text-align: center;
+  font-weight: 600;
+  color: var(--highlight-color);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.actor {
+  font-weight: 700;
+  font-size: 0.9em;
+  min-width: 100px;
+  flex-shrink: 0;
+  padding-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconImg {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--border-color-soft);
+  background: #222;
+}
+
+.narrativeText {
+  margin: 0;
+  flex-grow: 1;
+  color: var(--text-color-primary);
+  font-style: italic;
+  padding: 8px 12px;
+}
+
+/* Character-specific coloring */
+.p1Actor {
+  color: var(--player-1-color);
+}
+
+.p2Actor {
+  color: var(--player-2-color);
+}
+
+.default {
+  color: var(--text-color-secondary);
 } 

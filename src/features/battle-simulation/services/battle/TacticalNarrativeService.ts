@@ -43,7 +43,7 @@ export function buildNarrativeContext(
 ): NarrativeContext {
   return {
     damage,
-    maxHealth: target.stats.power + target.stats.defense + target.stats.agility,
+    maxHealth: target.base.stats.power + target.base.stats.defense + target.base.stats.agility,
     isMiss: damage === 0,
     isCritical: false, // Could be enhanced to detect critical hits
     isPatternBreak: attacker.flags?.forcedEscalation === 'true' && attacker.flags?.damageMultiplier === '2.0',

@@ -93,7 +93,8 @@ export async function executeAttackMove(
       const statusEffect = createStatusEffect(
         ability.name,
         ability.appliesEffect,
-        target.name
+        target.name,
+        state.turn
       );
       
       // Apply the status effect to the target
@@ -142,7 +143,7 @@ export async function executeAttackMove(
   // Generate enhanced narrative for attack using new system
   const context = {
     damage: finalDamage,
-    maxHealth: target.stats.power + target.stats.defense + target.stats.agility,
+    maxHealth: target.base.stats.power + target.base.stats.defense + target.base.stats.agility,
     isMiss: finalDamage === 0,
     isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target).wasCrit : false,
     isPatternBreak: attacker.flags?.forcedEscalation === 'true' && attacker.flags?.damageMultiplier === '2.0',

@@ -4,22 +4,24 @@
 import { BattleState } from '../../../types';
 import { getActiveParticipants } from '../state';
 import { forcePatternEscalation } from '../escalationApplication.service';
-import { processLogEntryForAnalytics } from '../analyticsTracker.service';
-import { EnhancedStateManager } from '../../narrative/enhancedStateManager';
-import { createNarrativeService } from '../../narrative';
-import { generateUniqueLogId } from '../../ai/logQueries';
+// import { processLogEntryForAnalytics } from '../analyticsTracker.service';
+// import { EnhancedStateManager } from '../../narrative/enhancedStateManager';
+// import { createNarrativeService } from '../../narrative';
+// import { generateUniqueLogId } from '../../ai/logQueries';
+import { createMechanicLogEntry } from '../../utils/mechanicLogUtils';
+// import type { Move } from '../../types/move.types';
 
 // Global enhanced state manager instance
-const enhancedStateManager = new EnhancedStateManager();
+// const enhancedStateManager = new EnhancedStateManager();
 // Lazy narrative service instance
-let narrativeService: ReturnType<typeof createNarrativeService> | null = null;
+// const narrativeService: ReturnType<typeof createNarrativeService> | null = null;
 
-function getNarrativeService() {
-  if (!narrativeService) {
-    narrativeService = createNarrativeService();
-  }
-  return narrativeService;
-}
+// function getNarrativeService() {
+//   if (!narrativeService) {
+//     narrativeService = createNarrativeService();
+//   }
+//   return narrativeService;
+// }
 
 const STALEMATE_TURN_THRESHOLD = 15;
 const STALEMATE_DAMAGE_THRESHOLD = 5; // Average damage per turn to be considered "active"
@@ -68,6 +70,15 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
   }
 
   if (shouldEscalate) {
+    // --- NEW: Add a clear "Stalemate Broken" log entry ---
+    const breakLogEntry = createMechanicLogEntry({
+      turn: state.turn,
+      actor: 'System',
+      mechanic: 'Stalemate Broken!',
+      effect: `The battle's pace quickens as ${attacker.name} is forced to change tactics.`,
+      reason: reason,
+    });
+    // --- END ---
     const { newState, logEntry } = forcePatternEscalation(state, attacker, escalationType, reason);
     
     // Update analytics with the escalation event
@@ -76,7 +87,9 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
         console.log(`DEBUG: Analytics updated - Pattern Adaptations: ${newState.analytics.patternAdaptations}`);
     }
 
+    newState.battleLog.push(breakLogEntry);
     newState.battleLog.push(logEntry);
+    newState.log.push(breakLogEntry.narrative || breakLogEntry.result);
     newState.log.push(logEntry.narrative || logEntry.result);
 
     // --- NEW: Increment the escalation cycle counter ---
@@ -89,16 +102,4 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
   }
 
   return state;
-}
-
-/**
- * @description Gets the active participants from the battle state
- */
-function getActiveParticipants(state: BattleState) {
-  const attacker = state.participants[state.activeParticipantIndex];
-  const target = state.participants[1 - state.activeParticipantIndex];
-  const attackerIndex = state.activeParticipantIndex;
-  const targetIndex = 1 - state.activeParticipantIndex;
-  
-  return { attacker, target, attackerIndex, targetIndex };
 } 

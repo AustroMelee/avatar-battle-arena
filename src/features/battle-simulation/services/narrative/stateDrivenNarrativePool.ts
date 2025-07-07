@@ -346,9 +346,11 @@ function hasActorAndTarget(ctx: unknown): ctx is { actor: { name: string }; targ
          typeof (ctx as { target: { name: string } }).target === 'object';
 }
 
-/**
- * @description Type guard to check if context has mechanics
- */
-function hasMechanics(ctx: unknown): ctx is { mechanics: { forcedEscalation?: boolean; isDesperation?: boolean; moveRepetition?: number } } {
-  return typeof ctx === 'object' && ctx !== null && 'mechanics' in ctx;
-} 
+// function hasMechanics(ctx: unknown): ctx is { mechanics: { forcedEscalation?: boolean; isDesperation?: boolean; moveRepetition?: number } } {
+//   return (
+//     typeof ctx === 'object' &&
+//     ctx !== null &&
+//     'mechanics' in ctx &&
+//     typeof (ctx as any).mechanics === 'object'
+//   );
+// } 

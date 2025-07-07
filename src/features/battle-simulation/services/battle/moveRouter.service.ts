@@ -52,8 +52,17 @@ export async function executeMove(
     case 'defense_buff':
     case 'evade':
     case 'parry_retaliate':
-      return await executeDefenseMove(ability, attacker, state, attackerIndex);
+      // Convert Ability to Move if possible (temporary fix)
+      if ('baseDamage' in ability && 'id' in ability) {
+        return await executeDefenseMove(ability as any, attacker, state, attackerIndex);
+      } else {
+        throw new TypeError('Ability is missing required Move properties (id, baseDamage)');
+      }
     default:
-      return await executeGenericMove(ability, attacker, state);
+      if ('baseDamage' in ability && 'id' in ability) {
+        return await executeGenericMove(ability as any, attacker, state);
+      } else {
+        throw new TypeError('Ability is missing required Move properties (id, baseDamage)');
+      }
   }
 } 

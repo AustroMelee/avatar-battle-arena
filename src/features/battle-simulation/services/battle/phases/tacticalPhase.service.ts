@@ -1,8 +1,9 @@
 // CONTEXT: Tactical Phase Service
 // RESPONSIBILITY: Handle tactical AI move selection and execution with enhanced narratives
 
-import { BattleState, BattleCharacter, BattleLogEntry, AILogEntry } from '../../../types';
-import { selectBestTacticalMove, moveToAbility } from '../../ai/enhancedMoveScoring';
+import { BattleState, BattleLogEntry, AILogEntry } from '../../../types';
+import { selectBestTacticalMove } from '../../ai/enhancedMoveScoring';
+// import { moveToAbility } from '../tacticalMove.service';
 import { canUseMove } from '../positioningMechanics.service';
 import { executeTacticalMove } from '../moveExecution.service';
 import { getCharacterMoves } from '../moveRegistry.service';
@@ -20,7 +21,7 @@ import type { PerceivedState } from '../../../types';
 import { resolveReversal } from '../reversalMechanic.service';
 import { createMechanicLogEntry } from '../../utils/mechanicLogUtils';
 import { Move, AANG_SUDDEN_DEATH_FINISHER, AZULA_SUDDEN_DEATH_FINISHER } from '../../../types/move.types';
-import { getAvailableMoves, hasEnoughResources, isMoveOnCooldown } from '../../ai/moveUtils';
+import { hasEnoughResources, isMoveOnCooldown } from '../../ai/moveUtils';
 import { forceBattleClimax } from '../battleValidation';
 
 /**
@@ -42,73 +43,46 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   }
   
   // --- NEW: ESCALATION MODE OVERRIDE (FINAL, DEFINITIVE REFINEMENT) ---
+  const locationData = availableLocations.find(loc => loc.name === newState.location) || availableLocations[0];
+  const normalTolerance = locationData.collateralTolerance || 2;
   if (attacker.flags?.forcedEscalation === 'true') {
     console.log(`DEBUG: T${newState.turn} ${attacker.name} is in ESCALATION MODE.`);
     let chosenMove: Move | undefined;
     let reasoning = "FORCED ESCALATION - ";
-    
-    const usableMoves = allMoves.filter(m => canUseMove(m, attacker, target, newState.location || 'Open Field'));
-    
-    // 1. Prioritize ANY usable attack move.
-    const attackMoves = usableMoves.filter(m => m.type === 'attack' && m.baseDamage > 1);
+    // Get only moves that are actually usable RIGHT NOW.
+    // const usableMoves = getAvailableMoves(attacker, {} as any, locationData, newState.turn, 2);
+    // 1. Prioritize any usable ATTACK move.
+    const attackMoves = allMoves.filter(m => m.type === 'attack');
     if (attackMoves.length > 0) {
         chosenMove = attackMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
         reasoning += `Forced to take offensive action. Choosing strongest available attack: ${chosenMove.name}.`;
+        const executionResult = await executeTacticalMove(chosenMove, attacker, target, newState);
+        if (newState.analytics) {
+          newState.analytics.desperationMoves = (newState.analytics.desperationMoves || 0) + 1;
+        }
+        newState.aiLog.push({
+          turn: newState.turn,
+          agent: attacker.name,
+          reasoning: reasoning,
+          chosenAction: chosenMove.name,
+        } as AILogEntry);
+        newState.log.push(executionResult.narrative);
+        newState.participants[attackerIndex] = executionResult.newAttacker;
+        newState.participants[targetIndex] = executionResult.newTarget;
+        return { state: newState, logEntries: executionResult.logEntries };
     } else {
-        // --- NEW: No valid attack? Skip turn to "Gather Power" instead of using Basic Strike. ---
+        // 2. If NO attacks are available, skip turn to Gather Power.
         const logEntry = createMechanicLogEntry({
             turn: newState.turn,
             actor: attacker.name,
             mechanic: 'Escalation Charge',
-            effect: `${attacker.name} has no powerful options and gathers power, skipping their turn!`,
+            effect: `${attacker.name} has no offensive options and gathers power, preparing for the next assault!`,
             reason: 'No offensive moves available during escalation.',
         });
         newState.participants[attackerIndex].resources.chi += 2;
         newState.log.push(logEntry.narrative || logEntry.result);
-        // Track as a desperation move for analytics
-        if (newState.analytics) {
-          newState.analytics.desperationMoves = (newState.analytics.desperationMoves || 0) + 1;
-        }
         return { state: newState, logEntries: [logEntry] };
     }
-    
-    // Safety net in case all logic fails
-    if (!chosenMove) {
-        chosenMove = allMoves.find(m => m.id.includes('basic_strike')) || allMoves[0];
-        reasoning = "ESCALATION: All options exhausted. Using Basic Strike.";
-    }
-
-    console.log(`DEBUG: T${newState.turn} ${attacker.name} escalation choice: ${chosenMove.name}`);
-
-    // Execute the chosen move
-    const executionResult = await executeTacticalMove(chosenMove, attacker, target, newState);
-    
-    // Log AI decision
-    newState.aiLog.push({
-      turn: newState.turn,
-      agent: attacker.name,
-      reasoning: reasoning,
-      chosenAction: chosenMove.name,
-    } as AILogEntry);
-    
-    newState.log.push(executionResult.narrative);
-    newState.participants[attackerIndex] = executionResult.newAttacker;
-    newState.participants[targetIndex] = executionResult.newTarget;
-
-    // VERY IMPORTANT: Decrement or remove the escalation flag after use
-    const escalationDuration = parseInt(attacker.flags.escalationDuration || '1', 10) - 1;
-    if (escalationDuration <= 0) {
-        newState.participants[attackerIndex].flags.forcedEscalation = 'false';
-    } else {
-        newState.participants[attackerIndex].flags.escalationDuration = escalationDuration.toString();
-    }
-    
-    // NEW: Track as a desperation move for analytics
-    if (newState.analytics) {
-      newState.analytics.desperationMoves = (newState.analytics.desperationMoves || 0) + 1;
-    }
-    
-    return { state: newState, logEntries: executionResult.logEntries };
   }
   // --- END OF ESCALATION OVERRIDE ---
   
@@ -134,20 +108,14 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   }
   // --- END OF SUDDEN DEATH OVERRIDE ---
   
-  // Only declare locationData here, after escalation block
-  const locationData = availableLocations.find(loc => loc.name === newState.location) || availableLocations[0];
-  const normalTolerance = locationData.collateralTolerance || 2;
-  
   // Get character-specific moves
-  const riskTolerance = calculateRiskTolerance(attacker);
-  const availableMoves = getAvailableMoves(attacker, {} as any, locationData, newState.turn, riskTolerance);
+  // const riskTolerance = calculateRiskTolerance(attacker);
   
   // --- NEW: Manage the Stuck Move Counter ---
   // Check how many powerful moves are being filtered specifically by collateral damage
   const collateralFilteredCount = allMoves.filter(move => {
-    const ability = moveToAbility(move);
-    return ability.collateralDamage && ability.collateralDamage > normalTolerance &&
-      hasEnoughResources(ability, attacker) && !isMoveOnCooldown(move.name, attacker);
+    return move.collateralDamage && move.collateralDamage > normalTolerance &&
+      hasEnoughResources(move, attacker) && !isMoveOnCooldown(move.name, attacker);
   }).length;
   if (collateralFilteredCount > 0) {
     attacker.flags.stuckMoveCounter = (attacker.flags.stuckMoveCounter || 0) + 1;
@@ -160,14 +128,11 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   // Filter out disabled moves (filteredMoves is Move[])
   const filteredMoves = allMoves.filter(move => !isMoveDisabled(move, attacker));
   
-  // Convert allMoves (Move[]) to Ability[] for tactical AI
-  const abilityList = allMoves.map(moveToAbility);
-  
   // --- NEW: Tactical Stalemate Counter Logic ---
   let currentStalemateCounter = newState.tacticalStalemateCounter || 0;
 
   // Use new tactical AI for move selection, passing the stalemate counter
-  const tacticalResult = selectBestTacticalMove(abilityList, attacker, target, currentStalemateCounter);
+  const tacticalResult = selectBestTacticalMove(allMoves, attacker, target, currentStalemateCounter);
 
   // Update the stalemate counter based on the result
   if (tacticalResult.priority === newState.lastTacticalPriority) {
@@ -178,7 +143,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   newState.tacticalStalemateCounter = currentStalemateCounter;
   newState.lastTacticalPriority = tacticalResult.priority;
   
-  // Convert chosen Ability back to Move for execution (search allMoves by name)
+  // Use chosen Move directly for execution
   const chosenMove = allMoves.find(m => m.name === tacticalResult.chosenAbility.name) || allMoves[0];
   
   // Check if move can be used
@@ -224,7 +189,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
         self: {
           health: attacker.currentHealth,
           defense: attacker.currentDefense,
-          personality: attacker.personality,
+          personality: attacker.base.personality,
           abilities: attacker.abilities.map(a => ({
             id: a.name,
             name: a.name,
@@ -245,7 +210,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
         enemy: {
           health: target.currentHealth,
           defense: target.currentDefense,
-          personality: target.personality,
+          personality: target.base.personality,
           name: target.name,
           lastMove: target.lastMove,
           moveHistory: target.moveHistory,
@@ -293,7 +258,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
     self: {
       health: attacker.currentHealth,
       defense: attacker.currentDefense,
-      personality: attacker.personality,
+      personality: attacker.base.personality,
       abilities: attacker.abilities.map(a => ({
         id: a.name,
         name: a.name,
@@ -314,7 +279,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
     enemy: {
       health: target.currentHealth,
       defense: target.currentDefense,
-      personality: target.personality,
+      personality: target.base.personality,
       name: target.name,
       lastMove: target.lastMove,
       moveHistory: target.moveHistory,
@@ -401,6 +366,21 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
       console.log(`AI TACTICAL SHIFT: ${attacker.name} is making a high-risk gamble due to being stuck.`);
   }
   
+  // --- NEW: Refined Analytics Tracking ---
+  if (tacticalResult.priority === 'gamble') {
+    // This was a high-risk gamble forced by a tactical stalemate. It's a desperation move.
+    if (newState.analytics) {
+      newState.analytics.desperationMoves = (newState.analytics.desperationMoves || 0) + 1;
+    }
+    console.log(`ANALYTICS: Desperation move logged for ${attacker.name} (gamble).`);
+  } else if (newState.lastTacticalPriority && tacticalResult.priority !== newState.lastTacticalPriority) {
+    // The AI made a conscious choice to change tactics without being forced. This is an adaptation.
+    if (newState.analytics) {
+      newState.analytics.patternAdaptations = (newState.analytics.patternAdaptations || 0) + 1;
+    }
+    console.log(`ANALYTICS: Pattern adaptation logged for ${attacker.name} (tactical shift).`);
+  }
+  
   return { state: newState, logEntries: [...logEntries, ...reversalLogEntries] };
 }
 
@@ -416,27 +396,22 @@ function getActiveParticipants(state: BattleState) {
   return { attacker, target, attackerIndex, targetIndex };
 }
 
-/**
- * @description NEW: Calculates the AI's risk tolerance based on its state.
- * @param {BattleCharacter} character - The AI character.
- * @returns {number} A risk level (0: normal, 1: risky, 2: desperate).
- */
-function calculateRiskTolerance(character: BattleCharacter): number {
-  let risk = 0;
-  // If health is low, take more risks.
-  if (character.currentHealth < 40) risk++;
-  if (character.currentHealth < 20) risk++;
-
-  // If stuck in a "recover chi" loop for too long, take a risk.
-  const moveHistory = character.moveHistory.slice(-3); // Check last 3 moves
-  const isStuckRecovering = moveHistory.length === 3 && moveHistory.every(move => 
-    move.includes('Glide') || move.includes('Dash') || move.includes('Focus')
-  );
-
-  if (isStuckRecovering) {
-    console.log(`AI TACTICAL SHIFT: ${character.name} is stuck in a recovery loop, increasing risk tolerance.`);
-    risk++;
-  }
-  
-  return Math.min(risk, 2); // Cap risk at 2
-} 
+// function calculateRiskTolerance(character: BattleCharacter): number {
+//   let risk = 0;
+//   // If health is low, take more risks.
+//   if (character.currentHealth < 40) risk++;
+//   if (character.currentHealth < 20) risk++;
+//
+//   // If stuck in a "recover chi" loop for too long, take a risk.
+//   const moveHistory = character.moveHistory.slice(-3); // Check last 3 moves
+//   const isStuckRecovering = moveHistory.length === 3 && moveHistory.every(move => 
+//     move.includes('Glide') || move.includes('Dash') || move.includes('Focus')
+//   );
+//
+//   if (isStuckRecovering) {
+//     console.log(`AI TACTICAL SHIFT: ${character.name} is stuck in a recovery loop, increasing risk tolerance.`);
+//     risk++;
+//   }
+//   
+//   return Math.min(risk, 2); // Cap risk at 2
+// } 

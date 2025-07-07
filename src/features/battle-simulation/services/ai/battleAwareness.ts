@@ -78,13 +78,13 @@ export function getBattleContext(
   
   // Analyze burst availability
   const burstAvailable = me.abilities.some(ability => 
-    ability.power > 40 && 
+    ability.baseDamage > 40 && 
     (!me.cooldowns[ability.name] || me.cooldowns[ability.name] === 0) && 
     (me.resources.chi || 0) >= (ability.chiCost || 0)
   );
   
   const enemyBurstThreat = enemy.abilities.some(ability => 
-    ability.power > 40 && 
+    ability.baseDamage > 40 && 
     (!enemy.cooldowns[ability.name] || enemy.cooldowns[ability.name] === 0) && 
     (enemy.resources.chi || 0) >= (ability.chiCost || 0)
   );

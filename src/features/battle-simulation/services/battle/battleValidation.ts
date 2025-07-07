@@ -1,9 +1,9 @@
 // CONTEXT: Battle Validation System
 // RESPONSIBILITY: Validate battle state, prevent deadlocks, and ensure proper resolution
-import { BattleState, BattleLogEntry } from '../../types';
+import { BattleState, BattleLogEntry, LogEventType } from '../../types';
 import { createEventId } from '../ai/logQueries';
-import { getAvailableFallbackMoves } from './fallbackMoves';
-import { trackDamage } from './analyticsTracker.service';
+// import { getAvailableFallbackMoves } from './fallbackMoves';
+// import { trackDamage } from './analyticsTracker.service';
 import { AANG_MOVES, AZULA_MOVES } from '../../types/move.types';
 import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
@@ -151,7 +151,10 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
       issues: [reason],
       recommendations: ['Trigger Climax Phase'],
       shouldForceEnd: false,
-      logEntry
+      logEntry: {
+        ...logEntry,
+        type: logEntry.type as LogEventType
+      }
     };
   }
 
@@ -179,7 +182,10 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     recommendations,
     shouldForceEnd,
     endReason,
-    logEntry
+    logEntry: logEntry ? {
+      ...logEntry,
+      type: logEntry.type as LogEventType
+    } : undefined
   };
 }
 

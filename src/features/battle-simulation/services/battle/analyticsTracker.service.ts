@@ -209,7 +209,7 @@ export function formatRealTimeAnalytics(analytics: RealTimeAnalytics): string {
  */
 export function updateRealTimeAnalytics(state: BattleState): BattleState {
   const newState = { ...state };
-  const lastLogEntry = newState.battleLog[newState.battleLog.length - 1];
+  // const _lastLogEntry = newState.battleLog[newState.battleLog.length - 1];
 
   // Only update analytics if the turn has advanced
   if (newState.turn === newState.analytics.lastUpdatedTurn) {

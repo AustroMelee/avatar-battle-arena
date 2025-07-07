@@ -3,6 +3,7 @@
 
 import type { BattleState, BattleLogEntry } from '../../types';
 import type { BattleMetrics } from './battleAnalysis.service';
+// import type { Move } from '../../types/move.types';
 
 export { analyzeCharacterPerformance } from './characterAnalysis.service';
 export type { CharacterMetrics } from './characterAnalysis.service';
@@ -11,6 +12,8 @@ export { analyzeAIPerformance } from './aiAnalysis.service';
 export type { AIMetrics } from './aiAnalysis.service';
 
 export { generateBattleReport } from './reportGenerator.service';
+
+export type { BattleMetrics } from './battleAnalysis.service';
 
 // Local implementation of analyzeBattlePerformance
 export function analyzeBattlePerformance(
@@ -33,28 +36,36 @@ export function analyzeBattlePerformance(
     });
   const criticalHits = battleLog.filter(entry => entry.meta?.crit).length;
   // Use improved desperationMoves logic
-  const desperationMoves = finalState.analytics?.desperationMoves || battleLog.filter(entry => entry.meta?.desperation).length;
+  const desperationMoves = finalState.analytics?.desperationMoves || 0;
   const finisherMoves = battleLog.filter(entry => entry.meta?.finisher).length;
   const climaxEvents = battleLog.filter(entry => entry.meta?.climax).length;
-  const patternAdaptations = battleLog.filter(entry => entry.meta?.aiRule?.includes('Anti-pattern')).length;
+  const patternAdaptations = finalState.analytics?.patternAdaptations || 0;
   const totalChiSpent = battleLog
     .filter(entry => entry.meta?.resourceCost)
     .reduce((sum, entry) => sum + (entry.meta?.resourceCost || 0), 0);
   const chiEfficiency = totalChiSpent > 0 ? totalDamage / totalChiSpent : 0;
-  let victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock' = 'health';
+  let victoryMethod: BattleMetrics['victoryMethod'] = 'health';
   if (finalState.winner && finalState.winner.name) {
-    const winnerLogs = battleLog.filter(entry => entry.actor === finalState.winner!.name);
-    if (winnerLogs.some(entry => entry.meta?.desperation)) {
-      victoryMethod = 'desperation';
-    } else if (winnerLogs.some(entry => entry.meta?.climax)) {
-      victoryMethod = 'climax';
+    const lastLog = battleLog[battleLog.length - 1];
+    // Check if the final blow was from a BURN effect
+    if (lastLog && lastLog.action === 'Burn Damage' && lastLog.target === finalState.winner.name) {
+      const loser = finalState.participants.find(p => p.name !== finalState.winner?.name);
+      if(loser && lastLog.target === loser.name) {
+        victoryMethod = 'burnout';
+      }
+    } else if (lastLog && lastLog.type === 'FINISHER') {
+        victoryMethod = 'climax';
+    } else if (desperationMoves > 0) {
+        victoryMethod = 'desperation';
     }
+  } else if (finalState.analytics.totalDamage === 0) {
+      victoryMethod = 'deadlock';
   } else {
-    victoryMethod = 'stalemate';
+      victoryMethod = 'stalemate';
   }
   // Improved stalematePrevention logic
   const stalematePrevention = finalState.analytics?.stalematePreventionTriggered || 
-    battleLog.some(e => e.type === 'ESCALATION' || e.meta?.crisis || e.meta?.climax || e.meta?.desperation || e.meta?.finisher);
+    battleLog.some(e => e.type === 'ESCALATION' || e.meta?.crisis || e.meta?.mechanic === 'SUDDEN DEATH');
   return {
     totalTurns,
     totalDamage,

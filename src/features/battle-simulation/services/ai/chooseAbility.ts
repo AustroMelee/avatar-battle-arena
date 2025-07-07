@@ -1,8 +1,8 @@
 // CONTEXT: AI Ability Selection
 // RESPONSIBILITY: Choose abilities with comprehensive logging
-import { Ability } from '@/common/types';
 import { BattleCharacter, AILogEntry, BattleLogEntry } from '../../types';
 import { shouldAvoidMove, getAntiPatternMoves, generatePatternNarrative } from './patternRecognition';
+import type { Move } from '../../types/move.types';
 
 
 
@@ -10,7 +10,7 @@ import { shouldAvoidMove, getAntiPatternMoves, generatePatternNarrative } from '
  * @description Represents the result of AI ability selection with logging.
  */
 export interface AIAbilityResult {
-  ability: Ability | null;
+  ability: Move | null;
   aiLog: AILogEntry;
 }
 
@@ -96,12 +96,12 @@ export function chooseAbilityWithLogging(
           self: {
             health: character.currentHealth,
             defense: character.currentDefense,
-            personality: character.personality,
+            personality: character.base.personality,
             abilities: character.abilities.map(ability => ({
               id: ability.name.toLowerCase().replace(/\s+/g, '_'),
               name: ability.name,
               type: ability.type,
-              power: ability.power,
+              power: ability.baseDamage,
               cooldown: ability.cooldown
             })),
             cooldowns: character.cooldowns,
@@ -117,7 +117,7 @@ export function chooseAbilityWithLogging(
           enemy: {
             health: enemy.currentHealth,
             defense: enemy.currentDefense,
-            personality: enemy.personality,
+            personality: enemy.base.personality,
             name: enemy.name,
             lastMove: enemy.lastMove,
             moveHistory: enemy.moveHistory,
@@ -149,9 +149,9 @@ export function chooseAbilityWithLogging(
     let score = 0;
     const reasons: string[] = [];
     
-    // Base score from ability power
-    score += ability.power * 2;
-    reasons.push(`Base power: ${ability.power}`);
+    // Base score from ability damage
+    score += ability.baseDamage * 2;
+    reasons.push(`Base damage: ${ability.baseDamage}`);
     
     // Bonus for anti-pattern moves
     if (antiPatternMoves.includes(ability.name)) {
@@ -199,7 +199,7 @@ export function chooseAbilityWithLogging(
     // Enemy health-based scoring
     if (enemy.currentHealth < 20) {
       // Enemy is low - finish them off
-      if ((ability.type === 'attack' || ability.type === 'parry_retaliate') && ability.power > 15) {
+      if ((ability.type === 'attack' || ability.type === 'parry_retaliate') && ability.baseDamage > 15) {
         score += 40;
         reasons.push('Enemy low health - finishing move');
       }
@@ -220,7 +220,7 @@ export function chooseAbilityWithLogging(
       }
     } else if ((character.resources.chi || 0) > 8) {
       // High chi - can afford expensive moves
-      if (ability.power > 20) {
+      if (ability.baseDamage > 20) {
         score += 25;
         reasons.push('High chi - using powerful moves');
       }
@@ -259,7 +259,7 @@ export function chooseAbilityWithLogging(
     
     // Critical hit potential
     if (ability.critChance && ability.critMultiplier) {
-      const expectedDamage = ability.power * (1 + (ability.critChance * (ability.critMultiplier - 1)));
+      const expectedDamage = ability.baseDamage * (1 + (ability.critChance * (ability.critMultiplier - 1)));
       score += expectedDamage * 0.5;
       reasons.push(`Critical potential: ${(ability.critChance * 100).toFixed(0)}% chance for ${ability.critMultiplier}x damage`);
     }
@@ -292,12 +292,12 @@ export function chooseAbilityWithLogging(
           self: {
             health: character.currentHealth,
             defense: character.currentDefense,
-            personality: character.personality,
+            personality: character.base.personality,
             abilities: character.abilities.map(ability => ({
               id: ability.name.toLowerCase().replace(/\s+/g, '_'),
               name: ability.name,
               type: ability.type,
-              power: ability.power,
+              power: ability.baseDamage,
               cooldown: ability.cooldown
             })),
             cooldowns: character.cooldowns,
@@ -313,7 +313,7 @@ export function chooseAbilityWithLogging(
           enemy: {
             health: enemy.currentHealth,
             defense: enemy.currentDefense,
-            personality: enemy.personality,
+            personality: enemy.base.personality,
             name: enemy.name,
             lastMove: enemy.lastMove,
             moveHistory: enemy.moveHistory,

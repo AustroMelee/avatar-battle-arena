@@ -12,7 +12,7 @@ export function generateMentalStateMoveDescription(
   move: Move
 ): string {
   const mentalState = character.mentalState;
-  const _profile = character.name; // We'll use the name to determine character personality
+  // const _profile = character.name; // We'll use the name to determine character personality
 
   // Base move description
   let description = `${character.name} uses ${move.name}`;
@@ -100,7 +100,7 @@ export function generateMoveOutcomeNarrative(
   character: BattleCharacter,
   move: Move,
   wasSuccessful: boolean,
-  damage?: number
+  _damage?: number
 ): string {
   const mentalState = character.mentalState;
 

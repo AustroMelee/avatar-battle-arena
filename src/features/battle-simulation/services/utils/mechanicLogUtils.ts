@@ -1,4 +1,4 @@
-import type { BattleLogEntry } from '../../types';
+import type { BattleLogEntry, LogDetails } from '../../types';
 import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
@@ -11,10 +11,10 @@ export interface MechanicLogOptions {
   effect: string;
   reason?: string;
   target?: string;
-  meta?: Record<string, unknown>;
+  details?: LogDetails;
 }
 
-let mechanicLogCounter = 0;
+// let mechanicLogCounter = 0;
 
 /**
  * Creates a standardized log entry for a battle mechanic event.
@@ -36,7 +36,7 @@ export function createMechanicLogEntry({
   effect,
   reason,
   target,
-  meta,
+  details,
 }: MechanicLogOptions): BattleLogEntry {
   return {
     id: generateUniqueLogId('mechanic'),
@@ -50,6 +50,6 @@ export function createMechanicLogEntry({
       ? `${actor}: [${mechanic}] ${effect} (${reason})`
       : `${actor}: [${mechanic}] ${effect}`,
     timestamp: Date.now(),
-    meta: meta || { mechanic, reason },
+    details: { ...details, mechanic, reason },
   };
 } 

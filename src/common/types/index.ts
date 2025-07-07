@@ -51,6 +51,7 @@ export type Character = {
   id: string;
   name: string;
   image: string; // URL or path to image
+  icon: string; // Path to image asset (e.g., '/assets/aang.jpg' or '/assets/aang-icon.svg')
 
   /** @description The primary bending art the character will use. */
   bending: 'air' | 'fire' | 'water' | 'earth' | 'avatar';

@@ -106,30 +106,6 @@ export class CharacterNarrativeRouter {
   }
 
   /**
-   * @description Get desperation line with phase-based selection
-   */
-  getDesperationLine(characterName: string): string {
-    if (characterName.toLowerCase().includes('aang')) {
-      return this.aangService.getDesperationLine();
-    } else if (characterName.toLowerCase().includes('azula')) {
-      return this.azulaService.getDesperationLine();
-    }
-    return "Desperation fuels their movements!";
-  }
-
-  /**
-   * @description Get victory line
-   */
-  getVictoryLine(characterName: string): string {
-    if (characterName.toLowerCase().includes('aang')) {
-      return this.aangService.getVictoryLine();
-    } else if (characterName.toLowerCase().includes('azula')) {
-      return this.azulaService.getVictoryLine();
-    }
-    return "Victory is achieved!";
-  }
-
-  /**
    * @description Get defeat line
    */
   getDefeatLine(characterName: string): string {
@@ -190,5 +166,12 @@ export class CharacterNarrativeRouter {
    */
   getCharacterArc(characterName: string): { currentPhase: string; lastPhaseChange: number; emotionalProgression: number; hasSnapped: boolean } | null {
     return this.arcTracker.getArc(characterName);
+  }
+
+  /**
+   * @description Get victory line for a character
+   */
+  getVictoryLine(characterName: string): string {
+    return `${characterName} is victorious!`;
   }
 } 

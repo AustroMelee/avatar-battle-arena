@@ -1,6 +1,6 @@
 // CONTEXT: BattleSimulation, // FOCUS: AbilityButton
 import React from 'react';
-import type { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import type { CooldownDisplayInfo } from '../../types/cooldown.types';
 import styles from './AbilityButton.module.css';
 
@@ -9,11 +9,11 @@ import styles from './AbilityButton.module.css';
  */
 export type AbilityButtonProps = {
   /** @description The ability to display. */
-  ability: Ability;
+  ability: Move;
   /** @description Display information for the ability. */
   displayInfo: CooldownDisplayInfo;
   /** @description Callback when the ability button is clicked. */
-  onClick: (ability: Ability) => void;
+  onClick: (move: Move) => void;
   /** @description Whether to show detailed tooltips. */
   showTooltips?: boolean;
   /** @description Additional CSS class names. */
@@ -109,15 +109,6 @@ export const AbilityButton: React.FC<AbilityButtonProps> = ({
         {usesText && (
           <div className={styles.usesIndicator}>
             <span className={styles.usesText}>{usesText}</span>
-          </div>
-        )}
-
-        {/* Desperation move indicator */}
-        {ability.unlockCondition && (
-          <div className={styles.desperationIndicator}>
-            <span className={styles.desperationText}>
-              Desperation Move
-            </span>
           </div>
         )}
       </button>

@@ -231,7 +231,7 @@ export class NarrativeCoordinator {
     
     // Check if desperation should be included using strategy service
     if (!this.strategyService.shouldIncludeDesperation(context, this.lastDesperationTurn)) {
-      return this.characterRouter.getDesperationLine(characterName);
+      return this.characterRouter.getDefeatLine(characterName);
     }
     
     this.lastDesperationTurn = turnNumber;
@@ -251,24 +251,32 @@ export class NarrativeCoordinator {
   updateEmotionalState(characterName: string, event: string, _context: NarrativeContext): void {
     // Enhanced emotion updates based on events
     if (event === 'hit') {
-      this.emotionManager.updateEmotion(characterName, { 
-        confidence: 0.7, 
-        intensity: 0.6 
+      this.emotionManager.updateEmotion(characterName, {
+        type: 'generic',
+        intensity: 0.6,
+        duration: 1,
+        timestamp: Date.now(),
       });
     } else if (event === 'miss') {
-      this.emotionManager.updateEmotion(characterName, { 
-        confidence: 0.3, 
-        intensity: 0.8 
+      this.emotionManager.updateEmotion(characterName, {
+        type: 'generic',
+        intensity: 0.8,
+        duration: 1,
+        timestamp: Date.now(),
       });
     } else if (event === 'damage') {
-      this.emotionManager.updateEmotion(characterName, { 
-        fear: 0.6, 
-        intensity: 0.9 
+      this.emotionManager.updateEmotion(characterName, {
+        type: 'generic',
+        intensity: 0.9,
+        duration: 1,
+        timestamp: Date.now(),
       });
     } else if (event === 'critical') {
       this.emotionManager.updateEmotion(characterName, {
-        anger: 0.8,
-        intensity: 0.9
+        type: 'generic',
+        intensity: 0.9,
+        duration: 1,
+        timestamp: Date.now(),
       });
     }
   }

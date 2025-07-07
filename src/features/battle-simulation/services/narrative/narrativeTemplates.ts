@@ -1,5 +1,5 @@
 // CONTEXT: Narrative System, // FOCUS: Template-Driven Storytelling
-import type { BattleContext, MechanicalState } from './types';
+import type { BattleContext } from './types';
 
 /**
  * @description Narrative template categories for different mechanical states

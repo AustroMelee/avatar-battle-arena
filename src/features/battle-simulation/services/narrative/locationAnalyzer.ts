@@ -1,5 +1,5 @@
 // CONTEXT: Narrative System, // FOCUS: Location Analysis
-import type { BattleCharacter } from '../../types';
+// import type { BattleCharacter } from '../../types';
 
 /**
  * @description Calculate collateral tolerance for a player based on location and character
@@ -11,8 +11,8 @@ import type { BattleCharacter } from '../../types';
  */
 export function calcCollateralTolerance(
   location: string,
-  actor: BattleCharacter,
-  target: BattleCharacter,
+  // actor: BattleCharacter,
+  // target: BattleCharacter,
   player: string
 ): number {
   if (location === 'Fire Nation Capital') {

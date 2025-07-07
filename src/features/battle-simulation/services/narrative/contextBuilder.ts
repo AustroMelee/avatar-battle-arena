@@ -39,8 +39,8 @@ export function buildBattleContext(
 
   // Collateral tolerance for each participant
   const collateralTolerance: Record<string, number> = {
-    [actor.name]: calcCollateralTolerance(location, actor, target, actor.name),
-    [target.name]: calcCollateralTolerance(location, actor, target, target.name)
+    [actor.name]: calcCollateralTolerance(location, actor.name),
+    [target.name]: calcCollateralTolerance(location, target.name)
   };
 
   // Determine narrative-specific context

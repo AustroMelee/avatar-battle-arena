@@ -50,7 +50,7 @@ export class NarrativeComposer {
   composeEmotionalNarrative(
     characterName: string, 
     damageOutcome: DamageOutcome, 
-    context: NarrativeContext, 
+    _context: NarrativeContext, 
     moveName: string,
     emotionalState: string,
     shouldNarrateEmotion: boolean,
@@ -185,11 +185,11 @@ export class NarrativeComposer {
   /**
    * @description Compose environmental narrative with move-specific flavor
    */
-  composeEnvironmentalNarrative(characterName: string, damageOutcome: DamageOutcome, context: NarrativeContext, moveName: string): string {
+  composeEnvironmentalNarrative(characterName: string, damageOutcome: DamageOutcome, _context: NarrativeContext, moveName: string): string {
     // Get move-specific flavor if available
     const moveFlavor = this.getMoveSpecificFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
-      const environmentalContext = this.variantsService.getEnvironmentalContext(context.turnNumber);
+      const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
       return `${moveFlavor} ${environmentalContext}`;
     }
     
@@ -199,7 +199,7 @@ export class NarrativeComposer {
       : this.characterRouter.getHitLine(characterName);
     
     // Add environmental context
-    const environmentalContext = this.variantsService.getEnvironmentalContext(context.turnNumber);
+    const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
     return `${baseLine} ${environmentalContext}`;
   }
 
@@ -220,7 +220,7 @@ export class NarrativeComposer {
    * @description Compose desperation narrative with anti-repetition
    */
   composeDesperationNarrative(characterName: string, _context: NarrativeContext): string {
-    const desperationLine = this.characterRouter.getDesperationLine(characterName);
+    const desperationLine = this.characterRouter.getDefeatLine(characterName);
     const stateAnnouncement = this.poolManager.getStateAnnouncementNarrative('desperation');
     
     return `${desperationLine} ${stateAnnouncement}`;
@@ -229,8 +229,8 @@ export class NarrativeComposer {
   /**
    * @description Compose escalation narrative
    */
-  composeEscalationNarrative(characterName: string, context: NarrativeContext): string {
-    const escalationLine = this.characterRouter.getEscalationLine(characterName, context);
+  composeEscalationNarrative(characterName: string, _context: NarrativeContext): string {
+    const escalationLine = this.characterRouter.getEscalationLine(characterName, _context);
     return escalationLine || '';
   }
 

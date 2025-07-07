@@ -1,6 +1,6 @@
 // CONTEXT: Contextual Move Scoring
 // RESPONSIBILITY: Score moves based on battle context and tactical intent
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { BattleCharacter } from '../../types';
 import { BattleTacticalContext } from './battleStateAwareness';
 import { Intent } from './intentSystem';
@@ -12,7 +12,7 @@ import { calculateIntentAlignment } from './intentAlignment.service';
  * @description Enhanced move score with detailed reasoning.
  */
 export interface ContextualMoveScore {
-  move: Ability;
+  move: Move;
   score: number;
   reasons: string[];
   contextFactors: string[];
@@ -21,7 +21,7 @@ export interface ContextualMoveScore {
 
 /**
  * @description Scores a move based on battle context and tactical intent.
- * @param {Ability} move - The move to score.
+ * @param {Move} move - The move to score.
  * @param {BattleCharacter} me - The character using the move.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {BattleTacticalContext} context - The current battle context.
@@ -29,7 +29,7 @@ export interface ContextualMoveScore {
  * @returns {ContextualMoveScore} The scored move with detailed analysis.
  */
 export function scoreMoveWithContext(
-  move: Ability,
+  move: Move,
   me: BattleCharacter,
   enemy: BattleCharacter,
   context: BattleTacticalContext,
@@ -90,7 +90,7 @@ export function scoreMoveWithContext(
  * @description Calculates context-specific bonuses for a move.
  */
 function calculateContextBonuses(
-  move: Ability,
+  move: Move,
   context: BattleTacticalContext,
   contextFactors: string[]
 ): number {
@@ -102,7 +102,7 @@ function calculateContextBonuses(
     contextFactors.push('Early game defense building');
   }
   
-  if (context.isLateGame && (move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 35) {
+  if (context.isLateGame && (move.type === 'attack' || move.type === 'parry_retaliate') && move.baseDamage > 35) {
     bonus += 3;
     contextFactors.push('Late game high damage');
   }
@@ -135,7 +135,7 @@ function calculateContextBonuses(
 
 /**
  * @description Scores multiple moves with context and returns them sorted.
- * @param {Ability[]} moves - The moves to score.
+ * @param {Move[]} moves - The moves to score.
  * @param {BattleCharacter} me - The character using the moves.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {BattleContext} context - The current battle context.
@@ -143,7 +143,7 @@ function calculateContextBonuses(
  * @returns {ContextualMoveScore[]} The scored moves sorted by score (highest first).
  */
 export function scoreMovesWithContext(
-  moves: Ability[],
+  moves: Move[],
   me: BattleCharacter,
   enemy: BattleCharacter,
   context: BattleTacticalContext,

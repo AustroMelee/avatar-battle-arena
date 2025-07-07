@@ -1,6 +1,6 @@
 // CONTEXT: BattleSimulation, // FOCUS: CooldownHook
 import { useState, useCallback, useMemo } from 'react';
-import type { Ability } from '@/common/types';
+import type { Move } from '../types/move.types';
 import type {
   CharacterCooldownState,
   AbilityCooldownState,
@@ -22,8 +22,8 @@ import {
  * @description Parameters for initializing the cooldown manager hook.
  */
 export type UseCooldownManagerParams = {
-  /** @description List of abilities to track cooldowns for. */
-  abilities: Ability[];
+  /** @description List of moves to track cooldowns for. */
+  moves: Move[];
   /** @description Starting turn number (usually 0). */
   startingTurn?: number;
   /** @description Current chi available to the character. */
@@ -40,18 +40,18 @@ export type UseCooldownManagerParams = {
 export type UseCooldownManagerReturn = {
   /** @description Current cooldown state. */
   cooldownState: CharacterCooldownState;
-  /** @description Check if an ability is available for use. */
-  isAbilityAvailable: (ability: Ability) => AbilityAvailabilityResult;
-  /** @description Use an ability and update cooldown state. */
-  useAbility: (ability: Ability) => void;
+  /** @description Check if a move is available for use. */
+  isMoveAvailable: (move: Move) => AbilityAvailabilityResult;
+  /** @description Use a move and update cooldown state. */
+  useMove: (move: Move) => void;
   /** @description Advance to the next turn. */
   advanceTurn: () => void;
   /** @description Reset all cooldowns for a new battle. */
   resetCooldowns: (newStartingTurn?: number) => void;
-  /** @description Get display information for an ability. */
-  getDisplayInfo: (ability: Ability) => CooldownDisplayInfo;
-  /** @description Get cooldown state for a specific ability. */
-  getAbilityCooldownState: (abilityName: string) => AbilityCooldownState | null;
+  /** @description Get display information for a move. */
+  getDisplayInfo: (move: Move) => CooldownDisplayInfo;
+  /** @description Get cooldown state for a specific move. */
+  getAbilityCooldownState: (moveName: string) => AbilityCooldownState | null;
   /** @description Current turn number. */
   currentTurn: number;
   /** @description Validate the current cooldown state. */
@@ -59,18 +59,18 @@ export type UseCooldownManagerReturn = {
 };
 
 /**
- * @description React hook for managing ability cooldowns in battle.
+ * @description React hook for managing move cooldowns in battle.
  * Provides comprehensive cooldown management with strict TypeScript typing.
  * @param {UseCooldownManagerParams} params - Parameters for initializing the hook.
  * @returns {UseCooldownManagerReturn} Cooldown management functions and state.
  * @throws {TypeError} When parameters are invalid.
  */
 export function useCooldownManager(params: UseCooldownManagerParams): UseCooldownManagerReturn {
-  const { abilities, startingTurn = 0, availableChi, currentHealthPercentage, battlePhase = 'normal' } = params;
+  const { moves, startingTurn = 0, availableChi, currentHealthPercentage, battlePhase = 'normal' } = params;
 
   // Validate input parameters
-  if (!Array.isArray(abilities) || abilities.length === 0) {
-    throw new TypeError('Abilities array must be non-empty');
+  if (!Array.isArray(moves) || moves.length === 0) {
+    throw new TypeError('Moves array must be non-empty');
   }
 
   if (typeof startingTurn !== 'number' || startingTurn < 0) {
@@ -87,27 +87,25 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
 
   // Initialize cooldown state
   const [cooldownState, setCooldownState] = useState<CharacterCooldownState>(() => 
-    initializeCooldownState({ abilities, startingTurn })
+    initializeCooldownState({ moves, startingTurn })
   );
 
   // Memoized current turn for performance
   const currentTurn = useMemo(() => cooldownState.currentTurn, [cooldownState.currentTurn]);
 
   /**
-   * @description Check if an ability is available for use.
-   * @param {Ability} ability - The ability to check.
+   * @description Check if a move is available for use.
+   * @param {Move} move - The move to check.
    * @returns {AbilityAvailabilityResult} Detailed availability information.
    */
-  const isAbilityAvailable = useCallback((ability: Ability): AbilityAvailabilityResult => {
-    const abilityState = getAbilityCooldownState(cooldownState, ability.name);
-    
-    if (!abilityState) {
-      throw new TypeError(`Ability ${ability.name} not found in cooldown state`);
+  const isMoveAvailable = useCallback((move: Move): AbilityAvailabilityResult => {
+    const moveState = getAbilityCooldownState(cooldownState, move.name);
+    if (!moveState) {
+      throw new TypeError(`Move ${move.name} not found in cooldown state`);
     }
-
     return checkAbilityAvailability({
-      ability,
-      cooldownState: abilityState,
+      move: move,
+      cooldownState: moveState,
       currentTurn: cooldownState.currentTurn,
       availableChi,
       battlePhase
@@ -115,30 +113,27 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
   }, [cooldownState, availableChi, battlePhase]);
 
   /**
-   * @description Use an ability and update cooldown state.
-   * @param {Ability} ability - The ability to use.
+   * @description Use a move and update cooldown state.
+   * @param {Move} move - The move to use.
    */
-  const useAbilityCallback = useCallback((ability: Ability): void => {
-    const abilityState = getAbilityCooldownState(cooldownState, ability.name);
-    
-    if (!abilityState) {
-      throw new TypeError(`Ability ${ability.name} not found in cooldown state`);
+  const useMove = useCallback((move: Move): void => {
+    const moveState = getAbilityCooldownState(cooldownState, move.name);
+    if (!moveState) {
+      throw new TypeError(`Move ${move.name} not found in cooldown state`);
     }
-
-    const updatedAbilityState = updateAbilityCooldownState(
+    const updatedMoveState = updateAbilityCooldownState(
       {
-        ability,
+        move: move,
         currentTurn: cooldownState.currentTurn,
         currentHealthPercentage
       },
-      abilityState
+      moveState
     );
-
     setCooldownState(prevState => ({
       ...prevState,
       abilityStates: {
         ...prevState.abilityStates,
-        [ability.name]: updatedAbilityState
+        [move.name]: updatedMoveState
       }
     }));
   }, [cooldownState, currentHealthPercentage]);
@@ -147,8 +142,8 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
    * @description Advance to the next turn.
    */
   const advanceTurn = useCallback((): void => {
-    setCooldownState(prevState => advanceCooldownTurn(prevState, abilities));
-  }, [abilities]);
+    setCooldownState(prevState => advanceCooldownTurn(prevState, moves));
+  }, [moves]);
 
   /**
    * @description Reset all cooldowns for a new battle.
@@ -162,36 +157,36 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
     }
 
     setCooldownState(() => 
-      resetCooldowns({ abilities, startingTurn: turn })
+      resetCooldowns({ moves, startingTurn: turn })
     );
-  }, [abilities]);
+  }, [moves]);
 
   /**
-   * @description Get cooldown state for a specific ability.
-   * @param {string} abilityName - Name of the ability.
+   * @description Get cooldown state for a specific move.
+   * @param {string} moveName - Name of the move.
    * @returns {AbilityCooldownState | null} The cooldown state or null if not found.
    */
-  const getAbilityCooldownStateCallback = useCallback((abilityName: string): AbilityCooldownState | null => {
-    return getAbilityCooldownState(cooldownState, abilityName);
+  const getAbilityCooldownStateCallback = useCallback((moveName: string): AbilityCooldownState | null => {
+    return getAbilityCooldownState(cooldownState, moveName);
   }, [cooldownState]);
 
   /**
-   * @description Get display information for an ability.
-   * @param {Ability} ability - The ability to get display info for.
-   * @returns {CooldownDisplayInfo} Display information for the ability.
+   * @description Get display information for a move.
+   * @param {Move} move - The move to get display info for.
+   * @returns {CooldownDisplayInfo} Display information for the move.
    */
-  const getDisplayInfo = useCallback((ability: Ability): CooldownDisplayInfo => {
-    const availability = isAbilityAvailable(ability);
-    const abilityState = getAbilityCooldownState(cooldownState, ability.name);
+  const getDisplayInfo = useCallback((move: Move): CooldownDisplayInfo => {
+    const availability = isMoveAvailable(move);
+    const moveState = getAbilityCooldownState(cooldownState, move.name);
     
-    if (!abilityState) {
-      throw new TypeError(`Ability ${ability.name} not found in cooldown state`);
+    if (!moveState) {
+      throw new TypeError(`Move ${move.name} not found in cooldown state`);
     }
 
     const isDisabled = !availability.isAvailable;
     const cooldownTurns = availability.cooldownTurnsRemaining;
     const usesRemaining = availability.usesRemaining;
-    const chiCost = ability.chiCost ?? 0;
+    const chiCost = move.chiCost ?? 0;
 
     // Determine button class based on availability
     let buttonClass = 'ability-button';
@@ -244,11 +239,11 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
           break;
       }
     } else {
-      tooltipText = `${ability.description} (${chiCost} chi)`;
+      tooltipText = `${move.description} (${chiCost} chi)`;
     }
 
     // Calculate cooldown progress for visualization
-    const maxCooldown = ability.cooldown ?? 0;
+    const maxCooldown = move.cooldown ?? 0;
     const cooldownProgress = maxCooldown > 0 
       ? Math.max(0, Math.min(100, ((maxCooldown - cooldownTurns) / maxCooldown) * 100))
       : 100;
@@ -262,7 +257,7 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
       showCooldownIndicator: cooldownTurns > 0,
       cooldownProgress
     };
-  }, [cooldownState, availableChi, isAbilityAvailable]);
+  }, [cooldownState, availableChi, isMoveAvailable]);
 
   /**
    * @description Validate the current cooldown state.
@@ -279,8 +274,8 @@ export function useCooldownManager(params: UseCooldownManagerParams): UseCooldow
 
   return {
     cooldownState,
-    isAbilityAvailable,
-    useAbility: useAbilityCallback,
+    isMoveAvailable,
+    useMove,
     advanceTurn,
     resetCooldowns: resetCooldownsCallback,
     getDisplayInfo,

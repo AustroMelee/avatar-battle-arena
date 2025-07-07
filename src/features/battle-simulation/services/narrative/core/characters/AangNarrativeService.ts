@@ -23,7 +23,13 @@ export class AangNarrativeService {
     "The young monk's hesitation costs him.",
     "Aang's strike lacks conviction.",
     "His movements betray his inner conflict.",
-    "The Avatar's attack is too controlled."
+    "The Avatar's attack is too controlled.",
+    "The wind answers, but too late.",
+    "He moves to strike—then remembers what it means to harm.",
+    "A breath held too long becomes hesitation.",
+    "The air shifts, uncertain, like his heart.",
+    "He steps lightly... but the world demands weight.",
+    "His strike drifts wide—like a leaf with no current to follow."
   ];
 
   // Aang-specific hit lines with emotional depth
@@ -39,7 +45,13 @@ export class AangNarrativeService {
     "His pacifist nature gives way to determination—the blow lands with controlled fury.",
     "Aang's hope hardens into resolve—his strike finds its mark.",
     "The young monk's movements betray his fatigue—yet the attack still connects.",
-    "His gentle spirit holds back his fury—but the strike still lands."
+    "His gentle spirit holds back his fury—but the strike still lands.",
+    "Balance guides him—the strike lands not in anger, but in harmony.",
+    "The force is not his own, but the world's—he simply channels it.",
+    "Even in violence, he bends with purpose.",
+    "The air itself wanted this blow to land.",
+    "The wind carries justice with it—soft, but undeniable.",
+    "He closes his eyes—and still connects."
   ];
 
   // Aang-specific escalation lines
@@ -55,23 +67,12 @@ export class AangNarrativeService {
     "The Avatar's movements become more focused, more determined.",
     "Aang's pacifist nature gives way to the necessity of action.",
     "The young monk's resolve strengthens with each exchange.",
-    "His gentle spirit is tested by the intensity of the conflict."
-  ];
-
-  // Aang-specific desperation lines
-  private desperationLines = [
-    "Aang's movements betray his exhaustion—yet he fights on.",
-    "The Avatar's gentle spirit is pushed to its limits.",
-    "His pacifist nature struggles against the desperate need to survive.",
-    "The young monk's fatigue shows in every movement.",
-    "Aang's hope flickers but refuses to die.",
-    "His determination is tested by the overwhelming odds.",
-    "The Avatar's resolve is pushed to the breaking point.",
-    "Aang's gentle nature is forced to embrace the fight.",
-    "The young monk's movements become desperate, yet controlled.",
-    "His pacifist heart is tested by the brutal reality of battle.",
-    "Aang's hope hardens into desperate determination.",
-    "The Avatar's gentle spirit is forced to become fierce."
+    "His gentle spirit is tested by the intensity of the conflict.",
+    "The still air becomes a storm—not by choice, but by calling.",
+    "He stops holding back—not out of anger, but duty.",
+    "The cyclone inside him begins to turn.",
+    "Every movement now carries the legacy of a thousand Avatars.",
+    "He no longer avoids the fight—he shapes it."
   ];
 
   // Aang-specific victory lines
@@ -87,7 +88,13 @@ export class AangNarrativeService {
     "Aang's hope and courage bring victory.",
     "The Avatar's gentle strength prevails.",
     "His pacifist nature proves its worth.",
-    "The young monk's resolve leads to triumph."
+    "The young monk's resolve leads to triumph.",
+    "Aang bows—not to gloat, but to remember who he is.",
+    "Peace, just for a moment, finds him again.",
+    "He does not cheer. He just breathes, deeply.",
+    "He wins without hate. That is his strength.",
+    "Even in triumph, he searches for what was lost.",
+    "The air settles. The fight is over. He remains."
   ];
 
   // Aang-specific defeat lines
@@ -103,7 +110,13 @@ export class AangNarrativeService {
     "Aang's gentle spirit is crushed by defeat.",
     "The Avatar's pacifist nature proves insufficient.",
     "His hope is extinguished by the harsh reality.",
-    "The young monk's gentle heart cannot prevail."
+    "The young monk's gentle heart cannot prevail.",
+    "He falls—not from pain, but from the weight of the world.",
+    "Even the Avatar cannot bend fate every time.",
+    "The wind dies with him—but only for now.",
+    "His failure is quiet, like dusk falling on a monastery.",
+    "He doesn't cry. The air does, for him.",
+    "He lost—but did not break."
   ];
 
   // Expanded move-specific flavor pools
@@ -114,7 +127,10 @@ export class AangNarrativeService {
       "Aang's airbending lets him float above the fray.",
       "A gentle breeze carries Aang's strike to its target.",
       "His staff flickers, air rippling around the opponent.",
-      "Aang flows like water, staff flickering—his strike snaps across their shoulder, stinging pride and skin alike."
+      "Aang flows like water, staff flickering—his strike snaps across their shoulder, stinging pride and skin alike.",
+      "He becomes a thought on the breeze—impossible to grasp.",
+      "Aang doesn't dodge—he dances on the world's breath.",
+      "His body floats, but his will does not waver."
     ],
     'Wind Slice': [
       "A sharp current rips through the throne room, cutting with a surgeon's precision.",
@@ -122,7 +138,10 @@ export class AangNarrativeService {
       "The air shreds forward, slicing through the tension.",
       "A razor-thin blast tears the dust from the throne room floor.",
       "Aang's hands whip the air into a shimmering blade.",
-      "The wind becomes a weapon in Aang's skilled hands."
+      "The wind becomes a weapon in Aang's skilled hands.",
+      "His staff carves a rift through the very breath of the room.",
+      "The air splits—sharp, clean, regretful.",
+      "With a flick, the wind itself becomes righteous."
     ],
     'Air Blast': [
       "Aang channels the wind into a focused blast.",
@@ -130,7 +149,10 @@ export class AangNarrativeService {
       "A concentrated gust strikes with precision.",
       "The wind responds to Aang's gentle command.",
       "Air ripples outward from Aang's staff.",
-      "The breeze becomes a battering ram."
+      "The breeze becomes a battering ram.",
+      "It isn't a blast—it's a lesson in pressure.",
+      "The gale doesn't roar. It teaches.",
+      "The push carries no anger—only certainty."
     ],
     'Staff Strike': [
       "Aang's staff finds its mark with monk precision.",
@@ -138,7 +160,10 @@ export class AangNarrativeService {
       "His training shows in every staff movement.",
       "The staff becomes an extension of Aang's will.",
       "Monk discipline guides the staff's path.",
-      "The staff strikes with the wisdom of his masters."
+      "The staff strikes with the wisdom of his masters.",
+      "Each strike echoes his teachers' voices.",
+      "The staff hums—not with power, but principle.",
+      "Wood meets flesh with purpose, not fury."
     ]
   };
 
@@ -291,36 +316,6 @@ export class AangNarrativeService {
     } else {
       // Balanced state - standard escalation lines
       return this.getCycledVariant(this.escalationLines, 'escalation');
-    }
-  }
-
-  /**
-   * @description Get desperation line with emotional state
-   */
-  getDesperationLine(): string {
-    const emotionalState = this.getEmotionalState();
-    
-    // Use emotional state to select appropriate desperation line
-    if (emotionalState.determination >= 3) {
-      // High determination - more resolved desperation
-      const highDeterminationLines = [
-        "Aang's hope flickers but refuses to die.",
-        "His determination is tested by the overwhelming odds.",
-        "The Avatar's resolve is pushed to the breaking point.",
-        "Aang's gentle nature is forced to embrace the fight.",
-        "The young monk's movements become desperate, yet controlled."
-      ];
-      return this.getCycledVariant(highDeterminationLines, 'desperation_high_determination');
-    } else {
-      // Low determination - more broken desperation
-      const lowDeterminationLines = [
-        "Aang's movements betray his exhaustion—yet he fights on.",
-        "The Avatar's gentle spirit is pushed to its limits.",
-        "His pacifist nature struggles against the desperate need to survive.",
-        "The young monk's fatigue shows in every movement.",
-        "Aang's pacifist heart is tested by the brutal reality of battle."
-      ];
-      return this.getCycledVariant(lowDeterminationLines, 'desperation_low_determination');
     }
   }
 

@@ -3,7 +3,8 @@
 import { SimulateBattleParams, BattleState, BattleLogEntry, AILogEntry } from '../types';
 import { createInitialBattleState, cloneBattleState } from './battle/state';
 import { processTurn } from './battle/processTurn';
-import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport, BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
+import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport } from './battle/analytics';
+import type { BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
 import { createMechanicLogEntry } from './utils/mechanicLogUtils';
@@ -38,10 +39,10 @@ interface BattleSimulatorConfig {
  * @description Battle simulator service
  */
 export class BattleSimulator {
-  private config: BattleSimulatorConfig;
+  // private _config: BattleSimulatorConfig;
 
-  constructor(config: BattleSimulatorConfig = { realTime: false, maxTurns: 50, timeoutMs: 30000 }) {
-    this.config = config;
+  constructor(_config: BattleSimulatorConfig = { realTime: false, maxTurns: 50, timeoutMs: 30000 }) {
+    // this._config = config;
   }
 
   /**

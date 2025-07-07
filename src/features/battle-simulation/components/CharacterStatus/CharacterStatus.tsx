@@ -48,7 +48,7 @@ export function CharacterStatus({ character, isActive, playerColor }: CharacterS
       </div>
       <div className={styles.header}>
         <h3 className={styles.name}>{character.name}</h3>
-        <div className={styles.bending}>{character.bending}</div>
+        <div className={styles.bending}>{character.base.bending}</div>
       </div>
       {/* Control State */}
       <div className={styles.controlStateSection}>

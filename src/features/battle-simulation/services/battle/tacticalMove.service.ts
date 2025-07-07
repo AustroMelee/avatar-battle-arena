@@ -1,7 +1,7 @@
 // CONTEXT: Tactical Move Service
 // RESPONSIBILITY: Execute tactical moves with positioning, charge-up, and status effect mechanics
 
-import { BattleState, BattleCharacter, BattleLogEntry, ArcStateModifier } from '../../types';
+import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Move } from '../../types/move.types';
 import { createBattleContext } from './battleContext.service';
 import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
@@ -12,7 +12,7 @@ import { getMoveFatigueMultiplier, applyMoveFatigue } from './moveFatigue.servic
 import { resolveMove } from './moveLogic.service';
 import { resolveImpact } from './resolveImpact';
 import { checkDefeat } from './checkDefeat';
-import { getLocationType } from '../../types/move.types';
+// import { getLocationType } from '../../types/move.types';
 import { canUseMove } from './positioningMechanics.service';
 import { TacticalMemory } from '../ai/tacticalMemory.service';
 import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
@@ -105,7 +105,7 @@ async function handleRepositioningMove(
   if (move.appliesEffect) {
     const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
     if (shouldApply) {
-      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
+      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name, state.turn);
       const { updatedCharacter, logEntry } = applyEffect(newTarget, statusEffect, state.turn);
       Object.assign(newTarget, updatedCharacter);
       if (state.battleLog) state.battleLog.push(logEntry);
@@ -186,7 +186,7 @@ async function handleChargeUpMove(
     if (move.appliesEffect) {
       const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
       if (shouldApply) {
-        const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
+        const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name, state.turn);
         const { updatedCharacter, logEntry } = applyEffect(newTarget, statusEffect, state.turn);
         Object.assign(newTarget, updatedCharacter);
         logEntries.push(logEntry);
@@ -279,7 +279,7 @@ async function handleRegularTacticalMove(
   if (move.appliesEffect) {
     const shouldApply = !move.appliesEffect.chance || Math.random() < move.appliesEffect.chance;
     if (shouldApply) {
-      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name);
+      const statusEffect = createStatusEffect(move.name, move.appliesEffect, target.name, state.turn);
       const { updatedCharacter, logEntry: statusLogEntry } = applyEffect(newTarget, statusEffect, state.turn);
       Object.assign(newTarget, updatedCharacter);
       logEntries.push(statusLogEntry);
@@ -379,7 +379,7 @@ async function handleRegularTacticalMove(
 }
 
 // Utility to convert Move to Ability for disruption logic
-function moveToAbility(move: Move): Ability {
+export function moveToAbility(move: Move): Ability {
   return {
     id: move.id,
     name: move.name,
@@ -397,12 +397,10 @@ export function selectTacticalMove(
   enemy: BattleCharacter,
   availableMoves: Move[],
   location: string,
-  arcModifiers?: ArcStateModifier
+  // arcModifiers?: ArcStateModifier
 ): { move: Move; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
-  const locationType = getLocationType(location);
-  const isAirbender = self.name.toLowerCase().includes('aang');
-  const isFirebender = self.name.toLowerCase().includes('azula');
-  // ... (getAvailableMovesSimple and fallback logic remains the same) ...
+  // const locationType = getLocationType(location);
+  // const isAirbender = self.base.bending === 'air';
   let tacticalMemory = tacticalMemoryMap.get(self);
   if (!tacticalMemory) {
     tacticalMemory = new TacticalMemory();

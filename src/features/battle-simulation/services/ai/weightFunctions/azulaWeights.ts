@@ -151,7 +151,7 @@ export const desperateMovesWeight: WeightFunction = (_state, self, opp) => {
 /**
  * @description Get all weighted moves for Azula
  * @param {BattleCharacter} self - Azula's character data
- * @returns {Array<{id: string, move: Ability, weightFn: WeightFunction, description: string}>} Weighted moves
+ * @returns {Array<{id: string, move: Move, weightFn: WeightFunction, description: string}>} Weighted moves
  */
 export function getAzulaWeightedMoves(self: BattleCharacter) {
   return [

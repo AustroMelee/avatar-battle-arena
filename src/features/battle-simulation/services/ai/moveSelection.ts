@@ -1,11 +1,11 @@
 // CONTEXT: AI Move Selection
 // RESPONSIBILITY: Weighted random selection from scored moves
-import { Ability } from '@/common/types';
 import { MetaState } from './metaState';
 import { MoveScore } from './moveScoring';
+import { Move } from '../../types/move.types';
 
 export interface WeightedMove {
-  move: Ability;
+  move: Move;
   weight: number;
   reasons: string[];
 }
@@ -21,21 +21,21 @@ export function applyVariance(moveScores: MoveScore[], meta: MetaState): Weighte
     let weight = Math.max(0.1, score);
     
     // Emotional variance
-    if (meta.bored && move.power > 40) {
+    if (meta.bored && move.baseDamage > 40) {
       weight *= 1.5;
     }
     if (meta.frustrated && move.tags?.includes('high-damage')) {
       weight *= 1.8;
     }
-    if (meta.desperate && move.power > 60) {
+    if (meta.desperate && move.baseDamage > 60) {
       weight *= 2.0;
     }
     
     // Tactical variance
-    if (meta.stuckLoop && move.power > 40) {
+    if (meta.stuckLoop && move.baseDamage > 40) {
       weight *= 1.6;
     }
-    if (meta.finishingTime && move.power > 60) {
+    if (meta.finishingTime && move.baseDamage > 60) {
       weight *= 2.2;
     }
     
@@ -86,18 +86,18 @@ export function selectMove(moveScores: MoveScore[], meta: MetaState): WeightedMo
 // RESPONSIBILITY: All move scoring, filtering, and selection logic for tactical AI
 
 import { BattleCharacter, ArcStateModifier } from '../../types';
-import { Move, getLocationType } from '../../types/move.types';
+import { getLocationType } from '../../types/move.types';
 import { canUseMove, applyPositionBonuses } from '../battle/positioningMechanics.service';
 import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
 import type { BattleLogEntry } from '../../types';
-import { TacticalMemory, checkTacticalMemoryWithLog } from './tacticalMemory.service';
+import { TacticalMemory } from './tacticalMemory.service';
 
 // TacticalMemory instance per AI (could be attached to BattleCharacter or managed externally)
 const tacticalMemoryMap = new WeakMap<BattleCharacter, TacticalMemory>();
 
 export function selectTacticalMove(
   self: BattleCharacter,
-  enemy: BattleCharacter,
+  _enemy: BattleCharacter,
   availableMoves: Move[],
   location: string,
   arcModifiers?: ArcStateModifier
@@ -107,7 +107,7 @@ export function selectTacticalMove(
   const isFirebender = self.name.toLowerCase().includes('azula');
   // Filter moves that can be used
   const usableMoves = availableMoves.filter(move => 
-    canUseMove(move, self, enemy, location)
+    canUseMove(move, self, _enemy, location)
   );
   const identityAdjustments = adjustScoresByIdentity(self, usableMoves);
   let tacticalMemory = tacticalMemoryMap.get(self);
@@ -189,7 +189,7 @@ export function selectTacticalMove(
         tacticalFactors.push("Escalation Focus");
       }
     }
-    if (enemy.isCharging || enemy.position === "repositioning" || enemy.position === "stunned") {
+    if (_enemy.isCharging || _enemy.position === "repositioning" || _enemy.position === "stunned") {
       if (move.punishIfCharging) {
         score += 200;
         reasoning += "PUNISHING VULNERABLE ENEMY! ";
@@ -201,7 +201,7 @@ export function selectTacticalMove(
         tacticalFactors.push("Vulnerability Exploit");
       }
     }
-    if (move.isChargeUp && canChargeSafely(enemy, locationType)) {
+    if (move.isChargeUp && canChargeSafely(self, locationType)) {
       score += 60;
       reasoning += "SAFE CHARGE-UP OPPORTUNITY! ";
       tacticalFactors.push("Charge Opportunity");
@@ -218,7 +218,7 @@ export function selectTacticalMove(
       tacticalFactors.push("Position Advantage");
     }
     if (move.changesPosition === "repositioning") {
-      const repositionScore = evaluateRepositionNeed(self, enemy, locationType, isAirbender);
+      const repositionScore = evaluateRepositionNeed(self, _enemy, locationType, isAirbender);
       score += repositionScore;
       if (repositionScore > 0) {
         reasoning += "Repositioning for tactical advantage. ";
@@ -242,7 +242,7 @@ export function selectTacticalMove(
       score += evaluateFirebenderTactics(move, locationType);
       tacticalFactors.push("Firebender Tactics");
     }
-    score += evaluateDefensiveMoves(move, self, enemy);
+    score += evaluateDefensiveMoves(move, self, _enemy);
     if (move.id.includes('evade') || move.id.includes('parry') || move.id.includes('counter')) {
       tacticalFactors.push("Defensive Strategy");
     }
@@ -257,7 +257,7 @@ export function selectTacticalMove(
       reasoning += 'Avoiding defensive spam. ';
       tacticalFactors.push('Defensive Spam Penalty');
     }
-    const isVulnerable = enemy.isCharging || enemy.position === 'repositioning' || enemy.position === 'stunned';
+    const isVulnerable = _enemy.isCharging || _enemy.position === 'repositioning' || _enemy.position === 'stunned';
     const isCriticallyLowHealth = self.currentHealth < 30;
     const isDefensiveOrUtilityMove = move.type !== 'attack';
     if (!isVulnerable && !isCriticallyLowHealth && isDefensiveOrUtilityMove) {
@@ -327,11 +327,11 @@ export function selectTacticalMove(
         reasoning += "Overconfidence demands flashy display. ";
       }
     }
-    if (enemy.activeFlags.has('isManipulated')) {
+    if (_enemy.activeFlags.has('isManipulated')) {
       score += 50;
       reasoning += "Target is manipulated - easier to exploit. ";
     }
-    if (enemy.activeFlags.has('isExposed')) {
+    if (_enemy.activeFlags.has('isExposed')) {
       score += 100;
       reasoning += "Target is completely exposed - perfect opportunity! ";
     }
@@ -376,7 +376,7 @@ function canChargeSafely(enemy: BattleCharacter, locationType: string): boolean 
 
 function evaluateRepositionNeed(
   self: BattleCharacter, 
-  enemy: BattleCharacter, 
+  _enemy: BattleCharacter, 
   locationType: string, 
   isAirbender: boolean
 ): number {
@@ -387,7 +387,7 @@ function evaluateRepositionNeed(
   if (self.position === "cornered") {
     score += 30;
   }
-  if (enemy.isCharging) {
+  if (_enemy.isCharging) {
     score += 25;
   }
   if (isAirbender) {
@@ -439,7 +439,7 @@ function evaluateFirebenderTactics(move: Move, locationType: string): number {
 function evaluateDefensiveMoves(
   move: Move, 
   self: BattleCharacter, 
-  enemy: BattleCharacter
+  _enemy: BattleCharacter
 ): number {
   let score = 0;
   const isEvadeMove = move.id.includes('evade') || move.id.includes('evasion') || move.id.includes('flowing');

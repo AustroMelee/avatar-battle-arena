@@ -1,8 +1,9 @@
 import { IDENTITY_PROFILES } from '../../data/identities';
 import type { BattleCharacter } from '../../types';
+import type { Move } from '../../types/move.types';
 import { MetaState } from '../ai/metaState';
-import type { Ability, Location } from '@/common/types';
-import { createMechanicLogEntry } from '../../services/utils/mechanicLogUtils';
+import type { Location } from '@/common/types';
+// import { createMechanicLogEntry } from '../../services/utils/mechanicLogUtils';
 
 const STUCK_AI_THRESHOLD = 2; // AI will take a risk after being stuck for this many turns
 
@@ -40,84 +41,56 @@ function getDynamicCollateralTolerance(character: BattleCharacter, location: Loc
 }
 
 /**
- * @description Gets available moves for a character, now with risk-taking logic.
+ * @description Gets available moves for a character, enforcing all constraints. This is the single source of truth for what an AI can do.
  * @param {BattleCharacter} character - The character.
  * @param {MetaState} meta - The current meta-state.
  * @param {Location} location - The battle location.
- * @param {number} turn - The current turn number.
+ * @param {number} _turn - The current turn number.
  * @param {number} riskTolerance - The AI's willingness to take risks.
- * @returns {Ability[]} The available moves.
+ * @returns {Move[]} The available moves.
  */
 export function getAvailableMoves(
   character: BattleCharacter,
   meta: MetaState,
   location: Location,
-  turn: number,
-  riskTolerance: number = 0 // NEW: Add riskTolerance parameter
-): Ability[] {
+  _turn: number,
+  riskTolerance: number = 0
+): Move[] {
   const currentTolerance = getDynamicCollateralTolerance(character, location, riskTolerance);
-  let moves = character.abilities.filter(ability => {
-    // ... (keep existing cooldown, uses, and resource checks)
-    if (character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) return false;
-    const usesLeft = character.usesLeft[ability.name] ?? (ability.maxUses || Infinity);
-    if (ability.maxUses && usesLeft <= 0) return false;
-    const chiCost = ability.chiCost || 0;
-    if (character.resources.chi < chiCost) return false;
 
-    // --- MODIFIED: Collateral Damage Check with Risk Tolerance ---
-    if (ability.collateralDamage && ability.collateralDamage > currentTolerance) {
-      // Log the standard filter reason
-      console.log(`DEBUG: T${turn} ${character.name} filtered out ${ability.name} due to Collateral damage ${ability.collateralDamage} > tolerance ${currentTolerance}`);
-      
-      // If risk tolerance is high, we might ignore this. For now, we just log.
-      // The tactical AI will use this info to decide if it should force a risky move.
-      // This implementation allows the AI to *know* why a move was filtered, which is key.
-      return false; 
+  // --- REFINED: Hard-gating move availability ---
+  let moves = character.abilities.filter((ability: Move) => {
+    // 1. Check Chi Cost
+    const chiCost = ability.chiCost || 0;
+    if (character.resources.chi < chiCost) {
+      return false;
     }
-    
+    // 2. Check Cooldown
+    if (character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) {
+      return false;
+    }
+    // 3. Check Uses Remaining
+    const usesLeft = character.usesLeft[ability.name] ?? (ability.maxUses || Infinity);
+    if (ability.maxUses && usesLeft <= 0) {
+      return false;
+    }
+    // 4. Check Collateral Damage
+    if (ability.collateralDamage && ability.collateralDamage > currentTolerance) {
+      return false;
+    }
     return true;
-  });
-  
-  // ... (keep all HARD GATING logic for meta state)
+  }) as Move[];
   if (meta.stuckLoop && moves.length > 1) {
     const lastMove = character.moveHistory[character.moveHistory.length - 1];
     moves = moves.filter(m => m.name !== lastMove);
-    console.log(`HARD PATTERN BREAK: Removed ${lastMove} from available moves`);
   }
-  
-  // ... (and so on)
-
-  // --- NEW: Overload path for desperation ---
-  // If no moves are available and risk tolerance is high, reconsider the filtered moves.
-  if (moves.length === 0 && riskTolerance > 1) {
-    console.log(`AI DESPERATION: ${character.name} has no safe moves and is taking a risk!`);
-    // Return all moves that are only blocked by collateral damage
-    const riskyMoves = character.abilities.filter(ability => {
-      const isCollateralBlocked = ability.collateralDamage && ability.collateralDamage > getDynamicCollateralTolerance(character, location, 0);
-      const isOtherwiseUsable = !(character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) &&
-                                hasEnoughResources(ability, character);
-      return isCollateralBlocked && isOtherwiseUsable;
-    });
-
-    if (riskyMoves.length > 0) {
-      // Add a log entry here for clarity in the battle log
-      createMechanicLogEntry({
-          turn,
-          actor: character.name,
-          mechanic: 'Desperate Gamble',
-          effect: `Ignoring collateral damage risks to break the stalemate!`,
-          reason: 'AI desperation protocol activated.',
-      });
-      return riskyMoves;
+  // Fallback: If ALL moves are filtered, ensure Basic Strike is an option if affordable.
+  if (moves.length === 0) {
+    const basicAttack = (character.abilities as Move[]).find(a => a.name === "Basic Strike");
+    if (basicAttack && hasEnoughResources(basicAttack, character)) {
+      return [basicAttack];
     }
   }
-
-  // Fallback: If we filtered too aggressively, allow some moves back
-  if (moves.length === 0) {
-    console.log(`HARD GATING: Too restrictive, allowing fallback moves`);
-    moves = character.abilities.filter(ability => hasEnoughResources(ability, character));
-  }
-  
   return moves;
 }
 
@@ -125,7 +98,7 @@ export function getAvailableMoves(
 export function isMoveOnCooldown(moveName: string, character: BattleCharacter): boolean {
   return !!(character.cooldowns[moveName] && character.cooldowns[moveName] > 0);
 }
-export function hasEnoughResources(ability: Ability, character: BattleCharacter): boolean {
+export function hasEnoughResources(ability: Move, character: BattleCharacter): boolean {
   const chiCost = ability.chiCost || 0;
   return character.resources.chi >= chiCost;
 } 

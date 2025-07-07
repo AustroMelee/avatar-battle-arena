@@ -2,7 +2,7 @@
 // RESPONSIBILITY: Handle desperation mechanics, stat surges, and dramatic power shifts
 
 import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
@@ -26,7 +26,7 @@ export interface DesperationState {
     defensePenalty: number;
     critChanceBonus: number;
   };
-  availableDesperateMoves: Ability[];
+  availableDesperateMoves: Move[];
   canUseFinisher: boolean;
 }
 
@@ -63,12 +63,12 @@ export function calculateDesperationState(
   }
 
   // Get desperate moves that are now available
-  const availableDesperateMoves = character.abilities.filter(ability => 
-    ability.tags?.includes('desperation') &&
-    ability.unlockCondition?.type === 'health' &&
-    character.currentHealth <= (ability.unlockCondition.threshold || 0) &&
-    (!character.cooldowns[ability.name] || character.cooldowns[ability.name] === 0) &&
-    (character.resources.chi || 0) >= (ability.chiCost || 0)
+  const availableDesperateMoves = character.abilities.filter(move =>
+    move.tags?.includes('desperation') &&
+    move.unlockCondition?.type === 'health' &&
+    character.currentHealth <= (move.unlockCondition.threshold || 0) &&
+    (!character.cooldowns[move.name] || character.cooldowns[move.name] === 0) &&
+    (character.resources.chi || 0) >= (move.chiCost || 0)
   );
 
   // Check if finisher is available (opponent below 20% HP)

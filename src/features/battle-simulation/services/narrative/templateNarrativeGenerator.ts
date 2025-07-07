@@ -1,5 +1,5 @@
 // CONTEXT: Narrative System, // FOCUS: Template-Based Narrative Generation
-import type { BattleContext, TriggeredNarrative, NarrativeSystemConfig, CharacterMood } from './types';
+import type { BattleContext, TriggeredNarrative, CharacterMood } from './types';
 import { 
   selectNarrativeTemplate, 
   generateNarrativeText, 
@@ -15,7 +15,7 @@ import { generateUniqueLogId } from '../ai/logQueries';
  */
 export function generateTemplateBasedNarratives(
   ctx: BattleContext,
-  config: NarrativeSystemConfig
+  // config: NarrativeSystemConfig
 ): TriggeredNarrative[] {
   const narratives: TriggeredNarrative[] = [];
   

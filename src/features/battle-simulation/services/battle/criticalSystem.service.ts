@@ -2,7 +2,7 @@
 // RESPONSIBILITY: Handle dramatic critical hits with consequences
 
 import { BattleCharacter, BattleLogEntry } from '../../types';
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { createEventId } from '../ai/logQueries';
 
 /**
@@ -58,14 +58,14 @@ export const CHARACTER_CRITICAL_CONFIGS: Record<string, Partial<CriticalConfig>>
  * @description Calculates critical hit with dramatic consequences
  * @param {BattleCharacter} attacker - The attacking character
  * @param {BattleCharacter} target - The target character
- * @param {Ability} ability - The ability being used
+ * @param {Move} move - The move being used
  * @param {number} desperationBonus - Additional crit chance from desperation
  * @returns {CriticalResult} The critical hit result
  */
 export function calculateCriticalHit(
   attacker: BattleCharacter,
   target: BattleCharacter,
-  ability: Ability,
+  move: Move,
   desperationBonus: number = 0
 ): CriticalResult {
   const config = {
@@ -107,7 +107,7 @@ export function calculateCriticalHit(
   const staggerApplied = Math.random() < config.staggerChance;
   
   // Generate dramatic narrative
-  const narrative = generateCriticalNarrative(attacker, target, ability, intensity, staggerApplied);
+  const narrative = generateCriticalNarrative(attacker, target, move, intensity, staggerApplied);
   
   return {
     isCritical: true,
@@ -122,7 +122,7 @@ export function calculateCriticalHit(
  * @description Generates dramatic narrative for critical hits
  * @param {BattleCharacter} attacker - The attacking character
  * @param {BattleCharacter} target - The target character
- * @param {Ability} ability - The ability used
+ * @param {Move} move - The move used
  * @param {string} intensity - The intensity level
  * @param {boolean} staggerApplied - Whether stagger was applied
  * @returns {string} The dramatic narrative
@@ -130,38 +130,38 @@ export function calculateCriticalHit(
 function generateCriticalNarrative(
   attacker: BattleCharacter,
   target: BattleCharacter,
-  ability: Ability,
+  move: Move,
   intensity: 'normal' | 'dramatic' | 'legendary',
   staggerApplied: boolean
 ): string {
   const characterName = attacker.name.toLowerCase();
   
   if (characterName === 'aang') {
-    return generateAangCriticalNarrative(target, ability, intensity, staggerApplied);
+    return generateAangCriticalNarrative(target, move, intensity, staggerApplied);
   } else if (characterName === 'azula') {
-    return generateAzulaCriticalNarrative(target, ability, intensity, staggerApplied);
+    return generateAzulaCriticalNarrative(target, move, intensity, staggerApplied);
   }
   
   // Generic critical narrative
-  return `${attacker.name}'s ${ability.name} strikes with devastating precision!`;
+  return `${attacker.name}'s ${move.name} strikes with devastating precision!`;
 }
 
 /**
  * @description Generates Aang-specific critical hit narrative
  * @param {BattleCharacter} target - The target character
- * @param {Ability} ability - The ability used
+ * @param {Move} move - The move used
  * @param {string} intensity - The intensity level
  * @param {boolean} staggerApplied - Whether stagger was applied
  * @returns {string} The dramatic narrative
  */
 function generateAangCriticalNarrative(
   target: BattleCharacter,
-  ability: Ability,
+  move: Move,
   intensity: 'normal' | 'dramatic' | 'legendary',
   staggerApplied: boolean
 ): string {
   if (intensity === 'legendary') {
-    return `Aang's ${ability.name} becomes a force of nature! The air itself seems to bend to his will, sending ${target.name} flying across the arena with a gasp that echoes through the marble halls.`;
+    return `Aang's ${move.name} becomes a force of nature! The air itself seems to bend to his will, sending ${target.name} flying across the arena with a gasp that echoes through the marble halls.`;
   }
   
   if (intensity === 'dramatic') {
@@ -178,19 +178,19 @@ function generateAangCriticalNarrative(
 /**
  * @description Generates Azula-specific critical hit narrative
  * @param {BattleCharacter} target - The target character
- * @param {Ability} ability - The ability used
+ * @param {Move} move - The move used
  * @param {string} intensity - The intensity level
  * @param {boolean} staggerApplied - Whether stagger was applied
  * @returns {string} The dramatic narrative
  */
 function generateAzulaCriticalNarrative(
   target: BattleCharacter,
-  ability: Ability,
+  move: Move,
   intensity: 'normal' | 'dramatic' | 'legendary',
   staggerApplied: boolean
 ): string {
   if (intensity === 'legendary') {
-    return `Azula's ${ability.name} erupts with blue fire so intense it seems to burn reality itself. ${target.name} is sent sprawling, the heat searing through their defenses like paper.`;
+    return `Azula's ${move.name} erupts with blue fire so intense it seems to burn reality itself. ${target.name} is sent sprawling, the heat searing through their defenses like paper.`;
   }
   
   if (intensity === 'dramatic') {
@@ -214,8 +214,7 @@ export function applyStaggerEffect(target: BattleCharacter): BattleCharacter {
     ...target,
     flags: {
       ...target.flags,
-      stunned: true,
-      stunDuration: 1 // Skip next turn
+      // stunDuration: 1 // Skip next turn
     }
   };
 }
@@ -224,7 +223,7 @@ export function applyStaggerEffect(target: BattleCharacter): BattleCharacter {
  * @description Creates a critical hit log entry
  * @param {BattleCharacter} attacker - The attacking character
  * @param {BattleCharacter} target - The target character
- * @param {Ability} ability - The ability used
+ * @param {Move} move - The move used
  * @param {CriticalResult} criticalResult - The critical result
  * @param {number} damage - The damage dealt
  * @param {number} turn - Current turn
@@ -233,7 +232,7 @@ export function applyStaggerEffect(target: BattleCharacter): BattleCharacter {
 export function createCriticalLogEntry(
   attacker: BattleCharacter,
   target: BattleCharacter,
-  ability: Ability,
+  move: Move,
   criticalResult: CriticalResult,
   damage: number,
   turn: number
@@ -255,9 +254,9 @@ export function createCriticalLogEntry(
     turn,
     actor: attacker.name,
     type: 'MOVE',
-    action: ability.name,
+    action: move.name,
     target: target.name,
-    abilityType: ability.type,
+    abilityType: move.type,
     result,
     damage,
     narrative: criticalResult.narrative,
@@ -267,7 +266,7 @@ export function createCriticalLogEntry(
       critIntensity: criticalResult.intensity,
       critMultiplier: criticalResult.damageMultiplier,
       stagger: criticalResult.staggerApplied,
-      resourceCost: ability.chiCost || 0
+      resourceCost: move.chiCost || 0
     }
   };
 } 

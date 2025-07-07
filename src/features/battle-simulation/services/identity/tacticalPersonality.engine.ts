@@ -1,6 +1,6 @@
 import { BattleCharacter } from '../../types';
 import { Move } from '../../types/move.types';
-import { MentalState, IdentityProfile, ScoreAdjustments } from '../../types/identity.types';
+import { ScoreAdjustments } from '../../types/identity.types';
 import { IDENTITY_PROFILES } from '../../data/identities';
 
 /**

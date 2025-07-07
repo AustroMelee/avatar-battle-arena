@@ -31,12 +31,12 @@ export interface DisruptionWindowState {
  * Checks if a disruption window can be opened for a character.
  */
 export function canOpenDisruptionWindow(
-  state: BattleState,
+  _state: BattleState,
   character: BattleCharacter,
-  config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
 ): boolean {
   const flags = character.flags as BattleCharacterFlags;
-  if (flags?.disruptionWindowCooldown !== undefined && state.turn - (flags.disruptionWindowCooldown ?? 0) < config.cooldown) {
+  if (flags?.disruptionWindowCooldown !== undefined && _state.turn - (flags.disruptionWindowCooldown ?? 0) < _config.cooldown) {
     return false;
   }
   // Example: open window if stability < 20 or after a failed defense
@@ -47,16 +47,16 @@ export function canOpenDisruptionWindow(
  * Opens a disruption window for a character.
  */
 export function openDisruptionWindow(
-  state: BattleState,
+  _state: BattleState,
   character: BattleCharacter,
-  config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
 ): void {
   const flags = character.flags as BattleCharacterFlags;
   character.flags = {
     ...flags,
     disruptionWindowActive: true,
-    disruptionWindowOpenedTurn: state.turn,
-    disruptionWindowCooldown: state.turn,
+    disruptionWindowOpenedTurn: _state.turn,
+    disruptionWindowCooldown: _state.turn,
   };
 }
 
@@ -64,13 +64,13 @@ export function openDisruptionWindow(
  * Resolves a disruption window (apply risk/reward, close window) and returns a mechanic log entry.
  */
 export function resolveDisruptionWindowWithLog(
-  state: BattleState,
+  _state: BattleState,
   character: BattleCharacter,
   turn: number,
   success: boolean,
-  config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
 ) {
-  resolveDisruptionWindow(state, character, success, config);
+  resolveDisruptionWindow(_state, character, success, _config);
   const logEntry = createMechanicLogEntry({
     turn,
     actor: character.name,
@@ -88,10 +88,10 @@ export function resolveDisruptionWindowWithLog(
  * Resolves a disruption window (apply risk/reward, close window).
  */
 export function resolveDisruptionWindow(
-  state: BattleState,
+  _state: BattleState,
   character: BattleCharacter,
   success: boolean,
-  config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
 ): void {
   const flags = character.flags as BattleCharacterFlags;
   if (success) {

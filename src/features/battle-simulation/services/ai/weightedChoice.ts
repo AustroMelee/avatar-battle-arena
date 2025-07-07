@@ -1,6 +1,7 @@
 // CONTEXT: AI, // FOCUS: WeightedChoice
 import type { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
-import type { Ability, Location } from '@/common/types';
+import type { Move } from '../../types/move.types';
+import type { Location } from '@/common/types';
 import { getAvailableMovesSimple } from './helpers/conditionHelpers';
 
 /**
@@ -18,7 +19,7 @@ export type WeightFunction = (
  */
 export type WeightedMove = {
   id: string;
-  move: Ability;
+  move: Move;
   weightFn: WeightFunction;
   description: string;
 };
@@ -27,7 +28,7 @@ export type WeightedMove = {
  * @description Fallback move type for when no weighted moves are available
  */
 type FallbackMove = {
-  move: Ability;
+  move: Move;
   weight: number;
   description: string;
 };
@@ -67,7 +68,7 @@ export function weightedRandomChoice<T>(
  * @param {BattleState} state - Current battle state
  * @param {BattleCharacter} opp - Opponent character
  * @param {BattleLogEntry[]} log - Battle log
- * @returns {Array<{move: Ability, weight: number, description: string}>} Available moves with weights
+ * @returns {Array<{move: Move, weight: number, description: string}>} Available moves with weights
  */
 export function getAvailableMovesWithWeights(
   self: BattleCharacter,
@@ -75,7 +76,7 @@ export function getAvailableMovesWithWeights(
   state: BattleState,
   opp: BattleCharacter,
   log: BattleLogEntry[]
-): Array<{move: Ability, weight: number, description: string}> {
+): Array<{move: Move, weight: number, description: string}> {
   const movesWithWeights = weightedMoves
     .map(({ move, weightFn, description }) => {
       const weight = weightFn(state, self, opp, log);
@@ -101,7 +102,7 @@ export function getAvailableMovesWithWeights(
  * @param {BattleCharacter} opp - Opponent character
  * @param {BattleLogEntry[]} log - Battle log
  * @param {Location} location - Optional battle location for collateral damage checks
- * @returns {{move: Ability, weights: Array<{move: string, weight: number, description: string}>} | null} Selected move and debug info
+ * @returns {{move: Move, weights: Array<{move: string, weight: number, description: string}>} | null} Selected move and debug info
  */
 export function selectWeightedMove(
   self: BattleCharacter,
@@ -110,7 +111,7 @@ export function selectWeightedMove(
   opp: BattleCharacter,
   log: BattleLogEntry[],
   location?: Location
-): {move: Ability, weights: Array<{move: string, weight: number, description: string}>} | null {
+): {move: Move, weights: Array<{move: string, weight: number, description: string}>} | null {
   const availableMoves = getAvailableMovesWithWeights(self, weightedMoves, state, opp, log);
   
   // If no weighted moves available, add fallback moves with minimum weight
@@ -124,7 +125,7 @@ export function selectWeightedMove(
     // During escalation, be even more aggressive about avoiding Basic Strike
     const isInEscalation = self.flags?.forcedEscalation === 'true';
     
-    const fallbackMoves = allMoves.map((move: Ability) => {
+    const fallbackMoves = allMoves.map((move: Move) => {
       let weight = 1; // Base weight
       let description = 'Fallback move';
       
@@ -192,14 +193,14 @@ export function selectWeightedMove(
 
 /**
  * @description Ensure all legal moves have a minimum weight for unpredictability
- * @param {Array<{move: Ability, weight: number}>} movesWithWeights - Moves with calculated weights
+ * @param {Array<{move: Move, weight: number}>} movesWithWeights - Moves with calculated weights
  * @param {number} minWeight - Minimum weight to ensure unpredictability (default: 1)
- * @returns {Array<{move: Ability, weight: number}>} Moves with adjusted weights
+ * @returns {Array<{move: Move, weight: number}>} Moves with adjusted weights
  */
 export function ensureMinimumWeights(
-  movesWithWeights: Array<{move: Ability, weight: number}>,
+  movesWithWeights: Array<{move: Move, weight: number}>,
   minWeight: number = 1
-): Array<{move: Ability, weight: number}> {
+): Array<{move: Move, weight: number}> {
   return movesWithWeights.map(({ move, weight }) => ({
     move,
     weight: Math.max(weight, minWeight)

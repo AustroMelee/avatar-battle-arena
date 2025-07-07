@@ -76,7 +76,7 @@ export const EnhancedBattleScene: React.FC<EnhancedBattleSceneProps> = ({
       <div className={`${styles.fighterCard} ${isActive ? styles.active : ''} ${isPlayer ? styles.player : styles.enemy}`}>
         <div className={styles.fighterHeader}>
           <h3 className={styles.fighterName}>{fighter.name}</h3>
-          <div className={styles.fighterBending}>{fighter.bending}</div>
+          <div className={styles.fighterBending}>{fighter.base.bending}</div>
           {isActive && <div className={styles.activeIndicator}>ACTIVE</div>}
         </div>
 
@@ -122,12 +122,6 @@ export const EnhancedBattleScene: React.FC<EnhancedBattleSceneProps> = ({
           </div>
         )}
 
-        {fighter.flags?.isResting && (
-          <div className={styles.restingIndicator}>
-            🔄 Resting - Enhanced regeneration active
-          </div>
-        )}
-
         {fighter.flags?.usedDesperation && (
           <div className={styles.desperationIndicator}>
             ⚡ Desperation move used
@@ -147,6 +141,7 @@ export const EnhancedBattleScene: React.FC<EnhancedBattleSceneProps> = ({
           battleLog={battleState.battleLog}
           aiLog={battleState.aiLog}
           maxEntries={12}
+          participants={battleState.participants}
         />
       </div>
     );

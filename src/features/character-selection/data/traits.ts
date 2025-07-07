@@ -1,5 +1,5 @@
 import { BehavioralTrait, TraitTriggerContext, TraitEffectResult } from '../../battle-simulation/types/behavioral.types';
-import { createMechanicLogEntry } from '../../battle-simulation/services/utils/mechanicLogUtils';
+// import { createMechanicLogEntry } from '../../battle-simulation/services/utils/mechanicLogUtils';
 
 export const manipulationTrait: BehavioralTrait = {
   id: "manipulation",
@@ -12,7 +12,7 @@ export const manipulationTrait: BehavioralTrait = {
     const isNotTooEarly = state.turn > 3; // Don't manipulate too early in the fight
     return isOpponentVulnerable && hasNotBeenManipulated && isNotTooEarly;
   },
-  onTrigger: ({ self, opponent, state }: TraitTriggerContext): TraitEffectResult => {
+  onTrigger: ({ self, opponent, state: _state }: TraitTriggerContext): TraitEffectResult => {
     const successChance = Math.max(10, 90 - opponent.manipulationResilience);
     const isSuccess = Math.random() * 100 < successChance;
     if (isSuccess) {
@@ -46,7 +46,7 @@ export const overconfidenceTrait: BehavioralTrait = {
     const isNotTooEarly = self.currentHealth > 60; // Only when she's healthy
     return isWinningDecisively && hasNotBeenOverconfident && isNotTooEarly;
   },
-  onTrigger: ({ self, opponent, state }: TraitTriggerContext): TraitEffectResult => {
+  onTrigger: ({ self, opponent, state: _state }: TraitTriggerContext): TraitEffectResult => {
     return {
       log: `${self.name}'s arrogance shows. She taunts ${opponent.name} instead of finishing the fight, giving them an opening!`,
       effects: [{
@@ -72,7 +72,7 @@ export const pleaForPeaceTrait: BehavioralTrait = {
     const isNotTooEarly = self.currentHealth < 40; // Only when truly desperate
     return isInDanger && hasNotPleaded && isNotTooEarly;
   },
-  onTrigger: ({ self, state }: TraitTriggerContext): TraitEffectResult => {
+  onTrigger: ({ self, state: _state }: TraitTriggerContext): TraitEffectResult => {
     return {
       log: `${self.name} lowers his staff. "We don't have to fight!" he calls out, leaving himself completely vulnerable.`,
       effects: [

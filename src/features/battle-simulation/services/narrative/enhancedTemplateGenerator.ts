@@ -12,12 +12,12 @@ import {
   getDesperationNarratives,
   getTacticalResponseNarratives,
   getLateGameNarratives,
-  getContextualMoveEscalation
+  // getContextualMoveEscalation
 } from './enhancedStateNarratives';
-import { 
-  getContextualMoveDescription, 
-  getStateTransitionDescription 
-} from './contextualNarrativeMapper';
+// import {
+//   getContextualMoveDescription,
+//   getStateTransitionDescription
+// } from './contextualNarrativeMapper';
 
 /**
  * @description Enhanced template generator with advanced anti-repetition and state management

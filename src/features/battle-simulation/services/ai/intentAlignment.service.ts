@@ -1,25 +1,25 @@
 // CONTEXT: Intent Alignment Service
 // RESPONSIBILITY: Calculate how well moves align with tactical intent
 
-import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { Intent } from './intentSystem';
 
 /**
  * @description Calculates how well a move aligns with the current tactical intent
- * @param {Ability} move - The move to evaluate
+ * @param {Move} move - The move to evaluate
  * @param {Intent} intent - The current tactical intent
  * @returns {number} Alignment score from 0-10
  */
-export function calculateIntentAlignment(move: Ability, intent: Intent): number {
+export function calculateIntentAlignment(move: Move, intent: Intent): number {
   let alignment = 5; // Base neutral alignment
   
   switch (intent.type) {
     case 'break_defense':
-      if (move.tags?.includes('piercing') || move.power > 15) alignment += 4;
+      if (move.tags?.includes('piercing') || move.baseDamage > 15) alignment += 4;
       if (move.type === 'attack') alignment += 2;
       break;
     case 'go_for_finish':
-      if (move.power > 10) alignment += 5;
+      if (move.baseDamage > 10) alignment += 5;
       if (move.type === 'attack') alignment += 3;
       break;
     case 'defend':
@@ -40,7 +40,7 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
       break;
     case 'desperate_attack':
       if (move.type === 'attack') alignment += 5;
-      if (move.power > 10) alignment += 3;
+      if (move.baseDamage > 10) alignment += 3;
       break;
   }
   
@@ -49,11 +49,11 @@ export function calculateIntentAlignment(move: Ability, intent: Intent): number 
 
 /**
  * @description Gets alignment reasons for a move and intent
- * @param {Ability} move - The move to analyze
+ * @param {Move} move - The move to analyze
  * @param {Intent} intent - The current tactical intent
  * @returns {string[]} Array of alignment reasons
  */
-export function getIntentAlignmentReasons(move: Ability, intent: Intent): string[] {
+export function getIntentAlignmentReasons(move: Move, intent: Intent): string[] {
   const reasons: string[] = [];
   
   switch (intent.type) {
@@ -61,7 +61,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.tags?.includes('piercing')) {
         reasons.push('Piercing move for defense breaking');
       }
-      if (move.power > 30) {
+      if (move.baseDamage > 30) {
         reasons.push('High power for defense breaking');
       }
       if (move.type === 'attack' || move.type === 'parry_retaliate') {
@@ -70,7 +70,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       break;
       
     case 'go_for_finish':
-      if (move.power > 40) {
+      if (move.baseDamage > 40) {
         reasons.push('High power for finishing');
       }
       if (move.tags?.includes('high-damage')) {
@@ -124,7 +124,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.type === 'attack' || move.type === 'parry_retaliate') {
         reasons.push('Attack move for standard play');
       }
-      if (move.power > 20 && move.power <= 40) {
+      if (move.baseDamage > 20 && move.baseDamage <= 40) {
         reasons.push('Moderate power for standard play');
       }
       break;
@@ -142,7 +142,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.type === 'attack' || move.type === 'parry_retaliate') {
         reasons.push('Attack or parry retaliate move for pressure');
       }
-      if (move.power > 15) {
+      if (move.baseDamage > 15) {
         reasons.push('Good power for pressure');
       }
       break;
@@ -160,7 +160,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.type === 'attack' || move.type === 'parry_retaliate') {
         reasons.push('Attack or parry retaliate move for momentum');
       }
-      if (move.power > 25) {
+      if (move.baseDamage > 25) {
         reasons.push('Good power for momentum');
       }
       break;
@@ -169,7 +169,7 @@ export function getIntentAlignmentReasons(move: Ability, intent: Intent): string
       if (move.type === 'attack' || move.type === 'parry_retaliate') {
         reasons.push('Attack or parry retaliate move for desperate situation');
       }
-      if (move.power > 30) {
+      if (move.baseDamage > 30) {
         reasons.push('High power for desperate situation');
       }
       if (move.tags?.includes('desperate')) {
