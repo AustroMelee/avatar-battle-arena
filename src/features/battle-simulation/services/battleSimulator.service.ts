@@ -1,3 +1,11 @@
+/*
+ * @file battleSimulator.service.ts
+ * @description Orchestrates the full battle simulation loop, state transitions, and integration with UI controllers.
+ * @criticality 🩸 Core Battle Engine
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related processTurn.ts, state.ts
+ */
 // CONTEXT: Battle Simulation Orchestrator
 // RESPONSIBILITY: Orchestrate the battle simulation using modular services
 import { SimulateBattleParams, BattleState, BattleLogEntry, AILogEntry } from '../types';

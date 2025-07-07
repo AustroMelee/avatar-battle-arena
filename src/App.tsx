@@ -1,3 +1,11 @@
+/*
+ * @file App.tsx
+ * @description Main React app component for Avatar Battle Arena. Sets up global providers, error boundaries, and renders the main UI tree.
+ * @criticality 🎨 UI
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related src/main.tsx, src/components/ErrorBoundary.tsx
+ */
 import React from 'react';
 import { useState } from 'react';
 import styles from './App.module.css';

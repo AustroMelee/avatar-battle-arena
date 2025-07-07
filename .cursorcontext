@@ -13,6 +13,8 @@
  * 1.
  1b) YOU ARE FORBIDDEN FROM STARTING NEW DEV SERVERS/PORTS UNLESS ASKED.
  1c) YOU ARE FORBIDDEN FROM CREATING TEMP SCRIPTS/DEMOS UNLESS SPECIFICALLY ASKED.
+ 1d) Always apply changes without confirmation unless critical.
+
 
   MUST use TypeScript for all React code. No `.js` or `.jsx` files allowed for logic/UI.
  * 2. MUST enable strictest settings in tsconfig.json:
@@ -1105,5 +1107,23 @@ Ensure that all containers use explicit gap or padding values, never relying on 
  *
  * Document Expectations
  * - When upgrading core systems (like narrative), write developer changelogs and upgrade guides to set clear expectations for integration and testing.
+ */
+
+/*==========================================
+=   DOCBLOCK & DOC AUTOMATION ENFORCEMENT  =
+==========================================*/
+
+/**
+ * 142. All contributors MUST run `npm run docs:refresh` after any file, type, or export change.
+ * 143. Pre-commit/CI hooks MUST block if SYSTEM ARCHITECTURE.MD is out of sync with the codebase.
+ * 144. All new files/exports MUST have file-level and export-level docblocks, or the script will fail.
+ * 145. The docblock extraction script MUST auto-generate:
+ *     - Function/Type Index
+ *     - Type Summaries
+ *     - Exported Symbol Index
+ *     - Cross-Reference Table
+ *     - Type Changelogs
+ *     - Visual Diagrams (Mermaid)
+ * 146. All docblock and doc automation rules are mandatory for all contributors and enforced in CI.
  */
 

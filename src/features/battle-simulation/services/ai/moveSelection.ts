@@ -1,9 +1,25 @@
+/**
+ * @file moveSelection.ts
+ * @description Tactical AI move selection and scoring logic for Avatar Battle Arena. Handles weighted random selection, variance application, and tactical memory for move choice.
+ * @exports WeightedMove, applyVariance, weightedRandom, selectMove, selectTacticalMove
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related metaState.ts, moveScoring.ts, tacticalMemory.service.ts, BattleCharacter, Move
+ */
+
 // CONTEXT: AI Move Selection
 // RESPONSIBILITY: Weighted random selection from scored moves
 import { MetaState } from './metaState';
 import { MoveScore } from './moveScoring';
 import { Move } from '../../types/move.types';
 
+/**
+ * @type WeightedMove
+ * @description A move with an associated weight and reasoning for selection.
+ * @property move Move The move being considered.
+ * @property weight number The computed weight for selection.
+ * @property reasons string[] Explanations for the assigned weight.
+ */
 export interface WeightedMove {
   move: Move;
   weight: number;
@@ -11,10 +27,12 @@ export interface WeightedMove {
 }
 
 /**
- * @description Applies variance to move scores based on meta-state.
- * @param {MoveScore[]} moveScores - The scored moves.
- * @param {MetaState} meta - The current meta-state.
- * @returns {WeightedMove[]} The weighted moves.
+ * @function applyVariance
+ * @description Applies meta-state-driven variance to move scores, increasing weights for moves that match emotional or tactical context.
+ * @param moveScores MoveScore[] The scored moves.
+ * @param meta MetaState The current meta-state.
+ * @returns WeightedMove[] The weighted moves.
+ * @related MetaState, MoveScore
  */
 export function applyVariance(moveScores: MoveScore[], meta: MetaState): WeightedMove[] {
   return moveScores.map(({ move, score, reasons }) => {
@@ -44,9 +62,10 @@ export function applyVariance(moveScores: MoveScore[], meta: MetaState): Weighte
 }
 
 /**
+ * @function weightedRandom
  * @description Performs weighted random selection from the top moves.
- * @param {WeightedMove[]} weightedMoves - The weighted moves.
- * @returns {WeightedMove} The selected move.
+ * @param weightedMoves WeightedMove[] The weighted moves.
+ * @returns WeightedMove The selected move.
  */
 export function weightedRandom(weightedMoves: WeightedMove[]): WeightedMove {
   const topMoves = weightedMoves.slice(0, 3);
@@ -72,10 +91,11 @@ export function weightedRandom(weightedMoves: WeightedMove[]): WeightedMove {
 }
 
 /**
- * @description Selects a move using the complete weighted selection pipeline.
- * @param {MoveScore[]} moveScores - The scored moves.
- * @param {MetaState} meta - The current meta-state.
- * @returns {WeightedMove} The selected move with reasons.
+ * @function selectMove
+ * @description Selects a move using the complete weighted selection pipeline (variance + weighted random).
+ * @param moveScores MoveScore[] The scored moves.
+ * @param meta MetaState The current meta-state.
+ * @returns WeightedMove The selected move with reasons.
  */
 export function selectMove(moveScores: MoveScore[], meta: MetaState): WeightedMove {
   const weightedMoves = applyVariance(moveScores, meta);
@@ -95,6 +115,17 @@ import { TacticalMemory } from './tacticalMemory.service';
 // TacticalMemory instance per AI (could be attached to BattleCharacter or managed externally)
 const tacticalMemoryMap = new WeakMap<BattleCharacter, TacticalMemory>();
 
+/**
+ * @function selectTacticalMove
+ * @description Selects the best tactical move for a BattleCharacter, considering memory, escalation, and environmental constraints.
+ * @param self BattleCharacter The acting character.
+ * @param _enemy BattleCharacter The opponent.
+ * @param availableMoves Move[] All available moves.
+ * @param location string The current location.
+ * @param arcModifiers ArcStateModifier Optional arc state modifiers.
+ * @returns { move: Move; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } Tactical move selection result and reasoning.
+ * @related TacticalMemory, adjustScoresByIdentity, canUseMove
+ */
 export function selectTacticalMove(
   self: BattleCharacter,
   _enemy: BattleCharacter,

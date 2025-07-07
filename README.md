@@ -2,7 +2,9 @@
 
 A sophisticated battle simulation system featuring characters from Avatar: The Last Airbender, with advanced AI, narrative generation, and environmental damage mechanics.
 
-## 🎯 **Core Features**
+[📝 Cursor Effectiveness Checklist](./docs/cursor-effectiveness.md)
+
+## �� **Core Features**
 
 ### **Battle System**
 - **Advanced AI Decision Making** - Context-aware tactical AI with personality-driven behavior

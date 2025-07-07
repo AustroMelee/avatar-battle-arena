@@ -1,15 +1,34 @@
+/*
+ * @file enhancedMoveScoring.ts
+ * @description Provides advanced move scoring logic for AI decision making in the battle simulation.
+ * @criticality 🧠 AI, Move Scoring
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related moveUtils.ts, advancedAIController.ts
+ */
+// @file enhancedMoveScoring.ts
+// @description Enhanced move scoring for AI, considering tactical priorities, context, and advanced battle state. Penalizes poor tactical choices and rewards contextually optimal moves.
+// @criticality 🧠 AI Move Scoring (High) | Depends on: tacticalAnalysis, types
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related tacticalAnalysis.ts
+//
+// All exports are documented below.
 import type { Move } from '../../types/move.types';
 import type { BattleCharacter } from '../../types';
 import { determineTacticalPriority, getTacticalExplanation } from './tacticalAnalysis';
 
 /**
- * @description Enhanced move scoring that considers tactical priorities and battle state
- * @param move - The move being scored
- * @param self - The AI character
- * @param enemy - The opponent character
- * @param availableAbilities - All abilities that can be used this turn
- * @param stalemateCounter - NEW: Stalemate counter from tactical phase
- * @returns Scored move with reasoning
+ * @description Scores a move with tactical context and priority.
+ * @function scoreMoveWithTactics
+ * @param {Move} move - The move being scored.
+ * @param {BattleCharacter} self - The AI character.
+ * @param {BattleCharacter} enemy - The opponent character.
+ * @param {Move[]} availableAbilities - All abilities that can be used this turn.
+ * @param {number} stalemateCounter - Stalemate counter from tactical phase.
+ * @returns {{ move: Move; score: number; reasons: string[]; priority: string }} Scored move with reasoning.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreMoveWithTactics(
   move: Move,
@@ -199,12 +218,15 @@ export function scoreMoveWithTactics(
 }
 
 /**
- * @description Selects the best move based on tactical scoring
- * @param availableAbilities - List of moves that can be used
- * @param self - The AI character
- * @param enemy - The opponent character
- * @param stalemateCounter - NEW: Stalemate counter from tactical phase
- * @returns The best move with full tactical analysis
+ * @description Selects the best tactical move from available abilities.
+ * @function selectBestTacticalMove
+ * @param {Move[]} availableAbilities - All abilities that can be used this turn.
+ * @param {BattleCharacter} self - The AI character.
+ * @param {BattleCharacter} enemy - The opponent character.
+ * @param {number} stalemateCounter - Stalemate counter from tactical phase.
+ * @returns {{ chosenAbility: Move; score: number; reasons: string[]; priority: string; tacticalExplanation: string }} Best move and reasoning.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function selectBestTacticalMove(
   availableAbilities: Move[],

@@ -1,3 +1,11 @@
+/*
+ * @file moveUtils.ts
+ * @description Provides utilities for move filtering, availability, and conversion in the battle simulation.
+ * @criticality 🧠 AI, Move Logic
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related move.types.ts, processTurn.ts
+ */
 import { IDENTITY_PROFILES } from '../../data/identities';
 import type { BattleCharacter } from '../../types';
 import type { Move } from '../../types/move.types';
@@ -42,12 +50,15 @@ function getDynamicCollateralTolerance(character: BattleCharacter, location: Loc
 
 /**
  * @description Gets available moves for a character, enforcing all constraints. This is the single source of truth for what an AI can do.
+ * @function getAvailableMoves
  * @param {BattleCharacter} character - The character.
  * @param {MetaState} meta - The current meta-state.
  * @param {Location} location - The battle location.
  * @param {number} _turn - The current turn number.
  * @param {number} riskTolerance - The AI's willingness to take risks.
  * @returns {Move[]} The available moves.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getAvailableMoves(
   character: BattleCharacter,
@@ -94,10 +105,28 @@ export function getAvailableMoves(
   return moves;
 }
 
-// ... (keep the rest of the file, like isMoveOnCooldown and hasEnoughResources)
+/**
+ * @description Checks if a move is currently on cooldown for a character.
+ * @function isMoveOnCooldown
+ * @param {string} moveName - The move name.
+ * @param {BattleCharacter} character - The character.
+ * @returns {boolean} True if on cooldown.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
+ */
 export function isMoveOnCooldown(moveName: string, character: BattleCharacter): boolean {
   return !!(character.cooldowns[moveName] && character.cooldowns[moveName] > 0);
 }
+
+/**
+ * @description Checks if a character has enough resources to use a move.
+ * @function hasEnoughResources
+ * @param {Move} ability - The move/ability.
+ * @param {BattleCharacter} character - The character.
+ * @returns {boolean} True if enough resources.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
+ */
 export function hasEnoughResources(ability: Move, character: BattleCharacter): boolean {
   const chiCost = ability.chiCost || 0;
   return character.resources.chi >= chiCost;

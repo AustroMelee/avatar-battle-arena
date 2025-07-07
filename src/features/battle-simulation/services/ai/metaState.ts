@@ -1,3 +1,11 @@
+// @file metaState.ts
+// @description Assesses AI meta-state (boredom, frustration, desperation, escalation, etc.) from battle context for advanced decision making.
+// @criticality 🧠 AI Meta-State (High) | Depends on: patternDetection, types
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related patternDetection.ts, types
+//
+// All exports are documented below.
 // CONTEXT: AI Meta-State Assessment
 // RESPONSIBILITY: Assess emotions and meta-state from battle context
 import { BattleCharacter } from '../../types';
@@ -17,11 +25,21 @@ export interface MetaState {
 }
 
 /**
+ * @description Meta-state for AI, including boredom, frustration, escalation, and more.
+ * @exports MetaState
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
+ */
+
+/**
  * @description Assesses the meta-state of a character based on battle context.
+ * @function assessMetaState
  * @param {BattleCharacter} character - The character to assess.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {number} turn - Current turn number.
  * @returns {MetaState} The assessed meta-state.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function assessMetaState(
   character: BattleCharacter, 
@@ -64,8 +82,11 @@ export function assessMetaState(
 
 /**
  * @description Gets the urgency level of the current situation.
+ * @function getUrgencyLevel
  * @param {MetaState} meta - The meta-state.
  * @returns {number} Urgency level from 0-10.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getUrgencyLevel(meta: MetaState): number {
   if (meta.desperate) return 10;
@@ -80,8 +101,11 @@ export function getUrgencyLevel(meta: MetaState): number {
 
 /**
  * @description Checks if the character should be aggressive.
+ * @function shouldBeAggressive
  * @param {MetaState} meta - The meta-state.
  * @returns {boolean} True if aggressive behavior is warranted.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function shouldBeAggressive(meta: MetaState): boolean {
   return meta.desperate || meta.finishingTime || meta.frustrated || meta.timeoutPressure;
@@ -89,8 +113,11 @@ export function shouldBeAggressive(meta: MetaState): boolean {
 
 /**
  * @description Checks if the character should prioritize variety.
+ * @function shouldPrioritizeVariety
  * @param {MetaState} meta - The meta-state.
  * @returns {boolean} True if variety should be prioritized.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function shouldPrioritizeVariety(meta: MetaState): boolean {
   return meta.bored || meta.stuckLoop;

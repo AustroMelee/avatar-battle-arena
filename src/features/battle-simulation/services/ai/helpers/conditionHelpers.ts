@@ -2,7 +2,6 @@ import type { BattleState, BattleCharacter } from '../../../types';
 import type { Move } from '../../../types/move.types';
 import type { Location } from '@/common/types';
 import { getAvailableMoves as getAvailableMovesWithLocation } from '../../utils/moveUtils';
-import { MetaState } from '../metaState';
 import { 
   wasLastMoveShield, 
   recentDamageTaken, 
@@ -146,19 +145,7 @@ export function isLosing(self: BattleCharacter, opp: BattleCharacter): boolean {
 export function getAvailableMovesSimple(self: BattleCharacter, location?: Location): Move[] {
   if (location) {
     // Use the main getAvailableMoves function with collateral damage filtering
-    const meta: MetaState = {
-      stuckLoop: false,
-      escalationNeeded: false,
-      finishingTime: false,
-      desperate: false,
-      timeoutPressure: false,
-      stalemate: false,
-      bored: false,
-      frustrated: false,
-      boredomLevel: 0,
-      frustrationLevel: 0
-    };
-    return getAvailableMovesWithLocation(self, meta, location, 0);
+    return getAvailableMovesWithLocation(self, self, location);
   }
   // Fallback to basic filtering if no location provided
   return self.abilities.filter(ability => 

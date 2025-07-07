@@ -1,3 +1,19 @@
+/*
+ * @file advancedAIController.ts
+ * @description Main controller for advanced AI decision making in the battle simulation.
+ * @criticality 🧠 AI Controller
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related moveUtils.ts, enhancedMoveScoring.ts
+ */
+// @file advancedAIController.ts
+// @description Integrates battle awareness, intent system, and contextual move scoring to select the optimal move for the AI. Maintains tactical intent and context across turns for advanced decision making.
+// @criticality 🧠 AI Core (High) | Depends on: battleStateAwareness, intentSystem, contextualMoveScoring, moveUtils, metaState
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related battleStateAwareness.ts, intentSystem.ts, contextualMoveScoring.ts, moveUtils.ts, metaState.ts
+//
+// All exports are documented below.
 // CONTEXT: Advanced AI Controller
 // RESPONSIBILITY: Integrate battle awareness, intent system, and contextual move scoring
 import { Location } from '@/common/types';
@@ -6,11 +22,14 @@ import type { Move } from '../../types/move.types';
 import { getBattleTacticalContext, BattleTacticalContext } from './battleStateAwareness';
 import { chooseIntent, Intent, shouldMaintainIntent } from './intentSystem';
 import { scoreMovesWithContext } from './contextualMoveScoring';
-import { getAvailableMoves } from '../utils/moveUtils';
+import { getAvailableMoves } from './moveUtils';
 import { assessMetaState } from './metaState';
 
 /**
  * @description Enhanced AI decision state that includes context and intent.
+ * @exports AdvancedAIState
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export interface AdvancedAIState {
   context: BattleTacticalContext;
@@ -78,6 +97,7 @@ export interface AdvancedAIState {
 
 /**
  * @description Chooses a move using the advanced AI system with context awareness and tactical intent.
+ * @function chooseMoveWithAdvancedAI
  * @param {BattleCharacter} character - The character choosing the move.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {number} turn - Current turn number.
@@ -85,6 +105,8 @@ export interface AdvancedAIState {
  * @param {Location} location - The battle location for collateral damage checks.
  * @param {AdvancedAIState | null} previousState - The previous AI state (for intent continuity).
  * @returns {{move: Move; aiLog: AILogEntry; newState: AdvancedAIState}} The chosen move, AI log, and new state.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function chooseMoveWithAdvancedAI(
   character: BattleCharacter, 
@@ -109,7 +131,7 @@ export function chooseMoveWithAdvancedAI(
   }
   
   const meta = assessMetaState(character, enemy, turn);
-  const availableMoves = getAvailableMoves(character, meta, location, turn);
+  const availableMoves = getAvailableMoves(character, meta, location, turn, 0);
   
   if (availableMoves.length === 0) {
     // Handle no available moves fallback
@@ -235,9 +257,12 @@ export function chooseMoveWithAdvancedAI(
 // }
 
 /**
- * @description Gets a summary of the current AI state for debugging and analysis.
+ * @description Returns a summary string for the current AI state.
+ * @function getAIStateSummary
  * @param {AdvancedAIState} state - The AI state to summarize.
- * @returns {string} A human-readable summary of the AI state.
+ * @returns {string} Human-readable summary.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getAIStateSummary(state: AdvancedAIState): string {
   const { context, intent, intentTurnCount } = state;
@@ -258,8 +283,12 @@ AI State Summary:
 }
 
 /**
- * Computes the AI's tendency to attempt a reversal based on character, state, and risk/reward.
- * Returns a weight (0-1) for reversal likelihood.
+ * @description Returns the reversal weight for a character (used for tactical analysis).
+ * @function getReversalWeight
+ * @param {BattleCharacter} character - The character to analyze.
+ * @returns {number} Reversal weight value.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getReversalWeight(character: BattleCharacter): number {
   let weight = 0;

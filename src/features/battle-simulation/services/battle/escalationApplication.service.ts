@@ -74,6 +74,8 @@ export function forcePatternEscalation(
           ...newState.participants[attackerIndex].cooldowns,
           [lastMove]: 2
         };
+        // eslint-disable-next-line no-console
+        console.log(`DEBUG: T${state.turn} Applied 2-turn cooldown to ${lastMove} for ${attacker.name} due to repetition.`);
       }
       break;
     }
@@ -94,11 +96,6 @@ export function forcePatternEscalation(
     result: `Forced into ${forcedState} state due to ${reason}`,
     narrative,
     timestamp: Date.now(),
-    meta: {
-      escalationType,
-      reason,
-      forcedState
-    }
   };
   
   return { newState, logEntry };

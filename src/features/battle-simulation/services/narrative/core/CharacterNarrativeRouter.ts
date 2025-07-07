@@ -1,3 +1,11 @@
+/*
+ * @file CharacterNarrativeRouter.ts
+ * @description Routes narrative line selection for specific characters in the battle simulation.
+ * @criticality 🎭 Narrative Routing
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related narrative.service.ts, BattleNarrationStrategyService.ts
+ */
 // CONTEXT: Character Narrative Router
 // RESPONSIBILITY: Route narrative requests to character-specific services only
 

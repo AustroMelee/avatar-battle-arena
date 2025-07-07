@@ -1,5 +1,14 @@
 import React from 'react';
 
+/*
+ * @file ErrorBoundary.tsx
+ * @description Global error boundary for React. Catches and displays errors in the UI tree.
+ * @criticality 🩸 Error Handling
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related App.tsx, main.tsx
+ */
+
 /**
  * @description Error fallback component for error boundaries
  * @returns {React.JSX.Element} Error display UI

@@ -1,9 +1,20 @@
+// @file intentSystem.ts
+// @description AI tactical intent and goal system. Sets and maintains intent to drive move selection for multiple turns, based on battle context.
+// @criticality 🧠 AI Intent (High) | Depends on: battleStateAwareness
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related battleStateAwareness.ts
+//
+// All exports are documented below.
 // CONTEXT: AI Intent and Goal System
 // RESPONSIBILITY: Set tactical intent to drive move selection for multiple turns
 import { BattleTacticalContext } from './battleStateAwareness';
 
 /**
  * @description Types of tactical intent that guide AI decision making.
+ * @exports IntentType
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export type IntentType =
   | 'break_defense'
@@ -21,6 +32,9 @@ export type IntentType =
 
 /**
  * @description Represents a tactical intent with description and priority.
+ * @exports Intent
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export interface Intent {
   type: IntentType;
@@ -31,8 +45,11 @@ export interface Intent {
 
 /**
  * @description Chooses the most appropriate tactical intent based on battle context.
+ * @function chooseIntent
  * @param {BattleTacticalContext} context - The current battle context.
  * @returns {Intent} The chosen tactical intent.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function chooseIntent(context: BattleTacticalContext): Intent {
   // Emergency situations (highest priority)
@@ -161,9 +178,12 @@ export function chooseIntent(context: BattleTacticalContext): Intent {
 
 /**
  * @description Gets the priority score for an intent type based on context.
+ * @function getIntentPriority
  * @param {IntentType} intentType - The type of intent.
  * @param {BattleTacticalContext} context - The battle context.
  * @returns {number} The priority score (0-10).
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getIntentPriority(intentType: IntentType, context: BattleTacticalContext): number {
   switch (intentType) {
@@ -198,9 +218,12 @@ export function getIntentPriority(intentType: IntentType, context: BattleTactica
 
 /**
  * @description Checks if the current intent should be maintained or changed.
- * @param {Intent} currentIntent - The current tactical intent.
+ * @function shouldMaintainIntent
+ * @param {Intent} currentIntent - The current intent.
  * @param {BattleTacticalContext} context - The current battle context.
- * @returns {boolean} True if the intent should be maintained.
+ * @returns {boolean} True if intent should be maintained.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function shouldMaintainIntent(currentIntent: Intent, context: BattleTacticalContext): boolean {
   // Check if the intent's conditions are still met

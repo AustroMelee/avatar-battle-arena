@@ -85,7 +85,6 @@ export function checkTacticalMemoryWithLog({
     mechanic: 'Tactical Memory',
     effect: `${moveName} avoided (AI adapts to stale/ineffective move)`,
     reason,
-    meta: { move: moveName }
   });
   return { logEntry };
 } 

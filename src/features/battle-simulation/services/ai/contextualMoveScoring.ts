@@ -1,3 +1,19 @@
+/*
+ * @file contextualMoveScoring.ts
+ * @description Provides context-aware move scoring logic for AI in the battle simulation.
+ * @criticality 🧠 AI, Move Scoring
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related moveUtils.ts, enhancedMoveScoring.ts
+ */
+// @file contextualMoveScoring.ts
+// @description Scores moves for the AI based on battle context and tactical intent, integrating attack/defense scoring, intent alignment, and context bonuses.
+// @criticality 🧠 AI Move Scoring (High) | Depends on: attackMoveScoring, defenseMoveScoring, intentAlignment, battleStateAwareness, intentSystem
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related attackMoveScoring.service.ts, defenseMoveScoring.service.ts, intentAlignment.service.ts, battleStateAwareness.ts, intentSystem.ts
+//
+// All exports are documented below.
 // CONTEXT: Contextual Move Scoring
 // RESPONSIBILITY: Score moves based on battle context and tactical intent
 import type { Move } from '../../types/move.types';
@@ -10,6 +26,9 @@ import { calculateIntentAlignment } from './intentAlignment.service';
 
 /**
  * @description Enhanced move score with detailed reasoning.
+ * @exports ContextualMoveScore
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export interface ContextualMoveScore {
   move: Move;
@@ -21,12 +40,15 @@ export interface ContextualMoveScore {
 
 /**
  * @description Scores a move based on battle context and tactical intent.
+ * @function scoreMoveWithContext
  * @param {Move} move - The move to score.
  * @param {BattleCharacter} me - The character using the move.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {BattleTacticalContext} context - The current battle context.
  * @param {Intent} intent - The current tactical intent.
  * @returns {ContextualMoveScore} The scored move with detailed analysis.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreMoveWithContext(
   move: Move,
@@ -135,12 +157,15 @@ function calculateContextBonuses(
 
 /**
  * @description Scores multiple moves with context and returns them sorted.
+ * @function scoreMovesWithContext
  * @param {Move[]} moves - The moves to score.
  * @param {BattleCharacter} me - The character using the moves.
  * @param {BattleCharacter} enemy - The enemy character.
- * @param {BattleContext} context - The current battle context.
+ * @param {BattleTacticalContext} context - The current battle context.
  * @param {Intent} intent - The current tactical intent.
  * @returns {ContextualMoveScore[]} The scored moves sorted by score (highest first).
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreMovesWithContext(
   moves: Move[],
@@ -156,9 +181,12 @@ export function scoreMovesWithContext(
 
 /**
  * @description Gets the top scoring moves with context.
+ * @function getTopContextualMoves
  * @param {ContextualMoveScore[]} moveScores - The scored moves.
  * @param {number} count - Number of top moves to return.
  * @returns {ContextualMoveScore[]} The top scoring moves.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getTopContextualMoves(moveScores: ContextualMoveScore[], count: number = 3): ContextualMoveScore[] {
   return moveScores.slice(0, count);

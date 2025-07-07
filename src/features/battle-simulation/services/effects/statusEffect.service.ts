@@ -47,10 +47,10 @@ export function applyEffect(
     type: 'STATUS',
     action: 'Effect Applied',
     target: character.name,
-    result: `${character.name} is affected by ${modifiedEffect.type}${modifiedEffect.name ? ` (${modifiedEffect.name})` : ''} from ${modifiedEffect.sourceAbility}`,
-    narrative: `${character.name} is now under the effect of ${modifiedEffect.type}${modifiedEffect.name ? ` (${modifiedEffect.name})` : ''} from ${modifiedEffect.sourceAbility}!`,
+    result: `${character.name} is affected by ${modifiedEffect.name} from ${modifiedEffect.sourceAbility}`,
+    narrative: `${character.name} is now under the effect of ${modifiedEffect.name} from ${modifiedEffect.sourceAbility}!`,
     timestamp: Date.now(),
-    meta: {
+    details: {
       effectType: modifiedEffect.type,
       sourceEffect: modifiedEffect.name,
       sourceAbility: modifiedEffect.sourceAbility
@@ -77,13 +77,14 @@ export function processTurnEffects(
   let updatedCharacter = { ...character };
   const logEntries: BattleLogEntry[] = [];
   
-  console.log(`🔄🔄🔄 PROCESSING TURN EFFECTS - ${character.name} on turn ${turn} 🔄🔄🔄`);
-  console.log(`🔄🔄🔄 ACTIVE EFFECTS - ${character.name} has ${updatedCharacter.activeEffects.length} active effects:`, updatedCharacter.activeEffects);
+  console.log(`♻️♻️♻️ PROCESSING TURN EFFECTS - ${character.name} on turn ${turn} ♻️♻️♻️`);
+  console.log(`♻️♻️♻️ ACTIVE EFFECTS - ${character.name} has ${updatedCharacter.activeEffects.length} active effects:`, updatedCharacter.activeEffects);
 
   const stillActiveEffects: ActiveStatusEffect[] = [];
 
   for (const effect of updatedCharacter.activeEffects) {
-    console.log(`🔄🔄🔄 PROCESSING EFFECT - ${character.name} processing ${effect.name} (${effect.type}) with ${effect.duration} turns remaining`);
+    let effectProcessed = false; 
+    console.log(`♻️♻️♻️ PROCESSING EFFECT - ${character.name} processing ${effect.name} (${effect.type}) with ${effect.duration} turns remaining`);
     
     // --- NEW: Burnout Crisis Logic ---
     if (effect.type === 'BURN' && (turn - effect.turnApplied) >= BURNOUT_CRISIS_TURNS) {
@@ -110,7 +111,7 @@ export function processTurnEffects(
         result: `Sustained burns cause exhaustion! Defense lowered.`,
         narrative: `The constant pain from the searing burns is breaking ${character.name}'s focus and stance!`,
         timestamp: Date.now(),
-        meta: { effectType: 'CRISIS', sourceEffect: effect.name, newEffect: 'DEFENSE_DOWN' }
+        details: { effectType: 'CRISIS', sourceEffect: effect.name, newEffect: 'DEFENSE_DOWN' }
       });
       console.log(`🔥🔥🔥 BURNOUT CRISIS - ${character.name} is exhausted from burns! Defense lowered. 🔥🔥🔥`);
     }
@@ -132,12 +133,12 @@ export function processTurnEffects(
           result: `Takes ${burnDamage} burn damage`,
           narrative: `${character.name} continues to burn from ${effect.sourceAbility}!`,
           timestamp: Date.now(),
-          meta: {
+          details: {
             effectType: 'BURN',
-            damage: burnDamage,
             sourceEffect: effect.name
           }
         });
+        effectProcessed = true;
         break;
       }
       case 'HEAL_OVER_TIME': {
@@ -155,12 +156,54 @@ export function processTurnEffects(
           result: `Recovers ${healAmount} health`,
           narrative: `${character.name} continues to recover from ${effect.sourceAbility}!`,
           timestamp: Date.now(),
-          meta: {
+          details: {
             effectType: 'HEAL_OVER_TIME',
             healing: healAmount,
             sourceEffect: effect.name
           }
         });
+        effectProcessed = true;
+        break;
+      }
+      case 'DEFENSE_DOWN': {
+        // Apply defense debuff for duration
+        updatedCharacter.currentDefense = Math.max(0, updatedCharacter.currentDefense - effect.potency);
+        logEntries.push({
+          id: generateUniqueLogId('status'),
+          turn,
+          actor: character.name,
+          type: 'STATUS',
+          action: 'Defense Down',
+          target: character.name,
+          result: `Defense lowered by ${effect.potency}`,
+          narrative: `${character.name}'s defense is weakened!`,
+          timestamp: Date.now(),
+          details: {
+            effectType: 'DEFENSE_DOWN',
+            defenseReduction: effect.potency
+          }
+        });
+        effectProcessed = true;
+        break;
+      }
+      case 'ATTACK_UP': {
+        // Apply attack buff for duration (could be tracked for move damage elsewhere)
+        logEntries.push({
+          id: generateUniqueLogId('status'),
+          turn,
+          actor: character.name,
+          type: 'STATUS',
+          action: 'Attack Up',
+          target: character.name,
+          result: `Attack boosted by ${effect.potency}`,
+          narrative: `${character.name}'s attack is strengthened!`,
+          timestamp: Date.now(),
+          details: {
+            effectType: 'ATTACK_UP',
+            attackBoost: effect.potency
+          }
+        });
+        effectProcessed = true;
         break;
       }
       case 'STUN': {
@@ -175,16 +218,18 @@ export function processTurnEffects(
           result: 'Cannot act this turn',
           narrative: `${character.name} is still stunned from ${effect.sourceAbility}!`,
           timestamp: Date.now(),
-          meta: {
+          details: {
             effectType: 'STUN',
             sourceEffect: effect.name
           }
         });
+        effectProcessed = true;
         break;
       }
       default:
-        console.log(`DEBUG: UNKNOWN EFFECT TYPE - ${character.name} has unknown effect type: ${effect.type}`);
-        break;
+        if (!effectProcessed) {
+             console.log(`DEBUG: UNHANDLED EFFECT TYPE - ${character.name} has unhandled effect type: ${effect.type}`);
+        }
     }
     
     // Decrease duration
@@ -204,7 +249,7 @@ export function processTurnEffects(
         result: `${effect.name} has worn off`,
         narrative: `${character.name} is no longer affected by ${effect.name}!`,
         timestamp: Date.now(),
-        meta: {
+        details: {
           effectType: 'EXPIRED',
           sourceEffect: effect.name
         }

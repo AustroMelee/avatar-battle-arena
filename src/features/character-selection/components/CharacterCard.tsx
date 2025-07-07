@@ -113,7 +113,7 @@ export function CharacterCard({ character, isSelected, isUnavailable, onSelect, 
               <span className={styles.abilityIcon}>{BENDING_ICONS[character.bending] || BENDING_ICONS.default}</span>
               <span className={styles.abilityName}>{ability.name}</span>
               <span className={styles.abilityTag} style={{ background: ABILITY_TYPE_COLORS[ability.type.replace('_', ' ')] || ABILITY_TYPE_COLORS.default }}>{ability.type.charAt(0).toUpperCase() + ability.type.slice(1)}</span>
-              <span className={styles.abilityPowerChip}>{ability.power}</span>
+              <span className={styles.abilityPowerChip}>{ability.baseDamage}</span>
               <span className={styles.abilityDesc}>{ability.description}</span>
             </li>
           ))}

@@ -28,7 +28,8 @@ function tickDownFlags(character: BattleCharacter): BattleLogEntry[] {
         type: 'INFO',
         action: 'flag_expired',
         result: `${character.name} is no longer ${flag}.`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        narrative: ''
       });
     }
   }
@@ -62,7 +63,8 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
       type: 'INFO',
       action: 'overconfidence_broken',
       result: `A sharp blow snaps ${character.name} out of their arrogance!`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      narrative: ''
     });
   }
 
@@ -76,7 +78,8 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
       type: 'INFO',
       action: 'manipulation_broken',
       result: `The jarring blow snaps ${character.name} out of their confusion!`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      narrative: ''
     });
   }
   
@@ -117,13 +120,14 @@ export function processBehavioralSystemForTurn(
       
       // Create main log entry
       behavioralLogEntry = {
-        id: generateUniqueLogId('behavioral'),
+        id: generateUniqueLogId('behavioral_log'),
         turn: state.turn,
         actor: self.name,
         type: 'NARRATIVE',
-        action: trait.id,
-        result: result.log,
-        timestamp: Date.now()
+        action: 'Behavioral event',
+        result: 'Behavioral event',
+        timestamp: Date.now(),
+        narrative: ''
       };
       
       traitInstance.lastTriggeredTurn = state.turn;

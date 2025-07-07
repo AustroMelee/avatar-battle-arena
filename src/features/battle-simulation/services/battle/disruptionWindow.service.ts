@@ -79,7 +79,6 @@ export function resolveDisruptionWindowWithLog(
       ? `${character.name} capitalized on the window!`
       : `${character.name} failed to capitalize on the window.`,
     reason: success ? 'All-in attack succeeded' : 'Opportunity missed',
-    meta: { success }
   });
   return { logEntry };
 }

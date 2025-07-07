@@ -1,3 +1,11 @@
+/*
+ * @file UnifiedBattleLog.tsx
+ * @description Unified battle log UI: tabs, log entries, and technical log for the Avatar Battle Arena.
+ * @criticality 🎨 Battle Log
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related BattleScene.tsx, TechnicalLog.tsx
+ */
 // CONTEXT: Unified Battle Log
 // RESPONSIBILITY: Single log component with tabs for narrative and technical logs
 // 
@@ -18,41 +26,6 @@ interface UnifiedBattleLogProps {
 }
 
 type LogTab = 'narrative' | 'technical' | 'ai';
-
-// Move this helper function above the component definition
-
-const renderMetaDetails = (entry: BattleLogEntry, styles: any): React.ReactNode | null => {
-  if (!entry.details || Object.keys(entry.details).length === 0) return null;
-  const filteredMetaFields = Object.entries(entry.details)
-    .filter(([key]) => !['crit','finisher','desperation','resourceCost','controlShift','stabilityChange','newControlState'].includes(key));
-  const hasResourceCost = entry.details.resourceCost !== undefined;
-  const hasFinisher = entry.details.finisher === true;
-  const hasDesperation = entry.details.desperation === true;
-  const hasOtherMeta = filteredMetaFields.length > 0;
-  if (!hasResourceCost && !hasFinisher && !hasDesperation && !hasOtherMeta) return null;
-  return (
-    <div className={styles.entryMeta}>
-      {hasResourceCost && (
-        <span className={styles.resourceCost}>💠 {Number(entry.details.resourceCost)} chi</span>
-      )}
-      {hasFinisher && (
-        <span className={styles.finisherBadge}>🔥 FINISHER</span>
-      )}
-      {hasDesperation && (
-        <span className={styles.desperationBadge}>⚡ DESPERATION</span>
-      )}
-      {hasOtherMeta && (
-        <div className={styles.metaDetails}>
-          {filteredMetaFields.map(([key, value]) => (
-            <div key={key} className={styles.metaDetailItem}>
-              <span className={styles.metaKey}>{key}:</span> <span className={styles.metaValue}>{JSON.stringify(value)}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 /**
  * @description Unified battle log with tabs for narrative and AI logs.
@@ -92,131 +65,6 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   //     return acc;
   //   }, {} as Record<number, AILogEntry[]>);
   // }, [aiLog]);
-
-  /**
-   * @description Gets the appropriate icon for a battle event.
-   */
-  const getEventIcon = (entry: BattleLogEntry): string => {
-    // Opening sequence entries get a special icon
-    if (entry.turn >= 1 && entry.turn <= 6) {
-      return '🎭';
-    }
-    
-    if (entry.type === 'VICTORY') return '🏆';
-    if (entry.type === 'DESPERATION') return '⚡';
-    if (entry.type === 'FINISHER') return '💥';
-    if (entry.type === 'NARRATIVE') return '💭';
-    if (entry.details?.crit === true) return '💥';
-    if (entry.details?.finisher === true) return '🔥';
-    if (entry.details?.rest === true) return '🔄';
-    if (entry.details?.heal === true) return '💚';
-    if (entry.details?.piercing === true) return '⚔️';
-    if (entry.details?.damage && entry.details.damage > 15) return '💢';
-    if (entry.details?.damage && entry.details.damage > 0) return '⚔️';
-    if (entry.details?.abilityType === 'finisher') return '💥';
-    if (entry.details?.abilityType === 'defense_buff') return '🛡️';
-    return '🎭';
-  };
-
-  /**
-   * @description Gets CSS classes for a battle log entry.
-   */
-  const getBattleEntryClasses = (entry: BattleLogEntry): string => {
-    const classes = [styles.logEntry];
-    
-    // Opening sequence classes (turns 1-6)
-    if (entry.turn >= 1 && entry.turn <= 6) {
-      classes.push(styles.openingSequence);
-    }
-    
-    // Type-based classes
-    classes.push(styles[entry.type.toLowerCase()]);
-    
-    // Meta-based classes
-    if (entry.details?.crit === true) classes.push(styles.critical);
-    if (entry.details?.finisher === true) classes.push(styles.finisher);
-    if (entry.details?.rest === true) classes.push(styles.rest);
-    if (entry.details?.heal === true) classes.push(styles.heal);
-    if (entry.details?.piercing === true) classes.push(styles.piercing);
-    if (entry.details?.desperation === true) classes.push(styles.desperation);
-    
-    // Damage-based classes
-    if (entry.details?.damage && entry.details.damage > 15) classes.push(styles.highDamage);
-    if (entry.details?.damage && entry.details.damage > 0) classes.push(styles.damage);
-    if (entry.details?.abilityType === 'finisher') classes.push(styles.finisher);
-    
-    // Highlight state change
-    if (entry.type === 'STATUS' && entry.action === 'State Change') {
-      classes.push(styles.stateChange);
-      if (entry.details?.newControlState === 'Compromised') classes.push(styles.compromised);
-      if (entry.details?.newControlState === 'Defeated') classes.push(styles.defeated);
-    }
-    
-    return classes.join(' ');
-  };
-
-  /**
-   * @description Formats the battle log entry text.
-   */
-  const formatBattleEntryText = (entry: BattleLogEntry): React.ReactNode => {
-    const icon = getEventIcon(entry);
-    if (entry.details?.controlShift !== undefined || entry.details?.stabilityChange !== undefined) {
-      return (
-        <React.Fragment>
-          {icon} <b>{entry.action}</b>: {entry.narrative}
-          {entry.details?.controlShift !== undefined && entry.details?.controlShift !== null ? (
-            <span className={styles.controlShift}> [Control Shift: {String(entry.details.controlShift)}]</span>
-          ) : null}
-          {entry.details?.stabilityChange !== undefined && entry.details?.stabilityChange !== null ? (
-            <span className={styles.stabilityChange}> [Stability: -{String(entry.details.stabilityChange)}]</span>
-          ) : null}
-          {entry.details?.newControlState !== undefined && entry.details?.newControlState !== null ? (
-            <span className={styles.newControlState}> [State: {String(entry.details.newControlState)}]</span>
-          ) : null}
-        </React.Fragment>
-      );
-    }
-    // Fallback to old logic
-    const baseText = entry.narrative || entry.result || entry.action;
-    
-    // Add damage highlight
-    if (entry.details?.damage) {
-      const damageText = ` (${entry.details.damage} damage)`;
-      const parts = baseText.split(damageText);
-      
-      if (parts.length > 1) {
-        return (
-          <React.Fragment>
-            {icon} {parts[0]}
-            <span className={styles.damageHighlight}>{damageText}</span>
-            {parts[1]}
-          </React.Fragment>
-        );
-      }
-    }
-    
-    // Add critical hit highlight
-    if (entry.details?.crit === true) {
-      const critText = ' (CRITICAL!)';
-      const parts = baseText.split(critText);
-      
-      if (parts.length > 1) {
-        return (
-          <React.Fragment>
-            {icon} {parts[0]}
-            <span className={styles.criticalHighlight}>{critText}</span>
-            {parts[1]}
-          </React.Fragment>
-        );
-      }
-    }
-    
-    return (
-      <React.Fragment>
-        {icon} {baseText}
-      </React.Fragment>
-    );
-  };
 
   /**
    * @description Gets the timestamp display for an entry.
@@ -406,25 +254,6 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
             <strong>{char.name}</strong>: {char.controlState} | S:{char.stability} | M:{char.momentum}
           </span>
         ))}
-      </div>
-    );
-  };
-
-  // Helper function to render a single log entry
-  const renderLogEntry = (entry: BattleLogEntry) => {
-    return (
-      <div key={entry.id} className={getBattleEntryClasses(entry)}>
-        <div className={styles.entryHeader}>
-          <span className={styles.turnNumber}>T{entry.turn}</span>
-          <span className={styles.actor}>{entry.actor}</span>
-          <span className={styles.timestamp}>{getTimestamp(entry.timestamp)}</span>
-        </div>
-        
-        <div className={styles.entryContent}>
-          {formatBattleEntryText(entry)}
-        </div>
-        
-        {renderMetaDetails(entry, styles) as React.ReactNode}
       </div>
     );
   };

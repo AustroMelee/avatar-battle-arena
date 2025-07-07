@@ -1,3 +1,11 @@
+/*
+ * @file BattleScene.tsx
+ * @description Main battle scene UI: renders player cards, log, and overlays for the Avatar Battle Arena.
+ * @criticality 🩸 Core Battle UI
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related UnifiedBattleLog.tsx, EnhancedBattleScene.tsx
+ */
 // CONTEXT: BattleSimulation, // FOCUS: UIRendering
 // 
 // ⚠️ CRITICAL REQUIREMENT: Battle log MUST always show T1 logs by default

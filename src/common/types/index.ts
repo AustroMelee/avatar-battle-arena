@@ -65,7 +65,7 @@ export type Character = {
   };
 
   /** @description A list of key techniques the character can use. */
-  abilities: Ability[];
+  abilities: import('../../features/battle-simulation/types/move.types').Move[];
 
   /** @description The default combat style or AI tendency. */
   personality: 'aggressive' | 'defensive' | 'balanced';

@@ -1,7 +1,10 @@
-/**
- * @fileoverview The main narrative service orchestrating line generation.
- * @description This service coordinates pools, anti-repetition, and fallback generation
- * to produce dynamic, character-driven battle narratives.
+/*
+ * @file narrative.service.ts
+ * @description Core orchestrator for narrative line selection, anti-repetition, and fallback logic in the battle simulation.
+ * @criticality 🎭 Narrative Engine
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related core/BattleNarrationStrategyService.ts, core/CharacterNarrativeRouter.ts
  */
 
 import { CharacterName, CombatMechanic, NarrativeContext } from './narrative.types';

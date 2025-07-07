@@ -1,3 +1,12 @@
+// @file attackMoveScoring.service.ts
+// @description Scores attack moves for the AI based on context and tactical intent, providing detailed reasoning and context factors for move selection.
+// @criticality 🧠 AI Move Scoring (High) | Depends on: types, battleStateAwareness, intentSystem
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related types, battleStateAwareness.ts, intentSystem.ts
+//
+// All exports are documented below.
+
 // CONTEXT: Attack Move Scoring Service
 // RESPONSIBILITY: Score attack moves based on context and intent
 
@@ -8,11 +17,14 @@ import { Intent } from './intentSystem';
 
 /**
  * @description Scores an attack move based on context and intent
+ * @function scoreAttackMove
  * @param {Move} move - The attack move to score
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
  * @param {Intent} intent - The current tactical intent
  * @returns {number} The calculated score
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreAttackMove(
   move: Move,
@@ -52,11 +64,14 @@ export function scoreAttackMove(
 
 /**
  * @description Gets scoring reasons for an attack move
+ * @function getAttackMoveScoringReasons
  * @param {Move} move - The attack move to analyze
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
  * @param {Intent} intent - The current tactical intent
  * @returns {string[]} Array of scoring reasons
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getAttackMoveScoringReasons(
   move: Move,
@@ -153,9 +168,12 @@ export function getAttackMoveScoringReasons(
 
 /**
  * @description Gets context factors for an attack move
+ * @function getAttackMoveContextFactors
  * @param {Move} move - The attack move to analyze
  * @param {BattleTacticalContext} context - The current battle context
  * @returns {string[]} Array of context factors
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getAttackMoveContextFactors(
   move: Move,

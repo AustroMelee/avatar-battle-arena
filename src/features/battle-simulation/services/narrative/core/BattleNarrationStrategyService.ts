@@ -1,3 +1,11 @@
+/*
+ * @file BattleNarrationStrategyService.ts
+ * @description Provides strategy logic for selecting and composing narrative lines in the battle simulation.
+ * @criticality 🎭 Narrative Strategy
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related narrative.service.ts, CharacterNarrativeRouter.ts
+ */
 // CONTEXT: Battle Narration Strategy Service
 // RESPONSIBILITY: Choose narrative tracks and strategies based on battle context
 

@@ -1,3 +1,11 @@
+/*
+ * @file arc.service.ts
+ * @description Manages the battle arc state machine and escalation triggers for the simulation.
+ * @criticality 🩸 Battle Arc
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related processTurn.ts, state.ts
+ */
 // CONTEXT: BattleSimulation, // FOCUS: ArcStateEngine
 import { BattleState, BattleArcState, ArcStateModifier, BattleLogEntry } from '../../types';
 import { ARC_TRANSITIONS } from '../../data/arcTransitions';

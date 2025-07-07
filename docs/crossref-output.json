@@ -1,0 +1,4248 @@
+[
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\App.tsx",
+    "exports": [],
+    "imports": [
+      "react",
+      "react",
+      "./App.module.css",
+      "./common/types",
+      "./features/character-selection/components/CharacterSelection",
+      "./features/location-selection/components/LocationSelection",
+      "./features/battle-simulation/controllers/useBattleSimulator.controller",
+      "./common/components/Button/Button",
+      "./features/battle-simulation/components/BattleScene/BattleScene"
+    ],
+    "tags": [],
+    "calls": [
+      "src/App.module.css",
+      "src/common/types",
+      "src/features/character-selection/components/CharacterSelection.tsx",
+      "src/features/location-selection/components/LocationSelection.tsx",
+      "src/features/battle-simulation/controllers/useBattleSimulator.controller.ts",
+      "src/common/components/Button/Button.tsx",
+      "src/features/battle-simulation/components/BattleScene/BattleScene.tsx"
+    ],
+    "usedBy": [
+      "src/main.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\common\\components\\Button\\Button.tsx",
+    "exports": [
+      "ButtonProps",
+      "Button"
+    ],
+    "imports": [
+      "react",
+      "./Button.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/common/components/Button/Button.module.css"
+    ],
+    "usedBy": [
+      "src/App.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\common\\types\\index.ts",
+    "exports": [
+      "Ability",
+      "Character",
+      "Location"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\components\\ErrorBoundary.tsx",
+    "exports": [
+      "ErrorFallback",
+      "LoadingSpinner"
+    ],
+    "imports": [
+      "react"
+    ],
+    "tags": [
+      "error-handling"
+    ],
+    "calls": [],
+    "usedBy": [
+      "src/main.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-log\\components\\BattleLog.tsx",
+    "exports": [
+      "BattleLogProps",
+      "BattleLog"
+    ],
+    "imports": [
+      "react",
+      "../../battle-simulation/types",
+      "./LogDetailSelector",
+      "./BattleLog.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-log/components/LogDetailSelector.tsx",
+      "src/features/battle-log/components/BattleLog.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-log\\components\\LogDetailSelector.tsx",
+    "exports": [
+      "LogDetailSelectorProps",
+      "LogDetailSelector"
+    ],
+    "imports": [
+      "../../battle-simulation/types",
+      "./LogDetailSelector.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-log/components/LogDetailSelector.module.css"
+    ],
+    "usedBy": [
+      "src/features/battle-log/components/BattleLog.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\AbilityButton\\AbilityButton.tsx",
+    "exports": [
+      "AbilityButtonProps",
+      "AbilityButton"
+    ],
+    "imports": [
+      "react",
+      "../../types/move.types",
+      "../../types/cooldown.types",
+      "./AbilityButton.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types/cooldown.types.ts",
+      "src/features/battle-simulation/components/AbilityButton/AbilityButton.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\AbilityButton\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\AbilityPanel\\AbilityPanel.tsx",
+    "exports": [
+      "AbilityPanelProps",
+      "AbilityPanel"
+    ],
+    "imports": [
+      "react",
+      "../../types/move.types",
+      "../../types",
+      "../AbilityButton",
+      "../../hooks/useCooldownManager.hook",
+      "./AbilityPanel.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/components/AbilityButton",
+      "src/features/battle-simulation/hooks/useCooldownManager.hook.ts",
+      "src/features/battle-simulation/components/AbilityPanel/AbilityPanel.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\AbilityPanel\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\BattleNarrativeTurn\\BattleNarrativeTurn.tsx",
+    "exports": [
+      "BattleNarrativeTurnProps",
+      "BattleNarrativeTurn"
+    ],
+    "imports": [
+      "react",
+      "./BattleNarrativeTurn.module.css",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/components/BattleNarrativeTurn/BattleNarrativeTurn.module.css",
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\BattleNarrativeTurn\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\BattleScene\\BattleScene.tsx",
+    "exports": [
+      "BattleSceneProps",
+      "BattleScene"
+    ],
+    "imports": [
+      "../../types",
+      "../VersusGrid/VersusGrid",
+      "../UnifiedBattleLog",
+      "../../services/narrative/types",
+      "./BattleScene.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/components/VersusGrid/VersusGrid.tsx",
+      "src/features/battle-simulation/components/UnifiedBattleLog",
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/components/BattleScene/BattleScene.module.css"
+    ],
+    "usedBy": [
+      "src/App.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\CharacterStatus\\CharacterStatus.tsx",
+    "exports": [
+      "CharacterStatus"
+    ],
+    "imports": [
+      "../../types",
+      "./CharacterStatus.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/components/CharacterStatus/CharacterStatus.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\EnhancedBattleLog\\EnhancedBattleLog.tsx",
+    "exports": [
+      "EnhancedBattleLog"
+    ],
+    "imports": [
+      "react",
+      "../../types",
+      "./EnhancedBattleLog.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/components/EnhancedBattleLog/EnhancedBattleLog.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\EnhancedBattleLog\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\EnhancedBattleScene\\EnhancedBattleScene.tsx",
+    "exports": [
+      "EnhancedBattleScene"
+    ],
+    "imports": [
+      "react",
+      "../../types",
+      "@/common/types",
+      "../../services/battle/fallbackMoves",
+      "../UnifiedBattleLog",
+      "./EnhancedBattleScene.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/fallbackMoves.ts",
+      "src/features/battle-simulation/components/UnifiedBattleLog",
+      "src/features/battle-simulation/components/EnhancedBattleScene/EnhancedBattleScene.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\EnhancedBattleScene\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\NarrativeBubble\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\NarrativeBubble\\NarrativeBubble.tsx",
+    "exports": [
+      "NarrativeBubbleProps",
+      "NarrativeBubble"
+    ],
+    "imports": [
+      "react",
+      "./NarrativeBubble.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/components/NarrativeBubble/NarrativeBubble.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\PlayerCardHorizontal\\PlayerCardHorizontal.tsx",
+    "exports": [
+      "PlayerCardHorizontal"
+    ],
+    "imports": [
+      "react",
+      "../../types",
+      "react-icons/fa",
+      "../../services/identity/behavioralUI.service",
+      "./PlayerCardHorizontal.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/identity/behavioralUI.service.ts",
+      "src/features/battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal.module.css"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/VersusGrid/VersusGrid.tsx",
+      "src/features/character-selection/components/CharacterSelection.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\UnifiedBattleLog\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\UnifiedBattleLog\\UnifiedBattleLog.tsx",
+    "exports": [
+      "UnifiedBattleLog"
+    ],
+    "imports": [
+      "react",
+      "../../types",
+      "./UnifiedBattleLog.module.css",
+      "../BattleNarrativeTurn/BattleNarrativeTurn"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.module.css",
+      "src/features/battle-simulation/components/BattleNarrativeTurn/BattleNarrativeTurn.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\VersusGrid\\VersusGrid.tsx",
+    "exports": [
+      "VersusGridProps",
+      "VersusGrid"
+    ],
+    "imports": [
+      "../PlayerCardHorizontal/PlayerCardHorizontal",
+      "../../types",
+      "./VersusGrid.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal.tsx",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/components/VersusGrid/VersusGrid.module.css"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/BattleScene/BattleScene.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\controllers\\useBattleSimulator.controller.ts",
+    "exports": [
+      "useBattleSimulator"
+    ],
+    "imports": [
+      "react",
+      "../types",
+      "../services/battleSimulator.service",
+      "../types",
+      "../services/battle/analytics"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battleSimulator.service.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/analytics.ts"
+    ],
+    "usedBy": [
+      "src/App.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\data\\arcTransitions.ts",
+    "exports": [
+      "ARC_TRANSITIONS",
+      "getDefaultArcState",
+      "getDefaultArcStateHistory"
+    ],
+    "imports": [
+      "../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/arc.service.ts",
+      "src/features/battle-simulation/services/battle/state.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\data\\identities.ts",
+    "exports": [
+      "AANG_IDENTITY",
+      "AZULA_IDENTITY",
+      "IDENTITY_PROFILES",
+      "DEFAULT_OPPONENT_PERCEPTION"
+    ],
+    "imports": [
+      "../types/identity.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/identity.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/moveUtils.ts",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/identity/mentalState.service.ts",
+      "src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
+      "src/features/battle-simulation/services/utils/moveUtils.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\hooks\\useCooldownManager.hook.ts",
+    "exports": [
+      "UseCooldownManagerParams",
+      "UseCooldownManagerReturn",
+      "useCooldownManager"
+    ],
+    "imports": [
+      "react",
+      "../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/AbilityPanel/AbilityPanel.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\hooks\\useNarrativeLine.ts",
+    "exports": [
+      "useNarrativeLine",
+      "useMultipleNarrativePools"
+    ],
+    "imports": [
+      "react"
+    ],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\advancedAIController.ts",
+    "exports": [
+      "AdvancedAIState",
+      "chooseMoveWithAdvancedAI",
+      "getAIStateSummary",
+      "getReversalWeight"
+    ],
+    "imports": [
+      "@/common/types",
+      "../../types",
+      "../../types/move.types",
+      "./battleStateAwareness",
+      "./intentSystem",
+      "./contextualMoveScoring",
+      "./moveUtils",
+      "./metaState"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/battleStateAwareness.ts",
+      "src/features/battle-simulation/services/ai/intentSystem.ts",
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts",
+      "src/features/battle-simulation/services/ai/moveUtils.ts",
+      "src/features/battle-simulation/services/ai/metaState.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\attackMoveScoring.service.ts",
+    "exports": [
+      "scoreAttackMove",
+      "getAttackMoveScoringReasons",
+      "getAttackMoveContextFactors"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types",
+      "./battleStateAwareness",
+      "./intentSystem"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/battleStateAwareness.ts",
+      "src/features/battle-simulation/services/ai/intentSystem.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\battleAwareness.ts",
+    "exports": [
+      "BattleContext",
+      "getBattleContext"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\battleStateAwareness.ts",
+    "exports": [
+      "PerceivedBattleState",
+      "BattleTacticalContext",
+      "getPerceivedBattleState",
+      "getBattleTacticalContext"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/advancedAIController.ts",
+      "src/features/battle-simulation/services/ai/attackMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts",
+      "src/features/battle-simulation/services/ai/defenseMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/intentSystem.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\behaviorTreeEngine.ts",
+    "exports": [
+      "decideMove",
+      "debugRules"
+    ],
+    "imports": [
+      "../../types",
+      "./types/AIBehavior",
+      "../../types/move.types",
+      "@/common/types",
+      "./rules/azulaRules",
+      "./rules/aangRules",
+      "./helpers/conditionHelpers",
+      "./weightedChoice",
+      "./weightFunctions/azulaWeights",
+      "./weightFunctions/aangWeights"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/types/AIBehavior.ts",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/rules/azulaRules.ts",
+      "src/features/battle-simulation/services/ai/rules/aangRules.ts",
+      "src/features/battle-simulation/services/ai/helpers/conditionHelpers.ts",
+      "src/features/battle-simulation/services/ai/weightedChoice.ts",
+      "src/features/battle-simulation/services/ai/weightFunctions/azulaWeights.ts",
+      "src/features/battle-simulation/services/ai/weightFunctions/aangWeights.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\chooseAbility.ts",
+    "exports": [
+      "AIAbilityResult",
+      "chooseAbilityWithLogging"
+    ],
+    "imports": [
+      "../../types",
+      "./patternRecognition",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/patternRecognition.ts",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\contextualMoveScoring.ts",
+    "exports": [
+      "ContextualMoveScore",
+      "scoreMoveWithContext",
+      "scoreMovesWithContext",
+      "getTopContextualMoves"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types",
+      "./battleStateAwareness",
+      "./intentSystem",
+      "./attackMoveScoring.service",
+      "./defenseMoveScoring.service",
+      "./intentAlignment.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/battleStateAwareness.ts",
+      "src/features/battle-simulation/services/ai/intentSystem.ts",
+      "src/features/battle-simulation/services/ai/attackMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/defenseMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/intentAlignment.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/advancedAIController.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\defenseMoveScoring.service.ts",
+    "exports": [
+      "scoreDefenseMove",
+      "getDefenseMoveScoringReasons",
+      "getDefenseMoveContextFactors"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types",
+      "./battleStateAwareness",
+      "./intentSystem"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/battleStateAwareness.ts",
+      "src/features/battle-simulation/services/ai/intentSystem.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\enhancedMoveScoring.ts",
+    "exports": [
+      "scoreMoveWithTactics",
+      "selectBestTacticalMove"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types",
+      "./tacticalAnalysis"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/tacticalAnalysis.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\helpers\\conditionHelpers.ts",
+    "exports": [
+      "isLowHP",
+      "isCriticalHP",
+      "isEnemyLowHP",
+      "isEnemyCriticalHP",
+      "isEnemyDefended",
+      "isEnemyHeavilyDefended",
+      "isLowChi",
+      "isCriticalChi",
+      "hasMoveAvailable",
+      "hasMoveWithTag",
+      "hasPiercingMove",
+      "hasHealingMove",
+      "hasDesperateMove",
+      "hasHighDamageMove",
+      "didEnemyJustUse",
+      "didEnemyJustShield",
+      "didEnemyJustShieldFromLog",
+      "hasTakenRecentDamage",
+      "wasRecentlyCriticallyHitFromLog",
+      "isEnemySpammingMove",
+      "wasRecentlyBlockedOrEvadedFromLog",
+      "hasUsedMoveRecently",
+      "isEarlyGame",
+      "isMidGame",
+      "isLateGame",
+      "isWinning",
+      "isLosing",
+      "getAvailableMovesSimple",
+      "getMoveByName",
+      "getMoveWithTag",
+      "getHighestDamageMove",
+      "getLowestCostMove"
+    ],
+    "imports": [
+      "../../../types",
+      "../../../types/move.types",
+      "@/common/types",
+      "../../utils/moveUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/utils/moveUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts",
+      "src/features/battle-simulation/services/ai/weightedChoice.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\intentAlignment.service.ts",
+    "exports": [
+      "calculateIntentAlignment",
+      "getIntentAlignmentReasons"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "./intentSystem"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/intentSystem.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\intentSystem.ts",
+    "exports": [
+      "IntentType",
+      "Intent",
+      "chooseIntent",
+      "getIntentPriority",
+      "shouldMaintainIntent"
+    ],
+    "imports": [
+      "./battleStateAwareness"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/ai/battleStateAwareness.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/advancedAIController.ts",
+      "src/features/battle-simulation/services/ai/attackMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts",
+      "src/features/battle-simulation/services/ai/defenseMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/intentAlignment.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\logQueries.ts",
+    "exports": [
+      "generateUniqueLogId",
+      "getRecentPlayerActions",
+      "wasLastMove",
+      "wasLastMoveShield",
+      "recentDamageTaken",
+      "moveCountInLastN",
+      "wasRecentlyCriticallyHit",
+      "isSpammingMove",
+      "isLowOnResources",
+      "getLastEventOfType",
+      "wasRecentlyBlockedOrEvaded",
+      "getCurrentCombo",
+      "createEventId"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/attackMove.service.ts",
+      "src/features/battle-simulation/services/battle/battleValidation.ts",
+      "src/features/battle-simulation/services/battle/criticalSystem.service.ts",
+      "src/features/battle-simulation/services/battle/defenseMove.service.ts",
+      "src/features/battle-simulation/services/battle/desperationSystem.service.ts",
+      "src/features/battle-simulation/services/battle/endPhase.service.ts",
+      "src/features/battle-simulation/services/battle/escalationApplication.service.ts",
+      "src/features/battle-simulation/services/battle/finisherSystem.service.ts",
+      "src/features/battle-simulation/services/battle/genericMove.service.ts",
+      "src/features/battle-simulation/services/battle/phases/desperationPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
+      "src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
+      "src/features/battle-simulation/services/battle/resolutionTriggers.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "src/features/battle-simulation/services/battleSimulator.service.ts",
+      "src/features/battle-simulation/services/effects/buffs.ts",
+      "src/features/battle-simulation/services/effects/effectFusion.service.ts",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts",
+      "src/features/battle-simulation/services/identity/behavioral.service.ts",
+      "src/features/battle-simulation/services/narrative/battleEndHandler.ts",
+      "src/features/battle-simulation/services/narrative/hookNarrativeGenerator.ts",
+      "src/features/battle-simulation/services/narrative/openingSequence.ts",
+      "src/features/battle-simulation/services/narrative/templateNarrativeGenerator.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\metaState.ts",
+    "exports": [
+      "MetaState",
+      "assessMetaState",
+      "getUrgencyLevel",
+      "shouldBeAggressive",
+      "shouldPrioritizeVariety"
+    ],
+    "imports": [
+      "../../types",
+      "./patternDetection"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/patternDetection.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/advancedAIController.ts",
+      "src/features/battle-simulation/services/ai/moveScoring.ts",
+      "src/features/battle-simulation/services/ai/moveSelection.ts",
+      "src/features/battle-simulation/services/ai/moveUtils.ts",
+      "src/features/battle-simulation/services/ai/narrative.ts",
+      "src/features/battle-simulation/services/utils/moveUtils.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\moveScoring.ts",
+    "exports": [
+      "MoveScore",
+      "scoreMove",
+      "scoreMoves",
+      "getTopMoves"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "./metaState"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/metaState.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/moveSelection.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\moveSelection.ts",
+    "exports": [
+      "WeightedMove",
+      "applyVariance",
+      "weightedRandom",
+      "selectMove",
+      "selectTacticalMove"
+    ],
+    "imports": [
+      "./metaState",
+      "./moveScoring",
+      "../../types/move.types",
+      "../../types",
+      "../../types/move.types",
+      "../battle/positioningMechanics.service",
+      "../identity/tacticalPersonality.engine",
+      "../../types",
+      "./tacticalMemory.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/ai/metaState.ts",
+      "src/features/battle-simulation/services/ai/moveScoring.ts",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
+      "src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/tacticalMemory.service.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\moveUtils.ts",
+    "exports": [
+      "getAvailableMoves",
+      "isMoveOnCooldown",
+      "hasEnoughResources"
+    ],
+    "imports": [
+      "../../data/identities",
+      "../../types",
+      "../../types/move.types",
+      "../ai/metaState",
+      "@/common/types",
+      "../../services/utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/data/identities.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/metaState.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/advancedAIController.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\narrative.ts",
+    "exports": [
+      "buildMoveNarrative",
+      "generateSimpleMoveDescription",
+      "generateDramaticMoveDescription"
+    ],
+    "imports": [
+      "@/common/types",
+      "../../types",
+      "./metaState"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/metaState.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\patternDetection.ts",
+    "exports": [
+      "isRepeatingPattern",
+      "detectPatterns",
+      "getRecentMoves",
+      "wasMoveUsedRecently"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/metaState.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\patternRecognition.ts",
+    "exports": [
+      "MovePattern",
+      "PatternAnalysis",
+      "detectMovePatterns",
+      "analyzeOpponentPatterns",
+      "shouldAvoidMove",
+      "getAntiPatternMoves",
+      "generatePatternNarrative"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/chooseAbility.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\rules\\aangRules.ts",
+    "exports": [
+      "aangAIRules"
+    ],
+    "imports": [
+      "../types/AIBehavior"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/ai/types/AIBehavior.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\rules\\azulaRules.ts",
+    "exports": [
+      "azulaAIRules"
+    ],
+    "imports": [
+      "../types/AIBehavior"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/ai/types/AIBehavior.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\tacticalAI.service.ts",
+    "exports": [
+      "createTacticalAnalysis",
+      "shouldPrioritizePositioning"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\tacticalAnalysis.ts",
+    "exports": [
+      "determineTacticalPriority",
+      "getTacticalExplanation",
+      "analyzeBattleState"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/enhancedMoveScoring.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\tacticalMemory.service.ts",
+    "exports": [
+      "TacticalMemoryEntry",
+      "TacticalMemory",
+      "checkTacticalMemoryWithLog"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/moveSelection.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\tacticalNarrative.ts",
+    "exports": [
+      "buildTacticalNarrative",
+      "buildTacticalExplanation",
+      "createTacticalLogEntry"
+    ],
+    "imports": [
+      "../../../../common/types",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/common/types",
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\types\\AIBehavior.ts",
+    "exports": [
+      "GameCondition",
+      "MoveSelector",
+      "AIRule",
+      "AIDecision"
+    ],
+    "imports": [
+      "../../../types",
+      "../../../types",
+      "../../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts",
+      "src/features/battle-simulation/services/ai/rules/aangRules.ts",
+      "src/features/battle-simulation/services/ai/rules/azulaRules.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\weightedChoice.ts",
+    "exports": [
+      "WeightFunction",
+      "WeightedMove",
+      "weightedRandomChoice",
+      "getAvailableMovesWithWeights",
+      "selectWeightedMove",
+      "ensureMinimumWeights",
+      "debugMoveWeights"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "@/common/types",
+      "./helpers/conditionHelpers"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/helpers/conditionHelpers.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts",
+      "src/features/battle-simulation/services/ai/weightFunctions/aangWeights.ts",
+      "src/features/battle-simulation/services/ai/weightFunctions/azulaWeights.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\weightFunctions\\aangWeights.ts",
+    "exports": [
+      "airShieldWeight",
+      "airBlastWeight",
+      "windSliceWeight",
+      "airScooterWeight",
+      "airNomadMeditationWeight",
+      "desperateMovesWeight",
+      "getAangWeightedMoves"
+    ],
+    "imports": [
+      "../../../types",
+      "../weightedChoice"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/weightedChoice.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\ai\\weightFunctions\\azulaWeights.ts",
+    "exports": [
+      "lightningWeight",
+      "firebombWeight",
+      "blueFireWeight",
+      "fireJetsWeight",
+      "phoenixRecoveryWeight",
+      "desperateMovesWeight",
+      "getAzulaWeightedMoves"
+    ],
+    "imports": [
+      "../../../types",
+      "../weightedChoice"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/weightedChoice.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\aiAnalysis.service.ts",
+    "exports": [
+      "AIMetrics",
+      "analyzeAIPerformance"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/reportGenerator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\analytics.ts",
+    "exports": [
+      "analyzeBattlePerformance"
+    ],
+    "imports": [
+      "../../types",
+      "./battleAnalysis.service",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/battleAnalysis.service.ts",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/controllers/useBattleSimulator.controller.ts",
+      "src/features/battle-simulation/services/battleSimulator.service.ts",
+      "src/features/battle-simulation/services/battleSimulator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\analyticsTracker.service.ts",
+    "exports": [
+      "RealTimeAnalytics",
+      "initializeAnalyticsTracker",
+      "trackDamage",
+      "trackChiSpent",
+      "trackPatternAdaptation",
+      "trackPunishOpportunity",
+      "trackDesperationMove",
+      "processLogEntryForAnalytics",
+      "getChiEfficiency",
+      "formatRealTimeAnalytics",
+      "updateRealTimeAnalytics"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/battleValidation.ts",
+      "src/features/battle-simulation/services/battle/finisherSystem.service.ts",
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
+      "src/features/battle-simulation/services/battleSimulator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\arc.service.ts",
+    "exports": [
+      "InjectedArcTrigger",
+      "ArcStateUpdateResult",
+      "updateArcState",
+      "getArcModifiers",
+      "getArcStateDescription",
+      "getArcStateProgression"
+    ],
+    "imports": [
+      "../../types",
+      "../../data/arcTransitions"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/data/arcTransitions.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\attackMove.service.ts",
+    "exports": [
+      "AttackMoveResult"
+    ],
+    "imports": [
+      "../../types",
+      "@/common/types",
+      "./moveConverter.service",
+      "./battleContext.service",
+      "./moveLogic.service",
+      "../narrative",
+      "../effects/statusEffect.service",
+      "./defensiveResolution.service",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/moveConverter.service.ts",
+      "src/features/battle-simulation/services/battle/battleContext.service.ts",
+      "src/features/battle-simulation/services/battle/moveLogic.service.ts",
+      "src/features/battle-simulation/services/narrative",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts",
+      "src/features/battle-simulation/services/battle/defensiveResolution.service.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/moveRouter.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\battleAnalysis.service.ts",
+    "exports": [
+      "BattleMetrics",
+      "analyzeBattlePerformance"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/analytics.ts",
+      "src/features/battle-simulation/services/battle/reportGenerator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\battleAnalytics.service.ts",
+    "exports": [
+      "BattleAnalytics",
+      "generateBattleAnalytics",
+      "formatBattleAnalytics",
+      "generateAndFormatBattleAnalytics"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\BattleAnalyticsTracker.ts",
+    "exports": [
+      "AnalyticsUpdateResult",
+      "initializeAnalytics",
+      "updateTacticalAnalytics",
+      "trackPatternAdaptation",
+      "trackStalematePrevention",
+      "trackEscalationEvent",
+      "trackCriticalHit",
+      "trackDesperationMove",
+      "getAnalyticsSummary",
+      "resetAnalytics"
+    ],
+    "imports": [
+      "../../types",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\battleContext.service.ts",
+    "exports": [
+      "createBattleContext"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/attackMove.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\BattleLogger.ts",
+    "exports": [
+      "LoggerConfig",
+      "BattleLogger",
+      "battleLogger",
+      "logTacticalMove",
+      "logEscalation",
+      "logPunishment",
+      "logNarrative",
+      "logMoveUsage",
+      "logCharge"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\battleValidation.ts",
+    "exports": [
+      "BattleValidationResult",
+      "validateBattleState",
+      "forceBattleClimax",
+      "shouldForceBattleEnd"
+    ],
+    "imports": [
+      "../../types",
+      "../ai/logQueries",
+      "./fallbackMoves",
+      "./analyticsTracker.service",
+      "../../types/move.types",
+      "../utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/battle/fallbackMoves.ts",
+      "src/features/battle-simulation/services/battle/analyticsTracker.service.ts",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\characterAnalysis.service.ts",
+    "exports": [
+      "CharacterMetrics",
+      "analyzeCharacterPerformance"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/reportGenerator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\checkDefeat.ts",
+    "exports": [
+      "checkDefeat"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\cooldownSystem.ts",
+    "exports": [
+      "EnhancedAbility",
+      "CooldownState",
+      "applyCooldownAndUsage",
+      "reduceCooldowns",
+      "isMoveAvailable",
+      "getEffectivePower",
+      "getCooldownInfo",
+      "ENHANCED_ABILITIES"
+    ],
+    "imports": [
+      "@/common/types",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\criticalSystem.service.ts",
+    "exports": [
+      "CriticalConfig",
+      "CriticalResult",
+      "BASE_CRITICAL_CONFIG",
+      "CHARACTER_CRITICAL_CONFIGS",
+      "calculateCriticalHit",
+      "applyStaggerEffect",
+      "createCriticalLogEntry"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\decisiveClash.service.ts",
+    "exports": [
+      "DecisiveClashConfig",
+      "DEFAULT_DECISIVE_CLASH_CONFIG",
+      "checkAndTriggerDecisiveClash"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\defenseMove.service.ts",
+    "exports": [
+      "DefenseMoveResult"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../ai/logQueries",
+      "../narrative",
+      "../effects/statusEffect.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/narrative",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/moveRouter.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\defensiveResolution.service.ts",
+    "exports": [
+      "resolveClash"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/attackMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\desperationMoveCreation.service.ts",
+    "exports": [
+      "createDesperationMove"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\desperationMoves.ts",
+    "exports": [
+      "DesperationMove",
+      "DESPERATION_MOVES",
+      "getAvailableDesperationMoves",
+      "hasDesperationMoves",
+      "getBestDesperationMove",
+      "applyDesperationSideEffects",
+      "getDesperationNarrative",
+      "isDesperate",
+      "isCriticallyWounded"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\desperationSystem.service.ts",
+    "exports": [
+      "DESPERATION_THRESHOLDS",
+      "DesperationState",
+      "calculateDesperationState",
+      "applyDesperationModifiers",
+      "generateDesperationNarrative",
+      "createDesperationLogEntry",
+      "shouldTriggerDesperation"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\disruptionWindow.service.ts",
+    "exports": [
+      "DisruptionWindowConfig",
+      "DEFAULT_DISRUPTION_WINDOW_CONFIG",
+      "DisruptionWindowState",
+      "canOpenDisruptionWindow",
+      "openDisruptionWindow",
+      "resolveDisruptionWindowWithLog",
+      "resolveDisruptionWindow"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/index",
+      "../utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/index.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\effectFusion.service.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\endPhase.service.ts",
+    "exports": [
+      "validateBattleEndPhase"
+    ],
+    "imports": [
+      "../ai/logQueries",
+      "../../types",
+      "./state"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/state.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\escalationApplication.service.ts",
+    "exports": [
+      "forcePatternEscalation"
+    ],
+    "imports": [
+      "../../types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/patternBreaking.service.ts",
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\escalationDetection.service.ts",
+    "exports": [
+      "calculateDamageStats",
+      "shouldTriggerEscalation"
+    ],
+    "imports": [
+      "../../types",
+      "./patternTracking.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/patternTracking.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/patternBreaking.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\fallbackMoves.ts",
+    "exports": [
+      "BASIC_ATTACK",
+      "REST_MOVE",
+      "DESPERATION_ATTACK",
+      "getFallbackMoves",
+      "shouldUnlockDesperation",
+      "getAvailableFallbackMoves"
+    ],
+    "imports": [
+      "@/common/types"
+    ],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/components/EnhancedBattleScene/EnhancedBattleScene.tsx",
+      "src/features/battle-simulation/services/battle/battleValidation.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\finisherSystem.service.ts",
+    "exports": [
+      "FinisherMove",
+      "getAvailableFinisher",
+      "executeFinisherMove",
+      "CHARACTER_FINISHERS",
+      "getCharacterFinisher"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../ai/logQueries",
+      "./analyticsTracker.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/battle/analyticsTracker.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/finisherPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\genericMove.service.ts",
+    "exports": [
+      "GenericMoveResult"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../ai/logQueries",
+      "../narrative"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/narrative"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/moveRouter.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\heroicReversal.service.ts",
+    "exports": [
+      "HeroicReversalConfig",
+      "DEFAULT_HEROIC_REVERSAL_CONFIG",
+      "canTriggerHeroicReversal",
+      "triggerHeroicReversalWithLog",
+      "triggerHeroicReversal",
+      "resolveHeroicReversalWithLog",
+      "resolveHeroicReversal"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/index",
+      "../utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/index.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\logIdGenerator.service.ts",
+    "exports": [
+      "generateUniqueLogId"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveConverter.service.ts",
+    "exports": [
+      "convertAbilityToMove"
+    ],
+    "imports": [
+      "@/common/types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/attackMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveDisabling.service.ts",
+    "exports": [
+      "applyEscalationModifiers",
+      "isMoveDisabled"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveExecution.service.ts",
+    "exports": [],
+    "imports": [
+      "./moveRouter.service",
+      "./tacticalMove.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/battle/moveRouter.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveFatigue.service.ts",
+    "exports": [
+      "MoveFatigueConfig",
+      "DEFAULT_MOVE_FATIGUE_CONFIG",
+      "getMoveFatigueMultiplier",
+      "applyMoveFatigue"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveLogic.service.ts",
+    "exports": [
+      "MoveResult",
+      "canUseMove",
+      "resolveMove"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "../../types",
+      "../effects/statusEffect.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/attackMove.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveRegistry.service.ts",
+    "exports": [
+      "getCharacterMoves"
+    ],
+    "imports": [
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/state.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\moveRouter.service.ts",
+    "exports": [
+      "MoveExecutionResult",
+      "MoveRouterResult"
+    ],
+    "imports": [
+      "../../types",
+      "@/common/types",
+      "./attackMove.service",
+      "./defenseMove.service",
+      "./genericMove.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/attackMove.service.ts",
+      "src/features/battle-simulation/services/battle/defenseMove.service.ts",
+      "src/features/battle-simulation/services/battle/genericMove.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/moveExecution.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\patternBreaking.service.ts",
+    "exports": [
+      "checkAndTriggerPatternBreaking"
+    ],
+    "imports": [
+      "../../types",
+      "./escalationDetection.service",
+      "./escalationApplication.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/escalationDetection.service.ts",
+      "src/features/battle-simulation/services/battle/escalationApplication.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\patternTracking.service.ts",
+    "exports": [
+      "PatternState",
+      "getPatternState",
+      "updatePatternTracking",
+      "resetPatternTracking"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/escalationDetection.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\desperationPhase.service.ts",
+    "exports": [],
+    "imports": [
+      "../../../types",
+      "../../narrative/enhancedStateManager",
+      "../../narrative",
+      "../../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/narrative/enhancedStateManager.ts",
+      "src/features/battle-simulation/services/narrative",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\effectsPhase.service.ts",
+    "exports": [
+      "endOfTurnEffectsPhase"
+    ],
+    "imports": [
+      "../../../types",
+      "../../effects/buffs",
+      "../tacticalState.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/effects/buffs.ts",
+      "src/features/battle-simulation/services/battle/tacticalState.service.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\endPhase.service.ts",
+    "exports": [
+      "validateBattleEndPhase"
+    ],
+    "imports": [
+      "../../../types",
+      "../battleValidation",
+      "../state",
+      "../battleAnalytics.service",
+      "../analyticsTracker.service",
+      "../decisiveClash.service",
+      "../heroicReversal.service",
+      "../../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/battleValidation.ts",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/battle/battleAnalytics.service.ts",
+      "src/features/battle-simulation/services/battle/analyticsTracker.service.ts",
+      "src/features/battle-simulation/services/battle/decisiveClash.service.ts",
+      "src/features/battle-simulation/services/battle/heroicReversal.service.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\escalationPhase.service.ts",
+    "exports": [],
+    "imports": [
+      "../../../types",
+      "../state",
+      "../escalationApplication.service",
+      "../analyticsTracker.service",
+      "../../narrative/enhancedStateManager",
+      "../../narrative",
+      "../../ai/logQueries",
+      "../../utils/mechanicLogUtils",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/battle/escalationApplication.service.ts",
+      "src/features/battle-simulation/services/battle/analyticsTracker.service.ts",
+      "src/features/battle-simulation/services/narrative/enhancedStateManager.ts",
+      "src/features/battle-simulation/services/narrative",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "src/features/battle-simulation/services/types/move.types"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\finisherPhase.service.ts",
+    "exports": [
+      "finisherPhase"
+    ],
+    "imports": [
+      "../../../types",
+      "../finisherSystem.service",
+      "../state"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/finisherSystem.service.ts",
+      "src/features/battle-simulation/services/battle/state.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\phases\\tacticalPhase.service.ts",
+    "exports": [],
+    "imports": [
+      "../../../types",
+      "../../ai/enhancedMoveScoring",
+      "../moveExecution.service",
+      "../patternBreaking.service",
+      "../tacticalState.service",
+      "../../../../location-selection/data/locationData",
+      "../reversalMechanic.service",
+      "../../utils/mechanicLogUtils",
+      "../../../types/move.types",
+      "../../utils/moveUtils",
+      "../battleValidation"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/enhancedMoveScoring.ts",
+      "src/features/battle-simulation/services/battle/moveExecution.service.ts",
+      "src/features/battle-simulation/services/battle/patternBreaking.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalState.service.ts",
+      "src/features/location-selection/data/locationData.ts",
+      "src/features/battle-simulation/services/battle/reversalMechanic.service.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/utils/moveUtils.ts",
+      "src/features/battle-simulation/services/battle/battleValidation.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\positioningMechanics.service.ts",
+    "exports": [
+      "canUseMove",
+      "performReposition",
+      "handleChargeUp",
+      "applyPositionBonuses",
+      "calculatePunishBonus",
+      "updatePositionAfterMove",
+      "resetRepositioningStatus",
+      "getEnvironmentalFactors",
+      "createTacticalLogEntry"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/moveSelection.ts",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\processTurn.ts",
+    "exports": [],
+    "imports": [
+      "../../types",
+      "./state",
+      "../identity/mentalState.service",
+      "./tacticalState.service",
+      "../identity/behavioral.service",
+      "../effects/statusEffect.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/identity/mentalState.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalState.service.ts",
+      "src/features/battle-simulation/services/identity/behavioral.service.ts",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battleSimulator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\reportGenerator.service.ts",
+    "exports": [
+      "generateBattleReport"
+    ],
+    "imports": [
+      "./battleAnalysis.service",
+      "./characterAnalysis.service",
+      "./aiAnalysis.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/battle/battleAnalysis.service.ts",
+      "src/features/battle-simulation/services/battle/characterAnalysis.service.ts",
+      "src/features/battle-simulation/services/battle/aiAnalysis.service.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\resolutionTriggers.ts",
+    "exports": [
+      "DESPERATION_MOVES",
+      "CHARACTER_LINES",
+      "shouldTriggerDesperation",
+      "isStalemate",
+      "isMutualKO",
+      "isTurnLimitExceeded",
+      "getCharacterLine",
+      "createResolutionLogEntry",
+      "checkResolutionTriggers"
+    ],
+    "imports": [
+      "../../types",
+      "@/common/types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\resolveImpact.ts",
+    "exports": [
+      "ImpactType",
+      "ImpactResult",
+      "resolveImpact"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\reversalMechanic.service.ts",
+    "exports": [
+      "resolveReversal"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/mechanic.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/mechanic.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\state.ts",
+    "exports": [
+      "createInitialBattleState",
+      "cloneBattleState",
+      "getActiveParticipants",
+      "switchActiveParticipant",
+      "isBattleTerminal",
+      "declareWinner"
+    ],
+    "imports": [
+      "../../types/move.types",
+      "./positioningMechanics.service",
+      "../narrative",
+      "../narrative/openingSequence",
+      "../narrative/enhancedStateManager",
+      "../identity/mentalState.service",
+      "../../data/identities",
+      "../../data/arcTransitions",
+      "../identity/behavioral.service",
+      "./moveRegistry.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
+      "src/features/battle-simulation/services/narrative",
+      "src/features/battle-simulation/services/narrative/openingSequence.ts",
+      "src/features/battle-simulation/services/narrative/enhancedStateManager.ts",
+      "src/features/battle-simulation/services/identity/mentalState.service.ts",
+      "src/features/battle-simulation/data/identities.ts",
+      "src/features/battle-simulation/data/arcTransitions.ts",
+      "src/features/battle-simulation/services/identity/behavioral.service.ts",
+      "src/features/battle-simulation/services/battle/moveRegistry.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/endPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/endPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/finisherPhase.service.ts",
+      "src/features/battle-simulation/services/battle/processTurn.ts",
+      "src/features/battle-simulation/services/battleSimulator.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\tacticalMove.service.ts",
+    "exports": [
+      "TacticalMoveResult",
+      "moveToAbility",
+      "selectTacticalMove"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "./battleContext.service",
+      "../effects/statusEffect.service",
+      "./positioningMechanics.service",
+      "../ai/logQueries",
+      "../../types/move.types",
+      "./moveFatigue.service",
+      "./moveLogic.service",
+      "./resolveImpact",
+      "./checkDefeat",
+      "../../types/move.types",
+      "./positioningMechanics.service",
+      "../ai/tacticalMemory.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/battle/battleContext.service.ts",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts",
+      "src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/battle/moveFatigue.service.ts",
+      "src/features/battle-simulation/services/battle/moveLogic.service.ts",
+      "src/features/battle-simulation/services/battle/resolveImpact.ts",
+      "src/features/battle-simulation/services/battle/checkDefeat.ts",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
+      "src/features/battle-simulation/services/ai/tacticalMemory.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/moveExecution.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\TacticalNarrativeService.ts",
+    "exports": [
+      "NarrativeContext",
+      "NarrativeResult",
+      "buildNarrativeContext"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../narrative"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/services/narrative"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\tacticalState.service.ts",
+    "exports": [
+      "propagateTacticalStates",
+      "createTacticalWindows",
+      "cleanupTacticalStates"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/effectsPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
+      "src/features/battle-simulation/services/battle/processTurn.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battleSimulator.service.ts",
+    "exports": [
+      "BattleSimulationResult",
+      "BattleSimulator"
+    ],
+    "imports": [
+      "../types",
+      "./battle/state",
+      "./battle/processTurn",
+      "./battle/analytics",
+      "./battle/analytics",
+      "./battle/analyticsTracker.service",
+      "./ai/logQueries",
+      "./utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/battle/processTurn.ts",
+      "src/features/battle-simulation/services/battle/analytics.ts",
+      "src/features/battle-simulation/services/battle/analytics.ts",
+      "src/features/battle-simulation/services/battle/analyticsTracker.service.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/controllers/useBattleSimulator.controller.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\cooldown\\cooldownManager.service.ts",
+    "exports": [
+      "initializeCooldownState",
+      "checkAbilityAvailability",
+      "updateAbilityCooldownState",
+      "advanceCooldownTurn",
+      "resetCooldowns",
+      "getAbilityCooldownState",
+      "validateCooldownState"
+    ],
+    "imports": [
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\effects\\buffs.ts",
+    "exports": [
+      "processBuffsAndDebuffs",
+      "applyBuff",
+      "applyDebuff",
+      "reduceCooldowns",
+      "recoverChi",
+      "createTestBuff",
+      "createTestDebuff"
+    ],
+    "imports": [
+      "../../types",
+      "./statusEffect.service",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/effectsPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\effects\\effectFusion.service.ts",
+    "exports": [
+      "processEffectFusions"
+    ],
+    "imports": [
+      "../../types",
+      "../ai/logQueries",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/effects/statusEffect.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\effects\\statusEffect.service.ts",
+    "exports": [
+      "applyEffect",
+      "processTurnEffects",
+      "modifyDamageWithEffects",
+      "createStatusEffect",
+      "isCharacterStunned",
+      "getDefenseModifier"
+    ],
+    "imports": [
+      "../../types",
+      "../ai/logQueries",
+      "./effectFusion.service"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/effects/effectFusion.service.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/attackMove.service.ts",
+      "src/features/battle-simulation/services/battle/defenseMove.service.ts",
+      "src/features/battle-simulation/services/battle/moveLogic.service.ts",
+      "src/features/battle-simulation/services/battle/processTurn.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "src/features/battle-simulation/services/effects/buffs.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\identity\\behavioral.service.ts",
+    "exports": [
+      "processBehavioralSystemForTurn",
+      "initializeBehavioralSystem",
+      "initializeActiveFlags"
+    ],
+    "imports": [
+      "../../types",
+      "@/common/types",
+      "../../../character-selection/data/traits",
+      "../../types/behavioral.types",
+      "../ai/logQueries",
+      "../utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/character-selection/data/traits.ts",
+      "src/features/battle-simulation/types/behavioral.types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/processTurn.ts",
+      "src/features/battle-simulation/services/battle/state.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\identity\\behavioralUI.service.ts",
+    "exports": [
+      "getFlagUIData",
+      "getActiveFlagsWithUI"
+    ],
+    "imports": [
+      "../../types/behavioral.types",
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/behavioral.types.ts",
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\identity\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\identity\\mentalState.service.ts",
+    "exports": [
+      "initializeMentalState",
+      "updateMentalState",
+      "resetMentalState"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/identity.types",
+      "../../data/identities"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/identity.types.ts",
+      "src/features/battle-simulation/data/identities.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/processTurn.ts",
+      "src/features/battle-simulation/services/battle/state.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\identity\\narrativeHooks.service.ts",
+    "exports": [
+      "generateMentalStateMoveDescription",
+      "generateBattleStateNarrative",
+      "generateMoveOutcomeNarrative"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\identity\\tacticalPersonality.engine.ts",
+    "exports": [
+      "adjustScoresByIdentity",
+      "getMentalStateNarrative"
+    ],
+    "imports": [
+      "../../types",
+      "../../types/move.types",
+      "../../types/identity.types",
+      "../../data/identities"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types/identity.types.ts",
+      "src/features/battle-simulation/data/identities.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/moveSelection.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\antiRepetitionTracker.ts",
+    "exports": [
+      "AntiRepetitionTracker"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\battleEndHandler.ts",
+    "exports": [
+      "BattleEndHandler"
+    ],
+    "imports": [
+      "../../types",
+      "./types",
+      "./stateDrivenNarrativePool",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/stateDrivenNarrativePool.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/index.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\battlePhaseAnalyzer.ts",
+    "exports": [
+      "determineBattlePhase",
+      "isFirstBlood"
+    ],
+    "imports": [
+      "../../types",
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/contextBuilder.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\characterHooks.ts",
+    "exports": [
+      "characterNarratives"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/configManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\configManager.ts",
+    "exports": [
+      "createNarrativeConfig",
+      "getDefaultConfig"
+    ],
+    "imports": [
+      "./types",
+      "./characterHooks",
+      "./narratorHooks"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/characterHooks.ts",
+      "src/features/battle-simulation/services/narrative/narratorHooks.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrativeEngine.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\contextBuilder.ts",
+    "exports": [
+      "buildBattleContext",
+      "getHealthStatus",
+      "getChiStatus"
+    ],
+    "imports": [
+      "../../types",
+      "@/common/types",
+      "./types",
+      "./mechanicalStateExtractor",
+      "./battlePhaseAnalyzer",
+      "./narrativeToneAnalyzer",
+      "./locationAnalyzer"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/mechanicalStateExtractor.ts",
+      "src/features/battle-simulation/services/narrative/battlePhaseAnalyzer.ts",
+      "src/features/battle-simulation/services/narrative/narrativeToneAnalyzer.ts",
+      "src/features/battle-simulation/services/narrative/locationAnalyzer.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\contextualNarrativeMapper.ts",
+    "exports": [
+      "NarrativeContext",
+      "getDamageIntensity",
+      "getContextualMoveDescription",
+      "getEscalationDescription",
+      "getPatternBreakDescription",
+      "getStateTransitionDescription"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/enhancedStateNarratives.ts",
+      "src/features/battle-simulation/services/narrative/enhancedTemplateGenerator.ts",
+      "src/features/battle-simulation/services/narrative/index.ts",
+      "src/features/battle-simulation/services/narrative/narrativePoolManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\BattleNarrationStrategyService.ts",
+    "exports": [
+      "BattleNarrationStrategyService"
+    ],
+    "imports": [
+      "../types/NarrativeTypes",
+      "./NarrativeTrackSelector"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeTrackSelector.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\CharacterNarrativeRouter.ts",
+    "exports": [
+      "CharacterNarrativeRouter"
+    ],
+    "imports": [
+      "./characters/AangNarrativeService",
+      "./characters/AzulaNarrativeService",
+      "./NarrativeMemoryManager",
+      "./EmotionalArcTracker",
+      "../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/core/characters/AangNarrativeService.ts",
+      "src/features/battle-simulation/services/narrative/core/characters/AzulaNarrativeService.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeMemoryManager.ts",
+      "src/features/battle-simulation/services/narrative/core/EmotionalArcTracker.ts",
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\characters\\AangNarrativeService.ts",
+    "exports": [
+      "AangNarrativeService"
+    ],
+    "imports": [
+      "../../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\characters\\AzulaNarrativeService.ts",
+    "exports": [
+      "AzulaNarrativeService"
+    ],
+    "imports": [
+      "../../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\EmotionalArcTracker.ts",
+    "exports": [
+      "EmotionalArcTracker"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\EmotionalNarrationPolicy.ts",
+    "exports": [
+      "EmotionalNarrationPolicy"
+    ],
+    "imports": [
+      "../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\emotions\\EmotionalStateManager.ts",
+    "exports": [
+      "EmotionalStateManager"
+    ],
+    "imports": [
+      "./EmotionTracker",
+      "./EmotionModifier"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/core/emotions/EmotionTracker.ts",
+      "src/features/battle-simulation/services/narrative/core/emotions/EmotionModifier.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\emotions\\EmotionModifier.ts",
+    "exports": [
+      "EmotionModifier"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/emotions/EmotionalStateManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\emotions\\EmotionTracker.ts",
+    "exports": [
+      "EmotionTracker"
+    ],
+    "imports": [
+      "../../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/emotions/EmotionalStateManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\MetaEventsService.ts",
+    "exports": [
+      "MetaEventsService"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeComposer.ts",
+    "exports": [
+      "NarrativeComposer"
+    ],
+    "imports": [
+      "../types/NarrativeTypes",
+      "./CharacterNarrativeRouter",
+      "./NarrativeVariantsService",
+      "./pools/PoolManager"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts",
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeVariantsService.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeCoordinator.ts",
+    "exports": [
+      "NarrativeCoordinator"
+    ],
+    "imports": [
+      "./CharacterNarrativeRouter",
+      "./pools/PoolManager",
+      "./emotions/EmotionalStateManager",
+      "./NarrativeVariantsService",
+      "./OneOffMomentManager",
+      "./StateTracker",
+      "./BattleNarrationStrategyService",
+      "./EmotionalNarrationPolicy",
+      "./NarrativeComposer",
+      "../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts",
+      "src/features/battle-simulation/services/narrative/core/emotions/EmotionalStateManager.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeVariantsService.ts",
+      "src/features/battle-simulation/services/narrative/core/OneOffMomentManager.ts",
+      "src/features/battle-simulation/services/narrative/core/StateTracker.ts",
+      "src/features/battle-simulation/services/narrative/core/BattleNarrationStrategyService.ts",
+      "src/features/battle-simulation/services/narrative/core/EmotionalNarrationPolicy.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeEscalationService.ts",
+    "exports": [
+      "NarrativeEscalationService"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeMemoryManager.ts",
+    "exports": [
+      "NarrativeMemoryManager"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeTrackSelector.ts",
+    "exports": [
+      "NarrativeTrackSelector"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/BattleNarrationStrategyService.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeVariantsService.ts",
+    "exports": [
+      "NarrativeVariantsService"
+    ],
+    "imports": [
+      "../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\OneOffMomentManager.ts",
+    "exports": [
+      "OneOffMomentManager"
+    ],
+    "imports": [
+      "../types/NarrativeTypes",
+      "./StateTracker",
+      "./pools/PoolManager"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts",
+      "src/features/battle-simulation/services/narrative/core/StateTracker.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\pools\\DamageOutcomePool.ts",
+    "exports": [
+      "DamageOutcomePool"
+    ],
+    "imports": [
+      "../../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\pools\\PoolManager.ts",
+    "exports": [
+      "PoolManager"
+    ],
+    "imports": [
+      "./DamageOutcomePool",
+      "./StateAnnouncementPool",
+      "../../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/core/pools/DamageOutcomePool.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/StateAnnouncementPool.ts",
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts",
+      "src/features/battle-simulation/services/narrative/core/OneOffMomentManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\pools\\StateAnnouncementPool.ts",
+    "exports": [
+      "StateAnnouncementPool"
+    ],
+    "imports": [
+      "../../types/NarrativeTypes"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\SpiritReactionService.ts",
+    "exports": [
+      "SpiritReactionService"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\StateTracker.ts",
+    "exports": [
+      "StateTracker"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts",
+      "src/features/battle-simulation/services/narrative/core/OneOffMomentManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\damageOutcomeMapper.ts",
+    "exports": [
+      "mapDamageToOutcome",
+      "getDamageOutcomeLines"
+    ],
+    "imports": [
+      "./types",
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\enhancedNarrativeSystem.ts",
+    "exports": [
+      "EnhancedNarrativeSystem",
+      "getEnhancedNarrativeSystem"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/index.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\enhancedRepetitionManager.ts",
+    "exports": [
+      "NarrativeToken",
+      "EnhancedRepetitionManager"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/enhancedTemplateGenerator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\enhancedStateManager.ts",
+    "exports": [
+      "CharacterStateSnapshot",
+      "EnhancedStateManager"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/desperationPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
+      "src/features/battle-simulation/services/battle/state.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\enhancedStateNarratives.ts",
+    "exports": [
+      "getBreakingPointNarratives",
+      "getEscalationNarratives",
+      "getDesperationNarratives",
+      "getTacticalResponseNarratives",
+      "getLateGameNarratives",
+      "getContextualMoveEscalation"
+    ],
+    "imports": [
+      "./contextualNarrativeMapper"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/contextualNarrativeMapper.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\enhancedTemplateGenerator.ts",
+    "exports": [
+      "EnhancedTemplateGenerator"
+    ],
+    "imports": [
+      "./types",
+      "./contextualNarrativeMapper",
+      "./enhancedRepetitionManager",
+      "./stateAnnouncementManager",
+      "./narrativePoolManager"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/contextualNarrativeMapper.ts",
+      "src/features/battle-simulation/services/narrative/enhancedRepetitionManager.ts",
+      "src/features/battle-simulation/services/narrative/stateAnnouncementManager.ts",
+      "src/features/battle-simulation/services/narrative/narrativePoolManager.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\hookNarrativeGenerator.ts",
+    "exports": [
+      "UsedHooksTracker",
+      "generateHookBasedNarratives"
+    ],
+    "imports": [
+      "./types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrativeEngine.ts",
+      "src/features/battle-simulation/services/narrative/utilityManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\index.ts",
+    "exports": [
+      "createNarrativeService",
+      "NarrativeService"
+    ],
+    "imports": [
+      "../../types",
+      "./types",
+      "./battleEndHandler",
+      "./stateDrivenNarrativePool",
+      "./contextualNarrativeMapper",
+      "./stateAnnouncementManager",
+      "./enhancedNarrativeSystem"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/battleEndHandler.ts",
+      "src/features/battle-simulation/services/narrative/stateDrivenNarrativePool.ts",
+      "src/features/battle-simulation/services/narrative/contextualNarrativeMapper.ts",
+      "src/features/battle-simulation/services/narrative/stateAnnouncementManager.ts",
+      "src/features/battle-simulation/services/narrative/enhancedNarrativeSystem.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\locationAnalyzer.ts",
+    "exports": [
+      "calcCollateralTolerance"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/contextBuilder.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\mechanicalStateExtractor.ts",
+    "exports": [
+      "extractMechanicalState",
+      "isComebackSequence",
+      "isRallySequence"
+    ],
+    "imports": [
+      "../../types",
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/contextBuilder.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narrative.service.ts",
+    "exports": [
+      "NarrativeService"
+    ],
+    "imports": [
+      "./narrative.types",
+      "./pools/narrative.pools",
+      "./utils/antiRepetition.utility",
+      "./utils/fallbackGenerator.utility"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/narrative.types.ts",
+      "src/features/battle-simulation/services/narrative/pools/narrative.pools.ts",
+      "src/features/battle-simulation/services/narrative/utils/antiRepetition.utility.ts",
+      "src/features/battle-simulation/services/narrative/utils/fallbackGenerator.utility.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narrative.types.ts",
+    "exports": [
+      "CharacterName",
+      "CombatMechanic",
+      "NarrativeContext",
+      "MechanicContextPool",
+      "CharacterNarrativePool",
+      "NarrativePools"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrative.service.ts",
+      "src/features/battle-simulation/services/narrative/pools/aang.narrative.ts",
+      "src/features/battle-simulation/services/narrative/pools/azula.narrative.ts",
+      "src/features/battle-simulation/services/narrative/pools/narrative.pools.ts",
+      "src/features/battle-simulation/services/narrative/utils/fallbackGenerator.utility.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narrativeEngine.ts",
+    "exports": [
+      "evaluateNarrativeHooks"
+    ],
+    "imports": [
+      "./types",
+      "./configManager",
+      "./templateNarrativeGenerator",
+      "./hookNarrativeGenerator"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/configManager.ts",
+      "src/features/battle-simulation/services/narrative/templateNarrativeGenerator.ts",
+      "src/features/battle-simulation/services/narrative/hookNarrativeGenerator.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narrativePoolManager.ts",
+    "exports": [
+      "NarrativePoolConfig",
+      "NarrativePoolManager",
+      "narrativePoolManager"
+    ],
+    "imports": [
+      "./contextualNarrativeMapper"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/contextualNarrativeMapper.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/enhancedTemplateGenerator.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narrativeTemplates.ts",
+    "exports": [
+      "NarrativeTemplate",
+      "NARRATIVE_TEMPLATES",
+      "selectNarrativeTemplate",
+      "generateNarrativeText",
+      "determineNarrativeTone",
+      "generateNarratorCommentary"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narrativeToneAnalyzer.ts",
+    "exports": [
+      "determineNarrativeTone",
+      "determineNarrativeIntensity",
+      "determineNarrativeFocus"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/contextBuilder.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\narratorHooks.ts",
+    "exports": [
+      "narratorHooks"
+    ],
+    "imports": [
+      "./types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/configManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\openingSequence.ts",
+    "exports": [
+      "OpeningSequence",
+      "generateOpeningSequence",
+      "integrateOpeningSequence"
+    ],
+    "imports": [
+      "../../types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/state.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\pools\\aang.narrative.ts",
+    "exports": [
+      "aangNarrativePool"
+    ],
+    "imports": [
+      "../narrative.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/narrative.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/pools/narrative.pools.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\pools\\azula.narrative.ts",
+    "exports": [
+      "azulaNarrativePool"
+    ],
+    "imports": [
+      "../narrative.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/narrative.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/pools/narrative.pools.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\pools\\narrative.pools.ts",
+    "exports": [
+      "narrativePools"
+    ],
+    "imports": [
+      "../narrative.types",
+      "./aang.narrative",
+      "./azula.narrative"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/narrative.types.ts",
+      "src/features/battle-simulation/services/narrative/pools/aang.narrative.ts",
+      "src/features/battle-simulation/services/narrative/pools/azula.narrative.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrative.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\stateAnnouncementManager.ts",
+    "exports": [
+      "StateAnnouncementTracker",
+      "StateAnnouncementManager"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/enhancedTemplateGenerator.ts",
+      "src/features/battle-simulation/services/narrative/index.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\stateDrivenNarrativePool.ts",
+    "exports": [
+      "NarrativeStateTracker",
+      "StateDrivenNarrativePool"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/battleEndHandler.ts",
+      "src/features/battle-simulation/services/narrative/index.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\statusAnalyzer.ts",
+    "exports": [
+      "getHealthStatus",
+      "getChiStatus"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\templateNarrativeGenerator.ts",
+    "exports": [
+      "generateTemplateBasedNarratives",
+      "generateFallbackNarrative",
+      "determineMoodFromTone"
+    ],
+    "imports": [
+      "./types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrativeEngine.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\types\\NarrativeTypes.ts",
+    "exports": [
+      "NarrativeState",
+      "EmotionalState",
+      "CharacterEmotion",
+      "NarrativeContext",
+      "NarrativeRequest",
+      "DamageOutcome",
+      "NarrativeTier",
+      "StateAnnouncementType",
+      "OneOffMomentType",
+      "OneOffMomentContext",
+      "RecentUsageTracker",
+      "OneOffTracker"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/core/BattleNarrationStrategyService.ts",
+      "src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts",
+      "src/features/battle-simulation/services/narrative/core/characters/AangNarrativeService.ts",
+      "src/features/battle-simulation/services/narrative/core/characters/AzulaNarrativeService.ts",
+      "src/features/battle-simulation/services/narrative/core/EmotionalNarrationPolicy.ts",
+      "src/features/battle-simulation/services/narrative/core/emotions/EmotionTracker.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts",
+      "src/features/battle-simulation/services/narrative/core/NarrativeVariantsService.ts",
+      "src/features/battle-simulation/services/narrative/core/OneOffMomentManager.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/DamageOutcomePool.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts",
+      "src/features/battle-simulation/services/narrative/core/pools/StateAnnouncementPool.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\types.ts",
+    "exports": [
+      "MechanicalState",
+      "BattleContext",
+      "CharacterMood",
+      "NarrativeHook",
+      "TriggeredNarrative",
+      "BATTLE_PHASE_THRESHOLDS",
+      "CharacterNarratives",
+      "NarrativeSystemConfig",
+      "DamageOutcome",
+      "NarrativeMechanic",
+      "RecentNarrativeTracker",
+      "DAMAGE_OUTCOME_THRESHOLDS",
+      "ANTI_REPETITION_CONFIG"
+    ],
+    "imports": [
+      "../../types",
+      "@/common/types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/BattleScene/BattleScene.tsx",
+      "src/features/battle-simulation/services/narrative/antiRepetitionTracker.ts",
+      "src/features/battle-simulation/services/narrative/battleEndHandler.ts",
+      "src/features/battle-simulation/services/narrative/battlePhaseAnalyzer.ts",
+      "src/features/battle-simulation/services/narrative/characterHooks.ts",
+      "src/features/battle-simulation/services/narrative/configManager.ts",
+      "src/features/battle-simulation/services/narrative/contextBuilder.ts",
+      "src/features/battle-simulation/services/narrative/contextualNarrativeMapper.ts",
+      "src/features/battle-simulation/services/narrative/damageOutcomeMapper.ts",
+      "src/features/battle-simulation/services/narrative/damageOutcomeMapper.ts",
+      "src/features/battle-simulation/services/narrative/enhancedRepetitionManager.ts",
+      "src/features/battle-simulation/services/narrative/enhancedTemplateGenerator.ts",
+      "src/features/battle-simulation/services/narrative/hookNarrativeGenerator.ts",
+      "src/features/battle-simulation/services/narrative/index.ts",
+      "src/features/battle-simulation/services/narrative/mechanicalStateExtractor.ts",
+      "src/features/battle-simulation/services/narrative/narrativeEngine.ts",
+      "src/features/battle-simulation/services/narrative/narrativeTemplates.ts",
+      "src/features/battle-simulation/services/narrative/narrativeToneAnalyzer.ts",
+      "src/features/battle-simulation/services/narrative/narratorHooks.ts",
+      "src/features/battle-simulation/services/narrative/templateNarrativeGenerator.ts",
+      "src/features/battle-simulation/services/narrative/utilityManager.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\utilityManager.ts",
+    "exports": [
+      "createUsedHooksTracker",
+      "updateUsedHooks",
+      "debugNarrativeEvaluation"
+    ],
+    "imports": [
+      "./types",
+      "./hookNarrativeGenerator"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/types.ts",
+      "src/features/battle-simulation/services/narrative/hookNarrativeGenerator.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\utils\\antiRepetition.utility.ts",
+    "exports": [
+      "AntiRepetitionUtility"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrative.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\utils\\fallbackGenerator.utility.ts",
+    "exports": [
+      "generateFallbackLine"
+    ],
+    "imports": [
+      "../narrative.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/services/narrative/narrative.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/narrative/narrative.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\utils\\mechanicLogUtils.ts",
+    "exports": [
+      "MechanicLogOptions",
+      "createMechanicLogEntry"
+    ],
+    "imports": [
+      "../../types",
+      "../ai/logQueries"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/logQueries.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/moveUtils.ts",
+      "src/features/battle-simulation/services/ai/tacticalMemory.service.ts",
+      "src/features/battle-simulation/services/battle/battleValidation.ts",
+      "src/features/battle-simulation/services/battle/disruptionWindow.service.ts",
+      "src/features/battle-simulation/services/battle/heroicReversal.service.ts",
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
+      "src/features/battle-simulation/services/battleSimulator.service.ts",
+      "src/features/battle-simulation/services/identity/behavioral.service.ts",
+      "src/features/battle-simulation/services/utils/moveUtils.ts",
+      "src/features/character-selection/data/traits.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\utils\\moveUtils.ts",
+    "exports": [
+      "getAvailableMoves",
+      "getAvailableMovesOld"
+    ],
+    "imports": [
+      "@/common/types",
+      "../../types",
+      "../ai/metaState",
+      "../../data/identities",
+      "./mechanicLogUtils",
+      "../../types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/battle-simulation/services/ai/metaState.ts",
+      "src/features/battle-simulation/data/identities.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/ai/helpers/conditionHelpers.ts",
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\types\\behavioral.types.ts",
+    "exports": [
+      "TraitTriggerContext",
+      "TraitEffect",
+      "TraitEffectResult",
+      "BehavioralTrait",
+      "BehavioralTraitInstance",
+      "FlagUIData",
+      "ActiveFlag"
+    ],
+    "imports": [
+      "./index"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/index.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/identity/behavioral.service.ts",
+      "src/features/battle-simulation/services/identity/behavioralUI.service.ts",
+      "src/features/battle-simulation/types/index.ts",
+      "src/features/character-selection/data/traits.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\types\\cooldown.types.ts",
+    "exports": [
+      "AbilityCooldownState",
+      "CharacterCooldownState",
+      "InitializeCooldownParams",
+      "CheckAbilityAvailabilityParams",
+      "AbilityAvailabilityResult",
+      "UseAbilityParams",
+      "ResetCooldownsParams",
+      "BattlePhase",
+      "CooldownDisplayInfo"
+    ],
+    "imports": [
+      "./move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/components/AbilityButton/AbilityButton.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\types\\identity.types.ts",
+    "exports": [
+      "IdentityProfile",
+      "MentalState",
+      "OpponentPerception",
+      "IdentityScoreAdjustment",
+      "ScoreAdjustments"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/data/identities.ts",
+      "src/features/battle-simulation/services/identity/mentalState.service.ts",
+      "src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
+      "src/features/battle-simulation/types/index.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\types\\index.ts",
+    "exports": [
+      "ArcStateModifier",
+      "ArcTransition",
+      "DefensiveStance",
+      "ClashResult",
+      "EffectCategory",
+      "EffectType",
+      "ActiveStatusEffect",
+      "Buff",
+      "Debuff",
+      "SimulateBattleParams",
+      "ControlState",
+      "RecoveryOption",
+      "BattleCharacter",
+      "PerceivedState",
+      "ConsideredAction",
+      "AILogEntry",
+      "LogEventType",
+      "BattleResolution",
+      "LogDetails",
+      "BattleLogEntry",
+      "LogDetailLevel",
+      "BattleState",
+      "BattleResult",
+      "PlayerCardHorizontalProps",
+      "BattleCharacterFlags",
+      "BattleAnalytics"
+    ],
+    "imports": [
+      "@/common/types",
+      "./move.types",
+      "./identity.types",
+      "./behavioral.types",
+      "./move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts",
+      "src/features/battle-simulation/types/identity.types.ts",
+      "src/features/battle-simulation/types/behavioral.types.ts",
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/disruptionWindow.service.ts",
+      "src/features/battle-simulation/services/battle/heroicReversal.service.ts",
+      "src/features/battle-simulation/types/behavioral.types.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\types\\mechanic.types.ts",
+    "exports": [
+      "ReversalResult"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/reversalMechanic.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\types\\move.types.ts",
+    "exports": [
+      "Position",
+      "LocationType",
+      "BattleContext",
+      "FinisherCondition",
+      "DesperationBuff",
+      "Move",
+      "ImpactClass",
+      "Ability",
+      "AANG_MOVES",
+      "AZULA_MOVES",
+      "AANG_STATS",
+      "AZULA_STATS",
+      "getLocationType",
+      "AANG_SUDDEN_DEATH_FINISHER",
+      "AZULA_SUDDEN_DEATH_FINISHER"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/components/AbilityButton/AbilityButton.tsx",
+      "src/features/battle-simulation/components/AbilityPanel/AbilityPanel.tsx",
+      "src/features/battle-simulation/hooks/useCooldownManager.hook.ts",
+      "src/features/battle-simulation/services/ai/advancedAIController.ts",
+      "src/features/battle-simulation/services/ai/attackMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/behaviorTreeEngine.ts",
+      "src/features/battle-simulation/services/ai/chooseAbility.ts",
+      "src/features/battle-simulation/services/ai/contextualMoveScoring.ts",
+      "src/features/battle-simulation/services/ai/defenseMoveScoring.service.ts",
+      "src/features/battle-simulation/services/ai/enhancedMoveScoring.ts",
+      "src/features/battle-simulation/services/ai/helpers/conditionHelpers.ts",
+      "src/features/battle-simulation/services/ai/intentAlignment.service.ts",
+      "src/features/battle-simulation/services/ai/moveScoring.ts",
+      "src/features/battle-simulation/services/ai/moveSelection.ts",
+      "src/features/battle-simulation/services/ai/moveSelection.ts",
+      "src/features/battle-simulation/services/ai/moveUtils.ts",
+      "src/features/battle-simulation/services/ai/tacticalAI.service.ts",
+      "src/features/battle-simulation/services/ai/tacticalAnalysis.ts",
+      "src/features/battle-simulation/services/ai/tacticalMemory.service.ts",
+      "src/features/battle-simulation/services/ai/types/AIBehavior.ts",
+      "src/features/battle-simulation/services/ai/weightedChoice.ts",
+      "src/features/battle-simulation/services/battle/analytics.ts",
+      "src/features/battle-simulation/services/battle/battleAnalysis.service.ts",
+      "src/features/battle-simulation/services/battle/battleContext.service.ts",
+      "src/features/battle-simulation/services/battle/battleContext.service.ts",
+      "src/features/battle-simulation/services/battle/battleValidation.ts",
+      "src/features/battle-simulation/services/battle/criticalSystem.service.ts",
+      "src/features/battle-simulation/services/battle/defenseMove.service.ts",
+      "src/features/battle-simulation/services/battle/defensiveResolution.service.ts",
+      "src/features/battle-simulation/services/battle/desperationMoveCreation.service.ts",
+      "src/features/battle-simulation/services/battle/desperationMoves.ts",
+      "src/features/battle-simulation/services/battle/desperationSystem.service.ts",
+      "src/features/battle-simulation/services/battle/finisherSystem.service.ts",
+      "src/features/battle-simulation/services/battle/genericMove.service.ts",
+      "src/features/battle-simulation/services/battle/moveConverter.service.ts",
+      "src/features/battle-simulation/services/battle/moveDisabling.service.ts",
+      "src/features/battle-simulation/services/battle/moveFatigue.service.ts",
+      "src/features/battle-simulation/services/battle/moveLogic.service.ts",
+      "src/features/battle-simulation/services/battle/moveRegistry.service.ts",
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
+      "src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
+      "src/features/battle-simulation/services/battle/resolveImpact.ts",
+      "src/features/battle-simulation/services/battle/state.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "src/features/battle-simulation/services/battle/TacticalNarrativeService.ts",
+      "src/features/battle-simulation/services/cooldown/cooldownManager.service.ts",
+      "src/features/battle-simulation/services/effects/effectFusion.service.ts",
+      "src/features/battle-simulation/services/identity/narrativeHooks.service.ts",
+      "src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
+      "src/features/battle-simulation/services/utils/moveUtils.ts",
+      "src/features/battle-simulation/types/cooldown.types.ts",
+      "src/features/battle-simulation/types/index.ts",
+      "src/features/battle-simulation/types/index.ts",
+      "src/features/character-selection/data/characterData.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\components\\CharacterCard.tsx",
+    "exports": [
+      "CharacterCardProps",
+      "CharacterCard"
+    ],
+    "imports": [
+      "react",
+      "@/common/types",
+      "./CharacterCard.module.css",
+      "react-icons/fa"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/character-selection/components/CharacterCard.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\components\\CharacterPortrait.tsx",
+    "exports": [
+      "CharacterPortraitProps",
+      "CharacterPortrait"
+    ],
+    "imports": [
+      "@/common/types",
+      "./CharacterPortrait.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/character-selection/components/CharacterPortrait.module.css"
+    ],
+    "usedBy": [
+      "src/features/character-selection/components/CharacterSelection.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\components\\CharacterSelection.tsx",
+    "exports": [
+      "CharacterSelectionProps",
+      "CharacterSelection"
+    ],
+    "imports": [
+      "@/common/types",
+      "../data/characterData",
+      "./CharacterSelection.module.css",
+      "../../battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal",
+      "./CharacterPortrait"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/character-selection/data/characterData.ts",
+      "src/features/character-selection/components/CharacterSelection.module.css",
+      "src/features/battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal.tsx",
+      "src/features/character-selection/components/CharacterPortrait.tsx"
+    ],
+    "usedBy": [
+      "src/App.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\data\\characterData.ts",
+    "exports": [
+      "availableCharacters"
+    ],
+    "imports": [
+      "@/common/types",
+      "../../battle-simulation/types/move.types"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/move.types.ts"
+    ],
+    "usedBy": [
+      "src/features/character-selection/components/CharacterSelection.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\data\\traits.ts",
+    "exports": [
+      "manipulationTrait",
+      "overconfidenceTrait",
+      "pleaForPeaceTrait",
+      "ALL_BEHAVIORAL_TRAITS"
+    ],
+    "imports": [
+      "../../battle-simulation/types/behavioral.types",
+      "../../battle-simulation/services/utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types/behavioral.types.ts",
+      "src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "usedBy": [
+      "src/features/battle-simulation/services/identity/behavioral.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\location-selection\\components\\LocationSelection.tsx",
+    "exports": [
+      "LocationSelectionProps",
+      "LocationSelection"
+    ],
+    "imports": [
+      "@/common/types",
+      "../data/locationData",
+      "./LocationSelection.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/location-selection/data/locationData.ts",
+      "src/features/location-selection/components/LocationSelection.module.css"
+    ],
+    "usedBy": [
+      "src/App.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\location-selection\\data\\locationData.ts",
+    "exports": [
+      "availableLocations"
+    ],
+    "imports": [
+      "@/common/types"
+    ],
+    "tags": [],
+    "calls": [],
+    "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
+      "src/features/location-selection/components/LocationSelection.tsx"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\technical-log\\components\\TechnicalLog.tsx",
+    "exports": [
+      "TechnicalLogProps",
+      "TechnicalLog"
+    ],
+    "imports": [
+      "react",
+      "../../battle-simulation/types",
+      "./TechnicalLog.module.css"
+    ],
+    "tags": [],
+    "calls": [
+      "src/features/battle-simulation/types",
+      "src/features/technical-log/components/TechnicalLog.module.css"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\main.tsx",
+    "exports": [],
+    "imports": [
+      "react",
+      "react-dom/client",
+      "./App.tsx",
+      "react-error-boundary",
+      "./components/ErrorBoundary"
+    ],
+    "tags": [],
+    "calls": [
+      "src/App.tsx",
+      "src/components/ErrorBoundary.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\types\\css.d.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "usedBy": []
+  }
+]

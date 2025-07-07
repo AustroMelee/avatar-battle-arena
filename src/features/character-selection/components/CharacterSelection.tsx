@@ -1,3 +1,11 @@
+/*
+ * @file CharacterSelection.tsx
+ * @description Main character selection UI: grid, card selection, and state management for Avatar Battle Arena.
+ * @criticality 🎨 Character Selection UI
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related CharacterCard.tsx, characterData.ts
+ */
 // CONTEXT: CharacterSelection, // FOCUS: UIRendering & Logic
 import { Character } from '@/common/types';
 import { availableCharacters } from '../data/characterData';
@@ -36,24 +44,15 @@ export function CharacterSelection({
         <div className={styles.displayCardContainer}>
           <PlayerCardHorizontal
             character={{
-              id: 'mock',
-              name: 'Mock',
-              base: {
-                id: 'mock',
-                name: 'Mock',
-                stats: { power: 10, defense: 10, agility: 10, intelligence: 10 },
-                bending: 'air',
-                abilities: [],
-                personality: 'balanced',
-                manipulationResilience: 1,
-                image: '',
-              },
+              base: selectedCharacter,
+              id: selectedCharacter.id,
+              name: selectedCharacter.name,
               controlState: 'Neutral',
               stability: 100,
               momentum: 0,
               recoveryOptions: [],
               currentHealth: 100,
-              currentDefense: 10,
+              currentDefense: selectedCharacter.stats.defense,
               cooldowns: {},
               usesLeft: {},
               lastMove: undefined,
@@ -73,8 +72,8 @@ export function CharacterSelection({
               mentalState: { stability: 100, pride: 100, activeStates: [] },
               opponentPerception: { aggressionLevel: 0, predictability: 0, respect: 0 },
               mentalThresholdsCrossed: {},
-              behavioralTraits: [],
-              manipulationResilience: 1,
+              behavioralTraits: selectedCharacter.behavioralTraits || [],
+              manipulationResilience: selectedCharacter.manipulationResilience || 50,
               activeFlags: new Map(),
               analytics: {
                 totalDamage: 0,
@@ -92,7 +91,7 @@ export function CharacterSelection({
               },
               tacticalStalemateCounter: 0,
               lastTacticalPriority: '',
-              abilities: [],
+              abilities: selectedCharacter.abilities as unknown as import('../../battle-simulation/types/move.types').Move[],
             }}
             isActive={true}
             playerColor={playerColor}

@@ -75,7 +75,6 @@ function getStatusEffectIcon(effectType: string) {
  */
 export function PlayerCardHorizontal({ character, isActive, playerColor, onChange }: PlayerCardHorizontalProps) {
   const bendingTheme = getBendingTheme(character.base.bending);
-  const healthPercentage = ((character.currentHealth || 0) / 100) * 100;
 
   const containerClasses = [
     styles.horizontalCard,
@@ -112,16 +111,6 @@ export function PlayerCardHorizontal({ character, isActive, playerColor, onChang
           {character.mentalState?.activeStates?.includes('fearful') && (
             <div className={styles.mentalStateIndicator_fearful}>FEARFUL</div>
           )}
-        </div>
-        
-        <div className={styles.healthRow}>
-          <div className={styles.healthBarContainer}>
-            <div 
-              className={styles.healthBarFill}
-              style={{ width: `${healthPercentage}%` }}
-            />
-            <span className={styles.healthText}>{character.currentHealth || 0} / 100</span>
-          </div>
         </div>
         
         <div className={styles.statsRow}>

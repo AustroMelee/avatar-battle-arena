@@ -1,14 +1,23 @@
-// CONTEXT: Intent Alignment Service
-// RESPONSIBILITY: Calculate how well moves align with tactical intent
+// @file intentAlignment.service.ts
+// @description Calculates how well moves align with tactical intent for AI move scoring and narrative.
+// @criticality 🧠 AI Intent Alignment (High) | Depends on: types, intentSystem
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related types, intentSystem.ts
+//
+// All exports are documented below.
 
 import type { Move } from '../../types/move.types';
 import { Intent } from './intentSystem';
 
 /**
  * @description Calculates how well a move aligns with the current tactical intent
+ * @function calculateIntentAlignment
  * @param {Move} move - The move to evaluate
  * @param {Intent} intent - The current tactical intent
  * @returns {number} Alignment score from 0-10
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function calculateIntentAlignment(move: Move, intent: Intent): number {
   let alignment = 5; // Base neutral alignment
@@ -49,9 +58,12 @@ export function calculateIntentAlignment(move: Move, intent: Intent): number {
 
 /**
  * @description Gets alignment reasons for a move and intent
+ * @function getIntentAlignmentReasons
  * @param {Move} move - The move to analyze
  * @param {Intent} intent - The current tactical intent
  * @returns {string[]} Array of alignment reasons
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getIntentAlignmentReasons(move: Move, intent: Intent): string[] {
   const reasons: string[] = [];

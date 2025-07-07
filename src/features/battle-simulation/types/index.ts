@@ -1,3 +1,11 @@
+/*
+ * @file index.ts
+ * @description Barrel export for all battle-simulation types, including BattleCharacter, BattleState, and related types.
+ * @criticality 💎 Types
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related move.types.ts, mechanic.types.ts, identity.types.ts
+ */
 // CONTEXT: BattleSimulation, // FOCUS: Types
 import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
@@ -303,6 +311,18 @@ export type BattleLogEntry = {
   narrative: string; // The cinematic, story-driven line.
   timestamp: number;
   details?: LogDetails; // All mechanical data goes here.
+  /**
+   * @description Optional: Numeric damage dealt by this event (for analytics, filtering, and UI)
+   */
+  damage?: number;
+  /**
+   * @description Optional: Meta/mechanical data for this log entry (legacy, prefer 'details')
+   */
+  meta?: Record<string, any>;
+  /**
+   * @description Optional: The type of ability used (e.g., 'attack', 'defense_buff', etc.)
+   */
+  abilityType?: string;
 };
 
 /**

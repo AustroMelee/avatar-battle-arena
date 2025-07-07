@@ -49,7 +49,6 @@ export function triggerHeroicReversalWithLog(
     mechanic: 'Heroic Reversal',
     effect: `${character.name} seizes a sudden opening and turns the tables!`,
     reason: 'Triggered by low health and momentum gap',
-    meta: { buff: config.reversalBuff }
   });
   return { logEntry };
 }
@@ -84,7 +83,6 @@ export function resolveHeroicReversalWithLog(
     mechanic: 'Heroic Reversal Ended',
     effect: `${character.name}'s heroic reversal effect has ended.`,
     reason: 'Buff duration expired or used',
-    meta: {}
   });
   return { logEntry };
 }

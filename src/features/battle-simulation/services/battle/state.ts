@@ -1,3 +1,11 @@
+/*
+ * @file state.ts
+ * @description Defines and manages the core battle state for the simulation, including initialization and mutation helpers.
+ * @criticality 🩸 Core State
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related processTurn.ts, battleSimulator.service.ts
+ */
 // CONTEXT: Battle State Management
 // RESPONSIBILITY: Initialize, clone, and manage battle state
 import { 

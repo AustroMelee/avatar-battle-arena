@@ -1,3 +1,12 @@
+// @file defenseMoveScoring.service.ts
+// @description Scores defense moves for the AI based on context and tactical intent, providing detailed reasoning and context factors for move selection.
+// @criticality 🧠 AI Move Scoring (High) | Depends on: types, battleStateAwareness, intentSystem
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related types, battleStateAwareness.ts, intentSystem.ts
+//
+// All exports are documented below.
+
 // CONTEXT: Defense Move Scoring Service
 // RESPONSIBILITY: Score defense moves based on context and intent
 
@@ -8,12 +17,15 @@ import { Intent } from './intentSystem';
 
 /**
  * @description Scores a defense move based on context and intent
+ * @function scoreDefenseMove
  * @param {Move} move - The defense move to score
  * @param {BattleCharacter} self - The character using the move
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
  * @param {Intent} intent - The current tactical intent
  * @returns {number} The calculated score
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreDefenseMove(
   move: Move,
@@ -126,12 +138,15 @@ export function scoreDefenseMove(
 
 /**
  * @description Gets scoring reasons for a defense move
+ * @function getDefenseMoveScoringReasons
  * @param {Move} move - The defense move to analyze
  * @param {BattleCharacter} self - The character using the move
  * @param {BattleCharacter} enemy - The enemy character
  * @param {BattleTacticalContext} context - The current battle context
  * @param {Intent} intent - The current tactical intent
  * @returns {string[]} Array of scoring reasons
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getDefenseMoveScoringReasons(
   move: Move,
@@ -209,9 +224,12 @@ export function getDefenseMoveScoringReasons(
 
 /**
  * @description Gets context factors for a defense move
+ * @function getDefenseMoveContextFactors
  * @param {Move} move - The defense move to analyze
  * @param {BattleTacticalContext} context - The current battle context
  * @returns {string[]} Array of context factors
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getDefenseMoveContextFactors(
   move: Move,

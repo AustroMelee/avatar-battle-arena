@@ -1,3 +1,11 @@
+/*
+ * @file move.types.ts
+ * @description Canonical type definitions for Move, Ability, and move-related data in the battle simulation.
+ * @criticality 💎 Types, Move Logic
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-08
+ * @related index.ts, mechanic.types.ts
+ */
 // UPGRADED MOVE TYPES FOR DRAMATIC BATTLE SYSTEM
 
 // Position types for tactical positioning system

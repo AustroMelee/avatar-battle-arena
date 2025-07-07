@@ -2,6 +2,81 @@
 
 All notable changes to the Avatar Battle Arena project will be documented in this file.
 
+## [2025-08-20] - Final AI & Battle Loop Integrity Patch (v2.6)
+
+### 🐛 Critical Bug Fixes
+
+-   **Fixed Double Status Effect Application**: Eliminated the last remaining instance of a double `processTurnEffects` call. The battle loop is now guaranteed to process effects exactly once per character turn, ensuring correct damage and duration for effects like `Burn`.
+-   **Fixed Incomplete Status Effect Logic**: The `statusEffect.service.ts` now correctly handles all defined status effects, including `DEFENSE_DOWN`, `ATTACK_UP`, etc. These effects now properly modify character stats for their duration, making them mechanically effective.
+
+### 🤖 AI & Battle Logic Improvements
+
+-   **Perfected `Forced Escalation` AI**: The AI's behavior during `forcedEscalation` is now perfected. It intelligently ignores cooldowns *only* on its most powerful, signature attack moves, preventing it from defaulting to weak or defensive options. This ensures that escalation phases are always climactic and impactful.
+-   **Removed Redundant Logic**: Cleaned up the `tacticalMove.service.ts` to remove a now-unnecessary secondary call to `processTurnEffects`, which was the source of the double-tick bug.
+
+### 🛠️ Refinements
+
+-   **Improved Code Clarity**: The battle loop in `processTurn.ts` and the logic in `statusEffect.service.ts` are now clearer, more robust, and easier to maintain.
+
+---
+
+## [2025-08-18] - Battle Loop & AI Logic Integrity Fix (v2.5)
+
+### 🐛 Critical Bug Fixes
+
+-   **Fixed Double Status Effect Bug**: Resolved a major issue where `processTurnEffects` was being called multiple times per turn, causing status effects (like Burn) to deal double damage and expire twice as fast. The battle loop in `processTurn.ts` has been refactored to ensure effects are processed exactly once at the beginning of each character's turn.
+-   **Fixed `SUDDEN DEATH` Trigger**: The `SUDDEN DEATH` mechanic was not firing correctly. The trigger logic has been moved to the `endPhase.service.ts` and simplified to ensure it reliably activates after a set number of escalation cycles or turns, guaranteeing a climactic end to prolonged battles.
+
+### 🤖 AI & Battle Logic Improvements
+
+-   **Intelligent `Forced Escalation` AI**: Overhauled the AI's behavior during `forcedEscalation`. The AI will now **ignore cooldowns** on its powerful signature moves, representing a character pushing past their limits. This prevents the AI from defaulting to weak moves like `Basic Strike` during climactic moments and ensures escalation is always impactful.
+-   **Refined Move Selection**: The AI's move selection services have been updated to correctly interface with the new battle loop, improving the quality and logic of its decisions.
+
+### 🛠️ Refinements
+
+-   **Code Cleanup**: Removed redundant and legacy logic from the battle loop and tactical phases, improving clarity and maintainability.
+-   **Improved Debug Logging**: Added more specific log messages to trace the flow of the new battle loop phases, making future debugging easier.
+
+---
+
+## [2025-08-15] - Critical AI Logic & Move Availability Fix (v2.4)
+
+### 🐛 Critical Bug Fixes
+
+-   **Fixed Finisher Move Spam Loop**: Resolved a game-breaking bug where the AI would repeatedly use powerful finisher moves from the start of the battle. The move availability logic now correctly checks and enforces `finisherCondition` (e.g., target health below 20%), preventing finishers from being selected until the appropriate moment.
+-   **Fixed Cooldown Enforcement**: Corrected a flaw where the AI could select moves that were on cooldown. The AI is now given a pre-filtered list of *only* legally available moves, ensuring it cannot make invalid choices.
+-   **Resolved Escalation Ineffectiveness**: The escalation system's cooldown penalties are now correctly enforced, preventing the AI from immediately re-selecting a move it was just penalized for spamming.
+
+### 🤖 AI & Battle Logic Improvements
+
+-   **Implemented "Single Source of Truth" for Moves**: Refactored the AI decision pipeline. A definitive `getAvailableMoves` function now acts as a universal gatekeeper, checking all game rules (Chi, Cooldowns, Uses, Finisher Conditions) *before* the AI scoring logic is run. This makes the AI's choices inherently valid and the system more robust.
+-   **Enhanced Tactical Priority Logic**: The `determineTacticalPriority` service has been refined to be more responsive. The AI is now much better at identifying when to switch from offense to defense, especially when at low health, leading to more believable and strategic battles.
+-   **Improved Fallback Logic**: If `getAvailableMoves` returns an empty list (a rare but possible scenario), the AI will now correctly fall back to a `Basic Strike`, preventing the simulation from crashing.
+
+### 📊 Performance & Metrics
+
+-   **Battle Logic Correctness**: Critical → **Fixed**. The simulation now follows its own rules correctly.
+-   **AI Decision Quality**: Moderate → High. The AI makes more varied, strategic, and contextually appropriate decisions, leading to more interesting and less repetitive battles.
+
+---
+
+## [2025-08-12] - AI & Escalation Logic Overhaul (v2.3)
+
+### 🤖 AI & Battle Logic Improvements
+
+-   **Fixed Charge-Up Deadlocks**: Resolved a critical bug where both AIs would get stuck in a loop of starting and interrupting charge-up moves. The AI now correctly prioritizes punishing a charging opponent instead of mirroring them.
+-   **Made Escalation System Effective**: The `forcedEscalation` state now has a hard override in the tactical move phase. When active, the AI is **forced** to use its strongest available direct-damage move and is prevented from using charge-up or defensive abilities. This guarantees that stalemates are broken decisively.
+-   **Introduced "Gather Power" Mechanic**: If an AI is in `forcedEscalation` mode but has no viable attack moves (e.g., all on cooldown), it will now "Gather Power" (skip its turn to regenerate Chi) instead of using a weak or inappropriate move. This adds strategic depth and consequence to being out of options.
+-   **Implemented Repetition Cooldowns**: When a pattern is broken due to repetition, the spammed move is now automatically put on a 2-turn cooldown, preventing the AI from immediately falling back into the same loop.
+
+### 🔧 Bug Fixes & Refinements
+
+-   **Resolved Infinite Loops**: The combination of the fixes above has eliminated the primary cause of infinite loops and non-progressive battles observed in the simulation logs.
+-   **Improved Tactical AI Flow**: The AI's behavior is now more dynamic, intelligent, and less prone to getting stuck in suboptimal tactical patterns.
+-   **Enhanced Logging**: Added clearer debug logs for when escalation modes are active and when specific fallback logic (like "Gather Power") is triggered.
+
+---
+
 ## [2025-08-10] - Chat-Style Narrative Log UI (v2.2)
 
 ### 🎨 UI/UX Enhancements

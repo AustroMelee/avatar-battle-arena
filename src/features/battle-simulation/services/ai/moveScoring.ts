@@ -1,3 +1,11 @@
+// @file moveScoring.ts
+// @description Scores moves for the AI based on current battle state and meta-state. Used for tactical and escalation logic.
+// @criticality 🧠 AI Move Scoring (High) | Depends on: types, metaState
+// @owner AustroMelee
+// @lastUpdated 2025-07-07
+// @related metaState.ts
+//
+// All exports are documented below.
 // CONTEXT: AI Move Scoring
 // RESPONSIBILITY: Score moves based on state and meta-state
 import { BattleCharacter } from '../../types';
@@ -12,11 +20,14 @@ export interface MoveScore {
 
 /**
  * @description Scores a move based on current battle state and meta-state.
+ * @function scoreMove
  * @param {Move} move - The move to score.
  * @param {BattleCharacter} character - The character using the move.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {MetaState} meta - The current meta-state.
  * @returns {MoveScore} The scored move with reasons.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreMove(
   move: Move, 
@@ -109,12 +120,15 @@ export function scoreMove(
 
 /**
  * @description Scores multiple moves and returns them sorted by score.
+ * @function scoreMoves
  * @param {Move[]} moves - The moves to score.
  * @param {BattleCharacter} character - The character using the moves.
  * @param {BattleCharacter} enemy - The enemy character.
  * @param {MetaState} meta - The current meta-state.
  * @param {number} turn - Current turn number.
  * @returns {MoveScore[]} The scored moves sorted by score (highest first).
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function scoreMoves(
   moves: Move[],
@@ -129,9 +143,12 @@ export function scoreMoves(
 
 /**
  * @description Gets the top scoring moves.
+ * @function getTopMoves
  * @param {MoveScore[]} moveScores - The scored moves.
  * @param {number} count - Number of top moves to return.
  * @returns {MoveScore[]} The top scoring moves.
+ * @owner AustroMelee
+ * @lastUpdated 2025-07-07
  */
 export function getTopMoves(moveScores: MoveScore[], count: number = 3): MoveScore[] {
   return moveScores.slice(0, count);

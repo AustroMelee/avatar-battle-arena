@@ -1,6 +1,16 @@
 # System Architecture: Avatar Battle Arena
 
-_Last Updated: 2025-07-07_
+---
+
+## Quick Links
+- [Project README](../README.md)
+- [System Architecture](./SYSTEM%20ARCHITECTURE.MD)
+- [Narrative Context Matrix](./NARRATIVE_CONTEXT_MATRIX.md)
+- [Changelog](../CHANGELOG.md)
+- [Cursor Effectiveness Checklist](./cursor-effectiveness.md)
+- [Main App Entry (App.tsx)](../src/App.tsx)
+- [React Entry Point (main.tsx)](../src/main.tsx)
+- [Docs Refresh Script Instructions](../scripts/README.md)
 
 ---
 
@@ -38,6 +48,52 @@ _Last Updated: 2025-07-07_
 16. [Glossary of Terms](#glossary-of-terms)
 17. [Recent Changes](#recent-changes)
 18. [🚨 How to Prevent Large-Scale Integration Errors](#how-to-prevent-large-scale-integration-errors)
+19. [Troubleshooting Playbook](#troubleshooting-playbook)
+
+## Key Logic Locator
+
+This table maps core gameplay and business logic to their exact file and function locations. Use it to find critical formulas and logic instantly. Click any link to jump directly to the file or function in the repository.
+
+| Core Logic            | File & Function Location                                 |
+|-----------------------|---------------------------------------------------------|
+| Damage Calculation    | [tacticalPhase.service.ts → applyMoveEffects()](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts#L)       |
+| Stalemate Detection   | [arc.service.ts → checkForStalemate()](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/battle/arc.service.ts#L)                |
+| AI Move Scoring       | [enhancedMoveScoring.ts → scoreMove()](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/ai/enhancedMoveScoring.ts#L)                |
+| Cooldown Ticks        | [useBattleSimulator.controller.ts → endTurn() loop](https://github.com/user/repo/blob/main/src/features/battle-simulation/controllers/useBattleSimulator.controller.ts#L)   |
+
+> **Note:** This table is manually curated. If you add or refactor core logic, please update this table accordingly. Interactive navigation is supported for all links.
+
+---
+
+## Roadmap: Code-Level Cross-Referencing & Tagging
+
+To further eliminate ambiguity and accelerate development, the following enhancements are planned and partially implemented:
+
+### 1. Code-Level Cross-Referencing
+- **"Used By" Lists:** For each exported type/function, the documentation will auto-list all files/components/services that import or use it.
+- **"Calls" Lists:** For each major function/service, the documentation will list all major functions/services it calls.
+- **Example:**
+
+  **BattleCharacter (type)**
+  - Used by: PlayerCardHorizontal.tsx, CharacterStatus.tsx, processTurn.ts, ...
+
+  **processTurn (function)**
+  - Calls: tacticalPhase.service.ts, arc.service.ts, state.ts
+  - Used by: battleSimulator.service.ts, useBattleSimulator.controller.ts
+
+### 2. Tagging and Filtering
+- **Tags:** Each file in the Folder & File Overview will have tags (e.g., `ai`, `ui`, `core-logic`, `cooldown`, `analytics`).
+- **Filtering:** In web-rendered docs, you will be able to filter the table by tag. In Markdown, use Ctrl+F to search for tags.
+- **Example:**
+
+  | Path | Description | Criticality | Owner | Tags | Used By | Calls |
+  |------|-------------|-------------|-------|------|---------|-------|
+  | .../AbilityButton.tsx | ... | 🎨 UI | AustroMelee | ui, cooldown, player-input |
+  | .../enhancedMoveScoring.ts | ... | 🧠 AI | AustroMelee | ai, core-logic, scoring |
+
+> **Implementation:**
+> - The docs-refresh script will be extended to parse imports/exports and generate these lists and tags automatically.
+> - Contributors should continue to add/curate tags and cross-references as new features are added.
 
 ---
 
@@ -71,6 +127,323 @@ Deadlock-Proof AI: The AI is not just data-driven but features robust anti-stale
 Consequence-Driven Escalation: The battle arc state machine controls fight pacing through a "Point of No Return" system. Stalemates trigger escalating consequences, culminating in a guaranteed, decisive Sudden Death phase if the battle drags on too long.
 
 ---
+
+## High-Level Architecture Diagram
+
+```mermaid
+graph TD
+    UI["UI Components"] --> |"User Actions, State"| BattleEngine["Battle Engine"]
+    BattleEngine --> |"Battle State, Events"| AI["AI & Decision Logic"]
+    BattleEngine --> |"Battle State, Events"| Narrative["Narrative System"]
+    BattleEngine --> |"State, Data"| Data["Data & Types"]
+    AI --> |"Move Choices, Analysis"| BattleEngine
+    Narrative --> |"Narrative Output"| UI
+    Data --> |"Types, Static Data"| BattleEngine
+    Data --> |"Types, Static Data"| AI
+    Data --> |"Types, Static Data"| Narrative
+    Utilities["Utilities & Hooks"] --> |"Shared Logic"| UI
+    Utilities --> |"Shared Logic"| BattleEngine
+    Utilities --> |"Shared Logic"| AI
+    Utilities --> |"Shared Logic"| Narrative
+```
+
+This diagram shows the main domains and their relationships:
+- **UI Components** interact with the Battle Engine and display Narrative output.
+- **Battle Engine** is the core, orchestrating state, events, and interactions with AI and Narrative systems.
+- **AI & Decision Logic** analyzes state and returns move choices.
+- **Narrative System** generates story output based on battle events.
+- **Data & Types** provide type safety and static data to all systems.
+- **Utilities & Hooks** are shared across all domains for common logic.
+
+---
+
+## Features
+
+### 🌀 Narrative System
+- services/narrative/pools/aang.narrative.ts
+- services/narrative/pools/azula.narrative.ts
+- services/narrative/narrative.service.ts
+- services/narrative/enhancedNarrativeSystem.ts
+- services/narrative/contextualNarrativeMapper.ts
+- services/narrative/templateNarrativeGenerator.ts
+- services/narrative/enhancedTemplateGenerator.ts
+- services/narrative/stateDrivenNarrativePool.ts
+
+### ⚔️ Tactical Engine
+- services/battle/phases/tacticalPhase.service.ts
+- services/battle/tacticalMove.service.ts
+- services/battle/processTurn.ts
+- services/battle/state.ts
+- services/battle/arc.service.ts
+
+### 🧠 AI & Decision Logic
+- services/ai/advancedAIController.ts
+- services/ai/contextualMoveScoring.ts
+- services/ai/enhancedMoveScoring.ts
+- services/ai/moveSelection.ts
+- services/ai/moveUtils.ts
+- services/ai/attackMoveScoring.service.ts
+- services/ai/defenseMoveScoring.service.ts
+- services/ai/tacticalMemory.service.ts
+
+### 🗂️ Data & Types
+- types/index.ts
+- types/move.types.ts
+- types/cooldown.types.ts
+- types/mechanic.types.ts
+- types/behavioral.types.ts
+- types/identity.types.ts
+- data/arcTransitions.ts
+- data/identities.ts
+- ../character-selection/data/characterData.ts
+- ../character-selection/data/traits.ts
+- ../location-selection/data/locationData.ts
+
+### 🎨 UI Components
+- components/AbilityPanel/AbilityPanel.tsx
+- components/AbilityButton/AbilityButton.tsx
+- components/PlayerCardHorizontal/PlayerCardHorizontal.tsx
+- components/UnifiedBattleLog/UnifiedBattleLog.tsx
+- components/VersusGrid/VersusGrid.tsx
+- components/NarrativeBubble/NarrativeBubble.tsx
+- components/EnhancedBattleScene/EnhancedBattleScene.tsx
+- components/EnhancedBattleLog/EnhancedBattleLog.tsx
+- components/CharacterStatus/CharacterStatus.tsx
+- components/BattleScene/BattleScene.tsx
+- components/BattleNarrativeTurn/BattleNarrativeTurn.tsx
+- ../character-selection/components/CharacterCard.tsx
+- ../character-selection/components/CharacterSelection.tsx
+- ../character-selection/components/CharacterPortrait.tsx
+- ../location-selection/components/LocationSelection.tsx
+- ../battle-log/components/BattleLog.tsx
+- ../battle-log/components/LogDetailSelector.tsx
+- ../technical-log/components/TechnicalLog.tsx
+- ../../common/components/Button/Button.tsx
+- ../../components/ErrorBoundary.tsx
+
+### 🛠️ Utilities & Hooks
+- hooks/useCooldownManager.hook.ts
+- hooks/useNarrativeLine.ts
+- controllers/useBattleSimulator.controller.ts
+
+### 🏗️ App Entrypoints & Styles
+- App.tsx
+- main.tsx
+- styles/global.css
+- styles/variables.css
+
+## System Diagrams & Visualizations
+## 4.1. Turn Processing Flow (Activity Diagram)
+
+This diagram illustrates the flow of a single turn. The pipeline is designed to be sequential and deadlock-proof, with multiple checks ensuring the battle progresses towards a decisive conclusion.
+
+Generated mermaid
+graph TD
+    A[Start Turn] --> B(Update Real-Time Analytics);
+    B --> C{End-Game Check?<br/>(KO / Decisive Win / Sudden Death Trigger)};
+    C -- Yes --> D[End Battle];
+    C -- No --> E{Escalation Check?<br/>(Stalemate / Repetition)};
+    E -- Escalate --> F[Set Escalation/Risk Flags];
+    F --> G{Tactical Move Phase};
+    E -- No --> G;
+    G -- Sudden Death? --> H[Force Finisher Move!];
+    G -- Escalation? --> I[Force Aggressive Move / Charge Power];
+    G -- Normal --> J[Execute AI-Chosen Tactical Move];
+    H --> K{Resolve Move & Apply Damage};
+    I --> K;
+    J --> K;
+    K --> L{End-of-Turn Effects<br/>(Status Ticks / Effect Fusion)};
+    L -- KO? --> D;
+    L -- No --> M[Switch Active Player & Increment Turn];
+    M --> A;
+
+    style D fill:#c00,stroke:#333,stroke-width:2px,color:#fff;
+
+## 4.2. AI Decision Pipeline (Flowchart)
+
+This diagram shows how the AI selects a move. It's a multi-layered process that now strictly adheres to resource and cooldown constraints.
+
+Generated mermaid
+graph TD
+    subgraph AI Decision
+        A[Start AI Turn] --> B(Calculate Risk & Stalemate Counters);
+        B --> C{Get Available Moves<br/>(Hard-filtered by Chi, Cooldowns, Uses & Collateral)};
+        C -- No Moves Available --> D[Choose "Gather Power" / Skip Turn];
+        C -- Moves Available --> E{Determine Tactical Priority<br/>(Attack, Defend, Pierce, Gamble...)};
+        E --> F[Score Available Moves Based on Priority];
+        F --> G[Adjust Scores by Character Identity];
+        G --> H[Select Best Move];
+        H --> I[End AI Turn: Execute Move];
+        D --> I;
+    end
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+Mermaid
+IGNORE_WHEN_COPYING_END
+
+## 4.3. Turn Processing Call Stack (Sequence Diagram)
+This sequence diagram shows the precise order of function calls during a single processTurn execution, from the UI trigger down to the core services.
+
+Generated mermaid
+sequenceDiagram
+    participant UI
+    participant useBattleSimulator
+    participant battleSimulator.service
+    participant processTurn
+    participant tacticalPhase
+
+    UI->>useBattleSimulator: runSimulation()
+    useBattleSimulator->>battleSimulator.service: run()
+    loop Until Battle End
+        battleSimulator.service->>processTurn: execute(state)
+        processTurn->>tacticalPhase: execute(state)
+        tacticalPhase-->>processTurn: updatedState
+        processTurn-->>battleSimulator.service: updatedState
+    end
+
+## 4.4. Battle Arc State Machine
+This state diagram visualizes the battle's progression through its major narrative phases, from an Idle start to the climactic Sudden_Death.
+
+Generated mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Escalation: Stalemate detected
+    Escalation --> Climax: Escalation limit reached
+    Climax --> Sudden_Death: Climax fails to resolve
+    Sudden_Death --> End: Finisher clash
+    Escalation --> End
+    Climax --> End
+
+## Narrative Context Matrix: Azula & Aang
+
+> **The full Narrative Context Matrix has been moved to [`docs/NARRATIVE_CONTEXT_MATRIX.md`](./NARRATIVE_CONTEXT_MATRIX.md) for clarity and maintainability.**
+
+---
+
+# How to Keep This Doc Legendary
+To ensure this document never decays and always reflects the true state of the codebase, we recommend a partially automated approach:
+
+## Self-Updating Architecture
+- At the top of each critical file, add structured comments like:
+
+```typescript
+// @docs
+// @description: The heart of the battle engine. Executes the turn-based pipeline...
+// @criticality: 🩸 High Risk
+// @owner: AustroMelee
+```
+
+- Create a script (e.g., `npm run docs:refresh`) that:
+  - Scans the `src/` directory for files with the `@docs` tag.
+  - Parses these comments.
+  - Automatically regenerates the entire Markdown table for the Folder & File Overview section.
+  - Optionally, parses all headings in this file to regenerate the Table of Contents.
+  - Optionally, runs a link-checker to report any broken URLs or file links.
+
+**Result:**
+- Zero drift between code and documentation.
+- Frictionless updates: change a file's description/owner in the code, not the doc.
+- Guaranteed accuracy: the doc is a provably accurate reflection of the codebase.
+
+---
+
+## Folder & File Overview
+
+> **Note:** Cross-references and tags in this table will soon be auto-generated by the docs-refresh script. Manual tags are currently maintained as a model.
+
+| Path | Description | Criticality & Dependencies | Owner / Expert | Tags |
+|------|-------------|---------------------------|----------------|------|
+| [index.html](https://github.com/user/repo/blob/main/index.html) | Main HTML entry for Vite app. Loads fonts, root div, and main script. | ⚙️ Config | AustroMelee | config, entry |
+| [INDEX.HTML](https://github.com/user/repo/blob/main/INDEX.HTML) | Legacy/alternate HTML entry. Should match index.html. | ⚙️ Config | AustroMelee | config, entry |
+| [favicon.ico](https://github.com/user/repo/blob/main/favicon.ico) | App favicon. | 🎨 Asset | AustroMelee | asset |
+| [CHANGELOG.md](https://github.com/user/repo/blob/main/CHANGELOG.md) | Project changelog. | 📄 Docs | AustroMelee | docs, changelog |
+| [README.md](https://github.com/user/repo/blob/main/README.md) | Project overview and setup instructions. | 📄 Docs | AustroMelee | docs, onboarding |
+| [cursor-effectiveness.md](./cursor-effectiveness.md) | Cursor AI effectiveness checklist. | 📄 Docs | AustroMelee | docs, ai, workflow |
+| [src/App.tsx](https://github.com/user/repo/blob/main/src/App.tsx) | Main React app component. | 🎨 UI | AustroMelee | ui, entry, error-handling |
+| [src/main.tsx](https://github.com/user/repo/blob/main/src/main.tsx) | React entry point. | 💎 Foundational | AustroMelee | entry, ui |
+| [src/features/battle-simulation/services/ai/enhancedMoveScoring.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/ai/enhancedMoveScoring.ts) | Enhanced AI move scoring logic. | 🧠 AI | AustroMelee | ai, core-logic, scoring |
+| [src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts) | Tactical phase: applies move effects, resolves damage. | ⚔️ Core Logic | AustroMelee | core-logic, battle, phase |
+| [src/features/battle-simulation/services/narrative/narrative.service.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/narrative/narrative.service.ts) | Narrative system: generates battle story output. | 🌀 Narrative | AustroMelee | narrative, core-logic |
+| [src/features/character-selection/data/characterData.ts](https://github.com/user/repo/blob/main/src/features/character-selection/data/characterData.ts) | Canonical data for all selectable characters (stats, moves, images). | 💎 Character Data | AustroMelee | data, character, static |
+| [src/components/ErrorBoundary.tsx](https://github.com/user/repo/blob/main/src/components/ErrorBoundary.tsx) | Global error boundary for React. | 🩸 Error Handling | AustroMelee | error-handling, ui |
+| [src/common/types/index.ts](https://github.com/user/repo/blob/main/src/common/types/index.ts) | Shared type definitions for common utilities and components. | 💎 Foundational | AustroMelee | types, data, shared |
+
+## Feature Inventory
+
+### 🌀 Narrative System
+- services/narrative/pools/aang.narrative.ts
+- services/narrative/pools/azula.narrative.ts
+- services/narrative/narrative.service.ts
+- services/narrative/enhancedNarrativeSystem.ts
+- services/narrative/contextualNarrativeMapper.ts
+- services/narrative/templateNarrativeGenerator.ts
+- services/narrative/enhancedTemplateGenerator.ts
+- services/narrative/stateDrivenNarrativePool.ts
+
+### ⚔️ Tactical Engine
+- services/battle/phases/tacticalPhase.service.ts
+- services/battle/tacticalMove.service.ts
+- services/battle/processTurn.ts
+- services/battle/state.ts
+- services/battle/arc.service.ts
+
+### 🧠 AI & Decision Logic
+- services/ai/advancedAIController.ts
+- services/ai/contextualMoveScoring.ts
+- services/ai/enhancedMoveScoring.ts
+- services/ai/moveSelection.ts
+- services/ai/moveUtils.ts
+- services/ai/attackMoveScoring.service.ts
+- services/ai/defenseMoveScoring.service.ts
+- services/ai/tacticalMemory.service.ts
+
+### 🗂️ Data & Types
+- types/index.ts
+- types/move.types.ts
+- types/cooldown.types.ts
+- types/mechanic.types.ts
+- types/behavioral.types.ts
+- types/identity.types.ts
+- data/arcTransitions.ts
+- data/identities.ts
+- ../character-selection/data/characterData.ts
+- ../character-selection/data/traits.ts
+- ../location-selection/data/locationData.ts
+
+### 🎨 UI Components
+- components/AbilityPanel/AbilityPanel.tsx
+- components/AbilityButton/AbilityButton.tsx
+- components/PlayerCardHorizontal/PlayerCardHorizontal.tsx
+- components/UnifiedBattleLog/UnifiedBattleLog.tsx
+- components/VersusGrid/VersusGrid.tsx
+- components/NarrativeBubble/NarrativeBubble.tsx
+- components/EnhancedBattleScene/EnhancedBattleScene.tsx
+- components/EnhancedBattleLog/EnhancedBattleLog.tsx
+- components/CharacterStatus/CharacterStatus.tsx
+- components/BattleScene/BattleScene.tsx
+- components/BattleNarrativeTurn/BattleNarrativeTurn.tsx
+- ../character-selection/components/CharacterCard.tsx
+- ../character-selection/components/CharacterSelection.tsx
+- ../character-selection/components/CharacterPortrait.tsx
+- ../location-selection/components/LocationSelection.tsx
+- ../battle-log/components/BattleLog.tsx
+- ../battle-log/components/LogDetailSelector.tsx
+- ../technical-log/components/TechnicalLog.tsx
+- ../../common/components/Button/Button.tsx
+- ../../components/ErrorBoundary.tsx
+
+### 🛠️ Utilities & Hooks
+- hooks/useCooldownManager.hook.ts
+- hooks/useNarrativeLine.ts
+- controllers/useBattleSimulator.controller.ts
+
+### 🏗️ App Entrypoints & Styles
+- App.tsx
+- main.tsx
+- styles/global.css
+- styles/variables.css
 
 ## System Diagrams & Visualizations
 ## 4.1. Turn Processing Flow (Activity Diagram)
@@ -192,302 +565,47 @@ To ensure this document never decays and always reflects the true state of the c
 ## Folder & File Overview
 This section provides an exhaustive, file-by-file breakdown of the project, detailing the purpose, dependencies, and criticality of each component.
 
-| Path | Description | Criticality & Dependencies | Owner / Expert |
-|------|-------------|---------------------------|----------------|
-| [index.html](https://github.com/user/repo/blob/main/index.html) | The main HTML entry point for the Vite application. Loads Google Fonts and the main script. | ⚙️ Configuration | Owner: AustroMelee |
-| [package.json](https://github.com/user/repo/blob/main/package.json) | Defines project metadata, scripts, and dependencies. | ⚙️ Configuration | Owner: AustroMelee |
-| [vite.config.ts](https://github.com/user/repo/blob/main/vite.config.ts) | Configuration for the Vite build tool, including the @ path alias. | ⚙️ Configuration | Owner: AustroMelee |
-| [tsconfig.json](https://github.com/user/repo/blob/main/tsconfig.json) | The main TypeScript configuration for the project, enforcing strict mode. | 💎 Foundational | Owner: AustroMelee |
-| [src/features/battle/services/battle/processTurn.ts](https://github.com/user/repo/blob/main/src/features/battle/services/battle/processTurn.ts) | The heart of the battle engine. Executes the turn-based pipeline by calling each phase service in order. | 🩸 High Risk | Owner: AustroMelee |
-| [src/features/battle/services/ai/enhancedMoveScoring.ts](https://github.com/user/repo/blob/main/src/features/battle/services/ai/enhancedMoveScoring.ts) | Primary scoring engine that evaluates moves based on tactical priority. | 🩸 High Risk | Owner: AustroMelee |
-| [src/features/narrative/core/NarrativeCoordinator.ts](https://github.com/user/repo/blob/main/src/features/narrative/core/NarrativeCoordinator.ts) | Orchestrates all narrative services. | 🩸 Orchestration | Owner: AustroMelee |
-| [src/features/battle-simulation/services/narrative/narrative.service.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/narrative/narrative.service.ts) | Modular narrative engine: orchestrates line selection, anti-repetition, and fallback logic. | 🩸 Narrative Core | Owner: AustroMelee |
-| [src/features/battle-simulation/services/narrative/pools/](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/narrative/pools/) | Narrative pools: 500+ unique lines for each character, organized by mechanic/context. | 🩸 Narrative Content | Owner: AustroMelee |
+| Path | Description | Criticality & Dependencies | Owner / Expert | Tags |
+|------|-------------|---------------------------|----------------|------|
+| [index.html](https://github.com/user/repo/blob/main/index.html) | Main HTML entry for Vite app. Loads fonts, root div, and main script. | ⚙️ Config | AustroMelee | config, entry |
+| [INDEX.HTML](https://github.com/user/repo/blob/main/INDEX.HTML) | Legacy/alternate HTML entry. Should match index.html. | ⚙️ Config | AustroMelee | config, entry |
+| [favicon.ico](https://github.com/user/repo/blob/main/favicon.ico) | App favicon. | 🎨 Asset | AustroMelee | asset |
+| [CHANGELOG.md](https://github.com/user/repo/blob/main/CHANGELOG.md) | Project changelog. | 📄 Docs | AustroMelee | docs, changelog |
+| [README.md](https://github.com/user/repo/blob/main/README.md) | Project overview and setup instructions. | 📄 Docs | AustroMelee | docs, onboarding |
+| [cursor-effectiveness.md](./cursor-effectiveness.md) | Cursor AI effectiveness checklist. | 📄 Docs | AustroMelee | docs, ai, workflow |
+| [src/App.tsx](https://github.com/user/repo/blob/main/src/App.tsx) | Main React app component. | 🎨 UI | AustroMelee | ui, entry, error-handling |
+| [src/main.tsx](https://github.com/user/repo/blob/main/src/main.tsx) | React entry point. | 💎 Foundational | AustroMelee | entry, ui |
+| [src/features/battle-simulation/services/ai/enhancedMoveScoring.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/ai/enhancedMoveScoring.ts) | Enhanced AI move scoring logic. | 🧠 AI | AustroMelee | ai, core-logic, scoring |
+| [src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts) | Tactical phase: applies move effects, resolves damage. | ⚔️ Core Logic | AustroMelee | core-logic, battle, phase |
+| [src/features/battle-simulation/services/narrative/narrative.service.ts](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/narrative/narrative.service.ts) | Narrative system: generates battle story output. | 🌀 Narrative | AustroMelee | narrative, core-logic |
+| [src/features/character-selection/data/characterData.ts](https://github.com/user/repo/blob/main/src/features/character-selection/data/characterData.ts) | Canonical data for all selectable characters (stats, moves, images). | 💎 Character Data | AustroMelee | data, character, static |
+| [src/components/ErrorBoundary.tsx](https://github.com/user/repo/blob/main/src/components/ErrorBoundary.tsx) | Global error boundary for React. | 🩸 Error Handling | AustroMelee | error-handling, ui |
+| [src/common/types/index.ts](https://github.com/user/repo/blob/main/src/common/types/index.ts) | Shared type definitions for common utilities and components. | 💎 Foundational | AustroMelee | types, data, shared |
+
+## Automation Roadmap
+
+The following documentation features are planned and partially implemented:
+- **Automated Cross-Referencing:** The docs-refresh script will parse all TypeScript files for imports/exports and generate "Used By" and "Calls" lists for each major type/function/service.
+- **Auto-Tagging:** Tags will be inferred from file paths, names, and @tags comments, and injected into the Folder & File Overview table.
+- **Continuous Sync:** The docs-refresh script will keep SYSTEM ARCHITECTURE.MD in sync with the codebase, eliminating manual drift.
+- **Extensible Output:** Cross-reference data may also be output as JSON or Markdown for use in other tools or dashboards.
 
 ---
 
-## Feature Inventory
-4.1. Core Battle Mechanics (User-Facing)
+## How to Contribute to Docs
 
-Turn-Based Engine: Phased combat, sequential state mutation (processTurn.ts).
-
-Damage & Crit System: Contextual crits with real damage multipliers.
-
-Finisher & Desperation Moves: Health-gated power spikes.
-
-Positional & Tactical System: Movement, charge-up moves, and vulnerability windows.
-
-Status Effect System: Unified system for buffs/debuffs, now with Effect Fusion and Crisis mechanics.
-
-Cooldown & Use Limits: Prevents ability spam via hard-gating.
-
-Sudden Death Phase: An irreversible endgame phase triggered by prolonged stalemates, forcing a final, decisive exchange with ultimate moves.
-
-4.2. AI & Deadlock Breaking System (Internal & User-Facing)
-
-Identity-Driven AI (IDTB): Decisions influenced by core values and moral boundaries.
-
-Stuck AI Detection: stuckMoveCounter tracks when the AI is cornered by its own risk aversion.
-
-Forced Risk-Taking: When stuck, the AI's collateral tolerance overloads, forcing it to use powerful, risky moves.
-
-Escalation Charge: In Escalation Mode, if no viable attacks are available, the AI will "Gather Power" (skip its turn to gain chi) rather than use a weak Basic Strike. This adds a strategic cost to being out of options.
-
-Canon-Compliant Logic: The AI cannot attempt to use moves that are on cooldown or that it cannot afford. These are hard-filtered before the AI's decision process begins.
-
-4.3. Narrative & Escalation System (User-Facing)
-
-#### ✅ Narrative System: 100% Completion (Aang & Azula)
-
-* **Avatar-Level Narrative Engine (2025-07):**
-  - Modular, extensible narrative core (`narrative.service.ts`) orchestrates all line selection, anti-repetition, and fallback logic.
-  - 500+ unique, hand-crafted narrative lines for Aang, Azula, and System/Narrator, organized in deep narrative pools (`pools/`).
-  - Advanced anti-repetition utility ensures no line is repeated within a configurable window; escalation logic intensifies repeated events.
-  - Emotional reactivity: narrative selection can be influenced by character emotional state and tactical context.
-  - Robust type safety: all narrative types, pools, and service boundaries are strictly typed and validated.
-  - Fallback generator ensures a high-quality line is always available, even if a pool is empty.
-  - All narrative logic is fully documented and covered in `docs/NARRATIVE_CONTEXT_MATRIX.md`.
-  - Integration: Core battle logic now calls the narrative service for all mechanic-triggered lines.
-* Full mechanic/context coverage for all implemented combat systems.
-* Engine-aligned: All lines are bound to real mechanic triggers (e.g., `Parry.hit`, `DesperationMove.victory`).
-* Scalable structure: Each character has a state-driven NarrativeService with anti-repetition, fallback logic, and emotion modeling.
-* Known exception: `Disrupt` is an [effect-only] mechanic and excluded from active move pools. It applies passive effects without a corresponding narrative moment, and only triggers fallback narrator lines in extreme edge cases.
-
-Dynamic Escalation Timeline: A battle arc state machine that triggers forcedEscalation flags based on analytics.
-
-Stalemate Prevention: The system now correctly logs "Yes" for this analytic if any deadlock-breaking mechanic (Escalation, Climax, Sudden Death) is triggered.
-
-### Narrative Line Selection Flow
-
-```mermaid
-graph TD
-  A[Input: Mechanic/Context] --> B[Narrative Service]
-  B --> C[Line Pool Search]
-  C --> D{Anti-Repetition Check}
-  D -- Pass --> E[Return Line]
-  D -- Repeat --> F[Escalation/Fallback Check]
-  F --> E
-```
+- **Adding Tags:**
+  - Add or update `@tags` comments at the top of any file to suggest tags for automation.
+  - Use clear, domain-relevant tags (e.g., `ai`, `ui`, `core-logic`, `narrative`, `data`, `error-handling`).
+- **Updating Cross-References:**
+  - When adding or refactoring a major type/function, update the Folder & File Overview table with new tags and a brief description.
+  - If you move or rename a file, update all relevant links and tags.
+- **Running the Docs Refresh Script:**
+  - Run `npm run docs:refresh` to regenerate SYSTEM ARCHITECTURE.MD with the latest cross-references and tags.
+  - For CI or pre-commit checks, use `npm run docs:refresh -- --check` to ensure docs are up to date.
+- **Best Practices:**
+  - Keep descriptions concise and focused on the file's responsibility.
+  - Use the Quick Links section for fast navigation.
+  - Review the Automation Roadmap for upcoming features and contribute ideas or improvements as needed.
 
 ---
-
-## Codebase Cookbooks
-
-### How to Add a New Character
-1.  **[ ] Data:** Add character data to [`src/features/character-selection/data/characterData.ts`](https://github.com/user/repo/blob/main/src/features/character-selection/data/characterData.ts).
-2.  **[ ] Types:** Define character-specific moves in a new [`src/features/battle-simulation/types/zuko.moves.ts`](https://github.com/user/repo/blob/main/src/features/battle-simulation/types/zuko.moves.ts) file and update the canonical move list.
-3.  **[ ] Identity:** Create a personality profile in [`src/features/battle-simulation/services/identity/profiles/`](https://github.com/user/repo/tree/main/src/features/battle-simulation/services/identity/profiles/).
-4.  **[ ] UI:** Create portrait and card assets.
-5.  **[ ] Test:** Write a test scenario in `battleSimulator.test.ts` to validate the new character's core moves.
-
-### How to Debug an AI Deadlock
-1.  **[ ] Enable Logs:** Set `LOG_LEVEL` to `DEBUG` in the [`TechnicalLog`](https://github.com/user/repo/blob/main/src/features/technical-log/components/TechnicalLog.tsx) component.
-2.  **[ ] Replicate:** Run the battle scenario that caused the deadlock.
-3.  **[ ] Analyze Logs:** In the Technical Log, find the turn where `stuckMoveCounter` increments.
-4.  **[ ] Check Move Availability:** Examine the `getAvailableMoves` log output for that turn. Is the list unexpectedly empty?
-5.  **[ ] Review Scoring:** Check the [`enhancedMoveScoring`](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/ai/enhancedMoveScoring.ts) output. Are all scores zero or negative? This points to a flaw in the scoring logic for that specific battle state.
-
----
-
-## Onboarding/Quick Start
-**For new developers:**
-- Clone the repo and run:
-  ```sh
-  npm install
-  ```
-- To start the app:
-  ```sh
-  npm run dev
-  ```
-  (if allowed by project rules)
-- To run type checks:
-  ```sh
-  npx tsc --noEmit
-  ```
-- To lint:
-  ```sh
-  npm run lint
-  ```
-- To run tests:
-  ```sh
-  npm test
-  ```
-- Start by reading `SYSTEM ARCHITECTURE.MD` and the `README.md` for high-level context.
-- For feature work, start in the relevant `src/features/` subfolder.
-
----
-
-## Best Practices & Architectural Patterns
-5.1. TypeScript & Code Style
-
-(Unchanged)
-
-5.2. Architecture & Dependencies
-The Single Source of Truth for Move Availability
-
-This is now a critical architectural principle.
-
-The Problem: Previously, the AI could "decide" to use a move, and the game logic would later check if it was possible. This led to "gamey" behavior where the AI would attempt impossible actions.
-
-The Solution: The getAvailableMoves service in moveUtils.ts is the single, definitive gatekeeper. It performs all hard checks (chi, cooldowns, uses, collateral damage). The AI's scoring and selection logic only ever operates on the list of moves returned by this service.
-
-The Rule: AI logic must trust the pre-filtered move list. It should never perform its own checks for chi, cooldowns, etc. Its job is to make the best tactical choice from the options it knows are possible.
-
-Move-Centric Logic & Strict Type Hygiene (2025-07-07):
-  - All tactical and AI logic must operate directly on Move objects. Ability is reserved for legacy disruption logic only.
-  - All property accesses on BattleCharacter must use base.<property> for static data.
-  - All mock/test data must match canonical types exactly—no extra or legacy fields.
-  - All move selection, scoring, and execution must be type-safe and strictly compliant with the unified type system.
-  - Any new features or refactors must maintain Move-centric, type-safe, and SRP-compliant patterns.
-
-Circular Dependencies
-
-(The existing guidance on using lazy initialization via factory functions remains the gold standard and has been adhered to.)
-
-5.3. Implementing New Features
-
-(Unchanged)
-
----
-
-## Architecture Decision Records (ADRs)
-- Major architectural decisions are documented in ADRs (in a dedicated `docs/adr/` folder or as markdown files in `docs/`).
-- Each ADR includes context, decision, alternatives considered, and consequences.
-- ADRs are referenced in `SYSTEM ARCHITECTURE.MD` and/or `README.md` as appropriate.
-
----
-
-## FAQ & Common Pitfalls
-
-Q: Why is my AI skipping its turn during Escalation Mode?
-
-A: This is the "Escalation Charge" mechanic. If the AI is forced to be aggressive but has no valid attack moves available (e.g., all are on cooldown or too expensive), it will skip its turn to "Gather Power" and recover chi. This is more narratively and mechanically sound than using a weak Basic Strike.
-
-Q: My battle ended suddenly with a "Sudden Death" log. What happened?
-
-A: The battle exceeded the turn limit or the number of allowed escalation cycles. To prevent an endless, unsatisfying fight, the system triggered an irreversible final phase where both characters were forced to use their most powerful finisher moves to guarantee a conclusion.
-
-Q: A character was hit by BURN and DEFENSE_DOWN at the same time and was immediately stunned. Why?
-
-A: This is the "Effect Fusion" or "Status Meltdown" mechanic. Certain combinations of debuffs can trigger a more powerful crisis effect, like a stun. This prevents characters from languishing under multiple debuffs and creates a dramatic turning point.
-
----
-
-## Core Policies
-## 13.1. Test/Mock Data Policy
-All mock/test/example data files must match canonical types exactly—no extra or legacy fields. Example/mock files are used for type/lint validation and documentation, and must be updated with any type system changes. Any deviation from canonical types is considered a type error and must be fixed immediately.
-
-## 13.2. Error Handling and Logging Policy
-- All errors in UI components are surfaced via Error Boundaries and user-friendly messages.
-- Service-level errors are logged to analytics and/or developer logs, with contextual error objects (including error codes and messages).
-- Unexpected errors in services are surfaced to the UI or logs, never silently swallowed.
-- Error object shapes should include a code, message, and (if relevant) a stack trace or context.
-
-## 13.3. Dependency Management and Upgrades
-- All dependencies must be reviewed for type safety, maintenance, and security before addition.
-- Upgrades are performed regularly, with type/lint/test checks after each upgrade.
-- New dependencies must be justified and should not duplicate existing functionality.
-
-## 13.4. Security and Privacy
-- All user input is sanitized before use.
-- Secrets (API keys, etc.) are never committed to the repo and are managed via environment variables.
-- If user data is handled, privacy best practices are followed (e.g., no PII in logs, GDPR compliance if relevant).
-
-## 13.5. Change Management/Versioning
-- All changes are proposed via Pull Requests (PRs) and require code review.
-- Changelog entries are required for all user-facing or architectural changes.
-- Versioning follows semantic versioning (major.minor.patch) if releases are published.
-- Merges to main/master require passing CI and code review.
-
----
-
-## Testing & Deployment
-## 14.1. Testing Strategy
-- **Frameworks:** Jest and React Testing Library are used for all unit and integration tests.
-- **Critical path:** All exported functions/components, battle engine phases, and AI logic must have tests.
-- **To run tests:**
-  ```sh
-  npm test
-  # or
-  npm run test
-  ```
-- **CI:** All tests must pass in CI before merge. Coverage must not decrease for critical modules.
-
-## 14.2. CI/CD and Deployment
-- **CI/CD tools:** GitHub Actions (or your chosen CI) runs type checks, lint, tests, and build on every PR.
-- **Steps:**
-  ```sh
-  npx tsc --noEmit
-  npm run lint
-  npm test
-  npm run build
-  ```
-- **Deployment:** (Describe your deployment process here, e.g., Vercel, Netlify, or custom server.)
-
----
-
-## Glossary of Terms
-
-### Battle Concepts
-- **[BattleCharacter](https://github.com/user/repo/blob/main/src/features/battle-simulation/types/index.ts)**: The dynamic, in-battle representation of a character, with static data in `base`.
-- **[Move](https://github.com/user/repo/blob/main/src/features/battle-simulation/types/move.types.ts)**: The canonical type for all tactical/AI logic, representing a battle action.
-- **Ability**: Legacy type, now only used for disruption logic.
-- **Escalation**: The process/mechanic that forces the battle to progress when a stalemate is detected. See [`escalationPhase.service.ts`](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts).
-- **Tactical Phase**: The main action phase where the AI selects and executes a move. See [`tacticalPhase.service.ts`](https://github.com/user/repo/blob/main/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts).
-
-### Architecture
-- **SRP**: Single Responsibility Principle—each file/module has one reason to change.
-- **Type Hygiene**: The practice of ensuring all code and data strictly match canonical type definitions.
-- **Mock Data**: Example/test data that must match canonical types exactly.
-- **Error Boundary**: React component that catches and displays errors in the UI tree.
-- **CI/CD**: Continuous Integration/Continuous Deployment—automated pipelines for testing and deploying code.
-- **ADR**: Architecture Decision Record—a document capturing a major architectural decision and its rationale. See [docs/adr/2025-06-28-type-hygiene.md](docs/adr/2025-06-28-type-hygiene.md).
-
-### Narrative
-- **Narrative Pool**: A structured collection of narrative lines for a character, organized by mechanic and context, used by the narrative engine for dynamic selection.
-- **Anti-Repetition**: A utility/service that prevents the same narrative line from being used repeatedly within a short window, ensuring variety and escalation.
-- **Narrative Service**: The core orchestrator that selects, validates, and returns a context-aware narrative line for a given battle event, using pools, anti-repetition, and fallback logic.
-
-Move-Centric Logic & Strict Type Hygiene (2025-07-07):
-  - All tactical and AI logic must operate directly on Move objects. Ability is reserved for legacy disruption logic only.
-  - All property accesses on BattleCharacter must use base.<property> for static data.
-  - All mock/test data must match canonical types exactly—no extra or legacy fields.
-  - All move selection, scoring, and execution must be type-safe and strictly compliant with the unified type system.
-  - Any new features or refactors must maintain Move-centric, type-safe, and SRP-compliant patterns.
-
----
-
-## Recent Changes
-Canon Authenticity Pass: Refactored moveUtils to be the single source of truth for move availability, preventing the AI from attempting moves it cannot afford or that are on cooldown. Introduced the "Escalation Charge" mechanic.
-Deadlock Breaker Pass: Implemented stuckMoveCounter and AI risk tolerance to force high-collateral moves during tactical deadlocks. Added "Sudden Death" phase as the ultimate stalemate breaker.
-Status Effect Crisis Pass: Introduced effect fusion and "Burnout Crisis" mechanics. Refined status effect logging to reduce clutter.
-SRP Refactoring: Refactored NarrativeCoordinator and processTurn into modular, SRP-compliant services and phases.
-Initial Fix Pass: Added real-time analytics to the battle state for detecting and breaking stalemates.
-Type Hygiene & Move-Centric Refactor (2025-07-07):
-  - All tactical AI and move selection logic is now strictly Move-centric—no more conversion to Ability or use of obsolete types.
-  - The moveToAbility utility is only used for legacy disruption logic and is not part of the tactical pipeline.
-  - All property accesses on BattleCharacter (e.g., personality) are now strictly via base.<property>.
-  - All move availability, scoring, and selection logic is now type-safe and consistent with the unified type system.
-  - The codebase is now fully type- and lint-compliant for these modules, with all legacy/ambiguous code removed.
-Avatar-Level Narrative System 10/10 Upgrade (2025-07-07):
-  - Complete rewrite of the narrative system: modular core, deep narrative pools, anti-repetition, emotional hooks, and robust type safety.
-  - 500+ new lines for Aang, Azula, and System/Narrator.
-  - All narrative logic now fully documented and integrated with the battle engine.
-  - See `docs/NARRATIVE_CONTEXT_MATRIX.md` for full context mapping.
-
-## 🚨 How to Prevent Large-Scale Integration Errors
-
-**Enforce Pre-Commit Hooks**
-- Run `npx tsc --noEmit` and `npm run lint` as pre-commit and CI requirements. Block commits if either fails.
-
-**Break Up Large Integrations**
-- Refactor and merge in smaller, testable chunks instead of one sweeping PR.
-
-**Use Type-First Development**
-- Update types/interfaces before writing or merging logic or UI code.
-
-**Automate Dead Code Cleanup**
-- Auto-prefix unused variables with `_` or clean them in CI to prevent TS6133 and lint noise.
-
-**Document Expectations**
-- When upgrading core systems (like narrative), write developer changelogs and upgrade guides to set clear expectations for integration and testing.

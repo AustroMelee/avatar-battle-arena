@@ -1,5 +1,6 @@
 // CONTEXT: Move Utilities
-// RESPONSIBILITY: Determine available moves based on cooldowns, resources, and meta-state
+// RESPONSIBILITY: The SINGLE SOURCE OF TRUTH for determining which moves a character can legally use in a turn.
+
 import { Location } from '@/common/types';
 import { BattleCharacter } from '../../types';
 import { MetaState } from '../ai/metaState';
@@ -41,6 +42,96 @@ function getDynamicCollateralTolerance(character: BattleCharacter, location: Loc
 }
 
 /**
+ * Checks if a character has enough resources for a move.
+ * @param ability - The move to check.
+ * @param character - The character to check.
+ * @returns True if the character has enough resources.
+ */
+function hasEnoughResources(ability: Move, character: BattleCharacter): boolean {
+  return character.resources.chi >= (ability.chiCost || 0);
+}
+
+/**
+ * Checks if a move is on cooldown.
+ * @param moveName - The name of the move to check.
+ * @param character - The character to check.
+ * @returns True if the move is on cooldown.
+ */
+function isMoveOnCooldown(moveName: string, character: BattleCharacter): boolean {
+  return (character.cooldowns[moveName] || 0) > 0;
+}
+
+/**
+ * Checks if a move has any uses left.
+ * @param ability - The move to check.
+ * @param character - The character to check.
+ * @returns True if the move has uses left.
+ */
+function hasUsesLeft(ability: Move, character: BattleCharacter): boolean {
+  if (ability.maxUses === undefined) return true; // Unlimited uses
+  return (character.usesLeft[ability.name] ?? 0) < ability.maxUses;
+}
+
+/**
+ * Checks if the conditions for a finisher move are met.
+ * @param ability - The finisher move to check.
+ * @param attacker - The character attempting the finisher.
+ * @param target - The target of the finisher.
+ * @returns True if the finisher conditions are met.
+ */
+function areFinisherConditionsMet(ability: Move, attacker: BattleCharacter, target: BattleCharacter): boolean {
+  if (!ability.isFinisher) return true; // Not a finisher, no special conditions
+
+  if (attacker.flags?.usedFinisher && ability.oncePerBattle) return false;
+
+  const condition = ability.finisherCondition;
+  if (!condition) return false; // Finisher must have a condition
+
+  switch (condition.type) {
+    case 'hp_below':
+      return (target.currentHealth / 100) * 100 <= condition.percent;
+    // Add cases for other finisher condition types here, like 'phase'
+    default:
+      return false;
+  }
+}
+
+/**
+ * Gets all available moves for a character, enforcing all game rules.
+ * This is the definitive gatekeeper for AI move selection.
+ * @param character - The character whose moves to check.
+ * @param enemy - The opponent, for condition checking.
+ * @param location - The battle location.
+ * @returns A filtered array of legally usable moves.
+ */
+export function getAvailableMoves(
+  character: BattleCharacter,
+  enemy: BattleCharacter,
+  _location: Location, // Placeholder for future environmental checks
+): Move[] {
+  const available = character.abilities.filter((move: Move) => {
+    if (!hasEnoughResources(move, character)) return false;
+    if (isMoveOnCooldown(move.name, character)) return false;
+    if (!hasUsesLeft(move, character)) return false;
+    if (!areFinisherConditionsMet(move, character, enemy)) return false;
+    
+    // Add future checks here (e.g., environmental constraints)
+
+    return true;
+  });
+
+  // If no moves are available after filtering, always allow Basic Strike as a fallback.
+  if (available.length === 0) {
+    const basicStrike = character.abilities.find(m => m.id.includes('basic_strike'));
+    if (basicStrike) {
+      return [basicStrike];
+    }
+  }
+
+  return available;
+}
+
+/**
  * @description Gets available moves for a character considering cooldowns, resources, meta-state, and collateral damage.
  * @param {BattleCharacter} character - The character whose moves to check.
  * @param {MetaState} meta - The current meta-state for hard gating.
@@ -48,7 +139,7 @@ function getDynamicCollateralTolerance(character: BattleCharacter, location: Loc
  * @param {number} turn - The current turn number.
  * @returns {Move[]} The available moves.
  */
-export function getAvailableMoves(character: BattleCharacter, meta: MetaState, location: Location, _turn: number): Move[] {
+export function getAvailableMovesOld(character: BattleCharacter, meta: MetaState, location: Location, _turn: number): Move[] {
   let moves = character.abilities.filter((ability: Move) => {
     // Check cooldown using the cooldown object system
     if (character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) {
@@ -142,25 +233,4 @@ export function getAvailableMoves(character: BattleCharacter, meta: MetaState, l
   }
   
   return moves;
-}
-
-/**
- * @description Checks if a move is on cooldown.
- * @param {string} moveName - The name of the move to check.
- * @param {BattleCharacter} character - The character to check.
- * @returns {boolean} True if the move is on cooldown.
- */
-export function isMoveOnCooldown(moveName: string, character: BattleCharacter): boolean {
-  return !!(character.cooldowns[moveName] && character.cooldowns[moveName] > 0);
-}
-
-/**
- * @description Checks if a character has enough resources for a move.
- * @param {Move} ability - The move to check.
- * @param {BattleCharacter} character - The character to check.
- * @returns {boolean} True if the character has enough resources.
- */
-export function hasEnoughResources(ability: Move, character: BattleCharacter): boolean {
-  const chiCost = ability.chiCost || 0;
-  return character.resources.chi >= chiCost;
 } 

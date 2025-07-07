@@ -238,7 +238,8 @@ export function forceBattleClimax(state: BattleState): BattleState {
     result: `CLIMAX: ${p1.name} unleashes ${p1Finisher.name} for ${p1Damage} damage!`,
     damage: p1Damage,
     timestamp: Date.now(),
-    meta: { climax: true, finisher: true }
+    meta: { climax: true, finisher: true },
+    narrative: ''
   };
   const p2ClimaxLog: BattleLogEntry = {
     id: createEventId(),
@@ -250,7 +251,8 @@ export function forceBattleClimax(state: BattleState): BattleState {
     result: `CLIMAX: ${p2.name} unleashes ${p2Finisher.name} for ${p2Damage} damage!`,
     damage: p2Damage,
     timestamp: Date.now(),
-    meta: { climax: true, finisher: true }
+    meta: { climax: true, finisher: true },
+    narrative: ''
   };
   newState.battleLog.push(p1ClimaxLog, p2ClimaxLog);
 
