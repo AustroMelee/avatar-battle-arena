@@ -25,7 +25,7 @@ export function scoreDefenseMove(
   let score = 0;
   
   // Base defense value
-  score += (move.power || 0) * 0.6; // Defense moves are worth less than attacks
+  score += (move.power || 0) * 1.5;
   
   // Status Effect Scoring
   // Value moves that apply defensive status effects
@@ -76,55 +76,24 @@ export function scoreDefenseMove(
   // Intent-specific scoring
   switch (intent.type) {
     case 'defend':
-      score += 15; // High base value for defensive intent
-      if (move.appliesEffect?.type === 'DEFENSE_UP') {
-        score += 8;
-      }
-      if (move.tags?.includes('healing')) {
-        score += 6;
-      }
+      score += 100;
+      if (move.appliesEffect?.type === 'DEFENSE_UP') score += 50;
       break;
-      
     case 'stall':
-      score += 12; // Good value for stalling
-      if (move.tags?.includes('rest')) {
-        score += 8;
-      }
-      if (move.appliesEffect?.type === 'HEAL_OVER_TIME') {
-        score += 6;
-      }
+      score += 80;
+      if (move.tags?.includes('rest')) score += 40;
       break;
-      
     case 'restore_chi':
-      if (move.tags?.includes('rest')) {
-        score += 15;
-      }
-      if (move.chiCost && move.chiCost <= 1) {
-        score += 6;
-      }
+      if (move.tags?.includes('rest')) score += 120;
       break;
-      
-    case 'counter_attack':
-      if (move.appliesEffect?.type === 'ATTACK_UP') {
-        score += 8; // Attack buffs help with counter-attacking
-      }
-      break;
-      
-    case 'build_momentum':
-      if (move.appliesEffect?.type === 'ATTACK_UP') {
-        score += 6; // Attack buffs help build momentum
-      }
-      break;
-      
     case 'desperate_attack':
-      // Less value for defense moves in desperate situations
-      score -= 5;
+      score -= 50; // Penalize defensive moves during all-out attacks
       break;
   }
   
   // Context-specific bonuses
   if (context.healthPressure) {
-    score += 10;
+    score += 30;
     // Extra value for healing when under health pressure
     if (move.appliesEffect?.type === 'HEAL_OVER_TIME') {
       score += 8;
@@ -227,18 +196,6 @@ export function getDefenseMoveScoringReasons(
       reasons.push('Chi restoration intent');
       if (move.tags?.includes('rest')) {
         reasons.push('Rest effect for chi restoration');
-      }
-      break;
-      
-    case 'counter_attack':
-      if (move.appliesEffect?.type === 'ATTACK_UP') {
-        reasons.push('Attack-up effect for counter-attacking');
-      }
-      break;
-      
-    case 'build_momentum':
-      if (move.appliesEffect?.type === 'ATTACK_UP') {
-        reasons.push('Attack-up effect for momentum building');
       }
       break;
       

@@ -199,7 +199,7 @@ export function getIntentPriority(intentType: IntentType, context: BattleTactica
 /**
  * @description Checks if the current intent should be maintained or changed.
  * @param {Intent} currentIntent - The current tactical intent.
- * @param {BattleContext} context - The current battle context.
+ * @param {BattleTacticalContext} context - The current battle context.
  * @returns {boolean} True if the intent should be maintained.
  */
 export function shouldMaintainIntent(currentIntent: Intent, context: BattleTacticalContext): boolean {

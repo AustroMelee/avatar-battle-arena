@@ -22,82 +22,62 @@ export function forcePatternEscalation(
   let forcedState = '';
   
   switch (escalationType) {
-    case 'damage':
-      narrative = `The arena trembles with anticipation! ${attacker.name} feels the pressure mounting - it's time to escalate!`;
-      forcedState = 'berserk';
-      // Force aggressive positioning and damage boost
-      newState.participants[attackerIndex].position = 'aggressive';
-      newState.participants[attackerIndex].flags = {
-        ...newState.participants[attackerIndex].flags,
-        forcedEscalation: 'true',
-        damageMultiplier: '2.0',
-        escalationTurns: state.turn.toString(), // Track when escalation was triggered
-        escalationDuration: '2' // Escalation lasts for 2 turns
-      };
-      break;
-      
-    case 'repetition': {
-      // Add variety to pattern breaking narratives
-      const patternNarratives = [
-        `The crowd grows restless! ${attacker.name} breaks free from their predictable pattern!`,
-        `${attacker.name} realizes they've become predictable and shifts tactics dramatically!`,
-        `The repetitive rhythm shatters as ${attacker.name} adapts their fighting style!`,
-        `${attacker.name} snaps out of their pattern, their movements becoming unpredictable!`,
-        `The predictable exchanges end as ${attacker.name} changes their approach completely!`,
-        `${attacker.name} recognizes the pattern and deliberately breaks free from it!`,
-        `The battle tempo shifts as ${attacker.name} abandons their predictable attacks!`,
-        `${attacker.name} feels the pattern and consciously chooses to disrupt it!`
-      ];
-      narrative = patternNarratives[Math.floor(Math.random() * patternNarratives.length)];
-      forcedState = 'pattern_break';
-      // Disable the repetitive move temporarily
-      const lastMove = attacker.moveHistory?.[attacker.moveHistory.length - 1];
-      if (lastMove) {
-        newState.participants[attackerIndex].cooldowns = {
-          ...newState.participants[attackerIndex].cooldowns,
-          [lastMove]: 3 // Disable for 3 turns
-        };
-      }
-      // Reset pattern tracking to prevent immediate re-triggering
-      newState.participants[attackerIndex].moveHistory = [];
-      newState.participants[attackerIndex].lastMove = '';
-      
-      // Set escalation duration to prevent immediate re-triggering
-      newState.participants[attackerIndex].flags = {
-        ...newState.participants[attackerIndex].flags,
-        escalationTurns: state.turn.toString(),
-        escalationDuration: '2', // Reduced escalation duration to 2 turns
-        forcedEscalation: 'true' // Ensure escalation state is properly set
-      };
-      break;
-    }
-      
     case 'reposition':
       narrative = `The arena constricts! ${attacker.name} is forced into close combat - no more running!`;
       forcedState = 'close_combat';
-      // Disable repositioning for 3 turns
-      newState.participants[attackerIndex].flags = {
-        ...newState.participants[attackerIndex].flags,
-        repositionDisabled: '3'
-      };
-      break;
-      
-    case 'stalemate':
-      narrative = `The battle reaches a breaking point! Both fighters are forced to escalate or face defeat!`;
-      forcedState = 'climax';
-      // Force both participants into aggressive states
-      newState.participants.forEach((participant, _index) => {
-        participant.position = 'aggressive';
-        participant.flags = {
-          ...participant.flags,
-          forcedEscalation: 'true',
-          damageMultiplier: '1.5',
-          escalationTurns: state.turn.toString(), // Track when escalation was triggered
-          escalationDuration: '2' // Escalation lasts for 2 turns
+      // Disable repositioning for 3 turns for BOTH players to force engagement
+      newState.participants.forEach(p => {
+        p.flags = {
+          ...p.flags,
+          repositionDisabled: '3'
         };
       });
       break;
       
+    case 'stalemate':
+      narrative = `The battle has become a war of attrition! The fighters are forced into an all-out attack!`;
+      forcedState = 'climax';
+      // Force both participants into an aggressive state with a large damage multiplier
+      newState.participants.forEach((participant) => {
+        participant.flags = {
+          ...participant.flags,
+          forcedEscalation: 'true',
+          damageMultiplier: '2.0', // MODIFIED: Increased multiplier for more decisive action
+          escalationTurns: state.turn.toString(),
+          escalationDuration: '3' // MODIFIED: Longer duration to ensure the stalemate breaks
+        };
+      });
+      break;
+      
+    case 'damage':
+      narrative = `The arena trembles with anticipation! ${attacker.name} feels the pressure mounting - it's time to escalate!`;
+      forcedState = 'berserk';
+      newState.participants[attackerIndex].flags = {
+        ...newState.participants[attackerIndex].flags,
+        forcedEscalation: 'true',
+        damageMultiplier: '1.5', // Standard damage boost
+        escalationTurns: state.turn.toString(),
+        escalationDuration: '2'
+      };
+      break;
+      
+    case 'repetition': {
+      const patternNarratives = [
+        `${attacker.name} breaks free from their predictable pattern!`,
+        `${attacker.name} realizes they've become predictable and shifts tactics dramatically!`,
+      ];
+      narrative = patternNarratives[Math.floor(Math.random() * patternNarratives.length)];
+      forcedState = 'pattern_break';
+      const lastMove = attacker.moveHistory?.[attacker.moveHistory.length - 1];
+      if (lastMove) {
+        newState.participants[attackerIndex].cooldowns = {
+          ...newState.participants[attackerIndex].cooldowns,
+          [lastMove]: 2
+        };
+      }
+      break;
+    }
+
     default:
       narrative = `${attacker.name} feels the battle intensifying!`;
       forcedState = 'escalation';
@@ -111,7 +91,7 @@ export function forcePatternEscalation(
     type: 'ESCALATION',
     action: 'Forced Escalation',
     target: 'Battle',
-    result: `Forced into ${forcedState} state`,
+    result: `Forced into ${forcedState} state due to ${reason}`,
     narrative,
     timestamp: Date.now(),
     meta: {

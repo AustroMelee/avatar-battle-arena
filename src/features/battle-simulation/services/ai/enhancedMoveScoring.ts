@@ -8,27 +8,65 @@ import { determineTacticalPriority, getTacticalExplanation } from './tacticalAna
  * @param self - The AI character
  * @param enemy - The opponent character
  * @param availableAbilities - All abilities that can be used this turn
+ * @param stalemateCounter - NEW: Stalemate counter from tactical phase
  * @returns Scored move with reasoning
  */
 export function scoreMoveWithTactics(
   move: Ability,
   self: BattleCharacter,
   enemy: BattleCharacter,
-  availableAbilities: Ability[]
+  availableAbilities: Ability[],
+  stalemateCounter: number = 0 // NEW: Accept stalemateCounter
 ): { move: Ability; score: number; reasons: string[]; priority: string } {
   let score = 0;
   const reasons: string[] = [];
   
   // Get tactical priority for this situation
-  const priority = determineTacticalPriority(self, enemy, availableAbilities);
+  const priority = determineTacticalPriority(self, enemy, availableAbilities, stalemateCounter);
   const tacticalExplanation = getTacticalExplanation(priority, self, enemy);
   reasons.push(`Tactical: ${tacticalExplanation}`);
   
+  // Base Score: Always add the move's power
+  score += move.power;
+  
+  // NEW: Context-aware penalty for useless defensive moves
+  // Use the same getLastMoveType logic as in tacticalAnalysis
+  function getLastMoveType(character: BattleCharacter): 'attack' | 'defense' | 'other' {
+    const lastMoveName = character.lastMove?.toLowerCase() || '';
+    if (lastMoveName.includes('shield') || lastMoveName.includes('evasion') || lastMoveName.includes('glide') || lastMoveName.includes('jets')) {
+      return 'defense';
+    }
+    if (lastMoveName.includes('strike') || lastMoveName.includes('fire') || lastMoveName.includes('slice') || lastMoveName.includes('blast')) {
+      return 'attack';
+    }
+    return 'other';
+  }
+  const enemyLastMoveType = getLastMoveType(enemy);
+  if (move.type === 'parry_retaliate' && enemyLastMoveType !== 'attack') {
+    score -= 150; // Heavy penalty for using a counter when the enemy isn't attacking
+    reasons.push('Penalty: Opponent is not attacking, counter is useless.');
+  }
+  
   // Score based on tactical priority
   switch (priority) {
+    case 'gamble':
+      if (move.isFinisher) {
+        score += 200; // Extremely high priority for finishers
+        reasons.push('High priority: Gamble with a finisher!');
+      } else if (move.critChance && move.critChance > 0.15) {
+        score += 80; // Prioritize high-crit moves
+        reasons.push('High priority: Gamble on a critical hit!');
+      } else if (move.baseDamage > 8) {
+        score += 60; // Prioritize high-damage moves
+        reasons.push('High priority: Gamble with a powerful attack!');
+      } else {
+        score += move.power; // Still prefer some damage
+      }
+      break;
+      
     case 'defend':
       if (move.type === 'defense_buff' || move.type === 'evade' || move.type === 'parry_retaliate') {
-        score += 20;
+        score += 80;
         reasons.push('High priority: Critical defense needed');
       }
       if (move.tags?.includes('desperate')) {
@@ -38,32 +76,27 @@ export function scoreMoveWithTactics(
       break;
       
     case 'finish':
-      if (move.tags?.includes('high-damage')) {
-        score += 25;
-        reasons.push('Finisher move against vulnerable enemy');
-      }
       if ((move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 15) {
-        score += 18;
+        score += 70;
         reasons.push('High damage attack to finish');
       }
       break;
       
     case 'pierce':
-      if (move.tags?.includes('piercing')) {
-        score += 22;
-        reasons.push('Piercing attack against high defense');
-      }
-      if ((move.type === 'attack' || move.type === 'parry_retaliate') && move.power > 12) {
-        score += 12;
-        reasons.push('Strong attack to test defenses');
+      // --- MODIFIED: Heavily penalize non-damaging moves when piercing is needed ---
+      if (move.type === 'defense_buff' || move.type === 'evade') {
+        score -= 200; // Massive penalty
+        reasons.push('Penalty: A non-damaging move cannot pierce defenses.');
+      } else if (typeof move.tags === 'object' && Array.isArray(move.tags) && move.tags.includes('piercing')) {
+        score += 150; // Massive bonus
+        reasons.push('High priority: Piercing move required!');
+      } else if (move.type === 'attack') {
+        score += move.power * 2; // Still prioritize any attack over a defensive move
+        reasons.push('Prioritizing any attack to apply pressure.');
       }
       break;
       
     case 'heal':
-      if (move.tags?.includes('healing')) {
-        score += 18;
-        reasons.push('Healing move when wounded');
-      }
       if (move.type === 'defense_buff' && move.power > 20) {
         score += 15;
         reasons.push('Strong defense buff for safety');
@@ -72,7 +105,7 @@ export function scoreMoveWithTactics(
       
     case 'recover':
       if (move.type === 'defense_buff' && !move.chiCost) {
-        score += 16;
+        score += 60;
         reasons.push('Free defense buff to conserve chi');
       }
       if (move.chiCost && move.chiCost <= 1) {
@@ -82,8 +115,8 @@ export function scoreMoveWithTactics(
       break;
       
     case 'attack':
-      if (move.type === 'attack' || move.type === 'parry_retaliate') {
-        score += 10;
+      if (move.type === 'attack') { // Only give bonus to pure attacks
+        score += 20;
         reasons.push('Standard attack pressure');
       }
       if (move.power > 15) {
@@ -174,8 +207,14 @@ export function scoreMoveWithTactics(
   
   // Variety bonus (avoid repeating moves)
   if (self.lastMove === move.name) {
-    score -= 8;
+    score -= 10;
     reasons.push('Penalty: Repeated move');
+  }
+  
+  // Universal Penalty for Basic Strike (unless it's the only option)
+  if (move.name === 'Basic Strike' && availableAbilities.length > 1) {
+    score -= 100;
+    reasons.push('Penalty: Avoiding weak Basic Strike');
   }
   
   return { move, score, reasons, priority };
@@ -186,12 +225,14 @@ export function scoreMoveWithTactics(
  * @param availableAbilities - List of abilities that can be used
  * @param self - The AI character
  * @param enemy - The opponent character
+ * @param stalemateCounter - NEW: Stalemate counter from tactical phase
  * @returns The best move with full tactical analysis
  */
 export function selectBestTacticalMove(
   availableAbilities: Ability[],
   self: BattleCharacter,
-  enemy: BattleCharacter
+  enemy: BattleCharacter,
+  stalemateCounter: number = 0 // NEW: Accept stalemateCounter
 ): { 
   chosenAbility: Ability; 
   score: number; 
@@ -199,15 +240,27 @@ export function selectBestTacticalMove(
   priority: string;
   tacticalExplanation: string;
 } {
+  if (availableAbilities.length === 0) {
+    // This case should be handled by the caller, but as a safeguard:
+    const basicStrike = self.abilities.find(a => a.name === 'Basic Strike')!;
+    return {
+      chosenAbility: basicStrike,
+      score: 0,
+      reasons: ['No other moves available'],
+      priority: 'attack',
+      tacticalExplanation: 'No other options, using Basic Strike.'
+    };
+  }
+
   const scoredMoves = availableAbilities.map(ability => 
-    scoreMoveWithTactics(ability, self, enemy, availableAbilities)
+    scoreMoveWithTactics(ability, self, enemy, availableAbilities, stalemateCounter)
   );
   
   // Sort by score (highest first)
   scoredMoves.sort((a, b) => b.score - a.score);
   
   const bestMove = scoredMoves[0];
-  const priority = determineTacticalPriority(self, enemy, availableAbilities);
+  const priority = determineTacticalPriority(self, enemy, availableAbilities, stalemateCounter);
   const tacticalExplanation = getTacticalExplanation(priority, self, enemy);
   
   return {
@@ -216,5 +269,34 @@ export function selectBestTacticalMove(
     reasons: bestMove.reasons,
     priority,
     tacticalExplanation
+  };
+}
+
+/**
+ * Converts a Move to an Ability for tactical AI compatibility.
+ * Only maps compatible fields; extra Ability fields are left undefined or defaulted.
+ */
+export function moveToAbility(move: any): Ability {
+  return {
+    name: move.name,
+    type: move.type,
+    power: typeof move.baseDamage === 'number' ? move.baseDamage : (move.power ?? 0),
+    description: move.description || '',
+    cooldown: move.cooldown,
+    chiCost: move.chiCost,
+    maxUses: move.maxUses,
+    tags: move.tags,
+    collateralRisk: move.collateralRisk,
+    collateralDamage: move.collateralDamage,
+    collateralDamageNarrative: move.collateralDamageNarrative,
+    unlockCondition: move.unlockCondition,
+    critChance: move.critChance,
+    critMultiplier: move.critMultiplier,
+    isFinisher: move.isFinisher,
+    oncePerBattle: move.oncePerBattle,
+    finisherCondition: move.finisherCondition,
+    desperationBuff: move.desperationBuff,
+    appliesEffect: move.appliesEffect,
+    beatsDefenseType: move.beatsDefenseType,
   };
 } 

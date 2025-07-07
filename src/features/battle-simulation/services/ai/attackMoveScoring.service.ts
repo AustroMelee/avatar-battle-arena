@@ -22,152 +22,29 @@ export function scoreAttackMove(
 ): number {
   let score = 0;
   
-  // Base damage calculation
   const netDamage = Math.max(1, move.power - (enemy.currentDefense || 0));
-  const damageRatio = netDamage / Math.max(1, enemy.currentHealth);
+  score += netDamage * 2.5; // Base damage is highly valued
   
-  score += netDamage * 0.8; // Base damage value
-  
-  // Status Effect Scoring
-  // Value moves that apply status effects
-  if (move.appliesEffect) {
-    score += 8; // Base bonus for applying effects
-    
-    // Extra value for powerful effects
-    if (move.appliesEffect.type === 'BURN' || move.appliesEffect.type === 'STUN') {
-      score += 6; // High value for damage-over-time or crowd control
-    } else if (move.appliesEffect.type === 'DEFENSE_DOWN') {
-      score += 4; // Medium value for defense reduction
-    }
-    
-    // Value longer duration effects
-    if (move.appliesEffect.duration >= 3) {
-      score += 3;
-    }
-  }
-  
-  // Value moves against targets with specific effects
-  const enemyEffects = enemy.activeEffects;
-  
-  // High value against stunned enemies
-  if (enemyEffects.some(e => e.type === 'STUN')) {
-    score += 12;
-  }
-  
-  // Value against enemies with defense down
-  if (enemyEffects.some(e => e.type === 'DEFENSE_DOWN')) {
-    score += 8;
-  }
-  
-  // Value against enemies with attack up (they're more dangerous, prioritize them)
-  if (enemyEffects.some(e => e.type === 'ATTACK_UP')) {
-    score += 6;
+  if (move.appliesEffect?.type === 'BURN' || move.appliesEffect?.type === 'STUN') {
+    score += 15;
   }
   
   // Intent-specific scoring
   switch (intent.type) {
     case 'go_for_finish':
-      if (move.power > 40) {
-        score += 15;
-      }
-      if (context.enemyVulnerable) {
-        score += 8;
-      }
-      // Extra value for status effects when finishing
-      if (move.appliesEffect) {
-        score += 4;
-      }
+      if (move.power > 10) score += 80;
+      if (context.enemyVulnerable) score += 50;
       break;
-      
     case 'break_defense':
-      if (move.tags?.includes('piercing')) {
-        score += 12;
-      }
-      if (move.power > 30) {
-        score += 6;
-      }
-      // Value defense-down effects for breaking defense
-      if (move.appliesEffect?.type === 'DEFENSE_DOWN') {
-        score += 8;
-      }
+      if (move.tags?.includes('piercing')) score += 100;
       break;
-      
     case 'pressure_enemy':
-      score += netDamage * 0.5;
-      // Value damage-over-time effects for pressure
-      if (move.appliesEffect?.type === 'BURN') {
-        score += 6;
-      }
+      score += netDamage * 1.5;
+      if (move.appliesEffect?.type === 'BURN') score += 20;
       break;
-      
-    case 'build_momentum':
-      if (context.hasMomentum) {
-        score += 5;
-      }
-      // Value any status effect for momentum building
-      if (move.appliesEffect) {
-        score += 3;
-      }
-      break;
-      
     case 'desperate_attack':
-      score += move.power * 0.3; // Prioritize raw power
-      // Value stun effects in desperate situations
-      if (move.appliesEffect?.type === 'STUN') {
-        score += 8;
-      }
+      score += move.power * 2;
       break;
-      
-    case 'counter_attack':
-      if (context.enemyPattern === 'aggressive') {
-        score += 4;
-      }
-      // Value defense-down effects for counter-attacking
-      if (move.appliesEffect?.type === 'DEFENSE_DOWN') {
-        score += 6;
-      }
-      break;
-  }
-  
-  // Context-specific bonuses
-  if (context.enemyVulnerable) {
-    score += 12;
-  }
-  
-  if (context.enemyDefenseStreak >= 3) {
-    score += 8;
-    // Extra value for defense-down effects against turtling enemies
-    if (move.appliesEffect?.type === 'DEFENSE_DOWN') {
-      score += 6;
-    }
-  }
-  
-  if (context.hasMomentum) {
-    score += 5;
-  }
-  
-  if (context.isLateGame && damageRatio > 0.3) {
-    score += 8;
-  }
-  
-  // Desperate move bonuses
-  if (context.healthPressure && move.tags?.includes('desperate')) {
-    score += 15;
-  }
-  
-  // High damage move bonuses when enemy is weak
-  if (context.enemyHealth < 30 && move.tags?.includes('high-damage')) {
-    score += 12;
-  }
-  
-  // Piercing move bonuses when enemy has high defense
-  if (context.enemyDefense > 15 && move.tags?.includes('piercing')) {
-    score += 10;
-  }
-  
-  // Chi pressure penalties for expensive attacks
-  if (context.chiPressure && (move.chiCost || 0) > 3) {
-    score -= 8;
   }
   
   return score;

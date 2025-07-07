@@ -1,7 +1,7 @@
 // CONTEXT: Real-time Analytics Tracker
 // RESPONSIBILITY: Track battle metrics in real-time during execution
 
-import { BattleLogEntry } from '../../types';
+import { BattleLogEntry, BattleState } from '../../types';
 
 /**
  * @description Real-time analytics tracking during battle execution
@@ -16,6 +16,9 @@ export interface RealTimeAnalytics {
   criticalHits: number;
   desperationMoves: number;
   lastUpdated: number;
+  lastUpdatedTurn: number;
+  turnsSinceLastDamage: number;
+  averageDamagePerTurn: number;
 }
 
 /**
@@ -31,7 +34,10 @@ export function initializeAnalyticsTracker(): RealTimeAnalytics {
     punishOpportunities: 0,
     criticalHits: 0,
     desperationMoves: 0,
-    lastUpdated: Date.now()
+    lastUpdated: Date.now(),
+    lastUpdatedTurn: 0,
+    turnsSinceLastDamage: 0,
+    averageDamagePerTurn: 0
   };
 }
 
@@ -193,4 +199,48 @@ export function formatRealTimeAnalytics(analytics: RealTimeAnalytics): string {
   Punish Opportunities: ${analytics.punishOpportunities}
   Critical Hits: ${analytics.criticalHits}
   Desperation Moves: ${analytics.desperationMoves}`;
+}
+
+/**
+ * @description Updates the real-time analytics stored in the battle state.
+ * This should be called after each turn or significant action.
+ * @param {BattleState} state - The current battle state.
+ * @returns {BattleState} The battle state with updated analytics.
+ */
+export function updateRealTimeAnalytics(state: BattleState): BattleState {
+  const newState = { ...state };
+  const lastLogEntry = newState.battleLog[newState.battleLog.length - 1];
+
+  // Only update analytics if the turn has advanced
+  if (newState.turn === newState.analytics.lastUpdatedTurn) {
+    return newState;
+  }
+  
+  let damageThisTurn = 0;
+  newState.battleLog
+    .filter(entry => entry.turn === newState.turn -1) // Analyze the turn that just finished
+    .forEach(entry => {
+      if (entry.damage) {
+        damageThisTurn += entry.damage;
+        newState.analytics.totalDamage += entry.damage;
+      }
+      if (entry.meta?.resourceCost) {
+        newState.analytics.totalChiSpent += entry.meta.resourceCost as number;
+      }
+    });
+
+  if (damageThisTurn > 0) {
+    newState.analytics.turnsSinceLastDamage = 0;
+  } else {
+    newState.analytics.turnsSinceLastDamage += 1;
+  }
+
+  // Recalculate average damage per turn
+  newState.analytics.averageDamagePerTurn = newState.turn > 0 
+    ? newState.analytics.totalDamage / newState.turn 
+    : 0;
+
+  newState.analytics.lastUpdatedTurn = newState.turn;
+
+  return newState;
 } 

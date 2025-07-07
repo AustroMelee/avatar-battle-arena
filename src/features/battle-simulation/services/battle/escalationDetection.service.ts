@@ -4,13 +4,13 @@
 import { BattleState, BattleCharacter } from '../../types';
 import { getPatternState } from './patternTracking.service';
 
-// Escalation triggers - EXTREMELY CONSERVATIVE
+// MODIFIED: More aggressive escalation triggers
 const ESCALATION_TRIGGERS = {
-  DAMAGE_THRESHOLD: 25, // Force escalation if total damage < 25 by turn 35 (much higher threshold)
-  TURNS_WITHOUT_DAMAGE: 15, // Force escalation after 15 turns without damage (increased from 10)
-  REPOSITION_SPAM: 8, // Force close combat after 8 reposition attempts (increased from 5)
-  STALEMATE_TURNS: 30, // Force climax after 30 turns of stalemate (increased from 20)
-  ESCALATION_COOLDOWN: 15 // Much longer cooldown between escalation triggers (increased from 12)
+  DAMAGE_THRESHOLD: 15, // Lowered: Force escalation if total damage < 15 by turn 30
+  TURNS_WITHOUT_DAMAGE: 10, // Lowered: Force escalation after 10 turns without damage
+  REPOSITION_SPAM: 5, // Lowered: Force close combat after only 5 reposition attempts
+  STALEMATE_TURNS: 20, // Lowered: Force climax after 20 turns of stalemate
+  ESCALATION_COOLDOWN: 12 // Lowered: Shorter cooldown between escalation events
 };
 
 /**
@@ -49,20 +49,9 @@ export function shouldTriggerEscalation(state: BattleState, attacker: BattleChar
   const damageStats = calculateDamageStats(state);
   const patternState = getPatternState(attacker);
   
-  // Check escalation cooldown - prevent spam
-  const lastEscalationTurn = attacker.flags?.escalationTurns ? parseInt(attacker.flags.escalationTurns) : 0;
-  const escalationDuration = attacker.flags?.escalationDuration ? parseInt(attacker.flags.escalationDuration) : 0;
+  const lastEscalationTurn = attacker.flags?.escalationTurns ? parseInt(attacker.flags.escalationTurns, 10) : -Infinity;
   
-  // If currently in escalation, don't trigger again
-  if (attacker.flags?.forcedEscalation === 'true' && state.turn - lastEscalationTurn < escalationDuration) {
-    return {
-      shouldEscalate: false,
-      reason: 'Currently in escalation state',
-      escalationType: 'damage'
-    };
-  }
-  
-  // Check cooldown between escalation triggers
+  // Check cooldown first
   if (state.turn - lastEscalationTurn < ESCALATION_TRIGGERS.ESCALATION_COOLDOWN) {
     return {
       shouldEscalate: false,
@@ -70,26 +59,17 @@ export function shouldTriggerEscalation(state: BattleState, attacker: BattleChar
       escalationType: 'damage'
     };
   }
-  
-  // Check for damage-based escalation - much higher threshold to prevent early escalation
-  if (state.turn >= 35 && damageStats.totalDamage < ESCALATION_TRIGGERS.DAMAGE_THRESHOLD) {
+
+  // Check for damage-based escalation (now more aggressive)
+  if (state.turn >= 30 && damageStats.totalDamage < ESCALATION_TRIGGERS.DAMAGE_THRESHOLD) {
     return {
       shouldEscalate: true,
       reason: `Low damage output (${damageStats.totalDamage} total) by turn ${state.turn}`,
       escalationType: 'damage'
     };
   }
-  
-  // Check for repetition-based escalation
-  if (patternState.patternStale) {
-    return {
-      shouldEscalate: true,
-      reason: `Repetitive move pattern detected: ${patternState.consecutiveMoves.join(', ')}`,
-      escalationType: 'repetition'
-    };
-  }
-  
-  // Check for reposition spam
+
+  // Check for reposition spam (more aggressive)
   if (patternState.repositionAttempts >= ESCALATION_TRIGGERS.REPOSITION_SPAM) {
     return {
       shouldEscalate: true,
@@ -98,8 +78,8 @@ export function shouldTriggerEscalation(state: BattleState, attacker: BattleChar
     };
   }
   
-  // Check for stalemate - increased threshold to prevent early stalemate detection
-  if (state.turn >= ESCALATION_TRIGGERS.STALEMATE_TURNS && damageStats.averageDamagePerTurn < 0.5) {
+  // Check for stalemate (more aggressive)
+  if (state.turn >= ESCALATION_TRIGGERS.STALEMATE_TURNS && damageStats.averageDamagePerTurn < 1.0) { // Increased sensitivity
     return {
       shouldEscalate: true,
       reason: `Stalemate detected: ${damageStats.averageDamagePerTurn.toFixed(1)} avg damage/turn`,
@@ -107,6 +87,15 @@ export function shouldTriggerEscalation(state: BattleState, attacker: BattleChar
     };
   }
   
+  // Check for repetition-based escalation (move spam)
+  if (patternState.patternStale) {
+    return {
+      shouldEscalate: true,
+      reason: `Repetitive move pattern detected: ${patternState.consecutiveMoves.join(', ')}`,
+      escalationType: 'repetition'
+    };
+  }
+
   return {
     shouldEscalate: false,
     reason: '',

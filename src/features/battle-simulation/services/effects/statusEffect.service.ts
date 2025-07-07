@@ -2,10 +2,13 @@
 // RESPONSIBILITY: Apply, process, and manage status effects on characters
 import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType, ArcStateModifier } from '../../types';
 import { createEventId, generateUniqueLogId } from '../ai/logQueries';
+import { processEffectFusions } from './effectFusion.service'; // NEW Import
 
 /**
  * @description Types for status effects
  */
+
+const BURNOUT_CRISIS_TURNS = 3; // Effect must persist for this many turns to trigger a crisis
 
 /**
  * Applies a new status effect to a character with arc state duration modification.
@@ -17,11 +20,15 @@ import { createEventId, generateUniqueLogId } from '../ai/logQueries';
  */
 export function applyEffect(
   character: BattleCharacter,
-  effect: ActiveStatusEffect,
+  effect: Omit<ActiveStatusEffect, 'id' | 'turnApplied'>, // Omitting fields we will set here
   turn: number,
   arcModifiers?: ArcStateModifier
 ): { updatedCharacter: BattleCharacter; logEntry: BattleLogEntry } {
-  let modifiedEffect = { ...effect };
+  let modifiedEffect: ActiveStatusEffect = {
+    ...effect,
+    id: generateUniqueLogId('effect'),
+    turnApplied: turn, // NEW: Set the application turn
+  };
   
   // Apply arc state duration modifier if provided
   if (arcModifiers) {
@@ -64,9 +71,12 @@ export function processTurnEffects(
   character: BattleCharacter, 
   turn: number
 ): { updatedCharacter: BattleCharacter; logEntries: BattleLogEntry[] } {
-  const updatedCharacter = { ...character };
+  if (character.activeEffects.length === 0) {
+    return { updatedCharacter: character, logEntries: [] };
+  }
+  let updatedCharacter = { ...character };
   const logEntries: BattleLogEntry[] = [];
-
+  
   console.log(`🔄🔄🔄 PROCESSING TURN EFFECTS - ${character.name} on turn ${turn} 🔄🔄🔄`);
   console.log(`🔄🔄🔄 ACTIVE EFFECTS - ${character.name} has ${updatedCharacter.activeEffects.length} active effects:`, updatedCharacter.activeEffects);
 
@@ -75,6 +85,36 @@ export function processTurnEffects(
   for (const effect of updatedCharacter.activeEffects) {
     console.log(`🔄🔄🔄 PROCESSING EFFECT - ${character.name} processing ${effect.name} (${effect.type}) with ${effect.duration} turns remaining`);
     
+    // --- NEW: Burnout Crisis Logic ---
+    if (effect.type === 'BURN' && (turn - effect.turnApplied) >= BURNOUT_CRISIS_TURNS) {
+      const crisisDebuff: ActiveStatusEffect = {
+        id: generateUniqueLogId('crisis'),
+        name: 'Exhaustion from Burns',
+        type: 'DEFENSE_DOWN',
+        category: 'debuff',
+        duration: 2,
+        potency: 10, // A significant defense penalty
+        sourceAbility: 'Burnout Crisis',
+        turnApplied: turn,
+      };
+      // Apply the new debuff directly
+      updatedCharacter.activeEffects.push(crisisDebuff);
+
+      logEntries.push({
+        id: createEventId(),
+        turn,
+        actor: character.name,
+        type: 'STATUS',
+        action: 'Burnout Crisis',
+        target: character.name,
+        result: `Sustained burns cause exhaustion! Defense lowered.`,
+        narrative: `The constant pain from the searing burns is breaking ${character.name}'s focus and stance!`,
+        timestamp: Date.now(),
+        meta: { effectType: 'CRISIS', sourceEffect: effect.name, newEffect: 'DEFENSE_DOWN' }
+      });
+      console.log(`🔥🔥🔥 BURNOUT CRISIS - ${character.name} is exhausted from burns! Defense lowered. 🔥🔥🔥`);
+    }
+
     // Apply effect logic based on type
     switch (effect.type) {
       case 'BURN': {
@@ -177,6 +217,14 @@ export function processTurnEffects(
   updatedCharacter.activeEffects = stillActiveEffects;
   console.log(`DEBUG: EFFECTS AFTER PROCESSING - ${character.name} now has ${updatedCharacter.activeEffects.length} active effects remaining`);
   
+  // --- NEW: Process effect fusions AFTER individual effects are processed ---
+  const fusionResult = processEffectFusions(updatedCharacter, turn);
+  if (fusionResult.logEntry) {
+    logEntries.push(fusionResult.logEntry);
+  }
+  updatedCharacter = fusionResult.updatedCharacter;
+  // --- END ---
+  
   return { updatedCharacter, logEntries };
 }
 
@@ -215,12 +263,14 @@ export function modifyDamageWithEffects(
  * @param {string} abilityName - Name of the ability applying the effect
  * @param {object} effectConfig - The effect configuration from the ability
  * @param {string} targetName - Name of the target character
+ * @param {number} turn - Current turn number
  * @returns {ActiveStatusEffect} The created status effect
  */
 export function createStatusEffect(
   abilityName: string,
   effectConfig: { type: EffectType; duration: number; potency: number },
-  targetName: string
+  targetName: string,
+  turn: number // NEW: Pass in the current turn
 ): ActiveStatusEffect {
   const effectNames: Record<EffectType, string> = {
     'DEFENSE_UP': 'Defense Boost',
@@ -251,7 +301,8 @@ export function createStatusEffect(
     category: effectCategories[effectConfig.type],
     duration: effectConfig.duration,
     potency: effectConfig.potency,
-    sourceAbility: abilityName
+    sourceAbility: abilityName,
+    turnApplied: turn, // NEW: Set the application turn
   };
 }
 

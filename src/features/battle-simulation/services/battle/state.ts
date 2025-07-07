@@ -4,6 +4,7 @@ import {
   BattleCharacter, 
   BattleState, 
   SimulateBattleParams, 
+  BattleAnalytics,
 } from '../../types';
 import { getLocationType } from '../../types/move.types';
 import { getEnvironmentalFactors } from './positioningMechanics.service';
@@ -30,6 +31,22 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   enhancedStateManager.reset();
   
   // Create battle characters
+  const analytics: BattleAnalytics = {
+    totalDamage: 0,
+    totalChiSpent: 0,
+    turnsSinceLastDamage: 0,
+    averageDamagePerTurn: 0,
+    lastUpdatedTurn: 0,
+    patternAdaptations: 0,
+    stalematePreventions: 0,
+    escalationEvents: 0,
+    punishOpportunities: 0,
+    criticalHits: 0,
+    desperationMoves: 0,
+    lastUpdated: 0,
+    stalematePreventionTriggered: false,
+  };
+  
   const p1Battle: BattleCharacter = {
     ...player1,
     currentHealth: 100, // All characters start with 100 health
@@ -39,7 +56,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     moveHistory: [],
     resources: { chi: 10 },
     activeEffects: [], // Unified status effects system
-    flags: {},
+    flags: { stuckMoveCounter: 0, escalationCycleCount: 0 },
     diminishingEffects: {},
     position: 'neutral',
     chargeProgress: 0,
@@ -48,18 +65,19 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     chargeInterruptions: 0,
     positionHistory: ['neutral'],
     defensiveStance: 'none',
-    mentalState: initializeMentalState(), // Use proper initialization
+    mentalState: initializeMentalState(),
     opponentPerception: DEFAULT_OPPONENT_PERCEPTION,
-    // NEW: Initialize mental thresholds tracking
-    mentalThresholdsCrossed: {}, // Starts with no thresholds crossed
-    // NEW: Behavioral System Integration
+    mentalThresholdsCrossed: {},
     behavioralTraits: initializeBehavioralSystem(player1),
-    manipulationResilience: player1.manipulationResilience || 50, // Default resilience
+    manipulationResilience: player1.manipulationResilience || 50,
     activeFlags: initializeActiveFlags(),
     controlState: 'Neutral',
     stability: 50,
     momentum: 50,
     recoveryOptions: [],
+    analytics: { ...analytics },
+    tacticalStalemateCounter: 0,
+    lastTacticalPriority: '',
   };
   
   const p2Battle: BattleCharacter = {
@@ -71,27 +89,28 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     moveHistory: [],
     resources: { chi: 10 },
     activeEffects: [],
-    flags: {},
+    flags: { stuckMoveCounter: 0, escalationCycleCount: 0 },
     diminishingEffects: {},
     position: 'neutral',
     chargeProgress: 0,
     isCharging: false,
     repositionAttempts: 0,
     chargeInterruptions: 0,
-    positionHistory: [],
+    positionHistory: ['neutral'],
     defensiveStance: 'none',
-    mentalState: initializeMentalState(), // Use proper initialization
+    mentalState: initializeMentalState(),
     opponentPerception: DEFAULT_OPPONENT_PERCEPTION,
-    // NEW: Initialize mental thresholds tracking
-    mentalThresholdsCrossed: {}, // Starts with no thresholds crossed
-    // NEW: Behavioral System Integration
+    mentalThresholdsCrossed: {},
     behavioralTraits: initializeBehavioralSystem(player2),
-    manipulationResilience: player2.manipulationResilience || 50, // Default resilience
+    manipulationResilience: player2.manipulationResilience || 50,
     activeFlags: initializeActiveFlags(),
     controlState: 'Neutral',
     stability: 50,
     momentum: 50,
     recoveryOptions: [],
+    analytics: { ...analytics },
+    tacticalStalemateCounter: 0,
+    lastTacticalPriority: '',
   };
   
   // Calculate environmental factors
@@ -122,6 +141,10 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     // NEW: Dynamic Escalation Timeline
     arcState: getDefaultArcState(),
     arcStateHistory: getDefaultArcStateHistory(),
+    analytics: { ...analytics },
+    // --- NEW: Initialize tactical stalemate fields ---
+    tacticalStalemateCounter: 0,
+    lastTacticalPriority: '',
   };
   
   // Integrate opening sequence into the state

@@ -1060,3 +1060,24 @@ Ensure that all containers use explicit gap or padding values, never relying on 
  *   All contributors MUST have these hooks enabled.
  */
 
+/*==========================================
+=   PROACTIVE EXPORT/RE-EXPORT CONFLICT PREVENTION   =
+==========================================*/
+
+/**
+ * To prevent Vite/ESM 'Multiple exports with the same name' errors:
+ *
+ * 1. NEVER re-export and locally define a function, type, or variable with the same name in the same file.
+ *    - Example: If you re-export `analyzeBattlePerformance` from another module, do NOT also define it locally in the same file.
+ *    - If you need a local override, REMOVE the re-export.
+ *    - If you only want to re-export, do NOT define it locally.
+ *
+ * 2. BEFORE adding a new export, always check for existing re-exports or local definitions in the file.
+ *
+ * 3. If you see a Vite/ESM error about 'Multiple exports with the same name', IMMEDIATELY remove the duplicate (either the re-export or the local definition).
+ *
+ * 4. This rule applies to all modules, but especially analytics.ts and any file that acts as a barrel or aggregation module.
+ *
+ * 5. Add this check to your pre-commit and code review process.
+ */
+

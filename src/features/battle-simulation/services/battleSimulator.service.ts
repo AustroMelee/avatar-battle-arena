@@ -6,6 +6,7 @@ import { processTurn } from './battle/processTurn';
 import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerformance, generateBattleReport, BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
+import { createMechanicLogEntry } from './utils/mechanicLogUtils';
 
 /**
  * @description Represents the result of a battle simulation with analytics.
@@ -90,11 +91,33 @@ export class BattleSimulator {
       });
     }
     
+    // Generate analytics first to get total damage
+    const battleMetrics = analyzeBattlePerformance(currentState, currentState.battleLog, startTime);
+    // --- NEW: Zero-Damage Win Prevention & Deadlock Declaration ---
+    if (currentState.isFinished && battleMetrics.totalDamage === 0) {
+        currentState.winner = null; // Override any winner, it's a draw
+        battleMetrics.victoryMethod = 'deadlock'; // Set the victory method
+        const deadlockLogEntry = createMechanicLogEntry({
+            turn: currentState.turn,
+            actor: 'System',
+            mechanic: 'Stalemate by Deadlock',
+            effect: 'The battle ends in a deadlock with no decisive action taken.',
+            reason: 'Zero total damage was dealt throughout the battle.',
+        });
+        currentState.battleLog.push(deadlockLogEntry);
+        currentState.log.push(deadlockLogEntry.narrative || deadlockLogEntry.result);
+    }
+    // --- NEW: Sudden Death Analytics Reporting ---
+    if (currentState.isFinished && currentState.participants.some(p => p.flags.suddenDeath)) {
+        if (battleMetrics.victoryMethod !== 'climax') {
+            battleMetrics.victoryMethod = 'climax';
+        }
+    }
+    
     const endTime = Date.now();
     const duration = endTime - startTime;
     
     // Generate comprehensive analytics
-    const battleMetrics = analyzeBattlePerformance(currentState, currentState.battleLog, startTime);
     const characterMetrics = currentState.participants.map(character => 
       analyzeCharacterPerformance(character, currentState.battleLog)
     );

@@ -68,6 +68,7 @@ export interface ActiveStatusEffect {
   duration: number; // How many turns it lasts
   potency: number; // e.g., Damage per turn for BURN, or % increase for BUFF
   sourceAbility: string; // The name of the ability that applied it
+  turnApplied: number; // NEW: Track when the effect was applied
 }
 
 /**
@@ -140,31 +141,7 @@ export interface BattleCharacter extends Character {
     chi: number;
   };
   activeEffects: ActiveStatusEffect[]; // Unified status effects system
-  flags: {
-    usedDesperation?: boolean; // Track if desperation move was used
-    usedFinisher?: boolean; // Track if finisher move was used
-    desperationState?: string; // JSON string of current desperation state
-    lowHealthTurns?: number; // Track consecutive turns at low health
-    stalemateTurns?: number; // Track consecutive stalemate turns
-    isResting?: boolean; // Track if character is resting/focusing for enhanced regeneration
-    stunned?: boolean; // Track if character is stunned
-    stunDuration?: number; // Duration of stun effect
-    // NEW: Pattern breaking and escalation flags
-    forcedEscalation?: string; // 'true' if forced into escalation state
-    damageMultiplier?: string; // Damage multiplier as string (e.g., '2.0')
-    repositionDisabled?: string; // Turns remaining as string (e.g., '3')
-    escalationTurns?: string; // Turns in escalation state as string
-    escalationDuration?: string; // Duration of escalation state as string (e.g., '3')
-    isCountering?: boolean; // NEW: Track if character is in counter-attack state
-    // --- NEW: Disruption Window ---
-    disruptionWindowActive?: boolean;
-    disruptionWindowCooldown?: number;
-    disruptionWindowOpenedTurn?: number;
-    // --- NEW: Heroic Reversal ---
-    heroicReversalUsed?: boolean;
-    heroicReversalActive?: boolean;
-    heroicReversalBuff?: number;
-  };
+  flags: BattleCharacterFlags;
   diminishingEffects: Record<string, number>; // Track power reduction from diminishing returns
   
   // NEW: Defensive state tracking for UI/VFX
@@ -201,6 +178,10 @@ export interface BattleCharacter extends Character {
   
   // REPLACES old boolean flags. This is a map to track all active flags and their durations.
   activeFlags: Map<string, ActiveFlag>;
+  analytics: BattleAnalytics;
+  // --- NEW: Tactical Stalemate Tracking ---
+  tacticalStalemateCounter: number;
+  lastTacticalPriority: string;
 }
 
 /**
@@ -366,17 +347,10 @@ export type BattleState = {
   arcState: BattleArcState;
   arcStateHistory: BattleArcState[]; // Tracks the progression to prevent reversion
   // NEW: Real-time analytics tracking
-  analytics?: {
-    totalDamage: number;
-    totalChiSpent: number;
-    patternAdaptations: number;
-    stalematePreventions: number;
-    escalationEvents: number;
-    punishOpportunities: number;
-    criticalHits: number;
-    desperationMoves: number;
-    lastUpdated: number;
-  };
+  analytics: BattleAnalytics;
+  // --- NEW: Tactical Stalemate Tracking ---
+  tacticalStalemateCounter: number;
+  lastTacticalPriority: string;
 };
 
 /**
@@ -423,15 +397,35 @@ export interface BattleCharacterFlags {
   stalemateTurns?: number;
   forcedEscalation?: string;
   damageMultiplier?: string;
+  repositionDisabled?: string;
   escalationTurns?: string;
   escalationDuration?: string;
   isCountering?: boolean;
-  // --- NEW: Disruption Window ---
   disruptionWindowActive?: boolean;
   disruptionWindowCooldown?: number;
   disruptionWindowOpenedTurn?: number;
-  // --- NEW: Heroic Reversal ---
   heroicReversalUsed?: boolean;
   heroicReversalActive?: boolean;
   heroicReversalBuff?: number;
-} 
+  stuckMoveCounter?: number;
+  // --- NEW: Final Phase Flags ---
+  suddenDeath?: boolean;
+  escalationCycleCount?: number;
+}
+
+// --- Analytics type for both BattleCharacter and BattleState ---
+export type BattleAnalytics = {
+  totalDamage: number;
+  totalChiSpent: number;
+  turnsSinceLastDamage: number;
+  averageDamagePerTurn: number;
+  lastUpdatedTurn: number;
+  patternAdaptations: number;
+  stalematePreventions: number;
+  escalationEvents: number;
+  punishOpportunities: number;
+  criticalHits: number;
+  desperationMoves: number;
+  lastUpdated: number;
+  stalematePreventionTriggered?: boolean;
+}; 

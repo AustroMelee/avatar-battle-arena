@@ -298,4 +298,42 @@ const result = updateArcState(battleState, injectedTrigger);
 
 - **Manipulation Resilience**: Each character now has a `manipulationResilience` stat (0-100) that determines their resistance to psychological manipulation and escalation triggers. Characters with low resilience are more likely to escalate or be affected by psychological tactics.
 - **Behavioral Traits**: The escalation system now considers `behavioralTraits` (instances of `BehavioralTraitInstance`) when determining escalation likelihood and narrative outcomes.
-- **Integration**: Both properties are tracked in `BattleCharacter` and `PerceivedState`, and are used by the AI and escalation logic to create more nuanced, context-aware battle flow. 
+- **Integration**: Both properties are tracked in `BattleCharacter` and `PerceivedState`, and are used by the AI and escalation logic to create more nuanced, context-aware battle flow.
+
+# Escalation AI: Hierarchical, Condition-Aware Override (2024 Update)
+
+## Final Escalation AI Logic (Implemented)
+
+The Avatar Battle Arena AI now features a **multi-layered, condition-aware escalation override** that ensures both ruthless aggression and tactical intelligence during Forced Escalation. This system prevents stalemates and guarantees dynamic, dramatic endgames.
+
+### Escalation Move Selection Hierarchy
+
+**During Forced Escalation, the AI follows this priority:**
+
+1. **Ultimate Opportunity:**
+   - If a charge-up or finisher move (e.g., Lightning, Charged Air Tornado) is *usable right now* (all conditions met, e.g., opponent is vulnerable), the AI will use it immediately.
+2. **Relentless Pressure:**
+   - If no ultimate is available, the AI will use the strongest standard attack (type: 'attack', not charge-up/finisher) that is valid this turn.
+3. **Fallback:**
+   - If no attacks are valid, the AI will use the best available move it can legally execute (including defensive or utility moves), or Basic Strike as a last resort.
+
+### Narrative and Mechanical Impact
+- The AI will **never spam unusable ultimates**; it waits for the perfect moment to unleash them.
+- While waiting, it relentlessly pressures the opponent with its best standard attacks, creating openings for a finisher.
+- This produces tense, back-and-forth escalation phases, with explosive climaxes when a vulnerability is detected.
+
+### Example Log Behavior
+```
+T20 Azula: Forced Escalation. Seizing opportunity for an ultimate attack: Lightning!
+T21 Aang: Forced Escalation. Applying relentless pressure with strongest standard attack: Wind Slice.
+T22 Azula: Forced Escalation. No ultimate available. Resorting to best available move: Blue Fire.
+T23 Aang: Forced Escalation. Seizing opportunity for an ultimate attack: Charged Air Tornado!
+```
+
+### Implementation Location
+- `src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts` (see Forced Escalation override block)
+
+### Why This Matters
+- **No more stalemates:** The AI never wastes turns on impossible moves.
+- **Dramatic, authentic battles:** The AI is both aggressive and patient, waiting for the perfect moment to strike with its finisher.
+- **Narrative consistency:** Characters act with believable desperation and tactical awareness in do-or-die moments. 

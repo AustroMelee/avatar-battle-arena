@@ -16,6 +16,8 @@ import {
   tacticalMovePhase,
   endOfTurnEffectsPhase
 } from './phases';
+import { updateRealTimeAnalytics } from './analyticsTracker.service';
+import { validateBattleState } from './battleValidation';
 
 /**
  * @description Processes a single turn of the battle using a clean phase-based pipeline.
@@ -29,6 +31,9 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   if (!state.analytics) {
     state.analytics = initializeAnalyticsTracker();
   }
+  
+  // --- NEW: Update real-time analytics at the start of the turn ---
+  state = updateRealTimeAnalytics(state);
   
   // --- NEW BEHAVIORAL SYSTEM PROCESSING STEP ---
   const { attacker, target, attackerIndex, targetIndex } = getActiveParticipants(state);
@@ -44,6 +49,21 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   state.participants[activeCharacterIndex] = effectResult.updatedCharacter;
   state.battleLog.push(...effectResult.logEntries);
   // --- END OF NEW STEP ---
+  
+  // --- MODIFIED: Use the updated validation function ---
+  const validationResult = validateBattleState(state);
+  if (validationResult.logEntry) {
+    state.battleLog.push(validationResult.logEntry);
+  }
+  if (validationResult.shouldForceEnd) {
+      // This path is now mostly for instant KOs, as climax is handled differently
+      state.isFinished = true;
+      if (state.winner == null && validationResult.endReason) {
+        state.winner = validationResult.endReason === 'victory' ? (state.participants.find(p => p.currentHealth > 0) || null) : null;
+      }
+      return state;
+  }
+  // --- END MODIFICATION ---
   
   // Execute battle phases in sequence
   // Each phase returns early if the battle should end

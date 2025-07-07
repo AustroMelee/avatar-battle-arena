@@ -1,7 +1,7 @@
 // CONTEXT: Tactical Move Service
 // RESPONSIBILITY: Execute tactical moves with positioning, charge-up, and status effect mechanics
 
-import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
+import { BattleState, BattleCharacter, BattleLogEntry, ArcStateModifier } from '../../types';
 import { Move } from '../../types/move.types';
 import { createBattleContext } from './battleContext.service';
 import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
@@ -12,6 +12,10 @@ import { getMoveFatigueMultiplier, applyMoveFatigue } from './moveFatigue.servic
 import { resolveMove } from './moveLogic.service';
 import { resolveImpact } from './resolveImpact';
 import { checkDefeat } from './checkDefeat';
+import { getLocationType } from '../../types/move.types';
+import { canUseMove } from './positioningMechanics.service';
+import { TacticalMemory } from '../ai/tacticalMemory.service';
+import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
 
 /**
  * @description Result of executing a tactical move
@@ -385,6 +389,9 @@ function moveToAbility(move: Move): Ability {
   };
 }
 
+// TacticalMemory instance per AI (could be attached to BattleCharacter or managed externally)
+const tacticalMemoryMap = new WeakMap<BattleCharacter, TacticalMemory>();
+
 export function selectTacticalMove(
   self: BattleCharacter,
   enemy: BattleCharacter,
@@ -407,7 +414,38 @@ export function selectTacticalMove(
   if (usableMoves.length === 0) {
     // ... (fallback logic remains the same) ...
   }
-  let tacticalMemoryLog = '';
+  // --- NEW: ESCALATION MODE OVERRIDE ---
+  if (self.flags?.forcedEscalation === 'true') {
+    const signatureMoves = usableMoves.filter(move =>
+      move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire') || move.id.includes('Slice') || move.id.includes('Relentless')
+    );
+    const highDamageMoves = usableMoves.filter(move => move.baseDamage >= 5 && !move.isChargeUp);
+    let chosenMove: Move | undefined;
+    let reasoning = "FORCED ESCALATION - Prioritizing signature and high-damage moves!";
+    // 1. Prioritize Signature Moves
+    if (signatureMoves.length > 0) {
+      chosenMove = signatureMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
+      reasoning += ` Using signature move: ${chosenMove.name}.`;
+    } 
+    // 2. Prioritize other High Damage Moves
+    else if (highDamageMoves.length > 0) {
+      chosenMove = highDamageMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
+      reasoning += ` Using high-damage move: ${chosenMove.name}.`;
+    } 
+    // 3. Fallback to any available non-Basic Strike move
+    else {
+      chosenMove = usableMoves.find(m => !m.id.includes('Basic')) || usableMoves[0];
+      reasoning += ` No signature/high-damage moves available, using best option: ${chosenMove.name}.`;
+    }
+    return {
+      move: chosenMove,
+      reasoning,
+      tacticalAnalysis: "Forced Escalation",
+    };
+  }
+  // --- END OF ESCALATION MODE OVERRIDE ---
+  // --- Regular Tactical Scoring (for non-escalation turns) ---
+  const identityAdjustments = adjustScoresByIdentity(self, usableMoves);
   const scoredMoves = usableMoves.map(move => {
     let score = 0;
     let reasoning = "";
@@ -415,14 +453,12 @@ export function selectTacticalMove(
     // --- ENHANCED: Punish bonus now scales with move power ---
     if (enemy.isCharging || enemy.position === "repositioning" || enemy.position === "stunned") {
       if (move.punishIfCharging) {
-        score += 150 + (move.baseDamage * 10); // Higher bonus for stronger punishes
+        score += 200;
         reasoning += "PUNISHING VULNERABLE ENEMY! ";
-        tacticalFactors.push("Punish Opportunity");
       }
       if (move.baseDamage > 0) {
-        score += 50 + (move.baseDamage * 5); // General bonus for attacking a vulnerable enemy
+        score += 80;
         reasoning += "Enemy is vulnerable, attacking! ";
-        tacticalFactors.push("Vulnerability Exploit");
       }
     }
     // --- NEW: Add a penalty for using Basic Strike when other options are available ---
@@ -477,6 +513,5 @@ export function selectTacticalMove(
     move: bestMove.move,
     reasoning: bestMove.reasoning,
     tacticalAnalysis: bestMove.tacticalFactors.join(", "),
-    tacticalMemoryLog
   };
 }

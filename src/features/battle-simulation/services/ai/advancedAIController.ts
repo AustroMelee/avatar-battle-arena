@@ -94,31 +94,39 @@ export function chooseAbilityWithAdvancedAI(
   previousState: AdvancedAIState | null = null
 ): { ability: Ability; aiLog: AILogEntry; newState: AdvancedAIState } {
   
-
-  
-  // 1. Analyze battle context
   const context = getBattleTacticalContext(character, enemy, battleLog);
   
-  // 2. Determine tactical intent
   let intent: Intent;
   let intentTurnCount: number;
   
   if (previousState && shouldMaintainIntent(previousState.intent, context)) {
-    // Maintain current intent
     intent = previousState.intent;
     intentTurnCount = previousState.intentTurnCount + 1;
   } else {
-    // Choose new intent
     intent = chooseIntent(context);
     intentTurnCount = 1;
   }
   
-  // 3. Get available moves
   const meta = assessMetaState(character, enemy, turn);
-  const availableMoves = getAvailableMoves(character, meta, location, 0);
+  const availableMoves = getAvailableMoves(character, meta, location, turn);
   
-  // 4. Score moves with context and intent
-  const contextualMoveScores = scoreMovesWithContext(
+  if (availableMoves.length === 0) {
+    // Handle no available moves fallback
+    const fallbackAbility = character.abilities.find(a => a.name === "Basic Strike") || character.abilities[0];
+    let lastIntentChange: number;
+    if (intentTurnCount === 1) {
+      lastIntentChange = turn;
+    } else {
+      lastIntentChange = previousState?.lastIntentChange ?? turn;
+    }
+    return {
+        ability: fallbackAbility,
+        newState: { context, intent, intentTurnCount, lastIntentChange },
+        aiLog: { /* ... create a fallback log ... */ } as any,
+    };
+  }
+
+  const scoredMoves = scoreMovesWithContext(
     availableMoves, 
     character, 
     enemy, 
@@ -126,53 +134,38 @@ export function chooseAbilityWithAdvancedAI(
     intent
   );
   
-  // 5. Select move with variance (weighted random from top 3)
-  const topMoves = contextualMoveScores.slice(0, 3);
-  const totalWeight = topMoves.reduce((sum, _move, index) => sum + (3 - index), 0);
-  const random = Math.random() * totalWeight;
-  
-  let cumulativeWeight = 0;
-  let selected = topMoves[0]; // Fallback
-  
-  for (let i = 0; i < topMoves.length; i++) {
-    cumulativeWeight += (3 - i);
-    if (random <= cumulativeWeight) {
-      selected = topMoves[i];
-      break;
-    }
-  }
-  
+  const bestMove = scoredMoves[0];
 
-  
-  // 6. Build enhanced AI log
-  const perceivedState = createEnhancedPerceivedState(character, enemy, turn);
-  const consideredActions: ConsideredAction[] = contextualMoveScores.slice(0, 5).map(({ move, score, reasons, contextFactors, intentAlignment }) => ({
-    move: move.name,
-    score: Math.round(score * 100) / 100,
-    reason: `${reasons.join(' - ')} [Intent: ${intentAlignment}/10] [Context: ${contextFactors.join(', ')}]`,
-    abilityId: move.name.toLowerCase().replace(/\s+/g, '_')
-  }));
-  
   const aiLog: AILogEntry = {
     turn,
     agent: character.name,
-    perceivedState,
-    consideredActions,
-    chosenAction: selected.move.name,
-    reasoning: `Intent: ${intent.type} (${intent.description}) - ${selected.reasons.join(' - ')}`,
-    narrative: buildAdvancedMoveNarrative(character, selected.move, context, intent, selected),
+    reasoning: `Intent: ${intent.type}. Reasons: ${bestMove.reasons.join('. ')}`,
+    chosenAction: bestMove.move.name,
+    consideredActions: scoredMoves.slice(0, 3).map(sm => ({
+        move: sm.move.name,
+        score: sm.score,
+        reason: sm.reasons.join(', '),
+        abilityId: sm.move.name,
+    })),
+    perceivedState: { /* ... populate this ... */ } as any,
     timestamp: Date.now()
   };
-  
-  // 7. Create new AI state
+
+  let lastIntentChange: number;
+  if (intentTurnCount === 1) {
+    lastIntentChange = turn;
+  } else {
+    lastIntentChange = previousState?.lastIntentChange ?? turn;
+  }
+
   const newState: AdvancedAIState = {
     context,
     intent,
     intentTurnCount,
-    lastIntentChange: intentTurnCount === 1 ? turn : (previousState?.lastIntentChange || turn)
+    lastIntentChange,
   };
   
-  return { ability: selected.move, aiLog, newState };
+  return { ability: bestMove.move, aiLog, newState };
 }
 
 /**

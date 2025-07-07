@@ -20,7 +20,7 @@ export interface BattleMetrics {
   stalematePrevention: boolean;
   battleDuration: number; // in milliseconds
   winner: string | null;
-  victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate';
+  victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock';
 }
 
 /**
@@ -68,7 +68,7 @@ export function analyzeBattlePerformance(
   const chiEfficiency = totalChiSpent > 0 ? totalDamage / totalChiSpent : 0;
   
   // Determine victory method
-  let victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' = 'health';
+  let victoryMethod: 'health' | 'desperation' | 'climax' | 'stalemate' | 'deadlock' = 'health';
   if (finalState.winner && finalState.winner.name) {
     const winnerLogs = battleLog.filter(entry => entry.actor === finalState.winner!.name);
     if (winnerLogs.some(entry => entry.meta?.desperation)) {

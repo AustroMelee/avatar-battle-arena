@@ -225,13 +225,13 @@ export const AANG_MOVES: Move[] = [
     name: 'Last Breath Cyclone',
     type: 'attack',
     chiCost: 10,
-    baseDamage: 12,
-    cooldown: 10,
-    maxUses: 1, // Only once per battle
+    baseDamage: 25, // Increased base damage for finisher
+    cooldown: 0, // No cooldown, it's a finisher
+    maxUses: 1,
     isFinisher: true,
     oncePerBattle: true,
     finisherCondition: { type: 'hp_below', percent: 20 },
-    description: 'Aang channels every last ounce of strength into a world-shaking cyclone. Only available below 20% HP.',
+    description: 'Aang channels every last ounce of strength into a world-shaking cyclone. A battle-ending move.',
     collateralDamage: 3,
     collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
   },
@@ -364,7 +364,22 @@ export const AZULA_MOVES: Move[] = [
         damageMultiplier: 1.2
       }
     }
-  }
+  },
+  {
+    id: 'phoenix_inferno',
+    name: 'Phoenix Inferno',
+    type: 'attack',
+    chiCost: 12,
+    baseDamage: 30, // Increased base damage for finisher
+    cooldown: 0,
+    maxUses: 1,
+    isFinisher: true,
+    oncePerBattle: true,
+    finisherCondition: { type: 'hp_below', percent: 20 },
+    description: 'Azula channels all remaining energy into a devastating final attack. A battle-ending move.',
+    collateralDamage: 3,
+    collateralDamageNarrative: "The inferno engulfs the entire plaza, leaving nothing but scorched earth and melted stone in its wake.",
+  },
 ];
 
 // --- SAMPLE: SUGGESTED CHARACTER STATS ---
@@ -410,4 +425,32 @@ export function getLocationType(location: string): LocationType {
     default:
       return "Open";
   }
-} 
+}
+
+// --- NEW: SUDDEN DEATH FINISHERS ---
+
+export const AANG_SUDDEN_DEATH_FINISHER: Move = {
+  id: 'final_tempest_finisher',
+  name: 'Final Tempest',
+  type: 'attack',
+  chiCost: 0,
+  baseDamage: 50, // Massive, almost guaranteed to be lethal
+  cooldown: 0,
+  isFinisher: true,
+  // tags: ['sudden_death', 'finisher', 'ultimate'], // Remove if not in Move
+  description: 'SUDDEN DEATH: Aang unleashes a final, uncontrolled storm of air, risking everything to end the fight.',
+  desperationBuff: { hpThreshold: 100, damageBonus: 20, defensePenalty: 100 },
+};
+
+export const AZULA_SUDDEN_DEATH_FINISHER: Move = {
+  id: 'comets_wrath_finisher',
+  name: "Comet's Wrath",
+  type: 'attack',
+  chiCost: 0,
+  baseDamage: 60,
+  cooldown: 0,
+  isFinisher: true,
+  // tags: ['sudden_death', 'finisher', 'ultimate', 'piercing'], // Remove if not in Move
+  description: 'SUDDEN DEATH: Azula channels the raw, destructive power of a comet, unleashing an inescapable inferno.',
+  desperationBuff: { hpThreshold: 100, damageBonus: 25, defensePenalty: 100 },
+}; 
