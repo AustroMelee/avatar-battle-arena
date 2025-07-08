@@ -1,7 +1,7 @@
 // CONTEXT: Narrative Composer
 // RESPONSIBILITY: Compose narrative lines from fragments and components
 
-import type { NarrativeContext, DamageOutcome } from '../types/NarrativeTypes';
+import type { NarrativeContext, DamageOutcome, NarrativeMemoryEntry } from '../types/NarrativeTypes';
 import { CharacterNarrativeRouter } from './CharacterNarrativeRouter';
 import { NarrativeVariantsService } from './NarrativeVariantsService';
 import { PoolManager } from './pools/PoolManager';
@@ -25,55 +25,96 @@ export class NarrativeComposer {
   }
 
   /**
-   * @description Compose technical narrative focusing on move execution
+   * @description Compose technical narrative focusing on move execution. Now supports multi-part output.
+   * @returns A string or array of narrative lines (e.g., [intention, action, reaction])
    */
-  composeTechnicalNarrative(characterName: string, damageOutcome: DamageOutcome, _context: NarrativeContext, moveName: string): string {
+  composeTechnicalNarrative(
+    characterName: string,
+    damageOutcome: DamageOutcome,
+    _context: NarrativeContext,
+    moveName: string,
+    memory: NarrativeMemoryEntry[]
+  ): string | string[] {
+    // Check for recent memory (last 3 turns)
+    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type) && _context.turnNumber - e.turn <= 3);
+    let memoryLine = '';
+    if (recent.length > 0) {
+      const last = recent[recent.length - 1];
+      memoryLine = `${characterName} remembers their recent ${last.type.replace('_',' ')}${last.move ? ` (${last.move})` : ''}.`;
+    }
     // Try to get move-specific flavor first
     const moveFlavor = this.characterRouter.getMoveFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
-      return moveFlavor;
+      const base = [
+        `${characterName} prepares to use ${moveName}.`,
+        moveFlavor
+      ];
+      return memoryLine ? [memoryLine, ...base] : base;
     }
-    
     // Fall back to character-specific lines
     if (damageOutcome === 'miss') {
-      return this.characterRouter.getMissLine(characterName);
+      const base = [
+        `${characterName} attempts a move, but it misses.`,
+        this.characterRouter.getMissLine(characterName)
+      ];
+      return memoryLine ? [memoryLine, ...base] : base;
     } else if (damageOutcome === 'hit') {
-      return this.characterRouter.getHitLine(characterName);
+      const base = [
+        `${characterName} strikes decisively.`,
+        this.characterRouter.getHitLine(characterName)
+      ];
+      return memoryLine ? [memoryLine, ...base] : base;
     } else {
-      return this.variantsService.getDamageOutcomeVariant(damageOutcome);
+      const base = this.variantsService.getDamageOutcomeVariant(damageOutcome);
+      return memoryLine ? [memoryLine, ...(Array.isArray(base) ? base : [base])] : base;
     }
   }
 
   /**
-   * @description Compose emotional narrative with state tracking
+   * @description Compose emotional narrative with state tracking. Now supports multi-part output.
+   * @returns A string or array of narrative lines (e.g., [intention, action, reaction])
    */
   composeEmotionalNarrative(
-    characterName: string, 
-    damageOutcome: DamageOutcome, 
-    _context: NarrativeContext, 
+    characterName: string,
+    damageOutcome: DamageOutcome,
+    _context: NarrativeContext,
     moveName: string,
     emotionalState: string,
     shouldNarrateEmotion: boolean,
-    emotionalEnhancement: string
-  ): string {
+    emotionalEnhancement: string,
+    memory: NarrativeMemoryEntry[]
+  ): string | string[] {
+    // Check for recent memory (last 3 turns)
+    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type) && _context.turnNumber - e.turn <= 3);
+    let memoryLine = '';
+    if (recent.length > 0) {
+      const last = recent[recent.length - 1];
+      memoryLine = `${characterName} recalls their recent ${last.type.replace('_',' ')}${last.move ? ` (${last.move})` : ''}.`;
+    }
     // Get move-specific flavor if available
     const moveFlavor = this.getMoveSpecificFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
-      // Only add emotional enhancement if state actually changed
       if (shouldNarrateEmotion) {
-        return `${moveFlavor} ${emotionalEnhancement}`;
+        const base = [
+          `${characterName} feels ${emotionalState} as the moment unfolds.`,
+          moveFlavor,
+          emotionalEnhancement
+        ];
+        return memoryLine ? [memoryLine, ...base] : base;
       }
-      return moveFlavor;
+      return memoryLine ? [memoryLine, moveFlavor] : moveFlavor;
     }
-    
     // Fallback to standard emotional narrative with enhanced emotional state selection
     const baseLine = this.getEmotionallyAppropriateLine(characterName, damageOutcome, emotionalState);
-    
-    // Only add emotional enhancement if state actually changed
     if (shouldNarrateEmotion) {
-      return `${baseLine} ${emotionalEnhancement}`;
+      const base = [
+        `${characterName} feels ${emotionalState}.`,
+        baseLine,
+        emotionalEnhancement
+      ];
+      return memoryLine ? [memoryLine, ...base] : base;
     }
-    return baseLine;
+    return memoryLine ? [memoryLine, baseLine] : baseLine;
   }
 
   /**
@@ -185,12 +226,26 @@ export class NarrativeComposer {
   /**
    * @description Compose environmental narrative with move-specific flavor
    */
-  composeEnvironmentalNarrative(characterName: string, damageOutcome: DamageOutcome, _context: NarrativeContext, moveName: string): string {
+  composeEnvironmentalNarrative(
+    characterName: string,
+    damageOutcome: DamageOutcome,
+    _context: NarrativeContext,
+    moveName: string,
+    memory: NarrativeMemoryEntry[]
+  ): string | string[] {
+    // Check for recent memory (last 3 turns)
+    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type) && _context.turnNumber - e.turn <= 3);
+    let memoryLine = '';
+    if (recent.length > 0) {
+      const last = recent[recent.length - 1];
+      memoryLine = `${characterName} is still affected by their recent ${last.type.replace('_',' ')}${last.move ? ` (${last.move})` : ''}.`;
+    }
     // Get move-specific flavor if available
     const moveFlavor = this.getMoveSpecificFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
       const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
-      return `${moveFlavor} ${environmentalContext}`;
+      const base = `${moveFlavor} ${environmentalContext}`;
+      return memoryLine ? [memoryLine, base] : base;
     }
     
     // Fallback to standard environmental narrative
@@ -200,7 +255,8 @@ export class NarrativeComposer {
     
     // Add environmental context
     const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
-    return `${baseLine} ${environmentalContext}`;
+    const base = `${baseLine} ${environmentalContext}`;
+    return memoryLine ? [memoryLine, base] : base;
   }
 
   /**

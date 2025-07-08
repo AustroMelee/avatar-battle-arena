@@ -61,7 +61,10 @@ export function BattleScene({
       )}
       <VersusGrid player1={player1Props} player2={player2Props} />
       <div className={styles.logContainer}>
-        {/* ⚠️ CRITICAL: UnifiedBattleLog defaults to showAllEntries=true to ensure T1 logs are always visible */}
+        {/*
+          UnifiedBattleLog expects participants[0] to be Player 1 (left) and participants[1] to be Player 2 (right).
+          If this contract is violated, UnifiedBattleLog will auto-correct and log a warning.
+        */}
         <UnifiedBattleLog 
           battleLog={state.battleLog}
           aiLog={state.aiLog}

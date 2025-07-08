@@ -11,7 +11,7 @@ import type {
 // Type for the dynamically imported coordinator
 interface NarrativeCoordinatorInstance {
   initializeBattle(player1Name: string, player2Name: string): void;
-  generateMoveNarrative(request: NarrativeRequest): string;
+  generateMoveNarrative(request: NarrativeRequest): string[];
   generateEscalationNarrative(characterName: string, context: NarrativeContext): string;
   generateDesperationNarrative(characterName: string, context: NarrativeContext): string;
   generateVictoryNarrative(winnerName: string, loserName: string): string;
@@ -47,14 +47,15 @@ export class EnhancedNarrativeSystem {
   }
 
   /**
-   * @description Generate narrative for a move execution
+   * @description Generate narrative for a move execution (multi-part output)
+   * @returns Array of narrative lines (e.g., [intention, action, reaction])
    */
   async generateMoveNarrative(
     characterName: string,
     moveName: string,
     context: NarrativeContext,
     damageOutcome: DamageOutcome
-  ): Promise<string> {
+  ): Promise<string[]> {
     await this.initializationPromise;
     if (!this.coordinator) {
       throw new Error('Narrative coordinator not initialized');
@@ -69,14 +70,15 @@ export class EnhancedNarrativeSystem {
   }
 
   /**
-   * @description Generate narrative (backward compatibility method)
+   * @description Generate narrative (backward compatibility method, now multi-part)
+   * @returns Array of narrative lines (e.g., [intention, action, reaction])
    */
   async generateNarrative(
     characterName: string,
     context: Record<string, unknown>,
     damageOutcome: DamageOutcome,
     moveName?: string
-  ): Promise<string> {
+  ): Promise<string[]> {
     // Convert legacy context to new format
     const narrativeContext: NarrativeContext = {
       turnNumber: (context.turnNumber as number) || 0,
@@ -89,7 +91,6 @@ export class EnhancedNarrativeSystem {
       isEscalation: (context.isEscalation as boolean) || false,
       isPatternBreak: (context.isPatternBreak as boolean) || false
     };
-
     return await this.generateMoveNarrative(characterName, moveName || '', narrativeContext, damageOutcome);
   }
 
@@ -295,7 +296,8 @@ export class EnhancedNarrativeSystem {
     } else if (type === 'defeat') {
       return this.generateDefeatNarrative(character, narrativeContext.turnNumber);
     } else {
-      return await this.generateMoveNarrative(character, '', narrativeContext, 'hit');
+      const lines = await this.generateMoveNarrative(character, '', narrativeContext, 'hit');
+      return lines[0];
     }
   }
 

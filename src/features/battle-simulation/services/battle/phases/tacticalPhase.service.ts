@@ -16,10 +16,24 @@ import { updatePatternTracking } from '../patternBreaking.service';
 import { propagateTacticalStates } from '../tacticalState.service';
 import { availableLocations } from '../../../../location-selection/data/locationData';
 import { resolveReversal } from '../reversalMechanic.service';
-import { createMechanicLogEntry } from '../../utils/mechanicLogUtils';
+import { createMechanicLogEntry, logStory } from '../../utils/mechanicLogUtils';
 import { AANG_SUDDEN_DEATH_FINISHER, AZULA_SUDDEN_DEATH_FINISHER } from '../../../types/move.types';
 import { getAvailableMoves } from '../../utils/moveUtils'; // Corrected import
 import { forceBattleClimax } from '../battleValidation';
+
+// Dynamic forced escalation flavor phrases
+const NO_MOVE_FLAVORS = [
+  (name: string) => `${name} hesitates, exhausted and wary. The next move never comes.`,
+  (name: string) => `${name}'s attacks are met and deflected—neither gains ground.`,
+  (name: string) => `${name} is forced on the defensive, unable to find an opening!`,
+  (name: string) => `${name} circles warily, unable to break the deadlock.`,
+  (name: string) => `Fatigue sets in for ${name}; no opportunity presents itself.`,
+];
+
+function getNoMoveFlavor(name: string): string {
+  const idx = Math.floor(Math.random() * NO_MOVE_FLAVORS.length);
+  return NO_MOVE_FLAVORS[idx](name);
+}
 
 /**
  * @description Processes tactical AI move selection and execution with enhanced narratives
@@ -31,30 +45,18 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   const newState = { ...state };
   const { attacker, target, attackerIndex, targetIndex } = getActiveParticipants(newState);
   
-  if ((newState as any).tacticalPhase === 'climax') {
-    const finalState = forceBattleClimax(newState);
-    const climaxLogs = finalState.battleLog.slice(-3);
-    return { state: finalState, logEntries: climaxLogs };
+  if (newState.climaxTriggered) {
+    return { state, logEntries: [] }; // Climax already happened, do nothing in this phase.
+  }
+  
+  if (newState.tacticalPhase === 'climax') {
+    // Centralized, atomic climax trigger
+    return { state: forceBattleClimax(newState), logEntries: [] };
   }
   
   if (attacker.flags?.suddenDeath) {
-    const finisherMove = attacker.name === 'Aang' ? AANG_SUDDEN_DEATH_FINISHER : AZULA_SUDDEN_DEATH_FINISHER;
-    const reasoning = "SUDDEN DEATH: The battle must end now with a final, decisive blow!";
-    const executionResult = await executeTacticalMove(finisherMove, attacker, target, newState);
-    newState.aiLog.push({
-      turn: newState.turn,
-      agent: attacker.name,
-      reasoning: reasoning,
-      chosenAction: finisherMove.name,
-      narrative: executionResult.narrative,
-      // Explicitly log as a Desperation Move
-      tacticalAnalysis: { positionAdvantage: false, chargeOpportunity: false, punishOpportunity: false, environmentalFactor: 'sudden_death' },
-      timestamp: Date.now(),
-    } as AILogEntry);
-    newState.log.push(executionResult.narrative);
-    newState.participants[attackerIndex] = executionResult.newAttacker;
-    newState.participants[targetIndex] = executionResult.newTarget;
-    return { state: newState, logEntries: executionResult.logEntries };
+    // Sudden death triggers climax via forceBattleClimax
+    return { state: forceBattleClimax(newState), logEntries: [] };
   }
 
   // --- CRITICAL FIX: Use the definitive getAvailableMoves function FIRST ---
@@ -64,29 +66,28 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   if (attacker.flags?.forcedEscalation === 'true') {
     console.log(`DEBUG: T${newState.turn} ${attacker.name} is in ESCALATION MODE.`);
     const attackMoves = availableMoves.filter(m => m.type === 'attack' && !m.isChargeUp && !m.changesPosition);
-    
-    if (attackMoves.length > 0) {
-        const chosenMove = attackMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
+    // Define weak move threshold (e.g., baseDamage <= 10 or name === 'Basic Strike')
+    const HIGH_IMPACT_THRESHOLD = 12;
+    const highImpactMoves = attackMoves.filter(m => m.baseDamage > HIGH_IMPACT_THRESHOLD && m.name !== 'Basic Strike');
+    if (highImpactMoves.length > 0) {
+        const chosenMove = highImpactMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
         const reasoning = `FORCED ESCALATION: Using strongest available attack: ${chosenMove.name}.`;
         console.log(`DEBUG: T${newState.turn} ${attacker.name} forced escalation move: ${chosenMove.name}`);
         const executionResult = await executeTacticalMove(chosenMove, attacker, target, newState);
-        
         newState.aiLog.push({ turn: newState.turn, agent: attacker.name, reasoning, chosenAction: chosenMove.name } as AILogEntry);
         newState.log.push(executionResult.narrative);
         newState.participants[attackerIndex] = executionResult.newAttacker;
         newState.participants[targetIndex] = executionResult.newTarget;
+        newState.participants[attackerIndex].cooldowns['Gather Power'] = 2;
         return { state: newState, logEntries: executionResult.logEntries };
     } else {
-        const logEntry = createMechanicLogEntry({
-            turn: newState.turn,
-            actor: attacker.name,
-            mechanic: 'Escalation Charge',
-            effect: `${attacker.name} has no offensive options and gathers power, preparing for the next assault! (Gains 2 Chi)`,
-            reason: 'No offensive moves available during forced escalation.',
+        // No high-impact moves and Gather Power is on cooldown: skip turn (no action)
+        const noMoveLog = logStory({
+          turn: newState.turn,
+          actor: 'Narrator',
+          narrative: getNoMoveFlavor(attacker.name)
         });
-        newState.participants[attackerIndex].resources.chi += 2; 
-        newState.log.push(logEntry.narrative || logEntry.result);
-        return { state: newState, logEntries: [logEntry] };
+        return { state: newState, logEntries: noMoveLog ? [noMoveLog] : [] };
     }
   }
 
@@ -107,8 +108,17 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   const chosenMove = attacker.abilities.find(m => m.name === tacticalResult.chosenAbility.name) || availableMoves[0];
   const executionResult = await executeTacticalMove(chosenMove, attacker, target, newState);
   
+  // Log the AI decision for this turn (always, not just forced escalation)
+  newState.aiLog.push({
+    turn: newState.turn,
+    agent: attacker.name,
+    reasoning: (Array.isArray(tacticalResult.reasons) && tacticalResult.reasons.length > 0)
+      ? tacticalResult.reasons.join('; ')
+      : (tacticalResult.tacticalExplanation || `Chose move: ${chosenMove.name}`),
+    chosenAction: chosenMove.name
+  } as AILogEntry);
+
   // Update logs and state
-  newState.battleLog.push(...executionResult.logEntries);
   newState.log.push(executionResult.narrative);
   newState.participants[attackerIndex] = executionResult.newAttacker;
   newState.participants[targetIndex] = executionResult.newTarget;
@@ -122,7 +132,8 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   for (const participant of participants) {
     const reversalResult = resolveReversal({ character: participant });
     if (reversalResult) {
-      reversalLogEntries.push(createMechanicLogEntry({ turn: newState.turn, actor: participant.name, mechanic: 'Reversal', effect: reversalResult.narrative, reason: reversalResult.source }));
+      const { technical } = createMechanicLogEntry({ turn: newState.turn, actor: participant.name, mechanic: 'Reversal', effect: reversalResult.narrative, reason: reversalResult.source });
+      reversalLogEntries.push(technical);
       participant.stability += reversalResult.stabilityGain;
     }
   }

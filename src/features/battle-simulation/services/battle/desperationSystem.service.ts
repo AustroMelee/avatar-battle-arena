@@ -4,6 +4,7 @@
 import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Desperation thresholds that trigger dramatic changes
@@ -162,23 +163,12 @@ export function createDesperationLogEntry(
     result = `${character.name} enters desperation! Desperate moves unlocked.`;
   }
 
-  return {
-    id: generateUniqueLogId('desperation'),
+  return logStory({
     turn,
     actor: character.name,
-    type: 'DESPERATION',
-    action: 'desperation_trigger',
-    target: character.name,
-    result,
     narrative,
-    timestamp: Date.now(),
-    meta: {
-      desperationLevel: desperationState.isFinal ? 'final' : desperationState.isExtreme ? 'extreme' : 'desperate',
-      attackBonus: desperationState.statModifiers.attackBonus,
-      defensePenalty: desperationState.statModifiers.defensePenalty,
-      critBonus: desperationState.statModifiers.critChanceBonus
-    }
-  };
+    target: character.name
+  });
 }
 
 /**

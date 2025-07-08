@@ -99,6 +99,23 @@ export function scoreMoveWithContext(
     reasons.push(`Random nudge (${randomNudge > 0 ? '+' : ''}${randomNudge.toFixed(1)})`);
   }
 
+  // --- STATUS FLAG LOGIC: Penalize attacks if enemy is evasive ---
+  const enemyIsEvasive = Array.isArray(enemy.statusFlags) && enemy.statusFlags.some(flag => flag.type === 'Evasive' && flag.turns > 0);
+  if (enemyIsEvasive) {
+    if (move.type === 'attack' && !(move.tags && (move.tags.includes('aoe') || move.tags.includes('tracking')))) {
+      score -= 30;
+      reasons.push('Penalty: Opponent is evasive, standard attacks likely to miss.');
+    }
+    if (move.tags && (move.tags.includes('aoe') || move.tags.includes('tracking'))) {
+      score += 20;
+      reasons.push('Bonus: AoE or tracking move counters evasive opponent.');
+    }
+    if (move.tags && move.tags.includes('gather')) {
+      score += 15;
+      reasons.push('Bonus: Gathering power is a smart response to evasive opponent.');
+    }
+  }
+
   return {
     move,
     score: Math.max(0, score),

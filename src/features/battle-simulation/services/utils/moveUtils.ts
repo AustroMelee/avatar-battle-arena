@@ -58,7 +58,7 @@ function hasEnoughResources(ability: Move, character: BattleCharacter): boolean 
  * @returns True if the move is on cooldown.
  */
 function isMoveOnCooldown(moveName: string, character: BattleCharacter): boolean {
-  return (character.cooldowns[moveName] || 0) > 0;
+  return (character.cooldowns?.[moveName] || 0) > 0;
 }
 
 /**
@@ -111,12 +111,14 @@ export function getAvailableMoves(
 ): Move[] {
   const available = character.abilities.filter((move: Move) => {
     if (!hasEnoughResources(move, character)) return false;
+    // Filter out any move on cooldown, including Gather Power
     if (isMoveOnCooldown(move.name, character)) return false;
     if (!hasUsesLeft(move, character)) return false;
     if (!areFinisherConditionsMet(move, character, enemy)) return false;
-    
-    // Add future checks here (e.g., environmental constraints)
-
+    // DEV ASSERT: If a move is selected and cooldown is not zero, throw an error
+    if (process.env.NODE_ENV === 'development' && isMoveOnCooldown(move.name, character)) {
+      throw new Error(`Move ${move.name} selected while on cooldown for ${character.name}`);
+    }
     return true;
   });
 

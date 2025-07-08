@@ -7,6 +7,8 @@ import styles from './EnhancedBattleLog.module.css';
 interface EnhancedBattleLogProps {
   entries: BattleLogEntry[];
   maxEntries?: number;
+  playerSide: string;
+  type: string;
 }
 
 /**
@@ -14,7 +16,9 @@ interface EnhancedBattleLogProps {
  */
 export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
   entries,
-  maxEntries = 20
+  maxEntries = 20,
+  playerSide,
+  type
 }) => {
   const [visibleEntries, setVisibleEntries] = useState<BattleLogEntry[]>([]);
   const [animations, setAnimations] = useState<Set<string>>(new Set());
@@ -99,7 +103,7 @@ export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
   const formatEntryText = (entry: BattleLogEntry): React.ReactNode => {
     const icon = getEventIcon(entry);
     // Prioritize enhanced narratives over mechanical results
-    const baseText = entry.narrative || entry.result || entry.action;
+    const baseText = typeof entry.narrative === 'string' ? entry.narrative : entry.narrative.join(' ');
     
     // Add damage highlight
     if (entry.damage) {
@@ -154,7 +158,7 @@ export const EnhancedBattleLog: React.FC<EnhancedBattleLogProps> = ({
   };
 
   return (
-    <div className={styles.enhancedBattleLog}>
+    <div className={`${styles.container} ${styles[playerSide]} ${type ? styles[type.toLowerCase()] : ''}`}>
       <div className={styles.header}>
         <h3>Battle Log</h3>
         <div className={styles.stats}>

@@ -4,6 +4,7 @@
 import { BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
 import { createEventId } from '../ai/logQueries';
+import { logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Critical hit configuration
@@ -249,24 +250,10 @@ export function createCriticalLogEntry(
     result += ` ${target.name} is staggered!`;
   }
   
-  return {
-    id: createEventId(),
+  return logStory({
     turn,
     actor: attacker.name,
-    type: 'MOVE',
-    action: move.name,
-    target: target.name,
-    abilityType: move.type,
-    result,
-    damage,
     narrative: criticalResult.narrative,
-    timestamp: Date.now(),
-    meta: {
-      crit: true,
-      critIntensity: criticalResult.intensity,
-      critMultiplier: criticalResult.damageMultiplier,
-      stagger: criticalResult.staggerApplied,
-      resourceCost: move.chiCost || 0
-    }
-  };
+    target: target.name
+  });
 } 

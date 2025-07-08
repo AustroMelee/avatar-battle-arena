@@ -76,9 +76,10 @@ export class NarrativeCoordinator {
   }
 
   /**
-   * @description Generate narrative for a move execution with aggressive anti-repetition
+   * @description Generate narrative for a move execution with aggressive anti-repetition. Now supports multi-part output.
+   * @returns Array of narrative lines (e.g., [intention, action, reaction])
    */
-  generateMoveNarrative(request: NarrativeRequest): string {
+  generateMoveNarrative(request: NarrativeRequest): string[] {
     const { characterName, moveName, damageOutcome, context } = request;
     const turnNumber = context.turnNumber;
 
@@ -91,17 +92,18 @@ export class NarrativeCoordinator {
     // Choose narrative track using strategy service
     const narrativeTrack = this.strategyService.getNarrativeTrack(context);
     
-    let narrative = '';
+    // NEW: Retrieve recent memory for the acting character
+    const memory = this.stateTracker.getMemory(characterName);
     
-    // Generate exactly ONE narrative line based on track using composer with anti-repetition
+    let narrative: string | string[] = '';
+    
+    // Generate narrative line(s) based on track using composer with anti-repetition
     switch (narrativeTrack) {
       case 'technical':
-        // Check if we should use technical narrative (avoid repetition)
         if (this.shouldUseNarrativeTrack(characterName, 'technical', turnNumber)) {
-          narrative = this.composer.composeTechnicalNarrative(characterName, damageOutcome, context, moveName);
+          narrative = this.composer.composeTechnicalNarrative(characterName, damageOutcome, context, moveName, memory);
           this.lastTechnicalNarrativeTurn.set(characterName, turnNumber);
         } else {
-          // Fall back to emotional if technical was used recently
           narrative = this.composer.composeEmotionalNarrative(
             characterName, 
             damageOutcome, 
@@ -109,7 +111,8 @@ export class NarrativeCoordinator {
             moveName,
             this.getCurrentEmotionalState(characterName, context),
             true,
-            this.composer.getEmotionalStateDescription(characterName, this.getCurrentEmotionalState(characterName, context))
+            this.composer.getEmotionalStateDescription(characterName, this.getCurrentEmotionalState(characterName, context)),
+            memory
           );
           this.lastEmotionalNarrativeTurn.set(characterName, turnNumber);
         }
@@ -118,11 +121,9 @@ export class NarrativeCoordinator {
         const emotionalState = this.getCurrentEmotionalState(characterName, context);
         const shouldNarrateEmotion = this.emotionPolicy.shouldNarrateEmotionalState(characterName, emotionalState, turnNumber);
         const emotionalEnhancement = this.composer.getEmotionalStateDescription(characterName, emotionalState);
-        
         if (shouldNarrateEmotion) {
           this.emotionPolicy.updateEmotionalStateTracking(characterName, emotionalState, turnNumber);
         }
-        
         narrative = this.composer.composeEmotionalNarrative(
           characterName, 
           damageOutcome, 
@@ -130,18 +131,17 @@ export class NarrativeCoordinator {
           moveName,
           emotionalState,
           shouldNarrateEmotion,
-          emotionalEnhancement
+          emotionalEnhancement,
+          memory
         );
         this.lastEmotionalNarrativeTurn.set(characterName, turnNumber);
         break;
       }
       case 'environmental':
-        // Check if we should use environmental narrative (avoid repetition)
         if (this.shouldUseNarrativeTrack(characterName, 'environmental', turnNumber)) {
-          narrative = this.composer.composeEnvironmentalNarrative(characterName, damageOutcome, context, moveName);
+          narrative = this.composer.composeEnvironmentalNarrative(characterName, damageOutcome, context, moveName, memory);
           this.lastEnvironmentalNarrativeTurn.set(characterName, turnNumber);
         } else {
-          // Fall back to emotional if environmental was used recently
           const emotionalState = this.getCurrentEmotionalState(characterName, context);
           narrative = this.composer.composeEmotionalNarrative(
             characterName, 
@@ -150,7 +150,8 @@ export class NarrativeCoordinator {
             moveName,
             emotionalState,
             true,
-            this.composer.getEmotionalStateDescription(characterName, emotionalState)
+            this.composer.getEmotionalStateDescription(characterName, emotionalState),
+            memory
           );
           this.lastEmotionalNarrativeTurn.set(characterName, turnNumber);
         }
@@ -161,12 +162,17 @@ export class NarrativeCoordinator {
     if (this.strategyService.shouldIncludeEscalation(context, this.lastEscalationTurn)) {
       const escalationVariant = this.composer.composeEscalationNarrative(characterName, context);
       if (escalationVariant) {
-        narrative += ` ${escalationVariant}`;
+        if (Array.isArray(narrative)) {
+          narrative.push(escalationVariant);
+        } else {
+          narrative = [narrative, escalationVariant];
+        }
         this.lastEscalationTurn = turnNumber;
       }
     }
 
-    return narrative;
+    // Always return an array of lines
+    return Array.isArray(narrative) ? narrative : [narrative];
   }
 
   /**

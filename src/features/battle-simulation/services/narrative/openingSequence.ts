@@ -1,6 +1,7 @@
 // CONTEXT: Narrative System, // FOCUS: Opening Sequence and Pre-Fight Banter
 import type { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { logStory, logTechnical } from '../utils/mechanicLogUtils';
 
 /**
  * @description Opening sequence configuration for each character
@@ -112,94 +113,87 @@ export function generateOpeningSequence(
   const openingEntries: BattleLogEntry[] = [];
   let turnCounter = 1; // Start from turn 1 for opening sequence
 
-  // System opening
-  openingEntries.push({
-    id: generateUniqueLogId('opening'),
-    turn: turnCounter++,
+  // System opening (INFO)
+  const sysLog = logTechnical({
+    turn: undefined as any, // Remove turn number for prologue
     actor: 'System',
-    type: 'INFO',
     action: 'Battle Start',
     result: `The battle begins in the ${location}!`,
-    narrative: getLocationOpening(location, player1.name, player2.name),
-    timestamp: Date.now()
+    reason: undefined,
+    target: undefined,
+    details: undefined
   });
+  if (sysLog) openingEntries.push({ ...(sysLog as BattleLogEntry), prologue: true });
 
-  // Narrator introduction
-  openingEntries.push({
-    id: generateUniqueLogId('opening'),
+  // NEW: Add a narrative entry for Prologue
+  const prologueNarrative = logStory({
+    turn: undefined as any, // Remove turn number for prologue
+    actor: 'Narrator',
+    narrative: `Battle Start: ${player1.name} vs ${player2.name} in the ${location}.`,
+    target: undefined
+  });
+  if (prologueNarrative) openingEntries.push({ ...(prologueNarrative as BattleLogEntry), prologue: true });
+
+  turnCounter++; // Now increment for subsequent entries
+
+  // Narrator introduction (NARRATIVE)
+  const intro = logStory({
     turn: turnCounter++,
     actor: 'Narrator',
-    type: 'NARRATIVE',
-    action: 'Opening',
-    result: getNarratorOpening(player1, player2, location),
     narrative: getNarratorOpening(player1, player2, location),
-    timestamp: Date.now()
+    target: undefined
   });
+  if (intro) openingEntries.push(intro);
 
   // Character 1 opening dialogue
   const char1Sequence = OPENING_SEQUENCES[player1.name];
   if (char1Sequence) {
-    openingEntries.push({
-      id: generateUniqueLogId('opening'),
+    const c1 = logStory({
       turn: turnCounter++,
       actor: player1.name,
-      type: 'NARRATIVE',
-      action: 'Opening',
-      result: getRandomDialogue(char1Sequence.dialogue),
       narrative: getRandomDialogue(char1Sequence.dialogue),
-      timestamp: Date.now()
+      target: undefined
     });
+    if (c1) openingEntries.push(c1);
   }
 
   // Character 2 opening dialogue
   const char2Sequence = OPENING_SEQUENCES[player2.name];
   if (char2Sequence) {
-    openingEntries.push({
-      id: generateUniqueLogId('opening'),
+    const c2 = logStory({
       turn: turnCounter++,
       actor: player2.name,
-      type: 'NARRATIVE',
-      action: 'Opening',
-      result: getRandomDialogue(char2Sequence.dialogue),
       narrative: getRandomDialogue(char2Sequence.dialogue),
-      timestamp: Date.now()
+      target: undefined
     });
+    if (c2) openingEntries.push(c2);
   }
 
   // Narrator character descriptions
-  openingEntries.push({
-    id: generateUniqueLogId('opening'),
+  const desc1 = logStory({
     turn: turnCounter++,
     actor: 'Narrator',
-    type: 'NARRATIVE',
-    action: 'Character Description',
-    result: getCharacterDescription(player1, char1Sequence),
     narrative: getCharacterDescription(player1, char1Sequence),
-    timestamp: Date.now()
+    target: undefined
   });
+  if (desc1) openingEntries.push(desc1);
 
-  openingEntries.push({
-    id: generateUniqueLogId('opening'),
+  const desc2 = logStory({
     turn: turnCounter++,
     actor: 'Narrator',
-    type: 'NARRATIVE',
-    action: 'Character Description',
-    result: getCharacterDescription(player2, char2Sequence),
     narrative: getCharacterDescription(player2, char2Sequence),
-    timestamp: Date.now()
+    target: undefined
   });
+  if (desc2) openingEntries.push(desc2);
 
   // Final tension building
-  openingEntries.push({
-    id: generateUniqueLogId('opening'),
+  const tension = logStory({
     turn: turnCounter++,
     actor: 'Narrator',
-    type: 'NARRATIVE',
-    action: 'Tension',
-    result: getTensionBuilding(player1, player2),
     narrative: getTensionBuilding(player1, player2),
-    timestamp: Date.now()
+    target: undefined
   });
+  if (tension) openingEntries.push(tension);
 
   return openingEntries;
 }

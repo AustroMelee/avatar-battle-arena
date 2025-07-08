@@ -51,8 +51,8 @@ export function useBattleSimulator() {
           turn: entry.turn
         }));
 
-      newNarratives.forEach((n: { id: string; text: string; turn: number }) => displayedNarrativeIds.current.add(n.id));
-      setNarratives(prev => [...prev, ...newNarratives.map((n: { id: string; text: string; turn: number }) => n.text)]);
+      newNarratives.forEach((n: { id: string; text: string | string[]; turn: number }) => displayedNarrativeIds.current.add(n.id));
+      setNarratives(prev => [...prev, ...newNarratives.map((n: { id: string; text: string | string[]; turn: number }) => typeof n.text === 'string' ? n.text : n.text.join(' '))]);
       
     } catch (error) {
       console.error('Battle simulation failed:', error);

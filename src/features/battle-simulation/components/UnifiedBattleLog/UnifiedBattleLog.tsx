@@ -25,10 +25,12 @@ interface UnifiedBattleLogProps {
   participants: [BattleCharacter, BattleCharacter];
 }
 
-type LogTab = 'narrative' | 'technical' | 'ai';
+type LogTab = 'narrative' | 'technical';
 
 /**
- * @description Unified battle log with tabs for narrative and AI logs.
+ * @description UnifiedBattleLog enforces that participants[0] is always Player 1 (left) and participants[1] is Player 2 (right).
+ * If the log entries suggest the order is reversed (e.g., Player 2 acts first), the component will auto-swap participants for rendering
+ * and log a warning. This guarantees left/right consistency in the UI regardless of upstream bugs or input order.
  */
 export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   battleLog,
@@ -36,6 +38,21 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   maxEntries = 15,
   participants
 }) => {
+  // Defensive: auto-swap participants if log entries suggest order is reversed
+  let [p1, p2] = participants;
+  if (battleLog.length > 0) {
+    // Find first log entry with an actor matching either participant
+    const firstEntry = battleLog.find(e => e.actor === p1.name || e.actor === p2.name);
+    if (firstEntry) {
+      // If the first actor is p2 and not p1, and the second actor is p1, swap
+      if (firstEntry.actor === p2.name) {
+        // Swap participants for rendering
+        [p1, p2] = [p2, p1];
+        // eslint-disable-next-line no-console
+        console.warn('[UnifiedBattleLog] Detected participants order mismatch. Swapping for left/right consistency.');
+      }
+    }
+  }
   // ⚠️ CRITICAL: Always start with showAllEntries = true to ensure T1 logs are visible
   // This is a hard requirement - users must always see the complete battle log by default
   const [activeTab, setActiveTab] = useState<LogTab>('narrative');
@@ -51,13 +68,18 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
     }
   }, [battleLog, activeTab]);
 
-  // Group battle log entries by turn
+  // Extract prologue and main logs
+  const prologueEntries = battleLog.filter(entry => entry.prologue);
+  const mainBattleLog = battleLog.filter(entry => !entry.prologue && typeof entry.turn === 'number' && !isNaN(entry.turn));
+
+  // Group battle log entries by turn, filtering for NARRATIVE only
   const groupedBattleLog = useMemo(() => {
-    return battleLog.reduce((acc, entry) => {
-      (acc[entry.turn] = acc[entry.turn] || []).push(entry);
-      return acc;
-    }, {} as Record<number, BattleLogEntry[]>);
-  }, [battleLog]);
+    return mainBattleLog
+      .reduce((acc, entry) => {
+        (acc[entry.turn] = acc[entry.turn] || []).push(entry);
+        return acc;
+      }, {} as Record<number, BattleLogEntry[]>);
+  }, [mainBattleLog]);
 
   // const _groupedAILog = useMemo(() => {
   //   return aiLog.reduce((acc, entry) => {
@@ -107,34 +129,64 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
 
     return (
       <div className={styles.tabContent} ref={logContainerRef}>
-        {visibleTurnNumbers.map(turnNumber => (
-          <div key={`turn-group-${turnNumber}`} className={styles.turnGroup}>
-            <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
-            {groupedBattleLog[turnNumber].map((entry, index) => {
-              let playerSide: 'p1' | 'p2' | 'system' = 'system';
-              let icon = entry.actor === 'Narrator' || entry.actor === 'System' || entry.actor === 'Environment' ? '/favicon.ico' : '';
-
-              if (entry.actor === p1.name) {
-                playerSide = 'p1';
-                icon = p1.base.icon;
-              } else if (entry.actor === p2.name) {
-                playerSide = 'p2';
-                icon = p2.base.icon;
-              }
-
-              return (
-                <BattleNarrativeTurn
-                  key={`${entry.id}-${index}`}
-                  actor={entry.actor}
-                  narrative={entry.narrative || entry.result}
-                  type={entry.type}
-                  playerSide={playerSide}
-                  icon={icon}
-                />
-              )
-            })}
+        {prologueEntries.length > 0 && (
+          <div className={styles.prologueSection}>
+            <h4 className={styles.prologueHeader}>Prologue</h4>
+            {prologueEntries.map((entry, idx) => (
+              <BattleNarrativeTurn
+                key={`prologue-${idx}`}
+                actor={entry.actor}
+                narrative={typeof entry.narrative === 'string' ? entry.narrative : entry.narrative.join(' ')}
+                type={entry.type}
+                playerSide={'left'}
+                icon={'/favicon.ico'}
+              />
+            ))}
           </div>
-        ))}
+        )}
+        {visibleTurnNumbers.map(turnNumber => {
+          const entries = groupedBattleLog[turnNumber];
+          if (!Array.isArray(entries)) {
+            console.warn(`[UnifiedBattleLog] No log entries found for turn ${turnNumber}. This may indicate a data bug.`);
+            return (
+              <div key={`turn-group-${turnNumber}`} className={styles.turnGroup}>
+                <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
+                <div className={styles.emptyState}>
+                  <span className={styles.emptyIcon}>⚠️</span>
+                  <p>No log entries for this turn.</p>
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div key={`turn-group-${turnNumber}`} className={styles.turnGroup}>
+              <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
+              {entries.map((entry, index) => {
+                let playerSide: 'p1' | 'p2' | 'system' = 'system';
+                let icon = entry.actor === 'Narrator' || entry.actor === 'System' || entry.actor === 'Environment' ? '/favicon.ico' : '';
+
+                if (entry.actor === p1.name) {
+                  playerSide = 'p1';
+                  icon = p1.base.icon;
+                } else if (entry.actor === p2.name) {
+                  playerSide = 'p2';
+                  icon = p2.base.icon;
+                }
+
+                return (
+                  <BattleNarrativeTurn
+                    key={`${entry.id}-${index}`}
+                    actor={entry.actor}
+                    narrative={typeof entry.narrative === 'string' ? entry.narrative : entry.narrative.join(' ')}
+                    type={entry.type}
+                    playerSide={playerSide === 'p1' ? 'left' : 'right'}
+                    icon={icon}
+                  />
+                )
+              })}
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -211,21 +263,30 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    * @description Formats all logs for clipboard copying.
    */
   const formatAllLogsForClipboard = () => {
-    const battleLogText = battleLog.map(entry => {
+    // Story Log (narrative)
+    const storyLogText = battleLog.map(entry => {
       const turn = `T${entry.turn}`;
       const actor = entry.actor;
-      const action = entry.action || entry.narrative || entry.result || '';
-      const chi = entry.details && entry.details.resourceCost !== undefined ? ` (${entry.details.resourceCost} chi)` : '';
-      return `${turn} ${actor}: ${action}${chi}`.trim();
+      const narrative = entry.narrative || entry.action || entry.result || '';
+      return `${turn} ${actor}: ${narrative}`.trim();
     }).join('\n');
-    const aiLogText = aiLog.map(entry => {
+
+    // Technical Log (AI)
+    const technicalLogText = aiLog.map(entry => {
       const turn = `T${entry.turn}`;
       const agent = entry.agent;
       const chosen = entry.chosenAction ? `Chose ${entry.chosenAction}` : '';
       const reason = entry.reasoning ? `Reason: ${entry.reasoning}` : '';
       return `${turn} ${agent}: ${chosen}${reason ? '. ' + reason : ''}`.trim();
     }).join('\n');
-    return `---\nBATTLE LOG\n---\n${battleLogText}\n\n---\nAI DECISIONS\n---\n${aiLogText}`;
+
+    // If you have a distinct battle log, add it here. Otherwise, just include story and technical logs.
+    return (
+      '=== Story Log ===\n' +
+      storyLogText +
+      '\n\n=== Technical Log ===\n' +
+      technicalLogText
+    );
   };
 
   /**
@@ -233,6 +294,60 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    */
   const handleCopyAllLogs = async () => {
     const text = formatAllLogsForClipboard();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      // fallback: do nothing
+    }
+  };
+
+  /**
+   * @description Formats only the narrative log for clipboard copying.
+   */
+  const formatNarrativeLogForClipboard = () => {
+    return battleLog.map(entry => {
+      const turn = `T${entry.turn}`;
+      const actor = entry.actor;
+      // Prefer narrative, fallback to action/result
+      const narrative = entry.narrative || entry.action || entry.result || '';
+      return `${turn} ${actor}: ${narrative}`.trim();
+    }).join('\n');
+  };
+
+  /**
+   * @description Formats only the technical log for clipboard copying.
+   */
+  const formatTechnicalLogForClipboard = () => {
+    return aiLog.map(entry => {
+      const turn = `T${entry.turn}`;
+      const agent = entry.agent;
+      const chosen = entry.chosenAction ? `Chose ${entry.chosenAction}` : '';
+      const reason = entry.reasoning ? `Reason: ${entry.reasoning}` : '';
+      return `${turn} ${agent}: ${chosen}${reason ? '. ' + reason : ''}`.trim();
+    }).join('\n');
+  };
+
+  /**
+   * @description Handles copying only the narrative log to clipboard.
+   */
+  const handleCopyNarrativeLog = async () => {
+    const text = formatNarrativeLogForClipboard();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      // fallback: do nothing
+    }
+  };
+
+  /**
+   * @description Handles copying only the technical log to clipboard.
+   */
+  const handleCopyTechnicalLog = async () => {
+    const text = formatTechnicalLogForClipboard();
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -276,19 +391,14 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
           >
             💻 Technical
           </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'ai' ? styles.active : ''}`}
-            onClick={() => setActiveTab('ai')}
-          >
-            🤖 AI Decisions
-          </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
           <input
             type="number"
             placeholder="Turn #"
             min="1"
-            max={Math.max(...battleLog.map(e => e.turn), 1)}
+            // Defensive: ensure max is always a valid number (prevents NaN warning)
+            max={Number.isFinite(Math.max(...battleLog.map(e => e.turn))) ? Math.max(...battleLog.map(e => e.turn), 1) : 1}
             value={turnFilter || ''}
             onChange={(e) => setTurnFilter(e.target.value ? Number(e.target.value) : null)}
             style={{ 
@@ -329,14 +439,30 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
           onClick={handleCopyAllLogs}
           style={{ marginLeft: '8px', padding: '6px 14px', borderRadius: 6, border: '1px solid #888', background: copied ? '#27ae60' : '#222', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
           title="Copy all logs to clipboard"
+          aria-label="Copy All Logs"
         >
-          {copied ? 'Copied!' : '📋 Copy All Logs'}
+          {copied ? 'Copied!' : 'Copy All Logs'}
+        </button>
+        <button
+          onClick={handleCopyNarrativeLog}
+          style={{ marginLeft: '8px', padding: '6px 14px', borderRadius: 6, border: '1px solid #888', background: copied ? '#27ae60' : '#222', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
+          title="Copy only the story (narrative) log"
+          aria-label="Copy Story Log"
+        >
+          Copy Story Log
+        </button>
+        <button
+          onClick={handleCopyTechnicalLog}
+          style={{ marginLeft: '8px', padding: '6px 14px', borderRadius: 6, border: '1px solid #888', background: copied ? '#27ae60' : '#222', color: '#fff', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
+          title="Copy only the technical (AI) log"
+          aria-label="Copy Technical Log"
+        >
+          Copy Technical Log
         </button>
       </div>
       
       {activeTab === 'narrative' && renderNarrativeTab()}
       {activeTab === 'technical' && renderAITab()}
-      {activeTab === 'ai' && renderAITab()}
     </div>
   );
 }; 

@@ -5,6 +5,7 @@ import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import type { Move, FinisherCondition } from '../../types/move.types';
 import { createEventId } from '../ai/logQueries';
 import { trackDamage, trackChiSpent } from './analyticsTracker.service';
+import { logStory, logTechnical } from '../utils/mechanicLogUtils';
 
 /**
  * @description Finisher move configuration
@@ -141,25 +142,12 @@ export function executeFinisherMove(
   }
   
   // Create dramatic log entry
-  const logEntry: BattleLogEntry = {
-    id: createEventId(),
+  const logEntry = logStory({
     turn: state.turn,
     actor: attacker.name,
-    type: 'FINISHER',
-    action: finisher.name,
-    target: target.name,
-    abilityType: finisher.type,
-    result,
-    damage: finalDamage,
     narrative: finisher.narrative.success,
-    timestamp: Date.now(),
-    meta: {
-      resourceCost: finisher.chiCost || 0,
-      crit: isCritical,
-      finisher: true,
-      critMultiplier: criticalMultiplier
-    }
-  };
+    target: target.name
+  });
   
   return logEntry;
 }

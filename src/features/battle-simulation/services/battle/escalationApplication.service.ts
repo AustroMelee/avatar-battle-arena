@@ -3,6 +3,7 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { createEventId } from '../ai/logQueries';
+import { logTechnical } from '../utils/mechanicLogUtils';
 
 /**
  * @description Forces pattern-breaking escalation
@@ -39,13 +40,17 @@ export function forcePatternEscalation(
       forcedState = 'climax';
       // Force both participants into an aggressive state with a large damage multiplier
       newState.participants.forEach((participant) => {
-        participant.flags = {
-          ...participant.flags,
-          forcedEscalation: 'true',
-          damageMultiplier: '2.0', // MODIFIED: Increased multiplier for more decisive action
-          escalationTurns: state.turn.toString(),
-          escalationDuration: '3' // MODIFIED: Longer duration to ensure the stalemate breaks
-        };
+        // Only trigger escalation if not already active or expired
+        if (!participant.flags.forcedEscalationTurns || participant.flags.forcedEscalationTurns <= 0) {
+          participant.flags = {
+            ...participant.flags,
+            forcedEscalation: 'true',
+            forcedEscalationTurns: participant.flags.escalationDuration ? parseInt(participant.flags.escalationDuration, 10) || 2 : 2,
+            damageMultiplier: '2.0',
+            escalationTurns: state.turn.toString(),
+            escalationDuration: '2', // Default duration if not set
+          };
+        }
       });
       break;
       
@@ -86,17 +91,15 @@ export function forcePatternEscalation(
       break;
   }
   
-  const logEntry: BattleLogEntry = {
-    id: createEventId(),
+  const logEntry: BattleLogEntry = logTechnical({
     turn: state.turn,
     actor: attacker.name,
-    type: 'ESCALATION',
     action: 'Forced Escalation',
-    target: 'Battle',
     result: `Forced into ${forcedState} state due to ${reason}`,
-    narrative,
-    timestamp: Date.now(),
-  };
+    reason,
+    target: 'Battle',
+    details: undefined
+  });
   
   return { newState, logEntry };
 } 

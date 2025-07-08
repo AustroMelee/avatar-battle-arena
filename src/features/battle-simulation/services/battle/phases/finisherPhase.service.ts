@@ -23,7 +23,7 @@ export function finisherPhase(state: BattleState): BattleState {
     // Execute finisher move with dramatic consequences
     finisherLogEntry = executeFinisherMove(availableFinisher, attacker, target, newState, targetIndex);
     newState.battleLog.push(finisherLogEntry);
-    newState.log.push(finisherLogEntry.narrative || finisherLogEntry.result);
+    newState.log.push(typeof finisherLogEntry.narrative === 'string' ? finisherLogEntry.narrative : finisherLogEntry.narrative.join(' ') || finisherLogEntry.result);
     
     // Check for winner after finisher
     if (newState.participants[targetIndex].currentHealth <= 0) {

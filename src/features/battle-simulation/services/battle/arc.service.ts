@@ -9,6 +9,7 @@
 // CONTEXT: BattleSimulation, // FOCUS: ArcStateEngine
 import { BattleState, BattleArcState, ArcStateModifier, BattleLogEntry } from '../../types';
 import { ARC_TRANSITIONS } from '../../data/arcTransitions';
+import { logTechnical } from '../utils/mechanicLogUtils';
 
 // For developer controls - can be overridden for testing
 const IS_DEV_MODE = false; // Set to true in development
@@ -48,22 +49,20 @@ function createArcTransitionLogEntry(
   narrative: string,
   isInjected: boolean = false
 ): BattleLogEntry {
-  return {
-    id: `arc-transition-${turn}-${Date.now()}`,
+  return logTechnical({
     turn,
     actor: 'Battle Arc',
-    type: 'ARC_TRANSITION',
     action: `Transition: ${fromState} → ${toState}`,
     result: narrative,
-    narrative: `${narrative} The battle arc shifts from ${fromState} to ${toState}.`,
-    timestamp: Date.now(),
-    meta: {
+    reason: isInjected ? 'Injected transition' : undefined,
+    target: undefined,
+    details: {
       fromState,
       toState,
       isInjected,
       arcTransition: true,
     },
-  };
+  });
 }
 
 /**

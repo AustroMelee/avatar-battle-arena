@@ -11,6 +11,7 @@ import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect, modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { resolveClash } from './defensiveResolution.service';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Result of executing an attack move
@@ -219,29 +220,12 @@ export async function executeAttackMove(
   }
   
   // Create log entry
-  const logEntry: BattleLogEntry = {
-    id: generateUniqueLogId('attack'),
+  const logEntry = logStory({
     turn: state.turn,
     actor: attacker.name,
-    type: 'MOVE',
-    action: ability.name,
-    target: target.name,
-    abilityType: ability.type,
-    result,
     narrative,
-    damage: finalDamage,
-    timestamp: Date.now(),
-    meta: {
-      resourceCost: chiCost,
-      evaded: wasEvaded,
-      parried: wasParried,
-      statusEffect: ability.appliesEffect && !wasEvaded && !wasParried ? {
-        type: ability.appliesEffect.type,
-        duration: ability.appliesEffect.duration,
-        potency: ability.appliesEffect.potency
-      } : undefined
-    }
-  };
+    target: target.name
+  });
   
   return {
     newState,

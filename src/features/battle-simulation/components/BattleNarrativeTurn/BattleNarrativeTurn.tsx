@@ -1,23 +1,22 @@
-import React from 'react';
 import styles from './BattleNarrativeTurn.module.css';
-import type { LogEventType } from '../../types';
 
 export interface BattleNarrativeTurnProps {
   actor: string;
-  narrative: string;
-  type: LogEventType;
-  playerSide: 'p1' | 'p2' | 'system';
+  narrative: string | string[];
+  type: string;
+  playerSide: 'left' | 'right';
   icon: string; // Path to image asset
 }
 
 /**
  * @description Displays a single, clean narrative turn for the user-facing battle log.
  */
-export const BattleNarrativeTurn: React.FC<BattleNarrativeTurnProps> = ({ actor, narrative, playerSide, icon }) => {
+export function BattleNarrativeTurn({ actor, narrative, type, playerSide, icon }: BattleNarrativeTurnProps) {
+  const displayText = Array.isArray(narrative) ? narrative.join(' ') : narrative;
 
   const getActorStyle = (charName: string): string => {
-    if (playerSide === 'p1') return styles.p1Actor;
-    if (playerSide === 'p2') return styles.p2Actor;
+    if (playerSide === 'left') return styles.p1Actor;
+    if (playerSide === 'right') return styles.p2Actor;
 
     // System and Narrator styles
     switch (charName.toLowerCase()) {
@@ -31,17 +30,24 @@ export const BattleNarrativeTurn: React.FC<BattleNarrativeTurnProps> = ({ actor,
   };
 
   // Don't render if narrative is empty or just whitespace
-  if (!narrative || !narrative.trim()) {
+  if (!displayText || !displayText.trim()) {
     return null;
   }
 
   return (
-    <div className={`${styles.container} ${styles[playerSide]}`}>
-      <div className={`${styles.actor} ${getActorStyle(actor)}`}>
-        <img src={icon} alt={`${actor} icon`} className={styles.iconImg} />
-        <span className={styles.actorName}>{actor}:</span>
+    <div className={
+      `${styles.container} ` +
+      (playerSide === 'left' ? styles.p1 + ' ' : '') +
+      (playerSide === 'right' ? styles.p2 + ' ' : '') +
+      (playerSide === 'left' ? styles.leftAlign + ' ' : playerSide === 'right' ? styles.rightAlign + ' ' : '') +
+      (playerSide !== 'left' && playerSide !== 'right' ? styles.system + ' ' + styles.centerAlign + ' ' : '') +
+      (type ? styles[type.toLowerCase()] : '')
+    }>
+      <div className={`${styles.actor} ${getActorStyle(actor)} ${styles.largeActor}`}>
+        <img src={icon} alt={`${actor} icon`} className={styles.iconImgLarge} />
+        <span className={styles.actorNameLarge}>{actor}:</span>
       </div>
-      <p className={styles.narrativeText}>{narrative}</p>
+      <p className={styles.narrativeText}>{displayText}</p>
     </div>
   );
-}; 
+} 

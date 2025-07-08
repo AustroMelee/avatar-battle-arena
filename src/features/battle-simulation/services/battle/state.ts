@@ -138,7 +138,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   // Create initial state without opening sequence
   const initialState: BattleState = {
     participants: [p1Battle, p2Battle],
-    turn: 7, // Start battle from turn 7 (after opening sequence turns 1-6)
+    turn: 1, // Start battle from turn 1 (main battle begins at T1)
     activeParticipantIndex: player1.stats.agility >= player2.stats.agility ? 0 : 1, // Fastest goes first
     log: [],
     battleLog: [],

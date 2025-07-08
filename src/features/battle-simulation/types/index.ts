@@ -182,6 +182,12 @@ export type BattleCharacter = {
   tacticalStalemateCounter: number;
   lastTacticalPriority: string;
   abilities: Move[];
+  /**
+   * @description Intent/status flags for tactical and AI logic (e.g., Evasive, Charging, etc.)
+   */
+  statusFlags?: Array<{ type: string; turns: number }>;
+  // --- NEW: Climax Trigger Flag ---
+  climaxTriggered?: boolean;
 };
 
 /**
@@ -308,7 +314,10 @@ export type BattleLogEntry = {
   action: string;
   target?: string;
   result: string; // Clean, human-readable result (e.g., "Azula takes 15 damage.")
-  narrative: string; // The cinematic, story-driven line.
+  /**
+   * @description The cinematic, story-driven line(s). Now supports multi-part narrative output (string or string[]).
+   */
+  narrative: string | string[];
   timestamp: number;
   details?: LogDetails; // All mechanical data goes here.
   /**
@@ -323,6 +332,10 @@ export type BattleLogEntry = {
    * @description Optional: The type of ability used (e.g., 'attack', 'defense_buff', etc.)
    */
   abilityType?: string;
+  /**
+   * If true, this log entry is part of the prologue/opening sequence and should be rendered in the Prologue section, not the main battle log.
+   */
+  prologue?: boolean;
 };
 
 /**
@@ -356,6 +369,11 @@ export type BattleState = {
   // --- NEW: Tactical Stalemate Tracking ---
   tacticalStalemateCounter: number;
   lastTacticalPriority: string;
+  // --- NEW: Climax Trigger Flag ---
+  climaxTriggered?: boolean;
+  // --- NEW: Narrative/UX Polish ---
+  noMoveTurns?: number; // Track consecutive no-move turns for Sudden Death logic
+  suddenDeathTriggered?: boolean; // Flag for Sudden Death event
 };
 
 /**
@@ -416,6 +434,10 @@ export interface BattleCharacterFlags {
   // --- NEW: Final Phase Flags ---
   suddenDeath?: boolean;
   escalationCycleCount?: number;
+  /**
+   * @description Number of turns remaining in forced escalation (stateful escalation duration)
+   */
+  forcedEscalationTurns?: number;
 }
 
 // --- Analytics type for both BattleCharacter and BattleState ---

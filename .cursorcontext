@@ -1125,5 +1125,6 @@ Ensure that all containers use explicit gap or padding values, never relying on 
  *     - Type Changelogs
  *     - Visual Diagrams (Mermaid)
  * 146. All docblock and doc automation rules are mandatory for all contributors and enforced in CI.
+ * 147. Whenever a file's implementation, responsibility, or integration changes (including refactors, logging, or SRP updates), the corresponding file description, tags, and criticality in SYSTEM ARCHITECTURE.MD (Folder & File Overview, Feature Inventory, etc.) MUST be updated in the same batch.
  */
 

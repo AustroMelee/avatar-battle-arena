@@ -11,6 +11,7 @@ import {
 import { EnhancedStateManager } from '../../narrative/enhancedStateManager';
 import { createNarrativeService } from '../../narrative';
 import { generateUniqueLogId } from '../../ai/logQueries';
+import { logStory } from '../../utils/mechanicLogUtils';
 
 // Global enhanced state manager instance (shared with escalation phase)
 const enhancedStateManager = new EnhancedStateManager();
@@ -60,26 +61,18 @@ export async function processDesperationPhase(state: BattleState): Promise<Battl
     
     // Add state announcement to the log if generated
     if (desperationAnnouncement) {
-      newState.battleLog.push({
-        id: generateUniqueLogId('desperation'),
+      newState.battleLog.push(logStory({
         turn: state.turn,
         actor: attacker.name,
-        type: 'DESPERATION',
-        action: 'Desperation Trigger',
-        result: desperationAnnouncement,
         narrative: desperationAnnouncement,
-        timestamp: Date.now(),
-        meta: {
-          desperationLevel: currentDesperationState.isFinal ? 'final' : 
-                           currentDesperationState.isExtreme ? 'extreme' : 'desperate'
-        }
-      });
+        target: undefined
+      }));
       newState.log.push(desperationAnnouncement);
     } else {
       // Add the original desperation log entry if no state announcement was generated
       const desperationLogEntry = createDesperationLogEntry(attacker, currentDesperationState, newState.turn);
       newState.battleLog.push(desperationLogEntry);
-      newState.log.push(desperationLogEntry.narrative || desperationLogEntry.result);
+      newState.log.push(typeof desperationLogEntry.narrative === 'string' ? desperationLogEntry.narrative : desperationLogEntry.narrative.join(' ') || desperationLogEntry.result);
     }
     
     // Store desperation state in character flags

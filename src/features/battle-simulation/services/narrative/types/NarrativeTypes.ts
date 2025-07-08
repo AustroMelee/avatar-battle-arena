@@ -130,4 +130,16 @@ export interface OneOffTracker {
       context?: string;
     };
   };
+}
+
+/**
+ * @description Entry for narrative memory (key past events)
+ */
+export interface NarrativeMemoryEntry {
+  type: 'dodge' | 'critical_hit' | 'reversal' | 'one_off_moment' | 'finisher' | 'defeat' | 'victory' | string;
+  turn: number;
+  actor: string;
+  target?: string;
+  move?: string;
+  context?: Record<string, any>;
 } 

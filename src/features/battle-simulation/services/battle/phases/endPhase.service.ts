@@ -9,6 +9,7 @@ import { formatRealTimeAnalytics } from '../analyticsTracker.service';
 import { checkAndTriggerDecisiveClash } from '../decisiveClash.service';
 import { canTriggerHeroicReversal, triggerHeroicReversalWithLog, resolveHeroicReversalWithLog } from '../heroicReversal.service';
 import { generateUniqueLogId } from '../../ai/logQueries';
+import { logStory, logTechnical } from '../../utils/mechanicLogUtils';
 
 /**
  * @description Validates if the battle should end and handles forced endings
@@ -24,7 +25,7 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
     if (validation.logEntry) {
       newState.battleLog.push(validation.logEntry);
       if (validation.logEntry.narrative) {
-        newState.log.push(validation.logEntry.narrative);
+        newState.log.push(typeof validation.logEntry.narrative === 'string' ? validation.logEntry.narrative : validation.logEntry.narrative.join(' '));
       }
     }
     
@@ -77,17 +78,15 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
   // --- DECISIVE CLASH CHECK ---
   const decisiveResult = checkAndTriggerDecisiveClash(newState);
   if (decisiveResult.triggered) {
-    newState.battleLog.push({
-      id: generateUniqueLogId('decisive'),
+    newState.battleLog.push(logTechnical({
       turn: newState.turn,
       actor: 'System',
-      type: 'DECISIVE_CLASH',
       action: decisiveResult.outcome,
       result: decisiveResult.log,
-      narrative: decisiveResult.log,
-      timestamp: Date.now(),
-      meta: { outcome: decisiveResult.outcome }
-    });
+      reason: undefined,
+      target: undefined,
+      details: { outcome: decisiveResult.outcome }
+    }));
     return newState;
   }
 

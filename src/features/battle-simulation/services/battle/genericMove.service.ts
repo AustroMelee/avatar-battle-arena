@@ -5,6 +5,7 @@ import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
 import { createEventId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
+import { logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Result of executing a generic move
@@ -62,21 +63,12 @@ export async function executeGenericMove(
     narrative = genericNarrative;
   }
   
-  const logEntry: BattleLogEntry = {
-    id: createEventId(),
+  const logEntry = logStory({
     turn: state.turn,
     actor: attacker.name,
-    type: 'MOVE',
-    action: move.name,
-    target: 'Unknown',
-    abilityType: move.type,
-    result,
     narrative,
-    timestamp: Date.now(),
-    meta: {
-      resourceCost: move.chiCost || 0
-    }
-  };
+    target: 'Unknown'
+  });
   
   return {
     newState: state,

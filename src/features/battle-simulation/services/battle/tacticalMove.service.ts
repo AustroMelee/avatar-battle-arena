@@ -283,14 +283,25 @@ async function handleRegularTacticalMove(
   if (move.cooldown && move.cooldown > 0) {
     newAttacker.cooldowns[move.id] = move.cooldown;
   }
+  // Ensure Gather Power cooldown is set even if move.cooldown is not defined
+  if (move.name === 'Gather Power') {
+    newAttacker.cooldowns['Gather Power'] = 1;
+  }
   newAttacker.lastMove = move.name;
   newAttacker.moveHistory.push(move.name);
+
+  // --- INTENT/STATUS FLAG LOGIC ---
+  // If the move is evasive (by tag or name), set Evasive status for 1 turn
+  if ((move.tags && move.tags.includes('evasive')) || move.name.toLowerCase().includes('glide')) {
+    if (!newAttacker.statusFlags) newAttacker.statusFlags = [];
+    newAttacker.statusFlags.push({ type: 'Evasive', turns: 1 });
+  }
   // --- POSITIONING LOGIC ---
   const positionResult = updatePositionAfterMove(newAttacker, move);
-  if (positionResult && positionResult.positionChanged) {
-  }
+  // (Position change logic can be added here if needed)
   // --- COLLATERAL DAMAGE LOGIC ---
   if (move.collateralDamage && move.collateralDamage > 0) {
+    // (Collateral damage logic can be added here if needed)
   }
   // --- DISRUPTION & STATE CHANGE ---
   newTarget.momentum = (newTarget.momentum ?? 0) + impactResult.controlShift;

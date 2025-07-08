@@ -6,6 +6,7 @@ import type { Move } from '../../types/move.types';
 import { generateUniqueLogId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect } from '../effects/statusEffect.service';
+import { logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Result of executing a defense move
@@ -164,28 +165,12 @@ export async function executeDefenseMove(
     result = `${attacker.name} uses ${move.name} and gains ${defenseBonus} defense!`;
   }
   
-  const logEntry: BattleLogEntry = {
-    id: generateUniqueLogId('defense'),
+  const logEntry = logStory({
     turn: state.turn,
     actor: attacker.name,
-    type: 'MOVE',
-    action: move.name,
-    target: attacker.name,
-    abilityType: move.type,
-    result,
     narrative,
-    timestamp: Date.now(),
-    meta: {
-      resourceCost: move.chiCost || 0,
-      defenseBonus,
-      statusEffect: move.appliesEffect ? {
-        type: move.appliesEffect.type,
-        duration: move.appliesEffect.duration,
-        potency: move.appliesEffect.potency
-      } : undefined,
-      defensiveStance: move.type === 'evade' || move.type === 'parry_retaliate' ? move.type : undefined
-    }
-  };
+    target: attacker.name
+  });
   
   return {
     newState,

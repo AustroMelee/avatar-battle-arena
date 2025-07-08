@@ -16,6 +16,7 @@ import type { BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analyt
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
 import { createMechanicLogEntry } from './utils/mechanicLogUtils';
+import { logStory } from './utils/mechanicLogUtils';
 
 /**
  * @description Represents the result of a battle simulation with analytics.
@@ -106,15 +107,16 @@ export class BattleSimulator {
     if (currentState.isFinished && battleMetrics.totalDamage === 0) {
         currentState.winner = null; // Override any winner, it's a draw
         battleMetrics.victoryMethod = 'deadlock'; // Set the victory method
-        const deadlockLogEntry = createMechanicLogEntry({
+        // Do NOT push the technical/system log for deadlock
+        // Only push a single narrative log for the player
+        const deadlockNarrativeLog = logStory({
             turn: currentState.turn,
-            actor: 'System',
-            mechanic: 'Stalemate by Deadlock',
-            effect: 'The battle ends in a deadlock with no decisive action taken.',
-            reason: 'Zero total damage was dealt throughout the battle.',
+            actor: 'Narrator',
+            narrative: 'The battle ends in a deadlock. Neither side claims victory as silence settles over the arena.'
         });
-        currentState.battleLog.push(deadlockLogEntry);
-        currentState.log.push(deadlockLogEntry.narrative || deadlockLogEntry.result);
+        if (deadlockNarrativeLog) {
+            currentState.battleLog.push(deadlockNarrativeLog);
+        }
     }
     // --- NEW: Sudden Death Analytics Reporting ---
     if (currentState.isFinished && currentState.participants.some(p => p.flags.suddenDeath)) {

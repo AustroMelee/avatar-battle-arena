@@ -5,7 +5,8 @@ import type {
   NarrativeState, 
   NarrativeContext, 
   RecentUsageTracker, 
-  OneOffTracker 
+  OneOffTracker, 
+  NarrativeMemoryEntry 
 } from '../types/NarrativeTypes';
 
 /**
@@ -16,6 +17,10 @@ export class StateTracker {
   private recentUsage: RecentUsageTracker = {};
   private oneOffTracker: OneOffTracker = {};
   private turnCounters: Map<string, number> = new Map();
+  /**
+   * @description Narrative memory: recent key events per character
+   */
+  private narrativeMemory: Map<string, NarrativeMemoryEntry[]> = new Map();
 
   /**
    * @description Initialize tracking for a character
@@ -173,5 +178,34 @@ export class StateTracker {
     this.recentUsage = {};
     this.oneOffTracker = {};
     this.turnCounters.clear();
+  }
+
+  /**
+   * @description Record a narrative memory event for a character
+   */
+  recordMemory(characterName: string, entry: NarrativeMemoryEntry, maxMemory = 5): void {
+    if (!this.narrativeMemory.has(characterName)) {
+      this.narrativeMemory.set(characterName, []);
+    }
+    const mem = this.narrativeMemory.get(characterName)!;
+    mem.push(entry);
+    if (mem.length > maxMemory) {
+      mem.shift();
+    }
+  }
+
+  /**
+   * @description Get recent narrative memory for a character
+   */
+  getMemory(characterName: string, filterType?: string): NarrativeMemoryEntry[] {
+    const mem = this.narrativeMemory.get(characterName) || [];
+    return filterType ? mem.filter(e => e.type === filterType) : mem;
+  }
+
+  /**
+   * @description Reset narrative memory for a character
+   */
+  resetMemory(characterName: string): void {
+    this.narrativeMemory.set(characterName, []);
   }
 } 

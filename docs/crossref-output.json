@@ -180,14 +180,11 @@
       "BattleNarrativeTurn"
     ],
     "imports": [
-      "react",
-      "./BattleNarrativeTurn.module.css",
-      "../../types"
+      "./BattleNarrativeTurn.module.css"
     ],
     "tags": [],
     "calls": [
-      "src/features/battle-simulation/components/BattleNarrativeTurn/BattleNarrativeTurn.module.css",
-      "src/features/battle-simulation/types"
+      "src/features/battle-simulation/components/BattleNarrativeTurn/BattleNarrativeTurn.module.css"
     ],
     "usedBy": [
       "src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx"
@@ -2131,6 +2128,7 @@
       "../../narrative",
       "../../ai/logQueries",
       "../../utils/mechanicLogUtils",
+      "../../narrative/utils/antiRepetition.utility",
       "../../types/move.types"
     ],
     "tags": [],
@@ -2143,6 +2141,7 @@
       "src/features/battle-simulation/services/narrative",
       "src/features/battle-simulation/services/ai/logQueries.ts",
       "src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "src/features/battle-simulation/services/narrative/utils/antiRepetition.utility.ts",
       "src/features/battle-simulation/services/types/move.types"
     ],
     "usedBy": []
@@ -3686,7 +3685,8 @@
       "OneOffMomentType",
       "OneOffMomentContext",
       "RecentUsageTracker",
-      "OneOffTracker"
+      "OneOffTracker",
+      "NarrativeMemoryEntry"
     ],
     "imports": [],
     "tags": [],
@@ -3783,6 +3783,7 @@
     "tags": [],
     "calls": [],
     "usedBy": [
+      "src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
       "src/features/battle-simulation/services/narrative/narrative.service.ts"
     ]
   },
@@ -4244,5 +4245,36 @@
     "tags": [],
     "calls": [],
     "usedBy": []
+  },
+  {
+    "logStory": {
+      "type": "function",
+      "location": "src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "description": "Creates a player-facing narrative log entry. Now enforces valid turn/actor, prevents undefined logs, and is used for all story/narrative events including forced escalation and end-of-battle summaries."
+    },
+    "logTechnical": {
+      "type": "function",
+      "location": "src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "description": "Creates a technical/developer log entry. Used for analytics and dev, not shown to player. Defensive guards prevent malformed logs."
+    },
+    "forcedEscalationHandling": {
+      "type": "logic",
+      "location": "src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
+      "description": "When forced escalation occurs and no valid move is possible, a narrator/system log is created. After N consecutive 'no valid move' turns, triggers Sudden Death or forced outcome."
+    },
+    "deadlockHandling": {
+      "type": "logic",
+      "location": "src/features/battle-simulation/services/battleSimulator.service.ts",
+      "description": "If the battle ends in a deadlock (e.g., zero total damage), a single, clear narrative log is shown to the player. Technical logs are retained for analytics."
+    },
+    "endOfBattleSummary": {
+      "type": "logic",
+      "location": "src/features/battle-simulation/services/battleSimulator.service.ts",
+      "description": "Every battle ends with a clear, player-facing result summary: winner, draw, or deadlock. Epilogue-style narrator lines and call-and-response flavor are added for narrative depth."
+    },
+    "narrativePolishRoadmap": {
+      "type": "roadmap",
+      "description": "Replace all 'No valid move possible' logs with immersive, narrator-driven lines. Deduplicate end-state logs. Add epilogue and reflection. Trigger Sudden Death after N 'no valid move' turns. Always end with a clear, player-facing result summary."
+    }
   }
 ]

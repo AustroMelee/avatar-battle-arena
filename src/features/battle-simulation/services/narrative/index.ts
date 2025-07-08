@@ -102,7 +102,8 @@ export class NarrativeService {
   }
 
   /**
-   * @description Generates a narrative line for a move with enhanced state management and anti-repetition
+   * @description Generates enhanced narrative with anti-repetition. Now supports multi-part output.
+   * @returns A string (joined) for legacy, but uses string[] internally.
    */
   async generateNarrative(
     characterName: string,
@@ -125,7 +126,7 @@ export class NarrativeService {
     this.updateTurn(context.turnNumber);
 
     // Generate enhanced narrative with anti-repetition
-    const narrative = await this.enhancedSystem.generateNarrative(
+    const narrativeArr = await this.enhancedSystem.generateNarrative(
       characterName,
       context,
       damageOutcome,
@@ -134,12 +135,11 @@ export class NarrativeService {
 
     // Add contextual move description if available
     const moveDescription = moveName ? getContextualMoveDescription(characterName, context, moveName) : null;
-    
-    if (moveDescription && narrative !== moveDescription) {
-      return `${narrative} ${moveDescription}`;
+    const narrativeJoined = narrativeArr.join(' ');
+    if (moveDescription && !narrativeArr.includes(moveDescription)) {
+      return `${narrativeJoined} ${moveDescription}`;
     }
-
-    return narrative;
+    return narrativeJoined;
   }
 
   /**
@@ -251,7 +251,7 @@ export class NarrativeService {
   }
 
   /**
-   * @description Generates narratives for a move with enhanced state management
+   * @description Generates narratives for a move with enhanced state management. Now supports multi-part output.
    */
   async generateNarratives(
     actor: BattleCharacter,
@@ -288,15 +288,15 @@ export class NarrativeService {
     };
 
     const damageOutcome = this.determineDamageOutcome(damage, targetMaxHealth);
-    const actorNarrative = await this.generateNarrative(
+    const actorNarrativeArr = await this.generateNarrative(
       actor.name,
       actorContext,
       damageOutcome,
       move.name as string
     );
 
-    if (actorNarrative) {
-      narratives.push(actorNarrative);
+    if (actorNarrativeArr) {
+      narratives.push(...(Array.isArray(actorNarrativeArr) ? actorNarrativeArr : [actorNarrativeArr]));
     }
 
     // Generate target response if appropriate
@@ -314,14 +314,13 @@ export class NarrativeService {
         characterState: this.determineCharacterState(target.currentHealth, targetMaxHealth)
       };
 
-      const targetResponse = await this.generateTacticalResponse(
+      const targetResponseArr = await this.generateTacticalResponse(
         target.name,
         targetContext,
-        'damage_received'
+        move.name as string
       );
-
-      if (targetResponse) {
-        narratives.push(targetResponse);
+      if (targetResponseArr) {
+        narratives.push(...(Array.isArray(targetResponseArr) ? targetResponseArr : [targetResponseArr]));
       }
     }
 

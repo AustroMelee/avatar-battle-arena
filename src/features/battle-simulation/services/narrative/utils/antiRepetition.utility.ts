@@ -4,33 +4,38 @@
  */
 
 export class AntiRepetitionUtility {
-  // A map to store the last used line for a given key (e.g., "Aang-Lightning-hit").
-  private lastUsedLines: Map<string, string> = new Map();
+  // A map to store the last used lines (queue) for a given key (e.g., "Aang-Lightning-hit").
+  private recentLines: Map<string, string[]> = new Map();
+  private readonly QUEUE_SIZE = 3;
 
   /**
-   * Selects a "fresh" line from a given pool, ensuring it's not the same as the last one used for this context.
+   * Selects a "fresh" line from a given pool, ensuring it's not in the recent queue for this context.
    * @param key - A unique identifier for the narrative context (e.g., `${characterName}-${mechanic}-${context}`).
    * @param linePool - The array of available narrative lines.
-   * @returns A line from the pool that was not the last one returned for this key.
+   * @returns A line from the pool that was not recently used for this key.
    */
   public getFreshLine(key: string, linePool: string[]): string | null {
     if (!linePool || linePool.length === 0) {
       return null;
     }
 
-    const lastLine = this.lastUsedLines.get(key);
-    let availableLines = linePool;
+    const recent = this.recentLines.get(key) || [];
+    let availableLines = linePool.filter(line => !recent.includes(line));
 
-    // If a last line was recorded and there's more than one option, filter it out.
-    if (lastLine && linePool.length > 1) {
-      availableLines = linePool.filter(line => line !== lastLine);
+    // If all lines have been used recently, allow all lines (reset cycle)
+    if (availableLines.length === 0) {
+      availableLines = linePool;
     }
 
     // Select a random line from the available options.
     const chosenLine = availableLines[Math.floor(Math.random() * availableLines.length)];
 
-    // Record the chosen line as the last used for this context.
-    this.lastUsedLines.set(key, chosenLine);
+    // Update the recent queue for this key
+    const updatedQueue = [...recent, chosenLine];
+    if (updatedQueue.length > this.QUEUE_SIZE) {
+      updatedQueue.shift(); // Remove oldest
+    }
+    this.recentLines.set(key, updatedQueue);
 
     return chosenLine;
   }
@@ -39,6 +44,6 @@ export class AntiRepetitionUtility {
    * Resets the entire history of used lines. Should be called at the start of a new battle.
    */
   public reset(): void {
-    this.lastUsedLines.clear();
+    this.recentLines.clear();
   }
 }

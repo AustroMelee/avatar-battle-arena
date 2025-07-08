@@ -162,10 +162,25 @@ export function BattleLog({
     }
   };
 
+  const renderNarrative = (narrative: string | string[], entry: BattleLogEntry) => {
+    if (Array.isArray(narrative)) {
+      return (
+        <div className={entry.details?.oneOffMoment ? styles.oneOffMoment : styles.logNarrative}>
+          {narrative.map((line, idx) => (
+            <div key={idx} className={styles.narrativeLine}>{line}</div>
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className={entry.details?.oneOffMoment ? styles.oneOffMoment : styles.logNarrative}>{narrative}</div>
+    );
+  };
+
   const renderLogEntries = () => {
     // Filter entries by event type
-    const filteredLog = eventTypeFilter === 'ALL' 
-      ? battleLog 
+    const filteredLog = eventTypeFilter === 'ALL'
+      ? battleLog.filter(entry => entry.type === 'NARRATIVE') // Default: only show NARRATIVE entries
       : battleLog.filter(entry => entry.type === eventTypeFilter);
     
     if (filteredLog.length > 0) {
@@ -185,9 +200,8 @@ export function BattleLog({
             )}
           </div>
           <div className={styles.logResult}>{entry.result}</div>
-          {currentDetailLevel === 'all' && entry.narrative && (
-            <div className={styles.logNarrative}>{entry.narrative}</div>
-          )}
+          {/* Narrative rendering (multi-part and one-off moment support) */}
+          {entry.narrative && renderNarrative(entry.narrative, entry)}
           {entry.meta && Object.keys(entry.meta).length > 0 && (
             <div className={styles.logMeta}>
               {entry.meta.isFinisher && <span className={styles.metaFinisher}>⚡ FINISHER!</span>}

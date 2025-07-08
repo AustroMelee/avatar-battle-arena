@@ -1,25 +1,209 @@
+:root {
+  --player-1-color: #6ec1e4;         /* Calm Cyan */
+  --player-2-color: #e650a6;         /* Fire Nation Magenta */
+  --narrator-color: #ffcc80;         /* Warm Parchment Gold */
+  --system-color: #b39ddb;           /* Soft Purple */
+  --text-color-primary: #f3f3fa;     /* Main log text */
+  --text-color-secondary: #a1a1b5;
+  --highlight-color: #ffd54f;
+}
+
+/* === Universal Layout === */
 .battleNarrativeTurn {
-  background: rgba(0, 0, 0, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  margin: 12px 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
-  transition: all 0.3s ease;
+  background: #141622;
+  border: 1.5px solid rgba(68, 80, 110, 0.42);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin: 14px 0;
+  box-shadow: 0 4px 32px 0 #090b18;
+  backdrop-filter: blur(8px);
+  transition: border 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: visible;
 }
 
 .battleNarrativeTurn:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  border-color: #3ec6f3;
+  box-shadow: 0 8px 40px 0 #181c35;
 }
 
+/* === Flex Layouts === */
 .narrativeHeader {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   flex-wrap: wrap;
+}
+
+/* === Player 1 (Air Nomad Blue) === */
+.p1 {
+  background: none !important;
+  text-align: left;
+  flex-direction: row;
+  margin-right: auto;
+}
+.p1 .actor {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.p1 .narrativeText {
+  background: linear-gradient(90deg, #182841 60%, #1e3456 100%);
+  color: var(--player-1-color);
+  border-radius: 16px 16px 16px 6px;
+  border: 1.5px solid #34d1ff;
+  font-weight: 500;
+  text-shadow: 0 0 6px #34d1ff77;
+  box-shadow: 0 0 24px 0 #0fd6ff19;
+}
+.p1Actor {
+  color: var(--player-1-color);
+  text-shadow: 0 0 10px #8ae9fc77, 0 0 1px #26fff0cc;
+}
+
+/* === Player 2 (Fire Nation Magenta) === */
+.p2 {
+  background: none !important;
+  text-align: right;
+  flex-direction: row-reverse;
+  margin-left: auto;
+}
+.p2 .actor {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+.p2 .narrativeText {
+  background: linear-gradient(90deg, #301128 60%, #56133c 100%);
+  border-radius: 16px 16px 6px 16px;
+  border: 1.5px solid #ff6cbd99;
+  color: var(--player-2-color);
+  font-weight: 500;
+  text-shadow: 0 0 10px #ff277f77, 0 0 1px #fd1d7fcc;
+  box-shadow: 0 0 24px 0 #fd1d7f19;
+}
+.p2Actor {
+  color: var(--player-2-color);
+  text-shadow: 0 0 10px #ff6cbd99, 0 1px 2px #37090f;
+}
+
+/* === Narrator/System (Gold on Black, Vignette) === */
+.system {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  justify-content: center;
+  text-align: center;
+  background: radial-gradient(ellipse at center, #22211c 70%, #181304 100%);
+  color: var(--narrator-color);
+  box-shadow: 0 0 48px 4px #ffb20011;
+  border: 1.5px solid #50431799;
+  border-radius: 20px;
+}
+.system .actor {
+  min-width: 0;
+  text-align: center;
+  color: var(--narrator-color);
+  text-shadow: 0 0 12px #ffcc8090, 0 0 2px #ffd54f;
+}
+.system .narrativeText {
+  text-align: center;
+  font-weight: 600;
+  color: var(--highlight-color);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Georgia', serif;
+  text-shadow: 0 1px 8px #cc840033, 0 0 2px #ffd54f;
+}
+
+/* === All Actors === */
+.actor {
+  font-weight: 800;
+  font-size: 1.08em;
+  min-width: 108px;
+  flex-shrink: 0;
+  padding-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none !important;
+}
+
+.iconImgLarge {
+  width: 52px;
+  height: 52px;
+  background: none !important;
+  border-radius: 50%;
+  border: 2.5px solid #222e;
+  box-shadow: 0 2px 14px 0 #0008;
+}
+
+.actorNameLarge {
+  font-size: 1.22em;
+  font-weight: bold;
+  margin-left: 8px;
+  background: none !important;
+}
+
+/* === Text Bubbles & Message Body === */
+.narrativeText {
+  margin: 0;
+  flex-grow: 1;
+  font-style: italic;
+  padding: 10px 16px;
+  font-size: 1.05em;
+  color: var(--text-color-primary);
+  word-break: break-word;
+}
+
+.rightAlign { text-align: right; }
+.leftAlign { text-align: left; }
+.centerAlign {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.largeActor {
+  font-size: 1.26em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none !important;
+}
+
+/* === Responsive for Mobile === */
+@media (max-width: 768px) {
+  .battleNarrativeTurn {
+    padding: 12px;
+    margin: 8px 0;
+  }
+  .narrativeHeader {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .actor {
+    font-size: 1em;
+  }
+  .actorNameLarge {
+    font-size: 1em;
+  }
+  .narrativeText {
+    font-size: 0.98em;
+    padding: 8px 12px;
+  }
+  .iconImgLarge {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* === Default/Fallbacks === */
+.default {
+  color: var(--text-color-secondary);
+}
+.defaultColor {
+  color: #fff;
 }
 
 .characterName {
@@ -231,6 +415,8 @@
 
 /* Player 1 (Left Aligned) */
 .p1 {
+  background: none !important;
+  text-align: left;
   flex-direction: row;
   margin-right: auto;
 }
@@ -241,13 +427,17 @@
 }
 
 .p1 .narrativeText {
-  background: rgba(59, 130, 246, 0.1); /* Blue tint */
+  background: #ffe066;
+  color: #222;
   border-radius: 12px 12px 12px 4px;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid #ffe066;
+  font-weight: 500;
 }
 
 /* Player 2 (Right Aligned) */
 .p2 {
+  background: none !important;
+  text-align: right;
   flex-direction: row-reverse;
   margin-left: auto;
 }
@@ -261,6 +451,7 @@
   background: rgba(239, 68, 68, 0.1); /* Red tint */
   border-radius: 12px 12px 4px 12px;
   border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fff;
 }
 
 /* System / Narrator (Centered) */
@@ -270,6 +461,8 @@
   max-width: 100%;
   justify-content: center;
   text-align: center;
+  background: #f5e9d7;
+  color: #ff9800;
 }
 
 .system .actor {
@@ -295,15 +488,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  background: none !important;
 }
 
-.iconImg {
-  width: 32px;
-  height: 32px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid var(--border-color-soft);
-  background: #222;
+.iconImg,
+.iconImgLarge {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .narrativeText {
@@ -320,9 +512,44 @@
 }
 
 .p2Actor {
-  color: var(--player-2-color);
+  color: #fff;
+  text-shadow: 0 1px 2px #6d348e;
 }
 
 .default {
   color: var(--text-color-secondary);
+}
+
+.rightAlign {
+  text-align: right;
+}
+.leftAlign {
+  text-align: left;
+}
+
+.centerAlign {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.largeActor {
+  font-size: 1.3em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none !important;
+}
+
+.iconImgLarge {
+  width: 48px;
+  height: 48px;
+  background: none !important;
+}
+
+.actorNameLarge {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-left: 8px;
+  background: none !important;
 } 

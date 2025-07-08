@@ -5,7 +5,7 @@ import { createEventId } from '../ai/logQueries';
 // import { getAvailableFallbackMoves } from './fallbackMoves';
 // import { trackDamage } from './analyticsTracker.service';
 import { AANG_MOVES, AZULA_MOVES } from '../../types/move.types';
-import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
+import { createMechanicLogEntry, logStory, logTechnical } from '../utils/mechanicLogUtils';
 
 /**
  * @description Battle validation result with action recommendations.
@@ -42,36 +42,30 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   if (fighter1.currentHealth <= 0) {
     shouldForceEnd = true;
     endReason = 'victory';
-    logEntry = {
-      id: createEventId(),
+    logEntry = logTechnical({
       turn: state.turn,
       actor: 'System',
-      type: 'VICTORY',
       action: 'victory',
-      target: fighter2.name,
       result: `${fighter1.name} has been defeated! ${fighter2.name} wins!`,
-      narrative: `${fighter1.name} falls, unable to continue. ${fighter2.name} emerges victorious!`,
-      timestamp: Date.now(),
-      meta: { resolution: 'victory', winner: fighter2.name }
-    };
+      reason: undefined,
+      target: fighter2.name,
+      details: { resolution: 'victory', winner: fighter2.name }
+    });
     return { isValid: false, issues, recommendations, shouldForceEnd, endReason, logEntry };
   }
 
   if (fighter2.currentHealth <= 0) {
     shouldForceEnd = true;
     endReason = 'victory';
-    logEntry = {
-      id: createEventId(),
+    logEntry = logTechnical({
       turn: state.turn,
       actor: 'System',
-      type: 'VICTORY',
       action: 'victory',
-      target: fighter1.name,
       result: `${fighter2.name} has been defeated! ${fighter1.name} wins!`,
-      narrative: `${fighter2.name} falls, unable to continue. ${fighter1.name} emerges victorious!`,
-      timestamp: Date.now(),
-      meta: { resolution: 'victory', winner: fighter1.name }
-    };
+      reason: undefined,
+      target: fighter1.name,
+      details: { resolution: 'victory', winner: fighter1.name }
+    });
     return { isValid: false, issues, recommendations, shouldForceEnd, endReason, logEntry };
   }
 
@@ -105,17 +99,15 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     recommendations.push('Force escalation or sudden death');
     shouldForceEnd = true;
     endReason = 'stalemate';
-    logEntry = {
-      id: createEventId(),
+    logEntry = logTechnical({
       turn: state.turn,
       actor: 'System',
-      type: 'DRAW',
       action: 'stalemate',
       result: 'Both fighters are exhausted and can only perform basic moves. The battle ends in a draw.',
-      narrative: 'The warriors are too exhausted to continue effectively. The duel ends in a stalemate.',
-      timestamp: Date.now(),
-      meta: { resolution: 'stalemate', reason: 'basic_move_loop' }
-    };
+      reason: 'basic_move_loop',
+      target: undefined,
+      details: { resolution: 'stalemate', reason: 'basic_move_loop' }
+    });
   }
 
   // Check for health regeneration stall
@@ -133,17 +125,15 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   // --- NEW: Force Climax on Prolonged Stalemate ---
   if (state.turn > CLIMAX_TURN_THRESHOLD && state.analytics && state.analytics.averageDamagePerTurn < CLIMAX_DAMAGE_THRESHOLD) {
     const reason = `Prolonged stalemate: average damage per turn is only ${state.analytics.averageDamagePerTurn.toFixed(1)}.`;
-    const logEntry = {
-      id: createEventId(),
+    const logEntry = logTechnical({
       turn: state.turn,
       actor: 'System',
-      type: 'INFO',
       action: 'climax_trigger',
       result: 'The battle has stalled! The fighters are forced into a final, decisive clash!',
-      narrative: 'The battle has stalled! The fighters are forced into a final, decisive clash!',
-      timestamp: Date.now(),
-      meta: { reason, phase: 'climax' }
-    };
+      reason,
+      target: undefined,
+      details: { reason, phase: 'climax' }
+    });
     // Mark the state to be handled by a new climax phase.
     (state as any).tacticalPhase = 'climax';
     return {
@@ -166,12 +156,14 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     fighter1.flags.suddenDeath = true;
     if (state.analytics) state.analytics.stalematePreventionTriggered = true;
     const reason = cycleThresholdMet ? `Battle has cycled through escalation ${SUDDEN_DEATH_ESCALATION_CYCLES} times.` : `Battle has exceeded ${SUDDEN_DEATH_TURN_THRESHOLD} turns.`;
-    const logEntry = createMechanicLogEntry({
-        turn: state.turn,
-        actor: 'System',
-        mechanic: 'SUDDEN DEATH',
-        effect: 'The battle has reached its final stage! The next exchange will end it!',
-        reason: reason,
+    const logEntry = logTechnical({
+      turn: state.turn,
+      actor: 'System',
+      action: 'SUDDEN DEATH',
+      result: 'The battle has reached its final stage! The next exchange will end it!',
+      reason,
+      target: undefined,
+      details: { reason, phase: 'sudden_death' }
     });
     return { isValid: true, issues: [], recommendations: [], shouldForceEnd: false, logEntry };
   }
@@ -189,27 +181,49 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   };
 }
 
+// Exported for use in processTurn and other modules
+export function deduplicateClimaxLogs(logs: BattleLogEntry[]): BattleLogEntry[] {
+  const seen = new Set<string>();
+  return logs.filter(log => {
+    if (log.action === 'climax' && log.turn != null) {
+      const key = `${log.action}-${log.turn}-${log.actor}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+    }
+    return true;
+  });
+}
+
 /**
  * @description Forces a battle climax when normal resolution is impossible.
  * @param {BattleState} state - The current battle state
  * @returns {BattleState} Updated state with forced climax
  */
 export function forceBattleClimax(state: BattleState): BattleState {
-  const newState = { ...state };
+  // Defensive: Prevent duplicate climax triggering/logging
+  if (state.climaxTriggered) {
+    return state;
+  }
+  // Set the flag BEFORE any logging or mutation
+  const newState: BattleState = { ...state, climaxTriggered: true };
   const [p1, p2] = newState.participants;
 
-  const climaxLogEntry: BattleLogEntry = {
-    id: createEventId(),
-    turn: newState.turn,
-    actor: 'System',
-    type: 'INFO',
-    action: 'climax',
-    result: 'The battle reaches its climax! Both fighters must give their all!',
-    narrative: 'The tension reaches its peak. Both warriors know this is the moment of truth!',
-    timestamp: Date.now(),
-    meta: { resolution: 'climax', turn: newState.turn }
-  };
-  newState.battleLog.push(climaxLogEntry);
+  // Only log climax if not already present for this turn
+  if (!newState.battleLog.some(log => log.action === 'climax' && log.turn === newState.turn)) {
+    const climaxStoryLog = logStory({
+      turn: newState.turn,
+      actor: 'System',
+      narrative: 'The battle reaches its climax! Both fighters must give their all!',
+    });
+    const climaxTechnicalLog = logTechnical({
+      turn: newState.turn,
+      actor: 'System',
+      action: 'climax',
+      result: 'Climax phase forced due to stalemate/turn limit.',
+      details: { resolution: 'climax', turn: newState.turn },
+    });
+    newState.battleLog.push(climaxStoryLog, climaxTechnicalLog);
+  }
 
   // --- REFINED: Force specific, powerful finisher moves ---
   const p1Finisher = (p1.name === 'Aang' ? AANG_MOVES : AZULA_MOVES).find(m => m.isFinisher);
@@ -227,85 +241,64 @@ export function forceBattleClimax(state: BattleState): BattleState {
   newState.participants[1].currentHealth = Math.max(0, p2.currentHealth - p1Damage);
   newState.participants[0].currentHealth = Math.max(0, p1.currentHealth - p2Damage);
 
-  // Log the climax moves
-  const p1ClimaxLog: BattleLogEntry = {
-    id: createEventId(),
-    turn: newState.turn,
-    actor: p1.name,
-    type: 'MOVE',
-    action: p1Finisher.name,
-    target: p2.name,
-    result: `CLIMAX: ${p1.name} unleashes ${p1Finisher.name} for ${p1Damage} damage!`,
-    damage: p1Damage,
-    timestamp: Date.now(),
-    meta: { climax: true, finisher: true },
-    narrative: ''
-  };
-  const p2ClimaxLog: BattleLogEntry = {
-    id: createEventId(),
-    turn: newState.turn,
-    actor: p2.name,
-    type: 'MOVE',
-    action: p2Finisher.name,
-    target: p1.name,
-    result: `CLIMAX: ${p2.name} unleashes ${p2Finisher.name} for ${p2Damage} damage!`,
-    damage: p2Damage,
-    timestamp: Date.now(),
-    meta: { climax: true, finisher: true },
-    narrative: ''
-  };
-  newState.battleLog.push(p1ClimaxLog, p2ClimaxLog);
+  // Only log climax moves if not already present for this turn and actor
+  if (!newState.battleLog.some(log => log.turn === newState.turn && log.actor === p1.name && log.narrative?.includes(p1Finisher.name))) {
+    const p1ClimaxLog = logStory({
+      turn: newState.turn,
+      actor: p1.name,
+      narrative: `${p1.name} unleashes ${p1Finisher.name}!`,
+      target: p2.name,
+    });
+    newState.battleLog.push(p1ClimaxLog);
+  }
+  if (!newState.battleLog.some(log => log.turn === newState.turn && log.actor === p2.name && log.narrative?.includes(p2Finisher.name))) {
+    const p2ClimaxLog = logStory({
+      turn: newState.turn,
+      actor: p2.name,
+      narrative: `${p2.name} unleashes ${p2Finisher.name}!`,
+      target: p1.name,
+    });
+    newState.battleLog.push(p2ClimaxLog);
+  }
 
   // Check for winner after climax
   if (newState.participants[1].currentHealth <= 0 && newState.participants[0].currentHealth <= 0) {
     newState.winner = null;
     newState.isFinished = true;
-    const drawLog: BattleLogEntry = {
-      id: createEventId(),
-      turn: newState.turn,
-      actor: 'System',
-      type: 'DRAW',
-      action: 'mutual_ko',
-      result: 'Both fighters are knocked out in the climactic exchange!',
-      narrative: 'The climactic clash leaves both warriors unconscious. The battle ends in a draw.',
-      timestamp: Date.now(),
-      meta: { resolution: 'mutual_ko', climax: true }
-    };
-    newState.battleLog.push(drawLog);
+    if (!newState.battleLog.some(log => log.turn === newState.turn && log.narrative?.includes('ends in a draw'))) {
+      const drawLog = logStory({
+        turn: newState.turn,
+        actor: 'System',
+        narrative: 'The climactic clash leaves both warriors unconscious. The battle ends in a draw.',
+      });
+      newState.battleLog.push(drawLog);
+    }
   } else if (newState.participants[1].currentHealth <= 0) {
     newState.winner = newState.participants[0];
     newState.isFinished = true;
-    const victoryLog: BattleLogEntry = {
-      id: createEventId(),
-      turn: newState.turn,
-      actor: 'System',
-      type: 'VICTORY',
-      action: 'victory',
-      target: p1.name,
-      result: `${p1.name} wins the climactic battle!`,
-      narrative: `${p1.name} emerges victorious from the intense climax!`,
-      timestamp: Date.now(),
-      meta: { resolution: 'victory', climax: true }
-    };
-    newState.battleLog.push(victoryLog);
+    if (!newState.battleLog.some(log => log.turn === newState.turn && log.narrative?.includes('emerges victorious') && log.actor === p1.name)) {
+      const victoryLog = logStory({
+        turn: newState.turn,
+        actor: 'System',
+        narrative: `${p1.name} emerges victorious from the intense climax!`,
+      });
+      newState.battleLog.push(victoryLog);
+    }
   } else if (newState.participants[0].currentHealth <= 0) {
     newState.winner = newState.participants[1];
     newState.isFinished = true;
-    const victoryLog: BattleLogEntry = {
-      id: createEventId(),
-      turn: newState.turn,
-      actor: 'System',
-      type: 'VICTORY',
-      action: 'victory',
-      target: p2.name,
-      result: `${p2.name} wins the climactic battle!`,
-      narrative: `${p2.name} emerges victorious from the intense climax!`,
-      timestamp: Date.now(),
-      meta: { resolution: 'victory', climax: true }
-    };
-    newState.battleLog.push(victoryLog);
+    if (!newState.battleLog.some(log => log.turn === newState.turn && log.narrative?.includes('emerges victorious') && log.actor === p2.name)) {
+      const victoryLog = logStory({
+        turn: newState.turn,
+        actor: 'System',
+        narrative: `${p2.name} emerges victorious from the intense climax!`,
+      });
+      newState.battleLog.push(victoryLog);
+    }
   }
   newState.isFinished = true;
+  // Deduplicate climax logs as a failsafe
+  newState.battleLog = deduplicateClimaxLogs(newState.battleLog);
   return newState;
 }
 
