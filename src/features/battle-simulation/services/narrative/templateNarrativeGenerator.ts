@@ -61,6 +61,33 @@ export function generateTemplateBasedNarratives(
   return narratives;
 }
 
+// Basic Strike flavor pools
+const BASIC_STRIKE_GENERAL = [
+  'A swift jab aimed for the opponent\'s center.',
+  'A sharp kick slices through the dust between them.',
+  'A sudden elbow catches the air, searching for an opening.',
+  'A quick feint, then a low strike that tests defenses.',
+  'A burst of movement—simple, direct, relentless.',
+  'A lunging attack, more muscle than art.',
+  'A spinning sweep, delivered with practiced precision.'
+];
+const BASIC_STRIKE_AANG = [
+  'A blast of wind-charged motion, light but insistent.',
+  'A staff jab, air swirling at its tip.',
+  'A gliding step—Aang\'s footwork turns defense into sudden offense.',
+  'A gust-driven palm strike, dancing just past Azula\'s guard.',
+  'A circular sweep of the staff, harnessing the room\'s air to push Azula back.',
+  'A playful feint turns into a real threat—air bends around Aang\'s heel.'
+];
+const BASIC_STRIKE_AZULA = [
+  'A crackling backhand, blue flames flickering at her knuckles.',
+  'A precise heel kick, sparks scattering where her foot lands.',
+  'A whip-fast elbow, fire licking the air behind the blow.',
+  'A contemptuous snap of the wrist, flame following her motion.',
+  'A thrusting strike, her movements razor-sharp, coldly efficient.',
+  'A low sweep, heat radiating from every inch of Azula\'s motion.'
+];
+
 /**
  * @description Generates fallback narrative when no template matches
  * @param ctx - Battle context
@@ -87,10 +114,20 @@ export function generateFallbackNarrative(ctx: BattleContext): TriggeredNarrativ
   } else if (mechanics.isLowDamage) {
     text = `${ctx.actor.name}'s attack lacks power.`;
     mood = 'defensive';
+  } else if (ctx.move && ctx.move.name === 'Basic Strike') {
+    // Use themed pool for Aang, Azula, or general
+    let pool = BASIC_STRIKE_GENERAL;
+    if (ctx.actor.name === 'Aang') pool = BASIC_STRIKE_AANG;
+    else if (ctx.actor.name === 'Azula') pool = BASIC_STRIKE_AZULA;
+    text = pool[Math.floor(Math.random() * pool.length)];
+    mood = 'neutral';
   } else {
-    text = `${ctx.actor.name} uses ${ctx.move.name}.`;
+    // Remove mechanical fallback like 'uses Basic Strike' or 'is forced to escalate the battle!'
+    text = '';
     mood = 'neutral';
   }
+  // If text is empty, return null to omit the log entry
+  if (!text.trim()) return null;
   
   return {
     id: generateUniqueLogId('template'),

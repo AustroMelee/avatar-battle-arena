@@ -297,7 +297,7 @@ async function handleRegularTacticalMove(
     newAttacker.statusFlags.push({ type: 'Evasive', turns: 1 });
   }
   // --- POSITIONING LOGIC ---
-  const positionResult = updatePositionAfterMove(newAttacker, move);
+  updatePositionAfterMove(newAttacker, move);
   // (Position change logic can be added here if needed)
   // --- COLLATERAL DAMAGE LOGIC ---
   if (move.collateralDamage && move.collateralDamage > 0) {

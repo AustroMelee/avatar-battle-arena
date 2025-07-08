@@ -1,3 +1,4 @@
+// Used via dynamic registry in AI engine. See SYSTEM ARCHITECTURE.MD for flow.
 import type { BattleState, BattleCharacter } from '../../types';
 import type { AIRule, AIDecision } from './types/AIBehavior';
 import type { Move } from '../../types/move.types';
@@ -8,6 +9,7 @@ import { getAvailableMovesSimple, getHighestDamageMove, getLowestCostMove } from
 import { selectWeightedMove } from './weightedChoice';
 import { getAzulaWeightedMoves } from './weightFunctions/azulaWeights';
 import { getAangWeightedMoves } from './weightFunctions/aangWeights';
+import { AIRuleRegistry } from './rules/aiRuleRegistry.service'; // MODIFIED: Import the registry
 
 /**
  * @description Gets the appropriate rule set for a character
@@ -70,8 +72,8 @@ export function decideMove(
   opp: BattleCharacter
 ): AIDecision {
   
-  // Get character-specific rules
-  const rules = getCharacterRules(self);
+  // MODIFICATION: Fetch rules from the registry using the character's AI ID
+  const rules = AIRuleRegistry.getRules(self.base.aiRulesetId);
   
   // Sort rules by priority (descending), then by array order
   const sortedRules = [...rules].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));

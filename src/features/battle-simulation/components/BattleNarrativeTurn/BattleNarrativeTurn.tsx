@@ -6,12 +6,13 @@ export interface BattleNarrativeTurnProps {
   type: string;
   playerSide: 'left' | 'right';
   icon: string; // Path to image asset
+  className?: string;
 }
 
 /**
  * @description Displays a single, clean narrative turn for the user-facing battle log.
  */
-export function BattleNarrativeTurn({ actor, narrative, type, playerSide, icon }: BattleNarrativeTurnProps) {
+export function BattleNarrativeTurn({ actor, narrative, type, playerSide, icon, className }: BattleNarrativeTurnProps) {
   const displayText = Array.isArray(narrative) ? narrative.join(' ') : narrative;
 
   const getActorStyle = (charName: string): string => {
@@ -41,7 +42,8 @@ export function BattleNarrativeTurn({ actor, narrative, type, playerSide, icon }
       (playerSide === 'right' ? styles.p2 + ' ' : '') +
       (playerSide === 'left' ? styles.leftAlign + ' ' : playerSide === 'right' ? styles.rightAlign + ' ' : '') +
       (playerSide !== 'left' && playerSide !== 'right' ? styles.system + ' ' + styles.centerAlign + ' ' : '') +
-      (type ? styles[type.toLowerCase()] : '')
+      (type ? styles[type.toLowerCase()] : '') +
+      (className ? ` ${className}` : '')
     }>
       <div className={`${styles.actor} ${getActorStyle(actor)} ${styles.largeActor}`}>
         <img src={icon} alt={`${actor} icon`} className={styles.iconImgLarge} />

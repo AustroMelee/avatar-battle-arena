@@ -1,3 +1,4 @@
+// Used via dynamic registry in Identity/Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 import { BattleCharacter } from '../../types';
 import { Move } from '../../types/move.types';
 

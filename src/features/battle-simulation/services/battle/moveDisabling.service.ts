@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Move Disabling Service
 // RESPONSIBILITY: Handle move disabling and cooldown logic
 

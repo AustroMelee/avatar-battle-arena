@@ -10,7 +10,6 @@ import { resolveMove } from './moveLogic.service';
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect, modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { resolveClash } from './defensiveResolution.service';
-import { generateUniqueLogId } from '../ai/logQueries';
 import { logStory } from '../utils/mechanicLogUtils';
 
 /**
@@ -223,13 +222,34 @@ export async function executeAttackMove(
   const logEntry = logStory({
     turn: state.turn,
     actor: attacker.name,
-    narrative,
+    narrative: narrative,
     target: target.name
   });
-  
+  if (logEntry) {
+    return {
+      newState,
+      logEntry,
+      damage: finalDamage,
+      result,
+      narrative,
+      isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target).wasCrit : false
+    };
+  }
+  // Fallback if logEntry is null
   return {
     newState,
-    logEntry,
+    logEntry: {
+      id: 'attack-fallback',
+      turn: state.turn,
+      actor: attacker.name,
+      type: 'INFO',
+      action: 'Attack',
+      result: narrative,
+      target: target.name,
+      narrative: narrative,
+      timestamp: Date.now(),
+      details: undefined
+    },
     damage: finalDamage,
     result,
     narrative,

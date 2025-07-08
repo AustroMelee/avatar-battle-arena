@@ -1,20 +1,40 @@
-// CONTEXT: Move Registry Service
-// RESPONSIBILITY: Provide character-specific moves
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
+// @file moveRegistry.service.ts
+// @description The single source of truth for accessing move data.
+// This service loads all moves and provides methods to query them by ID.
+// No other service should import move data directly.
 
-import { Move, AANG_MOVES, AZULA_MOVES } from '../../types/move.types';
+import { ALL_MOVES } from '../../data/moves';
+import type { Move } from '../../types/move.types';
 
-/**
- * @description Gets character-specific moves based on character name.
- * @param {string} characterName - The character name
- * @returns {Move[]} Array of available moves for the character
- */
-export function getCharacterMoves(characterName: string): Move[] {
-  const name = characterName.toLowerCase();
-  if (name.includes('aang')) {
-    return AANG_MOVES;
-  } else if (name.includes('azula')) {
-    return AZULA_MOVES;
+class MoveRegistryService {
+  private moves: Map<string, Move>;
+
+  constructor() {
+    this.moves = new Map(ALL_MOVES.map(move => [move.id, move]));
   }
-  // Fallback to Aang moves for unknown characters
-  return AANG_MOVES;
-} 
+
+  /**
+   * Retrieves a single move by its unique ID.
+   * @param id The unique ID of the move.
+   * @returns The Move object or undefined if not found.
+   */
+  public getMoveById(id: string): Move | undefined {
+    return this.moves.get(id);
+  }
+
+  /**
+   * Retrieves an array of moves from an array of IDs.
+   * Filters out any IDs that do not correspond to a valid move.
+   * @param ids An array of move IDs.
+   * @returns An array of Move objects.
+   */
+  public getMovesByIds(ids: string[]): Move[] {
+    return ids
+      .map(id => this.getMoveById(id))
+      .filter((move): move is Move => move !== undefined);
+  }
+}
+
+// Export a singleton instance of the registry
+export const MoveRegistry = new MoveRegistryService(); 

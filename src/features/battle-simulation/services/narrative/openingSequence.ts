@@ -1,6 +1,5 @@
 // CONTEXT: Narrative System, // FOCUS: Opening Sequence and Pre-Fight Banter
 import type { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
-import { generateUniqueLogId } from '../ai/logQueries';
 import { logStory, logTechnical } from '../utils/mechanicLogUtils';
 
 /**
@@ -59,47 +58,6 @@ const OPENING_SEQUENCES: Record<string, OpeningSequence> = {
     ],
     mood: 'aggressive'
   }
-};
-
-/**
- * @description Location-specific opening narratives
- */
-const LOCATION_OPENINGS: Record<string, string[]> = {
-  'Fire Nation Capital': [
-    "The ancient throne room echoes with the weight of history.",
-    "Shadows dance across the stone walls as flames illuminate the chamber.",
-    "The very foundations of the Fire Nation tremble with anticipation.",
-    "Centuries of Fire Nation power resonate through these halls.",
-    "The throne room bears witness to this epic confrontation."
-  ],
-  'Ba Sing Se': [
-    "The walls of Ba Sing Se have never seen such a battle.",
-    "The ancient city's defenses seem insignificant now.",
-    "Earth and stone bear witness to this elemental clash.",
-    "The city's heart beats with the rhythm of conflict.",
-    "Ba Sing Se's history is written in stone and earth."
-  ],
-  'Northern Water Tribe': [
-    "The ice and snow of the North Pole provide a stark backdrop.",
-    "Ancient ice formations reflect the battle's intensity.",
-    "The spirits of the North watch this confrontation.",
-    "Snow swirls around the combatants, nature's own audience.",
-    "The frozen landscape amplifies every sound and movement."
-  ],
-  'Southern Air Temple': [
-    "The sacred halls of the Air Nomads echo with conflict.",
-    "Ancient airbending wisdom seems to whisper through the ruins.",
-    "The spirits of Aang's people watch this confrontation.",
-    "Wind howls through the temple, carrying the weight of history.",
-    "The temple's peaceful past contrasts with the present violence."
-  ],
-  'Open Field': [
-    "The open sky provides no shelter from this confrontation.",
-    "Nature itself seems to hold its breath.",
-    "The elements themselves gather to witness this clash.",
-    "No walls or barriers contain this elemental fury.",
-    "The battlefield stretches as far as the eye can see."
-  ]
 };
 
 /**
@@ -196,16 +154,6 @@ export function generateOpeningSequence(
   if (tension) openingEntries.push(tension);
 
   return openingEntries;
-}
-
-/**
- * @description Gets location-specific opening narrative
- */
-function getLocationOpening(location: string, player1: string, player2: string): string {
-  const locationOpenings = LOCATION_OPENINGS[location] || LOCATION_OPENINGS['Open Field'];
-  const baseOpening = locationOpenings[Math.floor(Math.random() * locationOpenings.length)];
-  
-  return `The air crackles with anticipation as ${player1} and ${player2} face off in the ${location}. ${baseOpening}`;
 }
 
 /**

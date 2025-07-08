@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 /*
  * @file battleSimulator.service.ts
  * @description Orchestrates the full battle simulation loop, state transitions, and integration with UI controllers.
@@ -15,7 +16,6 @@ import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerform
 import type { BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
-import { createMechanicLogEntry } from './utils/mechanicLogUtils';
 import { logStory } from './utils/mechanicLogUtils';
 
 /**

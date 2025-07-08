@@ -10,6 +10,12 @@
 ==========================================*/
 
 /**
+ * 0. CORE RULE (Documentation Discipline)
+ *
+ * Any time a file is modified, added, or deleted in the codebase, `ALL_FILES_INDEX.md` MUST be updated to reflect the change.
+ * This ensures the index remains a reliable, up-to-date map of the project for all contributors and automation.
+ */
+/**
  * 1.
  1b) YOU ARE FORBIDDEN FROM STARTING NEW DEV SERVERS/PORTS UNLESS ASKED.
  1c) YOU ARE FORBIDDEN FROM CREATING TEMP SCRIPTS/DEMOS UNLESS SPECIFICALLY ASKED.
@@ -1126,5 +1132,54 @@ Ensure that all containers use explicit gap or padding values, never relying on 
  *     - Visual Diagrams (Mermaid)
  * 146. All docblock and doc automation rules are mandatory for all contributors and enforced in CI.
  * 147. Whenever a file's implementation, responsibility, or integration changes (including refactors, logging, or SRP updates), the corresponding file description, tags, and criticality in SYSTEM ARCHITECTURE.MD (Folder & File Overview, Feature Inventory, etc.) MUST be updated in the same batch.
+ */
+
+/*==========================================
+=        DEPENDENCY & BUNDLE HYGIENE       =
+==========================================*/
+
+/**
+ * 148. CI MUST fail on unused or outdated npm packages:
+ *     - Use tools like depcheck, npm-check, or npm outdated in CI.
+ *     - All dependencies must be current and actually used in the codebase.
+ *     - Remove unused or deprecated packages immediately.
+ * 149. Bundle analysis tools (e.g., webpack-bundle-analyzer, vite-plugin-inspect) MUST be run regularly:
+ *     - Analyze bundle size and composition after major changes.
+ *     - Address any unexpected bundle growth or bloat before merging.
+ */
+
+/*==========================================
+=        INTERNATIONALIZATION (i18n)       =
+==========================================*/
+
+/**
+ * 150. All user-facing strings MUST be externalized for i18n:
+ *     - Use a localization framework or string extraction utility.
+ *     - Even if only one language is supported at launch, code must be ready for translation.
+ */
+
+/*==========================================
+=        ERROR LOGGING & MONITORING        =
+==========================================*/
+
+/**
+ * 151. Production error monitoring tools (e.g., Sentry, LogRocket) MUST be integrated:
+ *     - All unhandled errors and crashes must be reported in production.
+ *     - Monitor error rates and address critical issues proactively.
+ */
+
+/*==========================================
+=        PERFORMANCE PROFILING             =
+==========================================*/
+
+/**
+ * 152. React render profiling MUST be performed regularly:
+ *     - Use React DevTools Profiler to measure render times and identify bottlenecks.
+ *     - Profile after major UI or state changes.
+ * 153. Bundle splits MUST be measured and optimized:
+ *     - Use dynamic imports and code splitting to minimize initial load time.
+ *     - Monitor and address any regressions in bundle size.
+ * 154. Memoization (useMemo, useCallback) MUST only be used when proven necessary:
+ *     - Avoid premature optimization; profile first, then optimize.
  */
 

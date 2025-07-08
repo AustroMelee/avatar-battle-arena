@@ -48,7 +48,6 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       if (firstEntry.actor === p2.name) {
         // Swap participants for rendering
         [p1, p2] = [p2, p1];
-        // eslint-disable-next-line no-console
         console.warn('[UnifiedBattleLog] Detected participants order mismatch. Swapping for left/right consistency.');
       }
     }
@@ -173,6 +172,13 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
                   icon = p2.base.icon;
                 }
 
+                // --- HIGHLIGHT FORCED ENDINGS/STALEMATES ---
+                const isForcedEnding = typeof entry.narrative === 'string' && (
+                  entry.narrative.includes('Stalemate') ||
+                  entry.narrative.includes('Sudden Death') ||
+                  entry.narrative.includes('draw')
+                );
+
                 return (
                   <BattleNarrativeTurn
                     key={`${entry.id}-${index}`}
@@ -181,6 +187,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
                     type={entry.type}
                     playerSide={playerSide === 'p1' ? 'left' : 'right'}
                     icon={icon}
+                    className={isForcedEnding ? styles.forcedEnding : ''}
                   />
                 )
               })}

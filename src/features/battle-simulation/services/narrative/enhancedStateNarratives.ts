@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Enhanced State Narratives
 import type { NarrativeContext } from './contextualNarrativeMapper';
 

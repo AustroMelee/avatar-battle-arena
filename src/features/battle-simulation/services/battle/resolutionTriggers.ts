@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Battle Resolution, // FOCUS: Triggers
 import type { BattleState, BattleCharacter, BattleLogEntry, LogEventType, BattleResolution } from '../../types';
 import type { Ability } from '@/common/types';

@@ -12,6 +12,8 @@ import { availableCharacters } from '../data/characterData';
 import styles from './CharacterSelection.module.css';
 import { PlayerCardHorizontal } from '../../battle-simulation/components/PlayerCardHorizontal/PlayerCardHorizontal';
 import { CharacterPortrait } from './CharacterPortrait';
+import { MoveRegistry } from '../../battle-simulation/services/battle/moveRegistry.service';
+import { BattleCharacter } from '../../battle-simulation/types';
 
 /**
  * @description Props for the CharacterSelection component.
@@ -23,6 +25,63 @@ export type CharacterSelectionProps = {
   opponent: Character | null;
   playerColor: string;
 };
+
+/**
+ * Converts a static Character object into a display-ready BattleCharacter.
+ * This is a lightweight hydrator for UI purposes only.
+ * @param character The static character data.
+ * @returns A BattleCharacter object suitable for display components.
+ */
+function hydrateCharacterForDisplay(character: Character): BattleCharacter {
+  return {
+    base: character,
+    id: character.id,
+    name: character.name,
+    abilities: MoveRegistry.getMovesByIds(character.abilities),
+    currentHealth: 100,
+    currentDefense: character.stats.defense,
+    resources: { chi: 10 },
+    cooldowns: {},
+    usesLeft: {},
+    moveHistory: [],
+    activeEffects: [],
+    flags: {},
+    diminishingEffects: {},
+    defensiveStance: 'none',
+    position: 'neutral',
+    isCharging: false,
+    chargeProgress: 0,
+    repositionAttempts: 0,
+    chargeInterruptions: 0,
+    positionHistory: [],
+    mentalState: { stability: 100, pride: 100, activeStates: [] },
+    opponentPerception: { aggressionLevel: 0, predictability: 0, respect: 0 },
+    mentalThresholdsCrossed: {},
+    behavioralTraits: character.behavioralTraits || [],
+    manipulationResilience: character.manipulationResilience || 50,
+    activeFlags: new Map(),
+    analytics: {
+      totalDamage: 0,
+      totalChiSpent: 0,
+      turnsSinceLastDamage: 0,
+      averageDamagePerTurn: 0,
+      lastUpdatedTurn: 0,
+      patternAdaptations: 0,
+      stalematePreventions: 0,
+      escalationEvents: 0,
+      punishOpportunities: 0,
+      criticalHits: 0,
+      desperationMoves: 0,
+      lastUpdated: 0,
+    },
+    tacticalStalemateCounter: 0,
+    lastTacticalPriority: '',
+    controlState: 'Neutral',
+    stability: 100,
+    momentum: 0,
+    recoveryOptions: [],
+  };
+}
 
 /**
  * @description Manages the UI for a single player's character selection, switching between a chooser grid and a detailed card display.
@@ -43,56 +102,7 @@ export function CharacterSelection({
         // STATE 2: Display the selected character's detailed card
         <div className={styles.displayCardContainer}>
           <PlayerCardHorizontal
-            character={{
-              base: selectedCharacter,
-              id: selectedCharacter.id,
-              name: selectedCharacter.name,
-              controlState: 'Neutral',
-              stability: 100,
-              momentum: 0,
-              recoveryOptions: [],
-              currentHealth: 100,
-              currentDefense: selectedCharacter.stats.defense,
-              cooldowns: {},
-              usesLeft: {},
-              lastMove: undefined,
-              moveHistory: [],
-              resources: { chi: 10 },
-              activeEffects: [],
-              flags: {},
-              diminishingEffects: {},
-              defensiveStance: 'none',
-              position: 'neutral',
-              isCharging: false,
-              chargeProgress: 0,
-              repositionAttempts: 0,
-              chargeInterruptions: 0,
-              lastPositionChange: undefined,
-              positionHistory: [],
-              mentalState: { stability: 100, pride: 100, activeStates: [] },
-              opponentPerception: { aggressionLevel: 0, predictability: 0, respect: 0 },
-              mentalThresholdsCrossed: {},
-              behavioralTraits: selectedCharacter.behavioralTraits || [],
-              manipulationResilience: selectedCharacter.manipulationResilience || 50,
-              activeFlags: new Map(),
-              analytics: {
-                totalDamage: 0,
-                totalChiSpent: 0,
-                turnsSinceLastDamage: 0,
-                averageDamagePerTurn: 0,
-                lastUpdatedTurn: 0,
-                patternAdaptations: 0,
-                stalematePreventions: 0,
-                escalationEvents: 0,
-                punishOpportunities: 0,
-                criticalHits: 0,
-                desperationMoves: 0,
-                lastUpdated: 0,
-              },
-              tacticalStalemateCounter: 0,
-              lastTacticalPriority: '',
-              abilities: selectedCharacter.abilities as unknown as import('../../battle-simulation/types/move.types').Move[],
-            }}
+            character={hydrateCharacterForDisplay(selectedCharacter)}
             isActive={true}
             playerColor={playerColor}
             onChange={() => onSelectCharacter(null)}

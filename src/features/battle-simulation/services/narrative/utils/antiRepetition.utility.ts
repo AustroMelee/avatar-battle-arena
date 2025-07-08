@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative engine. See SYSTEM ARCHITECTURE.MD for flow.
 /**
  * @fileoverview A utility service to prevent the same narrative line from being used back-to-back.
  * @description This ensures variety in the storytelling by tracking the last used line for each context.

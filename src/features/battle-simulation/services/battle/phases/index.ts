@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Battle Phases Index
 // RESPONSIBILITY: Export all battle phase services
 

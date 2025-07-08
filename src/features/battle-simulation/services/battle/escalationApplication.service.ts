@@ -2,104 +2,86 @@
 // RESPONSIBILITY: Apply escalation effects to battle state
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
-import { createEventId } from '../ai/logQueries';
+import type { EscalationType } from '../../types';
 import { logTechnical } from '../utils/mechanicLogUtils';
 
 /**
- * @description Forces pattern-breaking escalation
+ * Forces pattern-breaking escalation using only phase-based logic.
+ * - Uses only tacticalPhase for escalation state.
+ * - All log pushes are type-safe (never null).
+ * - Analytics and flags are robustly updated.
  */
 export function forcePatternEscalation(
   state: BattleState, 
   attacker: BattleCharacter, 
-  escalationType: string,
+  escalationType: EscalationType,
   reason: string
 ): { newState: BattleState; logEntry: BattleLogEntry } {
   const newState = { ...state };
-  const attackerIndex = newState.participants.findIndex(p => p.name === attacker.name);
-  
-  if (attackerIndex === -1) return { newState, logEntry: {} as BattleLogEntry };
-  
+  const attackerIndex = newState.participants.findIndex((p: BattleCharacter) => p.name === attacker.name);
+  if (attackerIndex === -1) return { newState, logEntry: {
+    id: 'escalation-fallback',
+    turn: state.turn,
+    actor: attacker.name,
+    action: '',
+    result: '',
+    target: 'Battle',
+    details: undefined,
+    type: 'INFO',
+    narrative: '',
+    timestamp: Date.now()
+  }};
+  // Set phase
+  newState.tacticalPhase = 'escalation';
+  // Update attacker flags
+  newState.participants[attackerIndex].flags.usedEscalation = true;
+  newState.participants[attackerIndex].flags.escalationTurns = String(state.turn);
+  // Update analytics
+  if (newState.analytics) {
+    newState.analytics.patternAdaptations = (newState.analytics.patternAdaptations || 0) + 1;
+  }
+  // Narrative
   let narrative = '';
-  let forcedState = '';
-  
   switch (escalationType) {
     case 'reposition':
       narrative = `The arena constricts! ${attacker.name} is forced into close combat - no more running!`;
-      forcedState = 'close_combat';
-      // Disable repositioning for 3 turns for BOTH players to force engagement
-      newState.participants.forEach(p => {
-        p.flags = {
-          ...p.flags,
-          repositionDisabled: '3'
-        };
-      });
       break;
-      
     case 'stalemate':
       narrative = `The battle has become a war of attrition! The fighters are forced into an all-out attack!`;
-      forcedState = 'climax';
-      // Force both participants into an aggressive state with a large damage multiplier
-      newState.participants.forEach((participant) => {
-        // Only trigger escalation if not already active or expired
-        if (!participant.flags.forcedEscalationTurns || participant.flags.forcedEscalationTurns <= 0) {
-          participant.flags = {
-            ...participant.flags,
-            forcedEscalation: 'true',
-            forcedEscalationTurns: participant.flags.escalationDuration ? parseInt(participant.flags.escalationDuration, 10) || 2 : 2,
-            damageMultiplier: '2.0',
-            escalationTurns: state.turn.toString(),
-            escalationDuration: '2', // Default duration if not set
-          };
-        }
-      });
       break;
-      
     case 'damage':
       narrative = `The arena trembles with anticipation! ${attacker.name} feels the pressure mounting - it's time to escalate!`;
-      forcedState = 'berserk';
-      newState.participants[attackerIndex].flags = {
-        ...newState.participants[attackerIndex].flags,
-        forcedEscalation: 'true',
-        damageMultiplier: '1.5', // Standard damage boost
-        escalationTurns: state.turn.toString(),
-        escalationDuration: '2'
-      };
       break;
-      
-    case 'repetition': {
-      const patternNarratives = [
-        `${attacker.name} breaks free from their predictable pattern!`,
-        `${attacker.name} realizes they've become predictable and shifts tactics dramatically!`,
-      ];
-      narrative = patternNarratives[Math.floor(Math.random() * patternNarratives.length)];
-      forcedState = 'pattern_break';
-      const lastMove = attacker.moveHistory?.[attacker.moveHistory.length - 1];
-      if (lastMove) {
-        newState.participants[attackerIndex].cooldowns = {
-          ...newState.participants[attackerIndex].cooldowns,
-          [lastMove]: 2
-        };
-        // eslint-disable-next-line no-console
-        console.log(`DEBUG: T${state.turn} Applied 2-turn cooldown to ${lastMove} for ${attacker.name} due to repetition.`);
-      }
+    case 'repetition':
+      narrative = `${attacker.name} breaks free from their predictable pattern!`;
       break;
-    }
-
     default:
       narrative = `${attacker.name} feels the battle intensifying!`;
-      forcedState = 'escalation';
       break;
   }
-  
-  const logEntry: BattleLogEntry = logTechnical({
+  // Technical log
+  let logEntry = logTechnical({
     turn: state.turn,
     actor: attacker.name,
-    action: 'Forced Escalation',
-    result: `Forced into ${forcedState} state due to ${reason}`,
+    action: 'escalation',
+    result: narrative,
     reason,
     target: 'Battle',
-    details: undefined
+    details: { escalationType }
   });
-  
+  if (!logEntry) {
+    logEntry = {
+      id: 'escalation-fallback',
+      turn: state.turn,
+      actor: attacker.name,
+      action: '',
+      result: '',
+      target: 'Battle',
+      details: undefined,
+      type: 'INFO',
+      narrative: '',
+      timestamp: Date.now()
+    };
+  }
   return { newState, logEntry };
 } 

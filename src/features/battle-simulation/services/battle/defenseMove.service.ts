@@ -3,7 +3,6 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
-import { generateUniqueLogId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect } from '../effects/statusEffect.service';
 import { logStory } from '../utils/mechanicLogUtils';
@@ -174,7 +173,10 @@ export async function executeDefenseMove(
   
   return {
     newState,
-    logEntry,
+    logEntry: ((): BattleLogEntry => {
+      if (!logEntry) throw new Error('logEntry is null when assigning to DefenseMoveResult');
+      return logEntry;
+    })(),
     result,
     narrative,
     defenseBonus,

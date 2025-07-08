@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative Coordinator
 // RESPONSIBILITY: Coordinate all focused narrative services only
 

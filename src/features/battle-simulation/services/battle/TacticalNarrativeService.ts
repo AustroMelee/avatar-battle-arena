@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Tactical Narrative Service
 // RESPONSIBILITY: Generate narrative context and stories for tactical moves
 

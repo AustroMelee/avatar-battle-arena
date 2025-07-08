@@ -1,13 +1,12 @@
-/*
- * @file processTurn.ts
- * @description Executes a single turn in the battle simulation, handling all phase transitions and state updates.
- * @criticality 🩸 Core Battle Logic
- * @owner AustroMelee
- * @lastUpdated 2025-07-08
- * @related tacticalPhase.service.ts, state.ts
- */
-// CONTEXT: Battle Turn Processing
-// RESPONSIBILITY: Orchestrate the battle turn phases
+// @docs
+// @description: Main turn-processing logic for Avatar Battle Arena. Registry-driven, plug-and-play architecture: all state, log, and move lookups are data/registry-based. No hard-coded content. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: ⚔️ Core Logic
+// @owner: AustroMelee
+// @tags: core-logic, turn, logging, SRP, registry, plug-and-play, extensibility
+//
+// This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 
 import { BattleState } from '../../types';
 import { cloneBattleState, switchActiveParticipant, getActiveParticipants } from './state';
@@ -24,6 +23,7 @@ import {
 import { processTurnEffects } from '../effects/statusEffect.service';
 import { deduplicateClimaxLogs } from './battleValidation';
 import { logStory } from '../utils/mechanicLogUtils';
+import { isBasicMove } from '../ai/moveSelection';
 
 // Dynamic no-move flavor phrases for processTurn
 const NO_MOVE_FLAVORS = [
@@ -35,7 +35,7 @@ const NO_MOVE_FLAVORS = [
   (name: string) => `Exhaustion gnaws at ${name}, but pride refuses surrender. For now: only a hush, and the hope of a misstep.`,
   (name: string) => `${name} circles, breathing shallow, eyes never leaving the opponent. A single mistake would be fatal—so neither acts.`,
   (name: string) => `${name} edges forward, testing, baiting, drawing no reaction. The battlefield is heavy with waiting.`,
-  (name: string) => `Both combatants draw in their energy, neither willing to risk the next attack. For a heartbeat, the world holds its breath.`
+  () => `Both combatants draw in their energy, neither willing to risk the next attack. For a heartbeat, the world holds its breath.`
 ];
 
 // Utility to prevent direct repeats
@@ -60,7 +60,7 @@ const EPILOGUE_FLAVORS = [
 
 // Utility for epilogue, preventing repeats in multi-line endings
 function* epilogueLineGen() {
-  let used = new Set<number>();
+  const used = new Set<number>();
   while (used.size < EPILOGUE_FLAVORS.length) {
     let idx;
     do {
@@ -70,6 +70,19 @@ function* epilogueLineGen() {
     yield EPILOGUE_FLAVORS[idx];
   }
 }
+
+const poeticFinalResultLines = [
+  "The clash fades, not in triumph, but in exhaustion—no victor rises, only the silence of spent ambition.",
+  "Steel and spirit yield to fatigue; the world bears witness as neither hero nor villain claims the day.",
+  "Victory slips from their grasp; what remains is only the hush of lessons learned in failure and persistence.",
+  "The arena grows still—struggle dissolves into emptiness, and glory is postponed to another dawn.",
+  "Both warriors retreat, battered and changed. The story ends, not with conquest, but with the echo of what might have been.",
+  "Futility crowns the moment; sweat and determination buy only a truce, not a legend.",
+  "Even legends must yield to weariness—the duel becomes a memory, unfinished, unresolved.",
+  "No fire blazes, no wind roars; what endures is the truth that not every battle can be won.",
+  "As the dust settles, hope and regret mingle. This day belongs to neither—only to the weary silence between heartbeats.",
+  "Defeat and victory dissolve together, leaving only the arena’s quiet and the promise of rematch beneath another sky."
+];
 
 /**
  * @description Processes a single turn of the battle using a clean, well-defined phase pipeline.
@@ -132,6 +145,21 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   state = await escalationPhase(state);
   if (state.isFinished || state.climaxTriggered) return state;
 
+  // --- ENGINE-LEVEL FORCED ENDING (Pattern Adaptation Breaker) ---
+  if (state.forcedEnding) {
+    const forcedEndingLog = logStory({
+      turn: state.turn,
+      actor: 'Narrator',
+      narrative: 'Both fighters have exhausted all meaningful tactics. The duel ends by narrative deadlock—no victor emerges, only the lesson of futility.'
+    });
+    if (forcedEndingLog) {
+      state.battleLog.push(forcedEndingLog);
+    }
+    state.isFinished = true;
+    state.suddenDeathTriggered = true;
+    return state;
+  }
+
   // --- PHASE 6: Finisher Moves (High Priority) ---
   state = finisherPhase(state);
   if (state.isFinished || state.climaxTriggered) return state;
@@ -140,7 +168,7 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   const tacticalResult = await tacticalMovePhase(state);
   state = tacticalResult.state;
   state.battleLog.push(...tacticalResult.logEntries);
-  if (state.isFinished || state.climaxTriggered) return state;
+  // (No further processTurnEffects call here)
 
   // --- PHASE 8: Post-Move Cleanup ---
   if (state.isFinished) return state;
@@ -166,6 +194,30 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
       state.battleLog.push(skippedLog);
     }
     state.noMoveTurns = (state.noMoveTurns || 0) + 1;
+    // --- ENGINE-LEVEL STALEMATE BREAKER ---
+    const N = 3; // Number of turns to check for staleness
+    const allBasic = state.participants.every(participant => {
+      if (!participant.moveHistory || participant.moveHistory.length < N) return false;
+      const recent = participant.moveHistory.slice(-N);
+      // All recent moves are basic
+      return recent.every(moveId => {
+        const move = participant.abilities.find(m => m.id === moveId);
+        return move && isBasicMove(move);
+      });
+    });
+    if (allBasic) {
+      const stalemateLog = logStory({
+        turn: state.turn,
+        actor: 'Narrator',
+        narrative: 'Both fighters are spent and fall into a predictable rhythm—no victory is possible. The duel ends in exhausted stalemate.'
+      });
+      if (stalemateLog) {
+        state.battleLog.push(stalemateLog);
+      }
+      state.isFinished = true;
+      state.suddenDeathTriggered = true;
+      return state;
+    }
     if (state.noMoveTurns >= 2) {
       const suddenDeathLog = logStory({
         turn: state.turn,
@@ -206,14 +258,10 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
     if (epilogue1) state.battleLog.push(epilogue1);
     if (epilogue2) state.battleLog.push(epilogue2);
     // Add final result summary
-    let resultLine = 'Result: Draw (Deadlock). No one yielded, and no one fell.';
-    if (state.winner && state.winner.name) {
-      resultLine = `Result: ${state.winner.name} claims victory—history will not soon forget this duel!`;
-    }
     const resultLog = logStory({
       turn: state.turn,
       actor: 'Narrator',
-      narrative: resultLine
+      narrative: poeticFinalResultLines[Math.floor(Math.random() * poeticFinalResultLines.length)]
     });
     if (resultLog) state.battleLog.push(resultLog);
   }

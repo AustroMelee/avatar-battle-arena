@@ -1,3 +1,5 @@
+/* eslint-env node */
+/* global __dirname, console, require, process */
 // scripts/auto-tag-extract.js
 // Automated tag extraction for SYSTEM ARCHITECTURE.MD Folder & File Overview
 // Requires: npm install ts-morph

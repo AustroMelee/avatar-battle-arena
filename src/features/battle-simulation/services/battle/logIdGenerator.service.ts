@@ -1,3 +1,4 @@
+// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 /**
  * Generates a globally unique log ID for battle log entries.
  * Ensures monotonic, collision-free keys for React list rendering.

@@ -1,9 +1,9 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Generic Move Service
 // RESPONSIBILITY: Execute generic moves with enhanced narrative generation
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
-import { createEventId } from '../ai/logQueries';
 import { createNarrativeService } from '../narrative';
 import { logStory } from '../utils/mechanicLogUtils';
 
@@ -52,7 +52,19 @@ export async function executeGenericMove(
     chi: attacker.resources.chi || 0
   };
   
-  let narrative = `${attacker.name} executes ${move.name} with practiced precision.`;
+  const genericMoveLines = [
+    `${attacker.name} channels every ounce of training—${move.name} flows like a force of nature.`,
+    `${attacker.name} unleashes ${move.name}, movement cutting through tension like a blade through silk.`,
+    `With a flash of insight, ${attacker.name} crafts ${move.name} into an opening no opponent could expect.`,
+    `The arena holds its breath as ${attacker.name} strikes—a perfect execution of ${move.name}.`,
+    `${attacker.name}'s form blurs; ${move.name} becomes both shield and spear in the chaos.`,
+    `A sudden surge—${move.name} erupts from ${attacker.name}, bending skill and instinct into one.`,
+    `No hesitation—${attacker.name} makes ${move.name} an extension of their will, fate trembling on the edge.`,
+    `${attacker.name} pivots, unleashing ${move.name} with a blend of mastery and improvisation.`,
+    `Every lesson, every mistake, culminates in this: ${attacker.name}'s ${move.name} is both art and assault.`,
+    `${attacker.name} embodies the spirit of a true bender, wielding ${move.name} as both challenge and invitation.`
+  ];
+  let narrative = genericMoveLines[Math.floor(Math.random() * genericMoveLines.length)];
   const genericNarrative = await narrativeService.generateNarrative(
     attacker.name,
     context,
@@ -66,13 +78,34 @@ export async function executeGenericMove(
   const logEntry = logStory({
     turn: state.turn,
     actor: attacker.name,
-    narrative,
-    target: 'Unknown'
+    narrative: narrative,
+    target: target.name
   });
-  
+  if (logEntry) {
+    return {
+      newState: state,
+      logEntry,
+      damage: 0,
+      result,
+      narrative,
+      isCritical: false
+    };
+  }
+  // Fallback if logEntry is null
   return {
     newState: state,
-    logEntry,
+    logEntry: {
+      id: 'generic-move-fallback',
+      turn: state.turn,
+      actor: attacker.name,
+      type: 'INFO',
+      action: 'Generic Move',
+      result: narrative,
+      target: target.name,
+      narrative: narrative,
+      timestamp: Date.now(),
+      details: undefined
+    },
     damage: 0,
     result,
     narrative,

@@ -1,3 +1,13 @@
+// Used via dynamic registry in Narrative engine. See SYSTEM ARCHITECTURE.MD for flow.
+// @docs
+// @description: Enhanced narrative engine for Avatar Battle Arena. All narrative logic is registry/data-driven and plug-and-play. No hard-coded content. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: 🌀 Narrative
+// @owner: AustroMelee
+// @tags: narrative, context, SRP, registry, plug-and-play, extensibility
+//
+// This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 // CONTEXT: Enhanced Narrative System
 // RESPONSIBILITY: Main entry point for the narrative system with backward compatibility
 

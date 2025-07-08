@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Effects Phase Service
 // RESPONSIBILITY: Handle end-of-turn effects like buffs, cooldowns, chi recovery, and tactical windows
 

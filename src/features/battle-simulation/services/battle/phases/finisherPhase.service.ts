@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Finisher Phase Service
 // RESPONSIBILITY: Handle finisher moves and dramatic consequences
 

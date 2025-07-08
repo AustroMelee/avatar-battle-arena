@@ -2,7 +2,6 @@ import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { Character } from '@/common/types';
 import { ALL_BEHAVIORAL_TRAITS } from '../../../character-selection/data/traits';
 import { ActiveFlag } from '../../types/behavioral.types';
-import { generateUniqueLogId } from '../ai/logQueries';
 import { logStory, logTechnical } from '../utils/mechanicLogUtils';
 // import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
@@ -22,7 +21,7 @@ function tickDownFlags(character: BattleCharacter): BattleLogEntry[] {
     data.duration--;
     if (data.duration <= 0) {
       expiredFlags.push(flag);
-      expiredLogs.push(logTechnical({
+      const log = logTechnical({
         turn: 0, // Will be set by caller
         actor: character.name,
         action: 'flag_expired',
@@ -30,7 +29,8 @@ function tickDownFlags(character: BattleCharacter): BattleLogEntry[] {
         reason: undefined,
         target: undefined,
         details: undefined
-      }));
+      });
+      if (log) expiredLogs.push(log);
     }
   }
   
@@ -56,7 +56,7 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
   // Overconfidence breaks when taking significant damage
   if (character.activeFlags.has('overconfidenceActive') && damageTaken > 20) {
     character.activeFlags.delete('overconfidenceActive');
-    clearedLogs.push(logTechnical({
+    const log = logTechnical({
       turn: state.turn,
       actor: character.name,
       action: 'overconfidence_broken',
@@ -64,13 +64,14 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
       reason: undefined,
       target: undefined,
       details: undefined
-    }));
+    });
+    if (log) clearedLogs.push(log);
   }
 
   // Manipulation breaks when stunned
   if (character.activeFlags.has('isManipulated')) {
     character.activeFlags.delete('isManipulated');
-    clearedLogs.push(logTechnical({
+    const log = logTechnical({
       turn: state.turn,
       actor: character.name,
       action: 'manipulation_broken',
@@ -78,7 +79,8 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
       reason: undefined,
       target: undefined,
       details: undefined
-    }));
+    });
+    if (log) clearedLogs.push(log);
   }
   
   return clearedLogs;
@@ -117,12 +119,25 @@ export function processBehavioralSystemForTurn(
       const result = trait.onTrigger(context);
       
       // Create main log entry
-      behavioralLogEntry = logStory({
+      const logEntry = logStory({
         turn: state.turn,
         actor: self.name,
         narrative: 'Behavioral event',
         target: undefined
       });
+      if (logEntry) behavioralLogEntry = logEntry;
+      else behavioralLogEntry = {
+        id: 'behavioral-fallback',
+        turn: state.turn,
+        actor: self.name,
+        type: 'INFO',
+        action: 'Behavioral',
+        result: 'Behavioral event',
+        target: undefined,
+        narrative: 'Behavioral event',
+        timestamp: Date.now(),
+        details: undefined
+      };
       
       traitInstance.lastTriggeredTurn = state.turn;
       

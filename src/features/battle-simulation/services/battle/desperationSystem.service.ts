@@ -1,10 +1,14 @@
 // CONTEXT: Desperation System Service
 // RESPONSIBILITY: Handle desperation mechanics, stat surges, and dramatic power shifts
 
-import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
+import {
+  BattleCharacter,
+  BattleState,
+  BattleLogEntry,
+  EscalationType
+} from '../../types';
 import type { Move } from '../../types/move.types';
-import { generateUniqueLogId } from '../ai/logQueries';
-import { logStory } from '../utils/mechanicLogUtils';
+import { logTechnical, logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Desperation thresholds that trigger dramatic changes
@@ -41,7 +45,9 @@ export function calculateDesperationState(
   character: BattleCharacter,
   state: BattleState
 ): DesperationState {
-  const healthPercent = character.currentHealth / 100;
+  // Use a global max health for all percent-based mechanics
+  const MAX_HEALTH = 100;
+  const healthPercent = character.currentHealth / MAX_HEALTH;
   const isDesperate = healthPercent <= DESPERATION_THRESHOLDS.CRITICAL_HP;
   const isExtreme = healthPercent <= DESPERATION_THRESHOLDS.EXTREME_HP;
   const isFinal = healthPercent <= DESPERATION_THRESHOLDS.FINAL_HP;
@@ -52,15 +58,15 @@ export function calculateDesperationState(
   let critChanceBonus = 0;
 
   if (isExtreme) {
-    attackBonus = 2; // +2 damage to all attacks
-    defensePenalty = 10; // -10 defense (vulnerable but deadly)
-    critChanceBonus = 0.15; // +15% crit chance
+    attackBonus = 2;
+    defensePenalty = 10;
+    critChanceBonus = 0.15;
   }
 
   if (isFinal) {
-    attackBonus += 3; // Additional +3 damage
-    defensePenalty += 15; // Additional -15 defense
-    critChanceBonus += 0.25; // Additional +25% crit chance
+    attackBonus += 3;
+    defensePenalty += 15;
+    critChanceBonus += 0.25;
   }
 
   // Get desperate moves that are now available
@@ -74,9 +80,10 @@ export function calculateDesperationState(
 
   // Check if finisher is available (opponent below 20% HP)
   const opponent = state.participants.find(p => p.name !== character.name);
-  const canUseFinisher = opponent ? 
-    (opponent.currentHealth / 100) <= 0.20 && 
-    character.abilities.some(a => a.tags?.includes('finisher')) : false;
+  const canUseFinisher = opponent
+    ? (opponent.currentHealth / MAX_HEALTH) <= 0.20 &&
+      character.abilities.some(a => a.tags?.includes('finisher'))
+    : false;
 
   return {
     isDesperate,
@@ -93,30 +100,18 @@ export function calculateDesperationState(
 }
 
 /**
- * @description Applies desperation stat modifiers to a character
- * @param {BattleCharacter} character - The character to modify
- * @param {DesperationState} desperationState - The desperation state
- * @returns {BattleCharacter} Modified character
+ * @description Applies all desperation stat modifiers to a character (attack, defense, crit)
+ * Returns the character unchanged, as stat modifications should be handled as derived values.
  */
 export function applyDesperationModifiers(
-  character: BattleCharacter,
-  desperationState: DesperationState
+  character: BattleCharacter
 ): BattleCharacter {
-  if (!desperationState.isExtreme) {
-    return character;
-  }
-
-  return {
-    ...character,
-    currentDefense: Math.max(0, character.currentDefense - desperationState.statModifiers.defensePenalty)
-  };
+  // No direct mutation; stat modifications should be handled as derived values in calculations.
+  return character;
 }
 
 /**
  * @description Generates dramatic narrative for desperation state
- * @param {BattleCharacter} character - The character
- * @param {DesperationState} desperationState - The desperation state
- * @returns {string} Dramatic narrative
  */
 export function generateDesperationNarrative(
   character: BattleCharacter,
@@ -125,24 +120,17 @@ export function generateDesperationNarrative(
   if (desperationState.isFinal) {
     return `${character.name} stands on the brink of collapse. Every breath is a struggle, every movement a gamble. The air itself seems to pulse with desperate energy.`;
   }
-  
   if (desperationState.isExtreme) {
     return `${character.name}'s defense slackens, but the air stings with raw, desperate power. A cornered animal is the most dangerous kind.`;
   }
-  
   if (desperationState.isDesperate) {
     return `${character.name} feels the weight of the battle pressing down. Desperation moves are now within reach.`;
   }
-  
   return '';
 }
 
 /**
- * @description Creates a desperation log entry
- * @param {BattleCharacter} character - The character entering desperation
- * @param {DesperationState} desperationState - The desperation state
- * @param {number} turn - Current turn
- * @returns {BattleLogEntry} The log entry
+ * @description Creates a narrative log entry for desperation
  */
 export function createDesperationLogEntry(
   character: BattleCharacter,
@@ -150,33 +138,38 @@ export function createDesperationLogEntry(
   turn: number
 ): BattleLogEntry {
   let narrative = '';
-  let result = '';
-
   if (desperationState.isFinal) {
     narrative = `${character.name}'s focus fractures. For a heartbeat, all restraint dissolves. The air howls—one last chance.`;
-    result = `${character.name} enters final desperation! Attack +5, Defense -25, Crit +40%`;
   } else if (desperationState.isExtreme) {
     narrative = `${character.name} fights like a cornered animal—deadly, but vulnerable.`;
-    result = `${character.name} enters extreme desperation! Attack +2, Defense -10, Crit +15%`;
   } else if (desperationState.isDesperate) {
     narrative = `${character.name} feels the ancient power stirring within. Desperate moves are now available.`;
-    result = `${character.name} enters desperation! Desperate moves unlocked.`;
   }
 
-  return logStory({
+  const log = logStory({
     turn,
     actor: character.name,
     narrative,
     target: character.name
   });
+  if (log) return log;
+  return {
+    id: 'desperation-fallback',
+    turn,
+    actor: character.name,
+    type: 'INFO',
+    action: 'Desperation',
+    result: narrative,
+    target: character.name,
+    narrative,
+    timestamp: Date.now(),
+    details: undefined
+  };
 }
 
 /**
  * @description Checks if a character should enter desperation state
- * @param {BattleCharacter} character - The character to check
- * @param {BattleState} state - Current battle state
- * @param {DesperationState} previousState - Previous desperation state
- * @returns {boolean} Whether desperation state has changed
+ * Defensive: Will not retrigger if already desperate
  */
 export function shouldTriggerDesperation(
   character: BattleCharacter,
@@ -184,15 +177,116 @@ export function shouldTriggerDesperation(
   previousState: DesperationState | null
 ): boolean {
   const currentState = calculateDesperationState(character, state);
-  
-  if (!previousState) {
-    return currentState.isDesperate;
-  }
-  
+  if (!previousState) return currentState.isDesperate;
   // Trigger if desperation level has increased
   return (
     (!previousState.isDesperate && currentState.isDesperate) ||
     (!previousState.isExtreme && currentState.isExtreme) ||
     (!previousState.isFinal && currentState.isFinal)
   );
-} 
+}
+
+/**
+ * @description Triggers full desperation flow: phase change, stat surges, flags, technical & narrative logs.
+ */
+export function triggerDesperation(
+  character: BattleCharacter,
+  state: BattleState,
+  previousState: DesperationState | null,
+  turn: number
+): { updatedCharacter: BattleCharacter; logs: BattleLogEntry[] } {
+  const desperationState = calculateDesperationState(character, state);
+  const logs: BattleLogEntry[] = [];
+
+  // Defensive: Only trigger if level has increased
+  if (
+    !previousState ||
+    (!previousState.isDesperate && desperationState.isDesperate) ||
+    (!previousState.isExtreme && desperationState.isExtreme) ||
+    (!previousState.isFinal && desperationState.isFinal)
+  ) {
+    // Phase Change Enforcement (log and mutate)
+    if (state.tacticalPhase !== 'desperation') {
+      state.tacticalPhase = 'desperation';
+      const techLog = logTechnical({
+        turn,
+        actor: character.name,
+        action: 'desperation_phase',
+        result: 'Battle phase changed to desperation.',
+        reason: 'Desperation threshold crossed',
+        target: character.name,
+        details: { phase: 'desperation' }
+      });
+      if (techLog) logs.push(techLog);
+    }
+
+    // Flag Consistency
+    character.flags.usedDesperation = true;
+
+    // Analytics Update
+    if (state.analytics) {
+      state.analytics.desperationMoves = (state.analytics.desperationMoves || 0) + 1;
+    }
+
+    // No direct stat mutation; stat modifications are derived
+    const mutated = character;
+
+    // Technical Log Consistency
+    const techLog2 = logTechnical({
+      turn,
+      actor: character.name,
+      action: 'desperation-triggered',
+      result: `entered ${desperationState.isFinal ? 'final desperation' : desperationState.isExtreme ? 'extreme desperation' : 'desperation'}`,
+      reason: generateDesperationNarrative(character, desperationState),
+      target: character.name,
+      details: {
+        escalationType: 'desperation' as EscalationType,
+        threshold: desperationState.isFinal
+          ? DESPERATION_THRESHOLDS.FINAL_HP
+          : desperationState.isExtreme
+          ? DESPERATION_THRESHOLDS.EXTREME_HP
+          : DESPERATION_THRESHOLDS.CRITICAL_HP,
+        statModifiers: desperationState.statModifiers
+      }
+    });
+    if (techLog2) logs.push(techLog2);
+
+    const narrativeLog = createDesperationLogEntry(character, desperationState, turn);
+    if (narrativeLog) logs.push(narrativeLog);
+
+    return { updatedCharacter: mutated, logs };
+  }
+
+  // Defensive: Already desperate, do not retrigger, but log the attempt
+  const techLog3 = logTechnical({
+    turn,
+    actor: character.name,
+    action: 'desperation-attempt',
+    result: 'already in desperation',
+    reason: 'Redundant desperation trigger attempt.',
+    target: character.name,
+    details: { escalationType: 'desperation' as EscalationType }
+  });
+  if (techLog3) logs.push(techLog3);
+  return { updatedCharacter: character, logs };
+}
+
+/**
+ * @description Filters available moves for a character in desperation phase
+ */
+export function filterDesperationMoves(
+  character: BattleCharacter,
+  desperationState: DesperationState,
+  state: BattleState
+): Move[] {
+  if (state.tacticalPhase === 'desperation') {
+    // Only allow desperation-tagged or finisher moves (if unlocked)
+    const desperationMoves = desperationState.availableDesperateMoves;
+    const finishers = desperationState.canUseFinisher
+      ? character.abilities.filter(m => m.tags?.includes('finisher'))
+      : [];
+    return [...desperationMoves, ...finishers];
+  }
+  // Otherwise allow normal pool
+  return character.abilities;
+}

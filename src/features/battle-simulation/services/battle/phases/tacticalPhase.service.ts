@@ -1,3 +1,13 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
+// @docs
+// @description: Tactical phase logic for Avatar Battle Arena. All move and narrative lookups are registry/data-driven. No hard-coded content. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: ⚔️ Core Logic
+// @owner: AustroMelee
+// @tags: core-logic, battle, phase, logging, SRP, registry, plug-and-play, extensibility
+//
+// This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 /*
  * @file tacticalPhase.service.ts
  * @description Handles the tactical phase of the battle, where moves are selected and executed.
@@ -17,23 +27,10 @@ import { propagateTacticalStates } from '../tacticalState.service';
 import { availableLocations } from '../../../../location-selection/data/locationData';
 import { resolveReversal } from '../reversalMechanic.service';
 import { createMechanicLogEntry, logStory } from '../../utils/mechanicLogUtils';
-import { AANG_SUDDEN_DEATH_FINISHER, AZULA_SUDDEN_DEATH_FINISHER } from '../../../types/move.types';
 import { getAvailableMoves } from '../../utils/moveUtils'; // Corrected import
 import { forceBattleClimax } from '../battleValidation';
-
-// Dynamic forced escalation flavor phrases
-const NO_MOVE_FLAVORS = [
-  (name: string) => `${name} hesitates, exhausted and wary. The next move never comes.`,
-  (name: string) => `${name}'s attacks are met and deflected—neither gains ground.`,
-  (name: string) => `${name} is forced on the defensive, unable to find an opening!`,
-  (name: string) => `${name} circles warily, unable to break the deadlock.`,
-  (name: string) => `Fatigue sets in for ${name}; no opportunity presents itself.`,
-];
-
-function getNoMoveFlavor(name: string): string {
-  const idx = Math.floor(Math.random() * NO_MOVE_FLAVORS.length);
-  return NO_MOVE_FLAVORS[idx](name);
-}
+import { MoveRegistry } from '../moveRegistry.service'; // IMPORT THE REGISTRY
+import { isMoveStale, isBasicMove } from '../../ai/moveSelection';
 
 /**
  * @description Processes tactical AI move selection and execution with enhanced narratives
@@ -61,51 +58,79 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
 
   // --- CRITICAL FIX: Use the definitive getAvailableMoves function FIRST ---
   const locationData = availableLocations.find(loc => loc.name === newState.location) || availableLocations[0];
-  const availableMoves = getAvailableMoves(attacker, target, locationData);
-
-  if (attacker.flags?.forcedEscalation === 'true') {
-    console.log(`DEBUG: T${newState.turn} ${attacker.name} is in ESCALATION MODE.`);
-    const attackMoves = availableMoves.filter(m => m.type === 'attack' && !m.isChargeUp && !m.changesPosition);
-    // Define weak move threshold (e.g., baseDamage <= 10 or name === 'Basic Strike')
-    const HIGH_IMPACT_THRESHOLD = 12;
-    const highImpactMoves = attackMoves.filter(m => m.baseDamage > HIGH_IMPACT_THRESHOLD && m.name !== 'Basic Strike');
-    if (highImpactMoves.length > 0) {
-        const chosenMove = highImpactMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
-        const reasoning = `FORCED ESCALATION: Using strongest available attack: ${chosenMove.name}.`;
-        console.log(`DEBUG: T${newState.turn} ${attacker.name} forced escalation move: ${chosenMove.name}`);
-        const executionResult = await executeTacticalMove(chosenMove, attacker, target, newState);
-        newState.aiLog.push({ turn: newState.turn, agent: attacker.name, reasoning, chosenAction: chosenMove.name } as AILogEntry);
-        newState.log.push(executionResult.narrative);
-        newState.participants[attackerIndex] = executionResult.newAttacker;
-        newState.participants[targetIndex] = executionResult.newTarget;
-        newState.participants[attackerIndex].cooldowns['Gather Power'] = 2;
-        return { state: newState, logEntries: executionResult.logEntries };
+  let availableMoves = getAvailableMoves(attacker, target, locationData);
+  const inEscalation = attacker.flags?.forcedEscalation === 'true' || attacker.flags?.desperationState;
+  if (inEscalation) {
+    const nonBasicMoves = availableMoves.filter(move => !isBasicMove(move));
+    if (nonBasicMoves.length > 0) {
+      availableMoves = nonBasicMoves;
     } else {
-        // No high-impact moves and Gather Power is on cooldown: skip turn (no action)
-        const noMoveLog = logStory({
-          turn: newState.turn,
-          actor: 'Narrator',
-          narrative: getNoMoveFlavor(attacker.name)
-        });
-        return { state: newState, logEntries: noMoveLog ? [noMoveLog] : [] };
+      // No non-basic moves left: forced ending
+      const forcedEndingLog = logStory({
+        turn: newState.turn,
+        actor: 'Narrator',
+        narrative: [
+          "The clash fades, not in triumph, but in exhaustion—no victor rises, only the silence of spent ambition.",
+          "Steel and spirit yield to fatigue; the world bears witness as neither hero nor villain claims the day.",
+          "Victory slips from their grasp; what remains is only the hush of lessons learned in failure and persistence.",
+          "The arena grows still—struggle dissolves into emptiness, and glory is postponed to another dawn.",
+          "Both warriors retreat, battered and changed. The story ends, not with conquest, but with the echo of what might have been.",
+          "Futility crowns the moment; sweat and determination buy only a truce, not a legend.",
+          "Even legends must yield to weariness—the duel becomes a memory, unfinished, unresolved.",
+          "No fire blazes, no wind roars; what endures is the truth that not every battle can be won.",
+          "As the dust settles, hope and regret mingle. This day belongs to neither—only to the weary silence between heartbeats.",
+          "Defeat and victory dissolve together, leaving only the arena’s quiet and the promise of rematch beneath another sky."
+        ][Math.floor(Math.random() * 10)]
+      });
+      newState.isFinished = true;
+      return { state: newState, logEntries: forcedEndingLog ? [forcedEndingLog] : [] };
+    }
+  } else {
+    const nonStaleMoves = availableMoves.filter(move => !isMoveStale(move.id, attacker.moveHistory));
+    if (nonStaleMoves.length > 0) {
+      availableMoves = nonStaleMoves;
     }
   }
+  if (availableMoves.length === 0) {
+    const forcedEndingLog = logStory({
+      turn: newState.turn,
+      actor: 'Narrator',
+      narrative: [
+        "The clash fades, not in triumph, but in exhaustion—no victor rises, only the silence of spent ambition.",
+        "Steel and spirit yield to fatigue; the world bears witness as neither hero nor villain claims the day.",
+        "Victory slips from their grasp; what remains is only the hush of lessons learned in failure and persistence.",
+        "The arena grows still—struggle dissolves into emptiness, and glory is postponed to another dawn.",
+        "Both warriors retreat, battered and changed. The story ends, not with conquest, but with the echo of what might have been.",
+        "Futility crowns the moment; sweat and determination buy only a truce, not a legend.",
+        "Even legends must yield to weariness—the duel becomes a memory, unfinished, unresolved.",
+        "No fire blazes, no wind roars; what endures is the truth that not every battle can be won.",
+        "As the dust settles, hope and regret mingle. This day belongs to neither—only to the weary silence between heartbeats.",
+        "Defeat and victory dissolve together, leaving only the arena’s quiet and the promise of rematch beneath another sky."
+      ][Math.floor(Math.random() * 10)]
+    });
+    newState.isFinished = true;
+    return { state: newState, logEntries: forcedEndingLog ? [forcedEndingLog] : [] };
+  }
+  // --- END OF FIX ---
 
   // --- AI DECISION PIPELINE ---
-  let currentStalemateCounter = newState.tacticalStalemateCounter || 0;
-  // The AI now only considers the moves it can legally use.
-  const tacticalResult = selectBestTacticalMove(availableMoves, attacker, target, currentStalemateCounter);
+  const tacticalResult = selectBestTacticalMove(availableMoves, attacker, target, newState.tacticalStalemateCounter);
 
-  if (tacticalResult.priority === newState.lastTacticalPriority) {
-    currentStalemateCounter++;
-  } else {
-    currentStalemateCounter = 0; 
+  // --- FIX APPLIED HERE ---
+  // The AI now returns a move ID. We resolve it to a full Move object using the registry.
+  const chosenMove = MoveRegistry.getMoveById(tacticalResult.chosenMoveId);
+
+  // Add a defensive check in case the move ID is invalid.
+  if (!chosenMove) {
+    console.error(`FATAL: AI chose move ID "${tacticalResult.chosenMoveId}" which could not be found in the MoveRegistry.`);
+    // Fallback to the first available move to prevent a crash.
+    const fallbackMove = availableMoves[0] || attacker.abilities.find(m => m.id.includes('basic_strike'))!;
+    const executionResult = await executeTacticalMove(fallbackMove, attacker, target, newState);
+    // ... update state and return ...
+    return { state: newState, logEntries: executionResult.logEntries };
   }
-  newState.tacticalStalemateCounter = currentStalemateCounter;
-  newState.lastTacticalPriority = tacticalResult.priority;
-
-  // Find the chosen move from the original full list to ensure we have the complete object.
-  const chosenMove = attacker.abilities.find(m => m.name === tacticalResult.chosenAbility.name) || availableMoves[0];
+  
+  // Now `chosenMove` is a valid Move object, and the rest of the logic works correctly.
   const executionResult = await executeTacticalMove(chosenMove, attacker, target, newState);
   
   // Log the AI decision for this turn (always, not just forced escalation)

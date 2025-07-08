@@ -207,7 +207,7 @@ export function processTurnEffects(
         break;
       }
       case 'STUN': {
-        console.log(`DEBUG: STUN EFFECT - ${character.name} is stunned by ${effect.name}`);
+        // Stun logic is handled in the main turn loop (skips turn). Log only.
         logEntries.push({
           id: generateUniqueLogId('status'),
           turn,
@@ -215,12 +215,11 @@ export function processTurnEffects(
           type: 'STATUS',
           action: 'Stunned',
           target: character.name,
-          result: 'Cannot act this turn',
-          narrative: `${character.name} is still stunned from ${effect.sourceAbility}!`,
+          result: `Stunned and cannot act this turn`,
+          narrative: `${character.name} is stunned and cannot act!`,
           timestamp: Date.now(),
           details: {
-            effectType: 'STUN',
-            sourceEffect: effect.name
+            effectType: 'STUN'
           }
         });
         effectProcessed = true;

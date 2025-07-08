@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Status Analysis
 /**
  * @description Gets health status description for narrative context

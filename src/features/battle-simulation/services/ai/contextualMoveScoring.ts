@@ -1,17 +1,12 @@
-/*
- * @file contextualMoveScoring.ts
- * @description Provides context-aware move scoring logic for AI in the battle simulation.
- * @criticality 🧠 AI, Move Scoring
- * @owner AustroMelee
- * @lastUpdated 2025-07-08
- * @related moveUtils.ts, enhancedMoveScoring.ts
- */
-// @file contextualMoveScoring.ts
-// @description Scores moves for the AI based on battle context and tactical intent, integrating attack/defense scoring, intent alignment, and context bonuses.
-// @criticality 🧠 AI Move Scoring (High) | Depends on: attackMoveScoring, defenseMoveScoring, intentAlignment, battleStateAwareness, intentSystem
-// @owner AustroMelee
-// @lastUpdated 2025-07-07
-// @related attackMoveScoring.service.ts, defenseMoveScoring.service.ts, intentAlignment.service.ts, battleStateAwareness.ts, intentSystem.ts
+// @docs
+// @description: Context-aware AI move scoring for Avatar Battle Arena. All move scoring is registry/data-driven and plug-and-play. No hard-coded content. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: 🧠 AI
+// @owner: AustroMelee
+// @tags: ai, scoring, context, status-flags, registry, plug-and-play, extensibility
+//
+// This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 //
 // All exports are documented below.
 // CONTEXT: Contextual Move Scoring

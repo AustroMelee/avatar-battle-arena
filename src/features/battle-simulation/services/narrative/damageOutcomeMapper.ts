@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Damage Outcome Mapping
 import type { DamageOutcome } from './types';
 import { DAMAGE_OUTCOME_THRESHOLDS } from './types';

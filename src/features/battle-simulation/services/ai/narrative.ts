@@ -1,3 +1,4 @@
+// Used via dynamic registry in AI engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: AI Narrative Generation
 // RESPONSIBILITY: Generate context-aware battle narration
 import { Ability } from '@/common/types';

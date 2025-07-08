@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine/cooldown system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: BattleSimulation, // FOCUS: CooldownManagement
 import type { Move } from '../../types/move.types';
 import type {

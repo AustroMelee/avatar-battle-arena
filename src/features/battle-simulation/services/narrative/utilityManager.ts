@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Utility Management
 import type { TriggeredNarrative, BattleContext } from './types';
 import type { UsedHooksTracker } from './hookNarrativeGenerator';

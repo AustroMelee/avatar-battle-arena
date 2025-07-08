@@ -45,7 +45,8 @@ export type Ability = {
 };
 
 /**
- * @description Represents a selectable character in the simulator, including their stats and abilities.
+ * @description Represents a selectable character in the simulator.
+ * Now includes IDs for AI and Narrative logic, making it fully data-driven.
  */
 export type Character = {
   id: string;
@@ -64,8 +65,16 @@ export type Character = {
     intelligence: number; // Tactical and strategic skill
   };
 
-  /** @description A list of key techniques the character can use. */
-  abilities: import('../../features/battle-simulation/types/move.types').Move[];
+  /** @description A list of move IDs that the character can use. */
+  abilities: string[];
+
+  /** @description The ID of the AI ruleset this character should use. */
+  aiRulesetId: string;
+  /** @description The ID of the narrative pool for this character's dialogue. */
+  narrativeId: string;
+
+  /** @description The ID of the pronoun set for this character (e.g., 'male', 'female', 'non_binary'). */
+  pronounId: string;
 
   /** @description The default combat style or AI tendency. */
   personality: 'aggressive' | 'defensive' | 'balanced';

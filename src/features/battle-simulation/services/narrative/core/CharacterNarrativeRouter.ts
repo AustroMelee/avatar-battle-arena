@@ -14,6 +14,9 @@ import { AzulaNarrativeService } from './characters/AzulaNarrativeService';
 import { NarrativeMemoryManager } from './NarrativeMemoryManager';
 import { EmotionalArcTracker } from './EmotionalArcTracker';
 import type { NarrativeContext } from '../types/NarrativeTypes';
+import { NarrativePoolRegistry } from '../pools/narrativePoolRegistry.service';
+import { moveNameToMechanicKey } from '../utils/narrativeKey.utility';
+import type { CombatMechanic } from '../narrative.types';
 
 /**
  * @description Router service that delegates to character-specific narrative services only
@@ -63,7 +66,14 @@ export class CharacterNarrativeRouter {
     } else if (characterName.toLowerCase().includes('azula')) {
       return this.azulaService.getMissLine();
     }
-    return "The attack misses its mark.";
+    return [
+      "The attack slips harmlessly through the air—both fighters read each other perfectly.",
+      "A flurry of motion, but the strike never finds its mark—skill and nerves cancel each other.",
+      "Missed! The arena echoes with the sound of wind, not pain.",
+      "A wild feint—an artful dodge—no contact, only anticipation.",
+      "Momentum stalls as the move fails, tension twisting tighter.",
+      "Both warriors move like shadows; the attack dissipates before it can matter."
+    ][Math.floor(Math.random() * 6)];
   }
 
   /**
@@ -75,13 +85,32 @@ export class CharacterNarrativeRouter {
     } else if (characterName.toLowerCase().includes('azula')) {
       return this.azulaService.getHitLine();
     }
-    return "The attack connects with solid force.";
+    return [
+      "A punishing blow lands, shifting the rhythm of battle.",
+      "The strike crashes home—pain flares, and focus wavers.",
+      "A perfectly timed attack shakes the defender’s resolve.",
+      "The move finds its mark—a sudden gasp from the crowd.",
+      "Flesh and spirit reel from the impact, the duel turning more desperate.",
+      "A jarring hit leaves one fighter staggered, eyes wide with surprise."
+    ][Math.floor(Math.random() * 6)];
   }
 
   /**
-   * @description Get move-specific flavor for character
+   * @description Get move-specific flavor for a character.
+   * This is now plug-and-play for any new character.
    */
   getMoveFlavor(characterName: string, moveName: string, damageOutcome: string): string | null {
+    // DEBUG: Print every call to getMoveFlavor
+    const mechanicKey = moveNameToMechanicKey(moveName);
+    console.log('CHARACTER NARRATIVE ROUTER CALL:', { characterName, moveName, mechanicKey, damageOutcome });
+
+    // FORCE: If Zuko/FireWhip, always return the custom line
+    if (characterName.toLowerCase() === 'zuko' && mechanicKey === ('FireWhip' as CombatMechanic)) {
+      console.log('FORCED ZUKO FIRE WHIP NARRATIVE TRIGGERED');
+      return "Zuko's fire whip cracks across the field!";
+    }
+
+    // 1. Handle special-cased characters (legacy or highly custom logic)
     if (characterName.toLowerCase().includes('aang')) {
       const flavor = this.aangService.getMoveFlavor(moveName, damageOutcome);
       if (flavor) {
@@ -93,7 +122,39 @@ export class CharacterNarrativeRouter {
         return flavor;
       }
     }
-    return null;
+
+    // 2. Generic "Plug-and-Play" Fallback for ALL other characters (including Zuko)
+    try {
+      const mechanicKey = moveNameToMechanicKey(moveName);
+      const narrativePool = NarrativePoolRegistry.getPool(characterName);
+      // Check for a valid context (hit, miss, etc.)
+      const validContext = ['hit', 'miss', 'victory', 'chargeStart', 'trigger', 'apply'].includes(damageOutcome) ? damageOutcome : 'hit';
+      let lines = narrativePool?.[mechanicKey]?.[validContext as keyof typeof narrativePool[typeof mechanicKey]] as string[] | undefined;
+      // Fallback: If no lines for the context, try 'hit'
+      if ((!lines || lines.length === 0) && validContext !== 'hit') {
+        lines = narrativePool?.[mechanicKey]?.['hit' as keyof typeof narrativePool[typeof mechanicKey]] as string[] | undefined;
+      }
+      // DEBUG: Print plug-and-play narrative pool lookup for all characters
+      console.log('PLUG-AND-PLAY NARRATIVE POOL LOOKUP:', { characterName, mechanicKey, validContext, lines });
+      if (lines && lines.length > 0) {
+        // Return a random line from the found pool
+        return lines[Math.floor(Math.random() * lines.length)];
+      }
+    } catch (error) {
+      console.error(`Error fetching narrative for ${characterName}/${moveName}:`, error);
+      return null;
+    }
+    
+    // 3. If no specific narrative is found, return a rich generic move description.
+    const genericMoves = [
+      `A burst of energy—${moveName} flashes in the chaos of battle.`,
+      `With fierce resolve, a ${moveName} cuts through the tension.`,
+      `A sudden lunge—a risky ${moveName} seeking weakness.`,
+      `Instinct takes over; ${moveName} arcs with raw intent.`,
+      `Desperation transforms into movement—${moveName} unleashed.`,
+      `A calculated gamble: ${moveName} lands with consequences yet unknown.`
+    ];
+    return genericMoves[Math.floor(Math.random() * genericMoves.length)];
   }
 
   /**
@@ -122,7 +183,14 @@ export class CharacterNarrativeRouter {
     } else if (characterName.toLowerCase().includes('azula')) {
       return this.azulaService.getDefeatLine();
     }
-    return "Defeat is suffered.";
+    return [
+      "The light fades from their eyes as defeat settles over the arena—lesson, not victory, is all that remains.",
+      "Collapse comes swift and final—a story written in sweat and failure.",
+      "A last desperate stand crumbles, their strength lost to exhaustion and fate.",
+      "Defeat is a silent companion, settling on tired shoulders.",
+      "Their knees touch the ground, but the spirit learns in falling.",
+      "A hard-fought duel ends not in triumph, but in wisdom’s painful sting."
+    ][Math.floor(Math.random() * 6)];
   }
 
   /**
@@ -180,6 +248,13 @@ export class CharacterNarrativeRouter {
    * @description Get victory line for a character
    */
   getVictoryLine(characterName: string): string {
-    return `${characterName} is victorious!`;
+    return [
+      `${characterName} stands triumphant, their will etched into the very stones of the arena.`,
+      `Victory is written in sweat and scars—${characterName} claims the day.`,
+      `Against all odds, ${characterName} rises, the roar of the crowd like thunder.`,
+      `The world holds its breath as ${characterName} basks in hard-won triumph.`,
+      `${characterName} has overcome adversity—legend grows in the telling of this moment.`,
+      `No doubt remains—${characterName}'s name is carved into the story of the age.`
+    ][Math.floor(Math.random() * 6)];
   }
 } 

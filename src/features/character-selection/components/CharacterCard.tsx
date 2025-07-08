@@ -1,8 +1,10 @@
+// Live UI component: imported and rendered in character selection. See SYSTEM ARCHITECTURE.MD for flow.
 import React from 'react';
 // CONTEXT: CharacterSelection, // FOCUS: UIRendering
 import { Character } from '@/common/types';
 import styles from './CharacterCard.module.css';
 import { FaWind, FaFire, FaShieldAlt, FaBolt, FaBrain, FaRunning, FaStar, FaShieldVirus } from 'react-icons/fa';
+import type { Ability } from '../../battle-simulation/types/move.types';
 
 /**
  * @description Props for a single CharacterCard.
@@ -108,15 +110,19 @@ export function CharacterCard({ character, isSelected, isUnavailable, onSelect, 
       <div className={styles.abilitiesSection}>
         <h4>Abilities:</h4>
         <ul className={styles.abilitiesList}>
-          {character.abilities.map(ability => (
-            <li key={ability.name} className={styles.abilityItem} title={ability.description} tabIndex={0} aria-label={`${ability.name}: ${ability.description}`}> 
-              <span className={styles.abilityIcon}>{BENDING_ICONS[character.bending] || BENDING_ICONS.default}</span>
-              <span className={styles.abilityName}>{ability.name}</span>
-              <span className={styles.abilityTag} style={{ background: ABILITY_TYPE_COLORS[ability.type.replace('_', ' ')] || ABILITY_TYPE_COLORS.default }}>{ability.type.charAt(0).toUpperCase() + ability.type.slice(1)}</span>
-              <span className={styles.abilityPowerChip}>{ability.baseDamage}</span>
-              <span className={styles.abilityDesc}>{ability.description}</span>
-            </li>
-          ))}
+          {Array.isArray(character.abilities) && character.abilities
+            .filter(a => typeof a === 'object' && a !== null && 'name' in a)
+            .map(a => {
+              const ability = (a as unknown) as Ability;
+              return (
+                <li key={ability.name} className={styles.abilityItem} title={ability.description} tabIndex={0} aria-label={`${ability.name}: ${ability.description}`}>
+                  <span className={styles.abilityName}>{ability.name}</span>
+                  <span className={styles.abilityTag} style={{ background: ABILITY_TYPE_COLORS[ability.type.replace('_', ' ')] || ABILITY_TYPE_COLORS.default }}>{ability.type.charAt(0).toUpperCase() + ability.type.slice(1)}</span>
+                  <span className={styles.abilityPowerChip}>{'power' in ability ? String(ability.power) : ''}</span>
+                  <span className={styles.abilityDesc}>{ability.description}</span>
+                </li>
+              );
+            })}
         </ul>
       </div>
       {/* Divider */}

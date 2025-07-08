@@ -1,3 +1,4 @@
+// Used via dynamic registry in AI engine. See SYSTEM ARCHITECTURE.MD for flow.
 import type { Ability } from '../../../../common/types';
 import type { BattleCharacter } from '../../types';
 

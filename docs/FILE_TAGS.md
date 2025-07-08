@@ -2,207 +2,213 @@
 
 | File | Tags |
 |------|------|
-| src/App.tsx |  |
-| src/common\components\Button\Button.tsx |  |
-| src/common\types\index.ts |  |
-| src/components\ErrorBoundary.tsx | error-handling |
-| src/features\battle-log\components\BattleLog.tsx |  |
-| src/features\battle-log\components\LogDetailSelector.tsx |  |
-| src/features\battle-simulation\components\AbilityButton\AbilityButton.tsx |  |
-| src/features\battle-simulation\components\AbilityButton\index.ts |  |
-| src/features\battle-simulation\components\AbilityPanel\AbilityPanel.tsx |  |
-| src/features\battle-simulation\components\AbilityPanel\index.ts |  |
-| src/features\battle-simulation\components\BattleNarrativeTurn\BattleNarrativeTurn.tsx |  |
-| src/features\battle-simulation\components\BattleNarrativeTurn\index.ts |  |
-| src/features\battle-simulation\components\BattleScene\BattleScene.tsx |  |
-| src/features\battle-simulation\components\CharacterStatus\CharacterStatus.tsx |  |
-| src/features\battle-simulation\components\EnhancedBattleLog\EnhancedBattleLog.tsx |  |
-| src/features\battle-simulation\components\EnhancedBattleLog\index.ts |  |
-| src/features\battle-simulation\components\EnhancedBattleScene\EnhancedBattleScene.tsx |  |
-| src/features\battle-simulation\components\EnhancedBattleScene\index.ts |  |
-| src/features\battle-simulation\components\NarrativeBubble\index.ts |  |
-| src/features\battle-simulation\components\NarrativeBubble\NarrativeBubble.tsx |  |
-| src/features\battle-simulation\components\PlayerCardHorizontal\PlayerCardHorizontal.tsx |  |
-| src/features\battle-simulation\components\UnifiedBattleLog\index.ts |  |
-| src/features\battle-simulation\components\UnifiedBattleLog\UnifiedBattleLog.tsx |  |
-| src/features\battle-simulation\components\VersusGrid\VersusGrid.tsx |  |
-| src/features\battle-simulation\controllers\useBattleSimulator.controller.ts |  |
-| src/features\battle-simulation\data\arcTransitions.ts |  |
-| src/features\battle-simulation\data\identities.ts |  |
-| src/features\battle-simulation\hooks\useCooldownManager.hook.ts |  |
-| src/features\battle-simulation\hooks\useNarrativeLine.ts |  |
-| src/features\battle-simulation\services\ai\advancedAIController.ts |  |
-| src/features\battle-simulation\services\ai\attackMoveScoring.service.ts |  |
-| src/features\battle-simulation\services\ai\battleAwareness.ts |  |
-| src/features\battle-simulation\services\ai\battleStateAwareness.ts |  |
-| src/features\battle-simulation\services\ai\behaviorTreeEngine.ts |  |
-| src/features\battle-simulation\services\ai\chooseAbility.ts |  |
-| src/features\battle-simulation\services\ai\contextualMoveScoring.ts |  |
-| src/features\battle-simulation\services\ai\defenseMoveScoring.service.ts |  |
-| src/features\battle-simulation\services\ai\enhancedMoveScoring.ts |  |
-| src/features\battle-simulation\services\ai\helpers\conditionHelpers.ts |  |
-| src/features\battle-simulation\services\ai\intentAlignment.service.ts |  |
-| src/features\battle-simulation\services\ai\intentSystem.ts |  |
-| src/features\battle-simulation\services\ai\logQueries.ts |  |
-| src/features\battle-simulation\services\ai\metaState.ts |  |
-| src/features\battle-simulation\services\ai\moveScoring.ts |  |
-| src/features\battle-simulation\services\ai\moveSelection.ts |  |
-| src/features\battle-simulation\services\ai\moveUtils.ts |  |
-| src/features\battle-simulation\services\ai\narrative.ts |  |
-| src/features\battle-simulation\services\ai\patternDetection.ts |  |
-| src/features\battle-simulation\services\ai\patternRecognition.ts |  |
-| src/features\battle-simulation\services\ai\rules\aangRules.ts |  |
-| src/features\battle-simulation\services\ai\rules\azulaRules.ts |  |
-| src/features\battle-simulation\services\ai\tacticalAI.service.ts |  |
-| src/features\battle-simulation\services\ai\tacticalAnalysis.ts |  |
-| src/features\battle-simulation\services\ai\tacticalMemory.service.ts |  |
-| src/features\battle-simulation\services\ai\tacticalNarrative.ts |  |
-| src/features\battle-simulation\services\ai\types\AIBehavior.ts |  |
-| src/features\battle-simulation\services\ai\weightedChoice.ts |  |
-| src/features\battle-simulation\services\ai\weightFunctions\aangWeights.ts |  |
-| src/features\battle-simulation\services\ai\weightFunctions\azulaWeights.ts |  |
-| src/features\battle-simulation\services\battle\aiAnalysis.service.ts |  |
-| src/features\battle-simulation\services\battle\analytics.ts |  |
-| src/features\battle-simulation\services\battle\analyticsTracker.service.ts |  |
-| src/features\battle-simulation\services\battle\arc.service.ts |  |
-| src/features\battle-simulation\services\battle\attackMove.service.ts |  |
-| src/features\battle-simulation\services\battle\battleAnalysis.service.ts |  |
-| src/features\battle-simulation\services\battle\battleAnalytics.service.ts |  |
-| src/features\battle-simulation\services\battle\BattleAnalyticsTracker.ts |  |
-| src/features\battle-simulation\services\battle\battleContext.service.ts |  |
-| src/features\battle-simulation\services\battle\BattleLogger.ts |  |
-| src/features\battle-simulation\services\battle\battleValidation.ts |  |
-| src/features\battle-simulation\services\battle\characterAnalysis.service.ts |  |
-| src/features\battle-simulation\services\battle\checkDefeat.ts |  |
-| src/features\battle-simulation\services\battle\cooldownSystem.ts |  |
-| src/features\battle-simulation\services\battle\criticalSystem.service.ts |  |
-| src/features\battle-simulation\services\battle\decisiveClash.service.ts |  |
-| src/features\battle-simulation\services\battle\defenseMove.service.ts |  |
-| src/features\battle-simulation\services\battle\defensiveResolution.service.ts |  |
-| src/features\battle-simulation\services\battle\desperationMoveCreation.service.ts |  |
-| src/features\battle-simulation\services\battle\desperationMoves.ts |  |
-| src/features\battle-simulation\services\battle\desperationSystem.service.ts |  |
-| src/features\battle-simulation\services\battle\disruptionWindow.service.ts |  |
-| src/features\battle-simulation\services\battle\effectFusion.service.ts |  |
-| src/features\battle-simulation\services\battle\endPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\escalationApplication.service.ts |  |
-| src/features\battle-simulation\services\battle\escalationDetection.service.ts |  |
-| src/features\battle-simulation\services\battle\fallbackMoves.ts |  |
-| src/features\battle-simulation\services\battle\finisherSystem.service.ts |  |
-| src/features\battle-simulation\services\battle\genericMove.service.ts |  |
-| src/features\battle-simulation\services\battle\heroicReversal.service.ts |  |
-| src/features\battle-simulation\services\battle\logIdGenerator.service.ts |  |
-| src/features\battle-simulation\services\battle\moveConverter.service.ts |  |
-| src/features\battle-simulation\services\battle\moveDisabling.service.ts |  |
-| src/features\battle-simulation\services\battle\moveExecution.service.ts |  |
-| src/features\battle-simulation\services\battle\moveFatigue.service.ts |  |
-| src/features\battle-simulation\services\battle\moveLogic.service.ts |  |
-| src/features\battle-simulation\services\battle\moveRegistry.service.ts |  |
-| src/features\battle-simulation\services\battle\moveRouter.service.ts |  |
-| src/features\battle-simulation\services\battle\patternBreaking.service.ts |  |
-| src/features\battle-simulation\services\battle\patternTracking.service.ts |  |
-| src/features\battle-simulation\services\battle\phases\desperationPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\phases\effectsPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\phases\endPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\phases\escalationPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\phases\finisherPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\phases\index.ts |  |
-| src/features\battle-simulation\services\battle\phases\tacticalPhase.service.ts |  |
-| src/features\battle-simulation\services\battle\positioningMechanics.service.ts |  |
-| src/features\battle-simulation\services\battle\processTurn.ts |  |
-| src/features\battle-simulation\services\battle\reportGenerator.service.ts |  |
-| src/features\battle-simulation\services\battle\resolutionTriggers.ts |  |
-| src/features\battle-simulation\services\battle\resolveImpact.ts |  |
-| src/features\battle-simulation\services\battle\reversalMechanic.service.ts |  |
-| src/features\battle-simulation\services\battle\state.ts |  |
-| src/features\battle-simulation\services\battle\tacticalMove.service.ts |  |
-| src/features\battle-simulation\services\battle\TacticalNarrativeService.ts |  |
-| src/features\battle-simulation\services\battle\tacticalState.service.ts |  |
-| src/features\battle-simulation\services\battleSimulator.service.ts |  |
-| src/features\battle-simulation\services\cooldown\cooldownManager.service.ts |  |
-| src/features\battle-simulation\services\effects\buffs.ts |  |
-| src/features\battle-simulation\services\effects\effectFusion.service.ts |  |
-| src/features\battle-simulation\services\effects\statusEffect.service.ts |  |
-| src/features\battle-simulation\services\identity\behavioral.service.ts |  |
-| src/features\battle-simulation\services\identity\behavioralUI.service.ts |  |
-| src/features\battle-simulation\services\identity\index.ts |  |
-| src/features\battle-simulation\services\identity\mentalState.service.ts |  |
-| src/features\battle-simulation\services\identity\narrativeHooks.service.ts |  |
-| src/features\battle-simulation\services\identity\tacticalPersonality.engine.ts |  |
-| src/features\battle-simulation\services\narrative\antiRepetitionTracker.ts |  |
-| src/features\battle-simulation\services\narrative\battleEndHandler.ts |  |
-| src/features\battle-simulation\services\narrative\battlePhaseAnalyzer.ts |  |
-| src/features\battle-simulation\services\narrative\characterHooks.ts |  |
-| src/features\battle-simulation\services\narrative\configManager.ts |  |
-| src/features\battle-simulation\services\narrative\contextBuilder.ts |  |
-| src/features\battle-simulation\services\narrative\contextualNarrativeMapper.ts |  |
-| src/features\battle-simulation\services\narrative\core\BattleNarrationStrategyService.ts |  |
-| src/features\battle-simulation\services\narrative\core\CharacterNarrativeRouter.ts |  |
-| src/features\battle-simulation\services\narrative\core\characters\AangNarrativeService.ts |  |
-| src/features\battle-simulation\services\narrative\core\characters\AzulaNarrativeService.ts |  |
-| src/features\battle-simulation\services\narrative\core\EmotionalArcTracker.ts |  |
-| src/features\battle-simulation\services\narrative\core\EmotionalNarrationPolicy.ts |  |
-| src/features\battle-simulation\services\narrative\core\emotions\EmotionalStateManager.ts |  |
-| src/features\battle-simulation\services\narrative\core\emotions\EmotionModifier.ts |  |
-| src/features\battle-simulation\services\narrative\core\emotions\EmotionTracker.ts |  |
-| src/features\battle-simulation\services\narrative\core\MetaEventsService.ts |  |
-| src/features\battle-simulation\services\narrative\core\NarrativeComposer.ts |  |
-| src/features\battle-simulation\services\narrative\core\NarrativeCoordinator.ts |  |
-| src/features\battle-simulation\services\narrative\core\NarrativeEscalationService.ts |  |
-| src/features\battle-simulation\services\narrative\core\NarrativeMemoryManager.ts |  |
-| src/features\battle-simulation\services\narrative\core\NarrativeTrackSelector.ts |  |
-| src/features\battle-simulation\services\narrative\core\NarrativeVariantsService.ts |  |
-| src/features\battle-simulation\services\narrative\core\OneOffMomentManager.ts |  |
-| src/features\battle-simulation\services\narrative\core\pools\DamageOutcomePool.ts |  |
-| src/features\battle-simulation\services\narrative\core\pools\PoolManager.ts |  |
-| src/features\battle-simulation\services\narrative\core\pools\StateAnnouncementPool.ts |  |
-| src/features\battle-simulation\services\narrative\core\SpiritReactionService.ts |  |
-| src/features\battle-simulation\services\narrative\core\StateTracker.ts |  |
-| src/features\battle-simulation\services\narrative\damageOutcomeMapper.ts |  |
-| src/features\battle-simulation\services\narrative\enhancedNarrativeSystem.ts |  |
-| src/features\battle-simulation\services\narrative\enhancedRepetitionManager.ts |  |
-| src/features\battle-simulation\services\narrative\enhancedStateManager.ts |  |
-| src/features\battle-simulation\services\narrative\enhancedStateNarratives.ts |  |
-| src/features\battle-simulation\services\narrative\enhancedTemplateGenerator.ts |  |
-| src/features\battle-simulation\services\narrative\hookNarrativeGenerator.ts |  |
-| src/features\battle-simulation\services\narrative\index.ts |  |
-| src/features\battle-simulation\services\narrative\locationAnalyzer.ts |  |
-| src/features\battle-simulation\services\narrative\mechanicalStateExtractor.ts |  |
-| src/features\battle-simulation\services\narrative\narrative.service.ts |  |
-| src/features\battle-simulation\services\narrative\narrative.types.ts |  |
-| src/features\battle-simulation\services\narrative\narrativeEngine.ts |  |
-| src/features\battle-simulation\services\narrative\narrativePoolManager.ts |  |
-| src/features\battle-simulation\services\narrative\narrativeTemplates.ts |  |
-| src/features\battle-simulation\services\narrative\narrativeToneAnalyzer.ts |  |
-| src/features\battle-simulation\services\narrative\narratorHooks.ts |  |
-| src/features\battle-simulation\services\narrative\openingSequence.ts |  |
-| src/features\battle-simulation\services\narrative\pools\aang.narrative.ts |  |
-| src/features\battle-simulation\services\narrative\pools\azula.narrative.ts |  |
-| src/features\battle-simulation\services\narrative\pools\narrative.pools.ts |  |
-| src/features\battle-simulation\services\narrative\stateAnnouncementManager.ts |  |
-| src/features\battle-simulation\services\narrative\stateDrivenNarrativePool.ts |  |
-| src/features\battle-simulation\services\narrative\statusAnalyzer.ts |  |
-| src/features\battle-simulation\services\narrative\templateNarrativeGenerator.ts |  |
-| src/features\battle-simulation\services\narrative\types\NarrativeTypes.ts |  |
-| src/features\battle-simulation\services\narrative\types.ts |  |
-| src/features\battle-simulation\services\narrative\utilityManager.ts |  |
-| src/features\battle-simulation\services\narrative\utils\antiRepetition.utility.ts |  |
-| src/features\battle-simulation\services\narrative\utils\fallbackGenerator.utility.ts |  |
-| src/features\battle-simulation\services\utils\mechanicLogUtils.ts |  |
-| src/features\battle-simulation\services\utils\moveUtils.ts |  |
-| src/features\battle-simulation\types\behavioral.types.ts |  |
-| src/features\battle-simulation\types\cooldown.types.ts |  |
-| src/features\battle-simulation\types\identity.types.ts |  |
-| src/features\battle-simulation\types\index.ts |  |
-| src/features\battle-simulation\types\mechanic.types.ts |  |
-| src/features\battle-simulation\types\move.types.ts |  |
-| src/features\character-selection\components\CharacterCard.tsx |  |
-| src/features\character-selection\components\CharacterPortrait.tsx |  |
-| src/features\character-selection\components\CharacterSelection.tsx |  |
-| src/features\character-selection\data\characterData.ts |  |
-| src/features\character-selection\data\traits.ts |  |
-| src/features\location-selection\components\LocationSelection.tsx |  |
-| src/features\location-selection\data\locationData.ts |  |
-| src/features\technical-log\components\TechnicalLog.tsx |  |
-| src/main.tsx |  |
-| src/types\css.d.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\App.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\common\components\Button\Button.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\common\types\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\components\ErrorBoundary.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-log\components\BattleLog.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-log\components\LogDetailSelector.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\AbilityButton\AbilityButton.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\AbilityButton\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\AbilityPanel\AbilityPanel.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\AbilityPanel\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\BattleNarrativeTurn\BattleNarrativeTurn.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\BattleNarrativeTurn\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\BattleScene\BattleScene.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\CharacterStatus\CharacterStatus.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\EnhancedBattleLog\EnhancedBattleLog.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\EnhancedBattleLog\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\EnhancedBattleScene\EnhancedBattleScene.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\EnhancedBattleScene\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\NarrativeBubble\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\NarrativeBubble\NarrativeBubble.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\PlayerCardHorizontal\PlayerCardHorizontal.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\UnifiedBattleLog\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\UnifiedBattleLog\UnifiedBattleLog.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\components\VersusGrid\VersusGrid.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\controllers\useBattleSimulator.controller.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\data\arcTransitions.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\data\identities.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\data\moves.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\hooks\useCooldownManager.hook.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\hooks\useNarrativeLine.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\advancedAIController.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\attackMoveScoring.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\battleAwareness.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\battleStateAwareness.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\behaviorTreeEngine.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\chooseAbility.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\contextualMoveScoring.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\defenseMoveScoring.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\enhancedMoveScoring.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\helpers\conditionHelpers.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\intentAlignment.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\intentSystem.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\logQueries.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\metaState.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\moveScoring.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\moveSelection.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\moveUtils.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\narrative.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\patternDetection.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\patternRecognition.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\rules\aangRules.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\rules\aiRuleRegistry.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\rules\azulaRules.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\tacticalAI.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\tacticalAnalysis.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\tacticalMemory.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\tacticalNarrative.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\types\AIBehavior.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\weightedChoice.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\weightFunctions\aangWeights.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\ai\weightFunctions\azulaWeights.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\aiAnalysis.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\analytics.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\analyticsTracker.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\arc.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\attackMove.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\battleAnalysis.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\battleAnalytics.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\BattleAnalyticsTracker.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\battleContext.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\BattleLogger.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\battleValidation.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\characterAnalysis.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\checkDefeat.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\cooldownSystem.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\criticalSystem.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\decisiveClash.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\defenseMove.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\defensiveResolution.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\desperationMoveCreation.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\desperationMoves.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\desperationSystem.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\disruptionWindow.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\effectFusion.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\endPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\escalationApplication.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\escalationDetection.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\escalationPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\fallbackMoves.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\finisherSystem.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\genericMove.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\heroicReversal.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\logIdGenerator.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveConverter.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveDisabling.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveExecution.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveFatigue.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveLogic.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveRegistry.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveRouter.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\patternBreaking.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\patternTracking.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\desperationPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\effectsPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\endPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\escalationPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\finisherPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\phases\tacticalPhase.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\positioningMechanics.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\processTurn.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\reportGenerator.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\resolutionTriggers.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\resolveImpact.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\reversalMechanic.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\state.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\tacticalMove.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\TacticalNarrativeService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\tacticalState.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battleSimulator.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\cooldown\cooldownManager.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\effects\buffs.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\effects\effectFusion.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\effects\statusEffect.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\identity\behavioral.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\identity\behavioralUI.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\identity\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\identity\mentalState.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\identity\narrativeHooks.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\identity\tacticalPersonality.engine.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\antiRepetitionTracker.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\battleEndHandler.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\battlePhaseAnalyzer.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\characterHooks.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\configManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\contextBuilder.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\contextualNarrativeMapper.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\BattleNarrationStrategyService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\CharacterNarrativeRouter.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\characters\AangNarrativeService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\characters\AzulaNarrativeService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\EmotionalArcTracker.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\EmotionalNarrationPolicy.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\emotions\EmotionalStateManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\emotions\EmotionModifier.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\emotions\EmotionTracker.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\MetaEventsService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\NarrativeComposer.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\NarrativeCoordinator.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\NarrativeEscalationService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\NarrativeMemoryManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\NarrativeTrackSelector.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\NarrativeVariantsService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\OneOffMomentManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\pools\DamageOutcomePool.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\pools\PoolManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\pools\StateAnnouncementPool.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\SpiritReactionService.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\StateTracker.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\damageOutcomeMapper.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedNarrativeSystem.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedRepetitionManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedStateManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedStateNarratives.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedTemplateGenerator.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\hookNarrativeGenerator.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\locationAnalyzer.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\mechanicalStateExtractor.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrative.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrative.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrativeEngine.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrativePoolManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrativeTemplates.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrativeToneAnalyzer.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narratorHooks.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\openingSequence.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\aang.narrative.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\azula.narrative.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\narrativePoolRegistry.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pronouns.data.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\stateAnnouncementManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\stateDrivenNarrativePool.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\statusAnalyzer.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\templateNarrativeGenerator.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\types\NarrativeTypes.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utilityManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\antiRepetition.utility.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\fallbackGenerator.utility.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\narrativeKey.utility.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\pronoun.utility.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\mechanicLogUtils.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\moveUtils.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\behavioral.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\cooldown.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\identity.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\index.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\mechanic.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\move.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\components\CharacterCard.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\components\CharacterPortrait.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\components\CharacterSelection.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\data\characterData.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\data\traits.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\location-selection\components\LocationSelection.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\location-selection\data\locationData.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\technical-log\components\TechnicalLog.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\main.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\types\css.d.ts |  |

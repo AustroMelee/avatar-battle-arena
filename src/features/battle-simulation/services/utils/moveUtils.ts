@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine/utilities. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Move Utilities
 // RESPONSIBILITY: The SINGLE SOURCE OF TRUTH for determining which moves a character can legally use in a turn.
 
@@ -115,10 +116,7 @@ export function getAvailableMoves(
     if (isMoveOnCooldown(move.name, character)) return false;
     if (!hasUsesLeft(move, character)) return false;
     if (!areFinisherConditionsMet(move, character, enemy)) return false;
-    // DEV ASSERT: If a move is selected and cooldown is not zero, throw an error
-    if (process.env.NODE_ENV === 'development' && isMoveOnCooldown(move.name, character)) {
-      throw new Error(`Move ${move.name} selected while on cooldown for ${character.name}`);
-    }
+    // TODO: Add browser-safe dev check if needed
     return true;
   });
 

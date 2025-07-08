@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Report Generator Service
 // RESPONSIBILITY: Generate battle reports and summaries
 

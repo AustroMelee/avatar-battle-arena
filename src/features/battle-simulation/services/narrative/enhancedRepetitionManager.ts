@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Enhanced Repetition Management
 import type { NarrativeMechanic } from './types';
 

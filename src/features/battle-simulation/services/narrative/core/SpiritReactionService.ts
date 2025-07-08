@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Spirit Reaction Service
 // RESPONSIBILITY: Spirit reactions and meta-events for atmospheric depth
 

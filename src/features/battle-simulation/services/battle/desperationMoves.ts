@@ -1,11 +1,11 @@
 // CONTEXT: Desperation Moves & Finisher System
 // RESPONSIBILITY: Provide dramatic, high-risk moves that unlock at critical health levels
+
 import type { Move } from '../../types/move.types';
 import { BattleCharacter } from '../../types';
 
-/**
- * @description Represents a desperation move that unlocks under specific conditions.
- */
+const MAX_HEALTH = 100; // Convention: global virtual max health for all mechanics
+
 export interface DesperationMove extends Omit<Move, 'unlockCondition'> {
   unlockCondition: (character: BattleCharacter) => boolean;
   isDesperation: true;
@@ -22,11 +22,9 @@ export interface DesperationMove extends Omit<Move, 'unlockCondition'> {
     success: string;
     failure?: string;
   };
+  tags?: string[]; // Ensure tag compliance
 }
 
-/**
- * @description Desperation move definitions for each character.
- */
 export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
   'aang': [
     {
@@ -36,8 +34,8 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
       baseDamage: 40,
       cooldown: 3,
       description: 'Aang channels his deepest airbending mastery, unleashing devastating power at great personal risk.',
-      chiCost: 0, // No chi cost - powered by desperation
-      unlockCondition: (character: BattleCharacter) => character.currentHealth < 20,
+      chiCost: 0,
+      unlockCondition: (character: BattleCharacter) => (character.currentHealth / MAX_HEALTH) < 0.2,
       riskLevel: 'extreme',
       sideEffect: { type: 'self_damage', value: 10 },
       narrative: {
@@ -47,7 +45,8 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
         failure: 'The power overwhelms Aang, causing severe backlash!'
       },
       isDesperation: true,
-      dramaticNarrative: "Aang's spirit surges as he risks it all for one final strike!"
+      dramaticNarrative: "Aang's spirit surges as he risks it all for one final strike!",
+      tags: ['desperation']
     },
     {
       id: 'air-tornado',
@@ -57,7 +56,7 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
       cooldown: 2,
       description: 'Creates a massive tornado that damages both combatants.',
       chiCost: 0,
-      unlockCondition: (character: BattleCharacter) => character.currentHealth < 30,
+      unlockCondition: (character: BattleCharacter) => (character.currentHealth / MAX_HEALTH) < 0.3,
       riskLevel: 'high',
       sideEffect: { type: 'self_damage', value: 5 },
       narrative: {
@@ -67,7 +66,8 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
         failure: 'The tornado spins out of control, backfiring on Aang!'
       },
       isDesperation: true,
-      dramaticNarrative: "Aang's desperation fuels a storm that spares no one!"
+      dramaticNarrative: "Aang's desperation fuels a storm that spares no one!",
+      tags: ['desperation']
     }
   ],
   'azula': [
@@ -79,7 +79,7 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
       cooldown: 3,
       description: 'Azula channels her fury into an unstoppable firestorm.',
       chiCost: 0,
-      unlockCondition: (character: BattleCharacter) => character.currentHealth < 25,
+      unlockCondition: (character: BattleCharacter) => (character.currentHealth / MAX_HEALTH) < 0.25,
       riskLevel: 'extreme',
       sideEffect: { type: 'self_damage', value: 15 },
       narrative: {
@@ -89,7 +89,8 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
         failure: "The firestorm consumes Azula's own energy!"
       },
       isDesperation: true,
-      dramaticNarrative: "Azula's fury becomes a force of nature!"
+      dramaticNarrative: "Azula's fury becomes a force of nature!",
+      tags: ['desperation']
     },
     {
       id: 'lightning-storm',
@@ -99,7 +100,7 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
       cooldown: 2,
       description: 'Creates a massive lightning storm that strikes randomly.',
       chiCost: 0,
-      unlockCondition: (character: BattleCharacter) => character.currentHealth < 35,
+      unlockCondition: (character: BattleCharacter) => (character.currentHealth / MAX_HEALTH) < 0.35,
       riskLevel: 'high',
       sideEffect: { type: 'self_damage', value: 10 },
       narrative: {
@@ -109,100 +110,80 @@ export const DESPERATION_MOVES: Record<string, DesperationMove[]> = {
         failure: 'The lightning backfires, leaving Azula vulnerable!'
       },
       isDesperation: true,
-      dramaticNarrative: "Azula's desperation unleashes a storm of lightning!"
+      dramaticNarrative: "Azula's desperation unleashes a storm of lightning!",
+      tags: ['desperation']
     }
   ]
 };
 
 /**
- * @description Gets all available desperation moves for a character.
- * @param {BattleCharacter} character - The character to check
- * @param {number} [turn] - The current turn number
- * @returns {DesperationMove[]} Array of available desperation moves
+ * Returns all available desperation moves for a character.
  */
-export function getAvailableDesperationMoves(character: BattleCharacter, turn?: number): DesperationMove[] {
+export function getAvailableDesperationMoves(
+  character: BattleCharacter
+): DesperationMove[] {
   const characterMoves = DESPERATION_MOVES[character.name.toLowerCase()] || [];
   return characterMoves.filter(move => {
     const unlocked = move.unlockCondition(character);
-    if (unlocked && turn !== undefined) {
-      // TODO: Add logEntry to log system
-    }
+    // (Optional) Place to add log entry when move is unlocked
     return unlocked;
   });
 }
 
 /**
- * @description Checks if a character has any desperation moves available.
- * @param {BattleCharacter} character - The character to check
- * @returns {boolean} True if desperation moves are available
+ * Checks if a character has any desperation moves available.
  */
 export function hasDesperationMoves(character: BattleCharacter): boolean {
   return getAvailableDesperationMoves(character).length > 0;
 }
 
 /**
- * @description Gets the most powerful available desperation move.
- * @param {BattleCharacter} character - The character to check
- * @returns {DesperationMove | null} The most powerful desperation move or null
+ * Returns the most powerful available desperation move.
  */
 export function getBestDesperationMove(character: BattleCharacter): DesperationMove | null {
   const availableMoves = getAvailableDesperationMoves(character);
-  
-  if (availableMoves.length === 0) {
-    return null;
-  }
-  
-  // Return the move with highest power
-  return availableMoves.reduce((best, current) => 
+  if (!availableMoves.length) return null;
+  return availableMoves.reduce((best, current) =>
     current.baseDamage > best.baseDamage ? current : best
   );
 }
 
 /**
- * @description Applies the side effects of a desperation move.
- * @param {BattleCharacter} character - The character using the move
- * @param {DesperationMove} move - The desperation move used
- * @returns {BattleCharacter} Character with side effects applied
+ * Applies the side effects of a desperation move, in a type-safe way.
  */
 export function applyDesperationSideEffects(
   character: BattleCharacter,
   move: DesperationMove
 ): BattleCharacter {
-  if (!move.sideEffect) {
-    return character;
-  }
+  if (!move.sideEffect) return character;
 
-  const { type, value, duration: _duration = 1 } = move.sideEffect;
-  
+  const { type, value } = move.sideEffect;
+
   switch (type) {
     case 'self_damage':
       return {
         ...character,
         currentHealth: Math.max(1, character.currentHealth - value)
       };
-      
     case 'chi_drain':
       return {
         ...character,
         resources: {
           ...character.resources,
-          chi: Math.max(0, character.resources.chi - value)
+          chi: Math.max(0, (character.resources?.chi || 0) - value)
         }
       };
-      
     case 'defense_reduction':
       return {
         ...character,
-        currentDefense: Math.max(0, character.currentDefense - value)
+        currentDefense: Math.max(0, (character.currentDefense || 0) - value)
       };
-      
     case 'stun':
-      // Add stun effect to flags
       return {
         ...character,
         flags: {
           ...character.flags,
-          // stunDuration: duration
+          stunDuration: value // or duration, as needed
         }
       };
       
@@ -212,29 +193,25 @@ export function applyDesperationSideEffects(
 }
 
 /**
- * @description Gets narrative text for desperation move events.
- * @param {DesperationMove} move - The desperation move
- * @param {string} event - The event type ('unlock', 'use', 'success', 'failure')
- * @returns {string} Narrative text
+ * Gets narrative text for desperation move events.
  */
-export function getDesperationNarrative(move: DesperationMove, event: keyof DesperationMove['narrative']): string {
+export function getDesperationNarrative(
+  move: DesperationMove,
+  event: keyof DesperationMove['narrative']
+): string {
   return move.narrative[event] || '';
 }
 
 /**
- * @description Checks if a character is in a desperate state (low health).
- * @param {BattleCharacter} character - The character to check
- * @returns {boolean} True if character is desperate
+ * True if the character is in a desperate state, using MAX_HEALTH.
  */
 export function isDesperate(character: BattleCharacter): boolean {
-  return character.currentHealth <= 25;
+  return (character.currentHealth / MAX_HEALTH) < 0.25;
 }
 
 /**
- * @description Checks if a character is critically wounded.
- * @param {BattleCharacter} character - The character to check
- * @returns {boolean} True if character is critically wounded
+ * True if the character is critically wounded, using MAX_HEALTH.
  */
 export function isCriticallyWounded(character: BattleCharacter): boolean {
-  return character.currentHealth <= 10;
+  return (character.currentHealth / MAX_HEALTH) < 0.10;
 } 

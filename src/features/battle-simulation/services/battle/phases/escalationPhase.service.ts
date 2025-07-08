@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Escalation Phase Service
 // RESPONSIBILITY: Handle pattern breaking and escalation events with enhanced state management
 
@@ -9,7 +10,6 @@ import { forcePatternEscalation } from '../escalationApplication.service';
 // import { createNarrativeService } from '../../narrative';
 // import { generateUniqueLogId } from '../../ai/logQueries';
 import { createMechanicLogEntry } from '../../utils/mechanicLogUtils';
-import { AntiRepetitionUtility } from '../../narrative/utils/antiRepetition.utility';
 // import type { Move } from '../../types/move.types';
 
 // Global enhanced state manager instance
@@ -27,16 +27,6 @@ import { AntiRepetitionUtility } from '../../narrative/utils/antiRepetition.util
 const STALEMATE_TURN_THRESHOLD = 15;
 const STALEMATE_DAMAGE_THRESHOLD = 5; // Average damage per turn to be considered "active"
 const REPETITIVE_LOOP_THRESHOLD = 3; // Number of same consecutive moves to trigger escalation
-
-const antiRepetition = new AntiRepetitionUtility();
-const STALEMATE_BROKEN_LINES = [
-  "The battle's pace quickens as the fighters are forced to break the deadlock!",
-  "A sudden shift in momentum! The stalemate is shattered.",
-  "No more waiting—both sides are compelled to act decisively!",
-  "The tension snaps; the fighters abandon caution for action.",
-  "A new urgency fills the arena as the deadlock is broken.",
-  "The crowd senses a change—no more stalemates, only action!"
-];
 
 /**
  * @description Processes battle escalation based on stalemate and pattern detection.
@@ -88,40 +78,31 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
   }
 
   if (shouldEscalate) {
-    // --- NEW: Add a clear, anti-repetitive "Stalemate Broken" log entry ---
-    const effect = antiRepetition.getFreshLine('system-stalemate-broken', STALEMATE_BROKEN_LINES) || STALEMATE_BROKEN_LINES[0];
+    // Use a poetic escalation/desperation line instead of mechanical log
+    const fallbackLines = [
+      (characterName: string) => `Out of options, ${characterName} digs deep—summoning a move born of sheer survival instinct.`
+    ];
+    const line = fallbackLines[Math.floor(Math.random() * fallbackLines.length)](attacker.name);
     const { narrative, technical } = createMechanicLogEntry({
       turn: state.turn,
-      actor: 'System',
-      mechanic: 'Stalemate Broken!',
-      effect,
-      reason: reason,
+      actor: 'Narrator',
+      mechanic: '',
+      effect: line,
+      reason: '', // Do not append reason/parenthetical to player log
     });
-    // --- END ---
-    const { newState, logEntry } = forcePatternEscalation(state, attacker, escalationType, reason);
-    
-    // Update analytics with the escalation event
+    const { newState, logEntry } = forcePatternEscalation(state, attacker, escalationType, '');
     if (newState.analytics) {
         newState.analytics.patternAdaptations = (newState.analytics.patternAdaptations || 0) + 1;
         console.log(`DEBUG: Analytics updated - Pattern Adaptations: ${newState.analytics.patternAdaptations}`);
     }
-
-    newState.battleLog.push(technical);
-    newState.battleLog.push(logEntry);
-    newState.log.push(narrative);
+    newState.battleLog.push(technical); // Technical log for devs only
+    newState.battleLog.push(logEntry); // Technical log for devs only
+    newState.log.push(narrative); // Only narrative, never mechanical
     newState.log.push(typeof logEntry.narrative === 'string' ? logEntry.narrative : logEntry.narrative.join(' ') || logEntry.result);
-
-    // --- NEW: Increment the escalation cycle counter ---
     const attackerIndex = newState.participants.findIndex(p => p.name === attacker.name);
     if (attackerIndex !== -1) {
       newState.participants[attackerIndex].flags.escalationCycleCount = (newState.participants[attackerIndex].flags.escalationCycleCount || 0) + 1;
     }
-
-    // If escalation should trigger a climax, call forceBattleClimax and return
-    if (shouldEscalate && escalationType === 'climax') {
-      return forceBattleClimax(state);
-    }
-
     return newState;
   }
 

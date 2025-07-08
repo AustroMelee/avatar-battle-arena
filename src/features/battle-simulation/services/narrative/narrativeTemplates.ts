@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Template-Driven Storytelling
 import type { BattleContext } from './types';
 
@@ -20,262 +21,269 @@ export type NarrativeTemplate = {
  * @description Enhanced narrative templates with rich, dramatic prose
  */
 export const NARRATIVE_TEMPLATES: NarrativeTemplate[] = [
-  // ESCALATION TEMPLATES - Dramatic forced escalation moments
+  // FORCED ESCALATION (Legendary Overhaul)
   {
     id: 'forced_escalation',
     condition: (ctx) => ctx.mechanics.forcedEscalation && ctx.damage !== undefined && ctx.damage > 0,
     templates: {
       'Aang': {
         'furious': [
-          "Aang's patience finally snaps! His normally peaceful demeanor shatters as frustration boils over, and he unleashes a tempest of raw power!",
-          "The air itself seems to answer Aang's desperate call as he's forced to escalate dramatically!",
-          "Aang's eyes narrow with determination—no more holding back! He channels his frustration into devastating force!",
-          "The normally gentle airbender erupts with unexpected fury, his attacks becoming a whirlwind of desperate power!"
+          "Aang’s serenity is shattered—he becomes a whirlwind of desperation, his bending wild and unrestrained.",
+          "Cornered by fate, Aang lashes out, every movement a storm breaking through the silence.",
+          "All pacifism abandoned, the Avatar’s fury bends the air itself—he fights for more than victory.",
+          "Aang’s hope becomes hurricane force; no more mercy, only pure will unleashed.",
+          "Desperation for peace is twisted into violent motion—Aang strikes with a force that chills even his own heart."
         ],
         'desperate': [
-          "Aang feels the weight of desperation pressing down. With a determined grimace, he channels everything into this attack!",
-          "Time is running out, and Aang knows it. He throws caution to the wind and unleashes his full power!",
-          "Aang's back is against the wall—he has no choice but to escalate dramatically!",
-          "The young Avatar's patience wears thin. He's forced to fight with everything he has!"
+          "Aang’s serenity is shattered—he becomes a whirlwind of desperation, his bending wild and unrestrained.",
+          "Cornered by fate, Aang lashes out, every movement a storm breaking through the silence.",
+          "All pacifism abandoned, the Avatar’s fury bends the air itself—he fights for more than victory.",
+          "Aang’s hope becomes hurricane force; no more mercy, only pure will unleashed.",
+          "Desperation for peace is twisted into violent motion—Aang strikes with a force that chills even his own heart."
         ]
       },
       'Azula': {
         'furious': [
-          "Azula's calculated facade cracks! Her eyes burn with pure rage as she's forced to unleash her full destructive power!",
-          "The princess's patience evaporates. She channels her fury into a devastating assault!",
-          "Azula's control slips—she's forced to escalate dramatically, her attacks becoming a storm of blue fire!",
-          "The normally precise Azula erupts with raw power, her frustration manifesting as devastating force!"
+          "Azula’s composure splinters; blue fire erupts, unpredictable and raw, her ambition burning through exhaustion.",
+          "Every failure feeds her rage—Azula’s attacks become wilder, her technique a storm of risk and brilliance.",
+          "With nowhere left to retreat, the princess becomes predator and prey—her power now reckless and sublime.",
+          "Azula bends not just fire, but the very rules of the fight—her need for victory eclipses all caution.",
+          "Desperation strips her of perfection—what’s left is Azula, unchained and terrifying."
         ],
         'desperate': [
-          "Azula's strategic mind gives way to desperation. She's forced to fight with everything she has!",
-          "The princess feels time slipping away. She channels her desperation into overwhelming power!",
-          "Azula's back is against the wall—she has no choice but to escalate dramatically!",
-          "The calculated warrior's patience wears thin. She's forced to unleash her full destructive potential!"
+          "Azula’s composure splinters; blue fire erupts, unpredictable and raw, her ambition burning through exhaustion.",
+          "Every failure feeds her rage—Azula’s attacks become wilder, her technique a storm of risk and brilliance.",
+          "With nowhere left to retreat, the princess becomes predator and prey—her power now reckless and sublime.",
+          "Azula bends not just fire, but the very rules of the fight—her need for victory eclipses all caution.",
+          "Desperation strips her of perfection—what’s left is Azula, unchained and terrifying."
         ]
       }
     },
     narratorTemplates: [
-      "The battle reaches a fever pitch as desperation drives them to unleash their ultimate power!",
-      "The very air crackles with tension as both fighters are forced to escalate dramatically!",
-      "No more holding back—the battle erupts into a flurry of desperate, devastating blows!",
-      "The elements themselves seem to answer the call as the fighters channel their frustration into raw power!"
+      "A furious crescendo overtakes the arena—both fighters abandon restraint, risking everything in a storm of will.",
+      "The air sizzles with desperation; benders turn instinct to weapon, unleashing fury unseen since ancient legends.",
+      "Strategy is cast aside. Only courage, hunger, and heartbreak remain in the battle’s final act.",
+      "No more hesitation; even the elements recoil as every secret technique, every forbidden trick is bared.",
+      "Pressure forges heroes—or destroys them. Both warriors reach beyond exhaustion into pure, ungoverned power.",
+      "With tactics exhausted, the duelists become raw force—bending their very destinies with every move.",
+      "The crowd falls silent as history is written in sweat and sparks—no holding back, no second chances.",
+      "Each attack becomes a prayer and a gamble; victory and ruin now hang on a single breath.",
+      "Boundaries shatter. The world narrows to a single truth: escalate or be erased.",
+      "All plans are ash—only heart and fury dictate the final exchanges of this legendary duel."
     ],
     priority: 9
   },
-
-  // VULNERABILITY PUNISHMENT - Capitalizing on enemy mistakes
-  {
-    id: 'vulnerability_punish_charging',
-    condition: (ctx) => ctx.mechanics.isVulnerable && ctx.mechanics.vulnerabilityType === 'charging' && ctx.mechanics.punishDamage > 0,
-    templates: {
-      'Aang': {
-        'calculated': [
-          "Aang spots the perfect opening! While his opponent is charging, he strikes with devastating precision!",
-          "The airbender capitalizes on the charging vulnerability, his attack landing with perfect timing!",
-          "Aang's eyes light up—he sees the weakness and exploits it with surgical precision!",
-          "The moment his opponent starts charging, Aang pounces, his attack finding the perfect opening!"
-        ]
-      },
-      'Azula': {
-        'calculated': [
-          "Azula's predatory instincts kick in! She spots the charging vulnerability and strikes with lethal precision!",
-          "The princess capitalizes on the moment of weakness, her attack landing with devastating accuracy!",
-          "Azula's eyes narrow—she sees the opening and exploits it with ruthless efficiency!",
-          "The moment her opponent starts charging, Azula strikes like lightning, finding the perfect weakness!"
-        ]
-      }
-    },
-    narratorTemplates: [
-      "A devastating counter-attack! The charging opponent is caught completely off-guard!",
-      "Perfect timing! The vulnerability is exploited with surgical precision!",
-      "The charging attack leaves them wide open—and the opponent capitalizes mercilessly!",
-      "A masterful counter-strike that turns the charging opponent's strength into their greatest weakness!"
-    ],
-    priority: 8
-  },
-
-  // PATTERN REPETITION - Breaking predictable patterns
+  // PATTERN BREAK (Legendary Overhaul)
   {
     id: 'pattern_break',
     condition: (ctx) => ctx.mechanics.moveRepetition >= 3,
     templates: {
       'Aang': {
         'desperate': [
-          "Aang's rhythm shifts dramatically! He breaks free from the predictable pattern, fighting with wild abandon!",
-          "The airbender snaps out of his repetitive attacks, his movements becoming unpredictable and dangerous!",
-          "Aang realizes he's become predictable. With a determined grimace, he changes tactics completely!",
-          "The young Avatar's strategy unravels—he's forced to adapt and fight with renewed unpredictability!"
+          "Aang’s movement becomes impossible to read—a dance of wind and intuition, adapting with every heartbeat.",
+          "He senses the trap of repetition and answers with sudden, joyful chaos.",
+          "The Avatar abandons old habits, inventing new rhythms mid-fight.",
+          "Aang breaks the cycle; his bending becomes a question the enemy cannot answer."
         ]
       },
       'Azula': {
         'desperate': [
-          "Azula's calculated facade cracks! She breaks free from the predictable pattern, her attacks becoming erratic and dangerous!",
-          "The princess's strategic mind adapts—she realizes the pattern and changes tactics completely!",
-          "Azula's precision gives way to unpredictability as she's forced to break her own patterns!",
-          "The normally methodical Azula becomes unpredictable, her attacks taking on a wild, dangerous edge!"
+          "Azula snaps the chain of predictability, her strikes weaving new, lethal patterns.",
+          "Her eyes narrow—pattern shattered, she turns unpredictability into her deadliest weapon.",
+          "Perfection cracks, and from its shards Azula creates something utterly unexpected.",
+          "The princess improvises with reckless genius, her flames now wild, untraceable."
         ]
       }
     },
     narratorTemplates: [
-      "The tempo shifts dramatically! Predictable patterns give way to wild, unpredictable combat!",
-      "The battle rhythm breaks as both fighters adapt to avoid becoming predictable!",
-      "No more patterns—the combat becomes a chaotic dance of desperate adaptation!",
-      "The predictable exchanges shatter as both warriors realize the need for unpredictability!"
+      "The rhythm of battle fractures—familiarity is shattered, and invention reigns.",
+      "Predictability dies in an instant; the fight becomes a storm of daring and surprise.",
+      "Stale tactics are tossed aside—creativity and chaos rush in like a flood.",
+      "A flash of wildness turns the duel on its head—what was safe is now lethal.",
+      "From routine, a spark: improvisation breathes new danger into the arena.",
+      "Sudden inspiration upends the duel, both fighters forced to invent on the fly.",
+      "Cautious repetition gives way to brilliance—this fight is now anyone’s to win or lose.",
+      "An unexpected gambit spins order into uncertainty—strategy dissolves into pure instinct.",
+      "The duelists change their dance; the familiar steps vanish beneath risk and imagination.",
+      "All patterns broken, all plans reborn—the battlefield is now a blank canvas for genius."
     ],
     priority: 7
   },
-
-  // HIGH DAMAGE MOMENTS - Devastating attacks
+  // VULNERABILITY PUNISHMENT (Legendary Overhaul)
+  {
+    id: 'vulnerability_punish_charging',
+    condition: (ctx) => ctx.mechanics.isVulnerable && ctx.mechanics.vulnerabilityType === 'charging' && ctx.mechanics.punishDamage > 0,
+    templates: {
+      'Aang': {
+        'calculated': [
+          "Aang flows around the opponent’s charge, striking at the exact moment of weakness.",
+          "He exploits the flaw with monk’s discipline—swift, precise, unstoppable.",
+          "A heartbeat’s hesitation is all Aang needs to turn defense into victory."
+        ]
+      },
+      'Azula': {
+        'calculated': [
+          "Azula pounces—her flames find the gap, punishing the mistake with regal cruelty.",
+          "Predator’s instincts—Azula strikes before her foe can recover, her precision absolute.",
+          "Her blue fire bites deep, a lesson in pain for the overzealous."
+        ]
+      }
+    },
+    narratorTemplates: [
+      "Opportunity flashes—one bender is exposed, punished with flawless, brutal timing.",
+      "The crowd gasps as a charging move is countered with devastating precision.",
+      "A single mistake, and the duel shifts—vulnerability ruthlessly exploited.",
+      "Caught wide open, the aggressor is humbled by a merciless counter-strike."
+    ],
+    priority: 8
+  },
+  // HIGH DAMAGE (Legendary Overhaul)
   {
     id: 'high_damage',
     condition: (ctx) => ctx.damage !== undefined && ctx.damage > 20,
     templates: {
       'Aang': {
         'confident': [
-          "Aang's attack lands with devastating force! The very air itself seems to answer his call!",
-          "The young Avatar channels his power perfectly—the impact is absolutely devastating!",
-          "Aang's technique is flawless! His attack strikes with the force of a hurricane!",
-          "The airbender's mastery shows—his attack lands with overwhelming power!"
+          "An attack like an earthquake—devastation written in every movement.",
+          "Shockwaves ripple through the crowd—someone just bent the limits of power.",
+          "The very ground trembles—a masterstroke lands, reshaping the duel.",
+          "Raw elemental force explodes—this strike could end legends."
         ]
       },
       'Azula': {
         'confident': [
-          "Azula's attack strikes with devastating precision! Her blue fire burns with overwhelming intensity!",
-          "The princess's technique is perfect—the impact is absolutely devastating!",
-          "Azula's attack lands like lightning—fast, precise, and utterly devastating!",
-          "The firebender's mastery is evident—her attack strikes with overwhelming destructive force!"
+          "An attack like an earthquake—devastation written in every movement.",
+          "Shockwaves ripple through the crowd—someone just bent the limits of power.",
+          "The very ground trembles—a masterstroke lands, reshaping the duel.",
+          "Raw elemental force explodes—this strike could end legends."
         ]
       }
     },
     narratorTemplates: [
-      "A devastating blow! The very elements themselves seem to answer the call!",
-      "The impact is absolutely devastating! Such raw power unleashed upon the battlefield!",
-      "A masterful strike that shakes the very foundations of the arena!",
-      "The attack lands with the force of a natural disaster—absolutely overwhelming!"
+      "An attack like an earthquake—devastation written in every movement.",
+      "Shockwaves ripple through the crowd—someone just bent the limits of power.",
+      "The very ground trembles—a masterstroke lands, reshaping the duel.",
+      "Raw elemental force explodes—this strike could end legends."
     ],
     priority: 8
   },
-
-  // LOW DAMAGE MOMENTS - Weak or blocked attacks
+  // LOW DAMAGE (Legendary Overhaul)
   {
     id: 'low_damage',
     condition: (ctx) => ctx.damage !== undefined && ctx.damage <= 5,
     templates: {
       'Aang': {
         'defensive': [
-          "Aang's attack lacks power—he's clearly holding back or exhausted from the battle!",
-          "The airbender's strike is weak, his energy clearly depleted from the intense combat!",
-          "Aang's attack barely connects, lacking the force needed to make a real impact!",
-          "The young Avatar's technique is off—his attack lands but with little power behind it!"
+          "A feeble attempt—fatigue and doubt sap all strength from the blow.",
+          "The attack lands, but it is little more than a plea for mercy.",
+          "Effort outweighs effect—weariness is written in every gesture.",
+          "A tired motion, quickly forgotten—a reminder that even titans tire."
         ]
       },
       'Azula': {
         'defensive': [
-          "Azula's attack lacks her usual precision—she's clearly exhausted or distracted!",
-          "The princess's strike is weak, her normally devastating power diminished by fatigue!",
-          "Azula's attack barely connects, lacking the destructive force she's known for!",
-          "The firebender's technique is off—her attack lands but with little impact!"
+          "A feeble attempt—fatigue and doubt sap all strength from the blow.",
+          "The attack lands, but it is little more than a plea for mercy.",
+          "Effort outweighs effect—weariness is written in every gesture.",
+          "A tired motion, quickly forgotten—a reminder that even titans tire."
         ]
       }
     },
     narratorTemplates: [
-      "The attack connects but lacks power—fatigue is clearly taking its toll!",
-      "A weak strike that barely makes an impact—the fighter's energy is clearly depleted!",
-      "The attack lands but with little force—exhaustion is evident in every movement!",
-      "A feeble attempt that barely connects—the intense battle has clearly taken its toll!"
+      "A feeble attempt—fatigue and doubt sap all strength from the blow.",
+      "The attack lands, but it is little more than a plea for mercy.",
+      "Effort outweighs effect—weariness is written in every gesture.",
+      "A tired motion, quickly forgotten—a reminder that even titans tire."
     ],
     priority: 4
   },
-
-  // COMEBACK MOMENTS - Turning the tide
+  // COMEBACK (Legendary Overhaul)
   {
     id: 'comeback',
     condition: (ctx) => ctx.mechanics.isComeback,
     templates: {
       'Aang': {
         'desperate': [
-          "Against all odds, Aang finds the strength to fight back! His determination burns brighter than ever!",
-          "The young Avatar refuses to give up! He channels his desperation into renewed strength!",
-          "Aang's spirit refuses to break! He finds reserves of strength he didn't know he had!",
-          "The airbender's willpower is unbreakable! He turns his desperation into a fighting chance!"
+          "A last stand becomes a miracle—one fighter’s spirit blazes back from the brink.",
+          "When all seemed lost, willpower ignites—momentum swings like a hammer.",
+          "Defeat snatched from the jaws of victory—resilience turns fate upside down.",
+          "Sheer stubbornness rewrites the story—one more attack, one more hope."
         ]
       },
       'Azula': {
         'desperate': [
-          "Azula's pride refuses to accept defeat! She channels her desperation into renewed destructive power!",
-          "The princess's determination is unbreakable! She finds strength in her refusal to lose!",
-          "Azula's willpower is legendary! She turns her desperation into a fighting chance!",
-          "The firebender's pride drives her forward! She refuses to accept anything but victory!"
+          "A last stand becomes a miracle—one fighter’s spirit blazes back from the brink.",
+          "When all seemed lost, willpower ignites—momentum swings like a hammer.",
+          "Defeat snatched from the jaws of victory—resilience turns fate upside down.",
+          "Sheer stubbornness rewrites the story—one more attack, one more hope."
         ]
       }
     },
     narratorTemplates: [
-      "Against all odds, they find the strength to fight back! The battle is far from over!",
-      "The tide begins to turn as desperation fuels renewed determination!",
-      "A miraculous comeback! The fighter refuses to accept defeat!",
-      "The impossible becomes possible as sheer willpower overcomes overwhelming odds!"
+      "A last stand becomes a miracle—one fighter’s spirit blazes back from the brink.",
+      "When all seemed lost, willpower ignites—momentum swings like a hammer.",
+      "Defeat snatched from the jaws of victory—resilience turns fate upside down.",
+      "Sheer stubbornness rewrites the story—one more attack, one more hope."
     ],
     priority: 7
   },
-
-  // RALLY MOMENTS - Building momentum
+  // RALLY (Legendary Overhaul)
   {
     id: 'rally',
     condition: (ctx) => ctx.mechanics.isRally,
     templates: {
       'Aang': {
         'confident': [
-          "Aang's confidence builds with each successful strike! He's finding his rhythm!",
-          "The airbender is on a roll! His attacks flow together with perfect timing!",
-          "Aang's momentum builds—he's hitting his stride and showing no signs of slowing!",
-          "The young Avatar is unstoppable! His confidence grows with every successful attack!"
+          "Momentum builds—a rising storm of attacks signals a champion’s return.",
+          "A fighter catches the rhythm—the tide of battle begins to turn.",
+          "The crowd feels it—each move sharper, faster, more sure.",
+          "This is the moment the legend is born—one strike at a time."
         ]
       },
       'Azula': {
         'confident': [
-          "Azula's confidence grows with each devastating strike! She's in perfect form!",
-          "The princess is unstoppable! Her attacks land with increasing precision and power!",
-          "Azula's momentum builds—she's hitting her stride and showing no mercy!",
-          "The firebender is on fire! Her confidence grows with every successful attack!"
+          "Momentum builds—a rising storm of attacks signals a champion’s return.",
+          "A fighter catches the rhythm—the tide of battle begins to turn.",
+          "The crowd feels it—each move sharper, faster, more sure.",
+          "This is the moment the legend is born—one strike at a time."
         ]
       }
     },
     narratorTemplates: [
-      "They're on a roll! Momentum builds with each successful strike!",
-      "The fighter is unstoppable! Confidence grows with every attack!",
-      "A perfect rhythm! The combatant is hitting their stride!",
-      "The momentum is undeniable! The fighter shows no signs of slowing down!"
+      "Momentum builds—a rising storm of attacks signals a champion’s return.",
+      "A fighter catches the rhythm—the tide of battle begins to turn.",
+      "The crowd feels it—each move sharper, faster, more sure.",
+      "This is the moment the legend is born—one strike at a time."
     ],
     priority: 6
   },
-
-  // POSITIONING MOMENTS - Strategic movement
+  // POSITIONING (Legendary Overhaul)
   {
     id: 'positioning',
     condition: (ctx) => ctx.mechanics.repositionAttempts > 0,
     templates: {
       'Aang': {
         'calculated': [
-          "Aang shifts his position strategically, looking for the perfect angle of attack!",
-          "The airbender moves with purpose, positioning himself for maximum advantage!",
-          "Aang's footwork is precise as he maneuvers for the perfect tactical position!",
-          "The young Avatar's positioning is masterful—he's setting up for something big!"
+          "A subtle dance—each step carves out new advantage, unseen by most.",
+          "Strategy is a blade; every footfall another cut.",
+          "Masterful movement—position becomes as deadly as power itself.",
+          "The wise warrior wins the ground before the battle is decided."
         ]
       },
       'Azula': {
         'calculated': [
-          "Azula's movements are calculated and precise as she positions herself for maximum advantage!",
-          "The princess maneuvers with deadly precision, setting up the perfect tactical position!",
-          "Azula's positioning is strategic—she's clearly planning something devastating!",
-          "The firebender's footwork is flawless as she moves into the perfect attack position!"
+          "A subtle dance—each step carves out new advantage, unseen by most.",
+          "Strategy is a blade; every footfall another cut.",
+          "Masterful movement—position becomes as deadly as power itself.",
+          "The wise warrior wins the ground before the battle is decided."
         ]
       }
     },
     narratorTemplates: [
-      "Strategic positioning! The fighter maneuvers for maximum advantage!",
-      "Precise footwork! The combatant sets up the perfect tactical position!",
-      "Masterful movement! The fighter positions themselves for something big!",
-      "Calculated positioning! The warrior sets up for maximum impact!"
+      "A subtle dance—each step carves out new advantage, unseen by most.",
+      "Strategy is a blade; every footfall another cut.",
+      "Masterful movement—position becomes as deadly as power itself.",
+      "The wise warrior wins the ground before the battle is decided."
     ],
     priority: 5
   }

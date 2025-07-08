@@ -1,0 +1,31 @@
+# projectrules.mdc
+
+> **AUTOMATION, DOCS, AND AI RULES (MANDATORY):**
+>
+> **1. Any time a file is modified, added, or deleted, `ALL_FILES_INDEX.md` MUST be updated via automation.**
+> **2. Any time a file, type, or export is changed, `SYSTEM ARCHITECTURE.MD` MUST be refreshed with `npm run docs:refresh`. Manual edits are forbidden; always use automation scripts.**
+> **3. Refer to the `cursorcontext` file for additional coding rules. All contributors and AI agents MUST follow its guidance.**
+> **4. No manual edits to auto-generated documentation are permitted unless requested by user. Violations fail CI.**
+> **5. If automation scripts fail, the codebase is INVALID; no merges/commits until sync is restored.**
+> **6. Drift detection scripts MUST run pre-push and in CI. Docs and index must match codebase/export state exactly.**
+> **7. Cursor and all LLM agents MUST ingest the latest docs/index before code changes or architectural answers.**
+> **8. All auto-generated docs and indices MUST include a UTC timestamp and last git SHA.**
+> **9. For codebase-wide changes: update code → run automation → verify sync → then commit.**
+> **10. Cursor must prompt to run automation after any code/export/type change, if user does not do so.**
+> **11. AI agents must check these rules and cursorcontext before contributing.**
+> **12. All scripts/tools referenced must be versioned and documented in `SYSTEM ARCHITECTURE.MD`**
+
+> **CORE RULES:**
+>
+> **1. Any time a file is modified, added, or deleted in the codebase, `ALL_FILES_INDEX.md` MUST be updated to reflect the change.**
+> This ensures the index remains a reliable, up-to-date map of the project for all contributors and automation.
+>
+> **2. Any time a file, type, or export is changed, `SYSTEM ARCHITECTURE.MD` MUST be refreshed using `npm run docs:refresh` to ensure documentation is always in sync with the codebase.**
+> This is mandatory and enforced by pre-commit/CI hooks. No manual edits—always use the automation script.
+
+> **3. For best coding practices, always refer to the `cursorcontext` file in addition to this file.**
+> The `cursorcontext` file contains additional guidance and rules that must be followed for all code contributions.
+description:
+globs:
+alwaysApply: false
+---

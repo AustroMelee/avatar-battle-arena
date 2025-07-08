@@ -430,3 +430,18 @@
 .logEntry:last-child {
   margin-bottom: 0;
 } 
+
+.forcedEnding {
+  background: #fffbe6;
+  border: 2px solid #f59e0b;
+  color: #b45309;
+  box-shadow: 0 0 8px #f59e0b44;
+  font-weight: 700;
+  animation: forcedEndingPulse 1.5s ease-in-out;
+}
+
+@keyframes forcedEndingPulse {
+  0% { box-shadow: 0 0 0 #f59e0b44; }
+  50% { box-shadow: 0 0 16px #f59e0b88; }
+  100% { box-shadow: 0 0 0 #f59e0b44; }
+} 

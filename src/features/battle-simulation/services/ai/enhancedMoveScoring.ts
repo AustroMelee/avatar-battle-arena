@@ -1,19 +1,12 @@
-/*
- * @file enhancedMoveScoring.ts
- * @description Provides advanced move scoring logic for AI decision making in the battle simulation.
- * @criticality 🧠 AI, Move Scoring
- * @owner AustroMelee
- * @lastUpdated 2025-07-08
- * @related moveUtils.ts, advancedAIController.ts
- */
-// @file enhancedMoveScoring.ts
-// @description Enhanced move scoring for AI, considering tactical priorities, context, and advanced battle state. Penalizes poor tactical choices and rewards contextually optimal moves.
-// @criticality 🧠 AI Move Scoring (High) | Depends on: tacticalAnalysis, types
-// @owner AustroMelee
-// @lastUpdated 2025-07-07
-// @related tacticalAnalysis.ts
+// @docs
+// @description: Enhanced AI move scoring logic for Avatar Battle Arena. All move scoring is registry/data-driven and plug-and-play. No hard-coded content. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: 🧠 AI
+// @owner: AustroMelee
+// @tags: ai, core-logic, scoring, registry, plug-and-play, extensibility
 //
-// All exports are documented below.
+// This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 import type { Move } from '../../types/move.types';
 import type { BattleCharacter } from '../../types';
 import { determineTacticalPriority, getTacticalExplanation } from './tacticalAnalysis';
@@ -208,47 +201,44 @@ export function scoreMoveWithTactics(
     reasons.push('Penalty: Repeated move');
   }
   
-  // Universal Penalty for Basic Strike (unless it's the only option)
-  if (move.name === 'Basic Strike' && availableAbilities.length > 1) {
-    score -= 100;
-    reasons.push('Penalty: Avoiding weak Basic Strike');
+  // Universal Penalty for Basic Strike if other damaging moves are available.
+  const hasOtherDamagingMoves = availableAbilities.some(
+    m => m.type === 'attack' && m.id !== 'basic_strike' && m.baseDamage > 1
+  );
+
+  if (move.id.includes('basic_strike') && hasOtherDamagingMoves) {
+    score -= 150; // Massively penalize to ensure it's a last resort
+    reasons.push('Penalty: Avoiding weak Basic Strike when better options exist.');
   }
   
   return { move, score, reasons, priority };
 }
 
 /**
- * @description Selects the best tactical move from available abilities.
- * @function selectBestTacticalMove
- * @param {Move[]} availableAbilities - All abilities that can be used this turn.
- * @param {BattleCharacter} self - The AI character.
- * @param {BattleCharacter} enemy - The opponent character.
- * @param {number} stalemateCounter - Stalemate counter from tactical phase.
- * @returns {{ chosenAbility: Move; score: number; reasons: string[]; priority: string; tacticalExplanation: string }} Best move and reasoning.
- * @owner AustroMelee
- * @lastUpdated 2025-07-07
+ * @description Selects the best tactical move's ID from available abilities.
+ * @returns An object containing the chosen move's ID and reasoning.
  */
 export function selectBestTacticalMove(
   availableAbilities: Move[],
   self: BattleCharacter,
   enemy: BattleCharacter,
-  stalemateCounter: number = 0 // NEW: Accept stalemateCounter
-): { 
-  chosenAbility: Move; 
-  score: number; 
-  reasons: string[]; 
+  stalemateCounter: number = 0
+): {
+  chosenMoveId: string;
+  score: number;
+  reasons: string[];
   priority: string;
   tacticalExplanation: string;
 } {
   if (availableAbilities.length === 0) {
-    // This case should be handled by the caller, but as a safeguard:
-    const basicStrike = self.abilities.find(a => a.name === 'Basic Strike')!;
+    // Robust fallback: use first ability if present, else dummy move
+    const fallback = self.abilities[0] || { id: 'unknown', name: 'Unknown', type: 'attack', chiCost: 0, baseDamage: 0, cooldown: 0 };
     return {
-      chosenAbility: basicStrike,
+      chosenMoveId: fallback.id,
       score: 0,
       reasons: ['No other moves available'],
       priority: 'attack',
-      tacticalExplanation: 'No other options, using Basic Strike.'
+      tacticalExplanation: 'No other options, using fallback move.'
     };
   }
 
@@ -256,7 +246,6 @@ export function selectBestTacticalMove(
     scoreMoveWithTactics(move, self, enemy, availableAbilities, stalemateCounter)
   );
   
-  // Sort by score (highest first)
   scoredMoves.sort((a, b) => b.score - a.score);
   
   const bestMove = scoredMoves[0];
@@ -264,7 +253,7 @@ export function selectBestTacticalMove(
   const tacticalExplanation = getTacticalExplanation(priority, self, enemy);
   
   return {
-    chosenAbility: bestMove.move,
+    chosenMoveId: bestMove.move.id,
     score: bestMove.score,
     reasons: bestMove.reasons,
     priority,

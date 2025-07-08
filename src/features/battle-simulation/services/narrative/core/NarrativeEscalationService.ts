@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative Escalation Service
 // RESPONSIBILITY: Manage escalation lines with anti-repetition logic
 

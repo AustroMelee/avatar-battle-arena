@@ -1,4 +1,12 @@
-// CONTEXT: BattleSimulation, // FOCUS: CooldownTypes
+// @docs
+// @description: Cooldown and ability usage type definitions for Avatar Battle Arena. Registry/data-driven, plug-and-play architecture. No hard-coded logic. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: 💎 Types
+// @owner: AustroMelee
+// @tags: types, cooldown, registry, plug-and-play, extensibility, SRP
+//
+// All cooldown types are designed for registry/data-driven extensibility. No engine changes required for new cooldown logic.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 import type { Move } from './move.types';
 
 /**

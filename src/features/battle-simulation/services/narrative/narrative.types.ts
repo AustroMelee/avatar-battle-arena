@@ -44,6 +44,7 @@ export type CharacterName = 'Aang' | 'Azula' | 'System' | 'Narrator';
  * - SuddenDeath: Final, forced endgame phase
  */
 export type CombatMechanic =
+  | 'BasicStrike'
   | 'ChargedAirTornado'
   | 'Lightning'
   | 'ForcedEscalation'
@@ -69,7 +70,7 @@ export type CombatMechanic =
   | 'ChiDrain'
   | 'CounterStance'
   | 'Parry'
-  | 'Disrupt'; // [effect-only] Not a real mechanic; triggered by state/effect, not move
+  | 'Disrupt';
 
 /**
  * Defines the specific contexts within a combat mechanic that can have unique narrative.

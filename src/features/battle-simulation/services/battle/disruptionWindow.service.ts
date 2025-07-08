@@ -1,3 +1,4 @@
+// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Battle, // FOCUS: DisruptionWindow
 import type { BattleState, BattleCharacter } from '../../types';
 import type { BattleCharacterFlags } from '../../types/index';

@@ -1,4 +1,4 @@
-import { generateUniqueLogId } from '../ai/logQueries';
+// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 import type { BattleState } from '../../types';
 import { declareWinner } from './state';
 import { logTechnical } from '../utils/mechanicLogUtils';
@@ -14,7 +14,7 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
     newState.isFinished = true;
     newState.winner = p1;
     newState.log.push(`${p1.name} has overwhelmed ${p2.name}. A decisive victory!`);
-    newState.battleLog.push(logTechnical({
+    const techLog1 = logTechnical({
       turn: newState.turn,
       actor: 'System',
       action: 'Decisive Win',
@@ -22,14 +22,15 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
       reason: undefined,
       target: p1.name,
       details: { resolution: 'decisive' }
-    }));
+    });
+    if (techLog1) newState.battleLog.push(techLog1);
     return declareWinner(newState, p1);
   }
   if (p2.currentHealth - p1.currentHealth >= DECISIVE_WIN_HEALTH_DIFFERENCE) {
     newState.isFinished = true;
     newState.winner = p2;
     newState.log.push(`${p2.name} has overwhelmed ${p1.name}. A decisive victory!`);
-    newState.battleLog.push(logTechnical({
+    const techLog2 = logTechnical({
       turn: newState.turn,
       actor: 'System',
       action: 'Decisive Win',
@@ -37,7 +38,8 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
       reason: undefined,
       target: p2.name,
       details: { resolution: 'decisive' }
-    }));
+    });
+    if (techLog2) newState.battleLog.push(techLog2);
     return declareWinner(newState, p2);
   }
   // If no decisive win, return the state unchanged

@@ -1,5 +1,4 @@
 // CONTEXT: Narrative System, // FOCUS: Narrative Pool Management
-import type { NarrativeContext } from './contextualNarrativeMapper';
 
 /**
  * @description Narrative pool configuration for each character and state
@@ -226,8 +225,6 @@ export class NarrativePoolManager {
    * @description Determines the appropriate state for narrative selection
    */
   determineNarrativeState(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _character: string,
     context: {
       isPatternBreak: boolean;
       isEscalation: boolean;
@@ -284,8 +281,6 @@ export class NarrativePoolManager {
   getNarrativeLine(
     characterName: string,
     pool: string[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _context: NarrativeContext,
     tier: number = 1
   ): string {
     // Initialize character state if not exists

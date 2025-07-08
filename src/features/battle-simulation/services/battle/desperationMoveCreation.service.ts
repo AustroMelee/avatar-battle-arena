@@ -1,3 +1,4 @@
+// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Desperation Move Creation Service
 // RESPONSIBILITY: Create desperation moves for escalation scenarios
 

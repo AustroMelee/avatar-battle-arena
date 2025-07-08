@@ -1,9 +1,9 @@
+// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Critical Hit System Service
 // RESPONSIBILITY: Handle dramatic critical hits with consequences
 
 import { BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
-import { createEventId } from '../ai/logQueries';
 import { logStory } from '../utils/mechanicLogUtils';
 
 /**
@@ -250,10 +250,24 @@ export function createCriticalLogEntry(
     result += ` ${target.name} is staggered!`;
   }
   
-  return logStory({
+  const narrative = generateCriticalNarrative(attacker, target, move, criticalResult.intensity, criticalResult.staggerApplied);
+  const logEntry = logStory({
     turn,
     actor: attacker.name,
-    narrative: criticalResult.narrative,
+    narrative: narrative,
     target: target.name
   });
+  if (logEntry) return logEntry;
+  return {
+    id: 'critical-fallback',
+    turn,
+    actor: attacker.name,
+    type: 'INFO',
+    action: 'Critical',
+    result: narrative,
+    target: target.name,
+    narrative: narrative,
+    timestamp: Date.now(),
+    details: undefined
+  };
 } 

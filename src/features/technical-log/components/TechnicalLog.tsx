@@ -1,3 +1,4 @@
+// Live UI component: imported and rendered in technical log feature. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: TechnicalLog, // FOCUS: AIDecisionDisplay
 import { useState } from 'react';
 import { AILogEntry } from '../../battle-simulation/types';

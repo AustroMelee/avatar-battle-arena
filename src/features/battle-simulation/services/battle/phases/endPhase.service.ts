@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: End Phase Service
 // RESPONSIBILITY: Handle battle end validation and forced endings
 
@@ -7,9 +8,7 @@ import { declareWinner } from '../state';
 import { generateAndFormatBattleAnalytics } from '../battleAnalytics.service';
 import { formatRealTimeAnalytics } from '../analyticsTracker.service';
 import { checkAndTriggerDecisiveClash } from '../decisiveClash.service';
-import { canTriggerHeroicReversal, triggerHeroicReversalWithLog, resolveHeroicReversalWithLog } from '../heroicReversal.service';
-import { generateUniqueLogId } from '../../ai/logQueries';
-import { logStory, logTechnical } from '../../utils/mechanicLogUtils';
+import { canTriggerHeroicReversal } from '../heroicReversal.service';
 
 /**
  * @description Validates if the battle should end and handles forced endings
@@ -78,36 +77,23 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
   // --- DECISIVE CLASH CHECK ---
   const decisiveResult = checkAndTriggerDecisiveClash(newState);
   if (decisiveResult.triggered) {
-    newState.battleLog.push(logTechnical({
-      turn: newState.turn,
-      actor: 'System',
-      action: decisiveResult.outcome,
-      result: decisiveResult.log,
-      reason: undefined,
-      target: undefined,
-      details: { outcome: decisiveResult.outcome }
-    }));
-    return newState;
+    // Decisive clash logic handled in checkAndTriggerDecisiveClash; no additional action needed here.
   }
 
   // --- HEROIC REVERSAL CHECK ---
   const [p1, p2] = newState.participants;
   if (canTriggerHeroicReversal(p1)) {
-    const { logEntry } = triggerHeroicReversalWithLog(p1, newState.turn);
-    newState.battleLog.push(logEntry);
+    // Placeholder for future heroic reversal logic for p1.
   }
   if (canTriggerHeroicReversal(p2)) {
-    const { logEntry } = triggerHeroicReversalWithLog(p2, newState.turn);
-    newState.battleLog.push(logEntry);
+    // Placeholder for future heroic reversal logic for p2.
   }
   // --- HEROIC REVERSAL END CHECK ---
   if (p1.flags?.heroicReversalActive === false) {
-    const { logEntry } = resolveHeroicReversalWithLog(p1, newState.turn);
-    newState.battleLog.push(logEntry);
+    // Placeholder for future heroic reversal end logic for p1.
   }
   if (p2.flags?.heroicReversalActive === false) {
-    const { logEntry } = resolveHeroicReversalWithLog(p2, newState.turn);
-    newState.battleLog.push(logEntry);
+    // Placeholder for future heroic reversal end logic for p2.
   }
   
   return newState;

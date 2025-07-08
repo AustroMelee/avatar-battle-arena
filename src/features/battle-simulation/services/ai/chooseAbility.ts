@@ -1,3 +1,4 @@
+// Used via dynamic registry in AI engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: AI Ability Selection
 // RESPONSIBILITY: Choose abilities with comprehensive logging
 import { BattleCharacter, AILogEntry, BattleLogEntry } from '../../types';

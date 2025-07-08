@@ -1,3 +1,4 @@
+// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 /*
  * @file arc.service.ts
  * @description Manages the battle arc state machine and escalation triggers for the simulation.
@@ -44,25 +45,33 @@ export interface ArcStateUpdateResult {
  */
 function createArcTransitionLogEntry(
   turn: number,
-  fromState: BattleArcState,
-  toState: BattleArcState,
+  _fromState: BattleArcState,
+  _toState: BattleArcState,
   narrative: string,
-  isInjected: boolean = false
+  _isInjected: boolean = false
 ): BattleLogEntry {
-  return logTechnical({
-    turn,
-    actor: 'Battle Arc',
-    action: `Transition: ${fromState} → ${toState}`,
+  const log = logTechnical({
+    turn: turn,
+    actor: 'System',
+    action: 'Arc Transition',
     result: narrative,
-    reason: isInjected ? 'Injected transition' : undefined,
+    reason: undefined,
     target: undefined,
-    details: {
-      fromState,
-      toState,
-      isInjected,
-      arcTransition: true,
-    },
+    details: undefined
   });
+  if (log) return log;
+  return {
+    id: 'arc-fallback',
+    turn: turn,
+    actor: 'System',
+    type: 'INFO',
+    action: 'Arc Transition',
+    result: narrative,
+    target: undefined,
+    narrative: '',
+    timestamp: Date.now(),
+    details: undefined
+  };
 }
 
 /**

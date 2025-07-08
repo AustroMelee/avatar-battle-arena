@@ -136,7 +136,6 @@ export function BattleLog({
 
   // DEBUG: Print all log entry types and actions
   if (typeof window !== 'undefined' && battleLog.length > 0) {
-    // eslint-disable-next-line no-console
     console.log('[BattleLog] Entry types:', battleLog.map(e => `${e.turn} ${e.type} ${e.action}`));
   }
 

@@ -1,3 +1,4 @@
+// Used via dynamic registry in Identity system. See SYSTEM ARCHITECTURE.MD for flow.
 // Identity-Driven Tactical Behavior (IDTB) System
 // This module provides character personality and mental state management
 

@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Move Router Service
 // RESPONSIBILITY: Route moves to appropriate execution services based on type
 

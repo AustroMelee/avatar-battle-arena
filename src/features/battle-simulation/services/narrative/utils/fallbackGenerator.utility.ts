@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative engine. See SYSTEM ARCHITECTURE.MD for flow.
 /**
  * @fileoverview Generates high-quality procedural narrative lines as a fallback.
  * @description This is used when a specific narrative pool is missing or empty, ensuring the engine never fails.

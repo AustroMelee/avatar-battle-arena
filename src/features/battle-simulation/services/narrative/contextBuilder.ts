@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative system. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Battle Context Building
 import type { BattleCharacter, BattleLogEntry } from '../../types';
 import type { Ability } from '@/common/types';

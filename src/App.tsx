@@ -14,7 +14,8 @@ import { CharacterSelection } from './features/character-selection/components/Ch
 import { LocationSelection } from './features/location-selection/components/LocationSelection';
 import { useBattleSimulator } from './features/battle-simulation/controllers/useBattleSimulator.controller';
 import { Button } from './common/components/Button/Button';
-import { BattleScene } from './features/battle-simulation/components/BattleScene/BattleScene';
+import { EnhancedBattleScene } from './features/battle-simulation/components/EnhancedBattleScene/EnhancedBattleScene';
+import type { Move } from './features/battle-simulation/types/move.types';
 
 /**
  * @description The root component that orchestrates the entire application state and renders feature modules.
@@ -44,14 +45,14 @@ function App() {
     setLocation(null);
     resetBattle();
   };
-
-  const handlePlayerChange = () => {
-    // Reset to character selection when a player wants to change
-    resetBattle();
-  };
   
   const isSelectionComplete = player1 && player2 && location;
   const isBattleActive = battleState !== null;
+
+  const handleMoveSelect = (move: Move) => {
+    // TODO: Implement move selection logic (e.g., update state, send to battle engine)
+    console.log('Selected move:', move);
+  };
 
   return (
     <div className={styles.appContainer}>
@@ -97,9 +98,10 @@ function App() {
           </React.Fragment>
         ) : (
           <React.Fragment>
-            <BattleScene 
-              state={battleState} 
-              onPlayerChange={handlePlayerChange}
+            <EnhancedBattleScene 
+              battleState={battleState} 
+              onMoveSelect={handleMoveSelect}
+              isPlayerTurn={undefined} // TODO: wire up turn logic if needed
             />
             <div className={styles.simulateSection}>
               {battleState.isFinished && (

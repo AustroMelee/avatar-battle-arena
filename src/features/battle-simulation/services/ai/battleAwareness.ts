@@ -1,3 +1,4 @@
+// Used via dynamic registry in AI engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Battle Awareness and Context Analysis
 // RESPONSIBILITY: Analyze battle state to provide situational awareness for AI decision making
 import { BattleCharacter, BattleLogEntry } from '../../types';

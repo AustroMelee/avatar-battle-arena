@@ -112,6 +112,28 @@ import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
 import type { BattleLogEntry } from '../../types';
 import { TacticalMemory } from './tacticalMemory.service';
 
+/**
+ * Utility: Checks if a move is considered basic/fallback.
+ * @param move Move
+ * @returns boolean
+ */
+export function isBasicMove(move: Move): boolean {
+  return !!move.isBasic;
+}
+
+/**
+ * Utility: Checks if a move is stale (used N times in a row).
+ * @param moveId string
+ * @param moveHistory string[]
+ * @param N number (default 3)
+ * @returns boolean
+ */
+export function isMoveStale(moveId: string, moveHistory: string[], N = 2): boolean {
+  if (!moveHistory || moveHistory.length < N) return false;
+  const recent = moveHistory.slice(-N);
+  return recent.every(id => id === moveId);
+}
+
 // TacticalMemory instance per AI (could be attached to BattleCharacter or managed externally)
 const tacticalMemoryMap = new WeakMap<BattleCharacter, TacticalMemory>();
 
@@ -132,14 +154,52 @@ export function selectTacticalMove(
   availableMoves: Move[],
   location: string,
   arcModifiers?: ArcStateModifier
-): { move: Move; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
+): { move: Move | null; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
   const locationType = getLocationType(location);
-  const isAirbender = self.name.toLowerCase().includes('aang');
-  const isFirebender = self.name.toLowerCase().includes('azula');
-  // Filter moves that can be used
-  const usableMoves = availableMoves.filter(move => 
-    canUseMove(move, self, _enemy, location)
-  );
+  // --- STALENESS & ESCALATION FILTERING ---
+  let filteredMoves = availableMoves;
+  const inEscalation = self.flags?.forcedEscalation === 'true' || self.flags?.desperationState;
+  if (inEscalation) {
+    const nonBasicMoves = availableMoves.filter(move => !isBasicMove(move));
+    if (nonBasicMoves.length > 0) {
+      filteredMoves = nonBasicMoves;
+    } else {
+      // No non-basic moves left: escalate immediately
+      return { move: null, reasoning: 'No valid moves in escalation', tacticalAnalysis: 'Forced ending' };
+    }
+  } else {
+    // Remove stale moves if other options exist (N=2 for stricter filtering)
+    const nonStaleMoves = availableMoves.filter(move => !isMoveStale(move.id, self.moveHistory, 2));
+    if (nonStaleMoves.length > 0) {
+      filteredMoves = nonStaleMoves;
+    }
+  }
+  // If all moves are filtered, force a different move if possible
+  if (filteredMoves.length === 0 && availableMoves.length > 0) {
+    // Try to pick any move that is not the last used
+    const lastMoveId = self.moveHistory[self.moveHistory.length - 1];
+    const altMoves = availableMoves.filter(move => move.id !== lastMoveId);
+    if (altMoves.length > 0) {
+      filteredMoves = [altMoves[Math.floor(Math.random() * altMoves.length)]];
+      if (typeof window !== 'undefined' && window.console) {
+        window.console.warn('[AI] Forced move variety: all moves stale, picking a different move.', { lastMoveId, altMoves });
+      }
+      // Optionally, update tactical memory here
+      let tacticalMemory = tacticalMemoryMap.get(self);
+      if (!tacticalMemory) {
+        tacticalMemory = new TacticalMemory();
+        tacticalMemoryMap.set(self, tacticalMemory);
+      }
+      tacticalMemory.recordForcedVariety?.(lastMoveId, altMoves.map(m => m.id));
+    } else {
+      // Only option is to repeat last move
+      filteredMoves = [availableMoves[0]];
+      if (typeof window !== 'undefined' && window.console) {
+        window.console.warn('[AI] Forced to repeat last move: no alternatives available.', { lastMoveId });
+      }
+    }
+  }
+  const usableMoves = filteredMoves.filter(move => canUseMove(move, self, _enemy, location));
   const identityAdjustments = adjustScoresByIdentity(self, usableMoves);
   let tacticalMemory = tacticalMemoryMap.get(self);
   if (!tacticalMemory) {
@@ -249,7 +309,7 @@ export function selectTacticalMove(
       tacticalFactors.push("Position Advantage");
     }
     if (move.changesPosition === "repositioning") {
-      const repositionScore = evaluateRepositionNeed(self, _enemy, locationType, isAirbender);
+      const repositionScore = evaluateRepositionNeed(self, _enemy, locationType);
       score += repositionScore;
       if (repositionScore > 0) {
         reasoning += "Repositioning for tactical advantage. ";
@@ -265,13 +325,6 @@ export function selectTacticalMove(
       score += 25;
       reasoning += "Environmental advantage. ";
       tacticalFactors.push("Environmental Bonus");
-    }
-    if (isAirbender) {
-      score += evaluateAirbenderTactics(move, locationType);
-      tacticalFactors.push("Airbender Tactics");
-    } else if (isFirebender) {
-      score += evaluateFirebenderTactics(move, locationType);
-      tacticalFactors.push("Firebender Tactics");
     }
     score += evaluateDefensiveMoves(move, self, _enemy);
     if (move.id.includes('evade') || move.id.includes('parry') || move.id.includes('counter')) {
@@ -393,7 +446,7 @@ export function selectTacticalMove(
   };
 }
 
-export { canChargeSafely, evaluateRepositionNeed, evaluateAirbenderTactics, evaluateFirebenderTactics, evaluateDefensiveMoves };
+export { canChargeSafely, evaluateRepositionNeed, evaluateDefensiveMoves };
 
 function canChargeSafely(enemy: BattleCharacter, locationType: string): boolean {
   if (enemy.position === "repositioning" || enemy.position === "stunned" || enemy.isCharging) {
@@ -408,8 +461,7 @@ function canChargeSafely(enemy: BattleCharacter, locationType: string): boolean 
 function evaluateRepositionNeed(
   self: BattleCharacter, 
   _enemy: BattleCharacter, 
-  locationType: string, 
-  isAirbender: boolean
+  locationType: string
 ): number {
   let score = 0;
   if (self.position === "high_ground" || self.position === "aggressive") {
@@ -421,48 +473,8 @@ function evaluateRepositionNeed(
   if (_enemy.isCharging) {
     score += 25;
   }
-  if (isAirbender) {
-    score += 10;
-  }
-  if (self.repositionAttempts > 3) {
-    score -= self.repositionAttempts * 5;
-  }
-  if (locationType === "Desert" && !isAirbender) {
+  if (locationType === "Desert") {
     score -= 20;
-  }
-  return score;
-}
-
-function evaluateAirbenderTactics(move: Move, locationType: string): number {
-  let score = 0;
-  if (move.changesPosition === "repositioning") {
-    score += 15;
-  }
-  if (move.changesPosition === "flying") {
-    score += 20;
-  }
-  if (locationType === "Enclosed") {
-    score -= 10;
-  }
-  if (locationType === "Open" || locationType === "Air-Friendly") {
-    score += 10;
-  }
-  return score;
-}
-
-function evaluateFirebenderTactics(move: Move, locationType: string): number {
-  let score = 0;
-  if (move.changesPosition === "aggressive") {
-    score += 15;
-  }
-  if (locationType === "Fire-Friendly") {
-    score += 15;
-  }
-  if (move.baseDamage > 0 && !move.isChargeUp) {
-    score += 10;
-  }
-  if (move.changesPosition === "repositioning") {
-    score += 5;
   }
   return score;
 }

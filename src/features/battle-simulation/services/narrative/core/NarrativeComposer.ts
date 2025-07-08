@@ -91,8 +91,8 @@ export class NarrativeComposer {
       const last = recent[recent.length - 1];
       memoryLine = `${characterName} recalls their recent ${last.type.replace('_',' ')}${last.move ? ` (${last.move})` : ''}.`;
     }
-    // Get move-specific flavor if available
-    const moveFlavor = this.getMoveSpecificFlavor(characterName, moveName, damageOutcome);
+    // Get move-specific flavor if available (directly from router)
+    const moveFlavor = this.characterRouter.getMoveFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
       if (shouldNarrateEmotion) {
         const base = [
@@ -240,8 +240,8 @@ export class NarrativeComposer {
       const last = recent[recent.length - 1];
       memoryLine = `${characterName} is still affected by their recent ${last.type.replace('_',' ')}${last.move ? ` (${last.move})` : ''}.`;
     }
-    // Get move-specific flavor if available
-    const moveFlavor = this.getMoveSpecificFlavor(characterName, moveName, damageOutcome);
+    // Get move-specific flavor if available (directly from router)
+    const moveFlavor = this.characterRouter.getMoveFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
       const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
       const base = `${moveFlavor} ${environmentalContext}`;
@@ -288,17 +288,6 @@ export class NarrativeComposer {
   composeEscalationNarrative(characterName: string, _context: NarrativeContext): string {
     const escalationLine = this.characterRouter.getEscalationLine(characterName, _context);
     return escalationLine || '';
-  }
-
-  /**
-   * @description Get move-specific flavor from character services
-   */
-  private getMoveSpecificFlavor(characterName: string, moveName: string, damageOutcome: DamageOutcome): string | null {
-    if (!moveName) return null;
-    
-    // Get move flavor from character router
-    const moveFlavor = this.characterRouter.getMoveFlavor(characterName, moveName, damageOutcome);
-    return moveFlavor || null;
   }
 
   /**

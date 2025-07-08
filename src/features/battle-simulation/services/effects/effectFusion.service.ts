@@ -24,6 +24,14 @@ const FUSION_RECIPES: FusionRecipe[] = [
   },
 ];
 
+const FUSION_SUCCESS_LINES = [
+  () => `Fire and exhaustion entwine—their defenses buckle, leaving them vulnerable to the onslaught.`,
+  () => `Pain and pressure converge; armor cracks, resolve fractures, and a single misstep brings them to their knees.`,
+  () => `The elements themselves conspire—heat scorches, fatigue weakens, and all resistance collapses in a storm of agony.`,
+  (characterName: string) => `Despair and agony meld as one—${characterName} is overwhelmed, their stance and spirit broken in a single instant.`,
+  () => `A symphony of suffering—wounds deepen, strength wanes, and the world narrows to one unbearable moment of collapse.`
+];
+
 export function processEffectFusions(character: BattleCharacter, turn: number): { updatedCharacter: BattleCharacter; logEntry: BattleLogEntry | null } {
   const activeEffectTypes = new Set(character.activeEffects.map(e => e.type));
   for (const recipe of FUSION_RECIPES) {
@@ -48,7 +56,7 @@ export function processEffectFusions(character: BattleCharacter, turn: number): 
         action: 'Status Meltdown!',
         target: character.name,
         result: `${character.name} suffers a system shock and is now ${recipe.resultantEffect.type}!`,
-        narrative: recipe.narrative,
+        narrative: FUSION_SUCCESS_LINES[Math.floor(Math.random() * FUSION_SUCCESS_LINES.length)](character.name),
         timestamp: Date.now(),
         meta: { crisis: true, effectsConsumed: recipe.requiredEffects, mechanic: 'Effect Fusion' },
       };

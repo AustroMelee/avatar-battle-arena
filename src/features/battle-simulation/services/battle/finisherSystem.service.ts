@@ -1,11 +1,11 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Finisher System Service
 // RESPONSIBILITY: Handle finisher moves - dramatic, once-per-battle abilities
 
 import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import type { Move, FinisherCondition } from '../../types/move.types';
-import { createEventId } from '../ai/logQueries';
+import { logStory } from '../utils/mechanicLogUtils';
 import { trackDamage, trackChiSpent } from './analyticsTracker.service';
-import { logStory, logTechnical } from '../utils/mechanicLogUtils';
 
 /**
  * @description Finisher move configuration
@@ -148,61 +148,17 @@ export function executeFinisherMove(
     narrative: finisher.narrative.success,
     target: target.name
   });
-  
-  return logEntry;
-}
-
-/**
- * @description Character-specific finisher moves
- */
-export const CHARACTER_FINISHERS: Record<string, FinisherMove> = {
-  'aang': {
-    id: 'finisher_aang',
-    name: 'Gale Ender',
-    type: 'attack',
-    baseDamage: 45,
-    description: 'Aang closes his eyes, one breath, one step, the cyclone erupts',
-    chiCost: 10,
-    cooldown: 0,
-    maxUses: 1,
-    tags: ['finisher', 'desperation', 'high-damage'],
-    isFinisher: true,
-    finisherCondition: { type: 'hp_below', percent: 20 },
-    critMultiplier: 3.5,
-    missPenalty: 'stun',
-    narrative: {
-      charge: 'Aang closes his eyes, one breath, one step. The air around him begins to swirl with ancient power.',
-      success: 'The cyclone erupts. The throne room\'s pillars splinter. Azula is sent sprawling, lightning caged by wind. This is the end, or nothing.',
-      miss: 'The wind spirals wild, missing its mark. Aang drops to his knees, exhausted. The opportunity slips away.'
-    }
-  },
-  'azula': {
-    id: 'finisher_azula',
-    name: 'Phoenix Inferno',
-    type: 'attack',
-    baseDamage: 50,
-    description: 'Azula channels all remaining energy into a devastating final attack',
-    chiCost: 12,
-    cooldown: 0,
-    maxUses: 1,
-    tags: ['finisher', 'desperation', 'high-damage', 'piercing'],
-    isFinisher: true,
-    finisherCondition: { type: 'hp_below', percent: 20 },
-    critMultiplier: 3.0,
-    missPenalty: 'damage',
-    narrative: {
-      charge: 'Azula gathers every spark of her will, blue fire swirling into a blinding inferno.',
-      success: 'The Phoenix Inferno engulfs the battlefield. Aang is forced to his knees, the world awash in blue flame. Azula stands triumphant, if only for a moment.',
-      miss: 'The inferno rages, but Aang slips through the flames. Azula gasps, her energy spent, the moment lost.'
-    }
-  }
-};
-
-/**
- * @description Gets finisher move for a character
- * @param {string} characterName - The character name
- * @returns {FinisherMove | null} The finisher move or null
- */
-export function getCharacterFinisher(characterName: string): FinisherMove | null {
-  return CHARACTER_FINISHERS[characterName.toLowerCase()] || null;
+  if (logEntry) return logEntry;
+  return {
+    id: 'finisher-fallback',
+    turn: state.turn,
+    actor: attacker.name,
+    type: 'INFO',
+    action: 'Finisher',
+    result: result || `Finisher move executed.`,
+    target: target.name,
+    narrative: `Finisher move executed: ${finisher.name}.`,
+    timestamp: Date.now(),
+    details: {},
+  };
 } 

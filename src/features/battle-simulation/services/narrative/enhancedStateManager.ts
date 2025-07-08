@@ -1,3 +1,4 @@
+// Used via dynamic registry in Narrative engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Narrative System, // FOCUS: Enhanced State Management with Change Detection
 import type { BattleState, BattleCharacter } from '../../types';
 

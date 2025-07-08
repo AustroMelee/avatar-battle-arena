@@ -1,13 +1,12 @@
-/*
- * @file state.ts
- * @description Defines and manages the core battle state for the simulation, including initialization and mutation helpers.
- * @criticality 🩸 Core State
- * @owner AustroMelee
- * @lastUpdated 2025-07-08
- * @related processTurn.ts, battleSimulator.service.ts
- */
-// CONTEXT: Battle State Management
-// RESPONSIBILITY: Initialize, clone, and manage battle state
+// @docs
+// @description: Battle state initialization and management for Avatar Battle Arena. All state hydration is registry/data-driven and plug-and-play. No hard-coded logic. Extensible via data/registries only. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: ⚔️ Core Logic
+// @owner: AustroMelee
+// @tags: state, registry, plug-and-play, extensibility, SRP
+//
+// All state hydration (e.g., moves, abilities) is done via registries. No engine changes required for new content.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 import { 
   BattleCharacter, 
   BattleState, 
@@ -23,7 +22,7 @@ import { initializeMentalState } from '../identity/mentalState.service';
 import { DEFAULT_OPPONENT_PERCEPTION } from '../../data/identities';
 import { getDefaultArcState, getDefaultArcStateHistory } from '../../data/arcTransitions';
 import { initializeBehavioralSystem, initializeActiveFlags } from '../identity/behavioral.service';
-import { getCharacterMoves } from './moveRegistry.service';
+import { MoveRegistry } from './moveRegistry.service';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -89,7 +88,8 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     analytics: { ...analytics },
     tacticalStalemateCounter: 0,
     lastTacticalPriority: '',
-    abilities: getCharacterMoves(player1.name),
+    // MODIFIED: Hydrate moves from the registry using IDs
+    abilities: MoveRegistry.getMovesByIds(player1.abilities),
   };
   
   const p2Battle: BattleCharacter = {
@@ -125,7 +125,8 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     analytics: { ...analytics },
     tacticalStalemateCounter: 0,
     lastTacticalPriority: '',
-    abilities: getCharacterMoves(player2.name),
+    // MODIFIED: Hydrate moves from the registry using IDs
+    abilities: MoveRegistry.getMovesByIds(player2.abilities),
   };
   
   // Calculate environmental factors

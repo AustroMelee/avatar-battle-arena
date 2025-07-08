@@ -1,3 +1,4 @@
+// Used via dynamic registry in AI engine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Tactical AI Decision Making
 // RESPONSIBILITY: AI that considers positioning, charge-ups, and environmental factors
 

@@ -1,3 +1,4 @@
+// Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Desperation Phase Service
 // RESPONSIBILITY: Handle desperation state changes and dramatic events with enhanced state management
 
@@ -10,7 +11,6 @@ import {
 } from '../desperationSystem.service';
 import { EnhancedStateManager } from '../../narrative/enhancedStateManager';
 import { createNarrativeService } from '../../narrative';
-import { generateUniqueLogId } from '../../ai/logQueries';
 import { logStory } from '../../utils/mechanicLogUtils';
 
 // Global enhanced state manager instance (shared with escalation phase)
@@ -61,12 +61,13 @@ export async function processDesperationPhase(state: BattleState): Promise<Battl
     
     // Add state announcement to the log if generated
     if (desperationAnnouncement) {
-      newState.battleLog.push(logStory({
+      const logEntry = logStory({
         turn: state.turn,
         actor: attacker.name,
         narrative: desperationAnnouncement,
         target: undefined
-      }));
+      });
+      if (logEntry) newState.battleLog.push(logEntry);
       newState.log.push(desperationAnnouncement);
     } else {
       // Add the original desperation log entry if no state announcement was generated
@@ -83,7 +84,7 @@ export async function processDesperationPhase(state: BattleState): Promise<Battl
   }
   
   // Apply desperation modifiers to attacker
-  const modifiedAttacker = applyDesperationModifiers(attacker, currentDesperationState);
+  const modifiedAttacker = applyDesperationModifiers(attacker);
   newState.participants[attackerIndex] = modifiedAttacker;
   
   return newState;

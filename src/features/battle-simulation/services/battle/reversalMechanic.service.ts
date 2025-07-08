@@ -40,9 +40,16 @@ export function resolveReversal({
 
   // Roll for reversal
   if (Math.random() < baseChance) {
+    const REVERSAL_SUCCESS_LINES = [
+      `In a heartbeat, ${character.name} twists defeat into triumph, reversing the flow of battle.`,
+      `With a surge of elemental force, ${character.name} turns the tables—one mistake becomes their opportunity.`,
+      `Desperation sharpens to inspiration—${character.name} pivots, seizing the moment and upending their foe’s advantage.`,
+      `A sudden spark—${character.name} reads their enemy’s intent, answers with perfect timing, and the duel’s momentum spins on its heel.`,
+      `The tide shifts—${character.name} catches their rival off guard, turning defense into stunning offense.`
+    ];
     return {
       effect: 'Reversal',
-      narrative: `${character.name} seizes a sudden opportunity and turns the tables!`,
+      narrative: REVERSAL_SUCCESS_LINES[Math.floor(Math.random() * REVERSAL_SUCCESS_LINES.length)],
       controlShift: 30,
       stabilityGain: 20,
       source,

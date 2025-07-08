@@ -1,12 +1,12 @@
-/*
- * @file index.ts
- * @description Barrel export for all battle-simulation types, including BattleCharacter, BattleState, and related types.
- * @criticality 💎 Types
- * @owner AustroMelee
- * @lastUpdated 2025-07-08
- * @related move.types.ts, mechanic.types.ts, identity.types.ts
- */
-// CONTEXT: BattleSimulation, // FOCUS: Types
+// @docs
+// @description: Barrel export for all battle-simulation types. All types are designed for registry/data-driven, plug-and-play extensibility. No hard-coded content. SRP-compliant. See SYSTEM ARCHITECTURE.MD for integration points.
+// @criticality: 💎 Types
+// @owner: AustroMelee
+// @tags: types, state, SRP, registry, plug-and-play, extensibility
+//
+// All type boundaries are enforced: static data uses IDs, runtime state hydrates objects via registries.
+//
+// Updated for 2025 registry-driven architecture overhaul.
 import { Character, Location } from '@/common/types';
 import { Position, LocationType } from './move.types';
 import { MentalState, OpponentPerception } from './identity.types';
@@ -136,6 +136,9 @@ export interface RecoveryOption {
  * @description Represents a character's dynamic state during a battle.
  */
 export type BattleCharacter = {
+  /**
+   * @description The static character data (abilities: string[])
+   */
   base: Character; // static data
   id: string;
   name: string;
@@ -181,6 +184,10 @@ export type BattleCharacter = {
   analytics: BattleAnalytics;
   tacticalStalemateCounter: number;
   lastTacticalPriority: string;
+  /**
+   * @description The hydrated Move objects for this character (runtime only).
+   * Always hydrate from base.abilities (string[]) using MoveRegistry.getMovesByIds().
+   */
   abilities: Move[];
   /**
    * @description Intent/status flags for tactical and AI logic (e.g., Evasive, Charging, etc.)
@@ -188,6 +195,9 @@ export type BattleCharacter = {
   statusFlags?: Array<{ type: string; turns: number }>;
   // --- NEW: Climax Trigger Flag ---
   climaxTriggered?: boolean;
+  // --- NEW: Narrative/UX Polish ---
+  noMoveTurns?: number; // Track consecutive no-move turns for Sudden Death logic
+  suddenDeathTriggered?: boolean; // Flag for Sudden Death event
 };
 
 /**
@@ -290,7 +300,7 @@ export interface LogDetails {
   chargeComplete?: number;
   interrupted?: boolean;
   tacticalAnalysis?: string;
-  escalationType?: 'repetition' | 'stalemate';
+  escalationType?: EscalationType;
   forcedState?: 'pattern_break' | 'climax';
   damageLevel?: number;
   controlShift?: number;
@@ -359,7 +369,7 @@ export type BattleState = {
   // NEW: Environmental and tactical context
   locationType: LocationType;
   environmentalFactors: string[]; // e.g., ["Desert", "No Repositioning"]
-  tacticalPhase: 'positioning' | 'engagement' | 'climax' | 'stalemate';
+  tacticalPhase: TacticalPhase;
   positionAdvantage: number; // -1 to 1, negative means player1 advantage, positive means player2
   // NEW: Dynamic Escalation Timeline
   arcState: BattleArcState;
@@ -374,6 +384,8 @@ export type BattleState = {
   // --- NEW: Narrative/UX Polish ---
   noMoveTurns?: number; // Track consecutive no-move turns for Sudden Death logic
   suddenDeathTriggered?: boolean; // Flag for Sudden Death event
+  // --- NEW: Forced Ending Flag for Deadlock Breaker ---
+  forcedEnding?: boolean;
 };
 
 /**
@@ -421,7 +433,7 @@ export interface BattleCharacterFlags {
   forcedEscalation?: string;
   damageMultiplier?: string;
   repositionDisabled?: string;
-  escalationTurns?: string;
+  escalationTurns?: string; // String: turn number when escalation was triggered
   escalationDuration?: string;
   isCountering?: boolean;
   disruptionWindowActive?: boolean;
@@ -438,7 +450,31 @@ export interface BattleCharacterFlags {
    * @description Number of turns remaining in forced escalation (stateful escalation duration)
    */
   forcedEscalationTurns?: number;
+  /**
+   * @description True if this character has triggered escalation in this battle
+   */
+  usedEscalation?: boolean;
+  /**
+   * @description Number of turns remaining stunned (for stun effects)
+   */
+  stunDuration?: number;
 }
+
+// Add EscalationType and TacticalPhase at the top, before their usage
+export type EscalationType =
+  | 'damage'
+  | 'repetition'
+  | 'stalemate'
+  | 'reposition'
+  | 'desperation';
+
+export type TacticalPhase =
+  | 'positioning'
+  | 'engagement'
+  | 'climax'
+  | 'stalemate'
+  | 'escalation'
+  | 'desperation';
 
 // --- Analytics type for both BattleCharacter and BattleState ---
 export type BattleAnalytics = {

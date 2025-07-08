@@ -1,3 +1,5 @@
+/* eslint-env node */
+/* global __dirname, console, process */
 // scripts/docs-refresh.cjs
 // Unified documentation refresh script: runs crossref and tag extraction, then updates SYSTEM ARCHITECTURE.MD
 
@@ -37,7 +39,7 @@ for (const line of tagLines) {
 const usedByMap = {};
 const callsMap = {};
 for (const entry of crossrefs) {
-  const rel = entry.file.replace(/^.*?src[\\\/]/, 'src/').replace(/\\/g, '/');
+  const rel = entry.file.replace(/^.*?src[\\/]\//, 'src/').replace(/\\/g, '/');
   usedByMap[rel] = entry.usedBy || [];
   callsMap[rel] = entry.calls || [];
 }

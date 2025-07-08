@@ -17,6 +17,7 @@ export interface TacticalMemoryEntry {
  */
 export class TacticalMemory {
   private memory: Map<string, TacticalMemoryEntry> = new Map();
+  private forcedVarietyEvents: { lastMoveId: string, alternatives: string[], turn: number }[] = [];
 
   /**
    * Record a move usage and its effectiveness.
@@ -62,6 +63,20 @@ export class TacticalMemory {
    */
   reset(): void {
     this.memory.clear();
+  }
+
+  /**
+   * Record a forced variety event (when AI is forced to pick a different move due to repetition).
+   */
+  recordForcedVariety(lastMoveId: string, alternatives: string[], turn: number = Date.now()): void {
+    this.forcedVarietyEvents.push({ lastMoveId, alternatives, turn });
+  }
+
+  /**
+   * Get all forced variety events for analytics/debugging.
+   */
+  getForcedVarietyEvents(): { lastMoveId: string, alternatives: string[], turn: number }[] {
+    return this.forcedVarietyEvents;
   }
 }
 
