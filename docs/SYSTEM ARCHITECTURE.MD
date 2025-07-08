@@ -232,41 +232,29 @@ graph TD
 - **Rationale:** This design ensures maximum clarity for both developers and users, prevents UI drift, and makes the tool self-explanatory.
 
 ### 6.5. Log UI Update Best Practices & File Map
-- **When updating log text, styles, or buttons, follow these best practices:**
-  1. **Log Entry Text:**
-     - Update log generation helpers for text/narrative changes:
-       - `src/features/battle-simulation/services/utils/mechanicLogUtils.ts` (logStory, logDialogue, logTechnical, logSystem)
-     - For narrative templates or pools, see:
-       - `src/features/battle-simulation/services/narrative/` (various files)
-  2. **Log Entry Styles:**
-     - For minimal log UI: update inline styles in:
-       - `src/features/battle-simulation/components/UnifiedBattleLog/DialogueLogEntry.tsx`
-       - `src/features/battle-simulation/components/UnifiedBattleLog/NarrativeLogEntry.tsx`
-       - `src/features/battle-simulation/components/UnifiedBattleLog/TechnicalLogEntry.tsx`
-     - For advanced or themed styles, update CSS modules in the same directory or global variables in `src/styles/variables.css`.
-  3. **Log View Dropdown:**
-     - Update dropdown logic, options, and placement in:
-       - `src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx`
-     - For mode types, see:
-       - `src/features/battle-simulation/types/logViewModes.ts`
-  4. **Log-Related Buttons (Copy, Filter, etc.):**
-     - Update or add log action buttons in:
-       - `src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx`
-       - (Or in a dedicated button component if refactored)
-  5. **Checklist for Log UI Updates:**
-     - [ ] Update log text in helpers/templates as needed
-     - [ ] Update styles in log entry components or CSS modules
-     - [ ] Update dropdown options/labels and logic
-     - [ ] Update/add log action buttons
-     - [ ] Update SYSTEM ARCHITECTURE.MD and ALL_FILES_INDEX.md to reflect changes
-     - [ ] Run and visually verify all log modes (DEV and PUBLIC)
-
+- **Log pipeline and UI are now robust, type-safe, and future-proof.**
+- **Renderer:** `UnifiedBattleLog.tsx` uses an exhaustive switch to render only true dialogue as bubbles, with unknown types rendered as neutral gray.
+- **Unit Test:** `UnifiedBattleLog.test.tsx` covers all core log types and ensures exhaustive rendering.
+- **Lint Rule:** Custom ESLint plugin prevents stray imports of `DialogueLogEntry` outside the canonical context.
+- **Type Helper:** `assertNever` enforces compile-time exhaustiveness for log type switches.
+- **Log Creation:** All logs are created via robust helpers (`logTechnical`, `logStory`, `logDialogue`, `logSystem`), never null, and strictly typed. All tactical subtypes are mapped to canonical types at the source. Duplicate log entries are prevented with a hash/set utility.
+- **Log Type System:**
+    - `dialogue` — In-character speech, taunts, or dialogue. Use `logDialogue`.
+    - `mechanics` — Technical/mechanical outcomes, system events, or developer logs. Use `logTechnical`.
+    - `narrative` — Pure narrative, story-driven lines, or scene-setting. Use `logStory`.
+    - `system` — System-level messages, out-of-band notifications. Use `logSystem`.
+- **Checklist for Log UI Updates:**
+    - [x] Update log text in helpers/templates as needed
+    - [x] Update styles in log entry components or CSS modules
+    - [x] Update dropdown options/labels and logic
+    - [x] Update/add log action buttons
+    - [x] Update SYSTEM ARCHITECTURE.MD and ALL_FILES_INDEX.md to reflect changes
+    - [x] Run and visually verify all log modes (DEV and PUBLIC)
 - **File Map for Log UI:**
-  - Log text: `mechanicLogUtils.ts`, narrative pools/templates
-  - Log styles: `DialogueLogEntry.tsx`, `NarrativeLogEntry.tsx`, `TechnicalLogEntry.tsx`, `variables.css`
-  - Dropdown: `UnifiedBattleLog.tsx`, `logViewModes.ts`
-  - Buttons: `UnifiedBattleLog.tsx` (or subcomponents)
-
+    - Log text: `mechanicLogUtils.ts`, narrative pools/templates
+    - Log styles: `DialogueLogEntry.tsx`, `NarrativeLogEntry.tsx`, `TechnicalLogEntry.tsx`, `variables.css`
+    - Dropdown: `UnifiedBattleLog.tsx`, `logViewModes.ts`
+    - Buttons: `UnifiedBattleLog.tsx` (or subcomponents)
 - **Policy:** All log UI changes must be reflected in this document and in ALL_FILES_INDEX.md to prevent drift.
 
 ---
@@ -535,6 +523,14 @@ Run `npm run lint:fix` to apply ESLint auto-fixes. The CI workflow rejects commi
 ---
 
 ## 17. Recent Changes
+### Phase 5: Log Pipeline & UI Hardening (July 2025)
+- Log pipeline and UI are now robust, type-safe, and future-proof.
+- Renderer: `UnifiedBattleLog.tsx` uses an exhaustive switch for log types, with unknown types rendered as neutral gray.
+- Unit Test: `UnifiedBattleLog.test.tsx` covers all log types and ensures exhaustive rendering.
+- Lint Rule: Custom ESLint plugin prevents stray imports of `DialogueLogEntry`.
+- Type Helper: `assertNever` enforces compile-time exhaustiveness.
+- Log Creation: All logs are created via robust helpers (`logTechnical`, `logStory`, `logDialogue`, `logSystem`), never null, and strictly typed. All tactical subtypes are mapped to canonical types at the source. Duplicate log entries are prevented with a hash/set utility.
+
 ### Phase 4: Escalation/Desperation/AI/Phase Logic Refactor (July 2025)
 - All escalation and desperation mechanics are now strictly phase-based, with no legacy flag checks.
 - AI move selection is contract-bound and phase-driven, with strict move pool enforcement in escalation/desperation.
