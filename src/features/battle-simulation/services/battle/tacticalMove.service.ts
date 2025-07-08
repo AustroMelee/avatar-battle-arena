@@ -7,6 +7,7 @@ import { createBattleContext } from './battleContext.service';
 import { createStatusEffect, applyEffect } from '../effects/statusEffect.service';
 import { handleChargeUp, calculatePunishBonus, applyPositionBonuses, updatePositionAfterMove } from './positioningMechanics.service';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { mapRawType } from '../utils/mechanicLogUtils';
 import type { Ability } from '../../types/move.types';
 import { getMoveFatigueMultiplier, applyMoveFatigue } from './moveFatigue.service';
 import { resolveMove } from './moveLogic.service';
@@ -128,7 +129,7 @@ async function handleRepositioningMove(
     id: generateUniqueLogId('reposition'),
     turn: state.turn,
     actor: attacker.name,
-    type: 'REPOSITION',
+    type: mapRawType('REPOSITION'),
     action: move.name,
     target: target.name,
     result: damage > 0 ? `${target.name} takes ${damage} damage.` : `${attacker.name} repositions.`,
@@ -212,7 +213,7 @@ async function handleChargeUpMove(
     id: generateUniqueLogId('charge'),
     turn: state.turn,
     actor: attacker.name,
-    type: 'CHARGE',
+    type: mapRawType('CHARGE'),
     action: move.name,
     target: target.name,
     result: chargeResult.interrupted ? `${attacker.name}'s charge was interrupted!` : 
@@ -320,7 +321,7 @@ async function handleRegularTacticalMove(
     id: generateUniqueLogId('tactical'),
     turn: state.turn,
     actor: newAttacker.name,
-    type: 'TACTICAL', // Main event type
+    type: mapRawType('TACTICAL'), // Main event type
     action: move.name,
     target: target.name,
     result: `${target.name} takes ${damage} damage. ${narrative}`,

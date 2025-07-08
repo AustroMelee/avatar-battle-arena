@@ -6,3 +6,7 @@
 - Every flagged file must have a rationale or legacy tag in its header.
 - Do not use or resurrect files flagged as @legacy or listed in the report without consulting the project architect.
 - See the decision log and changelog links in the report for context. 
+
+## Lint & Auto-fix
+
+Run `npm run lint:fix` to apply ESLint auto-fixes. The CI workflow rejects commits with any remaining lint errors. 

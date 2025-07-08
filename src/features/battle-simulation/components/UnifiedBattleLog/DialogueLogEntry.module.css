@@ -1,0 +1,23 @@
+.container {
+  padding: 2px 0;
+  display: flex;
+}
+.left {
+  justify-content: flex-start;
+  text-align: left;
+}
+.right {
+  justify-content: flex-end;
+  text-align: right;
+}
+.center {
+  justify-content: center;
+  text-align: center;
+}
+.actor {
+  font-weight: bold;
+  margin-right: 4px;
+}
+.text {
+  font-family: inherit;
+} 

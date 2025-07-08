@@ -1,11 +1,14 @@
-import js from '@eslint/js';
-import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsparser from '@typescript-eslint/parser';
+const js = require('@eslint/js');
+const globals = require('globals');
+const reactHooks = require('eslint-plugin-react-hooks');
+const reactRefresh = require('eslint-plugin-react-refresh');
+const tseslint = require('@typescript-eslint/eslint-plugin');
+const tsparser = require('@typescript-eslint/parser');
 
-export default [
+// 👇 Import your local plugin with require (CommonJS)
+const localPlugin = require('./eslint-plugin-local/index.cjs');
+
+module.exports = [
   js.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
@@ -27,6 +30,8 @@ export default [
       '@typescript-eslint': tseslint,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      // 👇 Add local plugin
+      local: localPlugin,
     },
     rules: {
       ...tseslint.configs.recommended.rules,
@@ -39,6 +44,8 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
+      // 👇 Your custom rule
+      'local/no-stray-dialogue-import': 'error',
     },
   },
   {

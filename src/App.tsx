@@ -8,28 +8,20 @@
  */
 import React from 'react';
 import { useState } from 'react';
-import styles from './App.module.css';
 import { Character, Location } from './common/types';
 import { CharacterSelection } from './features/character-selection/components/CharacterSelection';
 import { LocationSelection } from './features/location-selection/components/LocationSelection';
 import { useBattleSimulator } from './features/battle-simulation/controllers/useBattleSimulator.controller';
-import { Button } from './common/components/Button/Button';
-import { EnhancedBattleScene } from './features/battle-simulation/components/EnhancedBattleScene/EnhancedBattleScene';
-import type { Move } from './features/battle-simulation/types/move.types';
+import { UnifiedBattleLog } from './features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog';
 
-/**
- * @description The root component that orchestrates the entire application state and renders feature modules.
- * @returns {JSX.Element} The main application UI.
- */
 function App() {
   const [player1, setPlayer1] = useState<Character | null>(null);
   const [player2, setPlayer2] = useState<Character | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
-  
-  const { 
-    battleState, 
-    isRunning, 
-    startBattle, 
+  const {
+    battleState,
+    isRunning,
+    startBattle,
     resetBattle
   } = useBattleSimulator();
 
@@ -45,74 +37,72 @@ function App() {
     setLocation(null);
     resetBattle();
   };
-  
+
   const isSelectionComplete = player1 && player2 && location;
   const isBattleActive = battleState !== null;
 
-  const handleMoveSelect = (move: Move) => {
-    // TODO: Implement move selection logic (e.g., update state, send to battle engine)
-    console.log('Selected move:', move);
-  };
-
   return (
-    <div className={styles.appContainer}>
-      <header className={styles.header}>
-        <h1>Avatar: Battle Simulator</h1>
-      </header>
-
-      <main className={styles.mainContent}>
-        {!isBattleActive ? (
-          <React.Fragment>
-            <div className={styles.selectionGrid}>
-              <div className={styles.playerColumn}>
-                <CharacterSelection
-                  title="Player 1"
-                  selectedCharacter={player1}
-                  onSelectCharacter={setPlayer1}
-                  opponent={player2}
-                  playerColor="var(--border-color-p1)"
-                />
-              </div>
-              <div className={styles.separator} />
-              <div className={styles.playerColumn}>
-                <CharacterSelection
-                  title="Player 2"
-                  selectedCharacter={player2}
-                  onSelectCharacter={setPlayer2}
-                  opponent={player1}
-                  playerColor="var(--border-color-p2)"
-                />
-              </div>
-            </div>
-            <div className={styles.locationSection}>
-              <LocationSelection
-                selectedLocation={location}
-                onSelectLocation={setLocation}
+    <div style={{ maxWidth: 700, margin: '0 auto', padding: 16, fontFamily: 'sans-serif' }}>
+      <h1 style={{ textAlign: 'center', fontSize: 28, margin: '16px 0' }}>Avatar: Battle Simulator</h1>
+      {!isBattleActive ? (
+        <>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+            <div style={{ flex: 1 }}>
+              <CharacterSelection
+                title="Player 1"
+                selectedCharacter={player1}
+                onSelectCharacter={setPlayer1}
+                opponent={player2}
+                playerColor="#1e90ff"
               />
             </div>
-            <div className={styles.simulateSection}>
-              <Button onClick={handleSimulate} disabled={!isSelectionComplete || isRunning}>
-                {isRunning ? 'Simulating...' : 'Simulate Battle'}
-              </Button>
+            <div style={{ flex: 1 }}>
+              <CharacterSelection
+                title="Player 2"
+                selectedCharacter={player2}
+                onSelectCharacter={setPlayer2}
+                opponent={player1}
+                playerColor="#ff6347"
+              />
             </div>
-          </React.Fragment>
-        ) : (
-          <React.Fragment>
-            <EnhancedBattleScene 
-              battleState={battleState} 
-              onMoveSelect={handleMoveSelect}
-              isPlayerTurn={undefined} // TODO: wire up turn logic if needed
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <LocationSelection
+              selectedLocation={location}
+              onSelectLocation={setLocation}
             />
-            <div className={styles.simulateSection}>
-              {battleState.isFinished && (
-                  <Button onClick={handleReset}>
-                    Start New Battle
-                  </Button>
-              )}
-            </div>
-          </React.Fragment>
-        )}
-      </main>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <button
+              onClick={handleSimulate}
+              disabled={!isSelectionComplete || isRunning}
+              style={{ padding: '8px 16px', fontSize: 16 }}
+            >
+              {isRunning ? 'Simulating...' : 'Start Battle'}
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ marginBottom: 16 }}>
+            <UnifiedBattleLog
+              battleLog={battleState.battleLog}
+              aiLog={battleState.aiLog}
+              participants={battleState.participants}
+            />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            {battleState.isFinished && (
+              <button
+                onClick={handleReset}
+                style={{ padding: '8px 16px', fontSize: 16 }}
+              >
+                Start New Battle
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

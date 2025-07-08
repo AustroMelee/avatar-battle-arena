@@ -1,2 +1,1 @@
-export { NarrativeBubble } from './NarrativeBubble';
-export type { NarrativeBubbleProps } from './NarrativeBubble'; 
+// (No exports, as NarrativeBubble.tsx has been deleted) 

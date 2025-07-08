@@ -16,7 +16,7 @@ import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerform
 import type { BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
-import { logStory } from './utils/mechanicLogUtils';
+import { logDialogue, logTechnical, logStory, logSystem } from './utils/mechanicLogUtils';
 
 /**
  * @description Represents the result of a battle simulation with analytics.
@@ -92,7 +92,7 @@ export class BattleSimulator {
         id: generateUniqueLogId('turn'),
         turn: currentState.turn,
         actor: 'System',
-        type: 'DRAW',
+        type: 'system',
         action: 'max_turns',
         result: 'Battle ended due to maximum turns reached.',
         narrative: 'The battle has dragged on too long. Both warriors are exhausted.',

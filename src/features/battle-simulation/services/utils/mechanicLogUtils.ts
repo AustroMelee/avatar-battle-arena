@@ -8,7 +8,7 @@
 // This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
 //
 // Updated for 2025 registry-driven architecture overhaul.
-import type { BattleLogEntry, LogDetails } from '../../types';
+import type { BattleLogEntry, LogDetails, LogEntryType } from '../../types';
 import { generateUniqueLogId } from '../ai/logQueries';
 
 /**
@@ -48,7 +48,7 @@ export function createMechanicLogEntry({
     id: generateUniqueLogId('mechanic'),
     turn,
     actor,
-    type: 'INFO',
+    type: 'mechanics',
     action: mechanic,
     result: reason ? `${effect} (${reason})` : effect, // Keep result for technical log display
     target,
@@ -89,21 +89,56 @@ function getLegendaryFallbackNarrative(): string {
   return legendaryFallbackNarratives[Math.floor(Math.random() * legendaryFallbackNarratives.length)];
 }
 
+// --- Canonical log type mapping ---
+export const mapRawType = (raw: string): LogEntryType =>
+  raw === "mechanics" || raw === "TACTICAL" || raw === "CHARGE" || raw === "REPOSITION"
+    ? "mechanics"
+    : raw === "dialogue"
+    ? "dialogue"
+    : raw === "system"
+    ? "system"
+    : "narrative";
+
+// --- Duplicate prevention ---
+export const hashLogEntry = (e: BattleLogEntry) => `${e.type}|${e.actor}|${e.narrative}|${e.timestamp}`;
+export const pushLog = (state: { entries: BattleLogEntry[]; seen: Set<string> }, entry: BattleLogEntry) => {
+  const hash = hashLogEntry(entry);
+  if (!state.seen.has(hash)) {
+    state.entries.push(entry);
+    state.seen.add(hash);
+  }
+};
+
+// --- Updated logDialogue (canonical for fighter speech) ---
+export function logDialogue({ turn, actor, text, target }: { turn: number; actor: string; text: string; target?: string }): BattleLogEntry | null {
+  if (!text || !text.trim()) return null;
+  return {
+    id: generateUniqueLogId('dialogue'),
+    turn,
+    actor: actor.charAt(0).toUpperCase() + actor.slice(1),
+    type: 'dialogue',
+    action: 'Dialogue',
+    result: text,
+    target,
+    narrative: text,
+    timestamp: Date.now(),
+    details: {},
+  };
+}
+
 /**
- * Creates a player-facing narrative log entry (type: 'NARRATIVE').
+ * Creates a player-facing narrative log entry (type: 'narrative').
  * Ensures the narrative and result fields contain only clean, immersive prose.
  * Now with anti-repetition, null filtering, and formatting.
  */
 export function logStory({ turn, actor, narrative, target }: { turn: number; actor: string; narrative: string; target?: string }): BattleLogEntry | null {
-  // Defensive: filter null/undefined/empty
   if (typeof turn !== 'number' || !actor || !narrative) {
-    // Use a legendary fallback narrative if missing
     const narrative = getLegendaryFallbackNarrative();
     return {
       id: generateUniqueLogId('narrative'),
       turn: typeof turn === 'number' ? turn : 0,
       actor: actor ? actor.charAt(0).toUpperCase() + actor.slice(1) : 'The opponent',
-      type: 'NARRATIVE',
+      type: 'narrative',
       action: 'Story',
       result: narrative,
       target,
@@ -112,17 +147,13 @@ export function logStory({ turn, actor, narrative, target }: { turn: number; act
       details: {},
     };
   }
-  // Capitalize actor name
   const actorName = actor.charAt(0).toUpperCase() + actor.slice(1);
-  // Anti-repetition
   const cleanNarrative = antiRepetition(narrative.trim());
-  // Remove dev junk: no IDs, camelCase, or numbers unless dramatic
-  // (For now, assume narrative is already clean; in future, add regex/formatting here)
   return {
     id: generateUniqueLogId('narrative'),
     turn,
     actor: actorName,
-    type: 'NARRATIVE',
+    type: 'narrative',
     action: 'Story',
     result: cleanNarrative,
     target,
@@ -132,25 +163,47 @@ export function logStory({ turn, actor, narrative, target }: { turn: number; act
   };
 }
 
-/**
- * Creates a technical/developer log entry (type: 'INFO').
- * Ensures all mechanical data is stored in `details` and `result`, with no narrative pollution.
- */
-export function logTechnical({ turn, actor, action, result, reason, target, details }: { turn: number; actor: string; action: string; result: string; reason?: string; target?: string; details?: LogDetails }): BattleLogEntry | null {
-  if (typeof turn !== 'number' || !actor) {
-    // Final guard: Do not create log if turn or actor is missing
-    return null;
-  }
+// --- Updated logMechanics: skip empty or whitespace-only strings ---
+export function logMechanics({ turn, text }: { turn: number; text: string }): BattleLogEntry | null {
+  if (!text || !text.trim()) return null;
   return {
-    id: generateUniqueLogId('technical'),
+    id: generateUniqueLogId('mechanics'),
     turn,
-    actor,
-    type: 'INFO',
-    action,
-    result,
-    target,
+    actor: 'System',
+    type: 'mechanics',
+    action: 'Mechanics',
+    result: text,
     narrative: '',
     timestamp: Date.now(),
-    details: { ...details, mechanic: action, reason },
+    details: {},
   };
+}
+
+/**
+ * Creates a system-level log entry (type: 'system').
+ */
+export function logSystem({ turn, actor, message, target }: { turn: number; actor: string; message: string; target?: string }): BattleLogEntry {
+  return {
+    id: generateUniqueLogId('system'),
+    turn,
+    actor: actor.charAt(0).toUpperCase() + actor.slice(1),
+    type: 'system',
+    action: 'System',
+    result: message,
+    target,
+    narrative: message,
+    timestamp: Date.now(),
+    details: {},
+  };
+} 
+
+/**
+ * Infers the log type for legacy log entries that may not have a type field.
+ */
+export function inferLogType(log: any): LogEntryType {
+  if (log.type) return log.type;
+  if (typeof log.text === 'string' && /^(["“”])/.test(log.text)) return 'dialogue';
+  if (typeof log.text === 'string' && (log.text.includes('successfully') || log.text.includes('fails'))) return 'mechanics';
+  if (typeof log.text === 'string' && (log.text.startsWith('The ') || /^\w+ stands/.test(log.text))) return 'narrative';
+  return 'mechanics'; // default fallback
 } 

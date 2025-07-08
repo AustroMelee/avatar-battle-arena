@@ -13,10 +13,12 @@
 // No matter how many updates or changes we make, users MUST be able to see logs from T1
 // This is essential for battle analysis and debugging - never hide early turns!
 //
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, FC } from 'react';
 import { BattleLogEntry, AILogEntry, BattleCharacter } from '../../types';
-import styles from './UnifiedBattleLog.module.css';
-import { BattleNarrativeTurn } from '../BattleNarrativeTurn/BattleNarrativeTurn';
+import { LogViewMode } from '../../types/logViewModes';
+import DialogueLogEntry from './DialogueLogEntry';
+import NarrativeLogEntry from './NarrativeLogEntry';
+import TechnicalLogEntry from './TechnicalLogEntry';
 
 interface UnifiedBattleLogProps {
   battleLog: BattleLogEntry[];
@@ -32,21 +34,94 @@ type LogTab = 'narrative' | 'technical';
  * If the log entries suggest the order is reversed (e.g., Player 2 acts first), the component will auto-swap participants for rendering
  * and log a warning. This guarantees left/right consistency in the UI regardless of upstream bugs or input order.
  */
+// Minimal TurnGroup component
+function TurnGroup({ turn, entries, p1Name, p2Name }: { turn: string | number, entries: BattleLogEntry[], p1Name: string, p2Name: string }) {
+  return (
+    <div style={{ marginBottom: 24 }}>
+      {turn !== 'Prologue' && (
+        <div style={{ fontWeight: 700, fontSize: 18, margin: '0 0 8px 0', color: '#cbd5e1', textAlign: 'left' }}>Turn {turn}</div>
+      )}
+      {entries.map((entry, i) => (
+        <SingleLogEntry key={entry.id || i} entry={entry} p1Name={p1Name} p2Name={p2Name} />
+      ))}
+    </div>
+  );
+}
+
+// Minimal SingleLogEntry component
+const PLACEHOLDER_STRINGS = ["escalation", "Reversal", "", null, undefined];
+
+function isRenderableLogEntry(entry: BattleLogEntry) {
+  const text = typeof entry.narrative === 'string'
+    ? entry.narrative
+    : Array.isArray(entry.narrative)
+      ? entry.narrative.join(' ')
+      : (entry as any).text;
+  if (!text || PLACEHOLDER_STRINGS.includes(text)) return false;
+  return true;
+}
+
+type KnownLogType = "dialogue" | "narrative" | "mechanics" | "technical" | "system";
+
+function assertNever(x: never): never {
+  /* istanbul ignore next */
+  throw new Error(`Unhandled log type: ${JSON.stringify(x)}`);
+}
+
+type Props = {
+  entry: BattleLogEntry;
+  p1Name: string;
+  p2Name: string;
+};
+
+export const SingleLogEntry: FC<Props> = ({ entry, p1Name, p2Name }) => {
+  const common = { id: entry.id, ts: entry.timestamp };
+  switch (entry.type) {
+    case "dialogue":
+      if (entry.actor === p1Name || entry.actor === p2Name) {
+        return (
+          <DialogueLogEntry
+            {...common}
+            actor={entry.actor}
+            text={typeof entry.narrative === 'string' ? entry.narrative : Array.isArray(entry.narrative) ? entry.narrative.join(' ') : ''}
+            align={entry.actor === p1Name ? "left" : "right"}
+          />
+        );
+      }
+      // fall through to narrative styling
+    case "narrative":
+    case "mechanics":
+    case "system":
+      if (
+        (import.meta as any).env?.MODE !== "production" &&
+        entry.type !== "dialogue" &&
+        (entry.actor === p1Name || entry.actor === p2Name)
+      ) {
+        // eslint-disable-next-line no-console
+        console.warn("[LOG PIPELINE] Non-dialogue fighter entry:", entry);
+      }
+      return (
+        <NarrativeLogEntry
+          {...common}
+          text={typeof entry.narrative === 'string' ? entry.narrative : Array.isArray(entry.narrative) ? entry.narrative.join(' ') : ''}
+        />
+      );
+    default:
+      assertNever(entry.type as never);
+  }
+};
+
 export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   battleLog,
   aiLog,
   maxEntries = 15,
   participants
 }) => {
-  // Defensive: auto-swap participants if log entries suggest order is reversed
   let [p1, p2] = participants;
   if (battleLog.length > 0) {
-    // Find first log entry with an actor matching either participant
     const firstEntry = battleLog.find(e => e.actor === p1.name || e.actor === p2.name);
     if (firstEntry) {
-      // If the first actor is p2 and not p1, and the second actor is p1, swap
       if (firstEntry.actor === p2.name) {
-        // Swap participants for rendering
         [p1, p2] = [p2, p1];
         console.warn('[UnifiedBattleLog] Detected participants order mismatch. Swapping for left/right consistency.');
       }
@@ -59,6 +134,85 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   const [showAllEntries, setShowAllEntries] = useState(true); // ALWAYS TRUE BY DEFAULT
   const [turnFilter, setTurnFilter] = useState<number | null>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
+
+  // Log view mode state
+  const [viewMode, setViewMode] = useState<LogViewMode>('grouped');
+
+  // Grouping helper
+  function groupEntriesByTurn(entries: BattleLogEntry[]) {
+    const grouped: { prologue: BattleLogEntry[]; turns: { turn: number, entries: BattleLogEntry[] }[] } = { prologue: [], turns: [] };
+    const turnMap: Record<number, BattleLogEntry[]> = {};
+    for (const e of entries) {
+      if (e.turn === 0 || e.turn === undefined) grouped.prologue.push(e);
+      else {
+        if (!turnMap[e.turn]) turnMap[e.turn] = [];
+        turnMap[e.turn].push(e);
+      }
+    }
+    grouped.turns = Object.entries(turnMap)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([turn, entries]) => ({ turn: Number(turn), entries }));
+    return grouped;
+  }
+
+  // Determine which modes to show
+  const viteMode = (import.meta as any).env?.MODE || 'development';
+  const showDevModes = viteMode !== "production";
+  const logViewModes = showDevModes
+    ? [
+        { value: "grouped", label: "[DEV] Grouped by Turn – Full battle transcript" },
+        { value: "latest", label: "[DEV] Latest Turn Only – Just current turn" },
+        { value: "full", label: "[DEV] All Entries (Raw) – Unfiltered log" },
+        { value: "public", label: "[PUBLIC] Story View – For players/spectators" }
+      ]
+    : [
+        { value: "public", label: "[PUBLIC] Story View – For players/spectators" }
+      ];
+
+  // Render logic based on viewMode
+  let logContent: React.ReactNode = null;
+  if (battleLog.length === 0) {
+    logContent = <div style={{ color: "#64748b" }}>No log yet. Start a battle!</div>;
+  } else {
+    switch (viewMode) {
+      case 'latest': {
+        const maxTurn = Math.max(...battleLog.map(e => e.turn ?? 0));
+        const latest = battleLog.filter(e => e.turn === maxTurn);
+        logContent = <TurnGroup turn={maxTurn} entries={latest} p1Name={p1.name} p2Name={p2.name} />;
+        break;
+      }
+      case 'grouped': {
+        const grouped = groupEntriesByTurn(battleLog);
+        logContent = <>
+          {grouped.prologue.length > 0 && (
+            <TurnGroup turn="Prologue" entries={grouped.prologue} p1Name={p1.name} p2Name={p2.name} />
+          )}
+          {grouped.turns.map(({ turn, entries }) => (
+            <TurnGroup key={turn} turn={turn} entries={entries} p1Name={p1.name} p2Name={p2.name} />
+          ))}
+        </>;
+        break;
+      }
+      case 'public': {
+        // For now, [PUBLIC] mode is same as grouped; can customize later
+        const grouped = groupEntriesByTurn(battleLog);
+        logContent = <>
+          {grouped.prologue.length > 0 && (
+            <TurnGroup turn="Prologue" entries={grouped.prologue} p1Name={p1.name} p2Name={p2.name} />
+          )}
+          {grouped.turns.map(({ turn, entries }) => (
+            <TurnGroup key={turn} turn={turn} entries={entries} p1Name={p1.name} p2Name={p2.name} />
+          ))}
+        </>;
+        break;
+      }
+      case 'full':
+      default: {
+        logContent = battleLog.map((e, i) => <SingleLogEntry key={e.id || i} entry={e} p1Name={p1.name} p2Name={p2.name} />);
+        break;
+      }
+    }
+  }
 
   // Auto-scroll to the bottom when new entries are added or tab changes
   useEffect(() => {
@@ -106,94 +260,11 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    * The showAllEntries state should default to true to ensure complete visibility
    */
   const renderNarrativeTab = () => {
-    const turnNumbers = Object.keys(groupedBattleLog).map(Number).sort((a, b) => a - b);
-    const visibleTurnNumbers = showAllEntries ? turnNumbers : turnNumbers.slice(-Math.floor(maxEntries / 2));
-    if (visibleTurnNumbers.length === 0) {
-      return (
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>⚔️</span>
-          <p>Battle log is empty</p>
-        </div>
-      );
-    }
-    if (!participants || !Array.isArray(participants) || participants.length !== 2) {
-      return (
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>❓</span>
-          <p>Participants not loaded</p>
-        </div>
-      );
-    }
-    const [p1, p2] = participants;
-
     return (
-      <div className={styles.tabContent} ref={logContainerRef}>
-        {prologueEntries.length > 0 && (
-          <div className={styles.prologueSection}>
-            <h4 className={styles.prologueHeader}>Prologue</h4>
-            {prologueEntries.map((entry, idx) => (
-              <BattleNarrativeTurn
-                key={`prologue-${idx}`}
-                actor={entry.actor}
-                narrative={typeof entry.narrative === 'string' ? entry.narrative : entry.narrative.join(' ')}
-                type={entry.type}
-                playerSide={'left'}
-                icon={'/favicon.ico'}
-              />
-            ))}
-          </div>
-        )}
-        {visibleTurnNumbers.map(turnNumber => {
-          const entries = groupedBattleLog[turnNumber];
-          if (!Array.isArray(entries)) {
-            console.warn(`[UnifiedBattleLog] No log entries found for turn ${turnNumber}. This may indicate a data bug.`);
-            return (
-              <div key={`turn-group-${turnNumber}`} className={styles.turnGroup}>
-                <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
-                <div className={styles.emptyState}>
-                  <span className={styles.emptyIcon}>⚠️</span>
-                  <p>No log entries for this turn.</p>
-                </div>
-              </div>
-            );
-          }
-          return (
-            <div key={`turn-group-${turnNumber}`} className={styles.turnGroup}>
-              <h4 className={styles.turnHeader}>Turn {turnNumber}</h4>
-              {entries.map((entry, index) => {
-                let playerSide: 'p1' | 'p2' | 'system' = 'system';
-                let icon = entry.actor === 'Narrator' || entry.actor === 'System' || entry.actor === 'Environment' ? '/favicon.ico' : '';
-
-                if (entry.actor === p1.name) {
-                  playerSide = 'p1';
-                  icon = p1.base.icon;
-                } else if (entry.actor === p2.name) {
-                  playerSide = 'p2';
-                  icon = p2.base.icon;
-                }
-
-                // --- HIGHLIGHT FORCED ENDINGS/STALEMATES ---
-                const isForcedEnding = typeof entry.narrative === 'string' && (
-                  entry.narrative.includes('Stalemate') ||
-                  entry.narrative.includes('Sudden Death') ||
-                  entry.narrative.includes('draw')
-                );
-
-                return (
-                  <BattleNarrativeTurn
-                    key={`${entry.id}-${index}`}
-                    actor={entry.actor}
-                    narrative={typeof entry.narrative === 'string' ? entry.narrative : entry.narrative.join(' ')}
-                    type={entry.type}
-                    playerSide={playerSide === 'p1' ? 'left' : 'right'}
-                    icon={icon}
-                    className={isForcedEnding ? styles.forcedEnding : ''}
-                  />
-                )
-              })}
-            </div>
-          );
-        })}
+      <div ref={logContainerRef}>
+        {battleLog.filter(isRenderableLogEntry).map((entry, i) => (
+          <SingleLogEntry key={entry.id || i} entry={entry} p1Name={p1.name} p2Name={p2.name} />
+        ))}
       </div>
     );
   };
@@ -202,66 +273,15 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
    * @description Renders the AI log tab.
    */
   const renderAITab = () => {
-    let limitedEntries = showAllEntries ? aiLog : aiLog.slice(-maxEntries);
-    
-    // Apply turn filter if set
-    if (turnFilter !== null) {
-      limitedEntries = limitedEntries.filter(entry => entry.turn === turnFilter);
+    if (!aiLog || aiLog.length === 0) {
+      return <div style={{ padding: '8px', color: '#888' }}>No technical log entries.</div>;
     }
-
     return (
-      <div className={styles.tabContent}>
-        {limitedEntries.length === 0 ? (
-          <div className={styles.emptyState}>
-            <span className={styles.emptyIcon}>🤖</span>
-            <p>AI log is empty</p>
-          </div>
-        ) : (
-          limitedEntries.map((entry, index) => (
-            <div key={`${entry.turn}-${entry.agent}-${index}`} className={`${styles.logEntry} ${styles.aiEntry}`}>
-              <div className={styles.entryHeader}>
-                <span className={styles.turnNumber}>T{entry.turn}</span>
-                <span className={styles.actor}>{entry.agent}</span>
-                <span className={styles.timestamp}>{getTimestamp(entry.timestamp)}</span>
-              </div>
-              
-              <div className={styles.entryContent}>
-                <span className={styles.aiIcon}>🤖</span>
-                <span className={styles.aiAction}>{entry.chosenAction}</span>
-              </div>
-              
-              {entry.reasoning && (
-                <div className={styles.aiReasoning}>
-                  <strong>Reasoning:</strong> {entry.reasoning}
-                </div>
-              )}
-              
-              {entry.perceivedState && (
-                <div className={styles.aiPerceivedState}>
-                  <strong>Perceived State:</strong> 
-                  <div className={styles.perceivedStateDetails}>
-                    <div>Self Health: {entry.perceivedState.self.health}%</div>
-                    <div>Enemy Health: {entry.perceivedState.enemy.health}%</div>
-                    <div>Self Chi: {entry.perceivedState.self.resources.chi}</div>
-                  </div>
-                </div>
-              )}
-              
-              {entry.consideredActions && entry.consideredActions.length > 0 && (
-                <div className={styles.aiConsideredActions}>
-                  <strong>Considered Actions:</strong>
-                  <ul>
-                    {entry.consideredActions.map((action, actionIndex) => (
-                      <li key={actionIndex}>
-                        {action.move} (Score: {action.score}) - {action.reason}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))
-        )}
+      <div ref={logContainerRef}>
+        {aiLog.map((entry, idx) => {
+          const text = entry.reasoning || entry.narrative || '';
+          return <TechnicalLogEntry key={`${entry.turn}-${entry.agent}-${idx}`} text={text} title="System" turn={entry.turn} />;
+        })}
       </div>
     );
   };
@@ -368,10 +388,11 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   const renderDisruptionTicker = () => {
     if (!participants || !Array.isArray(participants) || participants.length < 1) return null;
     return (
-      <div className={styles.disruptionTicker} aria-label="Disruption State Ticker">
+      <div className="disruptionTicker" aria-label="Disruption State Ticker">
         {participants.map((char) => (
-          <span key={char.name} className={`${styles.tickerState} ${styles[char.controlState.toLowerCase()]}`}
+          <span key={char.name}
             aria-label={`${char.name} Control State: ${char.controlState}, Stability: ${char.stability}, Momentum: ${char.momentum}`}
+            style={{ marginRight: 12, fontWeight: 500 }}
           >
             <strong>{char.name}</strong>: {char.controlState} | S:{char.stability} | M:{char.momentum}
           </span>
@@ -381,19 +402,19 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   };
 
   return (
-    <div className={styles.unifiedBattleLog}>
+    <div className="unifiedBattleLog">
       {renderDisruptionTicker()}
-      <div className={styles.header}>
-        <h3>Battle Log</h3>
-        <div className={styles.tabSelector}>
+      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <h3 style={{ margin: 0, fontSize: 20 }}>Battle Log</h3>
+        <div className="tabSelector" style={{ display: 'flex', gap: 4 }}>
           <button
-            className={`${styles.tab} ${activeTab === 'narrative' ? styles.active : ''}`}
+            style={{ fontWeight: activeTab === 'narrative' ? 700 : 400, padding: '4px 10px', borderRadius: 4, border: '1px solid #888', background: activeTab === 'narrative' ? '#222' : '#444', color: '#fff', cursor: 'pointer' }}
             onClick={() => setActiveTab('narrative')}
           >
             🎭 Narrative
           </button>
           <button
-            className={`${styles.tab} ${activeTab === 'technical' ? styles.active : ''}`}
+            style={{ fontWeight: activeTab === 'technical' ? 700 : 400, padding: '4px 10px', borderRadius: 4, border: '1px solid #888', background: activeTab === 'technical' ? '#222' : '#444', color: '#fff', cursor: 'pointer' }}
             onClick={() => setActiveTab('technical')}
           >
             💻 Technical
@@ -404,7 +425,6 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
             type="number"
             placeholder="Turn #"
             min="1"
-            // Defensive: ensure max is always a valid number (prevents NaN warning)
             max={Number.isFinite(Math.max(...battleLog.map(e => e.turn))) ? Math.max(...battleLog.map(e => e.turn), 1) : 1}
             value={turnFilter || ''}
             onChange={(e) => setTurnFilter(e.target.value ? Number(e.target.value) : null)}
@@ -467,9 +487,19 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
           Copy Technical Log
         </button>
       </div>
-      
+      {/* DROPDOWN IS NOW AT TOP */}
+      <div style={{ marginBottom: 12 }}>
+        <label htmlFor="log-view-mode" style={{ color: '#cbd5e1', marginRight: 8 }}>Log View:</label>
+        <select id="log-view-mode" value={viewMode} onChange={e => setViewMode(e.target.value as LogViewMode)}>
+          {logViewModes.map(mode => (
+            <option key={mode.value} value={mode.value}>{mode.label}</option>
+          ))}
+        </select>
+      </div>
+      {/* NOW: all log rendering below */}
       {activeTab === 'narrative' && renderNarrativeTab()}
       {activeTab === 'technical' && renderAITab()}
+      {logContent}
     </div>
   );
 }; 

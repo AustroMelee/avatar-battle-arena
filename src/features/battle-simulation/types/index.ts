@@ -282,7 +282,7 @@ export type AILogEntry = {
 /**
  * @description Event types for structured battle logging.
  */
-export type LogEventType = 'MOVE' | 'STATUS' | 'KO' | 'TURN' | 'INFO' | 'VICTORY' | 'DRAW' | 'ESCAPE' | 'DESPERATION' | 'NARRATIVE' | 'FINISHER' | 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT' | 'TACTICAL' | 'ESCALATION' | 'ARC_TRANSITION' | 'DECISIVE_CLASH';
+export type LogEntryType = 'dialogue' | 'mechanics' | 'narrative' | 'system';
 
 /**
  * @description Battle resolution types for special end conditions.
@@ -320,7 +320,7 @@ export type BattleLogEntry = {
   id: string; // Unique event identifier
   turn: number;
   actor: string;
-  type: LogEventType;
+  type: LogEntryType;
   action: string;
   target?: string;
   result: string; // Clean, human-readable result (e.g., "Azula takes 15 damage.")

@@ -1,6 +1,6 @@
 // CONTEXT: BattleLog, // FOCUS: UIRendering
 import { useEffect, useRef, useState } from 'react';
-import { BattleLogEntry, AILogEntry, LogDetailLevel, LogEventType } from '../../battle-simulation/types';
+import { BattleLogEntry, AILogEntry, LogDetailLevel, LogEntryType } from '../../battle-simulation/types';
 import { LogDetailSelector } from './LogDetailSelector';
 import styles from './BattleLog.module.css';
 
@@ -75,40 +75,15 @@ ${entry.narrative ? `Narrative: ${entry.narrative}` : ''}
   }).join('\n\n');
 }
 
-/**
- * @description Gets the appropriate icon for a move type.
- * @param {string} moveName - The name of the move.
- * @param {string} abilityType - The type of ability.
- * @returns {string} The icon emoji.
- */
-function getMoveIcon(moveName: string, abilityType?: string): string {
-  // Desperation moves
-  if (moveName.includes('Avatar State') || moveName.includes('Phoenix Rage')) {
-    return '🔥';
-  }
-  if (moveName.includes('Tornado') || moveName.includes('Storm')) {
-    return '⚡';
-  }
-  
-  // Attack moves
-  if (abilityType === 'attack') {
-    if (moveName.includes('Lightning')) return '⚡';
-    if (moveName.includes('Fire')) return '🔥';
-    if (moveName.includes('Wind') || moveName.includes('Air')) return '💨';
-    if (moveName.includes('Strike')) return '👊';
-    return '⚔️';
-  }
-  
-  // Defense moves
-  if (abilityType === 'defense_buff') {
-    if (moveName.includes('Shield')) return '🛡️';
-    if (moveName.includes('Jets')) return '🚀';
-    if (moveName.includes('Focus')) return '🧘';
-    if (moveName.includes('Recovery')) return '💚';
-    return '🛡️';
-  }
-  
-  return '🎯';
+// Avatar image mapping utility
+const avatarMap: Record<string, string> = {
+  aang: '/assets/aang.jpg',
+  azula: '/assets/azula.jpg',
+  // Add more characters as needed
+};
+function getAvatar(name: string): string {
+  const normalized = name.trim().toLowerCase();
+  return avatarMap[normalized] || '/assets/default.jpg'; // fallback image
 }
 
 /**
@@ -125,7 +100,7 @@ export function BattleLog({
   const logContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [currentDetailLevel, setCurrentDetailLevel] = useState<LogDetailLevel>(detailLevel);
-  const [eventTypeFilter, setEventTypeFilter] = useState<LogEventType | 'ALL'>('ALL');
+  const [eventTypeFilter, setEventTypeFilter] = useState<LogEntryType | 'ALL'>('ALL');
 
   // Auto-scroll to the bottom when new log entries are added.
   useEffect(() => {
@@ -161,69 +136,53 @@ export function BattleLog({
     }
   };
 
-  const renderNarrative = (narrative: string | string[], entry: BattleLogEntry) => {
-    if (Array.isArray(narrative)) {
-      return (
-        <div className={entry.details?.oneOffMoment ? styles.oneOffMoment : styles.logNarrative}>
-          {narrative.map((line, idx) => (
-            <div key={idx} className={styles.narrativeLine}>{line}</div>
-          ))}
-        </div>
-      );
-    }
-    return (
-      <div className={entry.details?.oneOffMoment ? styles.oneOffMoment : styles.logNarrative}>{narrative}</div>
-    );
-  };
-
   const renderLogEntries = () => {
-    // Filter entries by event type
     const filteredLog = eventTypeFilter === 'ALL'
-      ? battleLog.filter(entry => entry.type === 'NARRATIVE') // Default: only show NARRATIVE entries
+      ? battleLog
       : battleLog.filter(entry => entry.type === eventTypeFilter);
-    
+
     if (filteredLog.length > 0) {
-      return filteredLog.map((entry, index) => (
-        <div
-          key={entry.id || `${entry.turn}-${entry.actor}-${index}`}
-          className={`${styles.logEntry} ${index === filteredLog.length - 1 ? styles.latest : ''} ${styles[`event-${entry.type.toLowerCase()}`] || ''}`}
-        >
-          <div className={styles.logHeader}>
-            <span className={styles.turnNumber}>Turn {entry.turn}</span>
-            <span className={styles.eventType}>{entry.type}</span>
-            <span className={styles.actor}>{entry.actor}</span>
-            <span className={styles.moveIcon}>{getMoveIcon(entry.action, entry.abilityType)}</span>
-            <span className={styles.action}>{entry.action}</span>
-            {entry.meta?.resourceCost !== undefined && (
-              <span className={styles.chiCost}>({entry.meta.resourceCost} chi)</span>
-            )}
-          </div>
-          <div className={styles.logResult}>{entry.result}</div>
-          {/* Narrative rendering (multi-part and one-off moment support) */}
-          {entry.narrative && renderNarrative(entry.narrative, entry)}
-          {entry.meta && Object.keys(entry.meta).length > 0 && (
-            <div className={styles.logMeta}>
-              {entry.meta.isFinisher && <span className={styles.metaFinisher}>⚡ FINISHER!</span>}
-              {entry.meta.isDesperation && <span className={styles.metaDesperation}>🔥 DESPERATION!</span>}
-              {entry.meta.crit && <span className={styles.metaCrit}>💥 CRITICAL!</span>}
-              {entry.meta.piercing && <span className={styles.metaPiercing}>⚡ PIERCING</span>}
-              {entry.meta.heal && <span className={styles.metaHeal}>💚 HEAL</span>}
-              {entry.meta.combo && <span className={styles.metaCombo}>🔥 COMBO x{entry.meta.combo}</span>}
+      return filteredLog.map((entry) => {
+        console.log('RENDERING LOG ENTRY:', entry);
+        if (entry.type === 'dialogue') {
+          return (
+            <div className={styles.container} key={entry.id || entry.turn}>
+              <div className={styles.actorBlock}>
+                <img src={getAvatar(entry.actor)} alt={`${entry.actor} icon`} className={styles.iconImgLarge} />
+                <span className={styles.actorNameLarge}>{entry.actor}:</span>
+              </div>
+              <p className={styles.dialogueText}>{entry.narrative}</p>
             </div>
-          )}
-        </div>
-      ));
+          );
+        }
+        if (entry.type === 'narrative') {
+          return (
+            <div className={styles.narrativeBubble} key={entry.id || entry.turn}>
+              <span className={styles.turnLabel}>Turn {entry.turn}</span>
+              <p className={styles.narrativeText}><i>{typeof entry.narrative === 'string' ? entry.narrative : entry.narrative.join(' ')}</i></p>
+            </div>
+          );
+        }
+        if (entry.type === 'mechanics') {
+          return (
+            <div className={styles.mechanicsBubble} key={entry.id || entry.turn}>
+              <span className={styles.mechanicsCue}>⚙️</span>
+              <span className={styles.mechanicsText}>{entry.result}</span>
+            </div>
+          );
+        }
+        if (entry.type === 'system') {
+          return (
+            <div className={styles.systemBubble} key={entry.id || entry.turn}>
+              <span className={styles.systemCue}>🖥️</span>
+              <span className={styles.systemText}>{entry.narrative || entry.result}</span>
+            </div>
+          );
+        }
+        return null;
+      });
     }
-    
-    // Fallback to legacy string entries
-    return logEntries.map((entry, index) => (
-      <div
-        key={index}
-        className={`${styles.logEntry} ${index === logEntries.length - 1 ? styles.latest : ''}`}
-      >
-        {entry}
-      </div>
-    ));
+    return null;
   };
 
   return (
@@ -240,7 +199,7 @@ export function BattleLog({
             <span className={styles.filterLabel}>Filter:</span>
             <select 
               value={eventTypeFilter} 
-              onChange={(e) => setEventTypeFilter(e.target.value as LogEventType | 'ALL')}
+              onChange={(e) => setEventTypeFilter(e.target.value as LogEntryType | 'ALL')}
               className={styles.filterSelect}
             >
               <option value="ALL">All Events</option>

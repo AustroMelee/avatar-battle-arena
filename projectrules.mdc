@@ -25,6 +25,13 @@
 
 > **3. For best coding practices, always refer to the `cursorcontext` file in addition to this file.**
 > The `cursorcontext` file contains additional guidance and rules that must be followed for all code contributions.
+
+## Linting & Auto-fix Policy
+- The canonical lint command is `npm run lint:fix` (see package.json scripts).
+- All contributors must run this before opening a PR.
+- CI and pre-commit hooks enforce linting and auto-fix.
+- No PR may be merged with lint errors.
+
 description:
 globs:
 alwaysApply: false

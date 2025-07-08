@@ -51,6 +51,10 @@ npm run lint
 npm run build
 ```
 
+## Lint & Auto-fix
+
+Run `npm run lint:fix` to apply ESLint auto-fixes. The CI workflow rejects commits with any remaining lint errors.
+
 ## 🏗️ **Architecture**
 
 ### **Core Systems**

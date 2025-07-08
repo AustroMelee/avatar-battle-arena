@@ -220,6 +220,55 @@ graph TD
 | --highlight-color       | #F59E0B                 | Highlights, buttons, accents |
 | --spacing-medium        | 16px                    | Medium gaps, padding         |
 
+### 6.4. Battle Log View Modes & Dropdown
+- **Log View Dropdown:** The battle log UI now features a persistent dropdown at the top, allowing instant toggling between multiple log view modes.
+- **Modes:**
+  - **[DEV] Grouped by Turn – Full battle transcript:** Shows all log entries grouped and ordered by turn, with headers for each turn. For developers and testers.
+  - **[DEV] Latest Turn Only – Just current turn:** Shows only the most recent turn's entries. For rapid debugging and step-by-step analysis.
+  - **[DEV] All Entries (Raw) – Unfiltered log:** Shows every log entry in order, with no grouping. For log system debugging.
+  - **[PUBLIC] Story View – For players/spectators:** (Currently same as grouped, but intended for user-facing release. Only this mode is shown in production.)
+- **Dropdown Placement:** The dropdown is always rendered at the very top of the log area, before any log content, and is never hidden or delayed.
+- **Educational Labels:** Each dropdown option includes a one-line summary for clarity. [DEV] modes are only visible in development; [PUBLIC] is the only option in production.
+- **Rationale:** This design ensures maximum clarity for both developers and users, prevents UI drift, and makes the tool self-explanatory.
+
+### 6.5. Log UI Update Best Practices & File Map
+- **When updating log text, styles, or buttons, follow these best practices:**
+  1. **Log Entry Text:**
+     - Update log generation helpers for text/narrative changes:
+       - `src/features/battle-simulation/services/utils/mechanicLogUtils.ts` (logStory, logDialogue, logTechnical, logSystem)
+     - For narrative templates or pools, see:
+       - `src/features/battle-simulation/services/narrative/` (various files)
+  2. **Log Entry Styles:**
+     - For minimal log UI: update inline styles in:
+       - `src/features/battle-simulation/components/UnifiedBattleLog/DialogueLogEntry.tsx`
+       - `src/features/battle-simulation/components/UnifiedBattleLog/NarrativeLogEntry.tsx`
+       - `src/features/battle-simulation/components/UnifiedBattleLog/TechnicalLogEntry.tsx`
+     - For advanced or themed styles, update CSS modules in the same directory or global variables in `src/styles/variables.css`.
+  3. **Log View Dropdown:**
+     - Update dropdown logic, options, and placement in:
+       - `src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx`
+     - For mode types, see:
+       - `src/features/battle-simulation/types/logViewModes.ts`
+  4. **Log-Related Buttons (Copy, Filter, etc.):**
+     - Update or add log action buttons in:
+       - `src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx`
+       - (Or in a dedicated button component if refactored)
+  5. **Checklist for Log UI Updates:**
+     - [ ] Update log text in helpers/templates as needed
+     - [ ] Update styles in log entry components or CSS modules
+     - [ ] Update dropdown options/labels and logic
+     - [ ] Update/add log action buttons
+     - [ ] Update SYSTEM ARCHITECTURE.MD and ALL_FILES_INDEX.md to reflect changes
+     - [ ] Run and visually verify all log modes (DEV and PUBLIC)
+
+- **File Map for Log UI:**
+  - Log text: `mechanicLogUtils.ts`, narrative pools/templates
+  - Log styles: `DialogueLogEntry.tsx`, `NarrativeLogEntry.tsx`, `TechnicalLogEntry.tsx`, `variables.css`
+  - Dropdown: `UnifiedBattleLog.tsx`, `logViewModes.ts`
+  - Buttons: `UnifiedBattleLog.tsx` (or subcomponents)
+
+- **Policy:** All log UI changes must be reflected in this document and in ALL_FILES_INDEX.md to prevent drift.
+
 ---
 
 ## 7. Folder & File Overview
@@ -338,6 +387,41 @@ Adding a new character is a data-only operation. You do not need to modify any c
     - Open `src/features/character-selection/data/characterData.ts`.
     - Add the new move's `id` to the `abilities` array of any character who should use it.
 
+### How to Ensure Dynamic Fighter Names in the Simulation UI (No Hardcoding)
+
+**Goal:** The simulation UI must always display the actual character names (e.g., "Aang" and "Azula") instead of hardcoded labels like "Fighter 1" and "Fighter 2". This supports plug-and-play extensibility for any future characters.
+
+#### Where Names Are Rendered
+- **UnifiedBattleLog.tsx**: The main battle log UI. Renders all log entries and passes participant names to log entry components.
+- **DialogueLogEntry.tsx**: Renders individual dialogue lines, displaying the `actor` prop as the speaker's name.
+
+#### How Participants Are Passed
+- The simulation state (`BattleState.participants`) always contains the two current fighters as `BattleCharacter` objects, each with a `name` property.
+- The `UnifiedBattleLog` component receives a `participants` prop (an array of two `BattleCharacter`s) and uses their `.name` fields for all log rendering.
+- All log and dialogue rendering (including `SingleLogEntry`, `TurnGroup`, and `renderNarrativeTab` in `UnifiedBattleLog.tsx`) must use these dynamic names, never hardcoded labels.
+
+#### How to Extend or Change for New Characters
+- To add new characters, simply add them to the registry in `characterData.ts` and ensure their names are set correctly.
+- The UI will automatically display the correct names for any selected participants, with no code changes required.
+- All log rendering will use the selected characters' names, supporting true plug-and-play extensibility.
+
+#### Relevant Files and Types
+- `src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx`
+- `src/features/battle-simulation/components/UnifiedBattleLog/DialogueLogEntry.tsx`
+- `src/features/character-selection/data/characterData.ts`
+- `BattleCharacter` type (see `types/index.ts`)
+- `BattleState` type (see `types/index.ts`)
+
+#### Contributor Checklist: Dynamic Fighter Name Display
+- [ ] Never hardcode participant labels (e.g., "Fighter 1", "Fighter 2") in any UI or log component.
+- [ ] Always use the `.name` property from the `BattleCharacter` objects in the simulation state.
+- [ ] When adding new log or dialogue UI, ensure the actor/speaker is set dynamically from the participant data.
+- [ ] When adding new characters, confirm their names are set in the registry and appear correctly in the UI.
+- [ ] When updating log UI, review all usages of actor/speaker labels for hardcoded values and refactor as needed.
+- [ ] Reference this section in PRs or code reviews when making changes to log or participant display logic.
+
+> **Policy:** All log and dialogue rendering must use the real character names from the simulation state. Hardcoded labels are forbidden. This ensures full plug-and-play compliance and future extensibility.
+
 ---
 
 ## 10. Core Policies
@@ -425,6 +509,9 @@ Adding a new character is a data-only operation. You do not need to modify any c
 - **12.1. Testing Strategy:** Includes unit, integration, and end-to-end tests.
 - **12.2. CI/CD and Deployment:** Automated pipeline for testing, building, and deploying.
 
+### Lint & Auto-fix
+Run `npm run lint:fix` to apply ESLint auto-fixes. The CI workflow rejects commits with any remaining lint errors. This command is enforced in package.json scripts, developer docs, and CI configuration.
+
 ---
 
 ## 13. Onboarding/Quick Start
@@ -492,3 +579,40 @@ Adding a new character is a data-only operation. You do not need to modify any c
   - [ ] Superseded file is live and covered by tests
   - [ ] Changelog/GitHub issue updated
   - [ ] Team notified
+
+## Log Type System (2025 Update)
+
+### LogEntryType
+All log entries now have an explicit `type` field:
+
+- `dialogue` — In-character speech, taunts, or dialogue. Use `logDialogue`.
+- `mechanics` — Technical/mechanical outcomes, system events, or developer logs. Use `logTechnical`.
+- `narrative` — Pure narrative, story-driven lines, or scene-setting. Use `logStory`.
+- `system` — System-level messages, out-of-band notifications. Use `logSystem`.
+
+### Log Creation Rules
+- Always use the correct log generator for the intent:
+  - Character speech: `logDialogue({ ... })`
+  - Mechanics/results: `logTechnical({ ... })`
+  - Narrative/story: `logStory({ ... })`
+  - System message: `logSystem({ ... })`
+- Never create a log entry without a `type`.
+- When loading legacy logs, use the `inferLogType(log)` helper to assign a type if missing.
+
+### Visual Distinction in UI
+- **Dialogue:** Speech bubble, quotes, speaker face, 💬 icon
+- **Mechanics:** Gear/sword icon, flat box, ⚙️ icon
+- **Narrative:** Italic, “storybook” style, NarrativeBubble
+- **System:** Subtle, out-of-band message, 🖥️ icon
+
+### Example
+```ts
+logDialogue({ turn, actor: 'Azula', text: 'You cannot win, Avatar!' });
+logTechnical({ turn, actor: 'System', action: 'Chi Drain', result: 'Azula loses 10 chi.' });
+logStory({ turn, actor: 'Narrator', narrative: 'The arena trembles as the battle intensifies.' });
+logSystem({ turn, actor: 'System', message: 'Battle paused for player input.' });
+```
+
+- All log types are enforced by TypeScript and reviewed in code review.
+- See `src/features/battle-simulation/services/utils/mechanicLogUtils.ts` for implementation.
+- **Log View Modes:** The UI supports multiple log view modes (see Section 6.4), with clear separation between developer and public-facing options. The dropdown is always visible for devs, and only [PUBLIC] mode is shown to users in production.
