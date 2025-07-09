@@ -32,12 +32,11 @@ export interface DisruptionWindowState {
  * Checks if a disruption window can be opened for a character.
  */
 export function canOpenDisruptionWindow(
-  _state: BattleState,
-  character: BattleCharacter,
-  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  state: BattleState,
+  character: BattleCharacter
 ): boolean {
   const flags = character.flags as BattleCharacterFlags;
-  if (flags?.disruptionWindowCooldown !== undefined && _state.turn - (flags.disruptionWindowCooldown ?? 0) < _config.cooldown) {
+  if (flags?.disruptionWindowCooldown !== undefined && state.turn - (flags.disruptionWindowCooldown ?? 0) < DEFAULT_DISRUPTION_WINDOW_CONFIG.cooldown) {
     return false;
   }
   // Example: open window if stability < 20 or after a failed defense
@@ -48,16 +47,15 @@ export function canOpenDisruptionWindow(
  * Opens a disruption window for a character.
  */
 export function openDisruptionWindow(
-  _state: BattleState,
-  character: BattleCharacter,
-  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  state: BattleState,
+  character: BattleCharacter
 ): void {
   const flags = character.flags as BattleCharacterFlags;
   character.flags = {
     ...flags,
     disruptionWindowActive: true,
-    disruptionWindowOpenedTurn: _state.turn,
-    disruptionWindowCooldown: _state.turn,
+    disruptionWindowOpenedTurn: state.turn,
+    disruptionWindowCooldown: state.turn,
   };
 }
 
@@ -68,10 +66,9 @@ export function resolveDisruptionWindowWithLog(
   _state: BattleState,
   character: BattleCharacter,
   turn: number,
-  success: boolean,
-  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  success: boolean
 ) {
-  resolveDisruptionWindow(_state, character, success, _config);
+  resolveDisruptionWindow(_state, character, success);
   const logEntry = createMechanicLogEntry({
     turn,
     mechanic: 'Disruption Window Resolved',
@@ -89,8 +86,7 @@ export function resolveDisruptionWindowWithLog(
 export function resolveDisruptionWindow(
   _state: BattleState,
   character: BattleCharacter,
-  success: boolean,
-  _config: DisruptionWindowConfig = DEFAULT_DISRUPTION_WINDOW_CONFIG
+  success: boolean
 ): void {
   const flags = character.flags as BattleCharacterFlags;
   if (success) {

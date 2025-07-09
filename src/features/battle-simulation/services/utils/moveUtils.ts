@@ -2,45 +2,10 @@
 // CONTEXT: Move Utilities
 // RESPONSIBILITY: The SINGLE SOURCE OF TRUTH for determining which moves a character can legally use in a turn.
 
-import { Location } from '@/common/types';
 import { BattleCharacter } from '../../types';
 import { MetaState } from '../ai/metaState';
-import { IDENTITY_PROFILES } from '../../data/identities';
 // import { createMechanicLogEntry } from './mechanicLogUtils';
 import type { Move } from '../../types/move.types';
-
-/**
- * @description Gets the dynamic collateral tolerance for a character based on their mental state and the location.
- * This is the core "conscience check" for the AI.
- * @param {BattleCharacter} character - The character whose tolerance to check.
- * @param {Location} location - The battle location.
- * @returns {number} The dynamic tolerance level (0-3).
- */
-function getDynamicCollateralTolerance(character: BattleCharacter, location: Location): number {
-  const profile = IDENTITY_PROFILES[character.name];
-  const tolerance = location.collateralTolerance || 2; // Default to moderate tolerance
-
-  // --- AANG'S LOGIC ---
-  if (profile?.moralBoundaries === 'non-lethal') {
-    // Aang is always careful, but desperation can make him bend the rules.
-    const desperationBonus = character.mentalState.activeStates.includes('enraged') ? 1 : 0;
-    return Math.min(tolerance, 1 + desperationBonus);
-  }
-
-  // --- AZULA'S LOGIC (IRREVERSIBLE) ---
-  if (character.name === 'Azula') {
-    // Once her composure breaks, it NEVER fully recovers in this battle.
-    if (character.mentalThresholdsCrossed.broken) {
-      return 3; // She will burn it all down. All moves are available.
-    }
-    if (character.mentalThresholdsCrossed.unhinged) {
-      // She no longer cares about the location's tolerance. Her own limit is now higher.
-      return 2; // Can use moderately destructive moves
-    }
-  }
-
-  return tolerance;
-}
 
 /**
  * Checks if a character has enough resources for a move.
@@ -107,8 +72,7 @@ function areFinisherConditionsMet(ability: Move, attacker: BattleCharacter, targ
  */
 export function getAvailableMoves(
   character: BattleCharacter,
-  enemy: BattleCharacter,
-  _location: Location, // Placeholder for future environmental checks
+  enemy: BattleCharacter
 ): Move[] {
   const available = character.abilities.filter((move: Move) => {
     if (!hasEnoughResources(move, character)) return false;
@@ -136,10 +100,9 @@ export function getAvailableMoves(
  * @param {BattleCharacter} character - The character whose moves to check.
  * @param {MetaState} meta - The current meta-state for hard gating.
  * @param {Location} location - The battle location for collateral damage checks.
- * @param {number} turn - The current turn number.
  * @returns {Move[]} The available moves.
  */
-export function getAvailableMovesOld(character: BattleCharacter, meta: MetaState, location: Location, _turn: number): Move[] {
+export function getAvailableMovesOld(character: BattleCharacter, meta: MetaState): Move[] {
   let moves = character.abilities.filter((ability: Move) => {
     // Check cooldown using the cooldown object system
     if (character.cooldowns[ability.name] && character.cooldowns[ability.name] > 0) {
@@ -159,10 +122,10 @@ export function getAvailableMovesOld(character: BattleCharacter, meta: MetaState
     if (character.resources.chi < chiCost) return false;
     
     // NEW: Check collateral damage tolerance
-    const currentTolerance = getDynamicCollateralTolerance(character, location);
-    if (ability.collateralDamage && ability.collateralDamage > currentTolerance) {
-      return false; // Move is too destructive for current tolerance
-    }
+    // const currentTolerance = getDynamicCollateralTolerance(character, location);
+    // if (ability.collateralDamage && ability.collateralDamage > currentTolerance) {
+    //   return false; // Move is too destructive for current tolerance
+    // }
     
     return true;
   });

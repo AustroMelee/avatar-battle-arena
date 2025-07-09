@@ -34,20 +34,19 @@ export function getDamageIntensity(damage: number, maxHealth: number): 'glancing
  */
 export function getContextualMoveDescription(
   character: string,
-  context: NarrativeContext,
-  baseMove: string
+  context: NarrativeContext
 ): string {
   const intensity = getDamageIntensity(context.damage, context.maxHealth);
   
   // Character-specific contextual descriptions
   if (character === 'Azula') {
-    return getAzulaContextualDescription(context, intensity, baseMove);
+    return getAzulaContextualDescription(context, intensity);
   } else if (character === 'Aang') {
-    return getAangContextualDescription(context, intensity, baseMove);
+    return getAangContextualDescription(context, intensity);
   }
   
   // Generic contextual descriptions
-  return getGenericContextualDescription(context, intensity, baseMove);
+  return getGenericContextualDescription(context, intensity);
 }
 
 /**
@@ -55,8 +54,7 @@ export function getContextualMoveDescription(
  */
 function getAzulaContextualDescription(
   context: NarrativeContext,
-  intensity: 'glancing' | 'solid' | 'devastating',
-  _baseMove: string
+  intensity: 'glancing' | 'solid' | 'devastating'
 ): string {
   if (context.isMiss) {
     const missReasons = [
@@ -100,8 +98,7 @@ function getAzulaContextualDescription(
  */
 function getAangContextualDescription(
   context: NarrativeContext,
-  intensity: 'glancing' | 'solid' | 'devastating',
-  _baseMove: string
+  intensity: 'glancing' | 'solid' | 'devastating'
 ): string {
   if (context.isMiss) {
     const missReasons = [
@@ -145,8 +142,7 @@ function getAangContextualDescription(
  */
 function getGenericContextualDescription(
   context: NarrativeContext,
-  intensity: 'glancing' | 'solid' | 'devastating',
-  _baseMove: string
+  intensity: 'glancing' | 'solid' | 'devastating'
 ): string {
   if (context.isMiss) {
     const missReasons = [

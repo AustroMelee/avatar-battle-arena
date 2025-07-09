@@ -51,8 +51,7 @@ export class EnhancedTemplateGenerator {
   generateContextualNarrative(
     character: string,
     context: NarrativeContext,
-    mechanic: NarrativeMechanic,
-    _baseMove: string
+    mechanic: NarrativeMechanic
   ): string {
     // Determine the narrative state based on context
     // const narrativeState = this.narrativePoolManager.determineNarrativeState(character, {
@@ -83,8 +82,7 @@ export class EnhancedTemplateGenerator {
    */
   generateStateAnnouncement(
     character: string,
-    stateType: 'breaking_point' | 'escalation' | 'desperation',
-    _context: NarrativeContext
+    stateType: 'breaking_point' | 'escalation' | 'desperation'
   ): string | null {
     switch (stateType) {
       case 'breaking_point': {

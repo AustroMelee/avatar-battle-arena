@@ -96,7 +96,7 @@ export const pushLog = (state: { entries: BattleLogEntry[]; seen: Set<string> },
 /**
  * Asserts a condition, throws if false.
  */
-function assert(condition: any, message: string): asserts condition {
+function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
@@ -126,7 +126,8 @@ export function logDialogue({ turn, actor, text, target }: { turn: number; actor
  */
 export function logStory({ turn, actor, narrative, target }: { turn: number; actor?: 'System' | 'Narrator'; narrative: string; target?: string }): import('../../types').NonDialogueLogEntry | null {
   assert(Number.isFinite(turn), 'log turn missing');
-  assert(typeof narrative === 'string' && narrative.trim().length > 0, 'log text empty');
+  // Enforce: narrative must be a real, context-aware line (never 'No narrative' or 'No result')
+  assert(typeof narrative === 'string' && narrative.trim().length > 0 && narrative !== 'No narrative' && narrative !== 'No result', 'log text empty or fallback');
   if (actor && actor !== 'System' && actor !== 'Narrator') throw new Error('Non-dialogue log cannot have actor other than System or Narrator');
   const cleanNarrative = antiRepetition(narrative.trim());
   return {
@@ -135,9 +136,9 @@ export function logStory({ turn, actor, narrative, target }: { turn: number; act
     actor: actor,
     type: 'narrative',
     action: 'Story',
-    result: nes((cleanNarrative && cleanNarrative.length ? cleanNarrative : 'No result')),
+    result: nes(cleanNarrative),
     target,
-    narrative: nes((cleanNarrative && cleanNarrative.length ? cleanNarrative : 'No narrative')),
+    narrative: nes(cleanNarrative),
     timestamp: Date.now(),
     details: {},
   };
@@ -167,14 +168,13 @@ export function logMechanics(params: { turn: number; text: string }): NonDialogu
  * Creates a system-level log entry (type: 'system').
  * Only accepts actor if 'System' or 'Narrator'.
  */
-export function logSystem({ turn, actor, message, target }: { turn: number; actor: 'System' | 'Narrator'; message: string; target?: string }): import('../../types').NonDialogueLogEntry {
+export function logSystem({ turn, message, target }: { turn: number; message: string; target?: string }): import('../../types').NonDialogueLogEntry {
   assert(Number.isFinite(turn), 'log turn missing');
   assert(typeof message === 'string' && message.trim().length > 0, 'log text empty');
-  if (actor !== 'System' && actor !== 'Narrator') throw new Error('Non-dialogue log cannot have actor other than System or Narrator');
+  // Remove actor from logSystem return value per linter rule
   return {
     id: generateUniqueLogId('system'),
-    turn,
-    actor: actor,
+    turn: turn,
     type: 'system',
     action: 'System',
     result: nes((message && message.length ? message : 'No result')),
@@ -183,7 +183,7 @@ export function logSystem({ turn, actor, message, target }: { turn: number; acto
     timestamp: Date.now(),
     details: {},
   };
-} 
+}
 
 /**
  * maybeLogSystem: Only emits a system log if the message is non-empty/meaningful.
@@ -194,7 +194,6 @@ export function maybeLogSystem(turn: number, message?: string): NonDialogueLogEn
   if (!trimmed) return null;
   return logSystem({
     turn,
-    actor: 'System',
     message: trimmed
   });
 }
@@ -202,16 +201,16 @@ export function maybeLogSystem(turn: number, message?: string): NonDialogueLogEn
 /**
  * Infers the log type for legacy log entries that may not have a type field.
  */
-export function inferLogType(log: any): LogEntryType {
-  if (log.type) return log.type;
-  if (typeof log.text === 'string' && /^(["“”])/.test(log.text)) return 'dialogue';
-  if (typeof log.text === 'string' && (log.text.includes('successfully') || log.text.includes('fails'))) return 'mechanics';
-  if (typeof log.text === 'string' && (log.text.startsWith('The ') || /^\w+ stands/.test(log.text))) return 'narrative';
+export function inferLogType(log: unknown): LogEntryType {
+  if (log && typeof log === 'object' && 'type' in log && (log as NonDialogueLogEntry).type) return (log as NonDialogueLogEntry).type;
+  if (typeof log === 'string' && /^(["\u201c\u201d])/.test(log)) return 'dialogue';
+  if (typeof log === 'string' && (log.includes('successfully') || log.includes('fails'))) return 'mechanics';
+  if (typeof log === 'string' && (log.startsWith('The ') || /^\w+ stands/.test(log))) return 'narrative';
   return 'mechanics'; // default fallback
-} 
+}
 
 function safeNes(val: string, fallback: string): ReturnType<typeof nes> {
   const v = val && val.length ? val : fallback;
   // Runtime guarantee: v is non-empty
-  return nes(v as any);
+  return nes(v as unknown as string);
 } 

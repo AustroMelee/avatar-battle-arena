@@ -15,7 +15,7 @@ import { CombatMechanic } from '../narrative.types';
  */
 export function moveNameToMechanicKey(moveName: string): CombatMechanic {
   if (!moveName || typeof moveName !== 'string') {
-    return 'DefaultMechanic' as any; // Fallback for safety
+    return 'DefaultMechanic' as unknown as CombatMechanic; // Fallback for safety
   }
 
   const mechanicKey = moveName
@@ -26,5 +26,5 @@ export function moveNameToMechanicKey(moveName: string): CombatMechanic {
   // The 'as any' cast is a pragmatic choice. We assume any move name
   // can be a valid mechanic key. A more advanced system might validate
   // this against the CombatMechanic type, but this is robust for now.
-  return mechanicKey as any;
+  return mechanicKey as unknown as CombatMechanic;
 } 

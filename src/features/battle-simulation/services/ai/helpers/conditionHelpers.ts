@@ -145,7 +145,7 @@ export function isLosing(self: BattleCharacter, opp: BattleCharacter): boolean {
 export function getAvailableMovesSimple(self: BattleCharacter, location?: Location): Move[] {
   if (location) {
     // Use the main getAvailableMoves function with collateral damage filtering
-    return getAvailableMovesWithLocation(self, self, location);
+    return getAvailableMovesWithLocation(self, self);
   }
   // Fallback to basic filtering if no location provided
   return self.abilities.filter(ability => 

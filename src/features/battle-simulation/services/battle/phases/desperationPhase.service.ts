@@ -49,15 +49,7 @@ export async function processDesperationPhase(state: BattleState): Promise<Battl
     getNarrativeService().updateTurn(state.turn);
     
     // Generate state announcement using enhanced narrative system
-    const desperationAnnouncement = await getNarrativeService().generateStateAnnouncement(
-      attacker.name,
-      'desperation',
-      {
-        turnNumber: state.turn,
-        escalationCount: 0,
-        desperationCount: 0
-      }
-    );
+    const desperationAnnouncement = await getNarrativeService().generateStateAnnouncement();
     
     // Add state announcement to the log if generated
     if (desperationAnnouncement) {

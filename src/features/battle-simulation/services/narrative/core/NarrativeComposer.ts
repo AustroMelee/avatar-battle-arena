@@ -1,10 +1,9 @@
 // CONTEXT: Narrative Composer
 // RESPONSIBILITY: Compose narrative lines from fragments and components
 
-import type { NarrativeContext, DamageOutcome, NarrativeMemoryEntry } from '../types/NarrativeTypes';
+import type { DamageOutcome, NarrativeMemoryEntry } from '../types/NarrativeTypes';
 import { CharacterNarrativeRouter } from './CharacterNarrativeRouter';
 import { NarrativeVariantsService } from './NarrativeVariantsService';
-import { PoolManager } from './pools/PoolManager';
 
 /**
  * @description Service responsible for composing narrative lines from various components
@@ -12,16 +11,13 @@ import { PoolManager } from './pools/PoolManager';
 export class NarrativeComposer {
   private characterRouter: CharacterNarrativeRouter;
   private variantsService: NarrativeVariantsService;
-  private poolManager: PoolManager;
 
   constructor(
     characterRouter: CharacterNarrativeRouter,
-    variantsService: NarrativeVariantsService,
-    poolManager: PoolManager
+    variantsService: NarrativeVariantsService
   ) {
     this.characterRouter = characterRouter;
     this.variantsService = variantsService;
-    this.poolManager = poolManager;
   }
 
   /**
@@ -31,12 +27,11 @@ export class NarrativeComposer {
   composeTechnicalNarrative(
     characterName: string,
     damageOutcome: DamageOutcome,
-    _context: NarrativeContext,
     moveName: string,
     memory: NarrativeMemoryEntry[]
   ): string | string[] {
     // Check for recent memory (last 3 turns)
-    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type) && _context.turnNumber - e.turn <= 3);
+    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type));
     let memoryLine = '';
     if (recent.length > 0) {
       const last = recent[recent.length - 1];
@@ -77,7 +72,6 @@ export class NarrativeComposer {
   composeEmotionalNarrative(
     characterName: string,
     damageOutcome: DamageOutcome,
-    _context: NarrativeContext,
     moveName: string,
     emotionalState: string,
     shouldNarrateEmotion: boolean,
@@ -85,7 +79,7 @@ export class NarrativeComposer {
     memory: NarrativeMemoryEntry[]
   ): string | string[] {
     // Check for recent memory (last 3 turns)
-    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type) && _context.turnNumber - e.turn <= 3);
+    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type));
     let memoryLine = '';
     if (recent.length > 0) {
       const last = recent[recent.length - 1];
@@ -229,12 +223,11 @@ export class NarrativeComposer {
   composeEnvironmentalNarrative(
     characterName: string,
     damageOutcome: DamageOutcome,
-    _context: NarrativeContext,
     moveName: string,
     memory: NarrativeMemoryEntry[]
   ): string | string[] {
     // Check for recent memory (last 3 turns)
-    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type) && _context.turnNumber - e.turn <= 3);
+    const recent = memory.filter(e => ['dodge','critical_hit','reversal','one_off_moment'].includes(e.type));
     let memoryLine = '';
     if (recent.length > 0) {
       const last = recent[recent.length - 1];
@@ -243,7 +236,7 @@ export class NarrativeComposer {
     // Get move-specific flavor if available (directly from router)
     const moveFlavor = this.characterRouter.getMoveFlavor(characterName, moveName, damageOutcome);
     if (moveFlavor) {
-      const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
+      const environmentalContext = this.variantsService.getEnvironmentalContext(0);
       const base = `${moveFlavor} ${environmentalContext}`;
       return memoryLine ? [memoryLine, base] : base;
     }
@@ -254,76 +247,8 @@ export class NarrativeComposer {
       : this.characterRouter.getHitLine(characterName);
     
     // Add environmental context
-    const environmentalContext = this.variantsService.getEnvironmentalContext(_context.turnNumber);
+    const environmentalContext = this.variantsService.getEnvironmentalContext(0);
     const base = `${baseLine} ${environmentalContext}`;
     return memoryLine ? [memoryLine, base] : base;
   }
-
-  /**
-   * @description Compose victory narrative with enhanced variety
-   */
-  composeVictoryNarrative(winnerName: string, loserName: string): string {
-    const victoryLine = this.characterRouter.getVictoryLine(winnerName);
-    const defeatLine = this.characterRouter.getDefeatLine(loserName);
-    
-    // Add environmental context to victory
-    const environmentalContext = this.variantsService.getVictoryEnvironmentalContext();
-    
-    return `${victoryLine} ${defeatLine} ${environmentalContext}`;
-  }
-
-  /**
-   * @description Compose desperation narrative with anti-repetition
-   */
-  composeDesperationNarrative(characterName: string, _context: NarrativeContext): string {
-    const desperationLine = this.characterRouter.getDefeatLine(characterName);
-    const stateAnnouncement = this.poolManager.getStateAnnouncementNarrative('desperation');
-    
-    return `${desperationLine} ${stateAnnouncement}`;
-  }
-
-  /**
-   * @description Compose escalation narrative
-   */
-  composeEscalationNarrative(characterName: string, _context: NarrativeContext): string {
-    const escalationLine = this.characterRouter.getEscalationLine(characterName, _context);
-    return escalationLine || '';
-  }
-
-  /**
-   * @description Get character-specific emotional state description with anti-repetition
-   */
-  getEmotionalStateDescription(characterName: string, emotionalState: string): string {
-    if (characterName.toLowerCase().includes('aang')) {
-      switch (emotionalState) {
-        case 'desperate': return "His gentle spirit is pushed to its absolute limits.";
-        case 'pressed': return "His pacifist nature struggles against the brutal reality.";
-        case 'focused': return "The Avatar's movements become more deliberate.";
-        case 'surprised': return "The unexpected blow tests his calm.";
-        case 'alert': return "His training guides his response.";
-        case 'intense': return "His determination reaches new heights.";
-        case 'determined': return "His resolve hardens with each strike.";
-        case 'steady': return "His gentle spirit remains unbroken.";
-        case 'frustrated': return "His movements betray his inner conflict.";
-        case 'confident': return "His hope hardens into resolve.";
-        default: return "His gentle spirit remains unbroken.";
-      }
-    } else if (characterName.toLowerCase().includes('azula')) {
-      switch (emotionalState) {
-        case 'desperate': return "Her perfect facade is finally shattered.";
-        case 'pressed': return "Her control is tested by the intensity.";
-        case 'focused': return "Her precision becomes razor-sharp.";
-        case 'surprised': return "The princess's composure wavers.";
-        case 'alert': return "Her calculated approach adapts.";
-        case 'intense': return "Her control grows stronger with each exchange.";
-        case 'determined': return "Her control remains unshakeable.";
-        case 'steady': return "Her perfect facade remains unbroken.";
-        case 'frustrated': return "Her perfect facade begins to crack.";
-        case 'confident': return "Her calculated approach shows mastery.";
-        default: return "Her perfect facade remains unbroken.";
-      }
-    }
-    
-    return "";
-  }
-} 
+}

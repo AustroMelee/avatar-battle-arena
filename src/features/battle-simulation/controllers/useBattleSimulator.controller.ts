@@ -3,9 +3,10 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { BattleState, BattleLogEntry } from '../types';
-import { simulateBattle } from '../services/battleSimulator.service';
 import { SimulateBattleParams } from '../types';
 import type { BattleMetrics, CharacterMetrics, AIMetrics } from '../services/battle/analytics';
+import { createInitialBattleState, cloneBattleState } from '../services/battle/state';
+import { processTurn } from '../services/battle/processTurn';
 
 /**
  * @description Custom hook for managing battle simulation state.
@@ -35,30 +36,27 @@ export function useBattleSimulator() {
     setAnalytics(null);
     displayedNarrativeIds.current.clear();
 
-    try {
-      const result = await simulateBattle(params);
-      
-      setBattleState(result.finalState);
-      setBattleLog(result.battleLog);
-      setAnalytics(result.analytics);
-      
-      // Extract narratives from battle log
-      const newNarratives = result.battleLog
-        .filter((entry: BattleLogEntry) => entry.type === 'narrative' && !displayedNarrativeIds.current.has(entry.id))
-        .map((entry: BattleLogEntry) => ({
-          id: entry.id,
-          text: entry.narrative || entry.result,
-          turn: entry.turn
-        }));
+    let currentState = createInitialBattleState(params);
+    const maxTurns = 50;
+    let turn = 0;
 
-      newNarratives.forEach((n: { id: string; text: string | string[]; turn: number }) => displayedNarrativeIds.current.add(n.id));
-      setNarratives(prev => [...prev, ...newNarratives.map((n: { id: string; text: string | string[]; turn: number }) => typeof n.text === 'string' ? n.text : n.text.join(' '))]);
-      
-    } catch (error) {
-      console.error('Battle simulation failed:', error);
-    } finally {
-      setIsRunning(false);
+    while (!currentState.isFinished && turn < maxTurns) {
+      // Process a chunk of 3 turns per tick
+      for (let j = 0; j < 3 && !currentState.isFinished && turn < maxTurns; j++, turn++) {
+        currentState = await processTurn(currentState);
+        setBattleState(cloneBattleState(currentState));
+        setBattleLog([...currentState.battleLog]);
+        // Optionally update narratives/analytics here
+      }
+      // Yield to the browser/UI
+      await new Promise(r => setTimeout(r, 16));
     }
+
+    // Final state update
+    setBattleState(cloneBattleState(currentState));
+    setBattleLog([...currentState.battleLog]);
+    // Optionally update narratives/analytics here
+    setIsRunning(false);
   }, []);
 
   /**

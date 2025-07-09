@@ -65,6 +65,7 @@ function createBattleCharacter(char: Character): BattleCharacter {
     tacticalStalemateCounter: 0,
     lastTacticalPriority: '',
     abilities: [],
+    restrictedMoves: [],
   };
 }
 
@@ -120,7 +121,6 @@ export function buildBattleState(
 
 /** Quick helper for a mechanics/technical log entry. */
 export function techLog(text: string, turn = 1): BattleLogEntry {
-  const message: NonEmptyString = nes((text && text.length ? text : 'No result') as NonEmptyString);
   return {
     type: 'mechanics',
     turn,

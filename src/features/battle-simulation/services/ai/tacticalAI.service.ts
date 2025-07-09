@@ -5,7 +5,7 @@
 import { BattleCharacter } from '../../types';
 import { Move, getLocationType } from '../../types/move.types';
 
-export { selectTacticalMove } from './moveSelection';
+export { selectTacticalMove } from './moveSelection'; // Now strictly phase-based
 
 /**
  * @description Creates a tactical analysis for AI decision logging.

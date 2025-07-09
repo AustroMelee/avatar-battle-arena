@@ -24,6 +24,7 @@ import { scoreMovesWithContext } from './contextualMoveScoring';
 import { getAvailableMoves } from './moveUtils';
 import { assessMetaState } from './metaState';
 import { isMoveStale, isBasicMove } from './moveSelection';
+import type { PerceivedState } from '../../types/index';
 
 /**
  * @description Enhanced AI decision state that includes context and intent.
@@ -118,7 +119,7 @@ export function selectAIMove({
   intentTurnCount: number;
   turn: number;
 }) {
-  // Phase-based move restriction
+  // Strict phase-based move restriction (no flag checks)
   const isDesperationPhase = battleState.tacticalPhase === 'desperation';
   const isEscalationPhase = battleState.tacticalPhase === 'escalation';
 
@@ -134,16 +135,18 @@ export function selectAIMove({
       // Prefer finishers if available
       const finisher = filteredMoves.find(m => m.tags?.includes('finisher'));
       if (finisher) {
+        if (finisher.isBasic) throw new Error('Basic move selected in desperation phase');
         return { move: finisher, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
       }
-      // Otherwise, pick the highest-risk desperation move (fallback to baseDamage)
+      // Pick the highest-risk desperation move (by baseDamage)
       const highestRisk = filteredMoves.reduce((best, current) =>
         (current.baseDamage > best.baseDamage) ? current : best
       );
+      if (highestRisk.isBasic) throw new Error('Basic move selected in desperation phase');
       return { move: highestRisk, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
     } else {
-      // No legal moves: fallback
-      return { move: null, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
+      // No legal moves: trigger forced ending
+      return { move: null, forcedEnding: true, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
     }
   } else if (isEscalationPhase) {
     // Only allow escalation-tagged moves or aggressive (non-basic) moves
@@ -153,15 +156,18 @@ export function selectAIMove({
     if (escalationMoves.length > 0) {
       filteredMoves = escalationMoves;
     } else {
-      // No legal moves: fallback
-      return { move: null, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
+      // No legal moves: trigger forced ending
+      return { move: null, forcedEnding: true, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
     }
   }
 
   // Default: use move scoring/intent logic (not shown here)
-  // ... existing scoring/selection logic ...
   // For now, just pick the best scored move
   const bestMove = filteredMoves[0] || null;
+  // Assertion: In escalation/desperation, no basic move can be selected
+  if ((isDesperationPhase || isEscalationPhase) && bestMove && bestMove.isBasic) {
+    throw new Error('Basic move selected in escalation/desperation phase');
+  }
   return { move: bestMove, aiLog: null, newState: { context, intent, intentTurnCount, lastIntentChange: turn } };
 }
 
@@ -242,7 +248,7 @@ export function chooseMoveWithAdvancedAI(
         reason: sm.reasons.join(', '),
         abilityId: sm.move.name,
     })),
-    perceivedState: { /* ... populate this ... */ } as any,
+    perceivedState: {} as PerceivedState,
     timestamp: Date.now()
   };
 

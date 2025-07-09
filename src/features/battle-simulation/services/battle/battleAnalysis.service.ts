@@ -60,12 +60,20 @@ export function analyzeBattlePerformance(
   const desperationMoves = battleLog.filter(entry => entry.meta?.desperation).length;
   const finisherMoves = battleLog.filter(entry => entry.meta?.finisher).length;
   const climaxEvents = battleLog.filter(entry => entry.meta?.climax).length;
-  const patternAdaptations = battleLog.filter(entry => entry.meta?.aiRule?.includes('Anti-pattern')).length;
+  const patternAdaptations = battleLog.filter(entry => 
+    entry.meta && (
+      Array.isArray(entry.meta.aiRule)
+        ? entry.meta.aiRule.includes('Anti-pattern')
+        : typeof entry.meta.aiRule === 'string'
+          ? entry.meta.aiRule.includes('Anti-pattern')
+          : false
+    )
+  ).length;
   
   // Calculate chi efficiency
   const totalChiSpent = battleLog
-    .filter(entry => entry.meta?.resourceCost)
-    .reduce((sum, entry) => sum + (entry.meta?.resourceCost || 0), 0);
+    .filter(entry => typeof entry.meta?.resourceCost === 'number')
+    .reduce((sum, entry) => sum + (entry.meta?.resourceCost as number), 0);
   const chiEfficiency = totalChiSpent > 0 ? totalDamage / totalChiSpent : 0;
   
   // Determine victory method

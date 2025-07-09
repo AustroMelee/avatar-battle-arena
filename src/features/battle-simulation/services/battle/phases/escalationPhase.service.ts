@@ -72,13 +72,11 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
 
   let shouldEscalate = false;
   let reason = '';
-  let escalationType: 'stalemate' | 'repetition' = 'stalemate';
 
   // 1. Stalemate Detection (based on real-time analytics)
   if (state.turn > STALEMATE_TURN_THRESHOLD && state.analytics.averageDamagePerTurn < STALEMATE_DAMAGE_THRESHOLD) {
     shouldEscalate = true;
     reason = `Stalemate detected: only ${state.analytics.averageDamagePerTurn.toFixed(1)} avg damage/turn.`;
-    escalationType = 'stalemate';
     console.log(`DEBUG: T${state.turn} ${attacker.name} ESCALATION: ${reason}`);
   }
 
@@ -90,7 +88,6 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
       if (lastThreeMoves.every(move => move === lastThreeMoves[0])) {
         shouldEscalate = true;
         reason = `Repetitive move pattern detected: used '${lastThreeMoves[0]}' ${REPETITIVE_LOOP_THRESHOLD} times in a row.`;
-        escalationType = 'repetition';
         console.log(`DEBUG: T${state.turn} ${attacker.name} ESCALATION: ${reason}`);
       }
     }
@@ -108,7 +105,7 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
       effect: line,
       reason: '', // Do not append reason/parenthetical to player log
     });
-    const { newState, logEntry } = forcePatternEscalation(state, attacker, escalationType);
+    const { newState, logEntry } = forcePatternEscalation(state, attacker);
     if (newState.analytics) {
         newState.analytics.patternAdaptations = (newState.analytics.patternAdaptations || 0) + 1;
         console.log(`DEBUG: Analytics updated - Pattern Adaptations: ${newState.analytics.patternAdaptations}`);

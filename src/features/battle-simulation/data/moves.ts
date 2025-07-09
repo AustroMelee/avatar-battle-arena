@@ -38,6 +38,7 @@ export const ALL_MOVES: Move[] = [
     critMultiplier: 3,
     description: 'Aang delivers a quick, focused physical blow.',
     punishIfCharging: true,
+    tags: ['basic']
   },
   {
     id: 'aang_air_glide',
@@ -103,9 +104,9 @@ export const ALL_MOVES: Move[] = [
   {
     id: 'aang_charged_tornado',
     name: 'Charged Air Tornado',
-    type: 'attack',
+    type: 'charge',
     chiCost: 8,
-    baseDamage: 99,
+    baseDamage: 0,
     cooldown: 8,
     maxUses: 1,
     isChargeUp: true,
@@ -118,13 +119,29 @@ export const ALL_MOVES: Move[] = [
     description: 'Aang channels immense airbending power into a devastating tornado. Only usable when opponent is vulnerable.',
     collateralDamage: 3,
     collateralDamageNarrative: "The force of the cyclone rips cobblestones from the ground and shatters the facades of nearby buildings.",
+    tags: ['finisher', 'escalation', 'lastResort'],
+    finisherCondition: { type: 'custom', isAvailable: (ctx) => ctx.selfHP > 0 && ctx.selfPosition === 'charging' && ctx.selfHP <= ctx.selfMaxHP && ctx.selfHP > 0 },
+    releaseMoveId: 'aang_charged_tornado_release'
+  },
+  {
+    id: 'aang_charged_tornado_release',
+    name: 'Air Tornado Blast',
+    type: 'attack',
+    chiCost: 0,
+    baseDamage: 35,
+    cooldown: 0,
+    maxUses: 1,
+    description: 'Aang unleashes the full force of his charged tornado in a devastating blast.',
+    tags: ['finisher', 'escalation', 'lastResort'],
+    collateralDamage: 3,
+    collateralDamageNarrative: 'The tornado blast devastates the battlefield.'
   },
   {
     id: 'aang_last_breath_cyclone',
     name: 'Last Breath Cyclone',
     type: 'attack',
     chiCost: 10,
-    baseDamage: 25,
+    baseDamage: 36, // High damage for finisher
     cooldown: 0,
     maxUses: 1,
     isFinisher: true,
@@ -132,6 +149,7 @@ export const ALL_MOVES: Move[] = [
     finisherCondition: { type: 'hp_below', percent: 20 },
     description: 'Aang channels every last ounce of strength into a world-shaking cyclone. A battle-ending move.',
     collateralDamage: 3,
+    tags: ['finisher', 'lastResort']
   },
   {
     id: 'aang_flowing_evasion',
@@ -156,6 +174,7 @@ export const ALL_MOVES: Move[] = [
     critMultiplier: 2.5,
     description: 'Azula delivers a precise, calculated strike.',
     punishIfCharging: true,
+    tags: ['basic']
   },
   {
     id: 'azula_blue_fire',
@@ -191,9 +210,9 @@ export const ALL_MOVES: Move[] = [
   {
     id: 'azula_lightning',
     name: 'Lightning',
-    type: 'attack',
+    type: 'charge',
     chiCost: 10,
-    baseDamage: 99,
+    baseDamage: 0,
     cooldown: 10,
     maxUses: 1,
     isChargeUp: true,
@@ -203,6 +222,22 @@ export const ALL_MOVES: Move[] = [
     chargeInterruptionPenalty: 8,
     description: 'Azula channels lightning. Only usable when opponent is vulnerable.',
     collateralDamage: 2,
+    tags: ['finisher', 'escalation', 'lastResort'],
+    finisherCondition: { type: 'custom', isAvailable: (ctx) => ctx.selfHP > 0 && ctx.selfPosition === 'charging' && ctx.selfHP <= ctx.selfMaxHP && ctx.selfHP > 0 },
+    releaseMoveId: 'azula_lightning_release'
+  },
+  {
+    id: 'azula_lightning_release',
+    name: 'Lightning Strike',
+    type: 'attack',
+    chiCost: 0,
+    baseDamage: 38,
+    cooldown: 0,
+    maxUses: 1,
+    description: 'Azula unleashes a devastating lightning strike after charging.',
+    tags: ['finisher', 'escalation', 'lastResort'],
+    collateralDamage: 2,
+    collateralDamageNarrative: 'The lightning strike scorches the battlefield.'
   },
   {
     id: 'azula_fire_shield',
@@ -240,7 +275,7 @@ export const ALL_MOVES: Move[] = [
     name: 'Phoenix Inferno',
     type: 'attack',
     chiCost: 12,
-    baseDamage: 30,
+    baseDamage: 40, // High damage for finisher
     cooldown: 0,
     maxUses: 1,
     isFinisher: true,
@@ -248,5 +283,159 @@ export const ALL_MOVES: Move[] = [
     finisherCondition: { type: 'hp_below', percent: 20 },
     description: 'Azula channels all remaining energy into a devastating final attack. A battle-ending move.',
     collateralDamage: 3,
+    tags: ['finisher', 'lastResort']
   },
-]; 
+  // --- AANG: Escalation Moves ---
+  {
+    id: 'aang_whirlwind_barrage',
+    name: 'Whirlwind Barrage',
+    type: 'attack',
+    chiCost: 4,
+    baseDamage: 16,
+    cooldown: 2,
+    description: 'Aang unleashes a flurry of air strikes, overwhelming his foe with relentless speed.',
+    tags: ['escalation'],
+    appliesEffect: {
+      type: 'DEFENSE_DOWN',
+      chance: 1.0,
+      duration: 1,
+      potency: 5
+    },
+  },
+  {
+    id: 'aang_tempest_step',
+    name: 'Tempest Step',
+    type: 'evade',
+    chiCost: 3,
+    baseDamage: 0,
+    cooldown: 2,
+    description: 'Aang dodges with supernatural agility, repositioning for advantage.',
+    tags: ['escalation', 'reposition'],
+  },
+  // --- AANG: Desperation Moves ---
+  {
+    id: 'aang_razor_gale',
+    name: 'Razor Gale',
+    type: 'attack',
+    chiCost: 5,
+    baseDamage: 22,
+    cooldown: 3,
+    description: 'A desperate burst of slicing wind. If it misses, Aang’s next defense is penalized.',
+    unlockCondition: { type: 'health', threshold: 30 },
+    tags: ['desperation'],
+  },
+  {
+    id: 'aang_vault_of_air',
+    name: 'Vault of Air',
+    type: 'evade',
+    chiCost: 6,
+    baseDamage: 0,
+    cooldown: 4,
+    description: 'Aang launches himself skyward, avoiding all attacks this turn.',
+    unlockCondition: { type: 'health', threshold: 30 },
+    tags: ['desperation', 'defense'],
+  },
+  // --- AANG: Finisher/Last-Resort Moves ---
+  {
+    id: 'aang_last_breath_cyclone',
+    name: 'Last Breath Cyclone',
+    type: 'attack',
+    chiCost: 10,
+    baseDamage: 36,
+    cooldown: 0,
+    description: 'Aang’s ultimate technique—a colossal tornado unleashed with his final reserves.',
+    isFinisher: true,
+    finisherCondition: { type: 'hp_below', percent: 20 },
+    tags: ['finisher', 'last-resort'],
+  },
+  {
+    id: 'aang_avatars_resilience',
+    name: 'Avatar’s Resilience',
+    type: 'defense_buff',
+    chiCost: 0,
+    baseDamage: 0,
+    cooldown: 99,
+    description: 'In a moment of crisis, Aang channels inner peace, restoring some vitality.',
+    oncePerBattle: true,
+    tags: ['last-resort', 'recovery'],
+  },
+  // --- AZULA: Escalation Moves ---
+  {
+    id: 'azula_inferno_cascade',
+    name: 'Inferno Cascade',
+    type: 'attack',
+    chiCost: 5,
+    baseDamage: 17,
+    cooldown: 2,
+    description: 'Azula unleashes a series of controlled blue fire bursts, pressing the attack with relentless precision.',
+    tags: ['escalation'],
+    appliesEffect: {
+      type: 'DEFENSE_DOWN',
+      chance: 1.0,
+      duration: 1,
+      potency: 3
+    },
+  },
+  {
+    id: 'azula_lightning_feint',
+    name: 'Lightning Feint',
+    type: 'parry_retaliate',
+    chiCost: 6,
+    baseDamage: 6,
+    cooldown: 2,
+    description: 'Azula channels lightning but uses it as a feint, leaving her foe exposed.',
+    tags: ['escalation', 'tactical'],
+  },
+  // --- AZULA: Desperation Moves ---
+  {
+    id: 'azula_combustion_rush',
+    name: 'Combustion Rush',
+    type: 'attack',
+    chiCost: 7,
+    baseDamage: 23,
+    cooldown: 3,
+    description: 'Azula channels her remaining strength into a reckless, explosive charge.',
+    unlockCondition: { type: 'health', threshold: 30 },
+    tags: ['desperation'],
+  },
+  {
+    id: 'azula_steel_nerve',
+    name: 'Steel Nerve',
+    type: 'defense_buff',
+    chiCost: 0,
+    baseDamage: 0,
+    cooldown: 4,
+    description: 'Azula enters a trance-like focus, shrugging off status effects and restoring some composure.',
+    unlockCondition: { type: 'health', threshold: 30 },
+    tags: ['desperation', 'recovery'],
+  },
+  // --- AZULA: Finisher/Last-Resort Moves ---
+  {
+    id: 'azula_phoenix_inferno',
+    name: 'Phoenix Inferno',
+    type: 'attack',
+    chiCost: 12,
+    baseDamage: 38,
+    cooldown: 0,
+    description: 'Azula unleashes her signature, all-consuming blue fire, aiming to end the battle in a single devastating display.',
+    isFinisher: true,
+    finisherCondition: { type: 'hp_below', percent: 20 },
+    tags: ['finisher', 'last-resort'],
+  },
+  {
+    id: 'azula_cold_precision',
+    name: 'Cold Precision',
+    type: 'attack',
+    chiCost: 8,
+    baseDamage: 19,
+    cooldown: 99,
+    description: 'With absolute clarity, Azula executes a flawless, surgically precise attack.',
+    oncePerBattle: true,
+    tags: ['last-resort', 'precision'],
+  },
+];
+
+// Helper to get a move by ID
+export function getMoveById(id: string) {
+  return ALL_MOVES.find(m => m.id === id);
+} 

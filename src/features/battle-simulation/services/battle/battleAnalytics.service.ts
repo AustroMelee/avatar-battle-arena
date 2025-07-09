@@ -48,7 +48,7 @@ export function generateBattleAnalytics(state: BattleState): BattleAnalytics {
   ).length;
   const escalationEvents = state.battleLog.filter(entry => entry.type === 'mechanics' && entry.meta?.escalation).length;
   const punishOpportunities = state.battleLog.filter(entry => 
-    entry.meta?.punishDamage && entry.meta.punishDamage > 0
+    typeof entry.meta?.punishDamage === 'number' && entry.meta.punishDamage > 0
   ).length;
   
   // FIXED: Track move usage from ALL move-related log types
@@ -74,8 +74,8 @@ export function generateBattleAnalytics(state: BattleState): BattleAnalytics {
 
   // FIXED: Track chi spent from resource cost meta
   const totalChiSpent = state.battleLog
-    .filter(entry => entry.meta?.resourceCost)
-    .reduce((sum, entry) => sum + (entry.meta?.resourceCost || 0), 0);
+    .filter(entry => typeof entry.meta?.resourceCost === 'number')
+    .reduce((sum, entry) => sum + (entry.meta?.resourceCost as number), 0);
   
   const chiEfficiency = totalChiSpent > 0 ? totalDamage / totalChiSpent : 0;
 

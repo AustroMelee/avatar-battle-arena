@@ -24,7 +24,6 @@ import { selectBestTacticalMove } from '../../ai/enhancedMoveScoring';
 import { executeTacticalMove } from '../moveExecution.service';
 import { updatePatternTracking } from '../patternBreaking.service';
 import { propagateTacticalStates } from '../tacticalState.service';
-import { availableLocations } from '../../../../location-selection/data/locationData';
 import { resolveReversal } from '../reversalMechanic.service';
 import { createMechanicLogEntry, logStory } from '../../utils/mechanicLogUtils';
 import { getAvailableMoves } from '../../utils/moveUtils'; // Corrected import
@@ -57,8 +56,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   }
 
   // --- CRITICAL FIX: Use the definitive getAvailableMoves function FIRST ---
-  const locationData = availableLocations.find(loc => loc.name === newState.location) || availableLocations[0];
-  let availableMoves = getAvailableMoves(attacker, target, locationData);
+  let availableMoves = getAvailableMoves(attacker, target);
   const inEscalation = attacker.flags?.forcedEscalation === 'true' || attacker.flags?.desperationState;
   if (inEscalation) {
     const nonBasicMoves = availableMoves.filter(move => !isBasicMove(move));

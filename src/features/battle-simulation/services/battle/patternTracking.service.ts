@@ -51,33 +51,37 @@ export function getPatternState(character: BattleCharacter): PatternState {
 }
 
 /**
- * @description Updates pattern tracking when a move is used
+ * @description Updates pattern tracking when a move is used. Adds to restrictedMoves if patternStale is detected.
  */
 export function updatePatternTracking(
   character: BattleCharacter, 
   moveName: string
 ): BattleCharacter {
   const updatedCharacter = { ...character };
-  
+  // Ensure restrictedMoves is initialized
+  if (!updatedCharacter.restrictedMoves) updatedCharacter.restrictedMoves = [];
   // Update move history
   if (!updatedCharacter.moveHistory) {
     updatedCharacter.moveHistory = [];
   }
   updatedCharacter.moveHistory.push(moveName);
-  
   // Keep only last 20 moves to prevent memory bloat
   if (updatedCharacter.moveHistory.length > 20) {
     updatedCharacter.moveHistory = updatedCharacter.moveHistory.slice(-20);
   }
-  
   // Update last move
   updatedCharacter.lastMove = moveName;
-  
+  // Check for repetition and restrict move if needed
+  const lastMoves = updatedCharacter.moveHistory.slice(-ESCALATION_TRIGGERS.MOVE_REPETITION);
+  const isRepetitive = lastMoves.length >= 8 && lastMoves.every(move => move === lastMoves[0]);
+  if (isRepetitive && !updatedCharacter.restrictedMoves.includes(moveName)) {
+    updatedCharacter.restrictedMoves.push(moveName);
+  }
   return updatedCharacter;
 }
 
 /**
- * @description Resets pattern tracking for a character
+ * @description Resets pattern tracking for a character, including restrictedMoves.
  */
 export function resetPatternTracking(character: BattleCharacter): BattleCharacter {
   return {
@@ -85,6 +89,7 @@ export function resetPatternTracking(character: BattleCharacter): BattleCharacte
     moveHistory: [],
     lastMove: '',
     repositionAttempts: 0,
-    chargeInterruptions: 0
+    chargeInterruptions: 0,
+    restrictedMoves: []
   };
 } 

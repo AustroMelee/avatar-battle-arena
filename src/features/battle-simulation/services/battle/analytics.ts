@@ -41,8 +41,8 @@ export function analyzeBattlePerformance(
   const climaxEvents = battleLog.filter(entry => entry.meta?.climax).length;
   const patternAdaptations = finalState.analytics?.patternAdaptations || 0;
   const totalChiSpent = battleLog
-    .filter(entry => entry.meta?.resourceCost)
-    .reduce((sum, entry) => sum + (entry.meta?.resourceCost || 0), 0);
+    .filter(entry => typeof entry.meta?.resourceCost === 'number')
+    .reduce((sum, entry) => sum + (entry.meta?.resourceCost as number), 0);
   const chiEfficiency = totalChiSpent > 0 ? totalDamage / totalChiSpent : 0;
   let victoryMethod: BattleMetrics['victoryMethod'] = 'health';
   if (finalState.winner && finalState.winner.name) {

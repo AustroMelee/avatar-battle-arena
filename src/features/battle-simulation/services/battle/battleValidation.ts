@@ -114,9 +114,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
       text: 'The battle has stalled! The fighters are forced into a final, decisive clash!'
     }) || undefined;
     // Mark the state to be handled by a new climax phase.
-    (state as any).tacticalPhase = 'climax';
-    (state as any).climaxTriggered = true;
-    (state as any).climaxLog = logEntry;
+    (state as unknown as { tacticalPhase: string; climaxTriggered: boolean; climaxLog: BattleLogEntry | undefined }).tacticalPhase = 'climax';
+    (state as unknown as { climaxTriggered: boolean; }).climaxTriggered = true;
+    (state as unknown as { climaxLog: BattleLogEntry | undefined; }).climaxLog = logEntry;
     return {
       isValid: true,
       issues: ['Prolonged stalemate: average damage per turn is only 0.0.'],
@@ -137,8 +137,8 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
       turn: state.turn,
       text: 'The battle has reached its final stage! The next exchange will end it!'
     }) || undefined;
-    (state as any).suddenDeathActive = true;
-    (state as any).suddenDeathLog = logEntry;
+    (state as unknown as { suddenDeathActive: boolean; suddenDeathLog: BattleLogEntry | undefined }).suddenDeathActive = true;
+    (state as unknown as { suddenDeathLog: BattleLogEntry | undefined; }).suddenDeathLog = logEntry;
     return { isValid: true, issues: [], recommendations: ['Trigger Sudden Death (only finishers/high-risk moves allowed)'], shouldForceEnd: false, logEntry };
   }
 
@@ -146,8 +146,8 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   if (shouldForceEnd && endReason === 'stalemate') {
     // If both fighters are alive, force a final exchange (finisher/high-risk only)
     if (fighter1.currentHealth > 0 && fighter2.currentHealth > 0) {
-      (state as any).tacticalPhase = 'climax';
-      (state as any).climaxTriggered = true;
+      (state as unknown as { tacticalPhase: string; climaxTriggered: boolean; }).tacticalPhase = 'climax';
+      (state as unknown as { climaxTriggered: boolean; }).climaxTriggered = true;
       const logEntry = logMechanics({
         turn: state.turn,
         text: 'Stalemate detected, forcing a final decisive exchange!'

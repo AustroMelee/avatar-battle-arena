@@ -10,7 +10,7 @@
 // RESPONSIBILITY: Choose narrative tracks and strategies based on battle context
 
 import type { NarrativeContext } from '../types/NarrativeTypes';
-// import { NarrativeTrackSelector } from './NarrativeTrackSelector';
+import { AntiRepetitionTracker } from '../antiRepetitionTracker';
 
 /**
  * @description Service responsible for choosing narrative strategies and tracks
@@ -18,6 +18,8 @@ import type { NarrativeContext } from '../types/NarrativeTypes';
 export class BattleNarrationStrategyService {
   private lastTrackUsage: Map<string, number> = new Map();
   private trackCooldowns: Map<string, number> = new Map();
+  private antiRepetition: AntiRepetitionTracker = new AntiRepetitionTracker();
+  private lastDialogueOrSceneTurn: number = 0;
 
   constructor() {
     // Initialize track cooldowns
@@ -87,6 +89,43 @@ export class BattleNarrationStrategyService {
   }
 
   /**
+   * @description Cadence logic: ensure at least one dialogue or scene-setting line every 2 turns in dramatic phases.
+   * Dramatic phases: escalation, desperation, climax.
+   */
+  shouldForceDialogueOrScene(turnNumber: number, phase: 'escalation' | 'desperation' | 'climax' | string): boolean {
+    if (phase === 'escalation' || phase === 'desperation' || phase === 'climax') {
+      return (turnNumber - this.lastDialogueOrSceneTurn) >= 2;
+    }
+    // fallback to previous cadence for other phases
+    return (turnNumber - this.lastDialogueOrSceneTurn) >= 3;
+  }
+
+  /**
+   * @description Selects a narrative line with global anti-repetition enforcement.
+   * Filters out recently used lines for the given mechanic and character, globally across all phases.
+   * If all lines are exhausted, generates a unique contextual line.
+   */
+  selectNarrativeLine(mechanic: string, characterName: string, availableLines: string[], turnNumber: number): string {
+    this.antiRepetition.updateTurn(turnNumber);
+    const mechanicKey = mechanic as import('../types').NarrativeMechanic;
+    const freshLines = this.antiRepetition.filterRecentlyUsedLines(mechanicKey, characterName, availableLines);
+    if (freshLines.length > 0) {
+      const chosen = freshLines[Math.floor(Math.random() * freshLines.length)];
+      this.antiRepetition.recordUsedLine(mechanicKey, characterName, chosen);
+      return chosen;
+    }
+    // If all lines have been used recently, generate a unique contextual line
+    return `[Unique] ${characterName}: ${mechanic} - ${Date.now()}`;
+  }
+
+  /**
+   * @description Call this when a dialogue or scene-setting line is selected.
+   */
+  markDialogueOrSceneUsed(turnNumber: number): void {
+    this.lastDialogueOrSceneTurn = turnNumber;
+  }
+
+  /**
    * @description Determine if escalation narrative should be included
    */
   shouldIncludeEscalation(context: NarrativeContext, lastEscalationTurn: number): boolean {
@@ -120,5 +159,7 @@ export class BattleNarrationStrategyService {
    */
   resetTracking(): void {
     this.lastTrackUsage.clear();
+    this.antiRepetition.reset();
+    this.lastDialogueOrSceneTurn = 0;
   }
 } 

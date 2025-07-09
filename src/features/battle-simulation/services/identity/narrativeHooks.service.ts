@@ -94,14 +94,12 @@ export function generateBattleStateNarrative(character: BattleCharacter): string
  * @param character The character who performed the move
  * @param move The move that was performed
  * @param wasSuccessful Whether the move was successful
- * @param damage The damage dealt (if any)
  * @returns A narrative description of the move outcome
  */
 export function generateMoveOutcomeNarrative(
   character: BattleCharacter,
   move: Move,
-  wasSuccessful: boolean,
-  _damage?: number
+  wasSuccessful: boolean
 ): string {
   const mentalState = character.mentalState;
 

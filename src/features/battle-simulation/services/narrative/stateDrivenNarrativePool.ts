@@ -42,8 +42,7 @@ export class StateDrivenNarrativePool {
   /**
    * @description Updates the state tracker with current context
    */
-  updateState(_ctx: unknown): void {
-    const ctx = _ctx as NarrativeContext;
+  updateState(ctx: NarrativeContext): void {
     
     if (ctx.turnIndex !== undefined) {
       this.stateTracker.turnCount = ctx.turnIndex;
@@ -80,7 +79,7 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual escalation narrative based on state
    */
-  getEscalationNarrative(_ctx: unknown): string {
+  getEscalationNarrative(): string {
     const { escalationCount } = this.stateTracker;
     
     if (escalationCount === 1) {
@@ -97,7 +96,7 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual pattern break narrative based on state
    */
-  getPatternBreakNarrative(_ctx: unknown): string {
+  getPatternBreakNarrative(): string {
     const { patternBreakCount } = this.stateTracker;
     
     if (patternBreakCount === 1) {
@@ -114,31 +113,31 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual damage narrative with character-specific details
    */
-  getDamageNarrative(_ctx: unknown, damage: number): string {
+  getDamageNarrative(ctx: NarrativeContext, damage: number): string {
     const { consecutiveHits, consecutiveMisses } = this.stateTracker;
     
     if (damage === 0) {
-      return this.getMissNarrative(_ctx, consecutiveMisses);
+      return this.getMissNarrative(ctx, consecutiveMisses);
     } else if (damage <= 5) {
-      return this.getGlanceNarrative(_ctx);
+      return this.getGlanceNarrative(ctx);
     } else if (damage <= 15) {
-      return this.getHitNarrative(_ctx, consecutiveHits);
+      return this.getHitNarrative(ctx, consecutiveHits);
     } else if (damage <= 30) {
-      return this.getDevastatingNarrative(_ctx);
+      return this.getDevastatingNarrative(ctx);
     } else {
-      return this.getOverwhelmingNarrative(_ctx);
+      return this.getOverwhelmingNarrative(ctx);
     }
   }
 
   /**
    * @description Gets miss narrative with character-specific details
    */
-  private getMissNarrative(_ctx: unknown, consecutiveMisses: number): string {
-    if (!hasActorAndTarget(_ctx)) {
+  private getMissNarrative(ctx: NarrativeContext, consecutiveMisses: number): string {
+    if (!hasActorAndTarget(ctx)) {
       return "The attack misses its target.";
     }
     
-    const { actor, target } = _ctx;
+    const { actor, target } = ctx;
     
     if (actor.name === 'Aang') {
       if (consecutiveMisses === 1) {
@@ -164,12 +163,12 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets glance narrative with character-specific details
    */
-  private getGlanceNarrative(_ctx: unknown): string {
-    if (!hasActorAndTarget(_ctx)) {
+  private getGlanceNarrative(ctx: NarrativeContext): string {
+    if (!hasActorAndTarget(ctx)) {
       return "The attack connects, but lacks power.";
     }
     
-    const { actor, target } = _ctx;
+    const { actor, target } = ctx;
     
     if (actor.name === 'Aang') {
       return `Aang's strike glances off ${target.name}'s guard, his hesitation showing as exhaustion creeps in.`;
@@ -183,12 +182,12 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets hit narrative with character-specific details
    */
-  private getHitNarrative(_ctx: unknown, consecutiveHits: number): string {
-    if (!hasActorAndTarget(_ctx)) {
+  private getHitNarrative(ctx: NarrativeContext, consecutiveHits: number): string {
+    if (!hasActorAndTarget(ctx)) {
       return "The attack lands with solid impact!";
     }
     
-    const { actor, target } = _ctx;
+    const { actor, target } = ctx;
     
     if (actor.name === 'Aang') {
       if (consecutiveHits === 1) {
@@ -210,12 +209,12 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets devastating narrative with character-specific details
    */
-  private getDevastatingNarrative(_ctx: unknown): string {
-    if (!hasActorAndTarget(_ctx)) {
+  private getDevastatingNarrative(ctx: NarrativeContext): string {
+    if (!hasActorAndTarget(ctx)) {
       return "The attack devastates with brutal efficiency!";
     }
     
-    const { actor, target } = _ctx;
+    const { actor, target } = ctx;
     
     if (actor.name === 'Aang') {
       return `Aang's palm strike lands squarely, air rippling from the impact!`;
@@ -229,12 +228,12 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets overwhelming narrative with character-specific details
    */
-  private getOverwhelmingNarrative(_ctx: unknown): string {
-    if (!hasActorAndTarget(_ctx)) {
+  private getOverwhelmingNarrative(ctx: NarrativeContext): string {
+    if (!hasActorAndTarget(ctx)) {
       return "An overwhelming assault that nearly ends the battle!";
     }
     
-    const { actor, target } = _ctx;
+    const { actor, target } = ctx;
     
     if (actor.name === 'Aang') {
       return `A cyclone whirls from Aang's staff, uprooting tiles as ${target.name} braces for impact!`;
@@ -248,12 +247,12 @@ export class StateDrivenNarrativePool {
   /**
    * @description Gets contextual defensive narrative
    */
-  getDefensiveNarrative(_ctx: unknown): string {
-    if (!hasActorAndTarget(_ctx)) {
+  getDefensiveNarrative(ctx: NarrativeContext): string {
+    if (!hasActorAndTarget(ctx)) {
       return "The fighter expertly dodges the attack.";
     }
     
-    const { actor, target } = _ctx;
+    const { actor, target } = ctx;
     
     if (actor.name === 'Aang') {
       return `Aang bends at the waist, ${target.name}'s attack hissing past his ear.`;

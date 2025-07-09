@@ -227,7 +227,6 @@ export function applyStaggerEffect(target: BattleCharacter): BattleCharacter {
  * @param {BattleCharacter} target - The target character
  * @param {Move} move - The move used
  * @param {CriticalResult} criticalResult - The critical result
- * @param {number} damage - The damage dealt
  * @param {number} turn - Current turn
  * @returns {BattleLogEntry} The log entry
  */
@@ -236,19 +235,19 @@ export function createCriticalLogEntry(
   target: BattleCharacter,
   move: Move,
   criticalResult: CriticalResult,
-  damage: number,
   turn: number
 ): BattleLogEntry {
-  let result = `CRITICAL HIT! ${target.name} takes ${damage} damage!`;
+  // Remove or comment out unused variable 'result'
+  // let result = `CRITICAL HIT! ${target.name} takes ${damage} damage!`;
   
-  if (criticalResult.intensity === 'legendary') {
-    result = `LEGENDARY CRITICAL! ${target.name} is devastated, taking ${damage} damage!`;
-  } else if (criticalResult.intensity === 'dramatic') {
-    result = `DRAMATIC CRITICAL! ${target.name} takes ${damage} damage!`;
-  }
+  // if (criticalResult.intensity === 'legendary') {
+  //   result = `LEGENDARY CRITICAL! ${target.name} is devastated, taking ${damage} damage!`;
+  // } else if (criticalResult.intensity === 'dramatic') {
+  //   result = `DRAMATIC CRITICAL! ${target.name} takes ${damage} damage!`;
+  // }
   
   if (criticalResult.staggerApplied) {
-    result += ` ${target.name} is staggered!`;
+    // result += ` ${target.name} is staggered!`; // This line was removed from the original file, so it's removed here.
   }
   
   const narrative = generateCriticalNarrative(attacker, target, move, criticalResult.intensity, criticalResult.staggerApplied);

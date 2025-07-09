@@ -1,11 +1,13 @@
 // Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 import type { BattleState, BattleCharacter } from '../../types';
 import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
+import { nes } from '@/common/branding/nonEmptyString';
 /**
  * Handles escalation phase transitions and logging.
  * - Uses only tacticalPhase for escalation state.
  * - All log pushes are type-safe (never null).
  * - Analytics and flags are robustly updated.
+ * - If AI returns forcedEnding: true, the battle engine must end the battle with a dramatic, decisive log (never a generic draw). See SYSTEM ARCHITECTURE.MD for policy.
  */
 export function handleEscalationPhase({ state, attacker, reason, shouldEscalate }: {
   state: BattleState;
@@ -36,6 +38,17 @@ export function handleEscalationPhase({ state, attacker, reason, shouldEscalate 
     reason,
   });
   if (technical && technical.technical) state.battleLog.push(technical.technical);
-  if (technical && technical.narrative) state.log.push(technical.narrative);
+  if (technical && technical.narrative) state.battleLog.push({
+    id: `escalation-narrative-${state.turn}`,
+    turn: state.turn,
+    actor: 'System',
+    type: 'narrative',
+    action: 'Escalation',
+    result: nes(technical.narrative),
+    target: attacker.name,
+    narrative: nes(technical.narrative),
+    timestamp: Date.now(),
+    details: { reason },
+  });
   return state;
 } 

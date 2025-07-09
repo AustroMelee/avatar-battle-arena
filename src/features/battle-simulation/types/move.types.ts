@@ -73,7 +73,7 @@ export interface DesperationBuff {
 export interface Move {
   id: string;
   name: string;
-  type: 'attack' | 'defense_buff' | 'evade' | 'parry_retaliate';
+  type: 'attack' | 'defense_buff' | 'evade' | 'parry_retaliate' | 'charge';
   chiCost: number;
   baseDamage: number;
   cooldown: number;
@@ -117,6 +117,7 @@ export interface Move {
    * @description If true, this move is considered a basic/fallback move and is subject to staleness filtering and escalation lockouts.
    */
   isBasic?: boolean;
+  releaseMoveId?: string;
 }
 
 export type ImpactClass = 'minor' | 'moderate' | 'severe';

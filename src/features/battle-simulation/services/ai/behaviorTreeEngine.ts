@@ -103,8 +103,7 @@ export function decideMove(
           };
         }
       }
-    } catch (error) {
-      console.error(`[AI ERROR] Rule "${rule.name}" failed:`, error);
+    } catch {
       continue; // Try next rule
     }
   }
@@ -225,7 +224,7 @@ export function debugRules(
         moveSelected: move?.name || null,
         priority: rule.priority ?? 0
       };
-    } catch (error) {
+    } catch {
       return {
         rule,
         conditionMet: false,

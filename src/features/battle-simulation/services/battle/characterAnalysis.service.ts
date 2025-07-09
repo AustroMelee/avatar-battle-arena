@@ -51,8 +51,8 @@ export function analyzeCharacterPerformance(
   
   // Calculate chi metrics
   const chiSpent = characterLogs
-    .filter(entry => entry.meta?.resourceCost)
-    .reduce((sum, entry) => sum + (entry.meta?.resourceCost || 0), 0);
+    .filter(entry => typeof entry.meta?.resourceCost === 'number')
+    .reduce((sum, entry) => sum + (entry.meta?.resourceCost as number), 0);
   
   const chiRecovered = characterLogs
     .filter(entry => entry.action === 'Focus' || entry.meta?.heal)

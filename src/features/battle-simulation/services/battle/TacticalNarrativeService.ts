@@ -39,8 +39,7 @@ export function buildNarrativeContext(
   target: BattleCharacter,
   _move: Move,
   damage: number,
-  state: BattleState,
-  _outcome: 'miss' | 'glance' | 'hit' | 'devastating' | 'overwhelming'
+  state: BattleState
 ): NarrativeContext {
   return {
     damage,
@@ -73,7 +72,7 @@ export async function generateTacticalNarrative(
 ): Promise<NarrativeResult> {
   const narrativeService = createNarrativeService();
   
-  const context = buildNarrativeContext(attacker, target, move, damage, state, outcome);
+  const context = buildNarrativeContext(attacker, target, move, damage, state);
   
   const generatedNarrative = await narrativeService.generateNarrative(
     attacker.name,

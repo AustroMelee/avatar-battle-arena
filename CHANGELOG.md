@@ -167,3 +167,23 @@ This is a complete overhaul of the narrative system to achieve a 10/10, "Avatar-
 
 - **Features**: Added Collateral Damage and Mental State Decay systems.
 - **Technical**: Achieved 99th percentile TypeScript compliance, eliminated `any` types.
+
+## [2025-07-09] - Engine Complete, Narrative Upgrade Next
+
+### ⚙️ Mechanics
+- All core mechanics (charge/release, escalation, effect processing, KO, turn logic) are robust and bug-free.
+- No deadlocks, infinite loops, or charge limbo remain.
+- Simulation loop is now chunked and browser-friendly: processes a few turns per tick and yields to the UI, so the browser never freezes and React state updates in real time.
+- End conditions (KO, max turns, draw) are strictly enforced, with clear logging at battle end.
+
+### 📖 Narrative
+- All major events (attacks, effects, escalation, charge/release) are logged, but the output is still debug-style (e.g., “Outcome: HIT for 1 damage,” “Searing Burn (BURN) with 3 turns remaining”).
+- Escalation and effect triggers are visible in logs, but not yet cinematic or immersive.
+- No special narrative lines for finishers, charge releases, or KOs—just mechanical logs.
+
+### 🚧 Next Steps
+- The groundwork is laid for a cinematic narrative layer, but the current update does not yet swap debug logs for in-world, story-driven narration.
+- The system is ready for narrative service integration to generate lines like “Aang unleashes a mighty tornado!” or “Azula’s lightning splits the arena.”
+
+---
+

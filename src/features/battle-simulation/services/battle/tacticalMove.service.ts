@@ -362,9 +362,8 @@ export function selectTacticalMove(
   self: BattleCharacter,
   enemy: BattleCharacter,
   availableMoves: Move[],
-  location: string,
-  // arcModifiers?: ArcStateModifier
-): { move: Move; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
+  location: string
+): { move: Move; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
   // const locationType = getLocationType(location);
   // const isAirbender = self.base.bending === 'air';
   let tacticalMemory = tacticalMemoryMap.get(self);
@@ -384,22 +383,26 @@ export function selectTacticalMove(
       move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire') || move.id.includes('Slice') || move.id.includes('Relentless')
     );
     const highDamageMoves = usableMoves.filter(move => move.baseDamage >= 5 && !move.isChargeUp);
-    let chosenMove: Move | undefined;
-    let reasoning = "FORCED ESCALATION - Prioritizing signature and high-damage moves!";
     // 1. Prioritize Signature Moves
     if (signatureMoves.length > 0) {
-      chosenMove = signatureMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
-      reasoning += ` Using signature move: ${chosenMove.name}.`;
+      return {
+        move: signatureMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0],
+        tacticalAnalysis: 'Signature Move',
+      };
     } 
     // 2. Prioritize other High Damage Moves
     else if (highDamageMoves.length > 0) {
-      chosenMove = highDamageMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0];
-      reasoning += ` Using high-damage move: ${chosenMove.name}.`;
+      return {
+        move: highDamageMoves.sort((a, b) => b.baseDamage - a.baseDamage)[0],
+        tacticalAnalysis: 'High Damage Move',
+      };
     } 
     // 3. Fallback to any available non-Basic Strike move
     else {
-      chosenMove = usableMoves.find(m => !m.id.includes('Basic')) || usableMoves[0];
-      reasoning += ` Using fallback move: ${chosenMove.name}.`;
+      return {
+        move: usableMoves.find(m => !m.id.includes('Basic')) || usableMoves[0],
+        tacticalAnalysis: 'Fallback',
+      };
     }
   } else {
     // ... (rest of the function remains unchanged) ...
@@ -407,7 +410,51 @@ export function selectTacticalMove(
   // ... (rest of the function remains unchanged) ...
   return {
     move: usableMoves[0],
-    reasoning: 'Fallback: no valid move selection path reached.',
     tacticalAnalysis: 'Fallback',
   };
+}
+
+// --- Dramatic Move Selection Enforcement ---
+/**
+ * Selects a move, guaranteeing a dramatic/finisher/last-resort move in escalation, desperation, and climax phases.
+ * Falls back to forced ending if none available.
+ */
+export function selectDramaticMove(availableMoves: Move[], phase: string): Move {
+  // Filter for dramatic/finisher/last-resort moves
+  const dramaticMoves = availableMoves.filter(m =>
+    m.tags && (m.tags.includes('escalation') || m.tags.includes('desperation') || m.tags.includes('finisher') || m.tags.includes('last-resort'))
+  );
+  // If in dramatic phase, must select a dramatic move if available
+  if ((phase === 'escalation' || phase === 'desperation' || phase === 'climax') && dramaticMoves.length > 0) {
+    // Prefer finisher/last-resort if only those remain
+    const finisher = dramaticMoves.find(m => m.tags && (m.tags.includes('finisher') || m.tags.includes('last-resort')));
+    return finisher || dramaticMoves[0];
+  }
+  // If no dramatic move is available, trigger forced ending
+  if ((phase === 'escalation' || phase === 'desperation' || phase === 'climax') && dramaticMoves.length === 0) {
+    // Fallback to a static unique cinematic string for forced ending
+    const uniqueLog = 'A forced ending occurs: the battle concludes in a dramatic, unforgettable moment.';
+    return { id: 'forced_ending', name: 'Forced Ending', type: 'attack', baseDamage: 0, chiCost: 0, cooldown: 0, description: uniqueLog, tags: ['forced-ending'] };
+  }
+  // Otherwise, fallback to normal selection
+  return availableMoves[0];
+}
+
+// --- Penalty Logic Update ---
+/**
+ * Ensures penalty logic cannot block all dramatic moves.
+ * Exempts moves with 'finisher', 'last-resort', or 'desperation' tags from total restriction.
+ */
+export function filterPenalties(moves: Move[]): Move[] {
+  const dramaticMoves = moves.filter(m => m.tags && (m.tags.includes('finisher') || m.tags.includes('last-resort') || m.tags.includes('desperation')));
+  if (dramaticMoves.length > 0) {
+    // Always leave at least one dramatic move available
+    return moves.map(m => {
+      if (m.tags && (m.tags.includes('finisher') || m.tags.includes('last-resort') || m.tags.includes('desperation'))) {
+        return { ...m, restricted: false };
+      }
+      return m;
+    });
+  }
+  return moves;
 }

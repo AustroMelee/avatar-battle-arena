@@ -12,7 +12,7 @@
 import { CharacterName, CombatMechanic, NarrativeContext } from './narrative.types';
 import { NarrativePoolRegistry } from './pools/narrativePoolRegistry.service'; // MODIFIED: Import registry
 import { AntiRepetitionUtility } from './utils/antiRepetition.utility';
-import { generateFallbackLine } from './utils/fallbackGenerator.utility';
+// import { generateFallbackLine } from './utils/fallbackGenerator.utility'; // REMOVED: Unused import
 import { moveNameToMechanicKey } from './utils/narrativeKey.utility'; // MODIFIED: Import the new utility
 
 export class NarrativeService {
@@ -38,15 +38,35 @@ export class NarrativeService {
     // MODIFICATION: Convert the move name to a mechanic key
     const mechanicKey = moveNameToMechanicKey(mechanicOrMoveName);
     const characterPool = NarrativePoolRegistry.getPool(characterName);
-    const linePool = characterPool?.[mechanicKey]?.[context];
+    let linePool = characterPool?.[mechanicKey]?.[context];
 
-    // --- ANTI-REPETITION QUEUE: Block last 3 lines for basic moves ---
+    // --- Map new mechanic contexts to narrative pools if missing ---
+    if (!linePool || linePool.length === 0) {
+      const ctxStr = String(context);
+      // Pattern break/adaptation
+      if (mechanicKey === 'Reversal' || ctxStr === 'patternBreak' || ctxStr === 'pattern_break') {
+        linePool = characterPool?.ForcedEscalation?.trigger;
+      }
+      // Forced escalation
+      if (ctxStr === 'forcedEscalation' || ctxStr === 'escalation' || mechanicKey === 'ForcedEscalation') {
+        linePool = characterPool?.ForcedEscalation?.trigger;
+      }
+      // Stalemate/deadlock
+      if (ctxStr === 'stalemate' || ctxStr === 'deadlock') {
+        linePool = characterPool?.Stalemate?.trigger;
+      }
+      // Forced ending
+      if (ctxStr === 'forced_ending' || ctxStr === 'forcedEnding') {
+        linePool = characterPool?.Stalemate?.trigger;
+      }
+    }
+
+    // --- ANTI-REPETITION QUEUE: Block last 3 lines for all contexts ---
     const antiRepetitionKey = `${characterName}-${mechanicKey}-${context}`;
-    // Use a type-safe check for basic moves: if context is 'basic_move' or mechanicKey is in a known set
     const freshLine = (this.antiRepetition.getFreshLine.length === 3)
       ? this.antiRepetition.getFreshLine(antiRepetitionKey, linePool || [])
       : this.antiRepetition.getFreshLine(antiRepetitionKey, linePool || []);
-    if (freshLine) {
+    if (freshLine && freshLine.trim().length > 0 && freshLine !== 'No narrative') {
       return freshLine;
     }
     // Add new forced ending/stalemate lines
@@ -56,16 +76,13 @@ export class NarrativeService {
         'Fatigue and predictability have claimed both fighters. Destiny demands a rematch another day.',
         'Both warriors are too exhausted or predictable to continue. The battle ends in a draw—neither can break the deadlock.'
       ];
-      // Use anti-repetition for these as well
       const fallback = this.antiRepetition.getFreshLine(antiRepetitionKey, forcedEndingLines);
-      if (fallback) return fallback;
+      if (fallback && fallback.trim().length > 0) return fallback;
       return forcedEndingLines[0];
     }
-    console.warn(
-      `Narrative line not found for ${characterName}/${mechanicKey}/${context}. Using fallback.`
-    );
-    // Pass the standardized key to the fallback generator
-    return generateFallbackLine(characterName, mechanicKey, context);
+    // --- Generic, non-empty fallback for any missing context ---
+    const genericFallback = `The fight grinds on, neither side relenting.`;
+    return genericFallback;
   }
 
   /**

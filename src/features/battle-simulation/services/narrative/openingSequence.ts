@@ -66,8 +66,7 @@ const OPENING_SEQUENCES: Record<string, OpeningSequence> = {
  */
 export function generateOpeningSequence(
   player1: BattleCharacter,
-  player2: BattleCharacter,
-  location: string
+  player2: BattleCharacter
 ): BattleLogEntry[] {
   const openingEntries: BattleLogEntry[] = [];
   let turnCounter = 1; // Start from turn 1 for opening sequence
@@ -136,13 +135,6 @@ export function generateOpeningSequence(
   if (tension) openingEntries.push(tension);
 
   return openingEntries;
-}
-
-/**
- * @description Gets random dialogue from character sequence
- */
-function getRandomDialogue(dialogue: string[]): string {
-  return dialogue[Math.floor(Math.random() * dialogue.length)];
 }
 
 /**

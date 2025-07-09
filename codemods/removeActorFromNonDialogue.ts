@@ -1,11 +1,8 @@
-// @ts-nocheck
-const { API, FileInfo, Options } = require('jscodeshift');
-
 /**
  * Codemod to remove `actor` property from non-dialogue log creators (logStory, logMechanics, logSystem).
  * Only logDialogue is allowed to have an actor property.
  */
-module.exports = function transformer(file, api, options) {
+module.exports = function transformer(file, api) {
   const j = api.jscodeshift;
   const root = j(file.source);
 

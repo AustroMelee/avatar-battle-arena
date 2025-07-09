@@ -141,5 +141,5 @@ export interface NarrativeMemoryEntry {
   actor: string;
   target?: string;
   move?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 } 

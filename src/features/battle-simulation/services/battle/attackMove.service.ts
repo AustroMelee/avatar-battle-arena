@@ -47,6 +47,31 @@ export async function executeAttackMove(
   const move = convertAbilityToMove(ability);
   const battleContext = createBattleContext(attacker, target, state);
   
+  // --- CHARGE MOVE PATCH: Set charging state and return immediately ---
+  if (move.type === 'charge') {
+    attacker.status = 'charging';
+    attacker.pendingReleaseMoveId = move.releaseMoveId;
+    console.log(`[DEBUG] ${attacker.name} starts charging ${move.name}`);
+    // No damage, no attack resolution this turn
+    return {
+      newState: state,
+      logEntry: {
+        id: `${attacker.name}-charge-${state.turn}`,
+        turn: state.turn,
+        actor: 'System',
+        type: 'mechanics',
+        action: move.name,
+        result: ensureNonEmpty('Charging'),
+        narrative: ensureNonEmpty(`[DEBUG] ${attacker.name} starts charging ${move.name}`),
+        timestamp: Date.now(),
+      },
+      damage: 0,
+      result: 'Charging',
+      narrative: `[DEBUG] ${attacker.name} starts charging ${move.name}`,
+      isCritical: false
+    };
+  }
+  
   // NEW: Check for defensive clash before damage calculation
   let finalDamage = 0;
   let clashNarrative = '';

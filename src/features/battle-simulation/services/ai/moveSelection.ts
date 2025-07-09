@@ -12,6 +12,7 @@
 import { MetaState } from './metaState';
 import { MoveScore } from './moveScoring';
 import { Move } from '../../types/move.types';
+import { getPatternBans } from './patternDetection';
 
 /**
  * @type WeightedMove
@@ -111,6 +112,8 @@ import { canUseMove, applyPositionBonuses } from '../battle/positioningMechanics
 import { adjustScoresByIdentity } from '../identity/tacticalPersonality.engine';
 import type { BattleLogEntry } from '../../types';
 import { TacticalMemory } from './tacticalMemory.service';
+import type { BattleState } from '../../types';
+import { getMoveById } from '../../data/moves';
 
 /**
  * Utility: Checks if a move is considered basic/fallback.
@@ -138,53 +141,150 @@ export function isMoveStale(moveId: string, moveHistory: string[], N = 2): boole
 const tacticalMemoryMap = new WeakMap<BattleCharacter, TacticalMemory>();
 
 /**
+ * Updates pattern bans for a character: decrements counters, removes expired, and adds new bans if needed.
+ * @param self BattleCharacter
+ * @param repeatThreshold number
+ * @param banDuration number
+ * @returns { banned: string[], forcedAllow: boolean, log: string[] }
+ */
+function updatePatternBans(self: BattleCharacter, repeatThreshold = 3, banDuration = 2) {
+  const log: string[] = [];
+  // Decrement turnsLeft for existing bans
+  self.patternBans = (self.patternBans || []).map(ban => ({ ...ban, turnsLeft: ban.turnsLeft - 1 }))
+    .filter(ban => ban.turnsLeft > 0);
+  // Detect new bans
+  const newBans = getPatternBans(self.moveHistory, repeatThreshold, banDuration);
+  for (const ban of newBans) {
+    if (!self.patternBans.some(b => b.moveId === ban.moveId)) {
+      self.patternBans.push(ban);
+      log.push(`[SYSTEM] Move '${ban.moveId}' banned for ${ban.turnsLeft} turns due to repetition.`);
+      // Analytics: increment patternAdaptations if present
+      if (self.analytics) self.analytics.patternAdaptations = (self.analytics.patternAdaptations || 0) + 1;
+    }
+  }
+  // Update restrictedMoves for compatibility
+  self.restrictedMoves = self.patternBans.map(ban => ban.moveId);
+  return { banned: self.restrictedMoves, forcedAllow: false, log };
+}
+
+/**
  * @function selectTacticalMove
  * @description Selects the best tactical move for a BattleCharacter, considering memory, escalation, and environmental constraints.
  * @param self BattleCharacter The acting character.
- * @param _enemy BattleCharacter The opponent.
  * @param availableMoves Move[] All available moves.
  * @param location string The current location.
  * @param arcModifiers ArcStateModifier Optional arc state modifiers.
+ * @param battleState BattleState The current battle state for phase detection.
  * @returns { move: Move; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } Tactical move selection result and reasoning.
  * @related TacticalMemory, adjustScoresByIdentity, canUseMove
  */
 export function selectTacticalMove(
   self: BattleCharacter,
-  _enemy: BattleCharacter,
   availableMoves: Move[],
   location: string,
-  arcModifiers?: ArcStateModifier
-): { move: Move | null; reasoning: string; tacticalAnalysis: string, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry } {
+  arcModifiers?: ArcStateModifier,
+  battleState?: BattleState
+): { move: Move | null; reasoning: string; tacticalAnalysis: string, forcedEnding?: boolean, tacticalMemoryLog?: string, tacticalMemoryLogEntry?: BattleLogEntry, systemLog?: string[] } {
+  // --- Pattern Ban Enforcement ---
+  const { banned, log } = updatePatternBans(self);
+  let filteredMoves = availableMoves.filter(move => !banned.includes(move.id));
+  // If only one legal move remains, allow it and log
+  if (filteredMoves.length === 0 && availableMoves.length === 1) {
+    filteredMoves = availableMoves;
+    log.push(`[SYSTEM] Only one legal move ('${availableMoves[0].id}') available; forced to allow despite ban.`);
+  }
   const locationType = getLocationType(location);
-  // --- STALENESS & ESCALATION FILTERING ---
-  let filteredMoves = availableMoves;
-  const inEscalation = self.flags?.forcedEscalation === 'true' || self.flags?.desperationState;
-  if (inEscalation) {
-    const nonBasicMoves = availableMoves.filter(move => !isBasicMove(move));
-    if (nonBasicMoves.length > 0) {
-      filteredMoves = nonBasicMoves;
+  // --- STRICT PHASE-BASED ESCALATION FILTERING ---
+  const restricted = self.restrictedMoves || [];
+  filteredMoves = filteredMoves.filter(move => !restricted.includes(move.id));
+  const isDesperationPhase = battleState?.tacticalPhase === 'desperation';
+  const isEscalationPhase = battleState?.tacticalPhase === 'escalation';
+  const isClimaxPhase = battleState?.tacticalPhase === 'climax';
+  // --- Tag-based filtering remains as before ---
+  if (isDesperationPhase || isClimaxPhase) {
+    const dramaMoves = filteredMoves.filter(move => move.tags?.some(tag => ['desperation', 'finisher', 'lastResort'].includes(tag)));
+    if (dramaMoves.length > 0) {
+      filteredMoves = dramaMoves;
     } else {
-      // No non-basic moves left: escalate immediately
-      return { move: null, reasoning: 'No valid moves in escalation', tacticalAnalysis: 'Forced ending' };
+      return { move: null, reasoning: 'No valid dramatic moves in desperation/climax', tacticalAnalysis: 'Forced ending', forcedEnding: true };
+    }
+  } else if (isEscalationPhase) {
+    const escalationMoves = filteredMoves.filter(move => move.tags?.includes('escalation') || move.tags?.includes('finisher') || move.tags?.includes('lastResort') || !isBasicMove(move));
+    if (escalationMoves.length > 0) {
+      filteredMoves = escalationMoves;
+    } else {
+      return { move: null, reasoning: 'No valid moves in escalation', tacticalAnalysis: 'Forced ending', forcedEnding: true };
     }
   } else {
-    // Remove stale moves if other options exist (N=2 for stricter filtering)
-    const nonStaleMoves = availableMoves.filter(move => !isMoveStale(move.id, self.moveHistory, 2));
+    const nonStaleMoves = filteredMoves.filter(move => !isMoveStale(move.id, self.moveHistory, 2));
     if (nonStaleMoves.length > 0) {
       filteredMoves = nonStaleMoves;
     }
   }
+  // --- FORCE BREAKTHROUGH LOGIC: If escalation/desperation or 10+ turns no damage, only allow breakthrough/damaging moves ---
+  const turnsSinceLastDamage = battleState?.analytics?.turnsSinceLastDamage || 0;
+  const isBreakthroughPhase = isDesperationPhase || isEscalationPhase || isClimaxPhase || turnsSinceLastDamage >= 10;
+  if (isBreakthroughPhase) {
+    let breakthroughMoves = filteredMoves.filter(move =>
+      (move.baseDamage && move.baseDamage >= 10) ||
+      move.tags?.some(tag => ['finisher', 'escalation', 'lastResort', 'comeback'].includes(tag))
+    );
+    // Filter out Basic Strike unless it's the only move left
+    if (breakthroughMoves.length > 1) {
+      breakthroughMoves = breakthroughMoves.filter(move => move.name !== 'Basic Strike');
+    }
+    // Debug log the move pool
+    console.log('[DEBUG] Move pool during escalation:', breakthroughMoves.map(m => `${m.name} (${m.baseDamage})`).join(', '));
+    if (breakthroughMoves.length > 0) {
+      // Pick the move with the highest baseDamage
+      const highestDamageMove = breakthroughMoves.reduce((max, move) => (move.baseDamage > (max.baseDamage || 0) ? move : max), breakthroughMoves[0]);
+      console.log('[DEBUG] Picked:', highestDamageMove.name, 'baseDamage:', highestDamageMove.baseDamage);
+      return {
+        move: highestDamageMove,
+        reasoning: 'Breakthrough phase: Forcing highest-damage or finisher move.',
+        tacticalAnalysis: 'Breakthrough/forced escalation',
+        systemLog: ['[SYSTEM] Breakthrough phase: Forcing highest-damage or finisher move.']
+      };
+    } else {
+      // No damaging move available, log error and end battle
+      console.error('[ERROR] No valid breakthrough move found—ending battle as a fail-safe.');
+      return {
+        move: null,
+        reasoning: 'No damaging or breakthrough move available in escalation/desperation/breakthrough phase.',
+        tacticalAnalysis: 'Forced ending',
+        forcedEnding: true,
+        systemLog: ['[ERROR] No valid breakthrough move found—ending battle as a fail-safe.']
+      };
+    }
+  }
+  // --- FORCE RELEASE LOGIC: If character is charging, always pick the release move ---
+  if (self.status === 'charging') {
+    const lastMove = self.moveHistory && self.moveHistory.length > 0 ? getMoveById(self.moveHistory[self.moveHistory.length - 1]) : null;
+    if (lastMove && lastMove.releaseMoveId) {
+      const releaseMove = getMoveById(lastMove.releaseMoveId);
+      if (releaseMove) {
+        console.log('[DEBUG] Forcing release move due to charging:', releaseMove.name);
+        return {
+          move: releaseMove,
+          reasoning: 'Forced release after charging',
+          tacticalAnalysis: 'Charge-release enforcement',
+          systemLog: ['[SYSTEM] Forced release move after charging.']
+        };
+      } else {
+        console.error('ERROR: Charging but releaseMoveId not found in move data!');
+        return { move: null, reasoning: 'No release move found after charging', tacticalAnalysis: 'Error', forcedEnding: true, systemLog: ['[ERROR] No release move found after charging.'] };
+      }
+    } else {
+      console.error('ERROR: Charging but no releaseMoveId on last move!');
+      return { move: null, reasoning: 'No releaseMoveId on last move after charging', tacticalAnalysis: 'Error', forcedEnding: true, systemLog: ['[ERROR] No releaseMoveId on last move after charging.'] };
+    }
+  }
   // If all moves are filtered, force a different move if possible
   if (filteredMoves.length === 0 && availableMoves.length > 0) {
-    // Try to pick any move that is not the last used
     const lastMoveId = self.moveHistory[self.moveHistory.length - 1];
-    const altMoves = availableMoves.filter(move => move.id !== lastMoveId);
+    const altMoves = availableMoves.filter(move => move.id !== lastMoveId && !restricted.includes(move.id));
     if (altMoves.length > 0) {
       filteredMoves = [altMoves[Math.floor(Math.random() * altMoves.length)]];
-      if (typeof window !== 'undefined' && window.console) {
-        window.console.warn('[AI] Forced move variety: all moves stale, picking a different move.', { lastMoveId, altMoves });
-      }
-      // Optionally, update tactical memory here
       let tacticalMemory = tacticalMemoryMap.get(self);
       if (!tacticalMemory) {
         tacticalMemory = new TacticalMemory();
@@ -192,57 +292,54 @@ export function selectTacticalMove(
       }
       tacticalMemory.recordForcedVariety?.(lastMoveId, altMoves.map(m => m.id));
     } else {
-      // Only option is to repeat last move
-      filteredMoves = [availableMoves[0]];
-      if (typeof window !== 'undefined' && window.console) {
-        window.console.warn('[AI] Forced to repeat last move: no alternatives available.', { lastMoveId });
-      }
+      return { move: null, reasoning: 'All moves restricted or stale', tacticalAnalysis: 'Forced ending', forcedEnding: true };
     }
   }
-  const usableMoves = filteredMoves.filter(move => canUseMove(move, self, _enemy, location));
+  if (filteredMoves.length === 0) {
+    return { move: null, reasoning: 'No moves available after filtering', tacticalAnalysis: 'Forced ending', forcedEnding: true };
+  }
+  if ((isDesperationPhase || isEscalationPhase) && filteredMoves.some(m => isBasicMove(m))) {
+    return { move: null, reasoning: 'Basic move would be selected in escalation/desperation', tacticalAnalysis: 'Forced ending', forcedEnding: true };
+  }
+  const usableMoves = filteredMoves.filter(move => canUseMove(move, self, self, location));
   const identityAdjustments = adjustScoresByIdentity(self, usableMoves);
   let tacticalMemory = tacticalMemoryMap.get(self);
   if (!tacticalMemory) {
     tacticalMemory = new TacticalMemory();
     tacticalMemoryMap.set(self, tacticalMemory);
   }
-  if (usableMoves.length === 0) {
-    if (self.flags?.forcedEscalation === 'true') {
-      const signatureMoves = availableMoves.filter(move => 
-        move.id.includes('Blazing') || move.id.includes('Wind') || move.id.includes('Blue') || move.id.includes('Fire') || move.id.includes('Slice')
-      );
-      if (signatureMoves.length > 0) {
-        return {
-          move: signatureMoves[0],
-          reasoning: "Escalation fallback: using available signature move",
-          tacticalAnalysis: "Escalation Signature Fallback"
-        };
-      }
-      const damagingMoves = availableMoves.filter(move => 
-        move.baseDamage > 5 && !move.isChargeUp
-      );
-      if (damagingMoves.length > 0) {
-        return {
-          move: damagingMoves[0],
-          reasoning: "Escalation fallback: using available damaging move",
-          tacticalAnalysis: "Escalation Fallback"
-        };
-      }
-    }
-    const basicMoves = availableMoves.filter(move => 
-      move.chiCost === 0 && !move.isChargeUp && !move.changesPosition
-    );
-    return {
-      move: basicMoves[0] || availableMoves[0],
-      reasoning: "No tactical options available, using basic move",
-      tacticalAnalysis: "Limited by environmental constraints or position requirements"
-    };
-  }
   let tacticalMemoryLog = '';
   const scoredMoves = usableMoves.map(move => {
     let score = 0;
     let reasoning = "";
     const tacticalFactors: string[] = [];
+    const tagBoosts: string[] = [];
+    let tagBoostScore = 0;
+    // --- Escalation/Desperation Tag Boosts ---
+    if (isEscalationPhase) {
+      const escalationTags = ['escalation', 'finisher', 'lastResort'];
+      const matches = move.tags?.filter(tag => escalationTags.includes(tag)) || [];
+      if (matches.length > 0) {
+        tagBoostScore += 200 * matches.length;
+        tagBoosts.push(...matches);
+        if (self.analytics) self.analytics.escalationEvents = (self.analytics.escalationEvents || 0) + 1;
+        log.push(`[SYSTEM] Escalation boost: Move '${move.name}' +${200 * matches.length} (tags: ${matches.join(', ')})`);
+      }
+    }
+    if (isDesperationPhase || isClimaxPhase) {
+      const desperationTags = ['desperation', 'comeback', 'all-in'];
+      const matches = move.tags?.filter(tag => desperationTags.includes(tag)) || [];
+      if (matches.length > 0) {
+        tagBoostScore += 200 * matches.length;
+        tagBoosts.push(...matches);
+        if (self.analytics) self.analytics.desperationMoves = (self.analytics.desperationMoves || 0) + 1;
+        log.push(`[SYSTEM] Desperation boost: Move '${move.name}' +${200 * matches.length} (tags: ${matches.join(', ')})`);
+      }
+    }
+    score += tagBoostScore;
+    if (tagBoosts.length > 0) {
+      tacticalFactors.push(`Tag Boost: ${tagBoosts.join(', ')}`);
+    }
     const staleMoves = tacticalMemory!.getStaleMoves();
     if (staleMoves.includes(move.name)) {
       score = -1000;
@@ -280,7 +377,7 @@ export function selectTacticalMove(
         tacticalFactors.push("Escalation Focus");
       }
     }
-    if (_enemy.isCharging || _enemy.position === "repositioning" || _enemy.position === "stunned") {
+    if (self.isCharging || self.position === "repositioning" || self.position === "stunned") {
       if (move.punishIfCharging) {
         score += 200;
         reasoning += "PUNISHING VULNERABLE ENEMY! ";
@@ -309,7 +406,7 @@ export function selectTacticalMove(
       tacticalFactors.push("Position Advantage");
     }
     if (move.changesPosition === "repositioning") {
-      const repositionScore = evaluateRepositionNeed(self, _enemy, locationType);
+      const repositionScore = evaluateRepositionNeed(self, locationType);
       score += repositionScore;
       if (repositionScore > 0) {
         reasoning += "Repositioning for tactical advantage. ";
@@ -326,7 +423,7 @@ export function selectTacticalMove(
       reasoning += "Environmental advantage. ";
       tacticalFactors.push("Environmental Bonus");
     }
-    score += evaluateDefensiveMoves(move, self, _enemy);
+    score += evaluateDefensiveMoves(move, self);
     if (move.id.includes('evade') || move.id.includes('parry') || move.id.includes('counter')) {
       tacticalFactors.push("Defensive Strategy");
     }
@@ -341,7 +438,7 @@ export function selectTacticalMove(
       reasoning += 'Avoiding defensive spam. ';
       tacticalFactors.push('Defensive Spam Penalty');
     }
-    const isVulnerable = _enemy.isCharging || _enemy.position === 'repositioning' || _enemy.position === 'stunned';
+    const isVulnerable = self.isCharging || self.position === 'repositioning' || self.position === 'stunned';
     const isCriticallyLowHealth = self.currentHealth < 30;
     const isDefensiveOrUtilityMove = move.type !== 'attack';
     if (!isVulnerable && !isCriticallyLowHealth && isDefensiveOrUtilityMove) {
@@ -411,11 +508,11 @@ export function selectTacticalMove(
         reasoning += "Overconfidence demands flashy display. ";
       }
     }
-    if (_enemy.activeFlags.has('isManipulated')) {
+    if (self.activeFlags.has('isManipulated')) {
       score += 50;
       reasoning += "Target is manipulated - easier to exploit. ";
     }
-    if (_enemy.activeFlags.has('isExposed')) {
+    if (self.activeFlags.has('isExposed')) {
       score += 100;
       reasoning += "Target is completely exposed - perfect opportunity! ";
     }
@@ -442,7 +539,8 @@ export function selectTacticalMove(
     move: bestMove.move,
     reasoning: bestMove.reasoning,
     tacticalAnalysis: bestMove.tacticalFactors.join(", "),
-    tacticalMemoryLog
+    tacticalMemoryLog,
+    systemLog: log
   };
 }
 
@@ -460,7 +558,6 @@ function canChargeSafely(enemy: BattleCharacter, locationType: string): boolean 
 
 function evaluateRepositionNeed(
   self: BattleCharacter, 
-  _enemy: BattleCharacter, 
   locationType: string
 ): number {
   let score = 0;
@@ -470,7 +567,7 @@ function evaluateRepositionNeed(
   if (self.position === "cornered") {
     score += 30;
   }
-  if (_enemy.isCharging) {
+  if (self.isCharging) {
     score += 25;
   }
   if (locationType === "Desert") {
@@ -481,8 +578,7 @@ function evaluateRepositionNeed(
 
 function evaluateDefensiveMoves(
   move: Move, 
-  self: BattleCharacter, 
-  _enemy: BattleCharacter
+  self: BattleCharacter
 ): number {
   let score = 0;
   const isEvadeMove = move.id.includes('evade') || move.id.includes('evasion') || move.id.includes('flowing');

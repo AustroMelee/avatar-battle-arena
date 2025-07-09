@@ -1,7 +1,129 @@
 // CONTEXT: Azula Character Narrative Service
 // RESPONSIBILITY: Generate character-specific narrative for Azula
 
-import type { NarrativeContext } from '../../types/NarrativeTypes';
+const AzulaNarrativePool = {
+  escalation: [
+    "Azula’s smile widens—the real game begins.",
+    "She escalates with ruthless precision.",
+    "Blue fire flickers, growing sharper with every move.",
+    "Azula’s eyes glint, analyzing every weakness.",
+    "She circles, closing in like a predator.",
+    "A spark of impatience drives her attacks faster.",
+    "Azula’s confidence only grows under pressure.",
+    "Each move is calculated, daring her opponent to react.",
+    "Her voice cuts through tension: 'Is that all?'",
+    "Azula thrives as the stakes rise."
+  ],
+  desperation: [
+    "Azula’s jaw tightens—she refuses to show weakness.",
+    "She lashes out, blue fire desperate and wild.",
+    "Desperation cracks beneath Azula’s composure.",
+    "Her attacks grow erratic, pride fueling every motion.",
+    "Azula glares, determined to reclaim control.",
+    "She mutters, 'I will not be beaten.'",
+    "Flames flare unpredictably, her focus wavering.",
+    "Azula’s laughter sounds brittle, masking fear.",
+    "For a moment, doubt flashes in her eyes.",
+    "Azula rallies, forcing herself back into the fight."
+  ],
+  climax: [
+    "Azula launches a devastating assault, power unrestrained.",
+    "Lightning crackles—she gambles everything on one attack.",
+    "All her training, all her pride, focus into this moment.",
+    "Azula’s eyes burn, cold and fierce.",
+    "She commands the battlefield—every step calculated.",
+    "Azula’s technique peaks in terrifying perfection.",
+    "She grins, savoring the chaos she unleashes.",
+    "Azula’s flames roar, the arena awash in blue.",
+    "There’s no turning back—Azula dominates the final exchange.",
+    "She ends it on her terms, refusing to yield an inch."
+  ],
+  finisher: [
+    "Azula gathers her energy for one lethal strike.",
+    "She hisses, 'This ends now.'",
+    "Every ounce of will pours into her final attack.",
+    "Blue lightning arcs from Azula’s fingertips.",
+    "She delivers her finishing move with icy resolve.",
+    "There is no hesitation—Azula’s wrath is absolute.",
+    "Her final act is ruthless and precise.",
+    "Azula’s smile is razor-thin as she unleashes her last resort.",
+    "She claims victory, or she will destroy herself trying.",
+    "Azula’s flames flare, one last time."
+  ],
+  forced_ending: [
+    "Azula snarls, hating the lack of a clear victor.",
+    "She storms away, unwilling to accept a draw.",
+    "Frustration crackles in Azula’s glare.",
+    "For her, a stalemate is just unfinished business.",
+    "Azula wipes soot from her brow, seething.",
+    "She mutters, 'This isn’t over.'",
+    "Azula refuses to acknowledge her opponent.",
+    "The silence after the fight is heavier than defeat.",
+    "Azula’s pride is wounded more than her body.",
+    "Even in stalemate, Azula plots her next move."
+  ],
+  taunt: [
+    "Pathetic. Was that supposed to impress me?",
+    "You’re embarrassing yourself.",
+    "Surely you can do better than this.",
+    "Why don’t you just surrender now?",
+    "I expected a challenge, not a warm-up.",
+    "Try to keep up, if you can.",
+    "You’re predictable—and boring.",
+    "This isn’t even worth my time.",
+    "I almost feel sorry for you. Almost.",
+    "Hurry up. I have better things to do."
+  ],
+  comeback: [
+    "Did you really think you could win?",
+    "I don’t lose—remember that.",
+    "You got careless, and now you’ll pay.",
+    "I always come out on top.",
+    "You underestimated me. That was your mistake.",
+    "Let me show you how a real fight turns.",
+    "It’s over for you now.",
+    "I’m not finished. Not by a long shot.",
+    "You only delayed the inevitable.",
+    "Your luck just ran out."
+  ],
+  pattern_break: [
+    "You didn’t see that one coming, did you?",
+    "Let’s see you adapt to this.",
+    "You thought you had me figured out. How cute.",
+    "Predictability is weakness—I have none.",
+    "I’ll change the rules whenever I like.",
+    "Surprised? You should be.",
+    "You can’t outmaneuver me.",
+    "I set the tempo here—not you.",
+    "Try and keep up with the real prodigy.",
+    "A twist you didn’t prepare for."
+  ],
+  interrupt: [
+    "Not so fast.",
+    "Did you really think that would work?",
+    "I anticipated your every move.",
+    "Weak.",
+    "You’re easy to read—and easier to stop.",
+    "I don’t give you the luxury of momentum.",
+    "Predictable. Try something else.",
+    "Consider your attack... canceled.",
+    "I decide when this ends.",
+    "Denied."
+  ],
+  stalemate: [
+    "What a waste of time.",
+    "Neither of us gets what we want? Unacceptable.",
+    "I don’t do draws.",
+    "You’re lucky I don’t end this now.",
+    "I will not be denied forever.",
+    "This impasse won’t last—I’ll see to that.",
+    "Consider yourself on borrowed time.",
+    "We’re not finished. Not by a long shot.",
+    "A stalemate is just a delay for my victory.",
+    "Next time, I won’t be so patient."
+  ]
+};
+export { AzulaNarrativePool };
 
 /**
  * @description Service for generating Azula-specific narrative lines
@@ -347,7 +469,7 @@ export class AzulaNarrativeService {
   /**
    * @description Get escalation line with emotional state
    */
-  getEscalationLine(_context: NarrativeContext): string {
+  getEscalationLine(): string {
     const emotionalState = this.getEmotionalState();
     
     // Use emotional state to select appropriate escalation line

@@ -152,6 +152,14 @@ export type BattleCharacter = {
   usesLeft: Record<string, number>; // Track remaining uses for limited moves
   lastMove?: string;
   moveHistory: string[];
+  /**
+   * @description List of move IDs that are restricted due to repetition penalties (pattern breaking).
+   */
+  restrictedMoves: string[];
+  /**
+   * @description List of currently pattern-banned moves with remaining ban duration.
+   */
+  patternBans?: { moveId: string, turnsLeft: number }[];
   resources: {
     chi: number;
   };
@@ -198,6 +206,8 @@ export type BattleCharacter = {
   // --- NEW: Narrative/UX Polish ---
   noMoveTurns?: number; // Track consecutive no-move turns for Sudden Death logic
   suddenDeathTriggered?: boolean; // Flag for Sudden Death event
+  status?: string;
+  pendingReleaseMoveId?: string;
 };
 
 /**
@@ -310,7 +320,7 @@ export interface LogDetails {
   desperationLevel?: 'desperate' | 'extreme' | 'final';
   resolution?: string;
   winner?: string;
-  [key: string]: any; // Allows other meta fields
+  [key: string]: unknown; // Allows other meta fields
 }
 
 export type FighterName = string;
@@ -331,7 +341,7 @@ export type DialogueLogEntry = {
   timestamp: number;
   details?: LogDetails;
   damage?: number;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   abilityType?: string;
   prologue?: boolean;
 };
@@ -348,7 +358,7 @@ export type NonDialogueLogEntry = {
   timestamp: number;
   details?: LogDetails;
   damage?: number;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   abilityType?: string;
   prologue?: boolean;
 };

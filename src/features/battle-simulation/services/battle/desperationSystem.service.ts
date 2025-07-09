@@ -148,7 +148,7 @@ export function createDesperationLogEntry(
 
   const log = logStory({
     turn,
-    text: `${character.name}: Desperation triggered.`
+    narrative: `${character.name}: Desperation triggered.`
   });
   if (log) return log;
   return {
@@ -248,6 +248,7 @@ export function triggerDesperation(
 
 /**
  * @description Filters available moves for a character in desperation phase
+ * NOTE: This function MUST be used by all AI/move selection logic in desperation phase to enforce move pool restriction.
  */
 export function filterDesperationMoves(
   character: BattleCharacter,

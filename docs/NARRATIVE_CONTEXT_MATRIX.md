@@ -109,3 +109,11 @@ This matrix is the canonical guide for the game's narrative system. It maps ever
 | **trigger**| **Narrator**| `"The battle has raged for too long! The next blow will be the last!"`<br/>`"SUDDEN DEATH! One strike to end it all!"` |
 
 ---
+
+---
+
+> **July 9th, 2025 Milestone:**
+> As of this update, the narrative system logs all major events in debug style. Cinematic, story-driven lines for finishers, charge releases, and KOs are not yet implemented but are the next milestone. The groundwork for a cinematic narrative layer is complete and ready for integration.
+
+---
+

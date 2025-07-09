@@ -62,3 +62,21 @@ export function wasMoveUsedRecently(moveName: string, moves: string[], recentCou
   const recentMoves = getRecentMoves(moves, recentCount);
   return recentMoves.includes(moveName);
 } 
+
+/**
+ * @description Returns a list of move IDs that should be banned due to repetition.
+ * @param {string[]} moves - The move history to analyze.
+ * @param {number} repeatThreshold - How many times a move must repeat to trigger a ban.
+ * @param {number} banDuration - How many turns the ban should last.
+ * @returns {{ moveId: string, turnsLeft: number }[]} List of pattern bans to apply.
+ */
+export function getPatternBans(moves: string[], repeatThreshold: number = 3, banDuration: number = 2): { moveId: string, turnsLeft: number }[] {
+  if (moves.length < repeatThreshold) return [];
+  const lastMove = moves[moves.length - 1];
+  // Check if the last N moves are identical
+  const repeated = moves.slice(-repeatThreshold).every(m => m === lastMove);
+  if (repeated) {
+    return [{ moveId: lastMove, turnsLeft: banDuration }];
+  }
+  return [];
+} 

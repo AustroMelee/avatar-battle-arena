@@ -91,6 +91,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     lastTacticalPriority: '',
     // MODIFIED: Hydrate moves from the registry using IDs
     abilities: MoveRegistry.getMovesByIds(player1.abilities),
+    restrictedMoves: [],
   };
   
   const p2Battle: BattleCharacter = {
@@ -128,6 +129,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
     lastTacticalPriority: '',
     // MODIFIED: Hydrate moves from the registry using IDs
     abilities: MoveRegistry.getMovesByIds(player2.abilities),
+    restrictedMoves: [],
   };
   
   // Calculate environmental factors
@@ -135,7 +137,7 @@ export function createInitialBattleState(params: SimulateBattleParams): BattleSt
   const locationType = getLocationType(location.name);
   
   // Generate comprehensive opening sequence
-  const openingEntries = generateOpeningSequence(p1Battle, p2Battle, location.name);
+  const openingEntries = generateOpeningSequence(p1Battle, p2Battle);
   
   // Create initial state without opening sequence
   const initialState: BattleState = {

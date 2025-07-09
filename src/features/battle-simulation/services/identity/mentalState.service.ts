@@ -102,6 +102,6 @@ export function updateMentalState(
  * @param character The character to reset
  * @returns The reset mental state
  */
-export function resetMentalState(_character: BattleCharacter): MentalState {
+export function resetMentalState(): MentalState {
   return initializeMentalState();
 } 

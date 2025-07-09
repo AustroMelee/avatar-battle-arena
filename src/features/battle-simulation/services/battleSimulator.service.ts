@@ -31,18 +31,17 @@ export interface BattleSimulationResult {
     characterMetrics: CharacterMetrics[];
     aiMetrics: AIMetrics;
     report: string;
-    realTime: any;
+    realTime: unknown;
   };
   duration: number;
-}
-
-/**
- * @description Battle simulator service configuration
- */
-interface BattleSimulatorConfig {
-  realTime: boolean;
-  maxTurns: number;
-  timeoutMs: number;
+  /**
+   * @description Combined move history for both participants (for test assertions)
+   */
+  moveHistory: string[];
+  /**
+   * @description Combined restricted moves for both participants (for test assertions)
+   */
+  restrictedMoves: string[];
 }
 
 /**
@@ -51,7 +50,7 @@ interface BattleSimulatorConfig {
 export class BattleSimulator {
   // private _config: BattleSimulatorConfig;
 
-  constructor(_config: BattleSimulatorConfig = { realTime: false, maxTurns: 50, timeoutMs: 30000 }) {
+  constructor() {
     // this._config = config;
   }
 
@@ -83,6 +82,26 @@ export class BattleSimulator {
       // Track new log entries for analytics
       const newEntries = currentState.battleLog.slice(previousState.battleLog.length);
       newEntries.forEach(trackAnalytics);
+      // --- BROWSER THROTTLE: Yield every 5 turns ---
+      if (currentState.turn % 5 === 0) {
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+    // --- LOG BATTLE END ---
+    if (currentState.isFinished) {
+      const winner = currentState.winner ? currentState.winner.name : 'Draw';
+      let reason = 'KO';
+      if (currentState.turn >= maxTurns) reason = 'Max turns';
+      if (currentState.winner === null) reason = 'Draw';
+      console.log('[BATTLE END]', {
+        winner,
+        reason,
+        turn: currentState.turn,
+        finalHp: {
+          a: currentState.participants[0].currentHealth,
+          b: currentState.participants[1].currentHealth
+        }
+      });
     }
     
     // Force battle end if max turns reached
@@ -159,7 +178,15 @@ export class BattleSimulator {
         report,
         realTime: analytics
       },
-      duration
+      duration,
+      moveHistory: [
+        ...(currentState.participants[0].moveHistory || []),
+        ...(currentState.participants[1].moveHistory || [])
+      ],
+      restrictedMoves: [
+        ...(currentState.participants[0].restrictedMoves || []),
+        ...(currentState.participants[1].restrictedMoves || [])
+      ]
     };
   }
 }

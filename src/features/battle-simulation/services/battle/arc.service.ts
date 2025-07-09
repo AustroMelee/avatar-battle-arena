@@ -48,8 +48,7 @@ function createArcTransitionLogEntry(
   turn: number,
   _fromState: BattleArcState,
   _toState: BattleArcState,
-  narrative: string,
-  _isInjected: boolean = false
+  narrative: string
 ): BattleLogEntry {
   const log = logMechanics({
     turn: turn,
@@ -132,8 +131,7 @@ export function updateArcState(
       state.turn,
       previousState,
       injectedTrigger.to,
-      injectedTrigger.narrative,
-      true
+      injectedTrigger.narrative
     );
     
     if (IS_DEV_MODE) {
@@ -172,8 +170,7 @@ export function updateArcState(
           state.turn,
           previousState,
           transition.to,
-          transition.narrative,
-          false
+          transition.narrative
         );
         
         if (IS_DEV_MODE) {
@@ -187,12 +184,7 @@ export function updateArcState(
           previousState,
         };
       }
-    } catch (error) {
-      if (IS_DEV_MODE) {
-        console.error(`[ARC_STATE] Error evaluating transition ${transition.from} -> ${transition.to}:`, error);
-      }
-      // Continue to next transition instead of failing completely
-    }
+    } catch { /* intentionally empty: continue to next transition */ }
   }
 
   return {

@@ -112,7 +112,7 @@ export class CharacterNarrativeRouter {
 
     // 1. Handle special-cased characters (legacy or highly custom logic)
     if (characterName.toLowerCase().includes('aang')) {
-      const flavor = this.aangService.getMoveFlavor(moveName, damageOutcome);
+      const flavor = this.aangService.getMoveFlavor(moveName);
       if (flavor) {
         return flavor;
       }
@@ -167,9 +167,9 @@ export class CharacterNarrativeRouter {
     if (!isSignificant) return null;
     
     if (characterName.toLowerCase().includes('aang')) {
-      return this.aangService.getEscalationLine(context);
+      return this.aangService.getEscalationLine();
     } else if (characterName.toLowerCase().includes('azula')) {
-      return this.azulaService.getEscalationLine(context);
+      return this.azulaService.getEscalationLine();
     }
     return null;
   }
@@ -196,10 +196,10 @@ export class CharacterNarrativeRouter {
   /**
    * @description Update emotional state and character arc
    */
-  updateEmotionalState(characterName: string, event: string, damage: number, healthPercentage: number): void {
+  updateEmotionalState(characterName: string, event: string, healthPercentage: number): void {
     this.arcTracker.updateArc(characterName, event, healthPercentage);
     if (characterName.toLowerCase().includes('aang')) {
-      this.aangService.updateEmotionalState(event, damage);
+      this.aangService.updateEmotionalState(event);
     } else if (characterName.toLowerCase().includes('azula')) {
       this.azulaService.updateEmotionalState(event);
     }

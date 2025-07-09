@@ -106,7 +106,7 @@ export function useNarrativeLine(
       console.error('[Narrative] Fallback failed: No selectable lines in freshLines!', { pool, context: options });
     }
     return selected || fallbackLine;
-  }, [pool, maxRecent, fallbackLine, onExhaustion]);
+  }, [pool, fallbackLine, onExhaustion, options]);
 
   const reset = useCallback(() => {
     trackerRef.current = {
@@ -149,19 +149,19 @@ export function useMultipleNarrativePools(
     onExhaustion?: ((poolName: PoolName) => void) | undefined;
   } = {}
 ) {
-  const getMaxRecent = (poolName: PoolName) => {
+  const getMaxRecent = useCallback((poolName: PoolName) => {
     if (typeof config.maxRecent === 'number') return config.maxRecent;
     if (config.maxRecent && config.maxRecent[poolName])
       return config.maxRecent[poolName];
     return 3;
-  };
+  }, [config.maxRecent]);
 
-  const getFallback = (poolName: PoolName) => {
+  const getFallback = useCallback((poolName: PoolName) => {
     if (typeof config.fallbackLine === 'string') return config.fallbackLine;
     if (config.fallbackLine && config.fallbackLine[poolName])
       return config.fallbackLine[poolName];
     return '<No lines available>';
-  };
+  }, [config.fallbackLine]);
 
   const trackersRef = useRef<Record<PoolName, NarrativeLineTracker>>({});
   const [usageStats, setUsageStats] = useState<
@@ -243,7 +243,7 @@ export function useMultipleNarrativePools(
       }));
       return selected;
     },
-    [pools, config]
+    [pools, config, getMaxRecent, getFallback]
   );
 
   const reset = useCallback((poolName?: PoolName) => {
@@ -262,7 +262,7 @@ export function useMultipleNarrativePools(
       trackersRef.current = {};
       setUsageStats({});
     }
-  }, [config]);
+  }, [getMaxRecent]);
 
   const getUsageStats = useCallback((poolName?: PoolName) => {
     if (poolName) {

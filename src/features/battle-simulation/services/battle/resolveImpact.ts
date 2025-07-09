@@ -13,7 +13,7 @@ export interface ImpactResult {
 }
 
 // Example: defenderHasEvaded is a placeholder for actual evasion logic
-function defenderHasEvaded(_defender: BattleCharacter, _move: Ability): boolean {
+function defenderHasEvaded(): boolean {
   // TODO: Implement real evasion logic
   return false;
 }
@@ -26,7 +26,7 @@ export function resolveImpact(
   defender: BattleCharacter,
   move: Ability
 ): ImpactResult {
-  if (defenderHasEvaded(defender, move)) {
+  if (defenderHasEvaded()) {
     return {
       impact: 'redirected',
       narrative: `${defender.name} evades the blow!`,

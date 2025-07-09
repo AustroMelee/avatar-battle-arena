@@ -56,7 +56,7 @@ function isRenderableLogEntry(entry: BattleLogEntry) {
     ? entry.narrative
     : Array.isArray(entry.narrative)
       ? entry.narrative.join(' ')
-      : (entry as any).text;
+      : (entry.action || entry.result || '');
   if (!text || PLACEHOLDER_STRINGS.includes(text)) return false;
   return true;
 }
@@ -96,7 +96,7 @@ export const SingleLogEntry: FC<Props> = ({ entry, p1Name, p2Name }) => {
     case "mechanics":
     case "system":
       if (
-        (import.meta as any).env?.MODE !== "production"
+        ((import.meta as { env?: { MODE?: string } }).env?.MODE !== "production")
       ) {
         if (entry.actor === p1Name || entry.actor === p2Name) {
           console.warn("[LOG PIPELINE] Non-dialogue fighter entry:", entry);
@@ -105,7 +105,14 @@ export const SingleLogEntry: FC<Props> = ({ entry, p1Name, p2Name }) => {
       return (
         <NarrativeLogEntry
           {...common}
-          text={typeof entry.narrative === 'string' ? entry.narrative : Array.isArray(entry.narrative) ? entry.narrative.join(' ') : ''}
+          text={(() => {
+            if (typeof entry.narrative === 'string') return entry.narrative;
+            if (Array.isArray(entry.narrative)) return entry.narrative.join(' ');
+            const fallback = (entry as { narrative?: string | string[] }).narrative;
+            if (typeof fallback === 'string') return fallback;
+            if (Array.isArray(fallback)) return fallback.join(' ');
+            return '';
+          })()}
         />
       );
     default:
@@ -157,7 +164,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   }
 
   // Determine which modes to show
-  const viteMode = (import.meta as any).env?.MODE || 'development';
+  const viteMode = (import.meta as { env?: { MODE?: string } }).env?.MODE || 'development';
   const showDevModes = viteMode !== "production";
   const logViewModes = showDevModes
     ? [
@@ -293,7 +300,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
+    } catch {
       // fallback: do nothing
     }
   };
@@ -333,7 +340,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
+    } catch {
       // fallback: do nothing
     }
   };
@@ -347,7 +354,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch (err) {
+    } catch {
       // fallback: do nothing
     }
   };

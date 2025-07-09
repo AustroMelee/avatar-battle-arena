@@ -1,7 +1,129 @@
 // CONTEXT: Aang Character Narrative Service
 // RESPONSIBILITY: Generate character-specific narrative for Aang
 
-import type { NarrativeContext } from '../../types/NarrativeTypes';
+const AangNarrativePool = {
+  escalation: [
+    "Aang’s eyes narrow—he senses the rising danger.",
+    "The wind answers as Aang steels himself for what’s next.",
+    "With each attack, Aang’s movements sharpen, urgency mounting.",
+    "Aang’s calm is replaced by unwavering focus.",
+    "He reads his opponent, adapting on the fly.",
+    "Aang glides into action, shifting tactics midair.",
+    "Determination flashes in Aang’s eyes as the battle intensifies.",
+    "He pivots, using momentum to press forward.",
+    "The arena’s tension grows—Aang matches it beat for beat.",
+    "Aang leans into the storm, refusing to back down."
+  ],
+  desperation: [
+    "Aang steadies his breath, eyes glowing with resolve.",
+    "With every ounce of strength, Aang refuses to yield.",
+    "The air crackles as Aang channels his last reserves.",
+    "Desperation fuels Aang’s next move—he will not fall.",
+    "Aang’s spirit blazes, undaunted by the odds.",
+    "He draws on memories of his friends, refusing defeat.",
+    "Aang’s stance shifts—he’s ready for one final stand.",
+    "The arena trembles as Aang unleashes his will.",
+    "Even cornered, Aang’s hope never fades.",
+    "Aang’s determination becomes a force of nature."
+  ],
+  climax: [
+    "Aang summons the full force of his training.",
+    "Every element answers his call—this is the turning point.",
+    "Aang’s energy peaks, the air charged with possibility.",
+    "His movements flow like water, unstoppable and clear.",
+    "With a decisive leap, Aang seizes the initiative.",
+    "The world quiets—Aang stands at the center of the storm.",
+    "He channels the Avatar State, power coursing through him.",
+    "Aang’s resolve crystallizes, nothing left to chance.",
+    "He brings harmony to chaos, bending fate itself.",
+    "Aang’s spirit shines brightest when the outcome hangs in the balance."
+  ],
+  finisher: [
+    "Aang unleashes his last, decisive strike.",
+    "With a deep breath, Aang commits to his final move.",
+    "This is it—Aang channels everything into one moment.",
+    "All hesitation vanishes as Aang makes his stand.",
+    "A surge of wind heralds Aang’s finishing blow.",
+    "He acts with perfect clarity, every motion deliberate.",
+    "The battle’s end is written in Aang’s eyes.",
+    "Aang’s final technique leaves no room for doubt.",
+    "He stakes everything on a single act of will.",
+    "Aang closes his eyes, trusting the world to guide him."
+  ],
+  forced_ending: [
+    "Aang exhales, accepting the unresolved outcome.",
+    "He stands tall, undiminished by the draw.",
+    "Sometimes, balance means letting go.",
+    "Aang lowers his guard—there’s no winner today.",
+    "The air settles, and Aang bows with respect.",
+    "He seeks understanding in stalemate, not victory.",
+    "Both sides retreat, the lesson unfinished.",
+    "Aang’s gaze is calm—this fight isn’t the end.",
+    "Peace, even imperfect, is better than senseless struggle.",
+    "Aang’s spirit remains unbroken, even as the battle halts."
+  ],
+  taunt: [
+    "Is that really your best move?",
+    "Come on, you can do better than that!",
+    "Try to keep up!",
+    "You’ll have to be quicker than that to catch me.",
+    "Hey, I thought you were supposed to be tough!",
+    "Maybe you should try some airbending—looks fun, right?",
+    "Careful, or you’ll trip over your own feet!",
+    "You’re making this too easy for me.",
+    "Are you even taking this seriously?",
+    "If this gets any slower, I’ll take a nap!"
+  ],
+  comeback: [
+    "You haven’t seen anything yet!",
+    "I’m just getting started.",
+    "Don’t count me out!",
+    "It’s not over till it’s over.",
+    "Aang finds new strength when it matters most.",
+    "I’m not finished—I never give up!",
+    "You thought I was done? Not even close.",
+    "No matter how hard it gets, I keep moving.",
+    "Time for me to turn this around!",
+    "Let’s see how you handle this!"
+  ],
+  pattern_break: [
+    "Let’s shake things up!",
+    "Didn’t see that coming, did you?",
+    "Switching things up!",
+    "Time to break the cycle.",
+    "Try predicting this one!",
+    "I can change faster than the wind.",
+    "Just when you think you’ve got me figured out—surprise!",
+    "Ready for something new?",
+    "A little unpredictability never hurt.",
+    "Expect the unexpected."
+  ],
+  interrupt: [
+    "Not so fast!",
+    "I saw that coming a mile away.",
+    "Nice try, but not today.",
+    "I can stop you before you start.",
+    "You’ll have to try harder to get past me.",
+    "Caught you off guard, huh?",
+    "You’re not the only one who can think fast.",
+    "Sorry, but that won’t work on me.",
+    "Blocked and reversed!",
+    "I’ve turned the tables!"
+  ],
+  stalemate: [
+    "Looks like we’re evenly matched.",
+    "Neither of us is budging, huh?",
+    "We could be here all day at this rate.",
+    "This is turning into a real standoff.",
+    "Balance, I guess, means nobody wins.",
+    "You’re not giving up—and neither am I.",
+    "I guess we’ll call this a draw... for now.",
+    "No ground gained, no ground lost.",
+    "Sometimes, the world just stands still.",
+    "I could do this all day!"
+  ]
+};
+export { AangNarrativePool };
 
 /**
  * @description Service for generating Aang-specific narrative lines
@@ -178,7 +300,7 @@ export class AangNarrativeService {
   /**
    * @description Update emotional state based on battle events
    */
-  updateEmotionalState(event: string, _damage: number): void {
+  updateEmotionalState(event: string): void {
     if (event === 'miss') {
       this.emotionalState.resolve -= 1;
       this.emotionalState.determination -= 1;
@@ -289,7 +411,7 @@ export class AangNarrativeService {
   /**
    * @description Get escalation line with emotional state
    */
-  getEscalationLine(_context: NarrativeContext): string {
+  getEscalationLine(): string {
     const emotionalState = this.getEmotionalState();
     
     // Use emotional state to select appropriate escalation line
@@ -359,7 +481,7 @@ export class AangNarrativeService {
   /**
    * @description Get move-specific flavor for Aang
    */
-  getMoveFlavor(moveName: string, _damageOutcome: string): string | null {
+  getMoveFlavor(moveName: string): string | null {
     const pool = this.moveFlavors[moveName];
     if (!pool) return null;
     

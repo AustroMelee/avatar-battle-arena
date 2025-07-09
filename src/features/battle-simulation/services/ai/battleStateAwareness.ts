@@ -188,12 +188,12 @@ export function getBattleTacticalContext(
   
   // Calculate recent damage
   const myRecentDamage = recent
-    .filter(entry => entry.actor === me.name && entry.details?.damage)
-    .reduce((sum, entry) => sum + (entry.details?.damage || 0), 0);
+    .filter(entry => entry.actor === me.name && typeof entry.damage === 'number')
+    .reduce((sum, entry) => sum + (entry.damage ?? 0), 0);
     
   const enemyRecentDamage = recent
-    .filter(entry => entry.actor === enemy.name && entry.details?.damage)
-    .reduce((sum, entry) => sum + (entry.details?.damage || 0), 0);
+    .filter(entry => entry.actor === enemy.name && typeof entry.damage === 'number')
+    .reduce((sum, entry) => sum + (entry.damage ?? 0), 0);
   
   const damageRatio = enemyRecentDamage > 0 ? myRecentDamage / enemyRecentDamage : 1;
   

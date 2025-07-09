@@ -1,5 +1,5 @@
 // .cursorcontext (v2.1, SOLO, AI-FIRST, STRICT)
-
+alwaysApply: true
 /*--------------------------------------------------
   CORE: PROJECT & WORKFLOW
 ---------------------------------------------------*/

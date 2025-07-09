@@ -4,6 +4,7 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import { Ability } from '@/common/types';
+import type { Move } from '../../types/move.types';
 import { executeAttackMove } from './attackMove.service';
 import { executeDefenseMove } from './defenseMove.service';
 import { executeGenericMove } from './genericMove.service';
@@ -27,6 +28,16 @@ export interface MoveRouterResult {
   success: boolean;
   logEntry: BattleLogEntry;
   narrative?: string;
+}
+
+// Add a type guard to check if ability is a Move before calling executeDefenseMove or executeGenericMove. If not, throw a TypeError.
+function isMove(obj: unknown): obj is Move {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'baseDamage' in obj
+  );
 }
 
 /**
@@ -53,17 +64,25 @@ export async function executeMove(
     case 'defense_buff':
     case 'evade':
     case 'parry_retaliate':
-      // Convert Ability to Move if possible (temporary fix)
-      if ('baseDamage' in ability && 'id' in ability) {
-        return await executeDefenseMove(ability as any, attacker, state, attackerIndex);
+      // Fix type errors for executeDefenseMove and executeGenericMove: only cast Ability to Move if it has all required Move properties, otherwise throw an error.
+      if (ability.type === 'defense_buff' || ability.type === 'evade' || ability.type === 'parry_retaliate') {
+        if (isMove(ability)) {
+          return await executeDefenseMove(ability, attacker, state, attackerIndex);
+        } else {
+          throw new TypeError('Ability is missing required Move properties (id, baseDamage) for defense moves');
+        }
+      }
+      // Fallback for other defense types or if not explicitly handled above
+      if (isMove(ability)) {
+        return await executeDefenseMove(ability, attacker, state, attackerIndex);
       } else {
-        throw new TypeError('Ability is missing required Move properties (id, baseDamage)');
+        throw new TypeError('Ability is missing required Move properties (id, baseDamage) for defense moves');
       }
     default:
-      if ('baseDamage' in ability && 'id' in ability) {
-        return await executeGenericMove(ability as any, attacker, state);
+      if (isMove(ability)) {
+        return await executeGenericMove(ability, attacker, state);
       } else {
-        throw new TypeError('Ability is missing required Move properties (id, baseDamage)');
+        throw new TypeError('Ability is missing required Move properties (id, baseDamage) for generic moves');
       }
   }
 } 

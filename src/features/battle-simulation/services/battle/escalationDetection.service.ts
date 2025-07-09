@@ -2,7 +2,7 @@
 // RESPONSIBILITY: Detect when escalation should be triggered
 
 // Custom assertion helper
-function assert(condition: any, message: string): asserts condition {
+function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
@@ -26,7 +26,7 @@ export interface EscalationTriggerResult {
   triggered: boolean;
   reason: string;
   escalationType: EscalationType;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**

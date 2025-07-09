@@ -26,7 +26,13 @@ export function analyzeAIPerformance(
 ): AIMetrics {
   // Calculate pattern recognition accuracy
   const patternAdaptations = battleLog.filter(entry => 
-    entry.meta?.aiRule?.includes('Anti-pattern')
+    entry.meta && (
+      Array.isArray(entry.meta.aiRule)
+        ? entry.meta.aiRule.includes('Anti-pattern')
+        : typeof entry.meta.aiRule === 'string'
+          ? entry.meta.aiRule.includes('Anti-pattern')
+          : false
+    )
   ).length;
   const totalAIInterventions = aiLog.filter(entry => 
     entry.reasoning?.includes('pattern') || entry.reasoning?.includes('spam')
@@ -36,7 +42,13 @@ export function analyzeAIPerformance(
   
   // Calculate anti-spam effectiveness
   const spamPreventions = battleLog.filter(entry => 
-    entry.meta?.aiRule?.includes('Anti-spam')
+    entry.meta && (
+      Array.isArray(entry.meta.aiRule)
+        ? entry.meta.aiRule.includes('Anti-spam')
+        : typeof entry.meta.aiRule === 'string'
+          ? entry.meta.aiRule.includes('Anti-spam')
+          : false
+    )
   ).length;
   const totalSpamAttempts = aiLog.filter(entry => 
     entry.reasoning?.includes('spam') || entry.reasoning?.includes('repetition')

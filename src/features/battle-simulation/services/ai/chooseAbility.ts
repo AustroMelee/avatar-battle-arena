@@ -4,7 +4,7 @@
 import { BattleCharacter, AILogEntry, BattleLogEntry } from '../../types';
 import { shouldAvoidMove, getAntiPatternMoves, generatePatternNarrative } from './patternRecognition';
 import type { Move } from '../../types/move.types';
-
+import type { LocationType } from '../../types/move.types';
 
 
 /**
@@ -131,7 +131,7 @@ export function chooseAbilityWithLogging(
           round: turn,
           cooldowns: {},
           location: 'Fire Nation Throne Hall',
-          locationType: 'interior' as any
+          locationType: 'interior' as LocationType
         },
         consideredActions: [],
         chosenAction: fallbackAbility?.name || 'No moves available',
@@ -327,7 +327,7 @@ export function chooseAbilityWithLogging(
           round: turn,
           cooldowns: {},
           location: 'Fire Nation Throne Hall',
-          locationType: 'interior' as any
+          locationType: 'interior' as LocationType
         },
         consideredActions: scoredAbilities.slice(0, 3).map(action => ({
           abilityId: action.move.toLowerCase().replace(/\s+/g, '_'),

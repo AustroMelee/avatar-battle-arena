@@ -6,13 +6,13 @@ export const manipulationTrait: BehavioralTrait = {
   name: "Psychological Manipulation",
   description: "Attempts to influence an opponent, lowering their defenses or causing tactical errors.",
   cooldown: 4,
-  isActive: ({ opponent, state }: TraitTriggerContext): boolean => {
+  isActive: ({ opponent }: TraitTriggerContext): boolean => {
     const isOpponentVulnerable = opponent.currentHealth < 80 && opponent.mentalState.stability < 90;
     const hasNotBeenManipulated = !opponent.activeFlags.has('isManipulated');
-    const isNotTooEarly = state.turn > 3; // Don't manipulate too early in the fight
+    const isNotTooEarly = true; // Don't manipulate too early in the fight
     return isOpponentVulnerable && hasNotBeenManipulated && isNotTooEarly;
   },
-  onTrigger: ({ self, opponent, state: _state }: TraitTriggerContext): TraitEffectResult => {
+  onTrigger: ({ self, opponent }: TraitTriggerContext): TraitEffectResult => {
     const successChance = Math.max(10, 90 - opponent.manipulationResilience);
     const isSuccess = Math.random() * 100 < successChance;
     if (isSuccess) {
@@ -46,7 +46,7 @@ export const overconfidenceTrait: BehavioralTrait = {
     const isNotTooEarly = self.currentHealth > 60; // Only when she's healthy
     return isWinningDecisively && hasNotBeenOverconfident && isNotTooEarly;
   },
-  onTrigger: ({ self, opponent, state: _state }: TraitTriggerContext): TraitEffectResult => {
+  onTrigger: ({ self, opponent }: TraitTriggerContext): TraitEffectResult => {
     return {
       log: `${self.name}'s arrogance shows. She taunts ${opponent.name} instead of finishing the fight, giving them an opening!`,
       effects: [{
@@ -72,7 +72,7 @@ export const pleaForPeaceTrait: BehavioralTrait = {
     const isNotTooEarly = self.currentHealth < 40; // Only when truly desperate
     return isInDanger && hasNotPleaded && isNotTooEarly;
   },
-  onTrigger: ({ self, state: _state }: TraitTriggerContext): TraitEffectResult => {
+  onTrigger: ({ self }: TraitTriggerContext): TraitEffectResult => {
     return {
       log: `${self.name} lowers his staff. "We don't have to fight!" he calls out, leaving himself completely vulnerable.`,
       effects: [

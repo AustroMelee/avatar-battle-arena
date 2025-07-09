@@ -65,9 +65,16 @@ export function updateTacticalAnalytics(
   // Update additional metrics if provided
   if (additionalMetrics) {
     Object.entries(additionalMetrics).forEach(([key, value]) => {
-      // Only update numeric fields, skip booleans (like stalematePreventionTriggered)
-      if (key in state.analytics! && typeof value === 'number' && typeof (state.analytics as any)[key] === 'number') {
-        (state.analytics as any)[key] += value;
+      if (
+        key in state.analytics! &&
+        typeof value === 'number' &&
+        (Object.prototype.hasOwnProperty.call(state.analytics, key)) &&
+        typeof (state.analytics as Record<string, unknown>)[key] === 'number'
+      ) {
+        const current = (state.analytics as Record<string, unknown>)[key];
+        if (typeof current === 'number') {
+          (state.analytics as Record<string, unknown>)[key] = (current as number) + (value as number);
+        }
       }
     });
   }

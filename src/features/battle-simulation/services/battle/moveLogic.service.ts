@@ -58,25 +58,28 @@ export function resolveMove(
   let wasCrit = false;
   let wasDesperation = false;
 
+  // DEBUG LOG: Start resolution
+  console.log(`[DEBUG] Resolving attack: ${attacker.name} uses ${move.name} on ${target.name}`);
+  console.log(`[DEBUG] Base damage: ${move.baseDamage}`);
+
   // Finisher logic - massive damage, dramatic narrative
   if (move.isFinisher) {
-    // Finishers can still get crits and desperation buffs for even more drama!
     let finisherDamage = move.baseDamage;
     let finisherWasCrit = false;
     let finisherWasDesperation = false;
-    
     // Apply desperation buff to finisher
     if (move.desperationBuff && (ctx.selfHP / ctx.selfMaxHP) * 100 <= move.desperationBuff.hpThreshold) {
       finisherDamage += move.desperationBuff.damageBonus;
       finisherWasDesperation = true;
+      console.log(`[DEBUG] Finisher desperation buff applied: +${move.desperationBuff.damageBonus}`);
     }
-    
     // Apply crit to finisher
     if (move.critChance && Math.random() < move.critChance) {
       finisherDamage *= move.critMultiplier ?? 2;
       finisherWasCrit = true;
+      console.log(`[DEBUG] Finisher critical hit! Multiplier: ${move.critMultiplier ?? 2}`);
     }
-    
+    console.log(`[DEBUG] Final finisher damage: ${finisherDamage}`);
     return {
       damage: finisherDamage,
       narrative: `FINISHER! ${move.name} unleashes devastating power, dealing ${finisherDamage} damage! The arena quakes as ${attacker.name} channels their final strength.`,
@@ -90,27 +93,36 @@ export function resolveMove(
   if (move.desperationBuff && (ctx.selfHP / ctx.selfMaxHP) * 100 <= move.desperationBuff.hpThreshold) {
     damage += move.desperationBuff.damageBonus;
     wasDesperation = true;
+    console.log(`[DEBUG] Desperation buff applied: +${move.desperationBuff.damageBonus}`);
   }
 
   // Critical hit - multiply damage
   if (move.critChance && Math.random() < move.critChance) {
     damage *= move.critMultiplier ?? 2;
     wasCrit = true;
+    console.log(`[DEBUG] Critical hit! Multiplier: ${move.critMultiplier ?? 2}`);
   }
 
   // Apply status effect damage modifiers
+  const beforeStatusEffect = damage;
   damage = modifyDamageWithEffects(damage, attacker, target);
+  if (damage !== beforeStatusEffect) {
+    console.log(`[DEBUG] Status effect modified damage: ${beforeStatusEffect} -> ${damage}`);
+  }
 
   // --- EXPOSED TARGET MECHANIC ---
-  // Ensure target's activeFlags is a Map
   if (!(target.activeFlags instanceof Map)) {
     target.activeFlags = new Map(Object.entries(target.activeFlags || {}));
   }
-  
   if (target.activeFlags.has('isExposed')) {
+    const beforeExpose = damage;
     damage = Math.round(damage * 1.5); // Target takes 50% more damage!
-    target.activeFlags.delete('isExposed'); // The flag is consumed.
+    target.activeFlags.delete('isExposed');
+    console.log(`[DEBUG] Exposed target: ${beforeExpose} -> ${damage}`);
   }
+
+  // Defensive/Block/Miss logic (if any) should be logged here
+  // (Add more logs if you have dodge/block logic elsewhere)
 
   // Generate narrative based on what happened
   let narrative: string;
@@ -120,6 +132,14 @@ export function resolveMove(
     narrative = `DESPERATION MOVE! ${move.name} surges with raw power, dealing ${damage} damage!`;
   } else {
     narrative = `${move.name} deals ${damage} damage.`;
+  }
+
+  // DEBUG LOG: Final calculated damage
+  console.log(`[DEBUG] Final calculated damage: ${damage}`);
+  if (damage <= 0) {
+    console.log(`[DEBUG] Outcome: NO DAMAGE. Likely blocked, dodged, or nullified by defense/effects.`);
+  } else {
+    console.log(`[DEBUG] Outcome: HIT for ${damage} damage.`);
   }
 
   return {

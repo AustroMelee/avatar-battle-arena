@@ -113,9 +113,9 @@ export function recentDamageTaken(
       entry.meta?.moveType === 'MOVE' &&
       entry.target === playerId && 
       entry.turn >= minTurn &&
-      entry.details?.damage !== undefined
+      typeof entry.damage === 'number'
     )
-    .reduce((total, entry) => total + (entry.details?.damage || 0), 0);
+    .reduce((total, entry) => total + (entry.damage ?? 0), 0);
 }
 
 /**
@@ -168,7 +168,7 @@ export function wasRecentlyCriticallyHit(
     entry.meta?.moveType === 'MOVE' &&
     entry.target === playerId && 
     entry.turn >= minTurn &&
-    entry.details?.meta?.crit === true
+    entry.meta?.crit === true
   );
 }
 
@@ -262,7 +262,7 @@ export function wasRecentlyBlockedOrEvaded(
   return log.some(entry => 
     entry.actor === playerId && 
     entry.turn >= minTurn &&
-    (entry.details?.meta?.blocked === true || entry.details?.meta?.evaded === true)
+    (entry.meta?.blocked === true || entry.meta?.evaded === true)
   );
 }
 
@@ -277,7 +277,8 @@ export function getCurrentCombo(log: BattleLogEntry[], playerId: string): number
   if (playerActions.length === 0) return 0;
   
   const lastAction = playerActions[playerActions.length - 1];
-  return lastAction.details?.meta?.combo || 0;
+  const combo = lastAction.meta?.combo;
+  return typeof combo === 'number' ? combo : 0;
 }
 
 export function createEventId(): string {

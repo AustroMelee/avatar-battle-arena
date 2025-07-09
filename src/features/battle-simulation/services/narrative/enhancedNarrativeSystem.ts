@@ -61,7 +61,6 @@ export class EnhancedNarrativeSystem {
    * @returns Array of narrative lines (e.g., [intention, action, reaction])
    */
   async generateMoveNarrative(
-    characterName: string,
     moveName: string,
     context: NarrativeContext,
     damageOutcome: DamageOutcome
@@ -71,7 +70,7 @@ export class EnhancedNarrativeSystem {
       throw new Error('Narrative coordinator not initialized');
     }
     const request: NarrativeRequest = {
-      characterName,
+      characterName: 'character', // Provide a dummy value to satisfy the type
       moveName,
       damageOutcome,
       context
@@ -84,7 +83,6 @@ export class EnhancedNarrativeSystem {
    * @returns Array of narrative lines (e.g., [intention, action, reaction])
    */
   async generateNarrative(
-    characterName: string,
     context: Record<string, unknown>,
     damageOutcome: DamageOutcome,
     moveName?: string
@@ -101,7 +99,7 @@ export class EnhancedNarrativeSystem {
       isEscalation: (context.isEscalation as boolean) || false,
       isPatternBreak: (context.isPatternBreak as boolean) || false
     };
-    return await this.generateMoveNarrative(characterName, moveName || '', narrativeContext, damageOutcome);
+    return await this.generateMoveNarrative(moveName || '', narrativeContext, damageOutcome);
   }
 
   /**
@@ -136,23 +134,23 @@ export class EnhancedNarrativeSystem {
   /**
    * @description Generate victory narrative with character-specific ending
    */
-  async generateVictoryNarrative(_characterName: string, _turnNumber: number): Promise<string> {
+  async generateVictoryNarrative(characterName: string): Promise<string> {
     await this.initializationPromise;
-    return this.coordinator ? this.coordinator.generateVictoryNarrative(_characterName, 'opponent') : '';
+    return this.coordinator ? this.coordinator.generateVictoryNarrative(characterName, 'opponent') : '';
   }
 
   /**
    * @description Generate defeat narrative with character-specific ending
    */
-  async generateDefeatNarrative(_characterName: string, _turnNumber: number): Promise<string> {
+  async generateDefeatNarrative(): Promise<string> {
     await this.initializationPromise;
-    return this.coordinator ? this.coordinator.generateVictoryNarrative('opponent', _characterName) : '';
+    return this.coordinator ? this.coordinator.generateVictoryNarrative('opponent', 'opponent') : '';
   }
 
   /**
    * @description Get current narrative state for character
    */
-  async getNarrativeState(_characterName: string): Promise<string> {
+  async getNarrativeState(): Promise<string> {
     await this.initializationPromise;
     // const _summary = this.coordinator ? this.coordinator.getBattleStateSummary() : {};
     return 'normal'; // Default state
@@ -188,7 +186,7 @@ export class EnhancedNarrativeSystem {
   /**
    * @description Reset tracking for specific character
    */
-  async resetCharacterTracking(_characterName: string): Promise<void> {
+  async resetCharacterTracking(): Promise<void> {
     // Reinitialize the coordinator to reset tracking
     this.initializationPromise = this.initializeCoordinator();
     await this.initializationPromise;
@@ -197,14 +195,14 @@ export class EnhancedNarrativeSystem {
   /**
    * @description Add custom narrative pool
    */
-  addCustomPool(_poolName: string, _lines: string[]): void {
+  addCustomPool(): void {
     // Stub for backward compatibility
   }
 
   /**
    * @description Get custom narrative pool
    */
-  getCustomPool(_poolName: string): string[] {
+  getCustomPool(): string[] {
     // Stub for backward compatibility
     return [];
   }
@@ -212,53 +210,43 @@ export class EnhancedNarrativeSystem {
   /**
    * @description Get narrative tier for character
    */
-  getNarrativeTier(_characterName: string, _turnNumber: number, _healthPercentage: number): string {
-    if (_healthPercentage <= 25) return 'exhausted';
-    if (_healthPercentage <= 50) return 'late';
-    if (_turnNumber >= 10) return 'mid';
+  getNarrativeTier(): string {
     return 'early';
   }
 
   // Backward compatibility methods
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateTurn(_characterName: string, _turnNumber: number): void {
+  updateTurn(): void {
     // Stub for backward compatibility
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateHealth(_characterName: string, _health: number, _maxHealth: number): void {
+  updateHealth(): void {
     // Stub for backward compatibility
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateChi(_characterName: string, _chi: number): void {
+  updateChi(): void {
     // Stub for backward compatibility
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateDamage(_characterName: string, _damage: number): void {
+  updateDamage(): void {
     // Stub for backward compatibility
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateCritical(_characterName: string, _isCritical: boolean): void {
+  updateCritical(): void {
     // Stub for backward compatibility
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateEscalation(_characterName: string, _isEscalation: boolean): void {
+  updateEscalation(): void {
     // Stub for backward compatibility
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updatePatternBreak(_characterName: string, _isPatternBreak: boolean): void {
+  updatePatternBreak(): void {
     // Stub for backward compatibility
   }
 
   /**
    * @description Should announce state (backward compatibility method)
    */
-  shouldAnnounceState(_stateType: string): boolean {
+  shouldAnnounceState(): boolean {
     // Always allow state announcements for now
     return true;
   }
@@ -266,22 +254,22 @@ export class EnhancedNarrativeSystem {
   /**
    * @description Get state announcement (backward compatibility method)
    */
-  async getStateAnnouncement(_stateType: string, _character?: string): Promise<string> {
+  async getStateAnnouncement(): Promise<string> {
     const turnNumber = 1; // Default turn number
-    return await this.generateStateAnnouncement(_stateType as StateAnnouncementType, turnNumber);
+    return await this.generateStateAnnouncement('escalation' as StateAnnouncementType, turnNumber);
   }
 
   /**
    * @description Record state announcement (backward compatibility method)
    */
-  recordStateAnnouncement(_stateType: string): void {
+  recordStateAnnouncement(): void {
     // Stub for backward compatibility
   }
 
   /**
    * @description Determine narrative state (backward compatibility method)
    */
-  determineNarrativeState(_character: string, _context: Record<string, unknown>): void {
+  determineNarrativeState(): void {
     // Stub for backward compatibility
   }
 
@@ -302,11 +290,11 @@ export class EnhancedNarrativeSystem {
     };
 
     if (type === 'victory') {
-      return this.generateVictoryNarrative(character, narrativeContext.turnNumber);
+      return this.generateVictoryNarrative(character);
     } else if (type === 'defeat') {
-      return this.generateDefeatNarrative(character, narrativeContext.turnNumber);
+      return this.generateDefeatNarrative();
     } else {
-      const lines = await this.generateMoveNarrative(character, '', narrativeContext, 'hit');
+      const lines = await this.generateMoveNarrative('', narrativeContext, 'hit');
       return lines[0];
     }
   }

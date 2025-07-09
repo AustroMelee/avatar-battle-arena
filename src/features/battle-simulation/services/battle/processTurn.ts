@@ -21,10 +21,11 @@ import {
   tacticalMovePhase,
 } from './phases';
 import { processTurnEffects } from '../effects/statusEffect.service';
-import { deduplicateClimaxLogs } from './battleValidation';
+import { deduplicateClimaxLogs, forceBattleClimax } from './battleValidation';
 import { logStory } from '../utils/mechanicLogUtils';
 import { isBasicMove } from '../ai/moveSelection';
 import { nes } from '@/common/branding/nonEmptyString';
+import { getMoveById } from '../../data/moves';
 
 // Dynamic no-move flavor phrases for processTurn
 const NO_MOVE_FLAVORS = [
@@ -146,11 +147,52 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   state = await escalationPhase(state);
   if (state.isFinished || state.climaxTriggered) return state;
 
+  // --- ENFORCE CHARGE RELEASE: If active participant is charging, force release move ---
+  const active = state.participants[state.activeParticipantIndex];
+  if (active.status === 'charging' && active.pendingReleaseMoveId) {
+    const releaseMove = getMoveById(active.pendingReleaseMoveId);
+    if (releaseMove) {
+      // Auto-execute release move
+      console.log('[DEBUG] Auto-executing release move after charging:', releaseMove.name);
+      // Execute the release move directly
+      const { attacker: relAttacker, target: relTarget, attackerIndex: relAttackerIndex, targetIndex: relTargetIndex } = getActiveParticipants(state);
+      const { newAttacker, newTarget, logEntries } = await import('./tacticalMove.service').then(m => m.executeTacticalMove(releaseMove, relAttacker, relTarget, state));
+      // Reset charging state
+      newAttacker.status = undefined;
+      newAttacker.pendingReleaseMoveId = undefined;
+      // Update state
+      state.participants[relAttackerIndex] = newAttacker;
+      state.participants[relTargetIndex] = newTarget;
+      state.battleLog.push(...logEntries);
+      return state;
+    } else {
+      console.error('ERROR: Charging but releaseMoveId not found in move data!');
+      state.isFinished = true;
+      return state;
+    }
+  }
+
   // --- ENGINE-LEVEL FORCED ENDING (Pattern Adaptation Breaker) ---
   if (state.forcedEnding) {
+    // Dramatic, cinematic forced ending for climax or deadlock
+    let endingNarrative = '';
+    if (state.tacticalPhase === 'climax') {
+      // Use a unique, cinematic climax ending
+      const climaxLines = [
+        'The arena erupts in a final, desperate clash—neither fighter yields, but the world itself seems to shudder at their will.',
+        'A storm of power and resolve collides; the outcome is not victory, but legend. The battle ends, but its echo will never fade.',
+        'Both warriors unleash everything in a final, blinding exchange. When the dust settles, there is no clear victor—only awe and silence.',
+        'The climax arrives: a crescendo of fury and skill. The duel ends not with defeat, but with mutual respect and exhaustion.',
+        'History will remember this as the day two legends met and neither could break the other. The world holds its breath as the battle ends.'
+      ];
+      endingNarrative = climaxLines[Math.floor(Math.random() * climaxLines.length)];
+    } else {
+      // Use or expand EPILOGUE_FLAVORS for non-climax forced endings
+      endingNarrative = EPILOGUE_FLAVORS[Math.floor(Math.random() * EPILOGUE_FLAVORS.length)];
+    }
     const forcedEndingLog = logStory({
       turn: state.turn,
-      narrative: nes('Both fighters have exhausted all meaningful tactics. The duel ends by narrative deadlock—no victor emerges, only the lesson of futility.'),
+      narrative: nes(endingNarrative),
     });
     if (forcedEndingLog) {
       state.battleLog.push(forcedEndingLog);
@@ -177,6 +219,124 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
     state.participants[index].mentalState = updateMentalState(participant, turnLogs);
   });
   cleanupTacticalStates(state);
+
+  // TEMP LOG: End of turn, before stalemate check
+  console.log('[DEBUG] End of Turn', {
+    turn: state.turn,
+    turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+    tacticalStalemateCounter: state.tacticalStalemateCounter,
+    battleLogLength: state.battleLog.length
+  });
+
+  // --- STALEMATE/DEADLOCK FORCING LOGIC ---
+  // Detect no damage/progress for X turns (X=5)
+  // --- FIX: Only check for stalemate after warmup period ---
+  if (state.turn < 4) {
+    // TEMP LOG: Skipping stalemate check during warmup period
+    console.log('[DEBUG] Skipping stalemate check: warmup period', { turn: state.turn });
+    // Continue with rest of turn processing
+    // --- PHASE 9: End-of-Turn Log Deduplication ---
+    state.battleLog = deduplicateClimaxLogs(state.battleLog);
+    // --- PHASE 10: Advance Turn, Guarantee a Narrative Log ---
+    const hasTurnLog = state.battleLog.some(entry => entry.turn === state.turn);
+    if (!hasTurnLog) {
+      const { attacker } = getActiveParticipants(state);
+      const skippedLog = logStory({
+        turn: state.turn,
+        narrative: nes(getNoMoveFlavor(attacker.name) || '—'),
+      });
+      if (skippedLog) {
+        state.battleLog.push(skippedLog);
+      }
+      state.noMoveTurns = (state.noMoveTurns || 0) + 1;
+    } else {
+      state.noMoveTurns = 0;
+    }
+    // TEMP LOG: End of Turn (final, warmup)
+    console.log('[DEBUG] End of Turn (final, warmup)', {
+      turn: state.turn,
+      turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+      tacticalStalemateCounter: state.tacticalStalemateCounter,
+      battleLogLength: state.battleLog.length
+    });
+    return switchActiveParticipant(state);
+  }
+
+  const X = 5;
+  const Y = 5; // Increased forced ending threshold
+  state.analytics.turnsSinceLastDamage = state.analytics.turnsSinceLastDamage || 0;
+  // TEMP LOG: Before stalemate check
+  console.log('[DEBUG] Before stalemate check', {
+    turn: state.turn,
+    turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+    tacticalStalemateCounter: state.tacticalStalemateCounter,
+    battleLogLength: state.battleLog.length
+  });
+  const lastDamage = state.battleLog.slice(-X).some(log => log.damage && log.damage > 0);
+  // --- FIX: Only increment stalemate counter if both last moves were attack (not charge/setup) ---
+  let bothAttacked = false;
+  if (state.battleLog.length >= 2) {
+    const lastTwoLogs = state.battleLog.slice(-2);
+    bothAttacked = lastTwoLogs.every(log => log.details?.moveType === 'attack' && log.damage !== undefined);
+  }
+  // TEMP LOG: Damage detected in last X turns? and bothAttacked
+  console.log('[DEBUG] Damage detected in last', X, 'turns:', lastDamage, 'bothAttacked:', bothAttacked);
+  if (!lastDamage && bothAttacked) {
+    state.tacticalStalemateCounter = (state.tacticalStalemateCounter || 0) + 1;
+    if (state.analytics) state.analytics.stalematePreventions = (state.analytics.stalematePreventions || 0) + 1;
+    // System log for stalemate detection
+    const stalemateLog = logStory({
+      turn: state.turn,
+      narrative: nes(`[SYSTEM] Stalemate detected: No damage for ${X} turns. Cycle ${state.tacticalStalemateCounter}.`)
+    });
+    if (stalemateLog) state.battleLog.push(stalemateLog);
+    // TEMP LOG: After stalemate increment
+    console.log('[DEBUG] After stalemate increment', {
+      turn: state.turn,
+      turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+      tacticalStalemateCounter: state.tacticalStalemateCounter,
+      battleLogLength: state.battleLog.length
+    });
+    // After Y cycles, force ending
+    if (state.tacticalStalemateCounter >= Y) {
+      const forcedEndingLog = logStory({
+        turn: state.turn,
+        narrative: nes('[SYSTEM] Forced ending: Multiple stalemate cycles reached. Forcing dramatic resolution.')
+      });
+      if (forcedEndingLog) state.battleLog.push(forcedEndingLog);
+      state = forceBattleClimax(state);
+      state.forcedEnding = true;
+      // TEMP LOG: Forced ending triggered
+      console.log('[DEBUG] Forced ending triggered', {
+        turn: state.turn,
+        turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+        tacticalStalemateCounter: state.tacticalStalemateCounter,
+        battleLogLength: state.battleLog.length
+      });
+      return state;
+    } else {
+      // Otherwise, force both sides to use their most powerful available move next turn
+      // (Handled by forceBattleClimax if needed, or by tactical move selection logic)
+    }
+  } else if (lastDamage) {
+    // Reset counter if damage occurs
+    state.tacticalStalemateCounter = 0;
+    // TEMP LOG: Damage occurred, stalemate counter reset
+    console.log('[DEBUG] Damage occurred, stalemate counter reset', {
+      turn: state.turn,
+      turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+      tacticalStalemateCounter: state.tacticalStalemateCounter,
+      battleLogLength: state.battleLog.length
+    });
+  } else {
+    // TEMP LOG: Skipping stalemate increment (not both attacked)
+    console.log('[DEBUG] Skipping stalemate increment: not both attacked', {
+      turn: state.turn,
+      turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+      tacticalStalemateCounter: state.tacticalStalemateCounter,
+      battleLogLength: state.battleLog.length
+    });
+  }
 
   // --- PHASE 9: End-of-Turn Log Deduplication ---
   state.battleLog = deduplicateClimaxLogs(state.battleLog);
@@ -214,6 +374,13 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
       }
       state.isFinished = true;
       state.suddenDeathTriggered = true;
+      // TEMP LOG: All basic moves stalemate
+      console.log('[DEBUG] All basic moves stalemate', {
+        turn: state.turn,
+        turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+        tacticalStalemateCounter: state.tacticalStalemateCounter,
+        battleLogLength: state.battleLog.length
+      });
       return state;
     }
     if (state.noMoveTurns >= 2) {
@@ -225,10 +392,25 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
         state.battleLog.push(suddenDeathLog);
       }
       state.suddenDeathTriggered = true;
+      // TEMP LOG: Sudden death triggered
+      console.log('[DEBUG] Sudden death triggered', {
+        turn: state.turn,
+        turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+        tacticalStalemateCounter: state.tacticalStalemateCounter,
+        battleLogLength: state.battleLog.length
+      });
     }
   } else {
     state.noMoveTurns = 0;
   }
+
+  // TEMP LOG: End of turn (final)
+  console.log('[DEBUG] End of Turn (final)', {
+    turn: state.turn,
+    turnsSinceLastDamage: state.analytics.turnsSinceLastDamage,
+    tacticalStalemateCounter: state.tacticalStalemateCounter,
+    battleLogLength: state.battleLog.length
+  });
 
   // --- Epilogue and result summary after climax or deadlock ---
   if (state.isFinished || state.climaxTriggered) {

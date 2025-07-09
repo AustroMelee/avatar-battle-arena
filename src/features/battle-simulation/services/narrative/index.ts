@@ -98,8 +98,7 @@ export class NarrativeService {
   updateTurn(turnNumber: number): void {
     this.currentTurn = turnNumber;
     // Update turn for all characters (backward compatibility)
-    this.enhancedSystem.updateTurn('Aang', turnNumber);
-    this.enhancedSystem.updateTurn('Azula', turnNumber);
+    this.enhancedSystem.updateTurn();
   }
 
   /**
@@ -128,15 +127,14 @@ export class NarrativeService {
 
     // Generate enhanced narrative with anti-repetition
     const narrativeArr = await this.enhancedSystem.generateNarrative(
-      characterName,
       context,
       damageOutcome,
       moveName
     );
 
     // Add contextual move description if available
-    const moveDescription = moveName ? getContextualMoveDescription(characterName, context, moveName) : null;
-    const narrativeJoined = narrativeArr.join(' ');
+    const moveDescription = moveName ? getContextualMoveDescription(characterName, context) : null;
+    const narrativeJoined = Array.isArray(narrativeArr) ? narrativeArr.join(' ') : narrativeArr;
     if (moveDescription && !narrativeArr.includes(moveDescription)) {
       return `${narrativeJoined} ${moveDescription}`;
     }
@@ -146,26 +144,17 @@ export class NarrativeService {
   /**
    * @description Generates state announcement with enhanced tracking
    */
-  async generateStateAnnouncement(
-    character: string,
-    stateType: 'breaking_point' | 'escalation' | 'desperation' | 'pattern_break',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _context: {
-      turnNumber: number;
-      escalationCount: number;
-      desperationCount: number;
-    }
-  ): Promise<string | null> {
+  async generateStateAnnouncement(): Promise<string | null> {
     // Check if state should be announced using enhanced system
-    if (!this.enhancedSystem.shouldAnnounceState(stateType)) {
+    if (!this.enhancedSystem.shouldAnnounceState()) {
       return null;
     }
 
     // Get state announcement from enhanced system
-    const announcement = await this.enhancedSystem.getStateAnnouncement(stateType, character);
+    const announcement = await this.enhancedSystem.getStateAnnouncement();
     
     // Record the announcement to prevent repetition
-    this.enhancedSystem.recordStateAnnouncement(stateType);
+    this.enhancedSystem.recordStateAnnouncement();
     
     return announcement;
   }
@@ -187,23 +176,10 @@ export class NarrativeService {
       turnNumber: number;
       characterState: 'fresh' | 'wounded' | 'exhausted' | 'desperate';
       chi?: number;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _mechanic: string
+    }
   ): Promise<string | null> {
     // Use enhanced system for tactical responses
-    this.enhancedSystem.determineNarrativeState(character, {
-      isPatternBreak: context.isPatternBreak,
-      isEscalation: context.isEscalation,
-      isDesperation: context.characterState === 'desperate',
-      turnNumber: context.turnNumber,
-      characterState: context.characterState,
-      health: context.maxHealth - context.damage,
-      maxHealth: context.maxHealth,
-      chi: context.chi || 0,
-      isCritical: context.isCritical,
-      damage: context.damage
-    });
+    this.enhancedSystem.determineNarrativeState();
 
     // Generate tactical response using enhanced system
     return await this.enhancedSystem.getNarrative(character, 'pattern_break', {
@@ -317,8 +293,7 @@ export class NarrativeService {
 
       const targetResponseArr = await this.generateTacticalResponse(
         target.name,
-        targetContext,
-        move.name as string
+        targetContext
       );
       if (targetResponseArr) {
         narratives.push(...(Array.isArray(targetResponseArr) ? targetResponseArr : [targetResponseArr]));
