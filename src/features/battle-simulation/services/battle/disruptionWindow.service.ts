@@ -74,7 +74,6 @@ export function resolveDisruptionWindowWithLog(
   resolveDisruptionWindow(_state, character, success, _config);
   const logEntry = createMechanicLogEntry({
     turn,
-    actor: character.name,
     mechanic: 'Disruption Window Resolved',
     effect: success
       ? `${character.name} capitalized on the window!`

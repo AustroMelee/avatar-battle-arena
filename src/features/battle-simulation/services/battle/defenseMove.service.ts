@@ -166,7 +166,6 @@ export async function executeDefenseMove(
   
   const logEntry = logStory({
     turn: state.turn,
-    actor: attacker.name,
     narrative,
     target: attacker.name
   });

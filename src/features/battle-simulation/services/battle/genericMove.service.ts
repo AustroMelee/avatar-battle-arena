@@ -6,6 +6,7 @@ import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
 import { createNarrativeService } from '../narrative';
 import { logStory } from '../utils/mechanicLogUtils';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Result of executing a generic move
@@ -77,7 +78,6 @@ export async function executeGenericMove(
   
   const logEntry = logStory({
     turn: state.turn,
-    actor: attacker.name,
     narrative: narrative,
     target: target.name
   });
@@ -86,8 +86,8 @@ export async function executeGenericMove(
       newState: state,
       logEntry,
       damage: 0,
-      result,
-      narrative,
+      result: nes(result),
+      narrative: nes(narrative),
       isCritical: false
     };
   }
@@ -97,18 +97,18 @@ export async function executeGenericMove(
     logEntry: {
       id: 'generic-move-fallback',
       turn: state.turn,
-      actor: attacker.name,
+      actor: 'System',
       type: 'mechanics',
       action: 'Generic Move',
-      result: narrative,
+      result: nes(narrative),
       target: target.name,
-      narrative: narrative,
+      narrative: nes(narrative),
       timestamp: Date.now(),
       details: undefined
     },
     damage: 0,
-    result,
-    narrative,
+    result: nes(result),
+    narrative: nes(narrative),
     isCritical: false
   };
 } 

@@ -4,12 +4,14 @@ const reactHooks = require('eslint-plugin-react-hooks');
 const reactRefresh = require('eslint-plugin-react-refresh');
 const tseslint = require('@typescript-eslint/eslint-plugin');
 const tsparser = require('@typescript-eslint/parser');
-
-// 👇 Import your local plugin with require (CommonJS)
 const localPlugin = require('./eslint-plugin-local/index.cjs');
+const jestPlugin = require('eslint-plugin-jest');
 
 module.exports = [
-  js.configs.recommended,
+  {
+    ...js.configs.recommended,
+    ignores: ['node_modules/**', 'dist/**', 'build/**'],
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -30,7 +32,6 @@ module.exports = [
       '@typescript-eslint': tseslint,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
-      // 👇 Add local plugin
       local: localPlugin,
     },
     rules: {
@@ -44,12 +45,31 @@ module.exports = [
       '@typescript-eslint/no-explicit-any': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
-      // 👇 Your custom rule
       'local/no-stray-dialogue-import': 'error',
       'local/no-actor-on-non-dialogue-logs': 'error',
     },
   },
+  // ✅  JEST TEST FILES
   {
-    ignores: ['node_modules/**', 'dist/**', 'build/**'],
+    files: ['**/*.test.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        describe: 'writable',
+        it: 'writable',
+        expect: 'writable',
+        beforeAll: 'writable',
+        afterAll: 'writable',
+        beforeEach: 'writable',
+        afterEach: 'writable',
+        jest: 'writable',
+        test: 'writable',
+      },
+    },
+    plugins: {
+      jest: jestPlugin,
+    },
+    rules: {
+      ...jestPlugin.configs.recommended.rules,
+    },
   },
 ];

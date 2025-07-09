@@ -65,7 +65,7 @@ export function updateMentalState(
     // Did we get stunned or interrupted?
     if (
       entry.target === character.name &&
-      (entry.meta?.interrupt || entry.type === 'STATUS')
+      (entry.meta?.interrupt)
     ) {
       pride = Math.max(0, pride - 15);
       stability = Math.max(0, stability - 20);

@@ -106,4 +106,41 @@ If any check fails → abort, reformat, then send. A failure to self-correct is 
 9. Static asset cap 250 kB.  
 10. `window.__DEV_LOG__` runtime toggle.  
 
+Agent Confirmation Policy
+
+Definition (Minor Change):
+Any change classified as a lint fix, code style update, or strictly non-functional/auto-fixable error (e.g. whitespace, formatting, unused imports, semicolons, or naming conventions) is considered non-critical.
+
+Policy:
+For all non-critical code changes:
+
+DO NOT prompt the user to “review changes”, “accept”, or “proceed” before applying.
+
+DO NOT batch minor changes into confirmation queues for user review.
+
+ALWAYS proceed automatically with all requested batch edits, unless a change would alter functionality, logic, or public interfaces.
+
+If in doubt, auto-apply unless the change would affect runtime behavior or public API contracts.
+
+NEVER require explicit confirmation for basic lint or formatting corrections.
+
+Critical Change Escalation:
+Only prompt for user review if a proposed edit meets at least one of the following:
+
+Alters runtime logic, control flow, or data structures.
+
+Changes public interface (types, function signatures, exports).
+
+Performs destructive or irreversible action (file deletion, migration).
+
+Justification:
+User bandwidth is reserved for meaningful review—all agentic auto-fixes for code health, lint, and formatting must proceed automatically and without ticky-tack confirmations.
+All Cursor and LLM agents must treat “batch edit minor flagged files” as default action, not a review opportunity.
+
+---
+
+## Branding & Hygiene Edits
+
+- For all future branding/hygiene tasks, do not require user confirmation or “review changes” prompts for pure-lint/type/branding edits unless an edit would impact logic or cause a test failure unrelated to the branded type system.
+
 # END_POLICY

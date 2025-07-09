@@ -144,7 +144,7 @@ export function createTacticalLogEntry(
   
   return {
     turn,
-    actor: character.name,
+    actor: 'System',
     action: move.name,
     target: target.name,
     result,

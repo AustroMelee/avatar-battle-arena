@@ -22,14 +22,32 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/main.tsx"
     ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\common\\branding\\nonEmptyString.ts",
+    "exports": [
+      "nes",
+      "NonEmptyString"
+    ],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "Canonical branded type export for global use",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
   },
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\common\\components\\Button\\Button.tsx",
@@ -266,9 +284,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "e53219f",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Sun Jul 6 19:12:51 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -342,9 +360,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "9710f16",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Fri Jul 4 01:20:47 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -513,9 +531,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -531,6 +549,11 @@
       "../../types",
       "vitest",
       "../../services/battle/escalationApplication.service",
+      "../../types",
+      "../../services/battleSimulator.service",
+      "../../../character-selection/data/characterData",
+      "../../../location-selection/data/locationData",
+      "@/common/branding/nonEmptyString",
       "../../types"
     ],
     "tags": [],
@@ -538,15 +561,19 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/escalationApplication.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battleSimulator.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/character-selection/data/characterData.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/location-selection/data/locationData.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
     ],
-    "description": "Example log set; in real tests, use the actual log array if available",
+    "description": "--- Escalation regression: generate a real escalation log ---",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -577,9 +604,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -1250,9 +1277,9 @@
     "owner": "AustroMelee",
     "category": "Other",
     "git": {
-      "hash": "f4e4d41",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Mon Jul 7 14:39:45 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -1358,7 +1385,8 @@
       "../battle/positioningMechanics.service",
       "../identity/tacticalPersonality.engine",
       "../../types",
-      "./tacticalMemory.service"
+      "./tacticalMemory.service",
+      "../../types"
     ],
     "tags": [],
     "calls": [
@@ -1370,7 +1398,8 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/tacticalMemory.service.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/tacticalMemory.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
     ],
     "description": "Tactical AI move selection and scoring logic for Avatar Battle Arena. Handles weighted random selection, variance application, and tactical memory for move choice.",
     "owner": "AustroMelee",
@@ -1884,9 +1913,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "8961a33",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Mon Jul 7 03:07:47 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -1920,9 +1949,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "8961a33",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Mon Jul 7 03:07:47 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -1946,7 +1975,8 @@
     "imports": [
       "../../types",
       "../../data/arcTransitions",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -1958,9 +1988,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -1979,7 +2009,8 @@
       "../narrative",
       "../effects/statusEffect.service",
       "./defensiveResolution.service",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "../utils/strings"
     ],
     "tags": [],
     "calls": [
@@ -1990,15 +2021,16 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/effects/statusEffect.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/defensiveResolution.service.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.ts"
     ],
     "description": "Result of executing an attack move",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2024,9 +2056,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "8961a33",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Mon Jul 7 03:07:47 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2053,9 +2085,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "40a9637",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Fri Jul 4 16:44:43 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2166,6 +2198,7 @@
       "../../types",
       "../utils/mechanicLogUtils",
       "../../types/move.types",
+      "../../types",
       "./fallbackMoves",
       "./analyticsTracker.service"
     ],
@@ -2174,6 +2207,7 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/fallbackMoves.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/analyticsTracker.service.ts"
     ],
@@ -2181,9 +2215,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2209,9 +2243,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "40a9637",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Fri Jul 4 16:44:43 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2288,7 +2322,8 @@
     "imports": [
       "../../types",
       "../../types/move.types",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -2300,9 +2335,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -2467,7 +2502,8 @@
     ],
     "imports": [
       "../../types/move.types",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -2478,9 +2514,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -2555,9 +2591,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -2569,22 +2605,23 @@
     ],
     "imports": [
       "../../types",
-      "../../types",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "../utils/strings",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.ts"
     ],
     "description": "CONTEXT: Escalation Application Service",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2613,9 +2650,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟡",
     "usedBy": []
@@ -2627,7 +2664,8 @@
     ],
     "imports": [
       "../../types",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -2684,7 +2722,9 @@
       "../../types",
       "../../types/move.types",
       "../utils/mechanicLogUtils",
-      "./analyticsTracker.service"
+      "./analyticsTracker.service",
+      "@/common/branding/nonEmptyString",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -2697,9 +2737,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2715,7 +2755,8 @@
       "../../types",
       "../../types/move.types",
       "../narrative",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -2728,9 +2769,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -2771,6 +2812,21 @@
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/endPhase.service.ts"
     ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\index.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
   },
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\logIdGenerator.service.ts",
@@ -2955,7 +3011,8 @@
     "status": "🟢",
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/tacticalMove.service.test.ts"
     ]
   },
   {
@@ -3161,9 +3218,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -3270,11 +3327,14 @@
     ],
     "imports": [
       "../../types",
+      "../../types",
       "../../types/move.types",
-      "../ai/logQueries"
+      "../ai/logQueries",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/logQueries.ts"
@@ -3307,7 +3367,8 @@
       "../effects/statusEffect.service",
       "./battleValidation",
       "../utils/mechanicLogUtils",
-      "../ai/moveSelection"
+      "../ai/moveSelection",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -3331,6 +3392,7 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/basicStrike.integration.test.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battleSimulator.service.ts"
     ]
   },
@@ -3377,7 +3439,8 @@
     "imports": [
       "../../types",
       "@/common/types",
-      "../ai/logQueries"
+      "../ai/logQueries",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -3471,7 +3534,8 @@
       "../../data/identities",
       "../../data/arcTransitions",
       "../identity/behavioral.service",
-      "./moveRegistry.service"
+      "./moveRegistry.service",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -3490,9 +3554,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -3501,6 +3565,7 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/finisherPhase.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/processTurn.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/helpers/mockState.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battleSimulator.service.ts"
     ]
   },
@@ -3509,7 +3574,9 @@
     "exports": [
       "TacticalMoveResult",
       "moveToAbility",
-      "selectTacticalMove"
+      "selectTacticalMove",
+      "selectDramaticMove",
+      "filterPenalties"
     ],
     "imports": [
       "../../types",
@@ -3526,7 +3593,9 @@
       "./checkDefeat",
       "../../types/move.types",
       "./positioningMechanics.service",
-      "../ai/tacticalMemory.service"
+      "../ai/tacticalMemory.service",
+      "@/common/branding/nonEmptyString",
+      "../../types"
     ],
     "tags": [],
     "calls": [
@@ -3544,7 +3613,8 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/checkDefeat.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/tacticalMemory.service.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/tacticalMemory.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
     ],
     "description": "Result of executing a tactical move",
     "owner": "",
@@ -3556,7 +3626,8 @@
     },
     "status": "🟢",
     "usedBy": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveExecution.service.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveExecution.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/tacticalMove.service.test.ts"
     ]
   },
   {
@@ -3618,6 +3689,82 @@
     ]
   },
   {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\__tests__\\basicStrike.integration.test.ts",
+    "exports": [],
+    "imports": [
+      "vitest",
+      "../processTurn",
+      "./helpers/mockState",
+      "../../../types",
+      "../../../../character-selection/data/characterData"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/processTurn.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/helpers/mockState.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/character-selection/data/characterData.ts"
+    ],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\__tests__\\helpers\\mockState.ts",
+    "exports": [
+      "createMockState"
+    ],
+    "imports": [
+      "../../state",
+      "../../../../../character-selection/data/characterData"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/character-selection/data/characterData.ts"
+    ],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/basicStrike.integration.test.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/tacticalMove.service.test.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battle\\__tests__\\tacticalMove.service.test.ts",
+    "exports": [],
+    "imports": [
+      "vitest",
+      "../tacticalMove.service",
+      "./helpers/mockState",
+      "../moveRegistry.service"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/tacticalMove.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/helpers/mockState.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveRegistry.service.ts"
+    ],
+    "description": "Unit test: Basic Strike should always reduce defender HP",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\battleSimulator.service.ts",
     "exports": [
       "BattleSimulationResult",
@@ -3631,7 +3778,8 @@
       "./battle/analytics",
       "./battle/analyticsTracker.service",
       "./ai/logQueries",
-      "./utils/mechanicLogUtils"
+      "./utils/mechanicLogUtils",
+      "../types"
     ],
     "tags": [],
     "calls": [
@@ -3642,19 +3790,22 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/analytics.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/analyticsTracker.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/logQueries.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
     ],
     "description": "Represents the result of a battle simulation with analytics.",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/controllers/useBattleSimulator.controller.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.test.tsx",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/controllers/useBattleSimulator.controller.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/__tests__/battle-log-pipeline.test.ts"
     ]
   },
   {
@@ -3729,6 +3880,8 @@
     "imports": [
       "../../types",
       "../ai/logQueries",
+      "@/common/branding/nonEmptyString",
+      "@/common/branding/nonEmptyString",
       "../../types/move.types"
     ],
     "tags": [],
@@ -3741,9 +3894,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -3763,7 +3916,8 @@
     "imports": [
       "../../types",
       "../ai/logQueries",
-      "./effectFusion.service"
+      "./effectFusion.service",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -3775,9 +3929,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -3802,6 +3956,7 @@
       "../../../character-selection/data/traits",
       "../../types/behavioral.types",
       "../utils/mechanicLogUtils",
+      "../utils/strings",
       "../utils/mechanicLogUtils"
     ],
     "tags": [],
@@ -3810,15 +3965,16 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/character-selection/data/traits.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/behavioral.types.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
     ],
     "description": "import { createMechanicLogEntry } from '../utils/mechanicLogUtils';",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟡",
     "usedBy": [
@@ -3983,7 +4139,9 @@
       "date": "Tue Jul 8 15:23:52 2025 -0400"
     },
     "status": "🟢",
-    "usedBy": []
+    "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/BattleNarrationStrategyService.ts"
+    ]
   },
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\battleEndHandler.ts",
@@ -4174,12 +4332,12 @@
     ],
     "imports": [
       "../types/NarrativeTypes",
-      "./NarrativeTrackSelector"
+      "../antiRepetitionTracker"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/NarrativeTrackSelector.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/antiRepetitionTracker.ts"
     ],
     "description": "Service responsible for choosing narrative strategies and tracks",
     "owner": "",
@@ -4551,9 +4709,7 @@
       "date": "Fri Jul 4 21:23:44 2025 -0400"
     },
     "status": "🟢",
-    "usedBy": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/BattleNarrationStrategyService.ts"
-    ]
+    "usedBy": []
   },
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\core\\NarrativeVariantsService.ts",
@@ -4759,6 +4915,66 @@
     "usedBy": []
   },
   {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\Engine\\BattleContext.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\Engine\\EnhancedNarrativeIntegration.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\Engine\\MetaCooldownManager.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\Engine\\NarrativeSelector.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\enhancedNarrativeSystem.ts",
     "exports": [
       "EnhancedNarrativeSystem",
@@ -4872,7 +5088,8 @@
       "./contextualNarrativeMapper",
       "./enhancedRepetitionManager",
       "./stateAnnouncementManager",
-      "./narrativePoolManager"
+      "./narrativePoolManager",
+      "../utils/strings"
     ],
     "tags": [],
     "calls": [
@@ -4880,7 +5097,8 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/contextualNarrativeMapper.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/enhancedRepetitionManager.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/stateAnnouncementManager.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/narrativePoolManager.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/narrativePoolManager.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.ts"
     ],
     "description": "Enhanced template generator with advanced anti-repetition and state management",
     "owner": "",
@@ -5216,25 +5434,42 @@
     ],
     "imports": [
       "../../types",
-      "../utils/mechanicLogUtils"
+      "../utils/mechanicLogUtils",
+      "../utils/strings"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.ts"
     ],
     "description": "Opening sequence configuration for each character",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts"
     ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\pools\\Aang\\EscalationLate.ts",
+    "exports": [],
+    "imports": [],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
   },
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\pools\\aang.narrative.ts",
@@ -5289,7 +5524,8 @@
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\narrative\\pools\\narrativePoolRegistry.service.ts",
     "exports": [
-      "NarrativePoolRegistry"
+      "NarrativePoolRegistry",
+      "systemNarrativePool"
     ],
     "imports": [
       "../narrative.types",
@@ -5660,6 +5896,26 @@
     "usedBy": []
   },
   {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\utils\\mechanicLogUtils.test.ts",
+    "exports": [],
+    "imports": [
+      "vitest",
+      "../utils/mechanicLogUtils"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts"
+    ],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\utils\\mechanicLogUtils.ts",
     "exports": [
       "MechanicLogOptions",
@@ -5671,11 +5927,13 @@
       "logStory",
       "logMechanics",
       "logSystem",
+      "maybeLogSystem",
       "inferLogType"
     ],
     "imports": [
       "../../types",
-      "../ai/logQueries"
+      "../ai/logQueries",
+      "@/common/branding/nonEmptyString"
     ],
     "tags": [],
     "calls": [
@@ -5717,6 +5975,7 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/behavioral.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/behavioral.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/openingSequence.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.test.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/moveUtils.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/character-selection/data/traits.ts"
     ]
@@ -5755,6 +6014,54 @@
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/helpers/conditionHelpers.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts"
+    ]
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\utils\\strings.test.ts",
+    "exports": [],
+    "imports": [
+      "vitest",
+      "../utils/strings"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.ts"
+    ],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\services\\utils\\strings.ts",
+    "exports": [
+      "ensureNonEmpty"
+    ],
+    "imports": [
+      "../../types"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
+    ],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/attackMove.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/escalationApplication.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/behavioral.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/enhancedTemplateGenerator.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/openingSequence.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/strings.test.ts"
     ]
   },
   {
@@ -5874,6 +6181,10 @@
       "LogEntryType",
       "BattleResolution",
       "LogDetails",
+      "FighterName",
+      "NonEmptyString",
+      "DialogueLogEntry",
+      "NonDialogueLogEntry",
       "BattleLogEntry",
       "LogDetailLevel",
       "BattleState",
@@ -6040,6 +6351,28 @@
     ]
   },
   {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\__tests__\\battle-log-pipeline.test.ts",
+    "exports": [],
+    "imports": [
+      "../services/battleSimulator.service",
+      "../types",
+      "vitest"
+    ],
+    "tags": [],
+    "calls": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battleSimulator.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
+    ],
+    "description": "battle-log-pipeline.test.ts",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\components\\CharacterCard.tsx",
     "exports": [
       "CharacterCard"
@@ -6051,9 +6384,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -6070,9 +6403,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "05ff14c",
+      "hash": "9c7f82b",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 19:11:39 2025 -0400"
+      "date": "Tue Jul 8 21:59:38 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -6107,7 +6440,8 @@
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\character-selection\\data\\characterData.ts",
     "exports": [
-      "availableCharacters"
+      "availableCharacters",
+      "getCharacterById"
     ],
     "imports": [
       "@/common/types"
@@ -6124,6 +6458,9 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.test.tsx",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/basicStrike.integration.test.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/helpers/mockState.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/character-selection/components/CharacterSelection.tsx"
     ]
   },
@@ -6204,6 +6541,7 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.test.tsx",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/location-selection/components/LocationSelection.tsx"
     ]
@@ -6257,6 +6595,32 @@
       "hash": "f4e4d41",
       "author": "AustroMelee",
       "date": "Mon Jul 7 14:39:45 2025 -0400"
+    },
+    "status": "🟢",
+    "usedBy": []
+  },
+  {
+    "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\test-utils\\battleTestFactory.ts",
+    "exports": [
+      "buildBattleState",
+      "techLog",
+      "dialogue"
+    ],
+    "imports": [
+      "@/common/branding/nonEmptyString",
+      "@/common/branding/nonEmptyString",
+      "@/features/location-selection/data/locationData",
+      "@/features/character-selection/data/characterData",
+      "@/common/types",
+      "@/features/battle-simulation/types"
+    ],
+    "tags": [],
+    "calls": [],
+    "description": "",
+    "owner": "",
+    "category": "Other",
+    "git": {
+      "hash": ""
     },
     "status": "🟢",
     "usedBy": []

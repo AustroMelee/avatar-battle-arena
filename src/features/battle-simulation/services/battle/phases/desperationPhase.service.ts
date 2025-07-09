@@ -63,7 +63,6 @@ export async function processDesperationPhase(state: BattleState): Promise<Battl
     if (desperationAnnouncement) {
       const logEntry = logStory({
         turn: state.turn,
-        actor: attacker.name,
         narrative: desperationAnnouncement,
         target: undefined
       });

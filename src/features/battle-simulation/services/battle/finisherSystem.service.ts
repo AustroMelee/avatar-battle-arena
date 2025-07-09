@@ -6,6 +6,8 @@ import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import type { Move, FinisherCondition } from '../../types/move.types';
 import { logStory } from '../utils/mechanicLogUtils';
 import { trackDamage, trackChiSpent } from './analyticsTracker.service';
+import { nes } from '@/common/branding/nonEmptyString';
+import type { NonEmptyString } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Finisher move configuration
@@ -136,15 +138,14 @@ export function executeFinisherMove(
   // Generate result text
   let result: string;
   if (isCritical) {
-    result = `FINISHER CRITICAL! ${target.name} is devastated, taking ${finalDamage} damage!`;
+    result = nes(`FINISHER CRITICAL! ${target.name} is devastated, taking ${finalDamage} damage!`);
   } else {
-    result = `FINISHER! ${target.name} takes ${finalDamage} damage!`;
+    result = nes(`FINISHER! ${target.name} takes ${finalDamage} damage!`);
   }
   
   // Create dramatic log entry
   const logEntry = logStory({
     turn: state.turn,
-    actor: attacker.name,
     narrative: finisher.narrative.success,
     target: target.name
   });
@@ -152,12 +153,12 @@ export function executeFinisherMove(
   return {
     id: 'finisher-fallback',
     turn: state.turn,
-    actor: attacker.name,
+    actor: 'System',
     type: 'mechanics',
     action: 'Finisher',
-    result: result || `Finisher move executed.`,
+    result: nes((result && result.length ? result : 'No result') as unknown as NonEmptyString),
     target: target.name,
-    narrative: `Finisher move executed: ${finisher.name}.`,
+    narrative: nes((result && result.length ? result : 'No narrative') as unknown as NonEmptyString),
     timestamp: Date.now(),
     details: {},
   };

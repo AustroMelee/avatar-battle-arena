@@ -13,7 +13,7 @@
 // No matter how many updates or changes we make, users MUST be able to see logs from T1
 // This is essential for battle analysis and debugging - never hide early turns!
 //
-import React, { useState, useMemo, useRef, useEffect, FC } from 'react';
+import React, { useState, useRef, useEffect, FC } from 'react';
 import { BattleLogEntry, AILogEntry, BattleCharacter } from '../../types';
 import { LogViewMode } from '../../types/logViewModes';
 import DialogueLogEntry from './DialogueLogEntry';
@@ -86,17 +86,21 @@ export const SingleLogEntry: FC<Props> = ({ entry, p1Name, p2Name }) => {
           />
         );
       }
-      // fall through to narrative styling
+      return (
+        <NarrativeLogEntry
+          {...common}
+          text={typeof entry.narrative === 'string' ? entry.narrative : Array.isArray(entry.narrative) ? entry.narrative.join(' ') : ''}
+        />
+      );
     case "narrative":
     case "mechanics":
     case "system":
       if (
-        (import.meta as any).env?.MODE !== "production" &&
-        entry.type !== "dialogue" &&
-        (entry.actor === p1Name || entry.actor === p2Name)
+        (import.meta as any).env?.MODE !== "production"
       ) {
-        // eslint-disable-next-line no-console
-        console.warn("[LOG PIPELINE] Non-dialogue fighter entry:", entry);
+        if (entry.actor === p1Name || entry.actor === p2Name) {
+          console.warn("[LOG PIPELINE] Non-dialogue fighter entry:", entry);
+        }
       }
       return (
         <NarrativeLogEntry
@@ -105,7 +109,7 @@ export const SingleLogEntry: FC<Props> = ({ entry, p1Name, p2Name }) => {
         />
       );
     default:
-      assertNever(entry.type as never);
+      return assertNever(entry as never);
   }
 };
 
@@ -135,7 +139,7 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   // Log view mode state
   const [viewMode, setViewMode] = useState<LogViewMode>('grouped');
 
-  // Grouping helper
+  // CRITICAL INVARIANT: Logs must always be sorted by turn for correct UI and analytics.
   function groupEntriesByTurn(entries: BattleLogEntry[]) {
     const grouped: { prologue: BattleLogEntry[]; turns: { turn: number, entries: BattleLogEntry[] }[] } = { prologue: [], turns: [] };
     const turnMap: Record<number, BattleLogEntry[]> = {};

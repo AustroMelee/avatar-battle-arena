@@ -16,6 +16,8 @@ import { checkDefeat } from './checkDefeat';
 // import { getLocationType } from '../../types/move.types';
 import { canUseMove } from './positioningMechanics.service';
 import { TacticalMemory } from '../ai/tacticalMemory.service';
+import { nes } from '@/common/branding/nonEmptyString';
+import type { NonEmptyString } from '../../types';
 
 /**
  * @description Result of executing a tactical move
@@ -128,12 +130,12 @@ async function handleRepositioningMove(
   const logEntry: BattleLogEntry = {
     id: generateUniqueLogId('reposition'),
     turn: state.turn,
-    actor: attacker.name,
+    actor: 'System',
     type: mapRawType('REPOSITION'),
     action: move.name,
     target: target.name,
-    result: damage > 0 ? `${target.name} takes ${damage} damage.` : `${attacker.name} repositions.`,
-    narrative,
+    result: nes((damage > 0 ? `${target.name} takes ${damage} damage.` : 'No result') as unknown as NonEmptyString),
+    narrative: nes((narrative && narrative.length > 0 ? narrative : 'No narrative') as unknown as NonEmptyString),
     timestamp: Date.now(),
     details: {
       moveType: 'repositioning',
@@ -146,7 +148,7 @@ async function handleRepositioningMove(
     newAttacker: attacker,
     newTarget: newTarget,
     logEntries: [logEntry],
-    narrative
+    narrative: nes((narrative && narrative.length > 0 ? narrative : 'No narrative') as unknown as NonEmptyString)
   };
 }
 
@@ -212,13 +214,13 @@ async function handleChargeUpMove(
   const logEntry: BattleLogEntry = {
     id: generateUniqueLogId('charge'),
     turn: state.turn,
-    actor: attacker.name,
+    actor: 'System',
     type: mapRawType('CHARGE'),
     action: move.name,
     target: target.name,
-    result: chargeResult.interrupted ? `${attacker.name}'s charge was interrupted!` : 
-            damage > 0 ? `${target.name} takes ${damage} damage.` : `${attacker.name} continues charging.`,
-    narrative,
+    result: chargeResult.interrupted ? nes(`${attacker.name}'s charge was interrupted!`) : 
+            damage > 0 ? nes(`${target.name} takes ${damage} damage.`) : nes(`${attacker.name} continues charging.`),
+    narrative: nes((narrative && narrative.length > 0 ? narrative : 'No narrative') as unknown as NonEmptyString),
     timestamp: Date.now(),
     details: {
       moveType: 'charge-up',
@@ -232,14 +234,14 @@ async function handleChargeUpMove(
     newAttacker: attacker,
     newTarget: newTarget,
     logEntries: [logEntry],
-    narrative
+    narrative: nes((narrative && narrative.length > 0 ? narrative : 'No narrative') as unknown as NonEmptyString)
   };
 }
 
 /**
  * @description Handles regular tactical moves
  */
-async function handleRegularTacticalMove(
+export async function handleRegularTacticalMove(
   move: Move,
   attacker: BattleCharacter,
   target: BattleCharacter,
@@ -320,12 +322,12 @@ async function handleRegularTacticalMove(
   const logEntry: BattleLogEntry = {
     id: generateUniqueLogId('tactical'),
     turn: state.turn,
-    actor: newAttacker.name,
+    actor: 'System',
     type: mapRawType('TACTICAL'), // Main event type
     action: move.name,
-    target: target.name,
-    result: `${target.name} takes ${damage} damage. ${narrative}`,
-    narrative,
+    target: newTarget.name,
+    result: damage > 0 ? nes(`${newTarget.name} takes ${damage} damage.`) : nes(`${newAttacker.name} attacks with ${move.name}.`),
+    narrative: nes((narrative && narrative.length > 0 ? narrative : 'No narrative') as unknown as NonEmptyString),
     timestamp: Date.now(),
     details: {
       controlShift: impactResult.controlShift,
@@ -338,7 +340,7 @@ async function handleRegularTacticalMove(
     newAttacker: newAttacker,
     newTarget: newTarget,
     logEntries: [logEntry],
-    narrative
+    narrative: nes((narrative && narrative.length > 0 ? narrative : 'No narrative') as unknown as NonEmptyString)
   };
 }
 

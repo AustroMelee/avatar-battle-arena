@@ -11,6 +11,7 @@ import { createNarrativeService } from '../narrative';
 import { applyEffect, createStatusEffect, modifyDamageWithEffects } from '../effects/statusEffect.service';
 import { resolveClash } from './defensiveResolution.service';
 import { logStory } from '../utils/mechanicLogUtils';
+import { ensureNonEmpty } from '../utils/strings';
 
 /**
  * @description Result of executing an attack move
@@ -221,8 +222,7 @@ export async function executeAttackMove(
   // Create log entry
   const logEntry = logStory({
     turn: state.turn,
-    actor: attacker.name,
-    narrative: narrative,
+    narrative: ensureNonEmpty(narrative),
     target: target.name
   });
   if (logEntry) {
@@ -230,8 +230,8 @@ export async function executeAttackMove(
       newState,
       logEntry,
       damage: finalDamage,
-      result,
-      narrative,
+      result: ensureNonEmpty(result),
+      narrative: ensureNonEmpty(narrative),
       isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target).wasCrit : false
     };
   }
@@ -241,18 +241,18 @@ export async function executeAttackMove(
     logEntry: {
       id: 'attack-fallback',
       turn: state.turn,
-      actor: attacker.name,
+      actor: 'System',
       type: 'mechanics',
       action: 'Attack',
-      result: narrative,
+      result: ensureNonEmpty(result),
       target: target.name,
-      narrative: narrative,
+      narrative: ensureNonEmpty(narrative),
       timestamp: Date.now(),
       details: undefined
     },
     damage: finalDamage,
-    result,
-    narrative,
+    result: ensureNonEmpty(result),
+    narrative: ensureNonEmpty(narrative),
     isCritical: !wasEvaded && !wasParried ? resolveMove(move, battleContext, attacker, target).wasCrit : false
   };
 } 

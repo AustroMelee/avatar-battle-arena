@@ -1,7 +1,7 @@
 // CONTEXT: Real-time Analytics Tracker
 // RESPONSIBILITY: Track battle metrics in real-time during execution
 
-import { BattleLogEntry, BattleState } from '../../types';
+import { BattleLogEntry } from '../../types';
 
 /**
  * @description Real-time analytics tracking during battle execution

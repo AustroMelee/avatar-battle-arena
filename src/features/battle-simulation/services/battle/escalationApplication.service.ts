@@ -2,8 +2,9 @@
 // RESPONSIBILITY: Apply escalation effects to battle state
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
-import type { EscalationType } from '../../types';
 import { logMechanics } from '../utils/mechanicLogUtils';
+import { ensureNonEmpty } from '../utils/strings';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * Forces pattern-breaking escalation using only phase-based logic.
@@ -13,9 +14,7 @@ import { logMechanics } from '../utils/mechanicLogUtils';
  */
 export function forcePatternEscalation(
   state: BattleState, 
-  attacker: BattleCharacter, 
-  escalationType: EscalationType,
-  reason: string
+  attacker: BattleCharacter
 ): { newState: BattleState; logEntry: BattleLogEntry } {
   const newState = { ...state };
   const attackerIndex = newState.participants.findIndex((p: BattleCharacter) => p.name === attacker.name);
@@ -24,11 +23,11 @@ export function forcePatternEscalation(
     turn: state.turn,
     actor: 'System',
     action: '',
-    result: '',
+    result: nes('Escalation fallback log.'),
     target: 'Battle',
     details: undefined,
     type: 'mechanics',
-    narrative: '',
+    narrative: nes('Escalation fallback log.'),
     timestamp: Date.now()
   }};
   // Set phase
@@ -40,29 +39,10 @@ export function forcePatternEscalation(
   if (newState.analytics) {
     newState.analytics.patternAdaptations = (newState.analytics.patternAdaptations || 0) + 1;
   }
-  // Narrative
-  let narrative = '';
-  switch (escalationType) {
-    case 'reposition':
-      narrative = `The arena constricts! ${attacker.name} is forced into close combat - no more running!`;
-      break;
-    case 'stalemate':
-      narrative = `The battle has become a war of attrition! The fighters are forced into an all-out attack!`;
-      break;
-    case 'damage':
-      narrative = `The arena trembles with anticipation! ${attacker.name} feels the pressure mounting - it's time to escalate!`;
-      break;
-    case 'repetition':
-      narrative = `${attacker.name} breaks free from their predictable pattern!`;
-      break;
-    default:
-      narrative = `${attacker.name} feels the battle intensifying!`;
-      break;
-  }
   // Technical log
   let logEntry = logMechanics({
     turn: state.turn,
-    text: `${attacker.name}: Escalation applied: ${reason}`
+    text: ensureNonEmpty(`${attacker.name} ESCALATION: stale pattern detected!`)
   });
   if (!logEntry) {
     logEntry = {
@@ -70,11 +50,11 @@ export function forcePatternEscalation(
       turn: state.turn,
       actor: 'System',
       action: '',
-      result: '',
+      result: nes('Escalation fallback log.'),
       target: 'Battle',
       details: undefined,
       type: 'mechanics',
-      narrative: '',
+      narrative: nes('Escalation fallback log.'),
       timestamp: Date.now()
     };
   }

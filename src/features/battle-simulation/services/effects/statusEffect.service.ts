@@ -3,6 +3,7 @@
 import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType, ArcStateModifier } from '../../types';
 import { createEventId, generateUniqueLogId } from '../ai/logQueries';
 import { processEffectFusions } from './effectFusion.service'; // NEW Import
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Types for status effects
@@ -43,12 +44,12 @@ export function applyEffect(
   const logEntry: BattleLogEntry = {
     id: generateUniqueLogId('status'),
     turn,
-    actor: character.name,
+    actor: 'System',
     type: 'mechanics',
     action: 'Effect Applied',
     target: character.name,
-    result: `${character.name} is affected by ${modifiedEffect.name} from ${modifiedEffect.sourceAbility}`,
-    narrative: `${character.name} is now under the effect of ${modifiedEffect.name} from ${modifiedEffect.sourceAbility}!`,
+    result: nes('Effect Applied'),
+    narrative: nes(`${character.name} is now under the effect of ${modifiedEffect.name} from ${modifiedEffect.sourceAbility}!`),
     timestamp: Date.now(),
     details: {
       effectType: modifiedEffect.type,
@@ -104,12 +105,12 @@ export function processTurnEffects(
       logEntries.push({
         id: createEventId(),
         turn,
-        actor: character.name,
+        actor: 'System',
         type: 'mechanics',
         action: 'Burnout Crisis',
         target: character.name,
-        result: `Sustained burns cause exhaustion! Defense lowered.`,
-        narrative: `The constant pain from the searing burns is breaking ${character.name}'s focus and stance!`,
+        result: nes('Sustained burns cause exhaustion! Defense lowered.'),
+        narrative: nes(`The constant pain from the searing burns is breaking ${character.name}'s focus and stance!`),
         timestamp: Date.now(),
         details: { effectType: 'CRISIS', sourceEffect: effect.name, newEffect: 'DEFENSE_DOWN' }
       });
@@ -126,12 +127,12 @@ export function processTurnEffects(
         logEntries.push({
           id: generateUniqueLogId('status'),
           turn,
-          actor: character.name,
+          actor: 'System',
           type: 'mechanics',
           action: 'Burn Damage',
           target: character.name,
-          result: `Takes ${burnDamage} burn damage`,
-          narrative: `${character.name} continues to burn from ${effect.sourceAbility}!`,
+          result: nes(`Takes ${burnDamage} burn damage`),
+          narrative: nes(`${character.name} continues to burn from ${effect.sourceAbility}!`),
           timestamp: Date.now(),
           details: {
             effectType: 'BURN',
@@ -149,12 +150,12 @@ export function processTurnEffects(
         logEntries.push({
           id: generateUniqueLogId('status'),
           turn,
-          actor: character.name,
+          actor: 'System',
           type: 'mechanics',
           action: 'Heal Over Time',
           target: character.name,
-          result: `Recovers ${healAmount} health`,
-          narrative: `${character.name} continues to recover from ${effect.sourceAbility}!`,
+          result: nes(`Recovers ${healAmount} health`),
+          narrative: nes(`${character.name} continues to recover from ${effect.sourceAbility}!`),
           timestamp: Date.now(),
           details: {
             effectType: 'HEAL_OVER_TIME',
@@ -171,12 +172,12 @@ export function processTurnEffects(
         logEntries.push({
           id: generateUniqueLogId('status'),
           turn,
-          actor: character.name,
+          actor: 'System',
           type: 'mechanics',
           action: 'Defense Down',
           target: character.name,
-          result: `Defense lowered by ${effect.potency}`,
-          narrative: `${character.name}'s defense is weakened!`,
+          result: nes(`Defense lowered by ${effect.potency}`),
+          narrative: nes(`${character.name}'s defense is weakened!`),
           timestamp: Date.now(),
           details: {
             effectType: 'DEFENSE_DOWN',
@@ -191,12 +192,12 @@ export function processTurnEffects(
         logEntries.push({
           id: generateUniqueLogId('status'),
           turn,
-          actor: character.name,
+          actor: 'System',
           type: 'mechanics',
           action: 'Attack Up',
           target: character.name,
-          result: `Attack boosted by ${effect.potency}`,
-          narrative: `${character.name}'s attack is strengthened!`,
+          result: nes(`Attack boosted by ${effect.potency}`),
+          narrative: nes(`${character.name}'s attack is strengthened!`),
           timestamp: Date.now(),
           details: {
             effectType: 'ATTACK_UP',
@@ -211,12 +212,12 @@ export function processTurnEffects(
         logEntries.push({
           id: generateUniqueLogId('status'),
           turn,
-          actor: character.name,
+          actor: 'System',
           type: 'mechanics',
           action: 'Stunned',
           target: character.name,
-          result: `Stunned and cannot act this turn`,
-          narrative: `${character.name} is stunned and cannot act!`,
+          result: nes(`Stunned and cannot act this turn`),
+          narrative: nes(`${character.name} is stunned and cannot act!`),
           timestamp: Date.now(),
           details: {
             effectType: 'STUN'
@@ -241,12 +242,12 @@ export function processTurnEffects(
       logEntries.push({
         id: generateUniqueLogId('status'),
         turn,
-        actor: character.name,
+        actor: 'System',
         type: 'mechanics',
         action: 'Effect Expired',
         target: character.name,
-        result: `${effect.name} has worn off`,
-        narrative: `${character.name} is no longer affected by ${effect.name}!`,
+        result: nes(`${effect.name} has worn off`),
+        narrative: nes(`${character.name} is no longer affected by ${effect.name}!`),
         timestamp: Date.now(),
         details: {
           effectType: 'EXPIRED',

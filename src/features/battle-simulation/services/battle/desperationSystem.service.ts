@@ -5,10 +5,10 @@ import {
   BattleCharacter,
   BattleState,
   BattleLogEntry,
-  EscalationType
 } from '../../types';
 import type { Move } from '../../types/move.types';
 import { logMechanics, logStory } from '../utils/mechanicLogUtils';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Desperation thresholds that trigger dramatic changes
@@ -148,20 +148,18 @@ export function createDesperationLogEntry(
 
   const log = logStory({
     turn,
-    actor: character.name,
-    narrative,
-    target: character.name
+    text: `${character.name}: Desperation triggered.`
   });
   if (log) return log;
   return {
     id: 'desperation-fallback',
     turn,
-    actor: character.name,
+    actor: 'System',
     type: 'mechanics',
     action: 'Desperation',
-    result: narrative,
+    result: nes(narrative),
     target: character.name,
-    narrative,
+    narrative: nes(narrative),
     timestamp: Date.now(),
     details: undefined
   };

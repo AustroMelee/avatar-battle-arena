@@ -8,8 +8,9 @@
 // This file should never reference character, move, or narrative content directly. All extensibility is via data/registries.
 //
 // Updated for 2025 registry-driven architecture overhaul.
-import type { BattleLogEntry, LogDetails, LogEntryType } from '../../types';
+import type { BattleLogEntry, LogDetails, LogEntryType, NonDialogueLogEntry } from '../../types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * Options for creating a standardized mechanic log entry.
@@ -33,26 +34,25 @@ export interface MechanicLogOptions {
  */
 export function createMechanicLogEntry({
   turn,
-  actor,
   mechanic,
   effect,
   reason,
   target,
   details,
-}: MechanicLogOptions): { narrative: string; technical: BattleLogEntry } {
+}: Omit<MechanicLogOptions, 'actor'>): { narrative: string; technical: import('../../types').NonDialogueLogEntry } {
   // Narrative: pure prose, no technical info
   const narrative = effect;
-  
   // Technical log: all details
-  const technical: BattleLogEntry = {
+  const resultString = reason && reason.length ? `${effect} (${reason})` : effect;
+  const technical = {
     id: generateUniqueLogId('mechanic'),
     turn,
-    actor,
-    type: 'mechanics',
+    actor: 'System' as const,
+    type: 'mechanics' as const,
     action: mechanic,
-    result: reason ? `${effect} (${reason})` : effect, // Keep result for technical log display
+    result: safeNes(resultString, 'No result'),
     target,
-    narrative: '', // Technical logs should NOT have narrative content
+    narrative: nes('No narrative' as const), // Technical logs should NOT have narrative content
     timestamp: Date.now(),
     details: { ...details, mechanic, reason },
   };
@@ -71,22 +71,6 @@ function antiRepetition(narrative: string): string {
   recentNarratives.push(narrative);
   if (recentNarratives.length > MAX_RECENT) recentNarratives.shift();
   return narrative;
-}
-
-const legendaryFallbackNarratives = [
-  "A desperate maneuver unfolds—tension thickens like storm clouds over the arena.",
-  "The air trembles with anticipation, as if fate itself is holding its breath.",
-  "Uncertainty grips the battlefield; each movement teeters on the edge of legend.",
-  "A hush falls, broken only by the heartbeats of those who refuse to yield.",
-  "Every eye in the arena is drawn to the smallest gesture—a storm brews beneath the surface.",
-  "A glimmer of resolve flickers in the gloom; destiny waits to be seized.",
-  "Between hope and fear, a silent challenge passes between rivals.",
-  "The world seems to pause; every action is laden with the weight of destiny.",
-  "Doubt and determination collide in a single, unforgettable instant.",
-  "What seems like hesitation is the calm before an upheaval no one can predict."
-];
-function getLegendaryFallbackNarrative(): string {
-  return legendaryFallbackNarratives[Math.floor(Math.random() * legendaryFallbackNarratives.length)];
 }
 
 // --- Canonical log type mapping ---
@@ -109,18 +93,26 @@ export const pushLog = (state: { entries: BattleLogEntry[]; seen: Set<string> },
   }
 };
 
+/**
+ * Asserts a condition, throws if false.
+ */
+function assert(condition: any, message: string): asserts condition {
+  if (!condition) throw new Error(message);
+}
+
 // --- Updated logDialogue (canonical for fighter speech) ---
-export function logDialogue({ turn, actor, text, target }: { turn: number; actor: string; text: string; target?: string }): BattleLogEntry | null {
-  if (!text || !text.trim()) return null;
+export function logDialogue({ turn, actor, text, target }: { turn: number; actor: string; text: string; target?: string }): import('../../types').DialogueLogEntry | null {
+  assert(Number.isFinite(turn), 'log turn missing');
+  assert(typeof text === 'string' && text.trim().length > 0, 'log text empty');
   return {
     id: generateUniqueLogId('dialogue'),
     turn,
     actor: actor.charAt(0).toUpperCase() + actor.slice(1),
     type: 'dialogue',
     action: 'Dialogue',
-    result: text,
+    result: safeNes(text, 'No result'),
     target,
-    narrative: text,
+    narrative: safeNes(text, 'No narrative'),
     timestamp: Date.now(),
     details: {},
   };
@@ -130,72 +122,82 @@ export function logDialogue({ turn, actor, text, target }: { turn: number; actor
  * Creates a player-facing narrative log entry (type: 'narrative').
  * Ensures the narrative and result fields contain only clean, immersive prose.
  * Now with anti-repetition, null filtering, and formatting.
+ * Only accepts actor if 'System' or 'Narrator'.
  */
-export function logStory({ turn, actor, narrative, target }: { turn: number; actor: string; narrative: string; target?: string }): BattleLogEntry | null {
-  if (typeof turn !== 'number' || !actor || !narrative) {
-    const narrative = getLegendaryFallbackNarrative();
-    return {
-      id: generateUniqueLogId('narrative'),
-      turn: typeof turn === 'number' ? turn : 0,
-      actor: actor ? actor.charAt(0).toUpperCase() + actor.slice(1) : 'The opponent',
-      type: 'narrative',
-      action: 'Story',
-      result: narrative,
-      target,
-      narrative,
-      timestamp: Date.now(),
-      details: {},
-    };
-  }
-  const actorName = actor.charAt(0).toUpperCase() + actor.slice(1);
+export function logStory({ turn, actor, narrative, target }: { turn: number; actor?: 'System' | 'Narrator'; narrative: string; target?: string }): import('../../types').NonDialogueLogEntry | null {
+  assert(Number.isFinite(turn), 'log turn missing');
+  assert(typeof narrative === 'string' && narrative.trim().length > 0, 'log text empty');
+  if (actor && actor !== 'System' && actor !== 'Narrator') throw new Error('Non-dialogue log cannot have actor other than System or Narrator');
   const cleanNarrative = antiRepetition(narrative.trim());
   return {
     id: generateUniqueLogId('narrative'),
     turn,
-    actor: actorName,
+    actor: actor,
     type: 'narrative',
     action: 'Story',
-    result: cleanNarrative,
+    result: nes((cleanNarrative && cleanNarrative.length ? cleanNarrative : 'No result')),
     target,
-    narrative: cleanNarrative,
+    narrative: nes((cleanNarrative && cleanNarrative.length ? cleanNarrative : 'No narrative')),
     timestamp: Date.now(),
     details: {},
   };
 }
 
 // --- Updated logMechanics: skip empty or whitespace-only strings ---
-export function logMechanics({ turn, text }: { turn: number; text: string }): BattleLogEntry | null {
-  if (!text || !text.trim()) return null;
-  return {
+export function logMechanics(params: { turn: number; text: string }): NonDialogueLogEntry | null {
+  assert(Number.isFinite(params.turn), 'log turn missing');
+  const trimmed = params.text.trim();
+  if (!trimmed) return null;
+  const result = nes((trimmed && trimmed.length ? trimmed : 'No result'));
+  const log: NonDialogueLogEntry = {
     id: generateUniqueLogId('mechanics'),
-    turn,
+    turn: params.turn,
     actor: 'System',
     type: 'mechanics',
     action: 'Mechanics',
-    result: text,
-    narrative: '',
+    result,
+    narrative: result,
     timestamp: Date.now(),
     details: {},
   };
+  return log;
 }
 
 /**
  * Creates a system-level log entry (type: 'system').
+ * Only accepts actor if 'System' or 'Narrator'.
  */
-export function logSystem({ turn, actor, message, target }: { turn: number; actor: string; message: string; target?: string }): BattleLogEntry {
+export function logSystem({ turn, actor, message, target }: { turn: number; actor: 'System' | 'Narrator'; message: string; target?: string }): import('../../types').NonDialogueLogEntry {
+  assert(Number.isFinite(turn), 'log turn missing');
+  assert(typeof message === 'string' && message.trim().length > 0, 'log text empty');
+  if (actor !== 'System' && actor !== 'Narrator') throw new Error('Non-dialogue log cannot have actor other than System or Narrator');
   return {
     id: generateUniqueLogId('system'),
     turn,
-    actor: actor.charAt(0).toUpperCase() + actor.slice(1),
+    actor: actor,
     type: 'system',
     action: 'System',
-    result: message,
+    result: nes((message && message.length ? message : 'No result')),
     target,
-    narrative: message,
+    narrative: nes((message && message.length ? message : 'No narrative')),
     timestamp: Date.now(),
     details: {},
   };
 } 
+
+/**
+ * maybeLogSystem: Only emits a system log if the message is non-empty/meaningful.
+ * Returns null for empty/whitespace input. See SYSTEM ARCHITECTURE.MD 10.5.
+ */
+export function maybeLogSystem(turn: number, message?: string): NonDialogueLogEntry | null {
+  const trimmed = message?.trim();
+  if (!trimmed) return null;
+  return logSystem({
+    turn,
+    actor: 'System',
+    message: trimmed
+  });
+}
 
 /**
  * Infers the log type for legacy log entries that may not have a type field.
@@ -206,4 +208,10 @@ export function inferLogType(log: any): LogEntryType {
   if (typeof log.text === 'string' && (log.text.includes('successfully') || log.text.includes('fails'))) return 'mechanics';
   if (typeof log.text === 'string' && (log.text.startsWith('The ') || /^\w+ stands/.test(log.text))) return 'narrative';
   return 'mechanics'; // default fallback
+} 
+
+function safeNes(val: string, fallback: string): ReturnType<typeof nes> {
+  const v = val && val.length ? val : fallback;
+  // Runtime guarantee: v is non-empty
+  return nes(v as any);
 } 

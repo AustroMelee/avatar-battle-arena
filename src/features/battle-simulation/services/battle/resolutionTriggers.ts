@@ -1,8 +1,9 @@
 // Used via dynamic registry in BattleEngine. See SYSTEM ARCHITECTURE.MD for flow.
 // CONTEXT: Battle Resolution, // FOCUS: Triggers
-import type { BattleState, BattleCharacter, BattleLogEntry, LogEventType, BattleResolution } from '../../types';
+import type { BattleState, BattleCharacter, BattleLogEntry, LogEntryType, BattleResolution } from '../../types';
 import type { Ability } from '@/common/types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Desperation move definitions for each character
@@ -176,7 +177,7 @@ export function createResolutionLogEntry(
   winner?: string,
   flavor?: string
 ): BattleLogEntry {
-  const eventType: LogEventType = resolution.toUpperCase() as LogEventType;
+  const eventType: LogEntryType = resolution.toUpperCase() as LogEntryType;
   
   return {
     id: generateUniqueLogId('resolution'),
@@ -184,8 +185,8 @@ export function createResolutionLogEntry(
     actor: 'System',
     type: eventType,
     action: resolution,
-    result: flavor || `${resolution} condition met`,
-    narrative: flavor || `The battle ends in ${resolution}.`,
+    result: nes(flavor || `${resolution} condition met`),
+    narrative: nes(flavor || `The battle ends in ${resolution}.`),
     timestamp: Date.now(),
     meta: {
       resolution,

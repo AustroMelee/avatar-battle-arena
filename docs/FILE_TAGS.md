@@ -3,6 +3,7 @@
 | File | Tags |
 |------|------|
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\App.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\common\branding\nonEmptyString.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\common\components\Button\Button.tsx |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\common\types\index.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\components\ErrorBoundary.tsx |  |
@@ -95,6 +96,7 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\finisherSystem.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\genericMove.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\heroicReversal.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\index.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\logIdGenerator.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveConverter.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\moveDisabling.service.ts |  |
@@ -122,6 +124,9 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\tacticalMove.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\TacticalNarrativeService.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\tacticalState.service.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\__tests__\basicStrike.integration.test.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\__tests__\helpers\mockState.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battle\__tests__\tacticalMove.service.test.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\battleSimulator.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\cooldown\cooldownManager.service.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\effects\buffs.ts |  |
@@ -163,6 +168,10 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\SpiritReactionService.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\core\StateTracker.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\damageOutcomeMapper.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\Engine\BattleContext.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\Engine\EnhancedNarrativeIntegration.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\Engine\MetaCooldownManager.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\Engine\NarrativeSelector.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedNarrativeSystem.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedRepetitionManager.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\enhancedStateManager.ts |  |
@@ -180,6 +189,7 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narrativeToneAnalyzer.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\narratorHooks.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\openingSequence.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\Aang\EscalationLate.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\aang.narrative.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\azula.narrative.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\pools\narrativePoolRegistry.service.ts |  |
@@ -195,8 +205,11 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\fallbackGenerator.utility.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\narrativeKey.utility.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\narrative\utils\pronoun.utility.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\mechanicLogUtils.test.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\mechanicLogUtils.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\moveUtils.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\strings.test.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\services\utils\strings.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\behavioral.types.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\cooldown.types.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\identity.types.ts |  |
@@ -204,6 +217,7 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\logViewModes.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\mechanic.types.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\types\move.types.ts |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\battle-simulation\__tests__\battle-log-pipeline.test.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\components\CharacterCard.tsx |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\components\CharacterPortrait.tsx |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\character-selection\components\CharacterSelection.tsx |  |
@@ -213,4 +227,5 @@
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\location-selection\data\locationData.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\features\technical-log\components\TechnicalLog.tsx |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\main.tsx |  |
+| C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\test-utils\battleTestFactory.ts |  |
 | C:\Users\rohai\Desktop\WEBSITE PAGES\AVATAR\BATTLE ARENA\GITHUB PROJECT\src\types\css.d.ts |  |

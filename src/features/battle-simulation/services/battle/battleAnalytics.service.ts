@@ -67,7 +67,9 @@ export function generateBattleAnalytics(state: BattleState): BattleAnalytics {
   state.battleLog
     .filter(entry => entry.damage && entry.damage > 0)
     .forEach(entry => {
-      damageByCharacter[entry.actor] = (damageByCharacter[entry.actor] || 0) + (entry.damage || 0);
+      if (typeof entry.actor === 'string' && entry.actor !== 'System' && entry.actor !== 'Narrator') {
+        damageByCharacter[entry.actor] = (damageByCharacter[entry.actor] || 0) + (entry.damage || 0);
+      }
     });
 
   // FIXED: Track chi spent from resource cost meta

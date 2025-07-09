@@ -104,12 +104,11 @@ export async function escalationPhase(state: BattleState): Promise<BattleState> 
     const line = fallbackLines[Math.floor(Math.random() * fallbackLines.length)](attacker.name);
     const { narrative, technical } = createMechanicLogEntry({
       turn: state.turn,
-      actor: 'Narrator',
       mechanic: '',
       effect: line,
       reason: '', // Do not append reason/parenthetical to player log
     });
-    const { newState, logEntry } = forcePatternEscalation(state, attacker, escalationType, '');
+    const { newState, logEntry } = forcePatternEscalation(state, attacker, escalationType);
     if (newState.analytics) {
         newState.analytics.patternAdaptations = (newState.analytics.patternAdaptations || 0) + 1;
         console.log(`DEBUG: Analytics updated - Pattern Adaptations: ${newState.analytics.patternAdaptations}`);

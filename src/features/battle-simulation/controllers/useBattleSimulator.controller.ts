@@ -44,7 +44,7 @@ export function useBattleSimulator() {
       
       // Extract narratives from battle log
       const newNarratives = result.battleLog
-        .filter((entry: BattleLogEntry) => entry.type === 'NARRATIVE' && !displayedNarrativeIds.current.has(entry.id))
+        .filter((entry: BattleLogEntry) => entry.type === 'narrative' && !displayedNarrativeIds.current.has(entry.id))
         .map((entry: BattleLogEntry) => ({
           id: entry.id,
           text: entry.narrative || entry.result,

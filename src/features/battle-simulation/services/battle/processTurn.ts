@@ -24,6 +24,7 @@ import { processTurnEffects } from '../effects/statusEffect.service';
 import { deduplicateClimaxLogs } from './battleValidation';
 import { logStory } from '../utils/mechanicLogUtils';
 import { isBasicMove } from '../ai/moveSelection';
+import { nes } from '@/common/branding/nonEmptyString';
 
 // Dynamic no-move flavor phrases for processTurn
 const NO_MOVE_FLAVORS = [
@@ -149,8 +150,7 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   if (state.forcedEnding) {
     const forcedEndingLog = logStory({
       turn: state.turn,
-      actor: 'Narrator',
-      narrative: 'Both fighters have exhausted all meaningful tactics. The duel ends by narrative deadlock—no victor emerges, only the lesson of futility.'
+      narrative: nes('Both fighters have exhausted all meaningful tactics. The duel ends by narrative deadlock—no victor emerges, only the lesson of futility.'),
     });
     if (forcedEndingLog) {
       state.battleLog.push(forcedEndingLog);
@@ -187,8 +187,7 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
     const { attacker } = getActiveParticipants(state);
     const skippedLog = logStory({
       turn: state.turn,
-      actor: 'Narrator',
-      narrative: getNoMoveFlavor(attacker.name)
+      narrative: nes(getNoMoveFlavor(attacker.name) || '—'),
     });
     if (skippedLog) {
       state.battleLog.push(skippedLog);
@@ -208,8 +207,7 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
     if (allBasic) {
       const stalemateLog = logStory({
         turn: state.turn,
-        actor: 'Narrator',
-        narrative: 'Both fighters are spent and fall into a predictable rhythm—no victory is possible. The duel ends in exhausted stalemate.'
+        narrative: nes('Both fighters are spent and fall into a predictable rhythm—no victory is possible. The duel ends in exhausted stalemate.'),
       });
       if (stalemateLog) {
         state.battleLog.push(stalemateLog);
@@ -221,8 +219,7 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
     if (state.noMoveTurns >= 2) {
       const suddenDeathLog = logStory({
         turn: state.turn,
-        actor: 'Narrator',
-        narrative: 'Both fighters are frozen, neither daring to act. Sudden Death! Fate demands a resolution—the next blow may be the last.'
+        narrative: nes('Both fighters are frozen, neither daring to act. Sudden Death! Fate demands a resolution—the next blow may be the last.'),
       });
       if (suddenDeathLog) {
         state.battleLog.push(suddenDeathLog);
@@ -237,7 +234,7 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
   if (state.isFinished || state.climaxTriggered) {
     // Remove duplicate end-of-battle logs
     state.battleLog = state.battleLog.filter((entry, idx, arr) => {
-      if (entry.type === 'NARRATIVE' && typeof entry.narrative === 'string' &&
+      if (entry.type === 'narrative' && typeof entry.narrative === 'string' &&
           (entry.narrative.includes('deadlock') || entry.narrative.includes('draw') || entry.narrative.includes('Result:'))) {
         return idx === arr.length - 1;
       }
@@ -247,21 +244,18 @@ export async function processTurn(currentState: BattleState): Promise<BattleStat
     const epilogueGen = epilogueLineGen();
     const epilogue1 = logStory({
       turn: state.turn,
-      actor: 'Narrator',
-      narrative: epilogueGen.next().value!
+      narrative: nes(epilogueGen.next().value || '—'),
     });
     const epilogue2 = logStory({
       turn: state.turn,
-      actor: 'Narrator',
-      narrative: epilogueGen.next().value!
+      narrative: nes(epilogueGen.next().value || '—'),
     });
     if (epilogue1) state.battleLog.push(epilogue1);
     if (epilogue2) state.battleLog.push(epilogue2);
     // Add final result summary
     const resultLog = logStory({
       turn: state.turn,
-      actor: 'Narrator',
-      narrative: poeticFinalResultLines[Math.floor(Math.random() * poeticFinalResultLines.length)]
+      narrative: nes(poeticFinalResultLines[Math.floor(Math.random() * poeticFinalResultLines.length)] || '—'),
     });
     if (resultLog) state.battleLog.push(resultLog);
   }

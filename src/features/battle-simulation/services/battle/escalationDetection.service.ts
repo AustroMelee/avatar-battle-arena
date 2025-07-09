@@ -6,8 +6,8 @@ function assert(condition: any, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-import { BattleState, BattleCharacter } from '../../types';
-import { logStory, logMechanics } from '../utils/mechanicLogUtils';
+import { BattleState, BattleCharacter, ensureNonEmpty } from '../../types';
+import { logMechanics } from '../utils/mechanicLogUtils';
 
 /**
  * EscalationType: All supported escalation triggers.
@@ -99,7 +99,7 @@ export function applyEscalation(state: BattleState, attacker: BattleCharacter, t
   if (state.tacticalPhase === 'escalation') {
     logMechanics({
       turn: state.turn,
-      text: 'Escalation already active; attempt ignored.'
+      text: ensureNonEmpty('Escalation already active; attempt ignored.')
     });
     return;
   }
@@ -108,6 +108,6 @@ export function applyEscalation(state: BattleState, attacker: BattleCharacter, t
   attacker.flags.escalationTurns = String(state.turn); // Store as string for clarity
   logMechanics({
     turn: state.turn,
-    text: `${attacker.name}: Escalation triggered.`
+    text: ensureNonEmpty(`${attacker.name}: Escalation triggered.`)
   });
 }

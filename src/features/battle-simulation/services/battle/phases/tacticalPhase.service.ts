@@ -68,7 +68,6 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
       // No non-basic moves left: forced ending
       const forcedEndingLog = logStory({
         turn: newState.turn,
-        actor: 'Narrator',
         narrative: [
           "The clash fades, not in triumph, but in exhaustion—no victor rises, only the silence of spent ambition.",
           "Steel and spirit yield to fatigue; the world bears witness as neither hero nor villain claims the day.",
@@ -94,7 +93,6 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   if (availableMoves.length === 0) {
     const forcedEndingLog = logStory({
       turn: newState.turn,
-      actor: 'Narrator',
       narrative: [
         "The clash fades, not in triumph, but in exhaustion—no victor rises, only the silence of spent ambition.",
         "Steel and spirit yield to fatigue; the world bears witness as neither hero nor villain claims the day.",
@@ -157,7 +155,7 @@ export async function tacticalMovePhase(state: BattleState): Promise<{ state: Ba
   for (const participant of participants) {
     const reversalResult = resolveReversal({ character: participant });
     if (reversalResult) {
-      const { technical } = createMechanicLogEntry({ turn: newState.turn, actor: participant.name, mechanic: 'Reversal', effect: reversalResult.narrative, reason: reversalResult.source });
+      const { technical } = createMechanicLogEntry({ turn: newState.turn, mechanic: 'Reversal', effect: reversalResult.narrative, reason: reversalResult.source });
       reversalLogEntries.push(technical);
       participant.stability += reversalResult.stabilityGain;
     }

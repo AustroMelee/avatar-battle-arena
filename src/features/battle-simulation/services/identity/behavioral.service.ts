@@ -3,6 +3,7 @@ import { Character } from '@/common/types';
 import { ALL_BEHAVIORAL_TRAITS } from '../../../character-selection/data/traits';
 import { ActiveFlag } from '../../types/behavioral.types';
 import { logStory, logMechanics } from '../utils/mechanicLogUtils';
+import { ensureNonEmpty } from '../utils/strings';
 // import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
 /**
@@ -106,20 +107,19 @@ export function processBehavioralSystemForTurn(
       // Create main log entry
       const logEntry = logStory({
         turn: state.turn,
-        actor: self.name,
-        narrative: 'Behavioral event',
+        narrative: ensureNonEmpty('Behavioral event'),
         target: undefined
       });
       if (logEntry) behavioralLogEntry = logEntry;
       else behavioralLogEntry = {
         id: 'behavioral-fallback',
         turn: state.turn,
-        actor: self.name,
+        actor: 'System',
         type: 'mechanics',
         action: 'Behavioral',
-        result: 'Behavioral event',
+        result: ensureNonEmpty('Behavioral event'),
         target: undefined,
-        narrative: 'Behavioral event',
+        narrative: ensureNonEmpty('Behavioral event'),
         timestamp: Date.now(),
         details: undefined
       };

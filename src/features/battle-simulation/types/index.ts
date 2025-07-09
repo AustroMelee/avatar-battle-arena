@@ -313,40 +313,47 @@ export interface LogDetails {
   [key: string]: any; // Allows other meta fields
 }
 
-/**
- * @description Enhanced battle log entry with a clear separation between narrative and mechanics.
- */
-export type BattleLogEntry = {
-  id: string; // Unique event identifier
+export type FighterName = string;
+/** Unique brand guaranteeing a non-empty (trimmed) string */
+export type NonEmptyString<T extends string = string> = T & { readonly __brand: 'NonEmptyString' };
+
+export { ensureNonEmpty } from '../services/utils/strings';
+
+export type DialogueLogEntry = {
+  id: string;
   turn: number;
-  actor: string;
-  type: LogEntryType;
+  actor: FighterName;
+  type: 'dialogue';
   action: string;
   target?: string;
-  result: string; // Clean, human-readable result (e.g., "Azula takes 15 damage.")
-  /**
-   * @description The cinematic, story-driven line(s). Now supports multi-part narrative output (string or string[]).
-   */
-  narrative: string | string[];
+  result: NonEmptyString;
+  narrative: NonEmptyString | NonEmptyString[];
   timestamp: number;
-  details?: LogDetails; // All mechanical data goes here.
-  /**
-   * @description Optional: Numeric damage dealt by this event (for analytics, filtering, and UI)
-   */
+  details?: LogDetails;
   damage?: number;
-  /**
-   * @description Optional: Meta/mechanical data for this log entry (legacy, prefer 'details')
-   */
   meta?: Record<string, any>;
-  /**
-   * @description Optional: The type of ability used (e.g., 'attack', 'defense_buff', etc.)
-   */
   abilityType?: string;
-  /**
-   * If true, this log entry is part of the prologue/opening sequence and should be rendered in the Prologue section, not the main battle log.
-   */
   prologue?: boolean;
 };
+
+export type NonDialogueLogEntry = {
+  id: string;
+  turn: number;
+  actor?: 'System' | 'Narrator';
+  type: Exclude<LogEntryType, 'dialogue'>;
+  action: string;
+  target?: string;
+  result: NonEmptyString;
+  narrative: NonEmptyString | NonEmptyString[];
+  timestamp: number;
+  details?: LogDetails;
+  damage?: number;
+  meta?: Record<string, any>;
+  abilityType?: string;
+  prologue?: boolean;
+};
+
+export type BattleLogEntry = DialogueLogEntry | NonDialogueLogEntry;
 
 /**
  * @description Log detail level for user preferences.

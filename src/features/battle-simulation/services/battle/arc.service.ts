@@ -11,6 +11,7 @@
 import { BattleState, BattleArcState, ArcStateModifier, BattleLogEntry } from '../../types';
 import { ARC_TRANSITIONS } from '../../data/arcTransitions';
 import { logMechanics } from '../utils/mechanicLogUtils';
+import { nes } from '@/common/branding/nonEmptyString';
 
 // For developer controls - can be overridden for testing
 const IS_DEV_MODE = false; // Set to true in development
@@ -61,9 +62,9 @@ function createArcTransitionLogEntry(
     actor: 'System',
     type: 'mechanics',
     action: 'Arc Transition',
-    result: narrative,
+    result: nes(narrative),
     target: undefined,
-    narrative: '',
+    narrative: nes(''),
     timestamp: Date.now(),
     details: undefined
   };

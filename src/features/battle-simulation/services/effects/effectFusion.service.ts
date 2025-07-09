@@ -1,5 +1,7 @@
 import { BattleCharacter, ActiveStatusEffect, BattleLogEntry, EffectType } from '../../types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { nes } from '@/common/branding/nonEmptyString';
+import type { NonEmptyString } from '@/common/branding/nonEmptyString';
 // import type { Move } from '../../types/move.types';
 
 interface FusionRecipe {
@@ -55,8 +57,8 @@ export function processEffectFusions(character: BattleCharacter, turn: number): 
         type: 'mechanics',
         action: 'Status Meltdown!',
         target: character.name,
-        result: `${character.name} suffers a system shock and is now ${recipe.resultantEffect.type}!`,
-        narrative: FUSION_SUCCESS_LINES[Math.floor(Math.random() * FUSION_SUCCESS_LINES.length)](character.name),
+        result: nes((character.name && character.name.length ? character.name : 'No character') as unknown as NonEmptyString),
+        narrative: nes(FUSION_SUCCESS_LINES[Math.floor(Math.random() * FUSION_SUCCESS_LINES.length)](character.name)),
         timestamp: Date.now(),
         meta: { crisis: true, effectsConsumed: recipe.requiredEffects, mechanic: 'Effect Fusion' },
       };

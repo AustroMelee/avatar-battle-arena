@@ -23,6 +23,7 @@ import { DEFAULT_OPPONENT_PERCEPTION } from '../../data/identities';
 import { getDefaultArcState, getDefaultArcStateHistory } from '../../data/arcTransitions';
 import { initializeBehavioralSystem, initializeActiveFlags } from '../identity/behavioral.service';
 import { MoveRegistry } from './moveRegistry.service';
+import { nes } from '@/common/branding/nonEmptyString';
 
 // Global enhanced state manager instance
 const enhancedStateManager = new EnhancedStateManager();
@@ -252,12 +253,12 @@ export function declareWinner(state: BattleState, winner: BattleCharacter): Batt
       newState.log.push(narrative.text);
       newState.battleLog.push({
         id: narrative.id,
-        turn: newState.turn,
-        actor: narrative.speaker,
+        turn: state.turn,
+        actor: 'System',
         type: 'system',
-        action: 'Battle End',
-        result: narrative.text,
-        narrative: narrative.text,
+        action: 'System',
+        result: nes(narrative.text),
+        narrative: nes(narrative.text),
         timestamp: narrative.timestamp
       });
     });

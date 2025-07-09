@@ -5,6 +5,7 @@
 import { BattleCharacter, BattleLogEntry } from '../../types';
 import type { Move } from '../../types/move.types';
 import { logStory } from '../utils/mechanicLogUtils';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Critical hit configuration
@@ -253,20 +254,19 @@ export function createCriticalLogEntry(
   const narrative = generateCriticalNarrative(attacker, target, move, criticalResult.intensity, criticalResult.staggerApplied);
   const logEntry = logStory({
     turn,
-    actor: attacker.name,
-    narrative: narrative,
+    narrative: nes(narrative),
     target: target.name
   });
   if (logEntry) return logEntry;
   return {
     id: 'critical-fallback',
     turn,
-    actor: attacker.name,
+    actor: 'System',
     type: 'mechanics',
     action: 'Critical',
-    result: narrative,
+    result: nes(narrative),
     target: target.name,
-    narrative: narrative,
+    narrative: nes(narrative),
     timestamp: Date.now(),
     details: undefined
   };

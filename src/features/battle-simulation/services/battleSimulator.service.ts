@@ -16,7 +16,8 @@ import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerform
 import type { BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
-import { logDialogue, logMechanics, logStory, logSystem } from './utils/mechanicLogUtils';
+import { logStory } from './utils/mechanicLogUtils';
+import { ensureNonEmpty } from '../types';
 
 /**
  * @description Represents the result of a battle simulation with analytics.
@@ -94,8 +95,8 @@ export class BattleSimulator {
         actor: 'System',
         type: 'system',
         action: 'max_turns',
-        result: 'Battle ended due to maximum turns reached.',
-        narrative: 'The battle has dragged on too long. Both warriors are exhausted.',
+        result: ensureNonEmpty('Battle ended due to maximum turns reached.'),
+        narrative: ensureNonEmpty('The battle has dragged on too long. Both warriors are exhausted.'),
         timestamp: Date.now(),
         meta: { resolution: 'max_turns' }
       });
@@ -111,8 +112,7 @@ export class BattleSimulator {
         // Only push a single narrative log for the player
         const deadlockNarrativeLog = logStory({
             turn: currentState.turn,
-            actor: 'Narrator',
-            narrative: 'The battle ends in a deadlock. Neither side claims victory as silence settles over the arena.'
+            narrative: ensureNonEmpty('A deadlock has occurred in the battle.')
         });
         if (deadlockNarrativeLog) {
             currentState.battleLog.push(deadlockNarrativeLog);

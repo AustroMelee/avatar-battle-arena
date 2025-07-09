@@ -1,9 +1,11 @@
 // CONTEXT: Battle Tactical Mechanics
 // RESPONSIBILITY: Handle positioning, charge-up, and environmental mechanics
 
-import { BattleCharacter, BattleLogEntry } from '../../types';
+import { BattleCharacter } from '../../types';
+import type { NonDialogueLogEntry } from '../../types';
 import { Move, Position, getLocationType } from '../../types/move.types';
 import { generateUniqueLogId } from '../ai/logQueries';
+import { nes } from '@/common/branding/nonEmptyString';
 
 /**
  * @description Determines if a move can be used based on positioning and environmental constraints.
@@ -290,21 +292,19 @@ export function getEnvironmentalFactors(location: string): string[] {
  */
 export function createTacticalLogEntry(
   turn: number,
-  actor: string,
-  type: 'POSITION' | 'CHARGE' | 'REPOSITION' | 'INTERRUPT',
   action: string,
   result: string,
   narrative: string,
   meta?: Record<string, unknown>
-): BattleLogEntry {
+): NonDialogueLogEntry {
   return {
     id: generateUniqueLogId('positioning'),
     turn,
-    actor,
-    type,
+    actor: 'System',
+    type: 'mechanics',
     action,
-    result,
-    narrative,
+    result: nes(result),
+    narrative: nes(narrative),
     timestamp: Date.now(),
     meta: {
       ...meta,

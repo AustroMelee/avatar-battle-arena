@@ -84,19 +84,16 @@ export class TacticalMemory {
  * Checks tactical memory and returns a mechanic log entry if a stale move is avoided.
  */
 export function checkTacticalMemoryWithLog({
-  actor,
   moveName,
   turn,
   reason = 'Move avoided due to low effectiveness or overuse',
 }: {
-  actor: string;
   moveName: string;
   turn: number;
   reason?: string;
 }) {
   const logEntry = createMechanicLogEntry({
     turn,
-    actor,
     mechanic: 'Tactical Memory',
     effect: `${moveName} avoided (AI adapts to stale/ineffective move)`,
     reason,

@@ -15,6 +15,7 @@ import {
   getLateGameNarratives,
   // getContextualMoveEscalation
 } from './enhancedStateNarratives';
+import { ensureNonEmpty } from '../utils/strings';
 // import {
 //   getContextualMoveDescription,
 //   getStateTransitionDescription
@@ -74,7 +75,7 @@ export class EnhancedTemplateGenerator {
       this.getIntensityFromContext(context)
     );
 
-    return narrative;
+    return ensureNonEmpty(narrative);
   }
 
   /**
@@ -93,7 +94,7 @@ export class EnhancedTemplateGenerator {
         const breakingPointLines = getBreakingPointNarratives();
         const breakingPointLine = breakingPointLines[this.stateAnnouncementManager.getEscalationCount() % breakingPointLines.length];
         this.stateAnnouncementManager.recordBreakingPoint();
-        return breakingPointLine;
+        return ensureNonEmpty(breakingPointLine);
       }
 
       case 'escalation': {
@@ -103,7 +104,7 @@ export class EnhancedTemplateGenerator {
         const escalationLines = getEscalationNarratives(character);
         const escalationLine = escalationLines[this.stateAnnouncementManager.getEscalationCount() % escalationLines.length];
         this.stateAnnouncementManager.recordEscalation();
-        return escalationLine;
+        return ensureNonEmpty(escalationLine);
       }
 
       case 'desperation': {
@@ -113,7 +114,7 @@ export class EnhancedTemplateGenerator {
         const desperationLines = getDesperationNarratives(character);
         const desperationLine = desperationLines[this.stateAnnouncementManager.getDesperationCount() % desperationLines.length];
         this.stateAnnouncementManager.recordDesperation();
-        return desperationLine;
+        return ensureNonEmpty(desperationLine);
       }
 
       default:
@@ -149,7 +150,7 @@ export class EnhancedTemplateGenerator {
       'medium'
     );
 
-    return selectedResponse;
+    return ensureNonEmpty(selectedResponse);
   }
 
   /**
@@ -176,7 +177,7 @@ export class EnhancedTemplateGenerator {
       'high'
     );
 
-    return selectedLine;
+    return ensureNonEmpty(selectedLine);
   }
 
   /**

@@ -31,7 +31,6 @@ export function handleEscalationPhase({ state, attacker, reason, shouldEscalate 
   const effect = reason || 'Escalation triggered.';
   const technical = createMechanicLogEntry({
     turn: state.turn,
-    actor: 'System',
     mechanic: 'Forced Escalation',
     effect,
     reason,

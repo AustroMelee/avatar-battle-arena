@@ -45,7 +45,6 @@ export function triggerHeroicReversalWithLog(
   triggerHeroicReversal(character, config);
   const logEntry = createMechanicLogEntry({
     turn,
-    actor: character.name,
     mechanic: 'Heroic Reversal',
     effect: `${character.name} seizes a sudden opening and turns the tables!`,
     reason: 'Triggered by low health and momentum gap',
@@ -79,7 +78,6 @@ export function resolveHeroicReversalWithLog(
   resolveHeroicReversal(character);
   const logEntry = createMechanicLogEntry({
     turn,
-    actor: character.name,
     mechanic: 'Heroic Reversal Ended',
     effect: `${character.name}'s heroic reversal effect has ended.`,
     reason: 'Buff duration expired or used',

@@ -55,4 +55,13 @@ export const availableCharacters: Character[] = [
       { traitId: 'overconfidence', lastTriggeredTurn: -99 }
     ]
   },
-]; 
+];
+
+/**
+ * Looks up a character by ID from the registry.
+ * @param {string} id - The character ID
+ * @returns {Character | undefined}
+ */
+export function getCharacterById(id: string) {
+  return availableCharacters.find(c => c.id === id);
+} 

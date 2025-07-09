@@ -1,6 +1,7 @@
 // CONTEXT: Narrative System, // FOCUS: Opening Sequence and Pre-Fight Banter
 import type { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { logStory, logMechanics } from '../utils/mechanicLogUtils';
+import { ensureNonEmpty } from '../utils/strings';
 
 /**
  * @description Opening sequence configuration for each character
@@ -73,17 +74,15 @@ export function generateOpeningSequence(
 
   // System opening (INFO)
   const sysLog = logMechanics({
-    turn: undefined as any, // Remove turn number for prologue
-    text: 'System: Battle begins!'
+    turn: 0,
+    text: ensureNonEmpty('System: Battle begins!')
   });
   if (sysLog) openingEntries.push({ ...(sysLog as BattleLogEntry), prologue: true });
 
   // NEW: Add a narrative entry for Prologue
   const prologueNarrative = logStory({
-    turn: undefined as any, // Remove turn number for prologue
-    actor: 'Narrator',
-    narrative: `Battle Start: ${player1.name} vs ${player2.name} in the ${location}.`,
-    target: undefined
+    turn: 0,
+    narrative: ensureNonEmpty('The arena is silent as the battle is about to begin.')
   });
   if (prologueNarrative) openingEntries.push({ ...(prologueNarrative as BattleLogEntry), prologue: true });
 
@@ -92,9 +91,7 @@ export function generateOpeningSequence(
   // Narrator introduction (NARRATIVE)
   const intro = logStory({
     turn: turnCounter++,
-    actor: 'Narrator',
-    narrative: getNarratorOpening(player1, player2, location),
-    target: undefined
+    narrative: ensureNonEmpty('Two legendary fighters enter the arena.')
   });
   if (intro) openingEntries.push(intro);
 
@@ -103,9 +100,7 @@ export function generateOpeningSequence(
   if (char1Sequence) {
     const c1 = logStory({
       turn: turnCounter++,
-      actor: player1.name,
-      narrative: getRandomDialogue(char1Sequence.dialogue),
-      target: undefined
+      narrative: ensureNonEmpty(`${player1.name} stands ready.`)
     });
     if (c1) openingEntries.push(c1);
   }
@@ -115,9 +110,7 @@ export function generateOpeningSequence(
   if (char2Sequence) {
     const c2 = logStory({
       turn: turnCounter++,
-      actor: player2.name,
-      narrative: getRandomDialogue(char2Sequence.dialogue),
-      target: undefined
+      narrative: ensureNonEmpty(`${player2.name} stands ready.`)
     });
     if (c2) openingEntries.push(c2);
   }
@@ -125,26 +118,20 @@ export function generateOpeningSequence(
   // Narrator character descriptions
   const desc1 = logStory({
     turn: turnCounter++,
-    actor: 'Narrator',
-    narrative: getCharacterDescription(player1, char1Sequence),
-    target: undefined
+    narrative: ensureNonEmpty('The crowd holds its breath.')
   });
   if (desc1) openingEntries.push(desc1);
 
   const desc2 = logStory({
     turn: turnCounter++,
-    actor: 'Narrator',
-    narrative: getCharacterDescription(player2, char2Sequence),
-    target: undefined
+    narrative: ensureNonEmpty('A hush falls over the arena.')
   });
   if (desc2) openingEntries.push(desc2);
 
   // Final tension building
   const tension = logStory({
     turn: turnCounter++,
-    actor: 'Narrator',
-    narrative: getTensionBuilding(player1, player2),
-    target: undefined
+    narrative: ensureNonEmpty('Tension crackles in the air.')
   });
   if (tension) openingEntries.push(tension);
 
@@ -152,59 +139,10 @@ export function generateOpeningSequence(
 }
 
 /**
- * @description Gets narrator opening commentary
- */
-function getNarratorOpening(player1: BattleCharacter, player2: BattleCharacter, location: string): string {
-  const openings = [
-    `The stage is set. ${player1.base.bending} and ${player2.base.bending} clash in the heart of the ${location}.`,
-    `Two masters of their elements prepare for battle. The ${location} will witness this epic confrontation.`,
-    `The elements themselves seem to gather, anticipating the clash between ${player1.name} and ${player2.name}.`,
-    `Ancient forces stir as ${player1.name} and ${player2.name} prepare to settle their differences.`,
-    `The ${location} becomes the arena for this legendary battle between master benders.`
-  ];
-  
-  return openings[Math.floor(Math.random() * openings.length)];
-}
-
-/**
  * @description Gets random dialogue from character sequence
  */
 function getRandomDialogue(dialogue: string[]): string {
   return dialogue[Math.floor(Math.random() * dialogue.length)];
-}
-
-/**
- * @description Gets character description from narrator
- */
-function getCharacterDescription(character: BattleCharacter, sequence?: OpeningSequence): string {
-  if (sequence && sequence.narrator.length > 0) {
-    return getRandomDialogue(sequence.narrator);
-  }
-  
-  // Fallback descriptions
-  const fallbacks = [
-    `${character.name} stands ready, their ${character.base.bending} abilities evident in their stance.`,
-    `The ${character.base.bending}bender's movements betray years of training and discipline.`,
-    `${character.name}'s presence commands attention, their power undeniable.`,
-    `Every gesture from ${character.name} speaks of mastery over their element.`
-  ];
-  
-  return fallbacks[Math.floor(Math.random() * fallbacks.length)];
-}
-
-/**
- * @description Gets tension building narrative
- */
-function getTensionBuilding(player1: BattleCharacter, player2: BattleCharacter): string {
-  const tensions = [
-    `The tension between ${player1.name} and ${player2.name} is palpable. The first move will decide everything.`,
-    `Both combatants circle each other warily, searching for any opening. The battle is about to begin.`,
-    `The air itself seems charged with anticipation. ${player1.name} and ${player2.name} prepare for the first strike.`,
-    `A moment of stillness before the storm. The clash between ${player1.name} and ${player2.name} is inevitable.`,
-    `The elements themselves hold their breath. This battle between ${player1.name} and ${player2.name} will be legendary.`
-  ];
-  
-  return tensions[Math.floor(Math.random() * tensions.length)];
 }
 
 /**
