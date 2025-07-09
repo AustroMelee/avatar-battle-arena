@@ -836,7 +836,8 @@
       "./contextualMoveScoring",
       "./moveUtils",
       "./metaState",
-      "./moveSelection"
+      "./moveSelection",
+      "../../types/index"
     ],
     "tags": [],
     "calls": [
@@ -850,7 +851,8 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/contextualMoveScoring.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveUtils.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/metaState.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveSelection.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveSelection.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/index.ts"
     ],
     "description": "Enhanced AI decision state that includes context and intent.",
     "owner": "AustroMelee",
@@ -1005,12 +1007,14 @@
     "imports": [
       "../../types",
       "./patternRecognition",
+      "../../types/move.types",
       "../../types/move.types"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/patternRecognition.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts"
     ],
     "description": "Represents the result of AI ability selection with logging.",
@@ -3028,6 +3032,7 @@
     "imports": [
       "../../types",
       "@/common/types",
+      "../../types/move.types",
       "./attackMove.service",
       "./defenseMove.service",
       "./genericMove.service"
@@ -3035,6 +3040,7 @@
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/attackMove.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/defenseMove.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/genericMove.service.ts"
@@ -6245,6 +6251,7 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/advancedAIController.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/disruptionWindow.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/heroicReversal.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/behavioral.types.ts"
@@ -6327,6 +6334,7 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/attackMoveScoring.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/behaviorTreeEngine.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/chooseAbility.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/chooseAbility.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/contextualMoveScoring.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/defenseMoveScoring.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/enhancedMoveScoring.ts",
@@ -6359,6 +6367,7 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveFatigue.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveLogic.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveRegistry.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveRouter.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/resolveImpact.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts",

@@ -89,6 +89,7 @@ The Avatar Battle Arena is a next-gen, turn-based battle simulator built on:
 - Consequence-Driven Escalation
 - Plug-and-Play Content
 - Log Hygiene
+- **Full mechanics/narrative type safety and lint/test enforcement as of July 2025**
 
 For diagrams, logic maps, and full details, see [Engine Deep Dive](./ENGINE_DEEP_DIVE.md).
 
@@ -102,6 +103,7 @@ All documentation is modular and auto-synced. See [Documentation Policy & Automa
 ## Recent Changes
 See [Changelog](../CHANGELOG.md) for the latest updates.
 - Multi-phase mechanics and narrative overhaul: expanded move/narrative pools, anti-repetition/cadence, forced ending logic (July 9th, 2025)
+- **July 2025 Compliance Update:** 100% mechanics and narrative coverage (all tactical/emotional contexts for Aang and Azula, including taunt, comeback, pattern_break, interrupt/counter/reversal, stalemate/deadlock). All core battle and narrative systems are now strictly type-safe, lint/test compliant, and robustly error-handled. All test stubs and codemods updated for type correctness. All critical errors and dependency issues resolved.
 
 ---
 
