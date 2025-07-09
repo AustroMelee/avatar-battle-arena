@@ -6,7 +6,6 @@
  * @lastUpdated 2025-07-08
  * @related src/main.tsx, src/components/ErrorBoundary.tsx
  */
-import React from 'react';
 import { useState } from 'react';
 import { Character, Location } from './common/types';
 import { CharacterSelection } from './features/character-selection/components/CharacterSelection';

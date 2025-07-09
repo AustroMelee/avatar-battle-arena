@@ -7,7 +7,7 @@
 //
 // All exports are documented below.
 // CONTEXT: AI, // FOCUS: LogAnalysis
-import { BattleLogEntry, LogEventType, BattleCharacter } from '../../types';
+import { BattleLogEntry, BattleCharacter } from '../../types';
 
 // --- SINGLETON LOG ID GENERATOR ---
 /**
@@ -109,7 +109,8 @@ export function recentDamageTaken(
   
   return log
     .filter(entry => 
-      entry.type === 'MOVE' && 
+      entry.type === 'mechanics' && 
+      entry.meta?.moveType === 'MOVE' &&
       entry.target === playerId && 
       entry.turn >= minTurn &&
       entry.details?.damage !== undefined
@@ -163,7 +164,8 @@ export function wasRecentlyCriticallyHit(
   const minTurn = Math.max(1, currentTurn - turnsBack);
   
   return log.some(entry => 
-    entry.type === 'MOVE' && 
+    entry.type === 'mechanics' && 
+    entry.meta?.moveType === 'MOVE' &&
     entry.target === playerId && 
     entry.turn >= minTurn &&
     entry.details?.meta?.crit === true
@@ -225,7 +227,7 @@ export function isLowOnResources(
  * @function getLastEventOfType
  * @param {BattleLogEntry[]} log - The battle log entries.
  * @param {string} playerId - The player ID to check.
- * @param {LogEventType} eventType - The type of event to look for.
+ * @param {string} eventType - The type of event to look for.
  * @returns {BattleLogEntry | null} The most recent event, or null if none found.
  * @owner AustroMelee
  * @lastUpdated 2025-07-07
@@ -233,7 +235,7 @@ export function isLowOnResources(
 export function getLastEventOfType(
   log: BattleLogEntry[], 
   playerId: string, 
-  eventType: LogEventType
+  eventType: string
 ): BattleLogEntry | null {
   const playerEvents = log.filter(entry => 
     entry.actor === playerId && entry.type === eventType

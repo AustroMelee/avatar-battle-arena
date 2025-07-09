@@ -76,7 +76,7 @@ export function trackChiSpent(
  */
 export function trackPatternAdaptation(
   analytics: RealTimeAnalytics,
-  adaptationType: 'escalation' | 'stalemate' | 'repetition' | 'reposition'
+  adaptationType: string
 ): RealTimeAnalytics {
   const updates: Partial<RealTimeAnalytics> = {
     patternAdaptations: analytics.patternAdaptations + 1,
@@ -150,7 +150,7 @@ export function processLogEntryForAnalytics(
   }
 
   // Track pattern adaptations
-  if (logEntry.type === 'ESCALATION') {
+  if (logEntry.meta?.escalationType) {
     const escalationType = logEntry.meta?.escalationType as string;
     if (escalationType === 'stalemate') {
       updatedAnalytics = trackPatternAdaptation(updatedAnalytics, 'stalemate');
@@ -198,49 +198,6 @@ export function formatRealTimeAnalytics(analytics: RealTimeAnalytics): string {
   Escalation Events: ${analytics.escalationEvents}
   Punish Opportunities: ${analytics.punishOpportunities}
   Critical Hits: ${analytics.criticalHits}
-  Desperation Moves: ${analytics.desperationMoves}`;
+  Desperation Moves: ${analytics.desperationMoves}
+  `;
 }
-
-/**
- * @description Updates the real-time analytics stored in the battle state.
- * This should be called after each turn or significant action.
- * @param {BattleState} state - The current battle state.
- * @returns {BattleState} The battle state with updated analytics.
- */
-export function updateRealTimeAnalytics(state: BattleState): BattleState {
-  const newState = { ...state };
-  // const _lastLogEntry = newState.battleLog[newState.battleLog.length - 1];
-
-  // Only update analytics if the turn has advanced
-  if (newState.turn === newState.analytics.lastUpdatedTurn) {
-    return newState;
-  }
-  
-  let damageThisTurn = 0;
-  newState.battleLog
-    .filter(entry => entry.turn === newState.turn -1) // Analyze the turn that just finished
-    .forEach(entry => {
-      if (entry.damage) {
-        damageThisTurn += entry.damage;
-        newState.analytics.totalDamage += entry.damage;
-      }
-      if (entry.meta?.resourceCost) {
-        newState.analytics.totalChiSpent += entry.meta.resourceCost as number;
-      }
-    });
-
-  if (damageThisTurn > 0) {
-    newState.analytics.turnsSinceLastDamage = 0;
-  } else {
-    newState.analytics.turnsSinceLastDamage += 1;
-  }
-
-  // Recalculate average damage per turn
-  newState.analytics.averageDamagePerTurn = newState.turn > 0 
-    ? newState.analytics.totalDamage / newState.turn 
-    : 0;
-
-  newState.analytics.lastUpdatedTurn = newState.turn;
-
-  return newState;
-} 

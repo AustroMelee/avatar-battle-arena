@@ -30,7 +30,7 @@ export function analyzeBattlePerformance(
   const averageDamagePerTurn = totalTurns > 0 ? totalDamage / totalTurns : 0;
   const moveUsage: Record<string, number> = {};
   battleLog
-    .filter(entry => entry.type === 'MOVE' || entry.type === 'DESPERATION')
+    .filter(entry => entry.type === 'mechanics' && (entry.meta?.moveType === 'MOVE' || entry.meta?.moveType === 'DESPERATION'))
     .forEach(entry => {
       moveUsage[entry.action] = (moveUsage[entry.action] || 0) + 1;
     });
@@ -53,7 +53,7 @@ export function analyzeBattlePerformance(
       if(loser && lastLog.target === loser.name) {
         victoryMethod = 'burnout';
       }
-    } else if (lastLog && lastLog.type === 'FINISHER') {
+    } else if (lastLog && lastLog.meta?.finisher) {
         victoryMethod = 'climax';
     } else if (desperationMoves > 0) {
         victoryMethod = 'desperation';
@@ -65,7 +65,7 @@ export function analyzeBattlePerformance(
   }
   // Improved stalematePrevention logic
   const stalematePrevention = finalState.analytics?.stalematePreventionTriggered || 
-    battleLog.some(e => e.type === 'ESCALATION' || e.meta?.crisis || e.meta?.mechanic === 'SUDDEN DEATH');
+    battleLog.some(e => e.meta?.escalation || e.meta?.crisis || e.meta?.mechanic === 'SUDDEN DEATH');
   return {
     totalTurns,
     totalDamage,

@@ -1,6 +1,3 @@
-import React from 'react';
-import styles from './TechnicalLogEntry.module.css';
-
 interface TechnicalLogEntryProps {
   text: string;
   align?: 'center';

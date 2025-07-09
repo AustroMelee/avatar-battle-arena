@@ -4,7 +4,6 @@
     "exports": [],
     "imports": [
       "react",
-      "react",
       "./common/types",
       "./features/character-selection/components/CharacterSelection",
       "./features/location-selection/components/LocationSelection",
@@ -23,9 +22,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -124,9 +123,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -263,7 +262,7 @@
     "imports": [],
     "tags": [],
     "calls": [],
-    "description": "",
+    "description": "Implementation missing; removing broken exports.",
     "owner": "",
     "category": "Other",
     "git": {
@@ -339,7 +338,7 @@
     "imports": [],
     "tags": [],
     "calls": [],
-    "description": "",
+    "description": "Implementation missing; removing broken export.",
     "owner": "",
     "category": "Other",
     "git": {
@@ -411,9 +410,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "e53219f",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Sun Jul 6 19:12:51 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -459,7 +458,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": ""
+      "hash": "05ff14c",
+      "author": "AustroMelee",
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -493,7 +494,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": ""
+      "hash": "05ff14c",
+      "author": "AustroMelee",
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -503,19 +506,16 @@
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\components\\UnifiedBattleLog\\TechnicalLogEntry.tsx",
     "exports": [],
-    "imports": [
-      "react",
-      "./TechnicalLogEntry.module.css"
-    ],
+    "imports": [],
     "tags": [],
-    "calls": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/TechnicalLogEntry.module.css"
-    ],
+    "calls": [],
     "description": "",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": ""
+      "hash": "05ff14c",
+      "author": "AustroMelee",
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -529,18 +529,24 @@
       "@testing-library/react",
       "./UnifiedBattleLog",
       "../../types",
-      "vitest"
+      "vitest",
+      "../../services/battle/escalationApplication.service",
+      "../../types"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.tsx",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/escalationApplication.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
     ],
-    "description": "",
+    "description": "Example log set; in real tests, use the actual log array if available",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": ""
+      "hash": "05ff14c",
+      "author": "AustroMelee",
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -571,9 +577,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -1901,8 +1907,7 @@
       "trackDesperationMove",
       "processLogEntryForAnalytics",
       "getChiEfficiency",
-      "formatRealTimeAnalytics",
-      "updateRealTimeAnalytics"
+      "formatRealTimeAnalytics"
     ],
     "imports": [
       "../../types"
@@ -2583,6 +2588,7 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.test.tsx",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts"
     ]
   },
@@ -2592,8 +2598,7 @@
       "EscalationType",
       "EscalationTriggerResult",
       "detectEscalationTrigger",
-      "applyEscalation",
-      "getAvailableMoves"
+      "applyEscalation"
     ],
     "imports": [
       "../../types",
@@ -3545,9 +3550,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -3643,9 +3648,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -5681,9 +5686,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -5897,9 +5902,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -5920,7 +5925,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": ""
+      "hash": "05ff14c",
+      "author": "AustroMelee",
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -6037,18 +6044,16 @@
     "exports": [
       "CharacterCard"
     ],
-    "imports": [
-      "react"
-    ],
+    "imports": [],
     "tags": [],
     "calls": [],
     "description": "",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -6058,18 +6063,16 @@
     "exports": [
       "CharacterPortrait"
     ],
-    "imports": [
-      "react"
-    ],
+    "imports": [],
     "tags": [],
     "calls": [],
     "description": "",
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ac3184d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Thu Jul 3 01:38:41 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": []
@@ -6092,9 +6095,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ebef44d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Tue Jul 8 15:23:52 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [
@@ -6172,9 +6175,9 @@
     "owner": "",
     "category": "Other",
     "git": {
-      "hash": "ac3184d",
+      "hash": "05ff14c",
       "author": "AustroMelee",
-      "date": "Thu Jul 3 01:38:41 2025 -0400"
+      "date": "Tue Jul 8 19:11:39 2025 -0400"
     },
     "status": "🟢",
     "usedBy": [

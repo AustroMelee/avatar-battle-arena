@@ -3,7 +3,7 @@
 
 import { BattleState, BattleCharacter, BattleLogEntry } from '../../types';
 import type { EscalationType } from '../../types';
-import { logTechnical } from '../utils/mechanicLogUtils';
+import { logMechanics } from '../utils/mechanicLogUtils';
 
 /**
  * Forces pattern-breaking escalation using only phase-based logic.
@@ -22,12 +22,12 @@ export function forcePatternEscalation(
   if (attackerIndex === -1) return { newState, logEntry: {
     id: 'escalation-fallback',
     turn: state.turn,
-    actor: attacker.name,
+    actor: 'System',
     action: '',
     result: '',
     target: 'Battle',
     details: undefined,
-    type: 'INFO',
+    type: 'mechanics',
     narrative: '',
     timestamp: Date.now()
   }};
@@ -60,25 +60,20 @@ export function forcePatternEscalation(
       break;
   }
   // Technical log
-  let logEntry = logTechnical({
+  let logEntry = logMechanics({
     turn: state.turn,
-    actor: attacker.name,
-    action: 'escalation',
-    result: narrative,
-    reason,
-    target: 'Battle',
-    details: { escalationType }
+    text: `${attacker.name}: Escalation applied: ${reason}`
   });
   if (!logEntry) {
     logEntry = {
       id: 'escalation-fallback',
       turn: state.turn,
-      actor: attacker.name,
+      actor: 'System',
       action: '',
       result: '',
       target: 'Battle',
       details: undefined,
-      type: 'INFO',
+      type: 'mechanics',
       narrative: '',
       timestamp: Date.now()
     };

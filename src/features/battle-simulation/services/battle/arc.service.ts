@@ -10,7 +10,7 @@
 // CONTEXT: BattleSimulation, // FOCUS: ArcStateEngine
 import { BattleState, BattleArcState, ArcStateModifier, BattleLogEntry } from '../../types';
 import { ARC_TRANSITIONS } from '../../data/arcTransitions';
-import { logTechnical } from '../utils/mechanicLogUtils';
+import { logMechanics } from '../utils/mechanicLogUtils';
 
 // For developer controls - can be overridden for testing
 const IS_DEV_MODE = false; // Set to true in development
@@ -50,21 +50,16 @@ function createArcTransitionLogEntry(
   narrative: string,
   _isInjected: boolean = false
 ): BattleLogEntry {
-  const log = logTechnical({
+  const log = logMechanics({
     turn: turn,
-    actor: 'System',
-    action: 'Arc Transition',
-    result: narrative,
-    reason: undefined,
-    target: undefined,
-    details: undefined
+    text: 'System: Arc state changed.'
   });
   if (log) return log;
   return {
     id: 'arc-fallback',
     turn: turn,
     actor: 'System',
-    type: 'INFO',
+    type: 'mechanics',
     action: 'Arc Transition',
     result: narrative,
     target: undefined,

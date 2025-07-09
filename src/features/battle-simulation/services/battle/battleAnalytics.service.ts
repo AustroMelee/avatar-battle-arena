@@ -42,11 +42,11 @@ export function generateBattleAnalytics(state: BattleState): BattleAnalytics {
   const desperationMoves = state.battleLog.filter(entry => entry.meta?.isDesperation).length;
   
   // FIXED: Track pattern adaptations and escalation events
-  const patternAdaptations = state.battleLog.filter(entry => entry.type === 'ESCALATION').length;
+  const patternAdaptations = state.battleLog.filter(entry => entry.type === 'mechanics' && entry.meta?.escalation).length;
   const stalematePreventions = state.battleLog.filter(entry => 
-    entry.type === 'ESCALATION' && entry.meta?.escalationType === 'stalemate'
+    entry.type === 'mechanics' && entry.meta?.escalationType === 'stalemate'
   ).length;
-  const escalationEvents = state.battleLog.filter(entry => entry.type === 'ESCALATION').length;
+  const escalationEvents = state.battleLog.filter(entry => entry.type === 'mechanics' && entry.meta?.escalation).length;
   const punishOpportunities = state.battleLog.filter(entry => 
     entry.meta?.punishDamage && entry.meta.punishDamage > 0
   ).length;

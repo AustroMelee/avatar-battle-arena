@@ -61,8 +61,6 @@ function isRenderableLogEntry(entry: BattleLogEntry) {
   return true;
 }
 
-type KnownLogType = "dialogue" | "narrative" | "mechanics" | "technical" | "system";
-
 function assertNever(x: never): never {
   /* istanbul ignore next */
   throw new Error(`Unhandled log type: ${JSON.stringify(x)}`);
@@ -114,7 +112,6 @@ export const SingleLogEntry: FC<Props> = ({ entry, p1Name, p2Name }) => {
 export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
   battleLog,
   aiLog,
-  maxEntries = 15,
   participants
 }) => {
   let [p1, p2] = participants;
@@ -220,39 +217,6 @@ export const UnifiedBattleLog: React.FC<UnifiedBattleLogProps> = ({
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
   }, [battleLog, activeTab]);
-
-  // Extract prologue and main logs
-  const prologueEntries = battleLog.filter(entry => entry.prologue);
-  const mainBattleLog = battleLog.filter(entry => !entry.prologue && typeof entry.turn === 'number' && !isNaN(entry.turn));
-
-  // Group battle log entries by turn, filtering for NARRATIVE only
-  const groupedBattleLog = useMemo(() => {
-    return mainBattleLog
-      .reduce((acc, entry) => {
-        (acc[entry.turn] = acc[entry.turn] || []).push(entry);
-        return acc;
-      }, {} as Record<number, BattleLogEntry[]>);
-  }, [mainBattleLog]);
-
-  // const _groupedAILog = useMemo(() => {
-  //   return aiLog.reduce((acc, entry) => {
-  //     (acc[entry.turn] = acc[entry.turn] || []).push(entry);
-  //     return acc;
-  //   }, {} as Record<number, AILogEntry[]>);
-  // }, [aiLog]);
-
-  /**
-   * @description Gets the timestamp display for an entry.
-   */
-  const getTimestamp = (timestamp: number): string => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-US', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
 
   /**
    * @description Renders the narrative/battle log tab.

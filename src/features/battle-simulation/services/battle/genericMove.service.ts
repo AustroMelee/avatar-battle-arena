@@ -98,7 +98,7 @@ export async function executeGenericMove(
       id: 'generic-move-fallback',
       turn: state.turn,
       actor: attacker.name,
-      type: 'INFO',
+      type: 'mechanics',
       action: 'Generic Move',
       result: narrative,
       target: target.name,

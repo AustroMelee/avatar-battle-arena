@@ -52,7 +52,7 @@ export function processEffectFusions(character: BattleCharacter, turn: number): 
         id: generateUniqueLogId('fusion_log'),
         turn,
         actor: 'System',
-        type: 'STATUS',
+        type: 'mechanics',
         action: 'Status Meltdown!',
         target: character.name,
         result: `${character.name} suffers a system shock and is now ${recipe.resultantEffect.type}!`,

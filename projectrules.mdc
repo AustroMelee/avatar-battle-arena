@@ -1,38 +1,109 @@
-# projectrules.mdc
+# PROJECT_RULES_AND_WORKFLOW_POLICY  (v3.1 – “Source-Hardened”)
 
-> **AUTOMATION, DOCS, AND AI RULES (MANDATORY):**
->
-> **1. Any time a file is modified, added, or deleted, `ALL_FILES_INDEX.md` MUST be updated via automation.**
-> **2. Any time a file, type, or export is changed, `SYSTEM ARCHITECTURE.MD` MUST be refreshed with `npm run docs:refresh`. Manual edits are forbidden; always use automation scripts.**
-> **3. Refer to the `cursorcontext` file for additional coding rules. All contributors and AI agents MUST follow its guidance.**
-> **4. No manual edits to auto-generated documentation are permitted unless requested by user. Violations fail CI.**
-> **5. If automation scripts fail, the codebase is INVALID; no merges/commits until sync is restored.**
-> **6. Drift detection scripts MUST run pre-push and in CI. Docs and index must match codebase/export state exactly.**
-> **7. Cursor and all LLM agents MUST ingest the latest docs/index before code changes or architectural answers.**
-> **8. All auto-generated docs and indices MUST include a UTC timestamp and last git SHA.**
-> **9. For codebase-wide changes: update code → run automation → verify sync → then commit.**
-> **10. Cursor must prompt to run automation after any code/export/type change, if user does not do so.**
-> **11. AI agents must check these rules and cursorcontext before contributing.**
-> **12. All scripts/tools referenced must be versioned and documented in `SYSTEM ARCHITECTURE.MD`**
+────────────────────────────────────────────────────────
+[CONTEXT]
+────────────────────────────────────────────────────────
+PROJECT_TYPE: Fan / Personal, SOLO_DEVELOPER_MODE (single contributor)  
+PRIORITY: VELOCITY > PROCESS > TEST_COVERAGE (tests optional)  
+TOOLCHAIN: Cursor (primary), O3, Gemini Pro 2.5 (support)  
+ENVIRONMENT: Local dev server, **direct-to-main only** (no branches / PRs)  
+STAKEHOLDER_IMPACT: None – risk is local and self-corrected  
 
-> **CORE RULES:**
->
-> **1. Any time a file is modified, added, or deleted in the codebase, `ALL_FILES_INDEX.md` MUST be updated to reflect the change.**
-> This ensures the index remains a reliable, up-to-date map of the project for all contributors and automation.
->
-> **2. Any time a file, type, or export is changed, `SYSTEM ARCHITECTURE.MD` MUST be refreshed using `npm run docs:refresh` to ensure documentation is always in sync with the codebase.**
-> This is mandatory and enforced by pre-commit/CI hooks. No manual edits—always use the automation script.
+────────────────────────────────────────────────────────
+[MANDATORY AUTOMATION & DRIFT CONTROL]
+────────────────────────────────────────────────────────
+• **Pre-commit (Husky)** runs  
+  `npm run docs:refresh && npm run lint:fix && npx tsc --noEmit`  
+  → aborts on any non-zero exit, auto-stages generated docs.  
+• CI fails if:  
+  – `git diff --exit-code docs-generated/` is non-empty  
+  – `depcheck` finds unused deps  
+  – `madge --circular src/` finds cycles  
+• Manual edits to generated docs (`ALL_FILES_INDEX.md`, `SYSTEM ARCHITECTURE.MD`, etc.) are forbidden.  
+• All automation scripts are versioned + documented in `SYSTEM ARCHITECTURE.MD`.  
+• Auto-generated docs include UTC timestamp + git SHA.  
+• **Fail-on-drift**: any doc/code divergence is Fatal (blocks commit).  
 
-> **3. For best coding practices, always refer to the `cursorcontext` file in addition to this file.**
-> The `cursorcontext` file contains additional guidance and rules that must be followed for all code contributions.
+────────────────────────────────────────────────────────
+[COMMIT RULES]
+────────────────────────────────────────────────────────
+• Message pattern: `fix|feat|chore(scope): summary` (≤50 chars) – SHA + UTC auto-appended.  
+• Cursor must split commits so each changes **≤500 LOC**.  
 
-## Linting & Auto-fix Policy
-- The canonical lint command is `npm run lint:fix` (see package.json scripts).
-- All contributors must run this before opening a PR.
-- CI and pre-commit hooks enforce linting and auto-fix.
-- No PR may be merged with lint errors.
+────────────────────────────────────────────────────────
+[MAIN-BRANCH DISCIPLINE]
+────────────────────────────────────────────────────────
+• Cursor pulls + rebases before write; if remote changed → abort, restitch diff, retry.  
+• **Readonly-main safeguard** prevents accidental overwrite.  
 
-description:
-globs:
-alwaysApply: false
----
+────────────────────────────────────────────────────────
+[ERROR CLASSIFICATION]
+────────────────────────────────────────────────────────
+• **Fatal**  = type error, lint error, doc drift, circular import, **Chat-Protocol violation** → blocks commit / forces reply redo.  
+• **Recoverable** = runtime exception in local dev → auto-fix or log under `window.__DEV_LOG__`; commit after local pass.  
+
+────────────────────────────────────────────────────────
+[MISC FAST-LANE GUARDS]
+────────────────────────────────────────────────────────
+• Dev script autokills ports **5173-5190** (`npx kill-port`).  
+• No `// TODO:` – use `// FIXME:` + context or delete.  
+• Asset gate: warn >250 kB single file; advise CDN / split.  
+• Global `window.__DEV_LOG__` toggle for lightweight prod tracing.  
+
+────────────────────────────────────────────────────────
+[SOLO DEV WORKFLOW]
+────────────────────────────────────────────────────────
+1. Edit on **main**; run local dev server.  
+2. On error → send to AI, apply fix or revert, retest.  
+3. On pass (lint + docs) → commit (hooks auto-run) → push main.  
+
+────────────────────────────────────────────────────────
+[AGENT / LLM DIRECTIVE]
+────────────────────────────────────────────────────────
+• Never propose tests, branches, PRs, or coverage gates.  
+• Focus on main-branch edits, local fixes, agentic recovery.  
+• Always read latest `.cursorcontext` + generated docs before any action.  
+
+────────────────────────────────────────────────────────
+[CHAT INTERACTION PROTOCOL]
+────────────────────────────────────────────────────────
+A. **USER FLAGS** (first non-blank char)  
+   ? = question  ! = action  # = docs/arch chat  $ = shell/git help  > = quick nudge  
+
+B. **CURSOR RESPONSE FORMAT**  
+   1. `[ACK]`  one-liner confirming task / answer scope  
+   2. `[PLAN]` ≤5 bullets (omit only for trivial Q&A)  
+   3. `[OUTCOME]` code / diff / answer body  
+   4. `[NEXT]` exactly one clarifier or “Done.”  
+
+C. **COMPLIANCE RULES**  
+   • Max one clarifying question per cycle.  
+   • Zero apologies / filler; stick to the four blocks.  
+   • Prefix emitted code with `// CONTEXT: <file|topic>`.  
+   • User may send `# refresh` to force Cursor to re-read docs before next action.  
+
+────────────────────────────────────────────────────────
+[RESPONSE VALIDATION & SELF-CHECK]   ← ***NEW HARD GUARD***
+────────────────────────────────────────────────────────
+Before emitting a reply, Cursor **must** run an internal checklist:  
+1. Does response contain `[ACK]`, `[OUTCOME]`, `[NEXT]`? (`[PLAN]` if non-trivial)  
+2. Does it violate “no apologies / fluff” rule?  
+3. Is block order correct?  
+4. Is length ≤200 lines or ≤1200 words?  
+If any check fails → abort, reformat, then send. A failure to self-correct is **Fatal**.  
+
+────────────────────────────────────────────────────────
+[NO-BS UPGRADE CHECKLIST]  (implicitly enforced)
+────────────────────────────────────────────────────────
+1. Docs+lint auto-run, no prompts.  
+2. Hard drift gate in CI.  
+3. Commit-message contract.  
+4. 500-LOC diff cap.  
+5. Read-only main rebase guard.  
+6. Fatal vs Recoverable error tiering.  
+7. Zero TODOs allowed.  
+8. Port autokill.  
+9. Static asset cap 250 kB.  
+10. `window.__DEV_LOG__` runtime toggle.  
+
+# END_POLICY

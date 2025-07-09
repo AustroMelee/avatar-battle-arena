@@ -1,6 +1,6 @@
 // CONTEXT: Narrative System, // FOCUS: Opening Sequence and Pre-Fight Banter
 import type { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
-import { logStory, logTechnical } from '../utils/mechanicLogUtils';
+import { logStory, logMechanics } from '../utils/mechanicLogUtils';
 
 /**
  * @description Opening sequence configuration for each character
@@ -72,14 +72,9 @@ export function generateOpeningSequence(
   let turnCounter = 1; // Start from turn 1 for opening sequence
 
   // System opening (INFO)
-  const sysLog = logTechnical({
+  const sysLog = logMechanics({
     turn: undefined as any, // Remove turn number for prologue
-    actor: 'System',
-    action: 'Battle Start',
-    result: `The battle begins in the ${location}!`,
-    reason: undefined,
-    target: undefined,
-    details: undefined
+    text: 'System: Battle begins!'
   });
   if (sysLog) openingEntries.push({ ...(sysLog as BattleLogEntry), prologue: true });
 

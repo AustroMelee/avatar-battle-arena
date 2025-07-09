@@ -46,6 +46,7 @@ module.exports = [
       'no-var': 'error',
       // 👇 Your custom rule
       'local/no-stray-dialogue-import': 'error',
+      'local/no-actor-on-non-dialogue-logs': 'error',
     },
   },
   {

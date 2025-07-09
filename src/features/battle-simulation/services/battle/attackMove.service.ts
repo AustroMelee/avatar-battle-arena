@@ -242,7 +242,7 @@ export async function executeAttackMove(
       id: 'attack-fallback',
       turn: state.turn,
       actor: attacker.name,
-      type: 'INFO',
+      type: 'mechanics',
       action: 'Attack',
       result: narrative,
       target: target.name,

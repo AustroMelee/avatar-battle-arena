@@ -262,7 +262,7 @@ export function createCriticalLogEntry(
     id: 'critical-fallback',
     turn,
     actor: attacker.name,
-    type: 'INFO',
+    type: 'mechanics',
     action: 'Critical',
     result: narrative,
     target: target.name,

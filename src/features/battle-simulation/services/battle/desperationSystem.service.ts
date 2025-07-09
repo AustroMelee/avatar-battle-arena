@@ -8,7 +8,7 @@ import {
   EscalationType
 } from '../../types';
 import type { Move } from '../../types/move.types';
-import { logTechnical, logStory } from '../utils/mechanicLogUtils';
+import { logMechanics, logStory } from '../utils/mechanicLogUtils';
 
 /**
  * @description Desperation thresholds that trigger dramatic changes
@@ -157,7 +157,7 @@ export function createDesperationLogEntry(
     id: 'desperation-fallback',
     turn,
     actor: character.name,
-    type: 'INFO',
+    type: 'mechanics',
     action: 'Desperation',
     result: narrative,
     target: character.name,
@@ -208,14 +208,9 @@ export function triggerDesperation(
     // Phase Change Enforcement (log and mutate)
     if (state.tacticalPhase !== 'desperation') {
       state.tacticalPhase = 'desperation';
-      const techLog = logTechnical({
+      const techLog = logMechanics({
         turn,
-        actor: character.name,
-        action: 'desperation_phase',
-        result: 'Battle phase changed to desperation.',
-        reason: 'Desperation threshold crossed',
-        target: character.name,
-        details: { phase: 'desperation' }
+        text: `${character.name}: Desperation triggered.`
       });
       if (techLog) logs.push(techLog);
     }
@@ -232,22 +227,9 @@ export function triggerDesperation(
     const mutated = character;
 
     // Technical Log Consistency
-    const techLog2 = logTechnical({
+    const techLog2 = logMechanics({
       turn,
-      actor: character.name,
-      action: 'desperation-triggered',
-      result: `entered ${desperationState.isFinal ? 'final desperation' : desperationState.isExtreme ? 'extreme desperation' : 'desperation'}`,
-      reason: generateDesperationNarrative(character, desperationState),
-      target: character.name,
-      details: {
-        escalationType: 'desperation' as EscalationType,
-        threshold: desperationState.isFinal
-          ? DESPERATION_THRESHOLDS.FINAL_HP
-          : desperationState.isExtreme
-          ? DESPERATION_THRESHOLDS.EXTREME_HP
-          : DESPERATION_THRESHOLDS.CRITICAL_HP,
-        statModifiers: desperationState.statModifiers
-      }
+      text: `${character.name}: Desperation log 2.`
     });
     if (techLog2) logs.push(techLog2);
 
@@ -258,14 +240,9 @@ export function triggerDesperation(
   }
 
   // Defensive: Already desperate, do not retrigger, but log the attempt
-  const techLog3 = logTechnical({
+  const techLog3 = logMechanics({
     turn,
-    actor: character.name,
-    action: 'desperation-attempt',
-    result: 'already in desperation',
-    reason: 'Redundant desperation trigger attempt.',
-    target: character.name,
-    details: { escalationType: 'desperation' as EscalationType }
+    text: `${character.name}: Desperation log 3.`
   });
   if (techLog3) logs.push(techLog3);
   return { updatedCharacter: character, logs };

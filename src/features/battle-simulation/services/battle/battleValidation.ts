@@ -1,7 +1,7 @@
 // CONTEXT: Battle Validation System
 // RESPONSIBILITY: Validate battle state, prevent deadlocks, and ensure proper resolution
 import { BattleState, BattleLogEntry } from '../../types';
-import { logStory, logTechnical } from '../utils/mechanicLogUtils';
+import { logStory, logMechanics } from '../utils/mechanicLogUtils';
 import type { Move } from '../../types/move.types';
 // import { getAvailableFallbackMoves } from './fallbackMoves';
 // import { trackDamage } from './analyticsTracker.service';
@@ -41,14 +41,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   if (fighter1.currentHealth <= 0) {
     shouldForceEnd = true;
     endReason = 'victory';
-    logEntry = logTechnical({
+    logEntry = logMechanics({
       turn: state.turn,
-      actor: 'System',
-      action: 'victory',
-      result: `${fighter1.name} has been defeated! ${fighter2.name} wins!`,
-      reason: undefined,
-      target: fighter2.name,
-      details: { resolution: 'victory', winner: fighter2.name }
+      text: `${fighter1.name} has been defeated! ${fighter2.name} wins!`
     }) || undefined;
     return { isValid: false, issues, recommendations, shouldForceEnd, endReason, logEntry };
   }
@@ -56,14 +51,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   if (fighter2.currentHealth <= 0) {
     shouldForceEnd = true;
     endReason = 'victory';
-    logEntry = logTechnical({
+    logEntry = logMechanics({
       turn: state.turn,
-      actor: 'System',
-      action: 'victory',
-      result: `${fighter2.name} has been defeated! ${fighter1.name} wins!`,
-      reason: undefined,
-      target: fighter1.name,
-      details: { resolution: 'victory', winner: fighter1.name }
+      text: `${fighter2.name} has been defeated! ${fighter1.name} wins!`
     }) || undefined;
     return { isValid: false, issues, recommendations, shouldForceEnd, endReason, logEntry };
   }
@@ -89,7 +79,7 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   // Check for infinite loop potential
   const recentLogs = state.battleLog.slice(-5);
   const repeatedMoves = recentLogs.filter(log => 
-    log.type === 'MOVE' && 
+    log.type === 'mechanics' && 
     (log.action === 'Basic Strike' || log.action === 'Focus')
   ).length;
 
@@ -98,14 +88,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     recommendations.push('Force escalation or sudden death');
     shouldForceEnd = true;
     endReason = 'stalemate';
-    logEntry = logTechnical({
+    logEntry = logMechanics({
       turn: state.turn,
-      actor: 'System',
-      action: 'stalemate',
-      result: 'Both fighters are exhausted and can only perform basic moves. The battle ends in a draw.',
-      reason: 'basic_move_loop',
-      target: undefined,
-      details: { resolution: 'stalemate', reason: 'basic_move_loop' }
+      text: 'Both fighters are exhausted and can only perform basic moves. The battle ends in a draw.'
     }) || undefined;
   }
 
@@ -124,14 +109,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
   // --- NEW: Force Climax on Prolonged Stalemate ---
   if (state.turn > CLIMAX_TURN_THRESHOLD && state.analytics && state.analytics.averageDamagePerTurn < CLIMAX_DAMAGE_THRESHOLD) {
     const reason = `Prolonged stalemate: average damage per turn is only ${state.analytics.averageDamagePerTurn.toFixed(1)}.`;
-    const logEntry = logTechnical({
+    const logEntry = logMechanics({
       turn: state.turn,
-      actor: 'System',
-      action: 'climax_trigger',
-      result: 'The battle has stalled! The fighters are forced into a final, decisive clash!',
-      reason,
-      target: undefined,
-      details: { reason, phase: 'climax' }
+      text: 'The battle has stalled! The fighters are forced into a final, decisive clash!'
     }) || undefined;
     // Mark the state to be handled by a new climax phase.
     (state as any).tacticalPhase = 'climax';
@@ -154,14 +134,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     fighter1.flags.suddenDeath = true;
     if (state.analytics) state.analytics.stalematePreventionTriggered = true;
     const reason = cycleThresholdMet ? `Battle has cycled through escalation ${SUDDEN_DEATH_ESCALATION_CYCLES} times.` : `Battle has exceeded ${SUDDEN_DEATH_TURN_THRESHOLD} turns.`;
-    const logEntry = logTechnical({
+    const logEntry = logMechanics({
       turn: state.turn,
-      actor: 'System',
-      action: 'SUDDEN DEATH',
-      result: 'The battle has reached its final stage! The next exchange will end it!',
-      reason,
-      target: undefined,
-      details: { reason, phase: 'sudden_death' }
+      text: 'The battle has reached its final stage! The next exchange will end it!'
     }) || undefined;
     (state as any).suddenDeathActive = true;
     (state as any).suddenDeathLog = logEntry;
@@ -174,14 +149,9 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     if (fighter1.currentHealth > 0 && fighter2.currentHealth > 0) {
       (state as any).tacticalPhase = 'climax';
       (state as any).climaxTriggered = true;
-      const logEntry = logTechnical({
+      const logEntry = logMechanics({
         turn: state.turn,
-        actor: 'System',
-        action: 'force_final_exchange',
-        result: 'Stalemate detected, forcing a final decisive exchange!',
-        reason: 'stalemate_forced_final',
-        target: undefined,
-        details: { phase: 'climax', reason: 'stalemate_forced_final' }
+        text: 'Stalemate detected, forcing a final decisive exchange!'
       }) || undefined;
       return {
         isValid: true,
@@ -198,16 +168,10 @@ export function validateBattleState(state: BattleState): BattleValidationResult 
     // Otherwise, resolve as win/loss
     endReason = fighter1.currentHealth <= 0 ? 'victory' : 'defeat';
     shouldForceEnd = true;
-    logEntry = logTechnical({
+    logEntry = logMechanics({
       turn: state.turn,
-      actor: 'System',
-      action: endReason,
-      result: `Battle forcibly ended: ${endReason}`,
-      reason: 'forced_ending',
-      target: fighter1.currentHealth <= 0 ? fighter2.name : fighter1.name,
-      details: { resolution: endReason, reason: 'forced_ending' }
+      text: `Battle forcibly ended: ${endReason}`
     }) || undefined;
-    return { isValid: false, issues, recommendations, shouldForceEnd, endReason, logEntry };
   }
 
   return {
@@ -253,14 +217,11 @@ export function forceBattleClimax(state: BattleState): BattleState {
     const climaxStoryLogMaybe = logStory({
       turn: newState.turn,
       actor: 'System',
-      narrative: 'The battle reaches its climax! Both fighters must give their all!',
+      narrative: 'The battle reaches its climax! Both fighters must give their all!'
     });
-    const climaxTechnicalLogMaybe = logTechnical({
+    const climaxTechnicalLogMaybe = logMechanics({
       turn: newState.turn,
-      actor: 'System',
-      action: 'climax',
-      result: 'Climax phase forced due to stalemate/turn limit.',
-      details: { resolution: 'climax', turn: newState.turn },
+      text: 'System: The battle reaches its climax! Both fighters must give their all!'
     });
     if (climaxStoryLogMaybe !== null && climaxStoryLogMaybe !== undefined) newState.battleLog.push(climaxStoryLogMaybe);
     if (climaxTechnicalLogMaybe !== null && climaxTechnicalLogMaybe !== undefined) newState.battleLog.push(climaxTechnicalLogMaybe);
@@ -326,7 +287,7 @@ export function forceBattleClimax(state: BattleState): BattleState {
       const drawLog = logStory({
         turn: newState.turn,
         actor: 'System',
-        narrative: 'The climactic clash leaves both warriors unconscious. The battle ends in a draw.',
+        narrative: 'The climactic clash leaves both warriors unconscious. The battle ends in a draw.'
       });
       if (drawLog !== null && drawLog !== undefined) newState.battleLog.push(drawLog);
     }

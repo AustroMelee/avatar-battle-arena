@@ -7,7 +7,7 @@ function assert(condition: any, message: string): asserts condition {
 }
 
 import { BattleState, BattleCharacter } from '../../types';
-import { logStory, logTechnical } from '../utils/mechanicLogUtils';
+import { logStory, logMechanics } from '../utils/mechanicLogUtils';
 
 /**
  * EscalationType: All supported escalation triggers.
@@ -97,46 +97,17 @@ export function detectEscalationTrigger(state: BattleState, attacker: BattleChar
 export function applyEscalation(state: BattleState, attacker: BattleCharacter, triggerResult: EscalationTriggerResult) {
   assert(triggerResult && triggerResult.triggered, 'applyEscalation called without a valid triggerResult');
   if (state.tacticalPhase === 'escalation') {
-    logTechnical({
+    logMechanics({
       turn: state.turn,
-      actor: attacker.name,
-      action: 'escalation_attempt',
-      result: 'Escalation already active; attempt ignored.',
-      reason: 'already_escalated',
-      target: attacker.name,
-      details: { ...triggerResult.data }
+      text: 'Escalation already active; attempt ignored.'
     });
     return;
   }
   state.tacticalPhase = 'escalation';
   attacker.flags.usedEscalation = true;
   attacker.flags.escalationTurns = String(state.turn); // Store as string for clarity
-  logTechnical({
+  logMechanics({
     turn: state.turn,
-    actor: attacker.name,
-    action: 'escalation',
-    result: `Escalation triggered: ${triggerResult.reason}`,
-    reason: triggerResult.reason,
-    target: attacker.name,
-    details: { escalationType: triggerResult.escalationType, ...triggerResult.data }
+    text: `${attacker.name}: Escalation triggered.`
   });
-  logStory({
-    turn: state.turn,
-    actor: attacker.name,
-    narrative: `The battle escalates! ${triggerResult.reason}`
-  });
-  // Optionally: update analytics, restrict moves, fire UI hooks, etc.
 }
-
-/**
- * Returns available moves for a fighter, filtered by escalation/desperation state.
- * @param fighter The fighter
- * @param state The battle state
- */
-export function getAvailableMoves(fighter: BattleCharacter, state: BattleState) {
-  if (state.tacticalPhase === 'escalation')
-    return fighter.abilities.filter(m => m.tags?.includes('escalation'));
-  if (state.tacticalPhase === 'desperation')
-    return fighter.abilities.filter(m => m.tags?.includes('desperation'));
-  return fighter.abilities;
-} 

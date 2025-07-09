@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix",
+    "clean": "rmdir /s /q node_modules\\.vite dist coverage && npm install",
     "docs:refresh": "node scripts/docs-refresh.cjs"
   },
   "dependencies": {

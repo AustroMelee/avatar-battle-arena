@@ -1,0 +1,233 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UnifiedBattleLog – snapshot rendering > renders all log types as expected 1`] = `
+<div>
+  <div
+    class="unifiedBattleLog"
+  >
+    <div
+      aria-label="Disruption State Ticker"
+      class="disruptionTicker"
+    >
+      <span
+        aria-label="Aang Control State: Neutral, Stability: 100, Momentum: 0"
+        style="margin-right: 12px; font-weight: 500;"
+      >
+        <strong>
+          Aang
+        </strong>
+        : 
+        Neutral
+         | S:
+        100
+         | M:
+        0
+      </span>
+      <span
+        aria-label="Azula Control State: Neutral, Stability: 100, Momentum: 0"
+        style="margin-right: 12px; font-weight: 500;"
+      >
+        <strong>
+          Azula
+        </strong>
+        : 
+        Neutral
+         | S:
+        100
+         | M:
+        0
+      </span>
+    </div>
+    <div
+      class="header"
+      style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;"
+    >
+      <h3
+        style="margin: 0px; font-size: 20px;"
+      >
+        Battle Log
+      </h3>
+      <div
+        class="tabSelector"
+        style="display: flex; gap: 4px;"
+      >
+        <button
+          style="font-weight: 700; padding: 4px 10px; border-radius: 4px; border: 1px solid rgb(136, 136, 136); background: rgb(34, 34, 34); color: rgb(255, 255, 255); cursor: pointer;"
+        >
+          🎭 Narrative
+        </button>
+        <button
+          style="font-weight: 400; padding: 4px 10px; border-radius: 4px; border: 1px solid rgb(136, 136, 136); background: rgb(68, 68, 68); color: rgb(255, 255, 255); cursor: pointer;"
+        >
+          💻 Technical
+        </button>
+      </div>
+      <div
+        style="display: flex; align-items: center; gap: 8px; margin-left: 16px;"
+      >
+        <input
+          max="1"
+          min="1"
+          placeholder="Turn #"
+          style="width: 60px; padding: 4px 8px; border-radius: 4px; border: 1px solid rgb(136, 136, 136); background: rgb(34, 34, 34); color: rgb(255, 255, 255); font-size: 12px;"
+          type="number"
+          value=""
+        />
+      </div>
+      <button
+        style="margin-left: auto; padding: 6px 14px; border-radius: 6px; border: 1px solid rgb(136, 136, 136); background: rgb(231, 76, 60); color: rgb(255, 255, 255); font-weight: 600; cursor: pointer; transition: background 0.2s;"
+        title="Show recent entries only (T1 logs will be hidden)"
+      >
+        📜 Recent Only
+      </button>
+      <button
+        aria-label="Copy All Logs"
+        style="margin-left: 8px; padding: 6px 14px; border-radius: 6px; border: 1px solid rgb(136, 136, 136); background: rgb(34, 34, 34); color: rgb(255, 255, 255); font-weight: 600; cursor: pointer; transition: background 0.2s;"
+        title="Copy all logs to clipboard"
+      >
+        Copy All Logs
+      </button>
+      <button
+        aria-label="Copy Story Log"
+        style="margin-left: 8px; padding: 6px 14px; border-radius: 6px; border: 1px solid rgb(136, 136, 136); background: rgb(34, 34, 34); color: rgb(255, 255, 255); font-weight: 600; cursor: pointer; transition: background 0.2s;"
+        title="Copy only the story (narrative) log"
+      >
+        Copy Story Log
+      </button>
+      <button
+        aria-label="Copy Technical Log"
+        style="margin-left: 8px; padding: 6px 14px; border-radius: 6px; border: 1px solid rgb(136, 136, 136); background: rgb(34, 34, 34); color: rgb(255, 255, 255); font-weight: 600; cursor: pointer; transition: background 0.2s;"
+        title="Copy only the technical (AI) log"
+      >
+        Copy Technical Log
+      </button>
+    </div>
+    <div
+      style="margin-bottom: 12px;"
+    >
+      <label
+        for="log-view-mode"
+        style="color: rgb(203, 213, 225); margin-right: 8px;"
+      >
+        Log View:
+      </label>
+      <select
+        id="log-view-mode"
+      >
+        <option
+          value="grouped"
+        >
+          [DEV] Grouped by Turn – Full battle transcript
+        </option>
+        <option
+          value="latest"
+        >
+          [DEV] Latest Turn Only – Just current turn
+        </option>
+        <option
+          value="full"
+        >
+          [DEV] All Entries (Raw) – Unfiltered log
+        </option>
+        <option
+          value="public"
+        >
+          [PUBLIC] Story View – For players/spectators
+        </option>
+      </select>
+    </div>
+    <div>
+      <div
+        style="text-align: left; margin: 0.5em auto 0.5em 0px; padding: 1em; border-radius: 8px; background: rgb(30, 41, 59); color: rgb(255, 255, 255); max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start;"
+        >
+          <div
+            style="font-weight: 900; font-size: 20px; margin-bottom: 8px;"
+          >
+            Aang
+          </div>
+        </div>
+        <div
+          style="font-size: 16px;"
+        >
+          I will not give up!
+        </div>
+      </div>
+      <div
+        style="text-align: center; margin: 0.5em auto 0.5em auto; padding: 1em; border-radius: 8px; background: rgb(51, 65, 85); color: rgb(255, 255, 255); max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start;"
+        />
+        <div
+          style="font-size: 16px; font-style: italic; white-space: pre-line; word-break: break-word;"
+        >
+          The wind howls.
+        </div>
+      </div>
+    </div>
+    <div
+      style="margin-bottom: 24px;"
+    >
+      <div
+        style="font-weight: 700; font-size: 18px; margin: 0px 0px 8px 0px; color: rgb(203, 213, 225); text-align: left;"
+      >
+        Turn 
+        1
+      </div>
+      <div
+        style="text-align: left; margin: 0.5em auto 0.5em 0px; padding: 1em; border-radius: 8px; background: rgb(30, 41, 59); color: rgb(255, 255, 255); max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start;"
+        >
+          <div
+            style="font-weight: 900; font-size: 20px; margin-bottom: 8px;"
+          >
+            Aang
+          </div>
+        </div>
+        <div
+          style="font-size: 16px;"
+        >
+          I will not give up!
+        </div>
+      </div>
+      <div
+        style="text-align: center; margin: 0.5em auto 0.5em auto; padding: 1em; border-radius: 8px; background: rgb(51, 65, 85); color: rgb(255, 255, 255); max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start;"
+        />
+        <div
+          style="font-size: 16px; font-style: italic; white-space: pre-line; word-break: break-word;"
+        />
+      </div>
+      <div
+        style="text-align: center; margin: 0.5em auto 0.5em auto; padding: 1em; border-radius: 8px; background: rgb(51, 65, 85); color: rgb(255, 255, 255); max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start;"
+        />
+        <div
+          style="font-size: 16px; font-style: italic; white-space: pre-line; word-break: break-word;"
+        >
+          The wind howls.
+        </div>
+      </div>
+      <div
+        style="text-align: center; margin: 0.5em auto 0.5em auto; padding: 1em; border-radius: 8px; background: rgb(51, 65, 85); color: rgb(255, 255, 255); max-width: 500px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start;"
+        />
+        <div
+          style="font-size: 16px; font-style: italic; white-space: pre-line; word-break: break-word;"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

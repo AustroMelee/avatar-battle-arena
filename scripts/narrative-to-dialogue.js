@@ -1,13 +1,15 @@
+/* eslint-env node */
+// If using CommonJS, ensure 'module' is defined in the Node.js environment.
 /**
  * Change   logNarrative("Aang", "text")
  *      →   logDialogue(aangVar, "text")
  *
  * Heuristic: any call where 1st arg is Aang|Azula|p1Name|p2Name gets flagged.
  */
-module.exports = function(fileInfo, api) {
+export default function(fileInfo, api) {
   const j = api.jscodeshift;
   return j(fileInfo.source)
-    .find(j.CallExpression, { callee: { name: "logNarrative" } })
+    .find(j.CallExpression)
     .forEach(path => {
       const [actorArg] = path.value.arguments;
       if (
@@ -18,5 +20,5 @@ module.exports = function(fileInfo, api) {
         path.value.callee.name = "logDialogue";
       }
     })
-    .toSource();
-};
+    .toSource()
+}

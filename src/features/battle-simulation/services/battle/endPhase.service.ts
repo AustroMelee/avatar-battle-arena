@@ -1,7 +1,7 @@
 // Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow.
 import type { BattleState } from '../../types';
 import { declareWinner } from './state';
-import { logTechnical } from '../utils/mechanicLogUtils';
+import { logMechanics } from '../utils/mechanicLogUtils';
 
 const DECISIVE_WIN_HEALTH_DIFFERENCE = 60; // A 60 HP lead can trigger a decisive win
 
@@ -14,14 +14,9 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
     newState.isFinished = true;
     newState.winner = p1;
     newState.log.push(`${p1.name} has overwhelmed ${p2.name}. A decisive victory!`);
-    const techLog1 = logTechnical({
+    const techLog1 = logMechanics({
       turn: newState.turn,
-      actor: 'System',
-      action: 'Decisive Win',
-      result: `${p1.name} wins by overwhelming force!`,
-      reason: undefined,
-      target: p1.name,
-      details: { resolution: 'decisive' }
+      text: `System: ${p1.name} has overwhelmed ${p2.name}. A decisive victory!`
     });
     if (techLog1) newState.battleLog.push(techLog1);
     return declareWinner(newState, p1);
@@ -30,14 +25,9 @@ export function validateBattleEndPhase(state: BattleState): BattleState {
     newState.isFinished = true;
     newState.winner = p2;
     newState.log.push(`${p2.name} has overwhelmed ${p1.name}. A decisive victory!`);
-    const techLog2 = logTechnical({
+    const techLog2 = logMechanics({
       turn: newState.turn,
-      actor: 'System',
-      action: 'Decisive Win',
-      result: `${p2.name} wins by overwhelming force!`,
-      reason: undefined,
-      target: p2.name,
-      details: { resolution: 'decisive' }
+      text: `System: ${p2.name} has overwhelmed ${p1.name}. A decisive victory!`
     });
     if (techLog2) newState.battleLog.push(techLog2);
     return declareWinner(newState, p2);

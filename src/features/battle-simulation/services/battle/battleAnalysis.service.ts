@@ -50,7 +50,7 @@ export function analyzeBattlePerformance(
   // Analyze move usage
   const moveUsage: Record<string, number> = {};
   battleLog
-    .filter(entry => entry.type === 'MOVE' || entry.type === 'DESPERATION')
+    .filter(entry => entry.type === 'mechanics' && (entry.meta?.moveType === 'MOVE' || entry.meta?.moveType === 'DESPERATION'))
     .forEach(entry => {
       moveUsage[entry.action] = (moveUsage[entry.action] || 0) + 1;
     });

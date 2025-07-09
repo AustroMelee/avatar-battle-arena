@@ -44,7 +44,7 @@ export function analyzeCharacterPerformance(
   // Analyze move usage
   const movesUsed: Record<string, number> = {};
   characterLogs
-    .filter(entry => entry.type === 'MOVE' || entry.type === 'DESPERATION')
+    .filter(entry => entry.type === 'mechanics' && (entry.meta?.moveType === 'MOVE' || entry.meta?.moveType === 'DESPERATION'))
     .forEach(entry => {
       movesUsed[entry.action] = (movesUsed[entry.action] || 0) + 1;
     });

@@ -153,7 +153,7 @@ export function executeFinisherMove(
     id: 'finisher-fallback',
     turn: state.turn,
     actor: attacker.name,
-    type: 'INFO',
+    type: 'mechanics',
     action: 'Finisher',
     result: result || `Finisher move executed.`,
     target: target.name,

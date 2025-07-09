@@ -16,7 +16,7 @@ import { analyzeBattlePerformance, analyzeCharacterPerformance, analyzeAIPerform
 import type { BattleMetrics, CharacterMetrics, AIMetrics } from './battle/analytics';
 import { initializeAnalyticsTracker, processLogEntryForAnalytics } from './battle/analyticsTracker.service';
 import { generateUniqueLogId } from './ai/logQueries';
-import { logDialogue, logTechnical, logStory, logSystem } from './utils/mechanicLogUtils';
+import { logDialogue, logMechanics, logStory, logSystem } from './utils/mechanicLogUtils';
 
 /**
  * @description Represents the result of a battle simulation with analytics.

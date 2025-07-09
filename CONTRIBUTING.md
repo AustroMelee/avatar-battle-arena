@@ -10,3 +10,10 @@
 ## Lint & Auto-fix
 
 Run `npm run lint:fix` to apply ESLint auto-fixes. The CI workflow rejects commits with any remaining lint errors. 
+
+## Log Entry Do’s & Don’ts
+
+| Log type                  | Can include actor? | Who/what goes there         |
+|--------------------------|--------------------|-----------------------------|
+| dialogue                 | ✅                 | a fighter                   |
+| mechanics/system/narrative| ❌                | text only or actor: 'System'| 

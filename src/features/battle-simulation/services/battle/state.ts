@@ -254,7 +254,7 @@ export function declareWinner(state: BattleState, winner: BattleCharacter): Batt
         id: narrative.id,
         turn: newState.turn,
         actor: narrative.speaker,
-        type: 'VICTORY',
+        type: 'system',
         action: 'Battle End',
         result: narrative.text,
         narrative: narrative.text,

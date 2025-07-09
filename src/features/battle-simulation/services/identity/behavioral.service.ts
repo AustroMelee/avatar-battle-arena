@@ -2,7 +2,7 @@ import { BattleCharacter, BattleState, BattleLogEntry } from '../../types';
 import { Character } from '@/common/types';
 import { ALL_BEHAVIORAL_TRAITS } from '../../../character-selection/data/traits';
 import { ActiveFlag } from '../../types/behavioral.types';
-import { logStory, logTechnical } from '../utils/mechanicLogUtils';
+import { logStory, logMechanics } from '../utils/mechanicLogUtils';
 // import { createMechanicLogEntry } from '../utils/mechanicLogUtils';
 
 /**
@@ -21,14 +21,9 @@ function tickDownFlags(character: BattleCharacter): BattleLogEntry[] {
     data.duration--;
     if (data.duration <= 0) {
       expiredFlags.push(flag);
-      const log = logTechnical({
+      const log = logMechanics({
         turn: 0, // Will be set by caller
-        actor: character.name,
-        action: 'flag_expired',
-        result: `${character.name} is no longer ${flag}.`,
-        reason: undefined,
-        target: undefined,
-        details: undefined
+        text: `${character.name}: Behavioral flag expired.`
       });
       if (log) expiredLogs.push(log);
     }
@@ -56,14 +51,9 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
   // Overconfidence breaks when taking significant damage
   if (character.activeFlags.has('overconfidenceActive') && damageTaken > 20) {
     character.activeFlags.delete('overconfidenceActive');
-    const log = logTechnical({
+    const log = logMechanics({
       turn: state.turn,
-      actor: character.name,
-      action: 'overconfidence_broken',
-      result: `A sharp blow snaps ${character.name} out of their arrogance!`,
-      reason: undefined,
-      target: undefined,
-      details: undefined
+      text: `${character.name}: Overconfidence flag removed due to high damage.`
     });
     if (log) clearedLogs.push(log);
   }
@@ -71,14 +61,9 @@ function clearFlagsOnStateChange(character: BattleCharacter, state: BattleState)
   // Manipulation breaks when stunned
   if (character.activeFlags.has('isManipulated')) {
     character.activeFlags.delete('isManipulated');
-    const log = logTechnical({
+    const log = logMechanics({
       turn: state.turn,
-      actor: character.name,
-      action: 'manipulation_broken',
-      result: `The jarring blow snaps ${character.name} out of their confusion!`,
-      reason: undefined,
-      target: undefined,
-      details: undefined
+      text: `${character.name}: Manipulation flag removed.`
     });
     if (log) clearedLogs.push(log);
   }
@@ -130,7 +115,7 @@ export function processBehavioralSystemForTurn(
         id: 'behavioral-fallback',
         turn: state.turn,
         actor: self.name,
-        type: 'INFO',
+        type: 'mechanics',
         action: 'Behavioral',
         result: 'Behavioral event',
         target: undefined,

@@ -12,6 +12,25 @@ import { forcePatternEscalation } from '../escalationApplication.service';
 import { createMechanicLogEntry } from '../../utils/mechanicLogUtils';
 // import type { Move } from '../../types/move.types';
 
+declare global {
+  interface ImportMeta {
+    hot?: unknown;
+    globEager?: (pattern: string) => Record<string, unknown>;
+  }
+}
+
+if (import.meta.hot) {
+  console.log('[TRACE] escalationPhase loaded from', import.meta.url);
+  if (typeof import.meta.globEager === 'function') {
+    console.log(
+      '[TRACE] Keys in battle services bundle:',
+      Object.keys(import.meta.globEager('../**/*.service.ts'))
+    );
+  } else {
+    console.log('[TRACE] import.meta.globEager is not available');
+  }
+}
+
 // Global enhanced state manager instance
 // const enhancedStateManager = new EnhancedStateManager();
 // Lazy narrative service instance

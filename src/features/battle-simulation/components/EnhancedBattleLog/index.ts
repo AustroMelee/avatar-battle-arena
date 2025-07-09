@@ -1,1 +1,1 @@
-export { EnhancedBattleLog } from './EnhancedBattleLog'; 
+// Implementation missing; removing broken export. 
