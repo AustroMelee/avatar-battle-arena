@@ -3298,7 +3298,6 @@
       "../moveExecution.service",
       "../patternBreaking.service",
       "../tacticalState.service",
-      "../../../../location-selection/data/locationData",
       "../reversalMechanic.service",
       "../../utils/mechanicLogUtils",
       "../../utils/moveUtils",
@@ -3313,7 +3312,6 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveExecution.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/patternBreaking.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/tacticalState.service.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/location-selection/data/locationData.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/reversalMechanic.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/moveUtils.ts",
@@ -4609,15 +4607,13 @@
     "imports": [
       "../types/NarrativeTypes",
       "./CharacterNarrativeRouter",
-      "./NarrativeVariantsService",
-      "./pools/PoolManager"
+      "./NarrativeVariantsService"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/NarrativeVariantsService.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/pools/PoolManager.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/NarrativeVariantsService.ts"
     ],
     "description": "Service responsible for composing narrative lines from various components",
     "owner": "",
@@ -4838,7 +4834,6 @@
     },
     "status": "🟢",
     "usedBy": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/NarrativeCoordinator.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/OneOffMomentManager.ts"
     ]
@@ -6579,7 +6574,6 @@
     "status": "🟢",
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.test.tsx",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/tacticalPhase.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/location-selection/components/LocationSelection.tsx"
     ]
   },
