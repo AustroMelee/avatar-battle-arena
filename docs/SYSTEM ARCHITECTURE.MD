@@ -25,6 +25,14 @@
 
 This document provides a high-level entry point to the Avatar Battle Arena system. For detailed information, see the linked modular documentation files above.
 
+- **July 9th, 2025 Overhaul:** The battle/narrative system was overhauled in a multi-phase update:
+  - Dramatic/finisher/last-resort move pools expanded for all characters.
+  - Move selection logic guarantees dramatic moves in escalation/desperation/climax.
+  - Penalty logic ensures dramatic moves are always available.
+  - Narrative pools expanded to 8–10 unique lines per phase/character, with fallback to contextual lines.
+  - Global anti-repetition and cadence logic: at least one dialogue/scene line every 2 turns in dramatic phases.
+  - Forced endings always output unique, cinematic lines.
+  - All changes are type/lint/test enforced, with robust error handling and test coverage.
 - **Architecture, policies, and best practices** are now organized into focused documents for clarity and maintainability.
 - **All automation, cross-referencing, and docs refresh scripts remain fully supported.**
 - **For a full file index, see [ALL_FILES_INDEX.md](./ALL_FILES_INDEX.md).**
@@ -50,6 +58,13 @@ This document provides a high-level entry point to the Avatar Battle Arena syste
 16. [Troubleshooting Playbook](../CONTRIBUTING.md)
 17. [Recent Changes](../CHANGELOG.md)
 18. [Glossary of Terms](./GLOSSARY.md)
+
+---
+
+## Folder & File Overview
+
+| Path | Type | Description | Size | Tags | Used By | Calls |
+|------|------|-------------|------|------|---------|-------|
 
 ---
 
@@ -86,6 +101,7 @@ All documentation is modular and auto-synced. See [Documentation Policy & Automa
 
 ## Recent Changes
 See [Changelog](../CHANGELOG.md) for the latest updates.
+- Multi-phase mechanics and narrative overhaul: expanded move/narrative pools, anti-repetition/cadence, forced ending logic (July 9th, 2025)
 
 ---
 
