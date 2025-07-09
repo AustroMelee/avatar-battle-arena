@@ -33,6 +33,11 @@ This document provides a high-level entry point to the Avatar Battle Arena syste
   - Global anti-repetition and cadence logic: at least one dialogue/scene line every 2 turns in dramatic phases.
   - Forced endings always output unique, cinematic lines.
   - All changes are type/lint/test enforced, with robust error handling and test coverage.
+  - **Pattern Adaptation Logic:** Introduced a pattern ban system—if the same move is repeated 3+ times, it is temporarily banned for 2 turns (default). Edge case handling ensures the AI never deadlocks or runs out of valid moves. Logging and analytics were added for pattern bans and adaptations.
+  - **Escalation/Desperation Logic:** Enhanced move selection logic to strongly boost escalation, finisher, lastResort, desperation, comeback, and all-in moves during their respective phases. Stacking boosts and logging for these events. Robust to edge cases and integrated with analytics.
+  - **Stalemate/Deadlock Forcing:** Added detection for 5 turns of no progress (stalemate). After 2 cycles, the system forces a dramatic ending using forceBattleClimax. System logging and analytics for all forced stalemates and climaxes.
+  - **Anti-Repetition Enforcement:** Enforced a buffer of the last 3 lines per narrative context. Never repeats a line or surfaces “No narrative.” Always provides a non-empty fallback line.
+  - **Technical Debt & Code Hygiene:** Systematically removed all unused variables and parameters across the codebase. Batch linting and doc automation enforced. Updated all function signatures and call sites to match actual usage. New best practices doc created.
 - **Architecture, policies, and best practices** are now organized into focused documents for clarity and maintainability.
 - **All automation, cross-referencing, and docs refresh scripts remain fully supported.**
 - **For a full file index, see [ALL_FILES_INDEX.md](./ALL_FILES_INDEX.md).**
@@ -104,8 +109,19 @@ All documentation is modular and auto-synced. See [Documentation Policy & Automa
 See [Changelog](../CHANGELOG.md) for the latest updates.
 - Multi-phase mechanics and narrative overhaul: expanded move/narrative pools, anti-repetition/cadence, forced ending logic (July 9th, 2025)
 - **July 2025 Compliance Update:** 100% mechanics and narrative coverage (all tactical/emotional contexts for Aang and Azula, including taunt, comeback, pattern_break, interrupt/counter/reversal, stalemate/deadlock). All core battle and narrative systems are now strictly type-safe, lint/test compliant, and robustly error-handled. All test stubs and codemods updated for type correctness. All critical errors and dependency issues resolved.
+- **July 2025 Mechanics/Narrative/Process Update:** Pattern ban system, escalation/desperation logic, forced stalemate resolution, anti-repetition narrative buffer, fallback enforcement, technical debt cleanup, and new best practices doc added.
 
 ---
 
 ## Glossary
 See [Glossary of Terms](./GLOSSARY.md) for all domain-specific and architectural terms.
+---
+
+## July 9th, 2025 Milestone: Engine Complete, Narrative Upgrade Next
+
+- **Battle Engine Stability:** All core mechanics (charge/release, escalation, effect processing, KO, turn logic) are robust and bug-free. No deadlocks, infinite loops, or charge limbo remain. The simulation loop is now chunked and browser-friendly: it processes a few turns per tick and yields to the UI, so the browser never freezes and React state updates in real time. End conditions (KO, max turns, draw) are strictly enforced, with clear logging at battle end.
+- **Narrative/Logging:** All major events (attacks, effects, escalation, charge/release) are logged, but the output is still debug-style (e.g., “Outcome: HIT for 1 damage,” “Searing Burn (BURN) with 3 turns remaining”). Escalation and effect triggers are visible in logs, but not yet cinematic or immersive. No special narrative lines for finishers, charge releases, or KOs—just mechanical logs.
+- **Next Steps:** The groundwork is laid for a cinematic narrative layer, but the current update does not yet swap debug logs for in-world, story-driven narration. The system is ready for narrative service integration to generate lines like “Aang unleashes a mighty tornado!” or “Azula’s lightning splits the arena.”
+
+---
+

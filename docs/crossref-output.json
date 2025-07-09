@@ -654,16 +654,18 @@
     "imports": [
       "react",
       "../types",
-      "../services/battleSimulator.service",
       "../types",
-      "../services/battle/analytics"
+      "../services/battle/analytics",
+      "../services/battle/state",
+      "../services/battle/processTurn"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battleSimulator.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/analytics.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/analytics.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/processTurn.ts"
     ],
     "description": "Custom hook for managing battle simulation state.",
     "owner": "",
@@ -734,14 +736,14 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveUtils.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/state.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/mentalState.service.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/moveUtils.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts"
     ]
   },
   {
     "file": "C:\\Users\\rohai\\Desktop\\WEBSITE PAGES\\AVATAR\\BATTLE ARENA\\GITHUB PROJECT\\src\\features\\battle-simulation\\data\\moves.ts",
     "exports": [
-      "ALL_MOVES"
+      "ALL_MOVES",
+      "getMoveById"
     ],
     "imports": [
       "../types/move.types"
@@ -760,7 +762,9 @@
     },
     "status": "🟢",
     "usedBy": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveRegistry.service.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveSelection.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/moveRegistry.service.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/processTurn.ts"
     ]
   },
   {
@@ -1386,26 +1390,30 @@
       "./metaState",
       "./moveScoring",
       "../../types/move.types",
+      "./patternDetection",
       "../../types",
       "../../types/move.types",
       "../battle/positioningMechanics.service",
       "../identity/tacticalPersonality.engine",
       "../../types",
       "./tacticalMemory.service",
-      "../../types"
+      "../../types",
+      "../../data/moves"
     ],
     "tags": [],
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/metaState.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveScoring.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/patternDetection.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/positioningMechanics.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/identity/tacticalPersonality.engine.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/tacticalMemory.service.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/data/moves.ts"
     ],
     "description": "Tactical AI move selection and scoring logic for Avatar Battle Arena. Handles weighted random selection, variance application, and tactical memory for move choice.",
     "owner": "AustroMelee",
@@ -1492,7 +1500,8 @@
       "isRepeatingPattern",
       "detectPatterns",
       "getRecentMoves",
-      "wasMoveUsedRecently"
+      "wasMoveUsedRecently",
+      "getPatternBans"
     ],
     "imports": [],
     "tags": [],
@@ -1507,7 +1516,8 @@
     },
     "status": "🟢",
     "usedBy": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/metaState.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/metaState.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveSelection.ts"
     ]
   },
   {
@@ -3378,7 +3388,8 @@
       "./battleValidation",
       "../utils/mechanicLogUtils",
       "../ai/moveSelection",
-      "@/common/branding/nonEmptyString"
+      "@/common/branding/nonEmptyString",
+      "../../data/moves"
     ],
     "tags": [],
     "calls": [
@@ -3390,7 +3401,8 @@
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/effects/statusEffect.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/battleValidation.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveSelection.ts"
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/moveSelection.ts",
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/data/moves.ts"
     ],
     "description": "Processes a single turn of the battle using a clean, well-defined phase pipeline.",
     "owner": "",
@@ -3402,6 +3414,7 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/controllers/useBattleSimulator.controller.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/__tests__/basicStrike.integration.test.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battleSimulator.service.ts"
     ]
@@ -3570,6 +3583,7 @@
     },
     "status": "🟢",
     "usedBy": [
+      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/controllers/useBattleSimulator.controller.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/endPhase.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/endPhase.service.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/battle/phases/escalationPhase.service.ts",
@@ -3820,7 +3834,6 @@
     "status": "🟢",
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/components/UnifiedBattleLog/UnifiedBattleLog.test.tsx",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/controllers/useBattleSimulator.controller.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/__tests__/battle-log-pipeline.test.ts"
     ]
   },
@@ -4413,13 +4426,9 @@
     "exports": [
       "AangNarrativeService"
     ],
-    "imports": [
-      "../../types/NarrativeTypes"
-    ],
+    "imports": [],
     "tags": [],
-    "calls": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
-    ],
+    "calls": [],
     "description": "Service for generating Aang-specific narrative lines",
     "owner": "",
     "category": "Other",
@@ -4438,13 +4447,9 @@
     "exports": [
       "AzulaNarrativeService"
     ],
-    "imports": [
-      "../../types/NarrativeTypes"
-    ],
+    "imports": [],
     "tags": [],
-    "calls": [
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/types/NarrativeTypes.ts"
-    ],
+    "calls": [],
     "description": "Service for generating Azula-specific narrative lines",
     "owner": "",
     "category": "Other",
@@ -4665,7 +4670,7 @@
       "author": "AustroMelee",
       "date": "Tue Jul 8 15:23:52 2025 -0400"
     },
-    "status": "🟢",
+    "status": "🟡",
     "usedBy": []
   },
   {
@@ -5727,8 +5732,6 @@
     "usedBy": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/BattleNarrationStrategyService.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/CharacterNarrativeRouter.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/characters/AangNarrativeService.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/characters/AzulaNarrativeService.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/EmotionalNarrationPolicy.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/emotions/EmotionTracker.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/narrative/core/NarrativeComposer.ts",
@@ -6015,10 +6018,8 @@
       "getAvailableMovesOld"
     ],
     "imports": [
-      "@/common/types",
       "../../types",
       "../ai/metaState",
-      "../../data/identities",
       "./mechanicLogUtils",
       "../../types/move.types"
     ],
@@ -6026,11 +6027,10 @@
     "calls": [
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/ai/metaState.ts",
-      "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/data/identities.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/services/utils/mechanicLogUtils.ts",
       "C:/Users/rohai/Desktop/WEBSITE PAGES/AVATAR/BATTLE ARENA/GITHUB PROJECT/src/features/battle-simulation/types/move.types.ts"
     ],
-    "description": "Gets the dynamic collateral tolerance for a character based on their mental state and the location.",
+    "description": "Used via dynamic registry in BattleEngine/utilities. See SYSTEM ARCHITECTURE.MD for flow.",
     "owner": "",
     "category": "Other",
     "git": {
