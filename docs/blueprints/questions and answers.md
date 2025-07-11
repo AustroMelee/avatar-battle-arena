@@ -91,7 +91,7 @@
 * No data ever leaves the user’s device.
 * Can boost frequently clicked items for the current user only.
 
-**14. ⚡ `useEdgeSearch.ts` optimization**
+**14. ⚡ `useAustrosSearch.ts` optimization**
 
 * Combines local filter state and global search efficiently.
 * Uses memoization and debouncing to avoid unnecessary re-renders.

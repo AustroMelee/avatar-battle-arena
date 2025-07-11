@@ -1,0 +1,10 @@
+# projectrules.mdc
+
+## Tool Usage Priority
+
+- Whenever possible, you must use Context7, Desktop Commander, and Web Search to aid in your development of this project. It should be your first priority to use them, not your last.
+
+description:
+globs:
+alwaysApply: false
+---

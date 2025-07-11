@@ -1,4 +1,4 @@
-# AVATAR EDGE-ONLY SEARCH & FILTERING BLUEPRINT (v3.0)
+# AUSTROS ATLA WORLD SEARCH & FILTERING BLUEPRINT (v3.0)
 
 ## 🏛️ **CORE PRINCIPLE**
 
@@ -49,7 +49,7 @@
 │   │   ├── LoadingSpinner.tsx
 │   │   └── ErrorBoundary.tsx
 │   ├── hooks/
-│   │   ├── useEdgeSearch.ts     # Wrapper for instant search/filter logic
+│   │   ├── useAustrosSearch.ts     # Wrapper for instant search/filter logic
 │   │   ├── useDebounce.ts
 │   │   ├── useVirtualScroll.ts
 │   ├── pages/
@@ -187,7 +187,7 @@
 ### **Batch 2: Core App Skeleton**
 
 * Scaffold `/src/` with per-domain pages, a global search bar, and filter panels.
-* Implement `useEdgeSearch.ts` to wrap FlexSearch + filter logic.
+* Implement `useAustrosSearch.ts` to wrap FlexSearch + filter logic.
 * Build dumb components for ItemCard, FilterTag, ResultsGrid, etc.
 
 ### **Batch 3: Client-Side Engine**

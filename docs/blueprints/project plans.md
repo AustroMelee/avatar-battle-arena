@@ -1,13 +1,14 @@
-Below is the updated project plan for the **Avatar Edge Encyclopedia**, incorporating the suggested improvements to address gaps and ambiguities while ensuring clarity for Cursor to execute autonomously. The revisions focus on dependency installation, schema clarity, FlexSearch configuration, Tailwind CSS integration, and testing setup, while maintaining the original structure’s intent. Tailwind’s role is emphasized for rapid, accessible UI development, aligning with the project’s `styles/tailwind.css` and `tailwind.config.ts`. Each step remains actionable, references the blueprint and raw data (`/raw-data/`), and aligns with the provided project structure (`/avatar-edge-encyclopedia/`).
+Below is the updated project plan for the **Austros ATLA World Encyclopedia**, incorporating the suggested improvements to address gaps and ambiguities while ensuring clarity for Cursor to execute autonomously. The revisions focus on dependency installation, schema clarity, FlexSearch configuration, Tailwind CSS integration, and testing setup, while maintaining the original structure’s intent. Tailwind’s role is emphasized for rapid, accessible UI development, aligning with the project’s `styles/tailwind.css` and `tailwind.config.ts`. Each step remains actionable, references the blueprint and raw data (`/raw-data/`), and aligns with the provided project structure (`/avatar-edge-encyclopedia/`).
 
 ---
 
-**Avatar Edge Encyclopedia – Updated Project Task Breakdown**
+**Austros ATLA World Encyclopedia – Updated Project Task Breakdown**
 
 **(User–Cursor Step-by-Step Workflow)**
 
 ---
 
+**[COMPLETED]**
 ### Pre-Step: Project Foundations
 
 **User**:  
@@ -19,6 +20,7 @@ I need the folder structure as documented in the blueprints, but keep in mind, i
 
 ---
 
+**[COMPLETED]**
 ### Step 1: Repository Initialization
 
 **User**:  
@@ -32,6 +34,7 @@ Do not scaffold code beyond the structure and README. Proceed.
 
 ---
 
+**[COMPLETED]**
 ### Step 2: Scaffold Core App and Build Setup
 
 **User**:  
@@ -49,6 +52,7 @@ Proceed.
 
 ---
 
+**[COMPLETED]**
 ### Step 3: Set Up Data Processing Scripts
 
 **User**:  
@@ -60,7 +64,7 @@ Ensure scripts are executable, handle errors gracefully, and are documented in `
 
 ---
 
-### Step 4: Implement Data Validation Workflow
+### Step 4 (Completed): Implement Data Validation Workflow
 
 **User**:  
 Cursor, add a build step (`npm run validate:data`) that runs `validate-data.mjs`.  
@@ -71,18 +75,174 @@ Proceed.
 
 ---
 
-### Step 5: Implement Data Enrichment Workflow
 
-**User**:  
-Cursor, wire up the build process to run `enrich-data.mjs` after successful validation.  
-- Input: Validated raw data from `/raw-data/`.  
-- Process: Add synonyms, tags, and relations per schema rules (e.g., add `synonyms: ["cat", "feline"]` for an animal).  
-- Output: `enriched-data.json` in `/dist/`.  
-- Ensure enrichment logic is modular and configurable (e.g., via a config file or constants).  
-- Update `/docs/setup.md` with the workflow, including sample enrichment rules.  
+
+**[COMPLETED]**
+**Step 5**: 
+Implement Data Enrichment Workflow (Revised)
+
+Cursor, wire up the build process to run enrich-data.mjs after successful validation.
+
+Input: Validated raw data from /raw-data/.
+
+Enrichment rules:
+
+All enrichment rules (for adding synonyms, tags, and relations) must be defined in a single config file: /scripts/enrich-config.mjs.
+
+This config must clearly specify, for each data type, which fields to enrich, synonym/tag/relations mappings, and any default or fallback rules.
+
+No enrichment logic is allowed to be hardcoded inside enrich-data.mjs—all rules, mappings, and exceptions must flow from the config file or the schema.
+
+Processing:
+
+For each record, apply enrichment (add synonyms, tags, and relations) strictly according to the config and schema.
+
+Example: If the config includes "cat": ["feline", "housecat"] for animals, then those must be set as synonyms for "cat".
+
+Output:
+
+Write a single enriched-data.json to /dist/.
+
+The script must process all files in /raw-data/ every run, so any new, updated, or removed data is always reflected in the output.
+
+The output is always fully regenerated from scratch (idempotent, never incremental).
+
+Error handling:
+
+If enrichment fails for any record, log the error and skip that record—never halt the build or throw.
+
+Build integration:
+
+The enrichment step must be a required part of the build pipeline (e.g., included in npm run build or CI job), ensuring all raw data changes are always processed.
+
+If data volume grows, optimize via streaming or batching, but do not change the workflow or output structure.
+
+Documentation:
+
+In /docs/setup.md, document the enrichment workflow, config file format, and provide a sample rule.
+
+Instructions must be clear: after editing raw data or config, simply re-run the scripts to update outputs.
+
+Proceed with my instructions.
+
+
+**(Revised, detailed enrichment workflow)**
+
+After successful validation, run enrich-data.mjs as the next build step.
+
+Input: All raw JSON files in /raw-data/ directory.
+
+Enrichment logic must be defined in a single config file: /scripts/enrich-config.mjs.
+
+The config specifies, for each data type, which fields to enrich (synonyms, tags, relations), default values, and any lookup tables for known synonyms or tags.
+
+No enrichment rules are hardcoded inside the main script. All logic must flow from this config file or the data schema itself.
+
+For each record in each file:
+- Add synonyms, tags, and relations according to schema rules and the enrichment config.
+- Example: For animals, if the config lists "cat": ["feline", "housecat"], ensure those are added as synonyms.
+
+Output a single enriched-data.json in /dist/, always fully regenerated from scratch on every run.
+
+If any enrichment fails for a record, log the error and skip that record—do not halt the pipeline.
+
+The workflow must be idempotent and repeatable: after editing any raw data or config, re-running the script must fully update the output.
+
+The enrichment step is wired into the main build process (npm run build) and is required to pass before deployment or test runs.
+
+Document this workflow in /docs/setup.md, including:
+- Example config structure and sample enrichment rule
+- How to add new synonym/tag/relations rules
+- What to do if enrichment errors occur
+
 Proceed.
 
 ---
+
+**[COMPLETED]**
+**Step 5.5**: Automate Markdown-to-JSON Data Extraction (Final, Architect-Clarified Version)
+User:
+Cursor, implement a new pipeline step to extract structured data from all Markdown (.md) files in /raw-data/{type}/ directories and convert them to valid .json files for downstream processing.
+
+Requirements:
+Script Location:
+
+Create a new script at /scripts/convert-md-to-json.mjs.
+
+This script must only handle Markdown-to-JSON conversion (do not mix with enrichment, validation, or indexing logic).
+
+Detection:
+
+For every /raw-data/{type}/ subdirectory, scan for .md files.
+
+Parsing and Extraction:
+
+For each .md file:
+
+Parse only "---" delimited YAML frontmatter at the file start (ignore "+++" or additional/multi-doc frontmatters).
+
+Normalize all YAML frontmatter keys to lower-case.
+
+If both a "description" field and Markdown body exist:
+
+Use "description" from frontmatter as the "description" field.
+
+Store the Markdown body (below frontmatter) as "body" (raw Markdown).
+
+If frontmatter is missing "name", set the filename (without extension) as "name" and log a warning.
+
+If no frontmatter exists, treat the entire file as "description" and set "name" to the filename.
+
+If frontmatter is malformed, skip it, log an error, and use only Markdown body as "description".
+
+Allow arbitrary extra fields in frontmatter (do not enforce a whitelist). Warn if unknown fields are encountered, but do not remove them.
+
+Output:
+
+For each .md file, write a .json file in the same directory, with the exact same basename (foo-bar.md → foo-bar.json), containing a single JSON object for that record.
+
+Overwrite any existing .json with the same basename.
+
+All JSON must be formatted with 2-space indentation.
+
+Idempotency:
+
+The script must be safely re-runnable at any time.
+
+Logging:
+
+Print a status line for every file processed, including errors or warnings.
+
+Support an optional --verbose flag for debug info (e.g., full output object).
+
+No Enrichment/Validation:
+
+Do not enrich, validate, or index at this step—only convert and extract.
+
+Documentation:
+
+Update /docs/setup.md with:
+
+Step-by-step instructions for running this script.
+
+Required Markdown/YAML structure and field conventions.
+
+Example before/after (.md and corresponding .json).
+
+Sample command:
+
+bash
+Copy
+Edit
+node scripts/convert-md-to-json.mjs
+or
+
+bash
+Copy
+Edit
+node scripts/convert-md-to-json.mjs --verbose
+
+--------------------------------------------------------------
 
 ### Step 6: Generate Search Index
 
@@ -123,7 +283,7 @@ Proceed.
 
 **User**:  
 Cursor, create empty shell hooks in `/src/hooks/`:  
-- `useEdgeSearch.ts`: For search/filter logic.  
+- `useAustrosSearch.ts`: For search/filter logic.  
 - `useDebounce.ts`: For debouncing search input.  
 - `useVirtualScroll.ts`: For efficient rendering of large lists.  
 - Add TypeScript interfaces referencing `domainTypes.ts`.  
@@ -235,7 +395,7 @@ Proceed.
 
 **User**:  
 Cursor, set up:  
-- Unit tests (`/tests/unit/`) for hooks (`useEdgeSearch.ts`, etc.), scripts, and utilities using Jest/Vitest.  
+- Unit tests (`/tests/unit/`) for hooks (`useAustrosSearch.ts`, etc.), scripts, and utilities using Jest/Vitest.  
 - Integration tests (`/tests/integration/`) for UI components and search flows.  
 - End-to-end tests for filter/search flows using Playwright.  
 - a11y tests (`/tests/a11y/`) using `axe-core` and Playwright, ensuring Tailwind-styled components meet ARIA standards.  
