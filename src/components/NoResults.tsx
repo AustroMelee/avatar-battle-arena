@@ -1,4 +1,6 @@
-// Dumb NoResults component placeholder
+import * as styles from './NoResults.css';
+import React from 'react';
+
 export default function NoResults() {
-  return <div>No Results Found</div>;
+  return <div className={styles.noResults}>No results found.</div>;
 }

@@ -1,17 +1,24 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import * as styles from './Navbar.css';
 
-const Navbar: React.FC = () => (
-  <nav className="bg-gray-900 text-white px-4 py-2 flex gap-4 items-center">
-    <Link to="/" className="font-bold text-lg">Austros ATLA World Encyclopedia</Link>
-    <Link to="/search">Search</Link>
-    <Link to="/characters">Characters</Link>
-    <Link to="/bending">Bending</Link>
-    <Link to="/locations">Locations</Link>
-    <Link to="/fauna">Fauna</Link>
-    <Link to="/food">Food</Link>
-    <Link to="/spirit-world">Spirit World</Link>
-  </nav>
-);
+const navItems = [
+  { label: 'Search', href: '/search' },
+  { label: 'Characters', href: '/characters' },
+  { label: 'Bending', href: '/bending' },
+  { label: 'Locations', href: '/locations' },
+  { label: 'Fauna', href: '/fauna' },
+  { label: 'Food', href: '/food' },
+  { label: 'Spirit World', href: '/spirit-world' },
+];
 
-export default Navbar;
+export default function Navbar() {
+  return (
+    <nav className={styles.navbar}>
+      <span className={styles.logo}>Austros ATLA World Encyclopedia</span>
+      {navItems.map((item) => (
+        <a key={item.href} href={item.href} className={styles.navLink}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  );
+}

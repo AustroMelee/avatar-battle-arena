@@ -1,4 +1,6 @@
-// Dumb LoadingSpinner component placeholder
+import * as styles from './LoadingSpinner.css';
+import React from 'react';
+
 export default function LoadingSpinner() {
-  return <div>Loading...</div>;
+  return <div className={styles.spinner} />;
 }

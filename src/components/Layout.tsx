@@ -1,11 +1,16 @@
+import * as styles from './Layout.css';
 import React from 'react';
 import Navbar from './Navbar';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <>
-    <Navbar />
-    <div className="min-h-screen bg-gray-50">{children}</div>
-  </>
-);
+type LayoutProps = {
+  children: React.ReactNode;
+};
 
-export default Layout;
+export default function Layout({ children }: LayoutProps) {
+  return (
+    <div className={styles.layout}>
+      <Navbar />
+      <main className={styles.main}>{children}</main>
+    </div>
+  );
+}

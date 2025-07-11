@@ -1,25 +1,14 @@
-// Dumb ErrorBoundary component placeholder
-import { Component, ReactNode } from 'react';
+import * as styles from './ErrorBoundary.css';
+import React from 'react';
 
-interface Props {
-  children: ReactNode;
-}
-interface State {
-  hasError: boolean;
-}
+type ErrorBoundaryProps = {
+  error?: Error;
+  children?: React.ReactNode;
+};
 
-export default class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
+export default function ErrorBoundary({ error, children }: ErrorBoundaryProps) {
+  if (error) {
+    return <div className={styles.errorBox}>Something went wrong: {error.message}</div>;
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div>Something went wrong.</div>;
-    }
-    return this.props.children;
-  }
+  return <>{children}</>;
 }

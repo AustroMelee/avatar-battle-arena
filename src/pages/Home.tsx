@@ -1,19 +1,29 @@
-import React from 'react';
+import * as styles from './Home.css';
 
-const Home: React.FC = () => (
-  <main className="container mx-auto p-8">
-    <h1 className="text-3xl font-bold mb-4">Austros ATLA World Encyclopedia</h1>
-    <p className="mb-6">Welcome! Explore the world of Avatar through characters, bending arts, locations, fauna, and more.</p>
-    <nav className="flex flex-wrap gap-4">
-      <a href="/search" className="btn">Search</a>
-      <a href="/characters" className="btn">Characters</a>
-      <a href="/bending" className="btn">Bending Arts</a>
-      <a href="/locations" className="btn">Locations</a>
-      <a href="/fauna" className="btn">Fauna</a>
-      <a href="/food" className="btn">Food</a>
-      <a href="/spirit-world" className="btn">Spirit World</a>
-    </nav>
-  </main>
-);
+const pageLinks = [
+  { label: 'Search', href: '/search' },
+  { label: 'Characters', href: '/characters' },
+  { label: 'Bending Arts', href: '/bending' },
+  { label: 'Locations', href: '/locations' },
+  { label: 'Fauna', href: '/fauna' },
+  { label: 'Food', href: '/food' },
+  { label: 'Spirit World', href: '/spirit-world' },
+];
 
-export default Home;
+export default function Home() {
+  return (
+    <main className={styles.container}>
+      <h1 className={styles.title}>Austros ATLA World Encyclopedia</h1>
+      <p className={styles.subtitle}>
+        Welcome! Explore the world of Avatar through characters, bending arts, locations, fauna, and more.
+      </p>
+      <div className={styles.linkGrid}>
+        {pageLinks.map((item) => (
+          <a key={item.href} href={item.href} className={styles.pageLink}>
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </main>
+  );
+}

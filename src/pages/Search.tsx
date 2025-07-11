@@ -5,7 +5,6 @@ const Search: React.FC = () => (
     <h1 className="text-2xl font-bold mb-4">Search Encyclopedia</h1>
     <input
       type="text"
-      className="input input-bordered w-full mb-4"
       placeholder="Search for characters, bending, locations, etc..."
       aria-label="Search encyclopedia"
     />

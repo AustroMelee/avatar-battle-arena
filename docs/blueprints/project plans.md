@@ -1,3 +1,5 @@
+[START-COMPLETE]
+> **Migration Note:** The original plan was to use Tailwind CSS for all styling. Due to persistent build and integration errors, the project is switching to [vanilla-extract](https://vanilla-extract.style/) for type-safe, zero-runtime CSS. All references to Tailwind in this document reflect the original intent; the current and future implementation will use vanilla-extract for all styles.
 Below is the updated project plan for the **Austros ATLA World Encyclopedia**, incorporating the suggested improvements to address gaps and ambiguities while ensuring clarity for Cursor to execute autonomously. The revisions focus on dependency installation, schema clarity, FlexSearch configuration, Tailwind CSS integration, and testing setup, while maintaining the original structure’s intent. Tailwind’s role is emphasized for rapid, accessible UI development, aligning with the project’s `styles/tailwind.css` and `tailwind.config.ts`. Each step remains actionable, references the blueprint and raw data (`/raw-data/`), and aligns with the provided project structure (`/avatar-edge-encyclopedia/`).
 
 ---
@@ -7,6 +9,8 @@ Below is the updated project plan for the **Austros ATLA World Encyclopedia**, i
 **(User–Cursor Step-by-Step Workflow)**
 
 ---
+
+
 
 **[COMPLETED]**
 ### Pre-Step: Project Foundations
@@ -244,15 +248,132 @@ node scripts/convert-md-to-json.mjs --verbose
 
 --------------------------------------------------------------
 
-### Step 6: Generate Search Index
+User:
+Cursor, implement Step 6 as follows:
 
-**User**:  
-Cursor, run `build-index.mjs` after enrichment to produce `search-index.json` using FlexSearch.  
-- Index fields: `name`, `synonyms`, `tags`, `relations` from `enriched-data.json`.  
-- Use English tokenization and stemming for efficient search.  
-- Output `search-index.json` and `enriched-data.json` to `/dist/`, ignored in `.gitignore`.  
-- Document the process, FlexSearch config, and output structure in `/docs/setup.md`.  
-Proceed.
+Script:
+
+Run /scripts/build-index.mjs after enrichment.
+
+Input:
+
+Always use /dist/enriched-data.json as the sole input source.
+
+Do not read from /raw-data/ or any other location.
+
+Index Fields:
+
+Index these fields only:
+
+name
+
+synonyms
+
+tags
+
+relations
+
+No other fields are indexed unless specified in a future spec.
+
+FlexSearch Configuration:
+
+Use default English tokenization and stemming for FlexSearch.
+
+No custom options unless scale or requirements change.
+
+Document exact config settings in /docs/setup.md.
+
+Output Structure:
+
+Output /dist/search-index.json as a single object with:
+
+The FlexSearch index.
+
+A mapping of record id to the full record for UI hydration.
+
+Example:
+
+json
+Copy
+Edit
+{
+  "index": { /* FlexSearch index object */ },
+  "records": { "id1": { ... }, "id2": { ... } }
+}
+ID Field:
+
+Use the id field from each record as the unique key.
+
+If id is missing, generate a deterministic hash from name + type.
+
+Never use name alone unless it is guaranteed globally unique.
+
+Error Handling:
+
+If a record is missing a required field (name or id),
+
+Skip it and log a warning with enough detail to identify the problem record.
+
+Never halt the build or throw.
+
+Output Location:
+
+Always write both /dist/search-index.json and /dist/enriched-data.json to /dist/ only.
+
+.gitignore Enforcement:
+
+Script must warn if /dist/search-index.json or /dist/enriched-data.json are not present in .gitignore to prevent accidental git commits.
+
+Documentation:
+
+Update /docs/setup.md with:
+
+Step-by-step commands
+
+FlexSearch config details
+
+Troubleshooting notes
+
+Output structure and sample
+
+Example queries
+
+Rebuild Triggers:
+
+Ensure build-index.mjs is automatically re-run whenever /dist/enriched-data.json changes—as part of the npm run build pipeline.
+
+Manual runs are allowed for debugging but not required for normal workflow.
+
+Strict enforcement:
+
+No data loss, no skipped types, robust error handling, and full hydration for UI.
+
+The output is always idempotent and up to date.
+
+Proceed with my instructions.
+
+---
+
+### Step 6.5: Migrate Styling from Tailwind CSS to vanilla-extract
+
+> **Migration Note:**
+> The original plan was to use Tailwind CSS for all styling. Due to persistent build and integration errors, the project is switching to [vanilla-extract](https://vanilla-extract.style/) for type-safe, zero-runtime CSS. All references to Tailwind in this document reflect the original intent; the current and future implementation will use vanilla-extract for all styles.
+
+**Actions:**
+- Remove all Tailwind CSS files, configuration, and dependencies from the project.
+- Install and configure `@vanilla-extract/css` and `@vanilla-extract/vite-plugin`.
+- Update `vite.config.ts` to use the vanilla-extract plugin.
+- Refactor all components and pages to use vanilla-extract for styling instead of Tailwind classes.
+- Update documentation and blueprints to reflect the migration and new styling approach.
+
+**Rationale:**
+- Tailwind CSS was originally chosen for rapid, utility-first styling, but integration issues and build errors made it unsustainable for this project.
+- vanilla-extract provides type-safe, zero-runtime CSS-in-TypeScript, aligning with the project's goals for maintainability, performance, and type safety.
+
+**Next Steps:**
+- All new and existing components should use vanilla-extract for styles.
+- Remove any remaining Tailwind references from code, docs, and configuration.
+- Document vanilla-extract usage patterns in `/docs/setup.md` as the new standard for styling.
 
 ---
 
@@ -265,17 +386,71 @@ Cursor, in `/src/types/`, define:
 - Ensure `validate-data.mjs` and `enrich-data.mjs` export types compatible with `domainTypes.ts`.  
 - Use these types in all scripts and components for type safety.  
 Proceed.
-
+[END-COMPLETE]
 ---
 
-### Step 8: Scaffold Initial Components
+Step 8: Scaffold Initial Components (Clarified & Architect-Grade)
+User:
+Cursor, proceed as follows:
 
-**User**:  
-Cursor, scaffold the following component files in `/src/components/` with placeholder exports:  
-- `SearchBar.tsx`, `FilterPanel.tsx`, `FilterTag.tsx`, `ItemCard.tsx`, `ResultsGrid.tsx`, `NoResults.tsx`, `LoadingSpinner.tsx`, `ErrorBoundary.tsx`.  
-- Add basic Tailwind classes for responsive styling (e.g., `SearchBar.tsx`: `className="flex p-2 bg-gray-100 rounded"`, `ResultsGrid.tsx`: `className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"`).  
-- Ensure components accept TypeScript props from `domainTypes.ts`.  
-Proceed.
+1. File Location:
+Create all files in /src/components/ (flat—no subfolders).
+
+2. Components to Scaffold:
+
+SearchBar.tsx
+
+FilterPanel.tsx
+
+FilterTag.tsx
+
+ItemCard.tsx
+
+ResultsGrid.tsx
+
+NoResults.tsx
+
+LoadingSpinner.tsx
+
+ErrorBoundary.tsx
+
+3. Exports:
+Each file must contain a default export only.
+
+4. Component Type:
+All components must be functional components.
+
+5. Prop Typing:
+Props must be strictly typed using the most relevant type from domainTypes.ts (imported via src/types/index.ts).
+
+6. Placeholder Content:
+Each component should render a <div> with the component name as placeholder content.
+
+7. Tailwind Classes:
+Apply only the example Tailwind classes provided in the step description (no additional classes).
+
+8. Array Handling:
+
+ItemCard.tsx accepts a single item as prop.
+
+ResultsGrid.tsx accepts an array of items as prop.
+
+9. PropTypes/Runtime Validation:
+No PropTypes or runtime validation—TypeScript typing only.
+
+10. Test Files:
+Do not create test files at this step—component files only.
+
+11. Naming/File Organization:
+All files use PascalCase. No subfolders or file grouping.
+
+Strict instructions:
+
+No business logic, event handlers, or UI beyond placeholders and prop typing.
+
+Do not import or scaffold anything not specified above.
+
+Proceed with my instructions.
 
 ---
 

@@ -41,3 +41,6 @@ export type SpiritWorldEntry = {
   type: string;
   description: string;
 };
+
+export * from './rawTypes';
+export * from './domainTypes';

@@ -1,7 +1,11 @@
 import React from 'react';
 import AppRouter from './router';
-import './styles/tailwind.css';
+import { lightThemeClass } from './styles/themes/lightTheme.css';
 
-const App: React.FC = () => <AppRouter />;
+const App: React.FC = () => (
+  <div className={lightThemeClass}>
+    <AppRouter />
+  </div>
+);
 
 export default App;

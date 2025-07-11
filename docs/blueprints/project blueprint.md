@@ -1,5 +1,7 @@
 # AUSTROS ATLA WORLD SEARCH & FILTERING BLUEPRINT (v3.0)
 
+> **Migration Note:** The original plan was to use Tailwind CSS for all styling. Due to persistent build and integration errors, the project is switching to [vanilla-extract](https://vanilla-extract.style/) for type-safe, zero-runtime CSS. All references to Tailwind in this document reflect the original intent; the current and future implementation will use vanilla-extract for all styles.
+
 ## 🏛️ **CORE PRINCIPLE**
 
 **One blazing-fast, client-side experience:**
@@ -94,7 +96,7 @@
 ## ⚡ **TECH STACK (OPEN SOURCE, CLIENT-ONLY)**
 
 * **React + TypeScript**: All logic and UI, strictly typed
-* **TailwindCSS**: Utility-first, custom theme
+* **vanilla-extract**: Type-safe, zero-runtime CSS-in-TypeScript (replacing TailwindCSS)
 * **FlexSearch.js**: Bleeding-edge, ultra-fast, client-side search index ([MIT License](https://github.com/nextapps-de/flexsearch))
 * **Zod**: Data validation and parsing, at build and runtime
 * **Vite**: Dev/build tool, enables code-splitting, HMR, PWA
@@ -168,7 +170,7 @@
 * [`FlexSearch`](https://github.com/nextapps-de/flexsearch) (search engine, MIT, best-in-class for speed/size)
 * [`Zod`](https://github.com/colinhacks/zod) (validation, MIT)
 * [`React`](https://react.dev/), [`React Router`](https://reactrouter.com/), [`TypeScript`](https://www.typescriptlang.org/)
-* [`TailwindCSS`](https://tailwindcss.com/)
+* [`vanilla-extract`](https://vanilla-extract.style/) (CSS-in-TypeScript, MIT, replacing TailwindCSS)
 * [`Vite`](https://vitejs.dev/)
 * [`axe-core`](https://github.com/dequelabs/axe-core) (a11y testing)
 * [`Playwright`](https://playwright.dev/) / [`Testing Library`](https://testing-library.com/)

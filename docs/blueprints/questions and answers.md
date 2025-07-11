@@ -1,5 +1,7 @@
 ### Project Structure & Setup
 
+> **Migration Note:** The original plan was to use Tailwind CSS for all styling. Due to persistent build and integration errors, the project is switching to [vanilla-extract](https://vanilla-extract.style/) for type-safe, zero-runtime CSS. All references to Tailwind in this document reflect the original intent; the current and future implementation will use vanilla-extract for all styles.
+
 **1. 📂 Purpose of `raw-data/`**
 
 * `raw-data/` holds the original, human-editable JSON files for each Avatar domain (e.g., `animals.json`, `foods.json`).
