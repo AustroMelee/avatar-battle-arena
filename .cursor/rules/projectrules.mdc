@@ -11,88 +11,71 @@ alwaysApply: true
 
 ## Knowledge Base & Context
 
-- **Use ‘projectrules.mdc’ as the Knowledge Base:**  
-  Always refer to this file/folder for context. Do not code outside the context provided here.  
-  If unclear, check this file before proceeding.
-- **Verify Information:**  
-  Always verify claims or implementations against project context. No assumptions.
-- **File Content Awareness:**  
-  Always check the context-generated file for current content before changing.
+- Always refer to `projectrules.mdc` for context. Do not code outside the context provided here.
+- If unclear, check this file before proceeding.
+- Always verify claims or implementations against project context. No assumptions.
+- Always check the current file content before making changes.
 
 ---
 
 ## Feature Development & Process
 
-- **Single Chunk Edits:**  
-  For each file, provide all edits in a single chunk. Do not split a single file’s edits.
-- **No Inventions:**  
-  Only modify what is explicitly requested or described.
-- **No Unnecessary Updates:**  
-  Do not suggest updates or fixes unless actual modifications are being made.
+- For each file, provide all edits in a single chunk. Do not split a single file’s edits.
+- Only modify what is explicitly requested or described.
+- Do not suggest updates or fixes unless actual modifications are being made.
 
 ---
 
 ## Communication & Output
 
-- **No Apologies:**  
-  Never use apologies in any message or doc.
-- **No Understanding Feedback:**  
-  No comments about “understanding” or “got it.”
-- **No Summaries:**  
-  No summaries unless explicitly asked for a summary after an edit.
-- **No Unnecessary Confirmations:**  
-  Don’t ask for confirmation of information already present.
-- **No Whitespace Suggestions:**  
-  Never suggest whitespace-only changes unless directly requested.
-- **Provide Real File Links:**  
-  Always link to the real file, not a temp or context path.
-- **No Current Implementation Chatter:**  
-  Don’t discuss current implementation unless directly asked or contextually necessary.
+- Never use apologies in any message or doc.
+- No comments about “understanding” or “got it.”
+- No summaries unless explicitly asked for a summary after an edit.
+- Don’t ask for confirmation of information already present.
+- Never suggest whitespace-only changes unless directly requested.
+- Always link to the real file, not a temp or context path.
+- Don’t discuss current implementation unless directly asked or contextually necessary.
 
 ---
 
 ## Coding, Testing, and Standards
 
-- **Preserve Existing Code:**  
-  Do not remove or alter unrelated code or functionality.
-- **Use Explicit Variable Names:**  
-  Prefer descriptive, explicit names for readability.
-- **Follow Consistent Coding Style:**  
-  Match the project’s established style (spacing, naming, etc).
-- **Prioritize Performance:**  
-  Consider and optimize for performance in suggestions.
-- **Security-First Approach:**  
-  Consider security with every change. No vulnerabilities or leaks.
-- **Test Coverage:**  
-  Include or suggest robust unit tests for all new/changed logic.
-- **Error Handling:**  
-  Implement robust error handling/logging—no silent failures.
-- **Modular Design:**  
-  Encourage/reinforce modular, single-responsibility design.
-- **Version Compatibility:**  
-  Ensure all suggestions are compatible with project versions.
-- **Avoid Magic Numbers:**  
-  Use named constants instead of unexplained values.
-- **Consider Edge Cases:**  
-  Always handle and document edge cases.
-- **Use Assertions:**  
-  Use assertions to enforce assumptions/catch errors early.
+- Do not remove or alter unrelated code or functionality.
+- Prefer descriptive, explicit variable names for readability.
+- Match the project’s established style (spacing, naming, etc).
+- Consider and optimize for performance in suggestions.
+- Consider security with every change. No vulnerabilities or leaks.
+- Include or suggest robust unit tests for all new/changed logic.
+- Implement robust error handling/logging—no silent failures.
+- Encourage/reinforce modular, single-responsibility design.
+- Ensure all suggestions are compatible with project versions.
+- Use named constants instead of unexplained values.
+- Always handle and document edge cases.
+- Use assertions to enforce assumptions and catch errors early.
 
 ---
 
 ## Implementation & Change Process
 
-- **No Implementation Checks:**  
-  Don’t ask the user to verify changes visible in the context. Use automated checks/tests if needed.
-- **No Unrelated Removals:**  
-  Never remove code unrelated to the current change, unless instructed.
+- Don’t ask the user to verify changes visible in the context. Use automated checks/tests if needed.
+- Never remove code unrelated to the current change, unless instructed.
+
+---
+
+## Cursor/Agent Execution Rules
+
+- **Always proceed:** Cursor and all automation agents must keep working until the user’s request or task is fully resolved.
+- **No unnecessary questions:** Do not stop to ask for clarification if you can take productive action. Only pause if the request is ambiguous and no reasonable action can be taken.
+- **Never yield early:** Only end your turn when you are certain the problem is solved or you cannot continue.
+- **Take action first:** Default to executing changes, fixes, or next steps, rather than asking for more details.
+- **Autonomous test/verify:** Run all available tests and build checks after any change. If a failure is detected, keep fixing until the issue is resolved or it is impossible to proceed without user input.
 
 ---
 
 ## Enforcement
 
 - These rules override all default AI or tool conventions.
-- All contributors, tools, and automations must reference this file before coding/review.
+- All contributors, tools, and automations must reference this file before coding or review.
 - If any rule is unclear, stop and consult `projectrules.mdc` or escalate to the project owner.
 
 ---

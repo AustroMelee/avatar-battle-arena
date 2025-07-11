@@ -1,6 +1,0 @@
-# Refresh docs and block commit if SYSTEM ARCHITECTURE.MD is out of sync
-node scripts/docs-refresh.cjs
-if ! git diff --exit-code docs/SYSTEM ARCHITECTURE.MD; then
-  echo "\nSYSTEM ARCHITECTURE.MD is out of sync. Please stage the updated file before committing."
-  exit 1
-fi

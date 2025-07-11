@@ -1,0 +1,423 @@
+Earthbending
+This page is move protected. This article has been featured on the main page. Click here for more featured articles. This article is an A-class article. It is written to a very high standard. Earthbender
+272
+Edit
+"Earth is the element of substance."
+— Iroh to Zuko.[1]
+
+Earthbending
+Earthbending
+General information
+Source
+Earth
+Learned from
+Badgermoles
+Alternate styles
+Lavabending
+Metalbending
+Sandbending
+Earthbending, one of the four elemental bending arts, is the geokinetic ability to manipulate earth and rock in all their various forms, prevalent in the Earth Kingdom and the United Republic.
+Earth is the element of substance, while the people of the Earth Kingdom are diverse, strong, and enduring.[1] Following the lion turtles' decision to relinquish their role as protectors of mankind, Oma and Shu were the first earthbenders to learn this art from the badgermoles.[2]
+
+The key to earthbending is utilizing neutral jing, which involves waiting and listening for the right moment to strike and, when that moment comes, acting decisively. In other words, earthbenders generally endure their enemies' attacks until the right opportunity to counterattack reveals itself.[3]
+
+
+Contents
+1	Origin
+2	Fighting style
+2.1	Earthbending abilities
+2.2	Earthbending master level
+2.3	Avatar level earthbending
+2.4	Special techniques
+2.5	Opposing bending art
+2.6	Weapons
+3	Strengths
+4	Weaknesses
+5	Elemental symbol
+6	Spirituality and earthbending
+7	Connection
+8	Notable earthbenders
+8.1	Avatar: The Last Airbender and related comics
+8.2	The Legend of Korra and related comics
+8.3	Chronicles of the Avatar
+8.4	Avatar Legends: The Roleplaying Game
+9	Trivia
+10	References
+11	See also
+12	External links
+Origin
+Oma and Shu learn earthbending
+Oma and Shu, the first human earthbenders, learning from badgermoles.
+
+During the era of Raava, the power of earth was temporarily bestowed on the inhabitants of a city atop a giant lion turtle while they left the village to hunt for food. After the inhabitants permanently left the care of the lion turtle, humans first learned to earthbend by observing and imitating the geokinetic abilities of badgermoles living in the mountains in what is now Earth Kingdom territory. According to a legend, known widely as "The Legend of the Two Lovers", two star-crossed lovers named Oma and Shu, who hailed from separate warring villages, were the first people who learned the art from these creatures so that they could meet within the mountain that divided them. To make sure no one could ever find them, they used their new abilities to create a labyrinth of tunnels inside the mountain, which only they could navigate. One day, after many meetings in the series of passageways, the man did not come to see his lover, as he had died, a casualty of the villages' quarrel. His lover showcased a devastating display of her earthbending abilities and ultimately proclaimed the feud over. The villages subsequently collaborated to construct a city, Omashu, in their honor. The pathways they made by earthbending became known as the Cave of Two Lovers.[2]
+
+Fighting style
+Toph's fighting stance
+Toph uses the Praying Mantis style of earthbending as opposed to the more common Hung Gar.
+
+Earthbending is one of the most diverse of the bending arts, ranging from the rigid and collectively learned earthbending of the Dai Li, which is the most commonly used earthbending style, to the individually taught styles, such as Toph's unique earthbending technique. Earthbenders are generally muscular, tough and direct, and like all benders, their technique reflects on their individual personalities.
+
+With the advent of pro-bending, earthbenders have learned to adapt fighting styles that are more suited to a fast-paced pro-bending match. Most earthbenders participating in pro-bending have learned to keep mobile and only root themselves long enough to actually launch and direct the earth discs provided in the arena. Bolin's earthbending is typical of the style used within the arena, although he has exhibited some of the more traditional forms and movements when outside of it.
+
+Earthbending differs from the other bending arts in that it maintains a distinct balance between offensive and defensive capabilities, though waterbending involves a more refined version by channeling defense into offense. Earthbending uses a balance of strength and defense to overwhelm opponents.
+
+The principle of jing is the essence of battle strategy of all bending arts, with a total of eighty-five possible actions. Positive jing occurs when one chooses to fight, while negative jing is when one chooses to evade. The earthbending discipline stresses neutral jing, which involves listening, waiting and attacking at the right moment.[3] King Bumi stressed this in his tactics against the Fire Nation; he allowed himself to be imprisoned in New Ozai for many months before liberating the city on the Day of Black Sun simply waiting for the right moment to fight and liberate the city.[4]
+
+Earthbending abilities
+Haru earthbending
+Haru earthbending.
+
+Earth and stone levitation: The most common attack involves levitating nearby pieces of earth and stone of numerous sizes (more powerful benders can move larger masses) and propelling them at foes with punching or kicking motions.[5]
+
+Earth block: Earthbenders can bring up blocks of earth and launch them at their enemies. The Dai Li used this technique against Team Avatar during the Day of Black Sun.[6]
+
+Compression
+Haru and Tyro compressing coal.
+
+Earth compression: It is possible for earthbenders to compress large chunks of rock into smaller, denser chunks, or to compress several smaller chunks into one big piece of rock. Haru and his father, Tyro, used this technique, compressing several small pieces of coal into one big coal boulder. The fact that two earthbenders were required to perform it suggests that this technique is quite difficult.[7]
+
+Earth dagger: Earthbenders can create hand-held spikes made out of stone to attack opponents with. Yun used this method of attack against Hei-Ran and Rangi.[8][9]
+
+Earth elevator:[10] Earthbenders can fashion a crude elevator by sliding a chunk of earth they are standing on against a vertical or diagonal surface in the direction they wish to travel. Aang and Toph first utilized this ability in tandem to scale the walls of Ba Sing Se and later to reach the top level of the Earth King's palace. In both cases, they were able to carry substantial loads, easily supporting the weight of Ying and her family in the first instance and Appa in the second, in addition to the rest of Team Avatar.[11][12] Lin performed this technique as well to help Korra ascend the stairs on Air Temple Island when she was confined to a wheelchair.[13]
+
+Earth etching: Earthbenders can draw designs on the ground without making contact by waving two fingers over the surface to engrave the desired shape. Toph performed this technique while training Aang by tracing a simple line in the ground.[1]
+
+Earth gauntlet: A much less advanced version of earth armor that can be used to throw back opponents with hard solid force. Aang used this technique when fighting against Azula on the drill.[11] Sun used two earth gauntlets simultaneously while fighting a waterbender in an underground bending tournament.[14] The technique is useful in that it grants some level of the protection of earth armor but allows the rest of the body to remain flexible.
+
+Earth hand/mannequin: An earthbender with a decent grasp and knowledge of sculpting can craft replicas of human appendages or bodies from any rock source and move them from place to place. While playing King of the Hill, Toph made a large hand to grab and toss Aang to the side.[15] When Toph was pretending to be Fire Lord Ozai as part of a training exercise, she used this technique to simulate the Fire Lord's bodyguards.[16]
+
+Earth impression: Earthbenders can create permanent impressions of themselves in solid rock by pressing their bodies against a surface and moving their limbs to imprint the intended shape. Toph performed this technique with considerable ease, as seen when she made a "snow angel" out of earth on the Si Wong Rock.[17]
+
+Earth launch: While earthbenders like being rooted to the ground, with some like Toph being unable to see in the air, they can quickly move rock beneath them and launch them several tens of feet into the air, whether to catch airborne opponents or to travel faster. Toph and Bumi did this during the battle at Wulong Forest and the liberation of Ba Sing Se, respectively.[4][18] Bolin has shown to be able to launch himself into the air with Earthbending, as was seen when he escaped the Earth Queen's palace.[19]
+
+Earth material manipulation: Earthbending is not limited to rock or soil alone. An earthbender can also manipulate coal, gems, crystals, chalk,[20] salt,[21] and other earth-based materials, like meteorites and jennamite.[5]
+
+Earth shelter: This can be used by earthbenders to create a shelter or dome which can provide instant shelter in the wilderness. Toph often created shelters like these to sleep in while the Team Avatar was traveling[5] and used it to create a safe place where Ying could give birth.[22] It can also be used to trap enemies, but this application would not work against an earthbending opponent, who would be able to cancel out the technique. These can also be created in combat as a defense against non-earthbending attacks.[18]
+
+Earth smash: Earthbenders can easily destroy rocks and boulders with punches and kicks, even if they have a small amount of muscle mass. This technique is useful when facing other earthbenders, as it allows the earthbender to destroy any earthen projectiles sent at them and break out of imprisoning techniques. However, it does not seem to affect objects not made of earth.[5]
+
+Aang creates earth wall
+Aang creating an earth wall during his fight with Azula.
+
+Earth wall: Earthbenders can create walls of earth, which can be used for both defense and offense, as well as for practical things, like construction.[5]
+
+Earthquakes/fissures or tectonic rift:[23] Striking the ground with feet, fists, or hammers, as shown by Gow, creates localized earthquakes or fissures to throw opponents off-balance.[24] This same process can be used to sculpt a landmass or to slice large chunks of rock clean off a surface to create avalanches or rockfalls. More advanced earthbenders can make narrow fissures for precise attacks.[5]
+
+Ground shift: Earthbenders can alter the ground beneath others to move them out of their way. The sudden movement can be disorienting to the target.[1]
+
+Quicksand: Earthbenders turn certain surfaces to quicksand to immobilize an enemy,[25] or to create a soft landing for themselves should they fall from a height. Sandbenders can also do the reverse of this, compacting sand together to create harder projectiles or a firmer grip on the ground.[26]
+
+Rock column: A more powerful version of rock projectiles, this technique involves forcing columns of rock out of the ground. Using a similar principle, an earthbender can shoot a stream of small ruts and protrusions from underground at their opponent.[27] This can also be used to enhance the benders' jumps.[28] It is, however, limited to the ground and does not have the same range as a rock projectile.
+
+Rock cuff: Earthbenders can quickly fashion cuffs out of rock to immobilize their opponents.[6]
+
+Rock hanging: If an earthbender is attached to, or wearing a piece of rock, they can attach to other stone surfaces and remain off the ground for long periods of time. The Dai Li are the only ones that have demonstrated this ability through the use of their earth gloves, giving them the ability to cling onto a rocky surface.[28]
+
+Rock shield: A levitated slab of rock can also double as a shield when positioned in front of a bender. This can also be performed with a slab or sheet of bedrock thrust out of the earth's surface. The shield can be hurled at the opponent for quick retaliation.[5]
+
+Canyon guide earthbends
+The canyon guide earthbending a rockslide.
+
+Rock slide: If an earthbender is near a cliff or mountain, they can cause many rocks of a multitude of sizes to rain down on their opponent. The canyon guide demonstrated that it would be possible to redirect the path of a rock slide. This was shown when he protected his refugee customers from getting crushed.[29]
+
+Sand spout: Similar to both the water and the air spout, an earthbender can manipulate the fine sand particulates to form a whirling column. The sandbenders used this technique to propel their sand-sailers through the Si Wong Desert.[17]
+
+Slab shackles: With proper timing, an earthbender can bind an opponent's arms with triangle-shaped slabs. This technique is generally used if the opponent is in a vulnerable position, for example on their knees. This technique was first used by Aang against Ozai to keep him in place while Aang took his bending away.[30] It was later used by Aang to detain Yakone while he removed his bending.[31] Lin and Su used this technique to trap Zaheer, after Korra defeated him.[13] Kuvira used the technique to trap Korra, after she was defeated by the former.[32]
+
+Thick mud: An earthbender can transform earth and stone into sticky, sinking mud, causing their foes to become stuck.[33]
+
+Water filtering: When working in concert with a waterbender, an earthbender can purify polluted water. The waterbender suspends the polluted water in the air, while the earthbender removes the pollutants.[34]
+
+Earthbending master level
+Dust cloud: By shaking the ground back and forth, earthbenders can create dust clouds of various sizes to provide cover, the particles of which can also be manipulated themselves.[27][11]
+
+Dust-stepping: A variation of the mist-stepping and fire-stepping techniques used by waterbenders and firebenders, respectively, by creating very thin pillars of increasing size, a master earthbender can use this technique to quickly scale walls. It was invented by the Flying Opera Company, who later taught the technique to Avatar Kyoshi.[35]
+
+Aang's crystal armor
+Aang in crystal armor.
+
+Earth armor: Earthbenders can bring rocks, dust, pebbles, or crystals around them and mold them to fit their body and create something similar to armor. They can also hide inside the earth by bending the rock around them as a shell. Later, it is demonstrated by Toph that metal can be used as armor as well.[18] The earth armor was used by Toph in a training exercise with Aang.[1] Aang later uses this technique with crystals against Azula,[36] and again with rocks against Combustion Man[37] and finally Ozai.[18] This earthbending move is great for defense, especially against fire. It is not as effective for offensive moves since it limits the practitioner's range of motion.[38]
+
+Earth bomb: By sending a rock toward the ground, earthbenders can cause massive damage as well as throw their opponents off their feet. Aang used it against Zuko, almost gaining the upper hand of the battle before the Dai Li intervened.[36]
+
+Earth preservation: By slamming their palm against a central surface to send rippling tremors into the surrounding earth, talented earthbenders can preserve the location, shape, and depth of footprints or other subtle markings left on the ground. Jianzhu often used this technique to track criminals.[39]
+
+Earth sinking: More advanced earthbenders, such as The Boulder, Master Yu,[27] and General Fong,[40] can forcibly sink their opponents into the ground, imprisoning them or even suffocating them in earth. This technique was used by General Fong to subdue Katara.[40]
+
+Earth tunneling: Earthbenders can move through the earth to out-maneuver their foes either by opening tunnels or by pulling the earth past them, literally swimming through the ground.[11][25]
+
+Toph slides
+Earth wave.
+
+Earth wave[41] or earth skating: High-level earthbenders can create a wave of earth to ride on and use it as a form of transportation,[41][42] as Aang and Toph have both done,[36] as well as Roku and Sud while training.[43] The downsides of the wave are that it takes a lot of energy to produce, as well as intense concentration; the slightest distraction could cause the user to lose control of the wave. They can also force a wave of earth outward and use it as an extremely powerful offensive attack, as both Aang and General Fong were seen doing during their battle.[40]
+
+Earth writing: Earthbenders can manipulate pebbles to spell out messages for others to read. The false Avatar, Yun, was particularly skilled at this technique, able to form such messages while a considerable distance away from the earth he was bending.[44]
+
+Magnetization: Skilled earthbenders are capable of magnetizing their limbs to any type of stone, making wall-scaling simpler in the appropriate circumstances.[45] The Dai Li agents could perform this move with ease and even stay upside down, such as when Team Avatar broke into the organization's secret headquarters in Lake Laogai.[28]
+
+Meteor fall: Earthbenders can drop down onto their targets with a massive force from a high position.[46]
+
+Remote earthbending: If an earthbender is suspended from the ground, but is aware that there is earth somewhere near, the earthbender can focus his energies and bend that earth out of his physical reach out of sheer concentration. This was shown in a flashback when Bumi told Team Avatar, sans Aang, how he freed himself during the eclipse. Bumi managed to summon some roof tiles and pieces of walls to rip open the front of his metal coffin.[4] Aang also uses this technique to summon rocks for his Elemental Sphere while in the Avatar State.[30]
+
+Stair folding: A technique once used by Toph, which consists of folding the steps of a stair into themselves, turning it into a sort of slide in order to cause the enemies to fall down.[12]
+
+Summon the storm: Earthbenders can call up small gravel, dust, and sand all around them to fill the air with swirling grit.[47]
+
+Avatar level earthbending
+Compressed rock bullets: Used solely by Aang in his fight with Phoenix King Ozai. Aang disintegrated one of his compressed rocks from his Elemental Sphere and shot its shrapnel-like fragments with great speed, in a machine gun-like fashion. Due to the speed and density of these rocks, they did great damage to the landscape.[30] It is similar to the rock gloves technique used by the Dai Li.[36]
+
+Dust devil: Avatars can raise themselves high above ground level through dust devils, similar to air and water spouts.[40]
+
+Aang vs General Old Iron
+Aang fighting General Old Iron in a giant rock body.
+
+Enhanced earth armor: By harnessing the power of the Avatar State, Avatars can surround themselves with large pieces of earth which they can subsequently conglomerate into a giant anthropomorphic rock body to use in combat. Avatar Aang used this technique to battle General Old Iron.[48]
+
+Enhanced earth levitation: With their greater power and stronger connection to the earth, the Avatar can move hill-sized statues at will. Utilizing the power of the Avatar State, Kyoshi moved large statues of badgermoles,[40] and Aang moved various earth pillars in his fight against Ozai, both for offense and defense.[30] Korra also used this technique in her fight with Zaheer and later Kuvira, trying to crush her opponent with a hill-sized boulder.[13][32]
+
+Powered compression: This is a much more powerful version of the earth compression technique, performed only by Aang while in the Avatar State. Instead of bending large chunks of earth into a single projectile, Aang gathered boulder-sized rocks and simultaneously compressed each fragment into smaller, denser, and harder rocks, essentially keeping the rocks under pressure for more volatile attacks if needed. Lastly, the rocks are directed to orbit the bender until they are used.[30]
+
+Tectonics: The Avatar can earthbend on a scale vast enough to move entire landmasses, as shown by Avatar Kyoshi when she separated Kyoshi Island from the mainland.[49] Aang later performed the same technique to separate the town of Yu Dao from its surrounding land.
+
+Special techniques
+Ghazan bringing down the Inner Wall
+Ghazan bent the inner wall of Ba Sing Se to lava, bringing it down as a result.
+
+Glassbending: Some earthbenders are able to control glass due to its mineral origin. Avatar Kyoshi was capable of this technique, such as when she bent shards of glass out of her skin following her confrontation with the Triad of the Golden Wing.[50]
+
+Lavabending: Certain powerful earthbenders are able to change the phase of the earth they are manipulating, melting it into lava for more versatility in battle, similar to what waterbenders do with ice. A bender using this ability can form the lava into different weapons or summon magma from the ground.[51] The earliest known bender to perform this technique was Szeto, the Avatar that preceded Yangchen.[40] Ghazan, Bolin, and Sun are the only known non-Avatar earthbenders to have demonstrated this technique.
+
+Liquifying earth: Similar to lavabending, highly skilled earthbenders can change earth and stone to a liquid state without the use of heat. The only known earthbender capable of this technique is Yun, who liquified the stone floor of the Avatar mansion before solidifying it again to trap Kyoshi. He used it as well to liquify the very foundations of the mansion and destroy it.[9]
+
+Metalbending: Metalbending is a sub-skill of earthbending developed by Toph. Most earthbenders are unable to affect processed metals. Usually, the trace amount of earth still present in metal is so minuscule that it goes undetected even by the best earthbenders, lending to its use in detaining earthbenders. However, due to her seismic sense, Toph was able to locate the small fragments of earth in metal, target them, and utilize them to "bend" the metal portion. In the beginning, she was not able to bend metal with the same ability or ease seen in normal earthbending.[52] Eventually, her skill with metalbending developed to the point where she could effectively defeat comet-enhanced firebenders during the battle at Wulong Forest with the technique.[18] After the conclusion of the Hundred Year War, Toph founded a metalbending academy to teach the newly acquired skill to other earthbenders, and the technique eventually became the primary weapon of the Metalbending Police Force in Republic City. As metalbending techniques were further refined, benders eventually learned how to manipulate metal without being in close contact with it, and amateur metalbending students were able to apply this skill to small objects such as coins and canes.
+
+Mudbending: It has been demonstrated that earthbenders, like waterbenders, are able to bend mud due to the presence of earth within. Toph, aided by Katara, was able to push the slurry from the rear of the Fire Nation drill back into the machine,[11] and the technique was also used by the two girls when they ended up fighting while they were training Aang.[53] Toph also used this ability while training Korra in the swamp.[54]
+
+Pigmentbending:[55] Skillful earthbenders are able to bend earth-based pigments, even those that have been dried for very long periods of time. Yun, a prodigy earthbender who was thought to be the Avatar, came up with this technique[55] and made use of it when he bent the paint on the portraits of Fire Avatars in the Fire Nation Royal Palace's Royal Gallery, and bent sharp pellets of paint at Chancellor Dairin, his men, and Kyoshi, killing some and wounding many.[56] He also accidentally tattooed himself because of this ability when he used an inkstone as glove.[55][57]
+
+Rock gloves: The Dai Li have mastered the rock glove technique. Similar to an earth gauntlet, they cover their hands in small rocks and project them at a target as small projectiles or compacted fists to bludgeon an opponent.[28] A more refined and favored method, however, is to use them as detachable hands, maintaining the hand shape and literally grabbing and restraining the opponent from a distance.[12]
+
+Rock shoes: The Dai Li also used shoes made out of earth to slide to travel faster and to cling to walls and suspend themselves on the ceiling, as Long Feng and the Dai Li used in Lake Laogai during their fight with Team Avatar and the reformed Freedom Fighters.[28][58]
+
+Sandbenders using a sand-sailer
+Sandbenders propelling their sand-sailers.
+
+Sandbending: Sandbending is an alternate earthbending style that has been adapted for use in the Si Wong Desert by the people that live there. They move quickly in the desert on specialized wooden sailers that are propelled by bending miniature, localized sandstorms behind their sails. Because sand is sediment which travels in flows, their style resembles air and waterbending more than earthbending. It is implied that most, if not all, earthbenders are capable of easily bending sand, but because of the loose shifty nature of sand, it is not an easy transition for the average earthbender. The sandbenders of the desert are especially proficient with it due to their particular habitat.[26] After the events at Si Wong Desert, Toph practiced her sandbending, achieving a mastery over it that allowed her to create an extremely detailed miniature sand version of Ba Sing Se.[16] Likewise, one can compact the sand to be solid and thick.[26] Sandbenders used this technique while stealing Appa, in order to steady themselves despite the lack of friction in sand.[59]
+
+Toph's vision
+Toph "seeing" with earthbending.
+
+Seismic sense: A technique originally developed by the blind badgermoles, skilled earthbenders are able to sense vibrations through the ground, "seeing" by sensing their surroundings and making a mental image of it. It allows for a 360-degree field of "vision", outside of normal line-of-sight.[27] To operate, the user needs direct contact with the ground, preferably without something like shoes in between.[60] The technique is only usable on surfaces the user can bend.[22] Being blind, Toph constantly used this technique to navigate the world; she described it as "kind of like seeing with [her] feet".[27] During his training with Toph, Aang also developed this ability. Aang used this during a three-way training spar with Toph and Katara,[53] and again during his fight against Ozai.[30] Due to Toph's extensive use of the technique, she discovered other applications of it. Her seismic sense was so acute that she was capable of sensing even ants moving about,[27] could identify people by the way they walked,[61] and could almost always tell if someone was lying by sensing their physical reactions, such as breathing and heart rate.[6][28] It was also the basis of her unique ability of metalbending.[52] Toph also passed this technique to her daughters, Lin[62] and Suyin.[32]
+
+Opposing bending art
+Earthbending is the opposing bending art to airbending. When first learning to earthbend, the pupil must first learn confrontational tactics and familiarity with the brute strength necessary to work with earth. This contrasts with the emphasis of airbenders on mobility and evasion. Earthbenders require a firm root in the ground, while airbenders are constantly moving. This is illustrated when Aang initially had great difficulty trying to learn earthbending from Toph.[1]
+
+Like all of the bending arts, earthbending is balanced so as not to be more or less powerful than the other arts. It is the skill and prowess of the user that determines victory.
+
+Weapons
+Earthbenders have been known to use hammers and fans to augment their bending, and it has been stated that the Chinese great sword dadao, a heavy war sword, or literally "big knife", would also be best suited for a strong earthbender. Aang has also demonstrated earthbending by wielding his glider-staff. Additionally, Gow has demonstrated earthbending with his war hammers,[24] and Kori Morishita was able to control her meteor hammer with earthbending. Giant maces and axes could work well. Avatar Kyoshi was well known for using her twin fans to assist her in her bending forms, but particularly in earthbending.[49]
+
+Strengths
+Lack of precision: Due to the nature of earthbending, which puts an emphasis on brute strength rather than precise, agile movements, benders do not need to have great precision.
+
+Variety of bendable matter: Out of the four elements, earthbenders have the greatest range of materials they are able to bend, many of which have developed into entire substyles of bending arts such as metal and lavabending.
+
+Weaknesses
+Reliance on earth: Since earthbenders rely on having access to earth, their ability can be negated by securing them within a metallic barrier, separating them from any contact with the earth. Toph, as the inventor of metalbending, is an exception to this, as are any who have been trained in the skill. However, even metalbenders cannot bend highly purified metals such as platinum.[53]
+
+Reliance on the lower body: Earthbending is at its strongest when the feet are in direct contact with the ground, enabling earthbenders to transfer their kinetic energies into their bending for fast and powerful moves.[63] However, this weakness can be overcome by bringing other body parts in contact with the earth.
+
+Elemental symbol
+Earthbending emblem
+The earthbending symbol.
+
+The symbol for earth and earthbending is a tall rough isosceles trapezoidal shape, the base of which is made up of the Bagua trigram "Kun", denoting "earth". Inside, at the top, is a spiral running counterclockwise. The symbol is present on wooden "elemental solitaire" cards owned by Iroh.[64] This symbol vaguely resembles a seated badgermole.
+
+Spirituality and earthbending
+Earthbending was explored in depth while Toph was teaching Aang, as well as during Iroh's lesson to Zuko on the elements.[1] Earthbending expresses the aspect of neutral jing, which involves listening and waiting,[3] and also requires decisiveness; when the time comes to strike, it must be done without hesitation or uncertainty. If an earthbender lacks determination, the earth will not respond to their will.
+
+Being connected to the earth is also an important aspect of earthbenders' spirituality; earthbenders, primarily earthbending soldiers and generals, typically travel barefoot to increase their connection with the earth and thus their power. As such, seismic sense users are particularly attuned to their connection to the earth. From the spiritually charged Foggy Swamp, with its roots stretching miles in every direction, Toph was able to remain connected and aware of faraway places, such as Zaofu and Republic City.[54]
+
+As the element of substance, earthbending seems to be the least spiritual of the bending arts. It is almost exclusively treated pragmatically with no observable interactions with supernatural phenomena.
+
+Connection
+The Hung Gar style of kung fu is the main influence for earthbending;[65] they both feature "heavily rooted stances and strong kicks and punches that evoke the mass and power of earth." Hung Gar itself parallels animal movements such as the tiger's hard blows and the crane's affinity to landing gracefully on the earth.[66] There are exceptions to this rule — Toph, the blind earthbender's style, is based on Southern Praying Mantis, a precise stepping skill which Toph uses to maintain constant contact with the ground and visualize the area around her with seismic sense.
+
+Earthbending, however, draws from a great number of the styles related to Nanquan (southern fist), which is a collection of Chinese martial arts styles from Southern China. This includes Choy Li Fut, Choy Gar, Hung Ga, Lau Gar, Li Gar, Mok Gar, and Wing Chun.
+
+The concept of neutral jing is also closely related to the philosophy of "sticky hands", a practice common to some southern Chinese martial arts such as Chow Gar Southern Praying Mantis and Wing Chun. The purpose of sticky hands is to enable the practitioner to predict their opponent's next move. Similar to Toph detecting the movements of others through her connection with earth, a practitioner learns to detect their opponent's upcoming move by maintaining constant contact between their own arm and their foe's arm (may also be between their hands or wrists). By practicing with a partner in this manner, a practitioner will learn to "read" the slight movements of their opponent's arms to detect their next attack and subsequently move accordingly to either strike before the attack is made or move in the same direction with the attack and effectively neutralize it. Concepts such as listening, reacting, balancing attacks and defense, and drawing power from a stable lower body are often referred to in the practice of sticky hands, again, closely relating to many primary concepts in earthbending.
+
+Notable earthbenders
+L indicates known ability to use lavabending.
+M indicates known ability to use metalbending.
+S indicates known ability to use seismic sense.
+Avatar: The Last Airbender and related comics
+Badgermoles S
+Aang S
+Bumi
+Canyon guide
+Chin
+Dai Li
+Earthbender captain
+Earthbending academy teenagers
+Fire Nation Man
+Fong
+Ghashiun
+Gow
+Haru
+Headhunter
+Ho Tun M
+How
+Jin Wei
+Kori Morishita
+Kuruk
+Kyoshi L
+Liling
+Long Feng
+Luumi
+Mrs. Morishita
+Oma
+Penga M
+Poi
+Roku L
+Royal Earthbender Guards
+Sha-Mo
+Shu
+Soonjei
+Sud
+Sun L
+Sung
+Szeto L
+Terra Team
+The Big Bad Hippo
+The Boulder
+The Dark One M
+The Gecko
+The Gopher
+Toph Beifong M S
+Tyro
+Xin Fu
+Yaling
+Yangchen
+Yu
+Yung
+The Legend of Korra and related comics
+Badgermoles S
+Aang S
+Aiwei M S
+Bathroom attendant
+Bolin L
+Dai Li
+Ganbat
+Ghazan L
+Guan M
+Guard post officer
+Guard post soldier
+Guo M
+Hong Li M
+Huan M
+Hundun
+Jargala Omo
+Korra M
+Kuruk
+Kuvira M
+Kyoshi L
+Lin Beifong M S
+Metalbender officer M
+Metalbending Police Force officers M
+Ming
+Mushi
+Roku L
+Royal Earthbender Guards
+Saikhan M
+Skoochy
+Song M
+Suyin Beifong M S
+Szeto L
+Terra Triad
+Toph Beifong M S
+Toza
+Tu
+Wan
+Wei and Wing M
+Yangchen
+Chronicles of the Avatar
+Aoma
+Gun
+Kuruk
+Kyoshi
+Jae
+Jianzhu S
+Lao Ge
+Lek
+Lu Beifong
+Mirai
+Roku
+Suzu
+Szeto L
+Wong
+Yangchen
+Yun S
+Avatar Legends: The Roleplaying Game
+Aang S
+Amrita
+Anri
+Ben Ta
+Boin
+Bolin L
+Bumi
+Buo Ren
+Chen Lai
+Chesa
+Cong
+Flint
+Hana
+He Xing
+Ho Tun M
+How
+Jialun
+Korra M
+Kuruk
+Kuvira M
+Kyoshi L
+Kyung Dae
+Lao Ge
+Leaf
+Lin Beifong M S
+Long Feng
+Metog
+Nianzhen
+Penga M
+Qian Yu M
+Quartz
+Rameh
+Roku L
+Skoochy
+Slate M
+Steely Ning M
+Sud
+Sung
+Suyin Beifong M S
+The Dark One M
+Toph Beifong M S
+Wan
+Wei Tia
+Wong
+Xaipan
+Xinyi
+Yangchen
+Yanran
+Yong
+Trivia
+	Avatar Wiki has
+243 images
+related to Earthbending.
+More earthbenders are born in the season of spring than in any other season.[67]
+Earthbenders also experience an increase in power during this time.[68]
+According to an early draft of the I.P. Bible, fault line energies can strengthen earthbenders.[69]
+Earthbending is the only bending art in which all known sub-skills have been used by Avatars.
+To date, there is no known metalbender capable of lavabending; whether it is possible to innately possess both subskills or not is yet to be confirmed.
+According to the advertisement for Master Yu's Earthbending Academy, the word "earthbending" is written as 運土術, which literally translates as "the technique of moving earth".[27]
+The sound effects for the earth discs used by pro-benders were made with a combination of "whooshing" sounds and oscillating mechanical noises.[70]
+F. C. Yee asked Michael Dante DiMartino if it was possible for a cruel earthbender to bend the bones within the human body, due to having a mineral basis. DiMartino expressed skepticism of the idea, noting that it might detract from the uniqueness of bloodbending.[55]
+Bryan Konietzko imagined that, in a live-action setting, earthbending would revolve more around manipulating dirt and mud than it would causing chunks of rock to emerge from the ground, as it is typically depicted in both animated series.[71]

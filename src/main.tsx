@@ -1,25 +1,11 @@
-/*
- * @file main.tsx
- * @description React entry point for the Avatar Battle Arena app. Mounts the root App component and sets up error boundaries and Suspense fallback.
- * @criticality 💎 Foundational
- * @owner AustroMelee
- * @lastUpdated 2025-07-08
- * @related src/App.tsx, src/components/ErrorBoundary.tsx
- */
-import React, { Suspense } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { App } from './App.tsx';
-import './styles/variables.css';
-import './styles/global.css';
-import { ErrorBoundary } from 'react-error-boundary';
-import { ErrorFallback, LoadingSpinner } from './components/ErrorBoundary';
+import '../index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary fallback={<ErrorFallback />}>
-      <Suspense fallback={<LoadingSpinner />}>
-        <App />
-      </Suspense>
-    </ErrorBoundary>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 text-2xl text-gray-700">
+      Minimal React + Tailwind Baseline
+    </div>
   </React.StrictMode>
 ); 

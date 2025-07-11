@@ -1,1 +1,0 @@
-// Used via dynamic registry in battle engine. See SYSTEM ARCHITECTURE.MD for flow. 

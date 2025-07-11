@@ -1,1 +1,0 @@
-export type LogViewMode = "grouped" | "latest" | "full" | "public"; 

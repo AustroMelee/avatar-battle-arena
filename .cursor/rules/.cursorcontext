@@ -1,0 +1,96 @@
+// .cursorcontext (v2.1, SOLO, AI-FIRST, STRICT)
+alwaysApply: true
+
+/*--------------------------------------------------
+  CORE: PROJECT & WORKFLOW
+---------------------------------------------------*/
+PROJECT_TYPE: Solo + AI. TypeScript / React. Direct-to-main only (no PRs, no branches).
+PRIORITY: Velocity > Process > Tests (tests optional).
+AGENTS: Cursor, O3, Gemini 2.5.
+ENV: Local dev with hot reload.
+All errors fixed immediately by AI or revert; never wait for human triage.
+
+/*--------------------------------------------------
+  MANDATORY AUTOMATION & PRE-COMMIT GATES
+---------------------------------------------------*/
+- On any file/type/export change, run: `npm run docs:refresh`.
+- `ALL_FILES_INDEX.md` and `SYSTEM ARCHITECTURE.MD` must always match the codebase (auto-generated, UTC-stamped, git SHA included). Manual edits forbidden.
+- Pre-commit must pass:
+  - `npm run lint:fix`
+  - `tsc --noEmit`
+- Drift in docs, lint, or types blocks commit.
+- No test-coverage thresholds. No container/integration CI gating.
+- Dev-server runs only when explicitly requested by user.
+
+/*--------------------------------------------------
+  TYPE / COMPONENT RULES
+---------------------------------------------------*/
+- All React code in `.tsx`; tsconfig strict. No `any` or `unknown` except with `@ts-expect-error <reason>`.
+- Use functional components and hooks only; no classes.
+- PascalCase for components, camelCase for hooks, kebab-case for files.
+- Fully type props, state, refs, events. Colocate component types in `types.ts`, share global types in `/src/types`.
+- No magic values—use enums or consts.
+- Strongly type API boundaries + runtime-validate (Zod preferred). Disallow untyped third-party responses.
+- All exported/public items require JSDoc (auto-doc enforced).
+
+/*--------------------------------------------------
+  ORGANIZATION & SRP
+---------------------------------------------------*/
+- ≤500 LOC per file. Single responsibility per file; filename must reflect role.
+- Structure:
+    - `/features/<domain>/…` – feature code
+    - `/common/…` – shared hooks/components/utils
+    - `/tests/…` – optional tests
+- No circular imports; run `madge` and `dependency-cruiser` pre-commit and CI.
+- Services use lazy/factory pattern; never use eager singletons at module scope.
+
+/*--------------------------------------------------
+  QUALITY, ERRORS, ACCESSIBILITY, PERFORMANCE
+---------------------------------------------------*/
+- Zero lint/type warnings on commit; remove unused imports immediately.
+- Root UI wrapped in `ErrorBoundary` and `Suspense` with fallback.
+- All UI passes a11y lint; interactive elements require ARIA labels.
+- Use `React.memo`, `useMemo`, and `useCallback` only when perf-profiled.
+- No empty `catch`; errors must be contextual and actionable.
+
+/*--------------------------------------------------
+  IMPORT / EXPORT HYGIENE
+---------------------------------------------------*/
+- Use explicit imports; wildcards only allowed for types.
+- Import order: React → external libs → internal code → types.
+- Validate all paths and exports; remove dead code immediately.
+
+/*--------------------------------------------------
+  INTEGRATION & TYPE-SAFETY PROTOCOLS
+---------------------------------------------------*/
+- Before and after major edits, verify function signatures, imports/exports, and type compatibility.
+- Orphaned, inconsistent, or unused code forbidden.
+- Use only lazy/factory services; never instantiate logic at import time.
+
+/*--------------------------------------------------
+  DOCS ENFORCEMENT
+---------------------------------------------------*/
+- `SYSTEM ARCHITECTURE.MD`, `ALL_FILES_INDEX.md`, and all derivative docs regenerate with every change.
+- Pre-commit/CI fails if generated docs drift or if any new file/export lacks docblocks.
+- Manual edits to generated docs forbidden.
+
+/*--------------------------------------------------
+  DEPENDENCY & BUNDLE HYGIENE
+---------------------------------------------------*/
+- CI fails on unused or outdated npm packages (`depcheck`, `npm outdated`).
+- Run bundle analysis (e.g., `vite-plugin-inspect`) after major changes to limit size and splits.
+
+/*--------------------------------------------------
+  i18n, LOGGING, PROFILING
+---------------------------------------------------*/
+- Externalize all user-facing strings for i18n.
+- Integrate production error monitoring (e.g., Sentry).
+- Profile React renders after significant UI/state changes.
+
+/*--------------------------------------------------
+  AGENT DIRECTIVE
+---------------------------------------------------*/
+- AGENTS must read `.cursorcontext` before acting. Obey main-branch-only constraint.
+- Never suggest test-coverage targets, branching, PRs, or merge gates.
+- All AI edits are immediate, local, explainable, and committed straight to main.
+
